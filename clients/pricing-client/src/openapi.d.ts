@@ -129,20 +129,6 @@ declare namespace Components {
             products: string[];
             filters: /* Availability filters dimensions */ AvailabilityFilters;
         }
-        export interface AvailabilityDate {
-            /**
-             * The availability interval start date
-             * example:
-             * 2017-07-21
-             */
-            available_start_date?: string; // date
-            /**
-             * The availability interval end date
-             * example:
-             * 2017-07-21
-             */
-            available_end_date?: string; // date
-        }
         /**
          * Availability filters dimensions
          */
@@ -254,7 +240,91 @@ declare namespace Components {
          * The common properties for a composite price entity, without the price components
          * example:
          * {
-         *   "$ref": "#/components/examples/composite-price"
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface BaseCompositePrice {
@@ -306,7 +376,28 @@ declare namespace Components {
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price[] | {
@@ -439,7 +530,69 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item/value"
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         export interface BasePriceItem {
@@ -545,7 +698,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -791,9 +1014,6 @@ declare namespace Components {
              * The name for the product.
              */
             product_name?: string;
-            /**
-             * Price mapping information required to compute totals
-             */
             price_mappings?: /**
              * example:
              * [
@@ -818,7 +1038,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -968,7 +1258,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -1066,9 +1426,14 @@ declare namespace Components {
             };
             external_fees_mappings?: /**
              * example:
-             * {
-             *   "$ref": "#/components/examples/external-fee-mappings/value"
-             * }
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
@@ -1127,88 +1492,6 @@ declare namespace Components {
             base_url?: string;
         }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
-        /**
-         * Supports shopping for products and services until ready for checkout.
-         */
-        export interface Cart {
-            /**
-             * Total of all items before (discounts or) taxes are applied.
-             */
-            amount_subtotal?: number;
-            /**
-             * Total of all items before (discounts or) taxes are applied, as a string with all the decimal places.
-             */
-            amount_subtotal_decimal?: string;
-            /**
-             * Total of all items after (discounts and) taxes are applied.
-             */
-            amount_total?: number;
-            /**
-             * Total of all items after (discounts and) taxes are applied, as a string with all the decimal places.
-             */
-            amount_total_decimal?: string;
-            /**
-             * The cashback amount.
-             */
-            cashback_amount?: number;
-            /**
-             * The cashback amount as a string with all the decimal places.
-             */
-            cashback_amount_decimal?: string;
-            cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
-            /**
-             * Total amount after cashback is applied.
-             */
-            after_cashback_amount_total?: number;
-            /**
-             * Total amount after cashback is applied as a string with all the decimal places.
-             */
-            after_cashback_amount_total_decimal?: string;
-            /**
-             * The discount amount.
-             */
-            discount_amount?: number;
-            /**
-             * The discount amount as a string with all the decimal places.
-             */
-            discount_amount_decimal?: string;
-            /**
-             * The discount percentage, if the applied coupon had a percentage type.
-             */
-            discount_percentage?: number;
-            /**
-             * Total amount before discount is applied.
-             */
-            before_discount_amount_total?: number;
-            /**
-             * Total amount before discount is applied as a string with all the decimal places.
-             */
-            before_discount_amount_total_decimal?: string;
-            /**
-             * The cart identifier
-             */
-            id?: string;
-            /**
-             * The user's Organization Id the cart belongs to
-             */
-            org_id?: string;
-            /**
-             * The status of the Cart:
-             * - open - the cart checkout is still in progress. Payment processing has not started
-             * - complete - the cart checkout is complete. Payment processing may still be in progress
-             * - expired - the cart checkout has expired. No further processing will occur
-             *
-             */
-            status?: "open" | "complete" | "expired";
-            customer?: Customer;
-            billing_address?: Address;
-            delivery_address?: Address;
-            metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
-            line_items?: /* Tracks a set of product prices, quantities, (discounts) and taxes. */ PriceItems;
-            total_details?: /* The total details with tax (and discount) aggregated totals. */ TotalDetails;
-            created_at?: string; // date-time
-            updated_at?: string; // date-time
-        }
         /**
          * A valid cart payload from a client.
          */
@@ -1346,28 +1629,143 @@ declare namespace Components {
          */
         export interface CatalogSearchResult {
             /**
-             * The number os results returned.
+             * The number of results returned.
              */
             hits?: number;
             results?: (/**
              * The product entity
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             Product | /**
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price | /**
              * The coupon entity
              * example:
              * {
-             *   "$ref": "#/components/examples/coupon-without-promo-codes/value"
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "category": "cashback",
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
              * }
              */
             Coupon)[];
@@ -1388,7 +1786,561 @@ declare namespace Components {
              * The order entity
              * example:
              * {
-             *   "$ref": "#/components/examples/order-with-simple-prices"
+             *   "order_number": "OR 2022/742701",
+             *   "status": "quote",
+             *   "source": {
+             *     "title": "manual",
+             *     "href": null
+             *   },
+             *   "source_type": "manual",
+             *   "_schema": "order",
+             *   "_title": "OR 2022/742701",
+             *   "expires_at": "2022-06-30T16:17:00.000Z",
+             *   "line_items": [
+             *     {
+             *       "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 255462
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "unit_amount": 100000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "1000",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Solar Panel Module",
+             *         "description": "Solar Panel Module",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:04:10.369Z",
+             *         "_updated_at": "2022-06-03T16:04:10.369Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 16,
+             *       "currency": "EUR",
+             *       "description": "Solar Panel Module",
+             *       "unit_amount": 100000,
+             *       "unit_amount_net": 84034,
+             *       "amount_subtotal": 1344538,
+             *       "amount_total": 1600000
+             *     },
+             *     {
+             *       "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 31933
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "unit_amount": 50000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "500",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Battery Module 500amps",
+             *         "description": "Battery Module 500amps",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:05:04.391Z",
+             *         "_updated_at": "2022-06-03T16:05:04.391Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 4,
+             *       "currency": "EUR",
+             *       "description": "Battery Module 500amps",
+             *       "unit_amount": 50000,
+             *       "unit_amount_net": 42017,
+             *       "amount_subtotal": 168067,
+             *       "amount_total": 200000
+             *     },
+             *     {
+             *       "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *       "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *         "unit_amount": 12055,
+             *         "type": "recurring",
+             *         "billing_period": "monthly",
+             *         "billing_duration_amount": 8,
+             *         "billing_duration_unit": "years",
+             *         "notice_time_amount": 3,
+             *         "notice_time_unit": "months",
+             *         "termination_time_amount": 2,
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_amount": 1,
+             *         "renewal_duration_unit": "years",
+             *         "active": true,
+             *         "sales_tax": "reduced",
+             *         "is_tax_inclusive": true,
+             *         "description": "Monthly",
+             *         "billing_scheme": "per_unit",
+             *         "_schema": "price",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-10T14:40:27.695Z",
+             *         "_updated_at": "2021-12-14T18:16:33.248Z",
+             *         "_title": "Monthly",
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "120.55456634",
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false
+             *       },
+             *       "_product": {
+             *         "_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *         "name": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "code": "1312378123",
+             *         "_tags": [
+             *           "wallbox",
+             *           "review demo",
+             *           "1"
+             *         ],
+             *         "categories": [
+             *           "Power"
+             *         ],
+             *         "type": "product",
+             *         "active": true,
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Bis zu 11 kW Ladeleistung (5x schneller laden)"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Integrierter MID Zähler für eine kilowattstundengenaue Abrechnung*"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Konfigurierbare Ladeleistung"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Zugangskontrolle über RFID-Karten"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Kommunikation über LAN"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "New feature"
+             *           }
+             *         ],
+             *         "_schema": "product",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-30T11:05:19.484Z",
+             *         "_updated_at": "2022-01-13T09:18:29.944Z",
+             *         "_title": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "5264b089-fc6a-4a91-9a2a-80c673958faa"
+             *             },
+             *             {
+             *               "entity_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf"
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "16729e60-c527-44ef-93c9-c68b6acf1224"
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Monthly",
+             *       "unit_amount": 12055,
+             *       "unit_amount_net": 11267,
+             *       "amount_subtotal": 11267,
+             *       "amount_total": 12055,
+             *       "taxes": [
+             *         {
+             *           "rate": "reduced",
+             *           "amount": 789
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *       "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *         "unit_amount": 9900,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "99",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "recurring",
+             *         "billing_period": "yearly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Yearly payment",
+             *         "description": "Yearly payment",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:39.884Z",
+             *         "_updated_at": "2022-02-07T22:58:39.884Z"
+             *       },
+             *       "_product": {
+             *         "_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *         "_schema": "product",
+             *         "_title": "Yearly Payment Product",
+             *         "name": "Yearly Payment Product",
+             *         "type": "product",
+             *         "active": true,
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:44.162Z",
+             *         "_updated_at": "2022-02-08T09:34:08.026Z",
+             *         "description": "Hier steht die Produktbeschreibung die sich auf dem Dokument, was generiert wird, gezogen wird."
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Yearly payment",
+             *       "unit_amount": 9900,
+             *       "unit_amount_net": 8319,
+             *       "amount_subtotal": 8319,
+             *       "amount_total": 9900,
+             *       "taxes": [
+             *         {
+             *           "rate": "standard",
+             *           "amount": 1581
+             *         }
+             *       ]
+             *     }
+             *   ],
+             *   "amount_subtotal": 1532191,
+             *   "amount_total": 1821955,
+             *   "total_details": {
+             *     "amount_tax": 289764,
+             *     "breakdown": {
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 287395
+             *         }
+             *       ],
+             *       "recurrences": [
+             *         {
+             *           "type": "one_time",
+             *           "amount_subtotal": 1512605,
+             *           "amount_subtotal_decimal": "15126.05",
+             *           "amount_total": 1800000,
+             *           "amount_total_decimal": "18000.00",
+             *           "amount_tax": 287395,
+             *           "amount_tax_decimal": "2873.95"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "monthly",
+             *           "amount_subtotal": 11267,
+             *           "amount_subtotal_decimal": "112.67",
+             *           "amount_total": 12055,
+             *           "amount_total_decimal": "120.55",
+             *           "amount_tax": 789,
+             *           "amount_tax_decimal": "7.89"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "yearly",
+             *           "amount_subtotal": 8319,
+             *           "amount_subtotal_decimal": "83.19",
+             *           "amount_total": 9900,
+             *           "amount_total_decimal": "99.00",
+             *           "amount_tax": 1581,
+             *           "amount_tax_decimal": "15.81"
+             *         }
+             *       ]
+             *     }
+             *   },
+             *   "currency": "EUR",
+             *   "payment_method": [
+             *     {
+             *       "type": "IBAN",
+             *       "details": {}
+             *     }
+             *   ],
+             *   "billing_contact": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "billing_first_name": "Joao",
+             *   "billing_last_name": "Pinho",
+             *   "billing_email": "j.pinho@epilot.cloud",
+             *   "billing_company_name": "epilot cloud",
+             *   "billing_address": [
+             *     {
+             *       "_tags": [],
+             *       "street": "Im Media Park",
+             *       "street_number": "8a",
+             *       "postal_code": "52000",
+             *       "city": "Cologne",
+             *       "country": "DE",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "delivery_address": [],
+             *   "dates": [
+             *     {
+             *       "_tags": [
+             *         "Instalation Date"
+             *       ],
+             *       "dates": "",
+             *       "value": "2022-06-30T16:29:00.000Z"
+             *     }
+             *   ],
+             *   "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:29:46.303Z",
+             *   "_updated_at": "2022-06-03T16:29:46.303Z"
              * }
              */
             Order;
@@ -1399,19 +2351,366 @@ declare namespace Components {
         export type CheckoutMode = "create_order" | "create_invoice" | "create_quote";
         /**
          * The composite price entity
+         * example:
+         * {
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
          */
-        export type CompositePrice = /* The composite price entity */ /**
+        export type CompositePrice = /**
          * The composite price entity
          * example:
          * {
-         *   "$ref": "#/components/examples/composite-price"
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        /**
+         * The composite price entity
+         * example:
+         * {
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
          * }
          */
         NonHydratedCompositePrice | /**
          * The composite price entity
          * example:
          * {
-         *   "$ref": "#/components/examples/composite-price"
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
          * }
          */
         HydratedCompositePrice;
@@ -1419,7 +2718,69 @@ declare namespace Components {
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item/value"
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         export interface CompositePriceItem {
@@ -1525,7 +2886,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -1825,7 +3256,88 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item/value"
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     },
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         },
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             PriceItem[];
@@ -1833,7 +3345,98 @@ declare namespace Components {
             /**
              * The price snapshot data.
              */
-            _price?: /* The price snapshot data. */ /* The composite price entity */ CompositePrice;
+            _price?: /* The price snapshot data. */ /**
+             * The composite price entity
+             * example:
+             * {
+             *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *   "_schema": "price",
+             *   "_title": "My Composite Price",
+             *   "description": "My Composite Price",
+             *   "_org": "739224",
+             *   "_created_at": "2022-02-18T10:10:26.439Z",
+             *   "_updated_at": "2022-02-18T11:53:04.191Z",
+             *   "active": true,
+             *   "is_composite_price": true,
+             *   "price_components": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 1,
+             *         "item": {
+             *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       },
+             *       {
+             *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 2,
+             *         "item": {
+             *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            CompositePrice;
         }
         /**
          * Represents a composite price input to the pricing library.
@@ -1888,7 +3491,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -1986,9 +3659,14 @@ declare namespace Components {
             };
             external_fees_mappings?: /**
              * example:
-             * {
-             *   "$ref": "#/components/examples/external-fee-mappings/value"
-             * }
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
@@ -2028,7 +3706,98 @@ declare namespace Components {
             price_component_coupon_ids?: {
                 [name: string]: string[];
             };
-            _price?: /* The composite price entity */ CompositePrice;
+            _price?: /**
+             * The composite price entity
+             * example:
+             * {
+             *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *   "_schema": "price",
+             *   "_title": "My Composite Price",
+             *   "description": "My Composite Price",
+             *   "_org": "739224",
+             *   "_created_at": "2022-02-18T10:10:26.439Z",
+             *   "_updated_at": "2022-02-18T11:53:04.191Z",
+             *   "active": true,
+             *   "is_composite_price": true,
+             *   "price_components": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 1,
+             *         "item": {
+             *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       },
+             *       {
+             *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 2,
+             *         "item": {
+             *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            CompositePrice;
         }
         /**
          * The compute price payload
@@ -2232,21 +4001,9 @@ declare namespace Components {
          * Price breakdown
          */
         export interface ComputedPriceBreakdown {
-            /**
-             * The static price breakdown
-             */
             static?: /* The computed price components */ ComputedPriceComponents;
-            /**
-             * The variable price breakdown (day and night)
-             */
             variable?: /* The computed price components */ ComputedPriceComponents;
-            /**
-             * The variable price breakdown for the day period
-             */
             variable_ht?: /* The computed price components */ ComputedPriceComponents;
-            /**
-             * The variable price breakdown for the night period
-             */
             variable_nt?: /* The computed price components */ ComputedPriceComponents;
         }
         /**
@@ -2260,7 +4017,31 @@ declare namespace Components {
          * The coupon entity
          * example:
          * {
-         *   "$ref": "#/components/examples/coupon-without-promo-codes/value"
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "category": "cashback",
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface Coupon {
@@ -2329,14 +4110,38 @@ declare namespace Components {
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price[];
             promo_codes?: /**
              * example:
              * {
-             *   "$ref": "#/components/examples/promo-code/value"
+             *   "id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "code": "123456",
+             *   "has_usage_limit": true,
+             *   "usage_limit": 10
              * }
              */
             PromoCode[];
@@ -2412,7 +4217,31 @@ declare namespace Components {
          * The base for the coupon entity without promo codes
          * example:
          * {
-         *   "$ref": "#/components/examples/coupon-without-promo-codes/value"
+         *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "_schema": "coupon",
+         *   "_org": "org_12345",
+         *   "_created_at": "2024-01-15T10:00:00.000Z",
+         *   "_updated_at": "2024-01-20T12:00:00.000Z",
+         *   "_title": "Sample Coupon",
+         *   "name": "Sample Coupon",
+         *   "type": "fixed",
+         *   "fixed_value": 555,
+         *   "fixed_value_currency": "USD",
+         *   "fixed_value_decimal": "5.55",
+         *   "active": true,
+         *   "category": "cashback",
+         *   "prices": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+         *         "_tags": [
+         *           "discount",
+         *           "special"
+         *         ],
+         *         "_schema": "price"
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface CouponWithoutPromoCodes {
@@ -2481,7 +4310,28 @@ declare namespace Components {
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price[];
@@ -2539,7 +4389,75 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "$ref": "#/components/examples/entity-item/value"
+         *   "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *   "_title": "Cool box",
+         *   "_org": "728",
+         *   "_schema": "order",
+         *   "_created_at": "2022-06-03T16:04:10.000Z",
+         *   "_updated_at": "2022-06-03T16:04:10.000Z",
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         export interface EntityItem {
@@ -2586,7 +4504,10 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "$ref": "#/components/examples/external-fee-mapping/value"
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
          * }
          */
         export interface ExternalFeeMapping {
@@ -2597,14 +4518,22 @@ declare namespace Components {
         }
         /**
          * example:
-         * {
-         *   "$ref": "#/components/examples/external-fee-mappings/value"
-         * }
+         * [
+         *   {
+         *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *     "frequency_unit": "weekly",
+         *     "amount_total": 1000,
+         *     "amount_total_decimal": "10.00"
+         *   }
+         * ]
          */
         export type ExternalFeeMappings = /**
          * example:
          * {
-         *   "$ref": "#/components/examples/external-fee-mapping/value"
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "amount_total": 1000,
+         *   "amount_total_decimal": "10.00"
          * }
          */
         ExternalFeeMapping[];
@@ -2748,7 +4677,91 @@ declare namespace Components {
          * The composite price entity
          * example:
          * {
-         *   "$ref": "#/components/examples/composite-price"
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface HydratedCompositePrice {
@@ -2800,14 +4813,56 @@ declare namespace Components {
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price[] | /**
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price[];
@@ -2953,7 +5008,91 @@ declare namespace Components {
          * The composite price entity
          * example:
          * {
-         *   "$ref": "#/components/examples/composite-price"
+         *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *   "_schema": "price",
+         *   "_title": "My Composite Price",
+         *   "description": "My Composite Price",
+         *   "_org": "739224",
+         *   "_created_at": "2022-02-18T10:10:26.439Z",
+         *   "_updated_at": "2022-02-18T11:53:04.191Z",
+         *   "active": true,
+         *   "is_composite_price": true,
+         *   "price_components": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 1,
+         *         "item": {
+         *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       },
+         *       {
+         *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *         "_schema": "price",
+         *         "_product_id": "target-price-product-id",
+         *         "quantity": 2,
+         *         "item": {
+         *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+         *           "unit_amount": 10000,
+         *           "unit_amount_currency": "EUR",
+         *           "unit_amount_decimal": "100.00",
+         *           "sales_tax": "standard",
+         *           "is_tax_inclusive": false,
+         *           "price_display_in_journeys": "show_price",
+         *           "type": "one_time",
+         *           "_schema": "price",
+         *           "_title": "Test 1",
+         *           "description": "Test 1",
+         *           "tax": {
+         *             "$relation": [
+         *               {
+         *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+         *               }
+         *             ]
+         *           },
+         *           "_org": "739224",
+         *           "_created_at": "2022-02-18T10:10:26.439Z",
+         *           "_updated_at": "2022-02-18T11:53:04.191Z",
+         *           "active": true,
+         *           "billing_period": "weekly",
+         *           "billing_duration_unit": "months",
+         *           "notice_time_unit": "months",
+         *           "termination_time_unit": "months",
+         *           "renewal_duration_unit": "months",
+         *           "is_composite_price": false
+         *         }
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface NonHydratedCompositePrice {
@@ -3113,7 +5252,108 @@ declare namespace Components {
          * The opportunity entity
          * example:
          * {
-         *   "$ref": "#/components/examples/opportunity"
+         *   "opportunity_number": "OP 2022/335790",
+         *   "source": {
+         *     "title": "manual"
+         *   },
+         *   "source_type": "manual",
+         *   "_schema": "opportunity",
+         *   "_title": "16 Module Solar Pack Lead",
+         *   "opportunity_title": "16 Module Solar Pack Lead",
+         *   "due_date": "2022-06-30T15:18:00.000Z",
+         *   "assignee": [
+         *     {
+         *       "id": "10002563",
+         *       "email": "j.pinho@epilot.cloud",
+         *       "display_name": "j.pinho@epilot.cloud",
+         *       "token": "9e1758a3-2a32-4a5f-b034-a8ab883f8fb9",
+         *       "image_uri": "https://dummy-image.jpg",
+         *       "organization_id": "728",
+         *       "department": null,
+         *       "preferred_language": "en",
+         *       "status": "Active",
+         *       "phone": null,
+         *       "email_notification_setting": {
+         *         "added_participant_opportunity": true,
+         *         "assigned_opportunity": true,
+         *         "assigned_task": true,
+         *         "comment_opportunity": true,
+         *         "deleted_task": true,
+         *         "escalated_task": true,
+         *         "message_receive_opportunity": true,
+         *         "message_send_opportunity": true,
+         *         "created_task": true,
+         *         "created_opportunity_manual": true,
+         *         "created_opportunity_auto": true,
+         *         "deleted_opportunity": true
+         *       },
+         *       "is_signature_enabled": true,
+         *       "created_at": "2021-05-18T06:30:25.36046"
+         *     }
+         *   ],
+         *   "description": "Lead generated automatically via journey automation.",
+         *   "customer": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "69bf4355-9c1e-498a-b87e-6c873668194d",
+         *         "_tags": []
+         *       },
+         *       {
+         *         "entity_id": "8625e2e4-978e-4d16-b3d2-0d05fb4091f0",
+         *         "_tags": []
+         *       }
+         *     ]
+         *   },
+         *   "dates": [
+         *     {
+         *       "_tags": [
+         *         "Installation Date"
+         *       ],
+         *       "dates": "",
+         *       "value": "2022-06-30T15:21:00.000Z"
+         *     }
+         *   ],
+         *   "items": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "ff5fcdaf-9e36-4292-97f0-6a4e3f82a8f3"
+         *       },
+         *       {
+         *         "entity_id": "ec10b7cf-95ce-4f6b-a266-c566c7734b96"
+         *       },
+         *       {
+         *         "entity_id": "c3745dfe-4a46-4c22-8bf3-6159303474e4"
+         *       }
+         *     ]
+         *   },
+         *   "billing_address": {
+         *     "$relation_ref": [
+         *       {
+         *         "entity_id": "69bf4355-9c1e-498a-b87e-6c873668194d",
+         *         "path": "address.2"
+         *       }
+         *     ]
+         *   },
+         *   "delivery_address": {
+         *     "$relation_ref": [
+         *       {
+         *         "entity_id": "69bf4355-9c1e-498a-b87e-6c873668194d",
+         *         "path": "address.24"
+         *       }
+         *     ]
+         *   },
+         *   "address": {
+         *     "$relation_ref": [
+         *       {
+         *         "entity_id": "69bf4355-9c1e-498a-b87e-6c873668194d",
+         *         "path": "address.25"
+         *       }
+         *     ]
+         *   },
+         *   "_id": "319a274b-0477-45e3-9d58-1f46c82d4604",
+         *   "_org": "728",
+         *   "_created_at": "2022-06-03T15:26:14.006Z",
+         *   "_updated_at": "2022-06-03T15:26:14.006Z"
          * }
          */
         export interface Opportunity {
@@ -3292,7 +5532,561 @@ declare namespace Components {
          * The order entity
          * example:
          * {
-         *   "$ref": "#/components/examples/order-with-simple-prices"
+         *   "order_number": "OR 2022/742701",
+         *   "status": "quote",
+         *   "source": {
+         *     "title": "manual",
+         *     "href": null
+         *   },
+         *   "source_type": "manual",
+         *   "_schema": "order",
+         *   "_title": "OR 2022/742701",
+         *   "expires_at": "2022-06-30T16:17:00.000Z",
+         *   "line_items": [
+         *     {
+         *       "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+         *       "pricing_model": "per_unit",
+         *       "is_composite_price": false,
+         *       "taxes": [
+         *         {
+         *           "tax": {
+         *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+         *             "rate": 19,
+         *             "_schema": "tax",
+         *             "_org": "728",
+         *             "_created_at": "2021-09-24T15:06:13.859Z",
+         *             "_updated_at": "2022-04-04T17:36:15.273Z",
+         *             "_title": "Tax Standard",
+         *             "type": "VAT",
+         *             "active": true,
+         *             "region": "DE",
+         *             "description": "Standard"
+         *           },
+         *           "amount": 255462
+         *         }
+         *       ],
+         *       "_price": {
+         *         "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *         "unit_amount": 100000,
+         *         "unit_amount_currency": "EUR",
+         *         "unit_amount_decimal": "1000",
+         *         "sales_tax": "standard",
+         *         "is_tax_inclusive": true,
+         *         "price_display_in_journeys": "show_price",
+         *         "type": "one_time",
+         *         "billing_period": "weekly",
+         *         "billing_duration_unit": "months",
+         *         "notice_time_unit": "months",
+         *         "termination_time_unit": "months",
+         *         "renewal_duration_unit": "months",
+         *         "_schema": "price",
+         *         "_title": "Solar Panel Module",
+         *         "description": "Solar Panel Module",
+         *         "active": true,
+         *         "pricing_model": "per_unit",
+         *         "is_composite_price": false,
+         *         "tax": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *             }
+         *           ]
+         *         },
+         *         "_org": "728",
+         *         "_created_at": "2022-06-03T16:04:10.369Z",
+         *         "_updated_at": "2022-06-03T16:04:10.369Z"
+         *       },
+         *       "_product": {
+         *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+         *         "type": "product",
+         *         "_schema": "product",
+         *         "_title": "Solar Panel with Battery Storage",
+         *         "name": "Solar Panel with Battery Storage",
+         *         "code": "SOLAR-BATT",
+         *         "active": true,
+         *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+         *         "feature": [
+         *           {
+         *             "_tags": [],
+         *             "feature": "Eco-Panels"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Remote Management Platform"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Battery Remote Control"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Mobile App"
+         *           }
+         *         ],
+         *         "cross_sellable_products": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+         *               "_schema": "product",
+         *               "_tags": []
+         *             },
+         *             {
+         *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+         *               "_tags": []
+         *             }
+         *           ]
+         *         },
+         *         "product_images": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+         *             },
+         *             {
+         *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+         *             }
+         *           ]
+         *         },
+         *         "product_downloads": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+         *             }
+         *           ]
+         *         },
+         *         "_org": "728",
+         *         "_created_at": "2022-06-03T15:52:27.512Z",
+         *         "_updated_at": "2022-06-03T16:05:15.029Z",
+         *         "price_options": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *               "_tags": []
+         *             },
+         *             {
+         *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+         *               "_tags": []
+         *             }
+         *           ]
+         *         }
+         *       },
+         *       "quantity": 16,
+         *       "currency": "EUR",
+         *       "description": "Solar Panel Module",
+         *       "unit_amount": 100000,
+         *       "unit_amount_net": 84034,
+         *       "amount_subtotal": 1344538,
+         *       "amount_total": 1600000
+         *     },
+         *     {
+         *       "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+         *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+         *       "pricing_model": "per_unit",
+         *       "is_composite_price": false,
+         *       "taxes": [
+         *         {
+         *           "tax": {
+         *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+         *             "rate": 19,
+         *             "_schema": "tax",
+         *             "_org": "728",
+         *             "_created_at": "2021-09-24T15:06:13.859Z",
+         *             "_updated_at": "2022-04-04T17:36:15.273Z",
+         *             "_title": "Tax Standard",
+         *             "type": "VAT",
+         *             "active": true,
+         *             "region": "DE",
+         *             "description": "Standard"
+         *           },
+         *           "amount": 31933
+         *         }
+         *       ],
+         *       "_price": {
+         *         "_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+         *         "unit_amount": 50000,
+         *         "unit_amount_currency": "EUR",
+         *         "unit_amount_decimal": "500",
+         *         "sales_tax": "standard",
+         *         "is_tax_inclusive": true,
+         *         "price_display_in_journeys": "show_price",
+         *         "type": "one_time",
+         *         "billing_period": "weekly",
+         *         "billing_duration_unit": "months",
+         *         "notice_time_unit": "months",
+         *         "termination_time_unit": "months",
+         *         "renewal_duration_unit": "months",
+         *         "_schema": "price",
+         *         "_title": "Battery Module 500amps",
+         *         "description": "Battery Module 500amps",
+         *         "active": true,
+         *         "pricing_model": "per_unit",
+         *         "is_composite_price": false,
+         *         "tax": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *             }
+         *           ]
+         *         },
+         *         "_org": "728",
+         *         "_created_at": "2022-06-03T16:05:04.391Z",
+         *         "_updated_at": "2022-06-03T16:05:04.391Z"
+         *       },
+         *       "_product": {
+         *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+         *         "type": "product",
+         *         "_schema": "product",
+         *         "_title": "Solar Panel with Battery Storage",
+         *         "name": "Solar Panel with Battery Storage",
+         *         "code": "SOLAR-BATT",
+         *         "active": true,
+         *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+         *         "feature": [
+         *           {
+         *             "_tags": [],
+         *             "feature": "Eco-Panels"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Remote Management Platform"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Battery Remote Control"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Mobile App"
+         *           }
+         *         ],
+         *         "cross_sellable_products": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+         *               "_schema": "product",
+         *               "_tags": []
+         *             },
+         *             {
+         *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+         *               "_tags": []
+         *             }
+         *           ]
+         *         },
+         *         "product_images": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+         *             },
+         *             {
+         *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+         *             }
+         *           ]
+         *         },
+         *         "product_downloads": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+         *             }
+         *           ]
+         *         },
+         *         "_org": "728",
+         *         "_created_at": "2022-06-03T15:52:27.512Z",
+         *         "_updated_at": "2022-06-03T16:05:15.029Z",
+         *         "price_options": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *               "_tags": []
+         *             },
+         *             {
+         *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+         *               "_tags": []
+         *             }
+         *           ]
+         *         }
+         *       },
+         *       "quantity": 4,
+         *       "currency": "EUR",
+         *       "description": "Battery Module 500amps",
+         *       "unit_amount": 50000,
+         *       "unit_amount_net": 42017,
+         *       "amount_subtotal": 168067,
+         *       "amount_total": 200000
+         *     },
+         *     {
+         *       "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+         *       "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+         *       "pricing_model": "per_unit",
+         *       "is_composite_price": false,
+         *       "_price": {
+         *         "_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+         *         "unit_amount": 12055,
+         *         "type": "recurring",
+         *         "billing_period": "monthly",
+         *         "billing_duration_amount": 8,
+         *         "billing_duration_unit": "years",
+         *         "notice_time_amount": 3,
+         *         "notice_time_unit": "months",
+         *         "termination_time_amount": 2,
+         *         "termination_time_unit": "months",
+         *         "renewal_duration_amount": 1,
+         *         "renewal_duration_unit": "years",
+         *         "active": true,
+         *         "sales_tax": "reduced",
+         *         "is_tax_inclusive": true,
+         *         "description": "Monthly",
+         *         "billing_scheme": "per_unit",
+         *         "_schema": "price",
+         *         "_org": "728",
+         *         "_created_at": "2021-11-10T14:40:27.695Z",
+         *         "_updated_at": "2021-12-14T18:16:33.248Z",
+         *         "_title": "Monthly",
+         *         "unit_amount_currency": "EUR",
+         *         "unit_amount_decimal": "120.55456634",
+         *         "pricing_model": "per_unit",
+         *         "is_composite_price": false
+         *       },
+         *       "_product": {
+         *         "_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+         *         "name": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+         *         "code": "1312378123",
+         *         "_tags": [
+         *           "wallbox",
+         *           "review demo",
+         *           "1"
+         *         ],
+         *         "categories": [
+         *           "Power"
+         *         ],
+         *         "type": "product",
+         *         "active": true,
+         *         "feature": [
+         *           {
+         *             "_tags": [],
+         *             "feature": "Bis zu 11 kW Ladeleistung (5x schneller laden)"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Integrierter MID Zähler für eine kilowattstundengenaue Abrechnung*"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Konfigurierbare Ladeleistung"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Zugangskontrolle über RFID-Karten"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "Kommunikation über LAN"
+         *           },
+         *           {
+         *             "_tags": [],
+         *             "feature": "New feature"
+         *           }
+         *         ],
+         *         "_schema": "product",
+         *         "_org": "728",
+         *         "_created_at": "2021-11-30T11:05:19.484Z",
+         *         "_updated_at": "2022-01-13T09:18:29.944Z",
+         *         "_title": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+         *         "price_options": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "5264b089-fc6a-4a91-9a2a-80c673958faa"
+         *             },
+         *             {
+         *               "entity_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf"
+         *             }
+         *           ]
+         *         },
+         *         "product_images": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "16729e60-c527-44ef-93c9-c68b6acf1224"
+         *             }
+         *           ]
+         *         }
+         *       },
+         *       "quantity": 1,
+         *       "currency": "EUR",
+         *       "description": "Monthly",
+         *       "unit_amount": 12055,
+         *       "unit_amount_net": 11267,
+         *       "amount_subtotal": 11267,
+         *       "amount_total": 12055,
+         *       "taxes": [
+         *         {
+         *           "rate": "reduced",
+         *           "amount": 789
+         *         }
+         *       ]
+         *     },
+         *     {
+         *       "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+         *       "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+         *       "pricing_model": "per_unit",
+         *       "is_composite_price": false,
+         *       "_price": {
+         *         "_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+         *         "unit_amount": 9900,
+         *         "unit_amount_currency": "EUR",
+         *         "unit_amount_decimal": "99",
+         *         "sales_tax": "standard",
+         *         "is_tax_inclusive": true,
+         *         "price_display_in_journeys": "show_price",
+         *         "type": "recurring",
+         *         "billing_period": "yearly",
+         *         "billing_duration_unit": "months",
+         *         "notice_time_unit": "months",
+         *         "termination_time_unit": "months",
+         *         "renewal_duration_unit": "months",
+         *         "_schema": "price",
+         *         "_title": "Yearly payment",
+         *         "description": "Yearly payment",
+         *         "active": true,
+         *         "pricing_model": "per_unit",
+         *         "is_composite_price": false,
+         *         "_org": "728",
+         *         "_created_at": "2022-02-07T22:58:39.884Z",
+         *         "_updated_at": "2022-02-07T22:58:39.884Z"
+         *       },
+         *       "_product": {
+         *         "_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+         *         "_schema": "product",
+         *         "_title": "Yearly Payment Product",
+         *         "name": "Yearly Payment Product",
+         *         "type": "product",
+         *         "active": true,
+         *         "price_options": {
+         *           "$relation": [
+         *             {
+         *               "entity_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+         *               "_tags": []
+         *             }
+         *           ]
+         *         },
+         *         "_org": "728",
+         *         "_created_at": "2022-02-07T22:58:44.162Z",
+         *         "_updated_at": "2022-02-08T09:34:08.026Z",
+         *         "description": "Hier steht die Produktbeschreibung die sich auf dem Dokument, was generiert wird, gezogen wird."
+         *       },
+         *       "quantity": 1,
+         *       "currency": "EUR",
+         *       "description": "Yearly payment",
+         *       "unit_amount": 9900,
+         *       "unit_amount_net": 8319,
+         *       "amount_subtotal": 8319,
+         *       "amount_total": 9900,
+         *       "taxes": [
+         *         {
+         *           "rate": "standard",
+         *           "amount": 1581
+         *         }
+         *       ]
+         *     }
+         *   ],
+         *   "amount_subtotal": 1532191,
+         *   "amount_total": 1821955,
+         *   "total_details": {
+         *     "amount_tax": 289764,
+         *     "breakdown": {
+         *       "taxes": [
+         *         {
+         *           "tax": {
+         *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+         *             "rate": 19,
+         *             "_schema": "tax",
+         *             "_org": "728",
+         *             "_created_at": "2021-09-24T15:06:13.859Z",
+         *             "_updated_at": "2022-04-04T17:36:15.273Z",
+         *             "_title": "Tax Standard",
+         *             "type": "VAT",
+         *             "active": true,
+         *             "region": "DE",
+         *             "description": "Standard"
+         *           },
+         *           "amount": 287395
+         *         }
+         *       ],
+         *       "recurrences": [
+         *         {
+         *           "type": "one_time",
+         *           "amount_subtotal": 1512605,
+         *           "amount_subtotal_decimal": "15126.05",
+         *           "amount_total": 1800000,
+         *           "amount_total_decimal": "18000.00",
+         *           "amount_tax": 287395,
+         *           "amount_tax_decimal": "2873.95"
+         *         },
+         *         {
+         *           "type": "recurring",
+         *           "billing_period": "monthly",
+         *           "amount_subtotal": 11267,
+         *           "amount_subtotal_decimal": "112.67",
+         *           "amount_total": 12055,
+         *           "amount_total_decimal": "120.55",
+         *           "amount_tax": 789,
+         *           "amount_tax_decimal": "7.89"
+         *         },
+         *         {
+         *           "type": "recurring",
+         *           "billing_period": "yearly",
+         *           "amount_subtotal": 8319,
+         *           "amount_subtotal_decimal": "83.19",
+         *           "amount_total": 9900,
+         *           "amount_total_decimal": "99.00",
+         *           "amount_tax": 1581,
+         *           "amount_tax_decimal": "15.81"
+         *         }
+         *       ]
+         *     }
+         *   },
+         *   "currency": "EUR",
+         *   "payment_method": [
+         *     {
+         *       "type": "IBAN",
+         *       "details": {}
+         *     }
+         *   ],
+         *   "billing_contact": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+         *         "_tags": []
+         *       }
+         *     ]
+         *   },
+         *   "billing_first_name": "Joao",
+         *   "billing_last_name": "Pinho",
+         *   "billing_email": "j.pinho@epilot.cloud",
+         *   "billing_company_name": "epilot cloud",
+         *   "billing_address": [
+         *     {
+         *       "_tags": [],
+         *       "street": "Im Media Park",
+         *       "street_number": "8a",
+         *       "postal_code": "52000",
+         *       "city": "Cologne",
+         *       "country": "DE",
+         *       "additional_info": ""
+         *     }
+         *   ],
+         *   "delivery_address": [],
+         *   "dates": [
+         *     {
+         *       "_tags": [
+         *         "Instalation Date"
+         *       ],
+         *       "dates": "",
+         *       "value": "2022-06-30T16:29:00.000Z"
+         *     }
+         *   ],
+         *   "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
+         *   "_org": "728",
+         *   "_created_at": "2022-06-03T16:29:46.303Z",
+         *   "_updated_at": "2022-06-03T16:29:46.303Z"
          * }
          */
         export interface Order {
@@ -3546,7 +6340,28 @@ declare namespace Components {
          * The price entity schema for simple pricing
          * example:
          * {
-         *   "$ref": "#/components/examples/price"
+         *   "unit_amount": 100000,
+         *   "unit_amount_currency": "EUR",
+         *   "unit_amount_decimal": "1000",
+         *   "sales_tax": "standard",
+         *   "is_tax_inclusive": true,
+         *   "price_display_in_journeys": "show_price",
+         *   "type": "one_time",
+         *   "billing_period": "weekly",
+         *   "billing_duration_unit": "months",
+         *   "notice_time_unit": "months",
+         *   "termination_time_unit": "months",
+         *   "renewal_duration_unit": "months",
+         *   "_schema": "price",
+         *   "_title": "Solar Panel Module",
+         *   "description": "Solar Panel Module",
+         *   "active": true,
+         *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *   "_org": "728",
+         *   "_created_at": "2022-06-03T16:04:10.369Z",
+         *   "_updated_at": "2022-06-03T16:04:10.369Z",
+         *   "pricing_model": "per_unit",
+         *   "is_composite_price": false
          * }
          */
         export interface Price {
@@ -3635,7 +6450,22 @@ declare namespace Components {
              * the tax configuration
              * example:
              * {
-             *   "$ref": "#/components/examples/tax/value"
+             *   "rate": 19,
+             *   "_title": "Tax Standard",
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "active": true,
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Tax[];
@@ -3875,7 +6705,14 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "$ref": "#/components/examples/price-input-mapping/value"
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
          * }
          */
         export interface PriceInputMapping {
@@ -3905,7 +6742,14 @@ declare namespace Components {
         export type PriceInputMappings = /**
          * example:
          * {
-         *   "$ref": "#/components/examples/price-input-mapping/value"
+         *   "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+         *   "frequency_unit": "weekly",
+         *   "value": 1000.245,
+         *   "name": "avg consumption",
+         *   "metadata": {
+         *     "journey_title": "energy journey",
+         *     "step_name": "avg consumption picker"
+         *   }
          * }
          */
         PriceInputMapping[];
@@ -3913,7 +6757,88 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item/value"
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     },
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         },
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         export interface PriceItem {
@@ -4019,7 +6944,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -4268,7 +7263,28 @@ declare namespace Components {
              * The price entity schema for simple pricing
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             Price;
@@ -4326,7 +7342,77 @@ declare namespace Components {
              * The snapshot of the product.
              * example:
              * {
-             *   "$ref": "#/components/examples/product"
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
              * }
              */
             _product?: {
@@ -4424,9 +7510,14 @@ declare namespace Components {
             };
             external_fees_mappings?: /**
              * example:
-             * {
-             *   "$ref": "#/components/examples/external-fee-mappings/value"
-             * }
+             * [
+             *   {
+             *     "price_id": "589B011B-F8D9-4F8E-AD71-BACE4B543C0F",
+             *     "frequency_unit": "weekly",
+             *     "amount_total": 1000,
+             *     "amount_total_decimal": "10.00"
+             *   }
+             * ]
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
@@ -4495,7 +7586,28 @@ declare namespace Components {
              * The snapshot of the price linked to the price item.
              * example:
              * {
-             *   "$ref": "#/components/examples/price"
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
              * }
              */
             _price?: {
@@ -4584,7 +7696,22 @@ declare namespace Components {
                  * the tax configuration
                  * example:
                  * {
-                 *   "$ref": "#/components/examples/tax/value"
+                 *   "rate": 19,
+                 *   "_title": "Tax Standard",
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "type": "VAT",
+                 *   "description": "Tax description",
+                 *   "active": true,
+                 *   "region": "DE",
+                 *   "region_label": "Germany",
+                 *   "_org": "123",
+                 *   "_schema": "tax",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
                  * }
                  */
                 Tax[];
@@ -4667,14 +7794,157 @@ declare namespace Components {
          * Represents a price item
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item/value"
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     },
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         },
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         PriceItem | /**
          * Represents a composite price input to the pricing library.
          * example:
          * {
-         *   "$ref": "#/components/examples/price-item/value"
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         CompositePriceItem)[];
@@ -4691,18 +7961,6 @@ declare namespace Components {
             display_mode?: PriceTierDisplayMode;
         }
         export type PriceTierDisplayMode = "hidden" | "on_request";
-        export interface PriceTierEnhanced {
-            up_to?: number | null;
-            flat_fee_amount?: number;
-            flat_fee_amount_decimal?: string;
-            unit_amount?: number;
-            unit_amount_decimal?: string;
-            display_mode?: PriceTierDisplayMode;
-            unit_amount_gross?: number;
-            unit_amount_gross_decimal?: string;
-            flat_fee_amount_gross?: number;
-            flat_fee_amount_gross_decimal?: string;
-        }
         /**
          * The result from the calculation of a set of price items.
          */
@@ -4711,14 +7969,157 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item/value"
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     },
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         },
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             PriceItem | /**
              * Represents a composite price input to the pricing library.
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item/value"
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             CompositePriceItem)[];
@@ -4761,14 +8162,157 @@ declare namespace Components {
              * Represents a price item
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item/value"
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     },
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         },
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             PriceItem | /**
              * Represents a composite price input to the pricing library.
              * example:
              * {
-             *   "$ref": "#/components/examples/price-item/value"
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             CompositePriceItem)[];
@@ -4818,7 +8362,77 @@ declare namespace Components {
          * The product entity
          * example:
          * {
-         *   "$ref": "#/components/examples/product"
+         *   "type": "product",
+         *   "_schema": "product",
+         *   "_title": "Solar Panel with Battery Storage",
+         *   "name": "Solar Panel with Battery Storage",
+         *   "code": "SOLAR-BATT",
+         *   "active": true,
+         *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+         *   "feature": [
+         *     {
+         *       "_tags": [],
+         *       "feature": "Eco-Panels"
+         *     },
+         *     {
+         *       "_tags": [],
+         *       "feature": "Remote Management Platform"
+         *     },
+         *     {
+         *       "_tags": [],
+         *       "feature": "Battery Remote Control"
+         *     },
+         *     {
+         *       "_tags": [],
+         *       "feature": "Mobile App"
+         *     }
+         *   ],
+         *   "cross_sellable_products": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+         *         "_schema": "product",
+         *         "_tags": []
+         *       },
+         *       {
+         *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+         *         "_tags": []
+         *       }
+         *     ]
+         *   },
+         *   "product_images": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+         *       },
+         *       {
+         *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+         *       }
+         *     ]
+         *   },
+         *   "product_downloads": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+         *       }
+         *     ]
+         *   },
+         *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+         *   "_org": "728",
+         *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+         *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+         *   "price_options": {
+         *     "$relation": [
+         *       {
+         *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+         *         "_tags": []
+         *       },
+         *       {
+         *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+         *         "_tags": []
+         *       }
+         *     ]
+         *   }
          * }
          */
         export interface Product {
@@ -4918,7 +8532,75 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "$ref": "#/components/examples/entity-item/value"
+         *   "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *   "_title": "Cool box",
+         *   "_org": "728",
+         *   "_schema": "order",
+         *   "_created_at": "2022-06-03T16:04:10.000Z",
+         *   "_updated_at": "2022-06-03T16:04:10.000Z",
+         *   "amount_subtotal": 10000,
+         *   "amount_total": 10600,
+         *   "currency": "EUR",
+         *   "description": "Annual internet service",
+         *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+         *   "taxes": [
+         *     {
+         *       "amount": 600,
+         *       "tax": {
+         *         "active": true,
+         *         "description": "Without Behaviour",
+         *         "rate": 6,
+         *         "region": "DE",
+         *         "type": "VAT",
+         *         "_created_at": "2022-02-07T14:49:08.831Z",
+         *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+         *         "_org": "739224",
+         *         "_schema": "tax",
+         *         "_title": "Tax Without Behaviour",
+         *         "_updated_at": "2022-02-07T14:49:08.831Z"
+         *       }
+         *     }
+         *   ],
+         *   "unit_amount": 10000,
+         *   "unit_amount_net": 10000,
+         *   "pricing_model": "per_unit",
+         *   "_price": {
+         *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+         *     "unit_amount": 10000,
+         *     "unit_amount_currency": "EUR",
+         *     "unit_amount_decimal": "100.00",
+         *     "sales_tax": "standard",
+         *     "is_tax_inclusive": false,
+         *     "price_display_in_journeys": "show_price",
+         *     "type": "one_time",
+         *     "billing_period": "weekly",
+         *     "billing_duration_unit": "months",
+         *     "notice_time_unit": "months",
+         *     "termination_time_unit": "months",
+         *     "renewal_duration_unit": "months",
+         *     "_schema": "price",
+         *     "_title": "Solar Panel Module",
+         *     "description": "Solar Panel Module",
+         *     "active": true,
+         *     "tax": {
+         *       "$relation": [
+         *         {
+         *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+         *         }
+         *       ]
+         *     },
+         *     "_org": "728",
+         *     "_created_at": "2022-06-03T16:04:10.369Z",
+         *     "_updated_at": "2022-06-03T16:04:10.369Z",
+         *     "pricing_model": "per_unit"
+         *   },
+         *   "_product": {
+         *     "name": "Cool box",
+         *     "type": "product",
+         *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+         *     "_title": "Cool box"
+         *   }
          * }
          */
         export interface ProductRecommendation {
@@ -4958,13 +8640,81 @@ declare namespace Components {
          */
         export interface ProductRecommendationResponse {
             /**
-             * The number os results returned.
+             * The number of results returned.
              */
             hits: number;
             results: /**
              * example:
              * {
-             *   "$ref": "#/components/examples/entity-item/value"
+             *   "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *   "_title": "Cool box",
+             *   "_org": "728",
+             *   "_schema": "order",
+             *   "_created_at": "2022-06-03T16:04:10.000Z",
+             *   "_updated_at": "2022-06-03T16:04:10.000Z",
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
              * }
              */
             ProductRecommendation[];
@@ -4995,7 +8745,10 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "$ref": "#/components/examples/promo-code/value"
+         *   "id": "123e4567-e89b-12d3-a456-426614174000",
+         *   "code": "123456",
+         *   "has_usage_limit": true,
+         *   "usage_limit": 10
          * }
          */
         export interface PromoCode {
@@ -5024,7 +8777,31 @@ declare namespace Components {
              * The base for the coupon entity without promo codes
              * example:
              * {
-             *   "$ref": "#/components/examples/coupon-without-promo-codes/value"
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "category": "cashback",
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
              * }
              */
             CouponWithoutPromoCodes[];
@@ -5238,7 +9015,7 @@ declare namespace Components {
              * The taxes applied to the price item.
              */
             tax?: {
-                [key: string]: any;
+                [name: string]: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
             };
         }
         export interface RedeemedPromo {
@@ -5253,7 +9030,31 @@ declare namespace Components {
              * The base for the coupon entity without promo codes
              * example:
              * {
-             *   "$ref": "#/components/examples/coupon-without-promo-codes/value"
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "category": "cashback",
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
              * }
              */
             CouponWithoutPromoCodes[];
@@ -5265,7 +9066,7 @@ declare namespace Components {
         }
         export interface SearchExternalCatalogResult {
             /**
-             * The number os results returned.
+             * The number of results returned.
              */
             hits: number;
             results: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem[];
@@ -5355,7 +9156,22 @@ declare namespace Components {
          * the tax configuration
          * example:
          * {
-         *   "$ref": "#/components/examples/tax/value"
+         *   "rate": 19,
+         *   "_title": "Tax Standard",
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "type": "VAT",
+         *   "description": "Tax description",
+         *   "active": true,
+         *   "region": "DE",
+         *   "region_label": "Germany",
+         *   "_org": "123",
+         *   "_schema": "tax",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z"
          * }
          */
         export interface Tax {
@@ -5407,7 +9223,22 @@ declare namespace Components {
              * the tax configuration
              * example:
              * {
-             *   "$ref": "#/components/examples/tax/value"
+             *   "rate": 19,
+             *   "_title": "Tax Standard",
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "active": true,
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Tax;
@@ -5444,7 +9275,22 @@ declare namespace Components {
              * the tax configuration
              * example:
              * {
-             *   "$ref": "#/components/examples/tax/value"
+             *   "rate": 19,
+             *   "_title": "Tax Standard",
+             *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+             *   "type": "VAT",
+             *   "description": "Tax description",
+             *   "active": true,
+             *   "region": "DE",
+             *   "region_label": "Germany",
+             *   "_org": "123",
+             *   "_schema": "tax",
+             *   "_tags": [
+             *     "example",
+             *     "mock"
+             *   ],
+             *   "_created_at": "2021-02-09T12:41:43.662Z",
+             *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
             Tax;
@@ -5520,12 +9366,9 @@ declare namespace Components {
          * The availability map file result payload
          * example:
          * {
-         *   "rules_parsed_count": 8,
-         *   "errors": [
-         *     "File must be UTF-8 encoded",
-         *     "Error on line 3 - street_number must be of type number",
-         *     "Error on line 6 - start_date cant be greater than end_date"
-         *   ]
+         *   "status": "success",
+         *   "rules_parsed_count": 10,
+         *   "errors": []
          * }
          */
         export interface ValidateAvailabilityFileResult {
@@ -5863,12 +9706,9 @@ declare namespace Paths {
              * The availability map file result payload
              * example:
              * {
-             *   "rules_parsed_count": 8,
-             *   "errors": [
-             *     "File must be UTF-8 encoded",
-             *     "Error on line 3 - street_number must be of type number",
-             *     "Error on line 6 - start_date cant be greater than end_date"
-             *   ]
+             *   "status": "success",
+             *   "rules_parsed_count": 10,
+             *   "errors": []
              * }
              */
             Components.Schemas.ValidateAvailabilityFileResult;
@@ -5904,7 +9744,561 @@ declare namespace Paths {
              * The order entity
              * example:
              * {
-             *   "$ref": "#/components/examples/order-with-simple-prices"
+             *   "order_number": "OR 2022/742701",
+             *   "status": "quote",
+             *   "source": {
+             *     "title": "manual",
+             *     "href": null
+             *   },
+             *   "source_type": "manual",
+             *   "_schema": "order",
+             *   "_title": "OR 2022/742701",
+             *   "expires_at": "2022-06-30T16:17:00.000Z",
+             *   "line_items": [
+             *     {
+             *       "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 255462
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "unit_amount": 100000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "1000",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Solar Panel Module",
+             *         "description": "Solar Panel Module",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:04:10.369Z",
+             *         "_updated_at": "2022-06-03T16:04:10.369Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 16,
+             *       "currency": "EUR",
+             *       "description": "Solar Panel Module",
+             *       "unit_amount": 100000,
+             *       "unit_amount_net": 84034,
+             *       "amount_subtotal": 1344538,
+             *       "amount_total": 1600000
+             *     },
+             *     {
+             *       "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 31933
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "unit_amount": 50000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "500",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Battery Module 500amps",
+             *         "description": "Battery Module 500amps",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:05:04.391Z",
+             *         "_updated_at": "2022-06-03T16:05:04.391Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 4,
+             *       "currency": "EUR",
+             *       "description": "Battery Module 500amps",
+             *       "unit_amount": 50000,
+             *       "unit_amount_net": 42017,
+             *       "amount_subtotal": 168067,
+             *       "amount_total": 200000
+             *     },
+             *     {
+             *       "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *       "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *         "unit_amount": 12055,
+             *         "type": "recurring",
+             *         "billing_period": "monthly",
+             *         "billing_duration_amount": 8,
+             *         "billing_duration_unit": "years",
+             *         "notice_time_amount": 3,
+             *         "notice_time_unit": "months",
+             *         "termination_time_amount": 2,
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_amount": 1,
+             *         "renewal_duration_unit": "years",
+             *         "active": true,
+             *         "sales_tax": "reduced",
+             *         "is_tax_inclusive": true,
+             *         "description": "Monthly",
+             *         "billing_scheme": "per_unit",
+             *         "_schema": "price",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-10T14:40:27.695Z",
+             *         "_updated_at": "2021-12-14T18:16:33.248Z",
+             *         "_title": "Monthly",
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "120.55456634",
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false
+             *       },
+             *       "_product": {
+             *         "_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *         "name": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "code": "1312378123",
+             *         "_tags": [
+             *           "wallbox",
+             *           "review demo",
+             *           "1"
+             *         ],
+             *         "categories": [
+             *           "Power"
+             *         ],
+             *         "type": "product",
+             *         "active": true,
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Bis zu 11 kW Ladeleistung (5x schneller laden)"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Integrierter MID Zähler für eine kilowattstundengenaue Abrechnung*"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Konfigurierbare Ladeleistung"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Zugangskontrolle über RFID-Karten"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Kommunikation über LAN"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "New feature"
+             *           }
+             *         ],
+             *         "_schema": "product",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-30T11:05:19.484Z",
+             *         "_updated_at": "2022-01-13T09:18:29.944Z",
+             *         "_title": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "5264b089-fc6a-4a91-9a2a-80c673958faa"
+             *             },
+             *             {
+             *               "entity_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf"
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "16729e60-c527-44ef-93c9-c68b6acf1224"
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Monthly",
+             *       "unit_amount": 12055,
+             *       "unit_amount_net": 11267,
+             *       "amount_subtotal": 11267,
+             *       "amount_total": 12055,
+             *       "taxes": [
+             *         {
+             *           "rate": "reduced",
+             *           "amount": 789
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *       "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *         "unit_amount": 9900,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "99",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "recurring",
+             *         "billing_period": "yearly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Yearly payment",
+             *         "description": "Yearly payment",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:39.884Z",
+             *         "_updated_at": "2022-02-07T22:58:39.884Z"
+             *       },
+             *       "_product": {
+             *         "_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *         "_schema": "product",
+             *         "_title": "Yearly Payment Product",
+             *         "name": "Yearly Payment Product",
+             *         "type": "product",
+             *         "active": true,
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:44.162Z",
+             *         "_updated_at": "2022-02-08T09:34:08.026Z",
+             *         "description": "Hier steht die Produktbeschreibung die sich auf dem Dokument, was generiert wird, gezogen wird."
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Yearly payment",
+             *       "unit_amount": 9900,
+             *       "unit_amount_net": 8319,
+             *       "amount_subtotal": 8319,
+             *       "amount_total": 9900,
+             *       "taxes": [
+             *         {
+             *           "rate": "standard",
+             *           "amount": 1581
+             *         }
+             *       ]
+             *     }
+             *   ],
+             *   "amount_subtotal": 1532191,
+             *   "amount_total": 1821955,
+             *   "total_details": {
+             *     "amount_tax": 289764,
+             *     "breakdown": {
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 287395
+             *         }
+             *       ],
+             *       "recurrences": [
+             *         {
+             *           "type": "one_time",
+             *           "amount_subtotal": 1512605,
+             *           "amount_subtotal_decimal": "15126.05",
+             *           "amount_total": 1800000,
+             *           "amount_total_decimal": "18000.00",
+             *           "amount_tax": 287395,
+             *           "amount_tax_decimal": "2873.95"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "monthly",
+             *           "amount_subtotal": 11267,
+             *           "amount_subtotal_decimal": "112.67",
+             *           "amount_total": 12055,
+             *           "amount_total_decimal": "120.55",
+             *           "amount_tax": 789,
+             *           "amount_tax_decimal": "7.89"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "yearly",
+             *           "amount_subtotal": 8319,
+             *           "amount_subtotal_decimal": "83.19",
+             *           "amount_total": 9900,
+             *           "amount_total_decimal": "99.00",
+             *           "amount_tax": 1581,
+             *           "amount_tax_decimal": "15.81"
+             *         }
+             *       ]
+             *     }
+             *   },
+             *   "currency": "EUR",
+             *   "payment_method": [
+             *     {
+             *       "type": "IBAN",
+             *       "details": {}
+             *     }
+             *   ],
+             *   "billing_contact": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "billing_first_name": "Joao",
+             *   "billing_last_name": "Pinho",
+             *   "billing_email": "j.pinho@epilot.cloud",
+             *   "billing_company_name": "epilot cloud",
+             *   "billing_address": [
+             *     {
+             *       "_tags": [],
+             *       "street": "Im Media Park",
+             *       "street_number": "8a",
+             *       "postal_code": "52000",
+             *       "city": "Cologne",
+             *       "country": "DE",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "delivery_address": [],
+             *   "dates": [
+             *     {
+             *       "_tags": [
+             *         "Instalation Date"
+             *       ],
+             *       "dates": "",
+             *       "value": "2022-06-30T16:29:00.000Z"
+             *     }
+             *   ],
+             *   "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:29:46.303Z",
+             *   "_updated_at": "2022-06-03T16:29:46.303Z"
              * }
              */
             Components.Schemas.Order;
@@ -5924,7 +10318,561 @@ declare namespace Paths {
              * The order entity
              * example:
              * {
-             *   "$ref": "#/components/examples/order-with-simple-prices"
+             *   "order_number": "OR 2022/742701",
+             *   "status": "quote",
+             *   "source": {
+             *     "title": "manual",
+             *     "href": null
+             *   },
+             *   "source_type": "manual",
+             *   "_schema": "order",
+             *   "_title": "OR 2022/742701",
+             *   "expires_at": "2022-06-30T16:17:00.000Z",
+             *   "line_items": [
+             *     {
+             *       "price_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 255462
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "unit_amount": 100000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "1000",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Solar Panel Module",
+             *         "description": "Solar Panel Module",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:04:10.369Z",
+             *         "_updated_at": "2022-06-03T16:04:10.369Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 16,
+             *       "currency": "EUR",
+             *       "description": "Solar Panel Module",
+             *       "unit_amount": 100000,
+             *       "unit_amount_net": 84034,
+             *       "amount_subtotal": 1344538,
+             *       "amount_total": 1600000
+             *     },
+             *     {
+             *       "price_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *       "product_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 31933
+             *         }
+             *       ],
+             *       "_price": {
+             *         "_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "unit_amount": 50000,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "500",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "one_time",
+             *         "billing_period": "weekly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Battery Module 500amps",
+             *         "description": "Battery Module 500amps",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "tax": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T16:05:04.391Z",
+             *         "_updated_at": "2022-06-03T16:05:04.391Z"
+             *       },
+             *       "_product": {
+             *         "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *         "type": "product",
+             *         "_schema": "product",
+             *         "_title": "Solar Panel with Battery Storage",
+             *         "name": "Solar Panel with Battery Storage",
+             *         "code": "SOLAR-BATT",
+             *         "active": true,
+             *         "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Eco-Panels"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Remote Management Platform"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Battery Remote Control"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Mobile App"
+             *           }
+             *         ],
+             *         "cross_sellable_products": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *               "_schema": "product",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *             },
+             *             {
+             *               "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *             }
+             *           ]
+             *         },
+             *         "product_downloads": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-06-03T15:52:27.512Z",
+             *         "_updated_at": "2022-06-03T16:05:15.029Z",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *               "_tags": []
+             *             },
+             *             {
+             *               "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 4,
+             *       "currency": "EUR",
+             *       "description": "Battery Module 500amps",
+             *       "unit_amount": 50000,
+             *       "unit_amount_net": 42017,
+             *       "amount_subtotal": 168067,
+             *       "amount_total": 200000
+             *     },
+             *     {
+             *       "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *       "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
+             *         "unit_amount": 12055,
+             *         "type": "recurring",
+             *         "billing_period": "monthly",
+             *         "billing_duration_amount": 8,
+             *         "billing_duration_unit": "years",
+             *         "notice_time_amount": 3,
+             *         "notice_time_unit": "months",
+             *         "termination_time_amount": 2,
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_amount": 1,
+             *         "renewal_duration_unit": "years",
+             *         "active": true,
+             *         "sales_tax": "reduced",
+             *         "is_tax_inclusive": true,
+             *         "description": "Monthly",
+             *         "billing_scheme": "per_unit",
+             *         "_schema": "price",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-10T14:40:27.695Z",
+             *         "_updated_at": "2021-12-14T18:16:33.248Z",
+             *         "_title": "Monthly",
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "120.55456634",
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false
+             *       },
+             *       "_product": {
+             *         "_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
+             *         "name": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "code": "1312378123",
+             *         "_tags": [
+             *           "wallbox",
+             *           "review demo",
+             *           "1"
+             *         ],
+             *         "categories": [
+             *           "Power"
+             *         ],
+             *         "type": "product",
+             *         "active": true,
+             *         "feature": [
+             *           {
+             *             "_tags": [],
+             *             "feature": "Bis zu 11 kW Ladeleistung (5x schneller laden)"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Integrierter MID Zähler für eine kilowattstundengenaue Abrechnung*"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Konfigurierbare Ladeleistung"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Zugangskontrolle über RFID-Karten"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "Kommunikation über LAN"
+             *           },
+             *           {
+             *             "_tags": [],
+             *             "feature": "New feature"
+             *           }
+             *         ],
+             *         "_schema": "product",
+             *         "_org": "728",
+             *         "_created_at": "2021-11-30T11:05:19.484Z",
+             *         "_updated_at": "2022-01-13T09:18:29.944Z",
+             *         "_title": "Smartmeter: Schneider Electric PM5000 LCD Energiemessgerät / 3-phasig",
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "5264b089-fc6a-4a91-9a2a-80c673958faa"
+             *             },
+             *             {
+             *               "entity_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf"
+             *             }
+             *           ]
+             *         },
+             *         "product_images": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "16729e60-c527-44ef-93c9-c68b6acf1224"
+             *             }
+             *           ]
+             *         }
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Monthly",
+             *       "unit_amount": 12055,
+             *       "unit_amount_net": 11267,
+             *       "amount_subtotal": 11267,
+             *       "amount_total": 12055,
+             *       "taxes": [
+             *         {
+             *           "rate": "reduced",
+             *           "amount": 789
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *       "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *       "pricing_model": "per_unit",
+             *       "is_composite_price": false,
+             *       "_price": {
+             *         "_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *         "unit_amount": 9900,
+             *         "unit_amount_currency": "EUR",
+             *         "unit_amount_decimal": "99",
+             *         "sales_tax": "standard",
+             *         "is_tax_inclusive": true,
+             *         "price_display_in_journeys": "show_price",
+             *         "type": "recurring",
+             *         "billing_period": "yearly",
+             *         "billing_duration_unit": "months",
+             *         "notice_time_unit": "months",
+             *         "termination_time_unit": "months",
+             *         "renewal_duration_unit": "months",
+             *         "_schema": "price",
+             *         "_title": "Yearly payment",
+             *         "description": "Yearly payment",
+             *         "active": true,
+             *         "pricing_model": "per_unit",
+             *         "is_composite_price": false,
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:39.884Z",
+             *         "_updated_at": "2022-02-07T22:58:39.884Z"
+             *       },
+             *       "_product": {
+             *         "_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
+             *         "_schema": "product",
+             *         "_title": "Yearly Payment Product",
+             *         "name": "Yearly Payment Product",
+             *         "type": "product",
+             *         "active": true,
+             *         "price_options": {
+             *           "$relation": [
+             *             {
+             *               "entity_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
+             *               "_tags": []
+             *             }
+             *           ]
+             *         },
+             *         "_org": "728",
+             *         "_created_at": "2022-02-07T22:58:44.162Z",
+             *         "_updated_at": "2022-02-08T09:34:08.026Z",
+             *         "description": "Hier steht die Produktbeschreibung die sich auf dem Dokument, was generiert wird, gezogen wird."
+             *       },
+             *       "quantity": 1,
+             *       "currency": "EUR",
+             *       "description": "Yearly payment",
+             *       "unit_amount": 9900,
+             *       "unit_amount_net": 8319,
+             *       "amount_subtotal": 8319,
+             *       "amount_total": 9900,
+             *       "taxes": [
+             *         {
+             *           "rate": "standard",
+             *           "amount": 1581
+             *         }
+             *       ]
+             *     }
+             *   ],
+             *   "amount_subtotal": 1532191,
+             *   "amount_total": 1821955,
+             *   "total_details": {
+             *     "amount_tax": 289764,
+             *     "breakdown": {
+             *       "taxes": [
+             *         {
+             *           "tax": {
+             *             "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+             *             "rate": 19,
+             *             "_schema": "tax",
+             *             "_org": "728",
+             *             "_created_at": "2021-09-24T15:06:13.859Z",
+             *             "_updated_at": "2022-04-04T17:36:15.273Z",
+             *             "_title": "Tax Standard",
+             *             "type": "VAT",
+             *             "active": true,
+             *             "region": "DE",
+             *             "description": "Standard"
+             *           },
+             *           "amount": 287395
+             *         }
+             *       ],
+             *       "recurrences": [
+             *         {
+             *           "type": "one_time",
+             *           "amount_subtotal": 1512605,
+             *           "amount_subtotal_decimal": "15126.05",
+             *           "amount_total": 1800000,
+             *           "amount_total_decimal": "18000.00",
+             *           "amount_tax": 287395,
+             *           "amount_tax_decimal": "2873.95"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "monthly",
+             *           "amount_subtotal": 11267,
+             *           "amount_subtotal_decimal": "112.67",
+             *           "amount_total": 12055,
+             *           "amount_total_decimal": "120.55",
+             *           "amount_tax": 789,
+             *           "amount_tax_decimal": "7.89"
+             *         },
+             *         {
+             *           "type": "recurring",
+             *           "billing_period": "yearly",
+             *           "amount_subtotal": 8319,
+             *           "amount_subtotal_decimal": "83.19",
+             *           "amount_total": 9900,
+             *           "amount_total_decimal": "99.00",
+             *           "amount_tax": 1581,
+             *           "amount_tax_decimal": "15.81"
+             *         }
+             *       ]
+             *     }
+             *   },
+             *   "currency": "EUR",
+             *   "payment_method": [
+             *     {
+             *       "type": "IBAN",
+             *       "details": {}
+             *     }
+             *   ],
+             *   "billing_contact": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "1834a54e-b68f-4f7f-a98a-fe16f11bc2a5",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "billing_first_name": "Joao",
+             *   "billing_last_name": "Pinho",
+             *   "billing_email": "j.pinho@epilot.cloud",
+             *   "billing_company_name": "epilot cloud",
+             *   "billing_address": [
+             *     {
+             *       "_tags": [],
+             *       "street": "Im Media Park",
+             *       "street_number": "8a",
+             *       "postal_code": "52000",
+             *       "city": "Cologne",
+             *       "country": "DE",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "delivery_address": [],
+             *   "dates": [
+             *     {
+             *       "_tags": [
+             *         "Instalation Date"
+             *       ],
+             *       "dates": "",
+             *       "value": "2022-06-30T16:29:00.000Z"
+             *     }
+             *   ],
+             *   "_id": "4c7c9562-f8f0-4af0-a3a6-6aebc5571a6e",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:29:46.303Z",
+             *   "_updated_at": "2022-06-03T16:29:46.303Z"
              * }
              */
             Components.Schemas.Order;
@@ -6408,7 +11356,6 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Address = Components.Schemas.Address;
 export type Amounts = Components.Schemas.Amounts;
 export type AvailabilityCheckParams = Components.Schemas.AvailabilityCheckParams;
-export type AvailabilityDate = Components.Schemas.AvailabilityDate;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
 export type AvailabilityResult = Components.Schemas.AvailabilityResult;
@@ -6423,7 +11370,6 @@ export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BasicAuthIntegration = Components.Schemas.BasicAuthIntegration;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
-export type Cart = Components.Schemas.Cart;
 export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
 export type CashbackAmounts = Components.Schemas.CashbackAmounts;
@@ -6501,7 +11447,6 @@ export type PriceItems = Components.Schemas.PriceItems;
 export type PriceItemsDto = Components.Schemas.PriceItemsDto;
 export type PriceTier = Components.Schemas.PriceTier;
 export type PriceTierDisplayMode = Components.Schemas.PriceTierDisplayMode;
-export type PriceTierEnhanced = Components.Schemas.PriceTierEnhanced;
 export type PricingDetails = Components.Schemas.PricingDetails;
 export type PricingDetailsResponse = Components.Schemas.PricingDetailsResponse;
 export type PricingModel = Components.Schemas.PricingModel;
