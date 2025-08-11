@@ -1863,6 +1863,7 @@ declare namespace Paths {
              * Installation mode
              */
             mode: "simple" | "advanced";
+            source_blueprint_type?: "marketplace";
         }
         namespace Responses {
             export interface $202 {
