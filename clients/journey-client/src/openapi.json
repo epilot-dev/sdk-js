@@ -733,6 +733,26 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request - Invalid file or content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "UTF-8 encoding error while processing CSV content"
+                    },
+                    "details": {
+                      "type": "string",
+                      "example": "Please ensure your CSV file is properly encoded in UTF-8 format"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found",
             "content": {
@@ -1158,7 +1178,17 @@
                 "nullable": true
               },
               "useNewDesign": {
-                "type": "boolean"
+                "type": "boolean",
+                "deprecated": true,
+                "description": "This property is deprecated and will be removed in a future version"
+              },
+              "useAustrianLabels": {
+                "type": "boolean",
+                "description": "If true, some journey input labels are in Austrian format"
+              },
+              "enableDarkMode": {
+                "type": "boolean",
+                "description": "If true, the journey shows an icon to toggle dark mode"
               },
               "accessMode": {
                 "type": "string",
@@ -1506,7 +1536,9 @@
                 "nullable": true
               },
               "useNewDesign": {
-                "type": "boolean"
+                "type": "boolean",
+                "deprecated": true,
+                "description": "This property is deprecated and will be removed in a future version"
               },
               "thirdPartyCookies": {
                 "type": "boolean",
@@ -1518,6 +1550,10 @@
                   "PUBLIC",
                   "PRIVATE"
                 ]
+              },
+              "enableDarkMode": {
+                "type": "boolean",
+                "description": "If true, the journey shows an icon to toggle dark mode"
               }
             },
             "additionalProperties": false

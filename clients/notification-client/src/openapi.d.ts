@@ -481,6 +481,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getNotificationsV2 - getNotificationsV2
@@ -640,6 +641,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Entity = Components.Schemas.Entity;
 export type EntityId = Components.Schemas.EntityId;

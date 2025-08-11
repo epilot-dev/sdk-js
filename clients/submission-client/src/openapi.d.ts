@@ -407,6 +407,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * createSubmission - createSubmission
@@ -460,6 +461,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type OptIn = Components.Schemas.OptIn;
 export type S3Reference = Components.Schemas.S3Reference;

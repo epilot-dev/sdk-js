@@ -669,6 +669,41 @@
         }
       }
     },
+    "/v1/entity/schemas/{slug}/capabilities/available": {
+      "get": {
+        "operationId": "listAvailableCapabilities",
+        "summary": "listAvailableCapabilities",
+        "description": "List available capabilities for schema",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityCapability"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/entity/schemas/blueprints": {
       "get": {
         "operationId": "listSchemaBlueprints",
@@ -3360,7 +3395,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -9519,9 +9554,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    },
     {
       "url": "https://entity.sls.epilot.io"
     }

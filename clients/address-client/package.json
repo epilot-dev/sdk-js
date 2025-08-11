@@ -1,6 +1,6 @@
 {
   "name": "@epilot/address-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Client for unified Address API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,7 +44,7 @@
     "!*.config.js"
   ],
   "peerDependencies": {
-    "axios": "^1.6.2"
+    "axios": "^1.0.0 || >=0.25.0 <1.0.0"
   },
   "dependencies": {
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",

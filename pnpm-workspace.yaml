@@ -1,3 +1,4 @@
 packages:
   - 'packages/*'
   - 'clients/*'
+shamefullyHoist: true

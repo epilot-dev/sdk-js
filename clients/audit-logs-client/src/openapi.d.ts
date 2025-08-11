@@ -228,6 +228,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getLogs - getLogs
@@ -279,6 +280,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Caller = Components.Schemas.Caller;
 export type Event = Components.Schemas.Event;

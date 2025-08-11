@@ -8386,6 +8386,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -10569,6 +10570,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;

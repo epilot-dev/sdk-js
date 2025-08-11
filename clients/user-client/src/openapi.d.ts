@@ -1062,6 +1062,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * signUpUser - signUpUser
@@ -1613,6 +1614,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type CognitoDetails = Components.Schemas.CognitoDetails;
 export type CreateGroupReq = Components.Schemas.CreateGroupReq;

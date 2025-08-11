@@ -517,6 +517,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getCategories - getCategories
@@ -772,6 +773,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type CategoryResult = Components.Schemas.CategoryResult;
 export type CustomVariable = Components.Schemas.CustomVariable;

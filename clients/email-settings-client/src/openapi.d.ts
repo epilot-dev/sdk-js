@@ -189,6 +189,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getSettings - getSettings
@@ -366,6 +367,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Domain = Components.Schemas.Domain;
 export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;

@@ -175,6 +175,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * publishConsentEvent - publishConsentEvent
@@ -254,6 +255,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ConsentEvent = Components.Schemas.ConsentEvent;
 export type ConsentEventRequestBody = Components.Schemas.ConsentEventRequestBody;

@@ -302,6 +302,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * listAccessTokens - listAccessTokens
@@ -501,6 +502,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AccessToken = Components.Schemas.AccessToken;
 export type AccessTokenId = Components.Schemas.AccessTokenId;

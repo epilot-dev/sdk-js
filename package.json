@@ -12,7 +12,10 @@
     "test": "pnpm --no-bail recursive run test",
     "lint": "pnpm --no-bail recursive run lint",
     "build": "pnpm --no-bail recursive run build",
-    "lint:fix": "eslint \"**/*.{js,ts}\" --fix"
+    "lint:fix": "eslint \"**/*.{js,ts}\" --fix",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "publish-packages": "changeset publish"
   },
   "keywords": [
     "epilot",
@@ -29,12 +32,12 @@
   },
   "homepage": "https://github.com/epilot-dev/sdk-js#readme",
   "devDependencies": {
+    "@changesets/cli": "^2.29.5",
     "@epilot/eslint-config": "^2.1.3",
     "@jest/types": "^30.0.0",
     "@types/node": "^24.0.1",
     "@types/yargs": "^17.0.33",
     "eslint": "^7.32.0",
-    "lerna": "^6.4.1",
     "openapicmd": "^2.7.0",
     "typescript": "^4.9.3"
   },

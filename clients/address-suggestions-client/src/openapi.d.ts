@@ -231,6 +231,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getAddresses - get addresses from file
@@ -326,6 +327,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AddressSuggestion = Components.Schemas.AddressSuggestion;
 export type AddressSuggestionError = Components.Schemas.AddressSuggestionError;

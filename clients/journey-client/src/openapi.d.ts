@@ -1,11 +1,12 @@
 /* eslint-disable */
+
 import type {
   OpenAPIClient,
   Parameters,
   UnknownParamsObject,
   OperationResponse,
   AxiosRequestConfig,
-} from 'openapi-client-axios'; 
+} from 'openapi-client-axios';
 
 declare namespace Components {
     namespace Schemas {
@@ -219,7 +220,18 @@ declare namespace Components {
                  */
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
+                /**
+                 * This property is deprecated and will be removed in a future version
+                 */
                 useNewDesign?: boolean;
+                /**
+                 * If true, some journey input labels are in Austrian format
+                 */
+                useAustrianLabels?: boolean;
+                /**
+                 * If true, the journey shows an icon to toggle dark mode
+                 */
+                enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 isPublished?: boolean;
                 status?: string;
@@ -341,7 +353,18 @@ declare namespace Components {
                  */
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
+                /**
+                 * This property is deprecated and will be removed in a future version
+                 */
                 useNewDesign?: boolean;
+                /**
+                 * If true, some journey input labels are in Austrian format
+                 */
+                useAustrianLabels?: boolean;
+                /**
+                 * If true, the journey shows an icon to toggle dark mode
+                 */
+                enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 isPublished?: boolean;
                 status?: string;
@@ -438,12 +461,19 @@ declare namespace Components {
                  */
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
+                /**
+                 * This property is deprecated and will be removed in a future version
+                 */
                 useNewDesign?: boolean;
                 /**
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                  */
                 thirdPartyCookies?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
+                /**
+                 * If true, the journey shows an icon to toggle dark mode
+                 */
+                enableDarkMode?: boolean;
             };
             /**
              * Manifest/Blueprint ID used to create/update the entity
@@ -767,6 +797,18 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* A single button option data */ Components.Schemas.ButtonOption[];
+            export interface $400 {
+                /**
+                 * example:
+                 * UTF-8 encoding error while processing CSV content
+                 */
+                message?: string;
+                /**
+                 * example:
+                 * Please ensure your CSV file is properly encoded in UTF-8 format
+                 */
+                details?: string;
+            }
             export interface $404 {
                 /**
                  * example:
@@ -997,6 +1039,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJourneysByOrgId - getJourneysByOrgId
@@ -1004,7 +1047,7 @@ export interface OperationMethods {
    * Get all journeys by organization id
    */
   'getJourneysByOrgId'(
-    parameters?: Parameters<Paths.GetJourneysByOrgId.PathParameters & Paths.GetJourneysByOrgId.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetJourneysByOrgId.QueryParameters & Paths.GetJourneysByOrgId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneysByOrgId.Responses.$200>
@@ -1014,7 +1057,7 @@ export interface OperationMethods {
    * Get journey by id. Private journeys requires valid private token to be passed
    */
   'getJourney'(
-    parameters?: Parameters<Paths.GetJourney.PathParameters & Paths.GetJourney.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetJourney.QueryParameters & Paths.GetJourney.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourney.Responses.$200>
@@ -1034,7 +1077,7 @@ export interface OperationMethods {
    * Get products available in the journey by id. requires public journey token to be passed.
    */
   'getJourneyProducts'(
-    parameters?: Parameters<Paths.GetJourneyProducts.PathParameters & Paths.GetJourneyProducts.QueryParameters> | null,
+    parameters?: Parameters<Paths.GetJourneyProducts.QueryParameters & Paths.GetJourneyProducts.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyProducts.Responses.$200>
@@ -1179,7 +1222,7 @@ export interface PathsDictionary {
      * Get all journeys by organization id
      */
     'get'(
-      parameters?: Parameters<Paths.GetJourneysByOrgId.PathParameters & Paths.GetJourneysByOrgId.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetJourneysByOrgId.QueryParameters & Paths.GetJourneysByOrgId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneysByOrgId.Responses.$200>
@@ -1191,7 +1234,7 @@ export interface PathsDictionary {
      * Get journey by id. Private journeys requires valid private token to be passed
      */
     'get'(
-      parameters?: Parameters<Paths.GetJourney.PathParameters & Paths.GetJourney.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetJourney.QueryParameters & Paths.GetJourney.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourney.Responses.$200>
@@ -1213,7 +1256,7 @@ export interface PathsDictionary {
      * Get products available in the journey by id. requires public journey token to be passed.
      */
     'get'(
-      parameters?: Parameters<Paths.GetJourneyProducts.PathParameters & Paths.GetJourneyProducts.QueryParameters> | null,
+      parameters?: Parameters<Paths.GetJourneyProducts.QueryParameters & Paths.GetJourneyProducts.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyProducts.Responses.$200>
@@ -1366,3 +1409,22 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
+
+export type ButtonOption = Components.Schemas.ButtonOption;
+export type GenerateDocumentRequest = Components.Schemas.GenerateDocumentRequest;
+export type GenerateDocumentResponse = Components.Schemas.GenerateDocumentResponse;
+export type GetJourneysResponse = Components.Schemas.GetJourneysResponse;
+export type GetSettingsForJourney = Components.Schemas.GetSettingsForJourney;
+export type Journey = Components.Schemas.Journey;
+export type JourneyAuditInfo = Components.Schemas.JourneyAuditInfo;
+export type JourneyCreationRequest = Components.Schemas.JourneyCreationRequest;
+export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequestV2;
+export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
+export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
+export type JourneyResponse = Components.Schemas.JourneyResponse;
+export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
+export type S3Reference = Components.Schemas.S3Reference;
+export type SearchJourneysQueryRequest = Components.Schemas.SearchJourneysQueryRequest;
+export type SearchJourneysResponse = Components.Schemas.SearchJourneysResponse;
+export type TemplateSettings = Components.Schemas.TemplateSettings;

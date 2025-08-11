@@ -538,6 +538,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * approvePartner - approvePartner
@@ -735,6 +736,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ActivatePartnerPayload = Components.Schemas.ActivatePartnerPayload;
 export type Address = Components.Schemas.Address;

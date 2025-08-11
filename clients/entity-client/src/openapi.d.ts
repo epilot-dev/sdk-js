@@ -10835,7 +10835,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -10861,7 +10861,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -10928,6 +10928,24 @@ declare namespace Paths {
              * }
              */
             Components.Responses.TooManyRequestsError;
+        }
+    }
+    namespace ListAvailableCapabilities {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: /* Capabilities the Entity has. Turn features on/off for entities. */ Components.Schemas.EntityCapability[];
+            }
         }
     }
     namespace ListEntities {
@@ -12262,6 +12280,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
   /**
+   * listAvailableCapabilities - listAvailableCapabilities
+   * 
+   * List available capabilities for schema
+   */
+  'listAvailableCapabilities'(
+    parameters?: Parameters<Paths.ListAvailableCapabilities.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListAvailableCapabilities.Responses.$200>
+  /**
    * listSchemaBlueprints - listSchemaBlueprints
    * 
    * List canonical versions of all available schemas
@@ -13345,6 +13373,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/capabilities/available']: {
+    /**
+     * listAvailableCapabilities - listAvailableCapabilities
+     * 
+     * List available capabilities for schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListAvailableCapabilities.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListAvailableCapabilities.Responses.$200>
   }
   ['/v1/entity/schemas/blueprints']: {
     /**

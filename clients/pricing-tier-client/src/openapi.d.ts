@@ -47,6 +47,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getCurrentPricingTier - getCurrentPricingTier
@@ -76,5 +77,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type PricingTier = Components.Schemas.PricingTier;

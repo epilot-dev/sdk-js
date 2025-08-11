@@ -1,6 +1,6 @@
 {
   "name": "@epilot/notification-client",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "API Client for epilot Notification API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -45,7 +45,7 @@
   "license": "UNLICENSED",
   "private": false,
   "peerDependencies": {
-    "axios": "^1.6.2"
+    "axios": "^1.0.0 || >=0.25.0 <1.0.0"
   },
   "dependencies": {
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
-    "axios": "^1.6.2",
+    "axios": "^1.11.0",
     "copy-webpack-plugin": "^7.0.0",
     "jest": "^26.6.3",
     "json-loader": "^0.5.7",

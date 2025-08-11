@@ -288,6 +288,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * listPipelines - listPipelines
@@ -451,6 +452,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AccessToken = Components.Schemas.AccessToken;
 export type CreatePipelineRequest = Components.Schemas.CreatePipelineRequest;

@@ -51,13 +51,58 @@ npm run typegen && npm run build
 
 ## commit your changes
 git commit -am 'chore(entity-client): update client with new spec'
-
-## push, tag & release
-## ensure you are only bumping the package your changed & the epilot-sdk.
-npx lerna publish
 ```
 
-Depending on whether you have publish access to [epilot-sdk](https://www.npmjs.com/package/epilot-sdk) registry repo or not `epilot-sdk` may fail with 403, which will leave some unstaged package.json's with a gitHead entry. Feel free to discard those files–the pipeline will pick up the changes an publish the `epilot-sdk` automatically.
+# Publishing packages (epilot internal)
+
+This monorepo uses [Changesets](https://github.com/changesets/changesets) for version management and publishing.
+
+## Creating a changeset for a single package
+
+```bash
+# Create a changeset (interactive prompt)
+pnpm changeset
+
+# Apply version bumps
+pnpm version-packages
+
+# Publish to npm (requires 2FA)
+pnpm publish-packages
+```
+
+## Publishing all client packages with a version bump
+
+To bump and publish all client packages at once:
+
+```bash
+# 1. Create a changeset file manually or use the changeset command
+# Example: .changeset/minor-bump-all-clients.md with all client packages listed
+
+# 2. Apply version bumps to all packages
+pnpm version-packages
+
+# 3. Publish all updated packages (requires 2FA authentication)
+pnpm publish-packages
+```
+
+## Manual changeset creation
+
+For bulk updates, create a file in `.changeset/` directory:
+
+```markdown
+---
+"@epilot/entity-client": minor
+"@epilot/file-client": patch
+---
+
+Description of changes
+```
+
+## Available scripts
+
+- `pnpm changeset` - Create a new changeset
+- `pnpm version-packages` - Apply version bumps based on changesets
+- `pnpm publish-packages` - Publish updated packages to npm
 
 # Contributing
 

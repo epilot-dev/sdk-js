@@ -1,6 +1,6 @@
 {
   "name": "@epilot/journey-client",
-  "version": "0.3.11",
+  "version": "0.4.0",
   "description": "API Client for epilot Journey API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,7 @@
   "author": "epilot GmbH",
   "license": "UNLICENSED",
   "peerDependencies": {
-    "axios": "^1.6.5"
+    "axios": "^1.0.0 || >=0.25.0 <1.0.0"
   },
   "dependencies": {
     "buffer": "^6.0.3",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^1.6.0",
-    "axios": "1.7.8",
+    "axios": "^1.11.0",
     "copy-webpack-plugin": "^7.0.0",
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^7.5.1",

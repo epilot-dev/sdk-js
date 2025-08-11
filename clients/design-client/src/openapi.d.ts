@@ -517,6 +517,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getAllDesigns - getAllDesigns
@@ -802,6 +803,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AddConsumerReq = Components.Schemas.AddConsumerReq;
 export type AddDesignReq = Components.Schemas.AddDesignReq;

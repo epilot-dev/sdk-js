@@ -1035,6 +1035,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getMaxAllowedLimit - getMaxAllowedLimit
@@ -1504,6 +1505,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AutomationConfig = Components.Schemas.AutomationConfig;

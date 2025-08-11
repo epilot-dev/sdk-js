@@ -119,6 +119,17 @@
         "responses": {}
       }
     },
+    "/v1/entity/schemas/{slug}/capabilities/available": {
+      "get": {
+        "operationId": "listAvailableCapabilities",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity/schemas/blueprints": {
       "get": {
         "operationId": "listSchemaBlueprints",

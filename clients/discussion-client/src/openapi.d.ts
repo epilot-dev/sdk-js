@@ -413,6 +413,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * createComment - Create comment
@@ -570,6 +571,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Attachment = Components.Schemas.Attachment;
 export type BaseEntity = Components.Schemas.BaseEntity;
