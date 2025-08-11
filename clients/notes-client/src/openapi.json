@@ -219,7 +219,14 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response with Note content"
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesSearchRequestResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -313,7 +320,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotesGetRequestResponse"
+                  "$ref": "#/components/schemas/NotesSearchRequestResponse"
                 }
               }
             }
@@ -1115,7 +1122,7 @@
           "contexts"
         ]
       },
-      "NotesGetRequestResponse": {
+      "NotesSearchRequestResponse": {
         "type": "object",
         "properties": {
           "hits": {
@@ -1182,5 +1189,13 @@
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ]
 }

@@ -1,5 +1,11 @@
 # @epilot/notes-client
 
+## 0.21.2
+
+### Patch Changes
+
+- Make sure server url is populated
+
 ## 0.21.1
 
 ### Patch Changes
