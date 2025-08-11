@@ -82,7 +82,7 @@ To bump and publish all client packages at once:
 pnpm version-packages
 
 # 3. Publish all updated packages (requires 2FA authentication)
-pnpm publish-packages
+pnpm publish-packages # NOTE: you may need to run this multiple times due to NPM rate limiting
 ```
 
 ## Manual changeset creation

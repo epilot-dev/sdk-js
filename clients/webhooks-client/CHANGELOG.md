@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.16.1
+
+### Patch Changes
+
+- Mark access as public for all packages
+
 ## 2.16.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.50.1
+
+### Patch Changes
+
+- Mark access as public for all packages
+
 ## 3.50.0
 
 ### Minor Changes

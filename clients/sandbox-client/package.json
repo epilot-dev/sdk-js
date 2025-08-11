@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sandbox-client",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Client for epilot Design API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

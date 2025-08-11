@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.17.1
+
+### Patch Changes
+
+- Mark access as public for all packages
+
 ## 1.17.0
 
 ### Minor Changes

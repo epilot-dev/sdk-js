@@ -1,5 +1,11 @@
 # @epilot/submission-client
 
+## 1.8.1
+
+### Patch Changes
+
+- Mark access as public for all packages
+
 ## 1.8.0
 
 ### Minor Changes

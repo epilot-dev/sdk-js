@@ -1,6 +1,6 @@
 {
   "name": "@epilot/kanban-client",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Client library for epilot Kanban API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
