@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Access Token API",
-    "version": "0.2.0",
+    "version": "0.4.0",
     "description": "Generate Access Tokens for 3rd party applications that need access to epilot APIs.\n"
   },
   "tags": [
@@ -69,6 +69,15 @@
                       "739224:employee"
                     ]
                   }
+                },
+                "app": {
+                  "value": {
+                    "name": "App Access Token",
+                    "token_type": "app",
+                    "assignments": [
+                      "739224:e5c1f9b1-e41d-421d-83c4-c5626e464430"
+                    ]
+                  }
                 }
               }
             }
@@ -92,6 +101,42 @@
                       "$ref": "#/components/schemas/AccessTokenItem"
                     }
                   ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -388,7 +433,8 @@
           "api",
           "journey",
           "portal",
-          "assume"
+          "assume",
+          "app"
         ],
         "description": "Access token type",
         "example": "api"
@@ -414,6 +460,9 @@
           },
           {
             "$ref": "#/components/schemas/AssumeTokenParameters"
+          },
+          {
+            "$ref": "#/components/schemas/AppTokenParameters"
           }
         ]
       },
@@ -530,6 +579,30 @@
           "name"
         ]
       },
+      "AppTokenParameters": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/AccessTokenName"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "app"
+            ]
+          },
+          "assignments": {
+            "$ref": "#/components/schemas/Assignments"
+          },
+          "expires_in": {
+            "$ref": "#/components/schemas/ExpiresIn"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "AccessTokenItem": {
         "type": "object",
         "properties": {
@@ -577,6 +650,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://access-token.sls.epilot.io"
+    },
     {
       "url": "https://access-token.sls.epilot.io"
     }

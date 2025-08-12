@@ -70,7 +70,18 @@ declare namespace Components {
          * example:
          * api
          */
-        export type AccessTokenType = "api" | "journey" | "portal" | "assume";
+        export type AccessTokenType = "api" | "journey" | "portal" | "assume" | "app";
+        export interface AppTokenParameters {
+            name: /**
+             * Human readable name for access token
+             * example:
+             * Postman Access Token
+             */
+            AccessTokenName;
+            token_type?: "app";
+            assignments?: /* List of role ids attached to an user */ Assignments;
+            expires_in?: ExpiresIn;
+        }
         /**
          * List of role ids attached to an user
          */
@@ -123,7 +134,7 @@ declare namespace Components {
          * 123:owner
          */
         export type RoleId = string;
-        export type TokenParameters = AccessTokenParameters | JourneyTokenParameters | PortalTokenParameters | AssumeTokenParameters;
+        export type TokenParameters = AccessTokenParameters | JourneyTokenParameters | PortalTokenParameters | AssumeTokenParameters | AppTokenParameters;
     }
 }
 declare namespace Paths {
@@ -158,6 +169,14 @@ declare namespace Paths {
                 journey_id?: /* Journey ID for access token type "journey" */ Components.Schemas.AccessTokenJourneyId;
                 portal_id?: /* Portal ID for access token type "portal" */ Components.Schemas.PortalId;
                 assignments?: /* List of role ids attached to an user */ Components.Schemas.Assignments;
+            }
+            export interface $400 {
+                status?: number;
+                error?: string;
+            }
+            export interface $500 {
+                status?: number;
+                error?: string;
             }
         }
     }
@@ -511,6 +530,7 @@ export type AccessTokenJourneyId = Components.Schemas.AccessTokenJourneyId;
 export type AccessTokenName = Components.Schemas.AccessTokenName;
 export type AccessTokenParameters = Components.Schemas.AccessTokenParameters;
 export type AccessTokenType = Components.Schemas.AccessTokenType;
+export type AppTokenParameters = Components.Schemas.AppTokenParameters;
 export type Assignments = Components.Schemas.Assignments;
 export type AssumeTokenParameters = Components.Schemas.AssumeTokenParameters;
 export type ExpiresIn = Components.Schemas.ExpiresIn;
