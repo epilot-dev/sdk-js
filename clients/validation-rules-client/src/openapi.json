@@ -1,0 +1,625 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Validation Rules API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Validation Rules",
+      "description": "Endpoints for managing validation rules"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/validation-rules": {
+      "get": {
+        "operationId": "getValidationRules",
+        "summary": "Get all validation rules by organization Id",
+        "description": "Gets all validation rules by organization Id",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetValidationRulesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createValidationRule",
+        "summary": "Create Validation Rule",
+        "description": "Creates a new validation rule",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValidationRuleRequest"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validation-rules/{ruleId}": {
+      "patch": {
+        "operationId": "updateValidationRule",
+        "summary": "Update Validation Rule (partial update)",
+        "description": "Updates an existing validation rule partially by ID",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateValidationRuleRequest"
+              }
+            }
+          },
+          "description": "Fields to update in the validation rule"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteValidationRule",
+        "summary": "Delete Validation Rule",
+        "description": "Deletes a validation rule by ID",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to delete."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Validation rule deleted successfully"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot public access token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "GetValidationRulesResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationRule"
+            }
+          }
+        }
+      },
+      "CreateValidationRuleRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "title",
+              "rules"
+            ]
+          }
+        ]
+      },
+      "UpdateValidationRuleRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          }
+        ]
+      },
+      "ValidationRuleBase": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Title of the validation rule."
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "Placeholder for the validation rule."
+              },
+              "used_by": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UsedBy"
+                },
+                "description": "Describes where and how a validation rule is applied."
+              },
+              "rules": {
+                "type": "array",
+                "description": "Matrix of validation rules that must be validated together.",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/RegexRuleType"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PatternRuleType"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NumericRuleType"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ValidationRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema_version",
+              "_id",
+              "_organization_id",
+              "title",
+              "type",
+              "created_at",
+              "updated_at",
+              "created_by",
+              "updated_by"
+            ],
+            "properties": {
+              "_schema_version": {
+                "type": "string",
+                "description": "Schema version of the validation rule."
+              },
+              "_id": {
+                "type": "string",
+                "description": "Unique identifier for the validation rule."
+              },
+              "_organization_id": {
+                "type": "string",
+                "description": "Organization ID that owns this rule."
+              },
+              "created_at": {
+                "type": "string",
+                "description": "ISO timestamp when the rule was created."
+              },
+              "updated_at": {
+                "type": "string",
+                "description": "ISO timestamp when the rule was last updated."
+              },
+              "created_by": {
+                "type": "string",
+                "description": "User ID of the creator."
+              },
+              "updated_by": {
+                "type": "string",
+                "description": "User ID of the last updater."
+              }
+            }
+          }
+        ],
+        "description": "The Validation rule definition."
+      },
+      "RegexRuleType": {
+        "type": "object",
+        "required": [
+          "type",
+          "regex"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "regex"
+            ],
+            "description": "Indicates this is a regex-based validation rule."
+          },
+          "regex": {
+            "type": "string",
+            "description": "The regular expression pattern to validate against."
+          },
+          "error_message": {
+            "type": "string",
+            "description": "The error message to display when the regex validation fails."
+          }
+        },
+        "description": "Validation rule that uses a regular expression to validate input."
+      },
+      "PatternRuleType": {
+        "type": "object",
+        "required": [
+          "type",
+          "patterns"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "pattern"
+            ],
+            "description": "Indicates this is a pattern-based validation rule."
+          },
+          "patterns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pattern"
+            },
+            "description": "List of patterns that define the validation logic."
+          }
+        },
+        "description": "Validation rule that uses a sequence of patterns to validate input."
+      },
+      "NumericRuleType": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "numeric"
+            ],
+            "description": "Indicates this is a numeric-based validation rule."
+          },
+          "numeric_pattern": {
+            "description": "Specific pattern for numeric based validation rules, supporting range and digit count constraints.",
+            "$ref": "#/components/schemas/NumericPattern"
+          }
+        },
+        "description": "Validation rule for numeric values, supporting range and digit count constraints."
+      },
+      "UsedBy": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "journey",
+              "entity"
+            ],
+            "description": "The context in which the rule is used (e.g., journey or entity)."
+          },
+          "schema_slug": {
+            "type": "string",
+            "description": "Slug of the schema using this rule for entities."
+          },
+          "source_id": {
+            "type": "string",
+            "description": "Source identifier for the usage context."
+          }
+        },
+        "description": "Describes where and how a validation rule is applied."
+      },
+      "NumericPattern": {
+        "type": "object",
+        "description": "Specific pattern for numeric based validation rules, supporting range and digit count constraints.",
+        "properties": {
+          "min_value": {
+            "type": "number",
+            "description": "Minimum allowed value."
+          },
+          "max_value": {
+            "type": "number",
+            "description": "Maximum allowed value."
+          },
+          "min_integer_count": {
+            "type": "integer",
+            "description": "Minimum number of integer digits."
+          },
+          "max_integer_count": {
+            "type": "integer",
+            "description": "Maximum number of integer digits."
+          },
+          "min_decimal_count": {
+            "type": "integer",
+            "description": "Minimum number of decimal digits."
+          },
+          "max_decimal_count": {
+            "type": "integer",
+            "description": "Maximum number of decimal digits."
+          },
+          "leading_zeroes": {
+            "type": "boolean",
+            "description": "Whether leading zeroes are allowed."
+          }
+        }
+      },
+      "Pattern": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "optional": {
+            "type": "boolean",
+            "description": "Whether this pattern is optional in the sequence."
+          },
+          "is_dependent": {
+            "type": "boolean",
+            "description": "Whether this pattern depends on the previous pattern."
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PatternStatic"
+          },
+          {
+            "$ref": "#/components/schemas/PatternAlphanumeric"
+          },
+          {
+            "$ref": "#/components/schemas/PatternDigits"
+          }
+        ],
+        "description": "A pattern element used in pattern-based validation rules evaluated in a sequence."
+      },
+      "PatternStatic": {
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "static"
+            ],
+            "description": "Indicates a static pattern type."
+          },
+          "value": {
+            "type": "string",
+            "description": "The static value to match."
+          }
+        },
+        "description": "A static pattern that matches a fixed value."
+      },
+      "PatternAlphanumeric": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "alphanumeric"
+            ],
+            "description": "Indicates an alphanumeric pattern type."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of allowed alphanumeric options."
+          },
+          "min_count": {
+            "type": "integer",
+            "description": "Minimum number of alphanumeric characters."
+          },
+          "count": {
+            "type": "integer",
+            "description": "Exact number of alphanumeric characters."
+          },
+          "max_count": {
+            "type": "integer",
+            "description": "Maximum number of alphanumeric characters."
+          }
+        },
+        "description": "A pattern that matches alphanumeric values with optional constraints."
+      },
+      "PatternDigits": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "digits"
+            ],
+            "description": "Indicates a digits pattern type."
+          },
+          "min_count": {
+            "type": "integer",
+            "description": "Minimum number of digits."
+          },
+          "count": {
+            "type": "integer",
+            "description": "Exact number of digits."
+          },
+          "max_count": {
+            "type": "integer",
+            "description": "Maximum number of digits."
+          }
+        },
+        "description": "A pattern that matches digit sequences with optional constraints."
+      }
+    }
+  }
+}
