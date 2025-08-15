@@ -1,0 +1,54 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/validation-rules": {
+      "get": {
+        "operationId": "getValidationRules",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createValidationRule",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/validation-rules/{ruleId}": {
+      "patch": {
+        "operationId": "updateValidationRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteValidationRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

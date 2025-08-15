@@ -2217,6 +2217,61 @@ importers:
         specifier: ^4.4.0
         version: 4.10.0(webpack@5.101.0)
 
+  clients/validation-rules-client:
+    dependencies:
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-backend:
+        specifier: 5.11.1
+        version: 5.11.1
+      openapi-client-axios:
+        specifier: ^7.5.1
+        version: 7.6.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.1.1
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^1.6.0
+        version: 1.6.1(vitest@1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1))
+      axios:
+        specifier: ^1.11.0
+        version: 1.11.0(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.101.0)
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapi-client-axios-typegen:
+        specifier: ^7.5.1
+        version: 7.7.0(encoding@0.1.13)(js-yaml@4.1.0)
+      ts-loader:
+        specifier: ^8.3.0
+        version: 8.4.0(typescript@5.7.3)(webpack@5.101.0)
+      typescript:
+        specifier: ^5.4.5
+        version: 5.7.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1)
+      webpack:
+        specifier: ^5.91.0
+        version: 5.101.0(webpack-cli@5.1.4)
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.101.0)
+
   clients/webhooks-client:
     dependencies:
       '@dazn/lambda-powertools-correlation-ids':
@@ -2463,7 +2518,7 @@ importers:
     dependencies:
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
       amazon-cognito-identity-js:
         specifier: ^5.2.5
         version: 5.2.14(encoding@0.1.13)
@@ -2587,7 +2642,7 @@ importers:
         version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
       '@epilot/workflow-client':
         specifier: ^1.15.0
         version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
@@ -8701,7 +8756,7 @@ snapshots:
 
   '@epilot/auth@0.8.0(axios@1.11.0)(encoding@0.1.13)(js-yaml@4.1.0)':
     dependencies:
-      '@epilot/user-client': 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      '@epilot/user-client': 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
       amazon-cognito-identity-js: 5.2.14(encoding@0.1.13)
       axios: 1.11.0(debug@4.4.1)
       debug: 4.4.1(supports-color@8.1.1)
@@ -9003,7 +9058,7 @@ snapshots:
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/user-client@3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)':
+  '@epilot/user-client@3.12.0(axios@1.11.0)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
       axios: 1.11.0(debug@4.4.1)
