@@ -621,5 +621,10 @@
         "description": "A pattern that matches digit sequences with optional constraints."
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://validation-rules.sls.epilot.io"
+    }
+  ]
 }

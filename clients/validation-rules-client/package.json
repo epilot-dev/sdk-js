@@ -6,14 +6,15 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "vitest",
-    "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/validation-rules.yaml",
     "openapi:local": "node ../../scripts/update-openapi.js ../../../validation-rules-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
-    "build": "npm run openapi && npm run typegen && npm run typescript && npm run bundle-definition",
-    "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
-    "prepublishOnly": "npm run build"
+    "build": "tsc && npm run build:patch && npm run bundle-definition",
+    "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
+    "build:watch": "npm run build && tsc -w",
+    "prepublishOnly": "npm run typegen && npm run build",
+    "lint": "pnpm exec eslint src"
   },
   "files": [
     "*.js",
@@ -37,7 +38,7 @@
     "epilot"
   ],
   "author": "epilot GmbH",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "peerDependencies": {
     "axios": "^1.0.0 || >=0.25.0 <1.0.0"
   },
