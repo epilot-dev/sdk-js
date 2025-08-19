@@ -17,6 +17,7 @@ declare namespace Components {
          */
         Schemas.ActivityId /* ulid */;
         export type AsyncOperationQueryParam = boolean;
+        export type DeleteTempFileQueryParam = boolean;
         export type FillActivityQueryParam = boolean;
         export type StrictQueryParam = boolean;
     }
@@ -25,6 +26,7 @@ declare namespace Components {
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
         FillActivityQueryParam?: Parameters.FillActivityQueryParam;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
+        DeleteTempFileQueryParam?: Parameters.DeleteTempFileQueryParam;
     }
     namespace Schemas {
         /**
@@ -245,7 +247,7 @@ declare namespace Components {
              * https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf
              */
             source_url?: string;
-            s3ref?: S3Ref;
+            s3ref?: S3Reference;
             versions: FileItem[];
             _updated_at?: string; // date-time
             _created_at?: string; // date-time
@@ -677,6 +679,9 @@ declare namespace Paths {
              * ef7d985c-2385-44f4-9c71-ae06a52264f8
              */
             Components.Schemas.FileEntityId;
+            /**
+             * Provide `true` to permanently delete the file from storage, otherwise it will be soft-deleted
+             */
             export type Purge = boolean;
             export type Strict = boolean;
         }
@@ -684,7 +689,7 @@ declare namespace Paths {
             id: Parameters.Id;
         }
         export interface QueryParameters {
-            purge?: Parameters.Purge;
+            purge?: /* Provide `true` to permanently delete the file from storage, otherwise it will be soft-deleted */ Parameters.Purge;
             activity_id?: Parameters.ActivityId;
             strict?: Parameters.Strict;
         }
@@ -953,6 +958,7 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type DeleteTempFile = boolean;
             export type FillActivity = boolean;
             export type Strict = boolean;
         }
@@ -961,6 +967,7 @@ declare namespace Paths {
             fill_activity?: Parameters.FillActivity;
             strict?: Parameters.Strict;
             async?: Parameters.Async;
+            delete_temp_file?: Parameters.DeleteTempFile;
         }
         export type RequestBody = Components.Schemas.SaveFilePayloadV2;
         namespace Responses {

@@ -37,6 +37,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DeleteTempFileQueryParam"
           }
         ],
         "requestBody": {
@@ -394,6 +397,11 @@
       },
       "AsyncOperationQueryParam": {
         "name": "async",
+        "in": "query",
+        "required": false
+      },
+      "DeleteTempFileQueryParam": {
+        "name": "delete_temp_file",
         "in": "query",
         "required": false
       }
