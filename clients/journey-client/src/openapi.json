@@ -1233,6 +1233,12 @@
             ],
             "additionalProperties": false
           },
+          "validationRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationRuleRef"
+            }
+          },
           "createdBy": {
             "type": "string"
           },
@@ -1561,6 +1567,12 @@
               }
             },
             "additionalProperties": false
+          },
+          "validationRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationRuleRef"
+            }
           },
           "_manifest": {
             "type": "array",
@@ -1998,6 +2010,49 @@
             "description": "The label of the button"
           }
         }
+      },
+      "RuleId": {
+        "type": "string",
+        "description": "The ID of the rule, used to reference a specific rule\n"
+      },
+      "FieldName": {
+        "type": "string",
+        "description": "Name of the field used in validation"
+      },
+      "RuleRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RuleId"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldName"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "fields"
+        ]
+      },
+      "ValidationRuleRef": {
+        "type": "object",
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/RuleId"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RuleRef"
+              }
+            }
+          ]
+        },
+        "description": "Record of BlockId → RuleId or array of RuleRef objects     \n"
       }
     },
     "securitySchemes": {

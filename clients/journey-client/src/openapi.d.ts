@@ -27,6 +27,10 @@ declare namespace Components {
              */
             label?: string;
         }
+        /**
+         * Name of the field used in validation
+         */
+        export type FieldName = string;
         export interface GenerateDocumentRequest {
             /**
              * Entity id for the template being used
@@ -245,6 +249,11 @@ declare namespace Components {
                  */
                 thirdPartyCookies?: boolean;
             };
+            validationRules?: /**
+             * Record of BlockId → RuleId or array of RuleRef objects
+             *
+             */
+            ValidationRuleRef[];
             createdBy?: string;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
@@ -378,6 +387,11 @@ declare namespace Components {
                  */
                 thirdPartyCookies?: boolean;
             };
+            validationRules?: /**
+             * Record of BlockId → RuleId or array of RuleRef objects
+             *
+             */
+            ValidationRuleRef[];
             createdBy?: string;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
@@ -476,6 +490,11 @@ declare namespace Components {
                  */
                 enableDarkMode?: boolean;
             };
+            validationRules?: /**
+             * Record of BlockId → RuleId or array of RuleRef objects
+             *
+             */
+            ValidationRuleRef[];
             /**
              * Manifest/Blueprint ID used to create/update the entity
              */
@@ -521,6 +540,19 @@ declare namespace Components {
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
             __lastModifiedAt?: string | null;
+        }
+        /**
+         * The ID of the rule, used to reference a specific rule
+         *
+         */
+        export type RuleId = string;
+        export interface RuleRef {
+            id: /**
+             * The ID of the rule, used to reference a specific rule
+             *
+             */
+            RuleId;
+            fields: /* Name of the field used in validation */ FieldName[];
         }
         export interface S3Reference {
             /**
@@ -731,6 +763,17 @@ declare namespace Components {
              * 1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p
              */
             file_entity_id?: string; // uuid
+        }
+        /**
+         * Record of BlockId → RuleId or array of RuleRef objects
+         *
+         */
+        export interface ValidationRuleRef {
+            [name: string]: /**
+             * The ID of the rule, used to reference a specific rule
+             *
+             */
+            RuleId | RuleRef[];
         }
     }
 }
@@ -1413,6 +1456,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type ButtonOption = Components.Schemas.ButtonOption;
+export type FieldName = Components.Schemas.FieldName;
 export type GenerateDocumentRequest = Components.Schemas.GenerateDocumentRequest;
 export type GenerateDocumentResponse = Components.Schemas.GenerateDocumentResponse;
 export type GetJourneysResponse = Components.Schemas.GetJourneysResponse;
@@ -1425,7 +1469,10 @@ export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
 export type JourneyResponse = Components.Schemas.JourneyResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
+export type RuleId = Components.Schemas.RuleId;
+export type RuleRef = Components.Schemas.RuleRef;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SearchJourneysQueryRequest = Components.Schemas.SearchJourneysQueryRequest;
 export type SearchJourneysResponse = Components.Schemas.SearchJourneysResponse;
 export type TemplateSettings = Components.Schemas.TemplateSettings;
+export type ValidationRuleRef = Components.Schemas.ValidationRuleRef;
