@@ -453,6 +453,7 @@ declare namespace Components {
                 templateId?: string;
                 targetedCustomer?: string;
                 description?: string | null;
+                publicToken?: string | null;
                 runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
                 filePurposes?: string[];
                 entityTags?: string[];

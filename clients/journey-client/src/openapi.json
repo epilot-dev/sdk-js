@@ -1503,6 +1503,10 @@
                 "type": "string",
                 "nullable": true
               },
+              "publicToken": {
+                "type": "string",
+                "nullable": true
+              },
               "runtimeEntities": {
                 "type": "array",
                 "items": {
