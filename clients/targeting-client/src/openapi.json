@@ -3,7 +3,7 @@
   "info": {
     "title": "Targeting API",
     "description": "API for Targeting",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "tags": [
     {
@@ -29,6 +29,9 @@
     }
   ],
   "servers": [
+    {
+      "url": "https://targeting.sls.epilot.io"
+    },
     {
       "url": "https://targeting.sls.epilot.io"
     },
@@ -237,6 +240,42 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/MatchTargetsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/target/queries": {
+      "post": {
+        "operationId": "getTargetQueries",
+        "summary": "Get target queries",
+        "description": "Transform target filters into Lucene queries for the provided target IDs.\nReturns the transformed query string for each target along with any errors encountered.\n",
+        "tags": [
+          "Target"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTargetQueriesParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetTargetQueriesResponse"
           },
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -641,6 +680,9 @@
       "BaseSystemFields": {
         "type": "object",
         "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
           "_org": {
             "type": "string",
             "description": "Organization Id the entity belongs to",
@@ -744,9 +786,6 @@
           {
             "type": "object",
             "properties": {
-              "id": {
-                "$ref": "#/components/schemas/BaseUUID"
-              },
               "name": {
                 "type": "string"
               },
@@ -785,9 +824,6 @@
           {
             "type": "object",
             "properties": {
-              "id": {
-                "$ref": "#/components/schemas/BaseUUID"
-              },
               "name": {
                 "type": "string"
               },
@@ -890,6 +926,48 @@
           "target_ids"
         ],
         "additionalProperties": false
+      },
+      "GetTargetQueriesParams": {
+        "type": "object",
+        "properties": {
+          "target_ids": {
+            "type": "array",
+            "description": "List of target IDs to transform into queries.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": [
+              "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+            ],
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "target_ids"
+        ],
+        "additionalProperties": false
+      },
+      "TargetQueryResult": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "query": {
+            "type": "string",
+            "description": "Transformed query string, or null if transformation failed.",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if query transformation failed."
+          }
+        },
+        "required": [
+          "target_id",
+          "query"
+        ]
       },
       "AutomationStatus": {
         "type": "string",
@@ -1274,6 +1352,28 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "GetTargetQueriesResponse": {
+        "description": "List of transformed target queries.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "description": "List of target query results.",
+                  "items": {
+                    "$ref": "#/components/schemas/TargetQueryResult"
+                  }
+                }
+              },
+              "required": [
+                "results"
+              ]
             }
           }
         }

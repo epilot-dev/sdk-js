@@ -70,6 +70,12 @@ declare namespace Components {
          *
          */
         Schemas.ClientError;
+        export interface GetTargetQueriesResponse {
+            /**
+             * List of target query results.
+             */
+            results: Schemas.TargetQueryResult[];
+        }
         export type JobStatusResponse = Schemas.JobStatus;
         export interface MatchCampaignsResponse {
             /**
@@ -188,6 +194,11 @@ declare namespace Components {
             }[];
         }
         export interface BaseSystemFields {
+            _id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
             /**
              * Organization Id the entity belongs to
              */
@@ -222,6 +233,11 @@ declare namespace Components {
          */
         export type BaseUUID = string; // uuid
         export interface Campaign {
+            _id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
             /**
              * Organization Id the entity belongs to
              */
@@ -239,11 +255,6 @@ declare namespace Components {
             _created_at?: string; // date-time
             _updated_at?: string; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ BaseEntityAcl;
-            id?: /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            BaseUUID /* uuid */;
             name?: string;
             goal?: string;
             status?: CampaignStatus;
@@ -335,6 +346,27 @@ declare namespace Components {
         export interface ExecutionSummaryItem {
             execution_id?: string;
             execution_status?: string;
+        }
+        export interface GetTargetQueriesParams {
+            /**
+             * List of target IDs to transform into queries.
+             * example:
+             * [
+             *   "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+             * ]
+             */
+            target_ids: [
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */,
+                .../**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */[]
+            ];
         }
         export interface JobStatus {
             /**
@@ -1437,6 +1469,11 @@ declare namespace Components {
         }
         export type ServerError = BaseError;
         export interface Target {
+            _id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
             /**
              * Organization Id the entity belongs to
              */
@@ -1454,17 +1491,27 @@ declare namespace Components {
             _created_at?: string; // date-time
             _updated_at?: string; // date-time
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ BaseEntityAcl;
-            id?: /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            BaseUUID /* uuid */;
             name?: string;
             description?: string;
             entity_schema?: string;
             entity_filters?: {
                 [name: string]: any;
             };
+        }
+        export interface TargetQueryResult {
+            target_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Transformed query string, or null if transformation failed.
+             */
+            query: string | null;
+            /**
+             * Error message if query transformation failed.
+             */
+            error?: string;
         }
         export interface UpdatePortalStatusRequest {
             status: PortalStatus;
@@ -1574,6 +1621,14 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace GetTargetQueries {
+        export type RequestBody = Components.Schemas.GetTargetQueriesParams;
+        namespace Responses {
+            export type $200 = Components.Responses.GetTargetQueriesResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
@@ -1745,6 +1800,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchTargets.Responses.$200>
   /**
+   * getTargetQueries - Get target queries
+   * 
+   * Transform target filters into Lucene queries for the provided target IDs.
+   * Returns the transformed query string for each target along with any errors encountered.
+   * 
+   */
+  'getTargetQueries'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetTargetQueries.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTargetQueries.Responses.$200>
+  /**
    * createRecipient - Create a recipient associated with a campaign
    * 
    * Creates a new recipient associated with a campaign.
@@ -1883,6 +1950,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MatchTargets.Responses.$200>
   }
+  ['/v1/target/queries']: {
+    /**
+     * getTargetQueries - Get target queries
+     * 
+     * Transform target filters into Lucene queries for the provided target IDs.
+     * Returns the transformed query string for each target along with any errors encountered.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetTargetQueries.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTargetQueries.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/recipient']: {
     /**
      * createRecipient - Create a recipient associated with a campaign
@@ -1961,6 +2042,7 @@ export type CampaignStatus = Components.Schemas.CampaignStatus;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
+export type GetTargetQueriesParams = Components.Schemas.GetTargetQueriesParams;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchCampaignParams = Components.Schemas.MatchCampaignParams;
 export type MatchTargetParams = Components.Schemas.MatchTargetParams;
@@ -1971,5 +2053,6 @@ export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomation
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type Target = Components.Schemas.Target;
+export type TargetQueryResult = Components.Schemas.TargetQueryResult;
 export type UpdatePortalStatusRequest = Components.Schemas.UpdatePortalStatusRequest;
 export type UpdateRecipientPayload = Components.Schemas.UpdateRecipientPayload;

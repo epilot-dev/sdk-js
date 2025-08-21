@@ -84,6 +84,18 @@
         "responses": {}
       }
     },
+    "/v1/target/queries": {
+      "post": {
+        "operationId": "getTargetQueries",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/campaign/{campaign_id}/recipient": {
       "post": {
         "operationId": "createRecipient",
@@ -223,6 +235,11 @@
         }
       },
       "MatchTargetsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetTargetQueriesResponse": {
         "content": {
           "application/json": {}
         }
