@@ -111,6 +111,74 @@
       }
     },
     "/v1/validation-rules/{ruleId}": {
+      "get": {
+        "operationId": "getValidationRuleById",
+        "summary": "Get validation rule by ID",
+        "description": "Retrieves a specific validation rule by its ID",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "operationId": "updateValidationRule",
         "summary": "Update Validation Rule (partial update)",
