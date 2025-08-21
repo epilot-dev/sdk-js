@@ -21,6 +21,17 @@
       }
     },
     "/v1/validation-rules/{ruleId}": {
+      "get": {
+        "operationId": "getValidationRuleById",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
       "patch": {
         "operationId": "updateValidationRule",
         "parameters": [

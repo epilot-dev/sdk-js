@@ -309,6 +309,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetValidationRuleById {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
+    }
     namespace GetValidationRules {
         namespace Responses {
             export type $200 = Components.Schemas.GetValidationRulesResponse;
@@ -379,6 +404,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateValidationRule.Responses.$201>
   /**
+   * getValidationRuleById - Get validation rule by ID
+   * 
+   * Retrieves a specific validation rule by its ID
+   */
+  'getValidationRuleById'(
+    parameters?: Parameters<Paths.GetValidationRuleById.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>
+  /**
    * updateValidationRule - Update Validation Rule (partial update)
    * 
    * Updates an existing validation rule partially by ID
@@ -424,6 +459,16 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.CreateValidationRule.Responses.$201>
   }
   ['/v1/validation-rules/{ruleId}']: {
+    /**
+     * getValidationRuleById - Get validation rule by ID
+     * 
+     * Retrieves a specific validation rule by its ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetValidationRuleById.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>
     /**
      * updateValidationRule - Update Validation Rule (partial update)
      * 
