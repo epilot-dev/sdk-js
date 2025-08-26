@@ -143,6 +143,12 @@ declare namespace Components {
              * List of user IDs who have read this note
              */
             read_by?: string[];
+            /**
+             * Reactions to the note, keyed by reaction type, with an array of user IDs for each type
+             */
+            reactions?: {
+                [name: string]: string[];
+            };
         }
         /**
          * List of resolved Entity and non-Entity contexts attached to a given Note.
@@ -221,6 +227,12 @@ declare namespace Components {
              * List of user IDs who have read this note
              */
             read_by?: string[];
+            /**
+             * Reactions to the note, keyed by reaction type, with an array of user IDs for each type
+             */
+            reactions?: {
+                [name: string]: string[];
+            };
         }
         /**
          * The Note's parent Note
@@ -300,6 +312,12 @@ declare namespace Components {
              * List of user IDs who have read this note
              */
             read_by?: string[];
+            /**
+             * Reactions to the note, keyed by reaction type, with an array of user IDs for each type
+             */
+            reactions?: {
+                [name: string]: string[];
+            };
         }
         export interface NotePatchRequestBody {
             /**
@@ -335,6 +353,12 @@ declare namespace Components {
              * List of user IDs who have read this note
              */
             read_by?: string[];
+            /**
+             * Reactions to the note, keyed by reaction type, with an array of user IDs for each type
+             */
+            reactions?: {
+                [name: string]: string[];
+            };
         }
         export interface NotePostRequestBody {
             /**
@@ -457,6 +481,12 @@ declare namespace Components {
              * List of user IDs who have read this note
              */
             read_by?: string[];
+            /**
+             * Reactions to the note, keyed by reaction type, with an array of user IDs for each type
+             */
+            reactions?: {
+                [name: string]: string[];
+            };
         }
         export interface NoteSearchByContextRequestBody {
             contexts: {
@@ -472,7 +502,7 @@ declare namespace Components {
              */
             size?: number;
         }
-        export interface NotesGetRequestResponse {
+        export interface NotesSearchRequestResponse {
             /**
              * The number of Note entries returned in this query
              */
@@ -580,7 +610,7 @@ declare namespace Paths {
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.NotesGetRequestResponse;
+            export type $200 = Components.Schemas.NotesSearchRequestResponse;
         }
     }
     namespace PatchNote {
@@ -616,8 +646,7 @@ declare namespace Paths {
     namespace SearchNotesByContext {
         export type RequestBody = Components.Schemas.NoteSearchByContextRequestBody;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.NotesSearchRequestResponse;
         }
     }
     namespace UpdateNote {
@@ -850,5 +879,5 @@ export type NotePatchRequestBody = Components.Schemas.NotePatchRequestBody;
 export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
 export type NotePutRequestBody = Components.Schemas.NotePutRequestBody;
 export type NoteSearchByContextRequestBody = Components.Schemas.NoteSearchByContextRequestBody;
-export type NotesGetRequestResponse = Components.Schemas.NotesGetRequestResponse;
+export type NotesSearchRequestResponse = Components.Schemas.NotesSearchRequestResponse;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;

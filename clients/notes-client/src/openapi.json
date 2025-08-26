@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
@@ -560,6 +560,16 @@
               "type": "string"
             },
             "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           }
         },
         "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
@@ -721,6 +731,16 @@
               "type": "string"
             },
             "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           }
         }
       },
@@ -797,6 +817,16 @@
               "type": "string"
             },
             "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           }
         }
       },
@@ -892,6 +922,16 @@
               "type": "string"
             },
             "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           }
         },
         "required": [
@@ -1083,6 +1123,16 @@
               "type": "string"
             },
             "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
           }
         }
       },
