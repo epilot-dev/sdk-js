@@ -5203,24 +5203,18 @@
         },
         "responses": {
           "200": {
-            "description": "The entities is retrieved successfully for the portal user.",
+            "description": "The entities have been retrieved successfully for the portal user.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/EntityItem"
-                      }
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EntityResponseWithHits"
                     },
-                    "hits": {
-                      "type": "number",
-                      "description": "Total number of entities for pagination",
-                      "example": 50
+                    {
+                      "$ref": "#/components/schemas/EntityResponseGroupedWithHits"
                     }
-                  }
+                  ]
                 }
               }
             }
@@ -5901,10 +5895,42 @@
             "in": "query",
             "name": "contract_id",
             "required": false,
+            "deprecated": true,
             "schema": {
               "$ref": "#/components/schemas/EntityId"
             },
-            "description": "Contract context for blocks"
+            "description": "Contract context for blocks. Use context_entities instead."
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "If the request is in a context of certain entities (i.e. the user in in a context of a specific contract), pages can be customized for that. Portal User and Contact entities are automatically part of the context.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Entity schema",
+                    "example": "contract"
+                  },
+                  "entity_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Entity id",
+                    "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+                  }
+                }
+              },
+              "example": [
+                {
+                  "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+                  "entity_schema": "contract"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -6479,6 +6505,219 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config": {
+      "post": {
+        "operationId": "createPortalConfig",
+        "summary": "createPortalConfig",
+        "description": "Creates a new portal configuration.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "requestBody": {
+          "description": "Portal configuration payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPortalConfigV3"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Portal config created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfigV3"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/{portal_id}": {
+      "get": {
+        "operationId": "getPortalConfigV3",
+        "summary": "getPortalConfigV3",
+        "description": "Retrieves a specific portal configuration by ID.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          }
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfigV3"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putPortalConfig",
+        "summary": "putPortalConfig",
+        "description": "Updates a specific portal configuration by ID.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal configuration payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPortalConfigV3"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfigV3"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePortalConfig",
+        "summary": "deletePortalConfig",
+        "description": "Deletes a specific portal configuration by ID.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Portal config deleted successfully."
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -7561,6 +7800,11 @@
                 "example": 12345,
                 "description": "ID of the organization"
               },
+              "portal_id": {
+                "type": "string",
+                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "ID of the portal"
+              },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
               },
@@ -8375,6 +8619,125 @@
             }
           }
         ]
+      },
+      "EntityResponseWithHits": {
+        "type": "object",
+        "description": "Response for entity search requests",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityItem"
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "description": "Pagination metadata",
+            "properties": {
+              "from": {
+                "type": "number",
+                "description": "Starting offset for the current page",
+                "example": 0
+              },
+              "size": {
+                "type": "number",
+                "description": "Number of entities per page",
+                "example": 10
+              },
+              "total": {
+                "type": "number",
+                "description": "Total number of entities available",
+                "example": 50
+              },
+              "has_more": {
+                "type": "boolean",
+                "description": "Whether there are more entities available beyond the current page"
+              }
+            }
+          },
+          "hits": {
+            "type": "number",
+            "description": "Number of entities returned in this response",
+            "example": 10
+          }
+        }
+      },
+      "EntityResponseGroupedWithHits": {
+        "type": "object",
+        "description": "Response for entity search requests, but with groupings",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "group": {
+                  "type": "string",
+                  "description": "Group title",
+                  "example": "active"
+                },
+                "count": {
+                  "type": "number",
+                  "description": "Total number of entities in this group",
+                  "example": 10
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntityItem"
+                  }
+                },
+                "pagination": {
+                  "type": "object",
+                  "description": "Pagination metadata for entities within this group",
+                  "properties": {
+                    "from": {
+                      "type": "number",
+                      "description": "Starting offset for entities in this group",
+                      "example": 0
+                    },
+                    "size": {
+                      "type": "number",
+                      "description": "Number of entities returned for this group",
+                      "example": 5
+                    },
+                    "total": {
+                      "type": "number",
+                      "description": "Total number of entities available in this group",
+                      "example": 10
+                    },
+                    "has_more": {
+                      "type": "boolean",
+                      "description": "Whether there are more entities available in this group beyond the current page"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "groups_pagination": {
+            "type": "object",
+            "description": "Group pagination metadata",
+            "properties": {
+              "has_more": {
+                "type": "boolean",
+                "description": "Whether there are more groups available"
+              },
+              "after_key": {
+                "type": "object",
+                "description": "Composite aggregation key for the next page",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "hits": {
+            "type": "number",
+            "description": "Number of groups returned in this response",
+            "example": 5
+          }
+        }
       },
       "PortalUser": {
         "description": "The portal user entity",
@@ -9479,6 +9842,60 @@
           "slug": {
             "$ref": "#/components/schemas/EntitySlug"
           },
+          "q": {
+            "type": "string",
+            "description": "Keyword search query",
+            "example": "contract"
+          },
+          "q_fields": {
+            "type": "array",
+            "description": "List of fields that can be searched",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "_title",
+              "customer._title",
+              "customer.first_name",
+              "customer.last_name"
+            ]
+          },
+          "group": {
+            "type": "string",
+            "description": "Field to group results by",
+            "example": "customer._title"
+          },
+          "group_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100,
+            "description": "Number of groups to return"
+          },
+          "group_sort": {
+            "type": "string",
+            "description": "Sort order for groups",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "asc",
+            "example": "desc"
+          },
+          "group_after_key": {
+            "type": "object",
+            "description": "Composite aggregation key for group pagination",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
           "sort": {
             "type": "string",
             "example": "_created_at:desc"
@@ -9491,7 +9908,7 @@
           "size": {
             "type": "integer",
             "minimum": 0,
-            "default": 10,
+            "default": 100,
             "description": "Max search size is 1000 with higher values defaulting to 1000"
           },
           "hydrate": {
@@ -9507,8 +9924,67 @@
             },
             "example": [
               "_id",
-              "_title",
-              "first_name"
+              "_title"
+            ]
+          },
+          "filters": {
+            "type": "array",
+            "description": "Additional filters to apply to the search query",
+            "items": {
+              "type": "object",
+              "description": "Elasticsearch filter object"
+            },
+            "example": [
+              {
+                "term": {
+                  "status.keyword": "active"
+                }
+              },
+              {
+                "range": {
+                  "_created_at": {
+                    "gte": "2023-01-01"
+                  }
+                }
+              }
+            ]
+          },
+          "filters_schema": {
+            "type": "array",
+            "description": "Schema-based filters for entity relations.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "contact",
+                "contract",
+                "portal_user"
+              ]
+            },
+            "example": [
+              "contact",
+              "portal_user"
+            ]
+          },
+          "contracts": {
+            "type": "array",
+            "description": "List of contract IDs to filter by",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "description": "Filters from these targets will be applied to the search query.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
             ]
           }
         },
@@ -10526,7 +11002,16 @@
         "type": "string",
         "nullable": true,
         "example": "Storing the feed-in record",
-        "description": "The reason for recording the reading"
+        "description": "The reason for recording the reading",
+        "enum": [
+          "",
+          "irregular",
+          "last",
+          "first",
+          "meter_change",
+          "contract_change",
+          "meter_adjustment"
+        ]
       },
       "ReadBy": {
         "type": "string",
@@ -10579,7 +11064,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -10588,6 +11073,21 @@
           "status": {
             "$ref": "#/components/schemas/ReadingStatus",
             "description": "The status of the reading"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
           }
         }
       },
@@ -11236,10 +11736,489 @@
             }
           }
         ]
+      },
+      "CommonConfigAttributesV3": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable/Disable the portal access"
+          },
+          "name": {
+            "type": "string",
+            "description": "A short name to identify your portal",
+            "example": "Installer Portal"
+          },
+          "domain": {
+            "type": "string",
+            "description": "The URL on which the portal is accessible",
+            "example": "abc.com"
+          },
+          "is_epilot_domain": {
+            "type": "boolean",
+            "description": "Mark true if the domain is an Epilot domain"
+          },
+          "design_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the design used to build the portal"
+          },
+          "self_registration_setting": {
+            "type": "string",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "ALLOW_WITHOUT_CONTACT_CREATION",
+              "DENY"
+            ]
+          },
+          "feature_settings": {
+            "type": "object",
+            "description": "Feature settings for the portal",
+            "properties": {
+              "start_page": {
+                "type": "boolean",
+                "description": "Start page feature flag"
+              },
+              "billing": {
+                "type": "boolean",
+                "description": "Billing feature flag"
+              },
+              "change_due_date": {
+                "type": "boolean",
+                "description": "Change due date feature flag"
+              },
+              "new_design": {
+                "type": "boolean",
+                "description": "Enable or disable the new design for the portal"
+              }
+            }
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "Access token for the portal"
+          },
+          "advanced_mfa": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Advanced MFA feature flag"
+              }
+            }
+          },
+          "auth_settings": {
+            "type": "object",
+            "description": "Authentication settings for the portal",
+            "properties": {
+              "passwordless_login": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Passwordless login feature flag"
+                  }
+                }
+              },
+              "entry_point": {
+                "type": "string",
+                "enum": [
+                  "PASSWORD",
+                  "SSO"
+                ]
+              },
+              "preferred_sso_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderSlug"
+                }
+              }
+            }
+          },
+          "cognito_details": {
+            "type": "object",
+            "description": "AWS Cognito Pool details for the portal",
+            "properties": {
+              "cognito_user_pool_client_id": {
+                "type": "string",
+                "example": "6bsd0jkgoie74k2i8mrhc1vest",
+                "description": "Cognito user pool client ID"
+              },
+              "cognito_user_pool_arn": {
+                "type": "string",
+                "example": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
+                "description": "Cognito user pool ARN"
+              },
+              "cognito_user_pool_id": {
+                "type": "string",
+                "example": "eu-central-1_CUEQRNbUb",
+                "description": "Cognito user pool ID"
+              },
+              "password_policy": {
+                "type": "object",
+                "description": "Password policy for the portal",
+                "properties": {
+                  "minimum_length": {
+                    "type": "integer",
+                    "example": 8,
+                    "description": "Minimum password length"
+                  },
+                  "require_lowercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require lowercase characters"
+                  },
+                  "require_uppercase": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require uppercase characters"
+                  },
+                  "require_numbers": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require numbers"
+                  },
+                  "require_symbols": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Require symbols"
+                  }
+                }
+              }
+            }
+          },
+          "config": {
+            "type": "string",
+            "description": "Stringified object with configuration details"
+          },
+          "contact_identifiers": {
+            "type": "array",
+            "description": "Deprecated. Use registration_identifiers instead.",
+            "deprecated": true,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "email",
+              "last_name"
+            ]
+          },
+          "approval_state_attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "contact": [
+                "name",
+                "address"
+              ],
+              "contract": [
+                "installment_amount"
+              ]
+            }
+          },
+          "email_templates": {
+            "$ref": "#/components/schemas/EmailTemplates"
+          },
+          "images": {
+            "type": "object",
+            "description": "Teaser & Banner Image web links",
+            "properties": {
+              "orderLeftTeaser": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
+                "description": "URL of the order left teaser image"
+              },
+              "orderRightTeaser": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
+                "description": "URL of the order right teaser image"
+              },
+              "welcomeBanner": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg",
+                "description": "URL of the welcome banner image"
+              }
+            }
+          },
+          "entity_identifiers": {
+            "type": "object",
+            "description": "Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.",
+            "deprecated": true,
+            "properties": {
+              "type": {
+                "type": "object",
+                "properties": {
+                  "isEnabled": {
+                    "type": "boolean",
+                    "description": "Enable/Disable the entity identifier"
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "description": "Attributes used to identify an entity",
+                    "items": {
+                      "type": "string",
+                      "example": "contract_number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "contract_identifiers": {
+            "type": "array",
+            "description": "Identifiers to identify a contract by a portal user.",
+            "items": {
+              "$ref": "#/components/schemas/ContractIdentifier"
+            },
+            "example": [
+              {
+                "name": "email",
+                "schema": "contact"
+              },
+              {
+                "name": "last_name",
+                "schema": "contact"
+              },
+              {
+                "name": "contract_number",
+                "schema": "contract"
+              }
+            ]
+          },
+          "contract_selector_config": {
+            "type": "object",
+            "description": "Configuration for contract selector in the portal",
+            "properties": {
+              "show_inactive": {
+                "type": "boolean",
+                "description": "Whether to show inactive contracts in the selector"
+              },
+              "title_path": {
+                "type": "string",
+                "description": "Path to the property to use as the contract title"
+              }
+            }
+          },
+          "registration_identifiers": {
+            "type": "array",
+            "description": "Identifiers to identify a contact of a portal user during the registration.",
+            "items": {
+              "$ref": "#/components/schemas/ContractIdentifier"
+            },
+            "example": [
+              {
+                "name": "last_name",
+                "schema": "contact"
+              },
+              {
+                "name": "contract_number",
+                "schema": "contract"
+              }
+            ]
+          },
+          "triggered_journeys": {
+            "type": "array",
+            "description": "Journeys automatically opened on a portal user action",
+            "items": {
+              "type": "object",
+              "properties": {
+                "trigger_name": {
+                  "type": "string",
+                  "enum": [
+                    "FIRST_LOGIN",
+                    "ACCEPT_ORDER",
+                    "DECLINE_ORDER"
+                  ]
+                },
+                "journey_id": {
+                  "$ref": "#/components/schemas/EntityId"
+                }
+              }
+            }
+          },
+          "entity_edit_rules": {
+            "type": "array",
+            "description": "Rules for editing an entity by a portal user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slug": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "attribute": {
+                  "type": "string",
+                  "example": "first_name"
+                },
+                "rule_type": {
+                  "type": "string",
+                  "enum": [
+                    "cadence",
+                    "relative_to_current_value",
+                    "days_before_date",
+                    "overdue_payments"
+                  ]
+                },
+                "cadence_period_type": {
+                  "type": "string",
+                  "enum": [
+                    "days",
+                    "weeks",
+                    "months"
+                  ]
+                },
+                "cadence_period": {
+                  "type": "number",
+                  "example": 1
+                },
+                "changes_allowed": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "grace_period": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "allowed_increment": {
+                  "type": "string",
+                  "example": "10%"
+                },
+                "allowed_decrement": {
+                  "type": "string",
+                  "example": "10%"
+                },
+                "number_of_days_before_restriction": {
+                  "type": "integer",
+                  "example": 10
+                }
+              }
+            }
+          },
+          "allowed_file_extensions": {
+            "$ref": "#/components/schemas/AllowedFileExtensions"
+          },
+          "prevent_search_engine_indexing": {
+            "type": "boolean",
+            "description": "Prevent indexing by search engines"
+          },
+          "meter_reading_grace_period": {
+            "type": "number",
+            "description": "Grace period in days for meter readings"
+          },
+          "inactive_contract_cutoff_years": {
+            "type": "number",
+            "description": "Number of years to look back for showing inactive contracts in the portal"
+          },
+          "is_dummy": {
+            "type": "boolean",
+            "description": "Whether this is a dummy/test portal configuration"
+          },
+          "pages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Page"
+            }
+          }
+        }
+      },
+      "UpsertPortalConfigV3": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
+          },
+          {
+            "$ref": "#/components/schemas/CommonConfigAttributesV3"
+          },
+          {
+            "properties": {
+              "origin": {
+                "$ref": "#/components/schemas/Origin"
+              }
+            }
+          }
+        ]
+      },
+      "PortalConfigV3": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonConfigAttributesV3"
+          },
+          {
+            "properties": {
+              "portal_id": {
+                "type": "string",
+                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "ID of the portal"
+              },
+              "organization_id": {
+                "type": "string",
+                "example": 12345,
+                "description": "ID of the organization"
+              },
+              "origin": {
+                "$ref": "#/components/schemas/Origin"
+              },
+              "org_settings": {
+                "type": "object",
+                "description": "Organization settings",
+                "properties": {
+                  "canary": {
+                    "type": "object",
+                    "description": "Canary feature flag",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Enable/Disable the canary feature"
+                      }
+                    }
+                  },
+                  "notracking": {
+                    "type": "object",
+                    "description": "Disable Advanced Usage Metrics",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Disable browser-side scripts that track advanced usage metrics"
+                      }
+                    }
+                  }
+                }
+              },
+              "feature_flags": {
+                "type": "object",
+                "description": "Feature flags for the portal",
+                "additionalProperties": {
+                  "type": "boolean"
+                }
+              },
+              "grants": {
+                "type": "array",
+                "description": "Permissions granted to a portal user while accessing entities",
+                "items": {
+                  "$ref": "#/components/schemas/Grant"
+                }
+              },
+              "identity_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderPublicConfig"
+                }
+              }
+            }
+          }
+        ]
       }
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

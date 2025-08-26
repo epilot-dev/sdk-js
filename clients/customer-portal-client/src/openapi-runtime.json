@@ -1414,6 +1414,12 @@
           {
             "in": "query",
             "name": "contract_id",
+            "required": false,
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
             "required": false
           }
         ],
@@ -1553,6 +1559,59 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v3/portal/config": {
+      "post": {
+        "operationId": "createPortalConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/config/{portal_id}": {
+      "get": {
+        "operationId": "getPortalConfigV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putPortalConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePortalConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     }
