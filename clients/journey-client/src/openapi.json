@@ -958,9 +958,6 @@
                 "type": "object"
               }
             },
-            "required": [
-              "theme"
-            ],
             "additionalProperties": false
           },
           "rules": {

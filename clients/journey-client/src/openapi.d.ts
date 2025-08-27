@@ -159,7 +159,7 @@ declare namespace Components {
             }[];
             design?: {
                 logoUrl?: string | null;
-                theme: {
+                theme?: {
                     [name: string]: any;
                 };
                 designTokens?: {
@@ -297,7 +297,7 @@ declare namespace Components {
             }[];
             design?: {
                 logoUrl?: string | null;
-                theme: {
+                theme?: {
                     [name: string]: any;
                 };
                 designTokens?: {
