@@ -1231,10 +1231,7 @@
             "additionalProperties": false
           },
           "validationRules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ValidationRuleRef"
-            }
+            "$ref": "#/components/schemas/ValidationRuleRef"
           },
           "createdBy": {
             "type": "string"
@@ -1566,10 +1563,7 @@
             "additionalProperties": false
           },
           "validationRules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ValidationRuleRef"
-            }
+            "$ref": "#/components/schemas/ValidationRuleRef"
           },
           "_manifest": {
             "type": "array",
@@ -2008,48 +2002,40 @@
           }
         }
       },
-      "RuleId": {
-        "type": "string",
-        "description": "The ID of the rule, used to reference a specific rule\n"
-      },
-      "FieldName": {
-        "type": "string",
-        "description": "Name of the field used in validation"
-      },
-      "RuleRef": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/RuleId"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FieldName"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "fields"
-        ]
-      },
       "ValidationRuleRef": {
         "type": "object",
+        "description": "References to validation rules organized by blocks and fields.\nMaps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).\n",
         "additionalProperties": {
           "oneOf": [
             {
-              "$ref": "#/components/schemas/RuleId"
+              "type": "string",
+              "description": "Rule ID for block-level validation"
             },
             {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/RuleRef"
-              }
+              "$ref": "#/components/schemas/RuleRef"
             }
           ]
         },
-        "description": "Record of BlockId → RuleId or array of RuleRef objects     \n"
+        "example": {
+          "block1": "rule123",
+          "block2": {
+            "field1": "rule456",
+            "field2": "rule789"
+          }
+        }
+      },
+      "RuleRef": {
+        "type": "object",
+        "description": "Field-level rule references within a block.\nMaps field names to rule IDs.\n",
+        "additionalProperties": {
+          "type": "string",
+          "description": "Rule ID for field-level validation"
+        },
+        "example": {
+          "firstName": "rule123",
+          "lastName": "rule456",
+          "email": "rule789"
+        }
       }
     },
     "securitySchemes": {
@@ -2062,9 +2048,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://journey-config.sls.epilot.io"
-    },
     {
       "url": "https://journey-config.sls.epilot.io"
     }
