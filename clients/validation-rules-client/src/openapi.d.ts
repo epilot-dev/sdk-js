@@ -23,47 +23,117 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-            /**
-             * Matrix of validation rules that must be validated together.
-             */
-            rules: (/* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType)[][];
+            rule: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
         }
         export interface GetValidationRulesResponse {
             results?: /* The Validation rule definition. */ ValidationRule[];
         }
         /**
-         * Specific pattern for numeric based validation rules, supporting range and digit count constraints.
+         * Condition definition for a numeric validation rule
          */
-        export interface NumericPattern {
+        export type NumericCondition = /* Condition definition for a numeric validation rule */ {
+            all: (/* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition)[];
+        } | {
+            any: (/* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition)[];
+        } | {
+            not: /* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition;
+        };
+        /**
+         * Fact-based condition for numeric validation
+         */
+        export type NumericFactCondition = /* Fact-based condition for numeric validation */ {
             /**
-             * Minimum allowed value.
+             * The numeric value extracted from input
              */
-            min_value?: number;
+            fact: "numericValue";
             /**
-             * Maximum allowed value.
+             * Numeric comparison operator
              */
-            max_value?: number;
+            operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive";
             /**
-             * Minimum number of integer digits.
+             * Numeric value to compare against
              */
-            min_integer_count?: number;
+            value: number;
             /**
-             * Maximum number of integer digits.
+             * Additional parameters for the condition
              */
-            max_integer_count?: number;
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        } | {
             /**
-             * Minimum number of decimal digits.
+             * Count of integer digits (excludes leading zeros unless allowed)
              */
-            min_decimal_count?: number;
+            fact: "integerDigitsCount";
             /**
-             * Maximum number of decimal digits.
+             * Digit count comparison operator
              */
-            max_decimal_count?: number;
+            operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits";
             /**
-             * Whether leading zeroes are allowed.
+             * Expected number of integer digits
              */
-            leading_zeroes?: boolean;
-        }
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * Whether to count leading zeroes in digit count
+                 */
+                allowLeadingZeroes?: boolean;
+            };
+        } | {
+            /**
+             * Count of decimal digits
+             */
+            fact: "decimalDigitsCount";
+            /**
+             * Decimal digit count comparison operator
+             */
+            operator: "equal" | "minDecimalDigits" | "maxDecimalDigits";
+            /**
+             * Expected number of decimal digits
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        } | {
+            /**
+             * Whether the input has leading zeros
+             */
+            fact: "hasLeadingZeroes";
+            /**
+             * Leading zeros check operator
+             */
+            operator: "equal" | "notAllowed";
+            /**
+             * Whether leading zeros should be present or not
+             */
+            value: boolean;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        };
         /**
          * Validation rule for numeric values, supporting range and digit count constraints.
          */
@@ -73,69 +143,144 @@ declare namespace Components {
              */
             type: "numeric";
             /**
-             * Specific pattern for numeric based validation rules, supporting range and digit count constraints.
+             * The conditions that must be met for the rule to trigger
              */
-            numeric_pattern?: /* Specific pattern for numeric based validation rules, supporting range and digit count constraints. */ NumericPattern;
+            conditions: /* Condition definition for a numeric validation rule */ NumericCondition;
         }
         /**
-         * A pattern element used in pattern-based validation rules evaluated in a sequence.
+         * Condition definition for a pattern-based validation rule
          */
-        export type Pattern = {
-            /**
-             * Whether this pattern is optional in the sequence.
-             */
-            optional?: boolean;
-            /**
-             * Whether this pattern depends on the previous pattern.
-             */
-            is_dependent?: boolean;
-        } & (/* A pattern element used in pattern-based validation rules evaluated in a sequence. */ /* A static pattern that matches a fixed value. */ PatternStatic | /* A pattern that matches alphanumeric values with optional constraints. */ PatternAlphanumeric | /* A pattern that matches digit sequences with optional constraints. */ PatternDigits);
+        export type PatternCondition = /* Condition definition for a pattern-based validation rule */ {
+            all: (/* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition)[];
+        } | {
+            any: (/* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition)[];
+        } | {
+            not: /* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition;
+        };
         /**
-         * A pattern that matches alphanumeric values with optional constraints.
+         * Fact-based condition for pattern validation
          */
-        export interface PatternAlphanumeric {
+        export type PatternFactCondition = /* Fact-based condition for pattern validation */ {
             /**
-             * Indicates an alphanumeric pattern type.
+             * The name of the value to validate.
              */
-            type: "alphanumeric";
+            fact: "totalLength";
             /**
-             * List of allowed alphanumeric options.
+             * Numeric comparison operator
              */
-            options?: string[];
+            operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive";
             /**
-             * Minimum number of alphanumeric characters.
+             * Numeric value to compare against
              */
-            min_count?: number;
+            value: number;
             /**
-             * Exact number of alphanumeric characters.
+             * Additional parameters for the condition
              */
-            count?: number;
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
             /**
-             * Maximum number of alphanumeric characters.
+             * The name of the value to validate.
              */
-            max_count?: number;
-        }
-        /**
-         * A pattern that matches digit sequences with optional constraints.
-         */
-        export interface PatternDigits {
+            fact: "staticCheck" | "totalLength";
             /**
-             * Indicates a digits pattern type.
+             * Exact digit count operator
              */
-            type: "digits";
+            operator: "exactlyNDigits";
             /**
-             * Minimum number of digits.
+             * Number of digits required
              */
-            min_count?: number;
+            value: number;
             /**
-             * Exact number of digits.
+             * Additional parameters for the condition
              */
-            count?: number;
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
             /**
-             * Maximum number of digits.
+             * The name of the value to validate.
              */
-            max_count?: number;
-        }
+            fact: "staticCheck";
+            /**
+             * Array-based comparison operator
+             */
+            operator: "in" | "notIn" | "contains" | "doesNotContain";
+            /**
+             * Array of string values for array-based operators
+             */
+            value: string[];
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
+            /**
+             * The name of the value to validate.
+             */
+            fact: "staticCheck";
+            /**
+             * String comparison operator
+             */
+            operator: "equal" | "notEqual";
+            /**
+             * String value to compare against
+             */
+            value: string;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        };
         /**
          * Validation rule that uses a sequence of patterns to validate input.
          */
@@ -145,22 +290,45 @@ declare namespace Components {
              */
             type: "pattern";
             /**
-             * List of patterns that define the validation logic.
+             * The conditions that must be met for the rule to trigger
              */
-            patterns: /* A pattern element used in pattern-based validation rules evaluated in a sequence. */ Pattern[];
+            conditions: /* Condition definition for a pattern-based validation rule */ PatternCondition;
         }
         /**
-         * A static pattern that matches a fixed value.
+         * Condition definition for a regex-based validation rule
          */
-        export interface PatternStatic {
+        export type RegexCondition = /* Condition definition for a regex-based validation rule */ {
+            all: (/* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition)[];
+        } | {
+            any: (/* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition)[];
+        } | {
+            not: /* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition;
+        };
+        /**
+         * Fact-based condition for regex validation
+         */
+        export interface RegexFactCondition {
             /**
-             * Indicates a static pattern type.
+             * The name of the value to validate. Should always be 'inputValue' because this property name is passed to the engine
              */
-            type: "static";
+            fact: "inputValue";
             /**
-             * The static value to match.
+             * The operator to use for comparison
+             */
+            operator: "regexMatch";
+            /**
+             * The actual regex
              */
             value: string;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
         }
         /**
          * Validation rule that uses a regular expression to validate input.
@@ -171,13 +339,9 @@ declare namespace Components {
              */
             type: "regex";
             /**
-             * The regular expression pattern to validate against.
+             * The conditions that must be met for the rule to trigger
              */
-            regex: string;
-            /**
-             * The error message to display when the regex validation fails.
-             */
-            error_message?: string;
+            conditions: /* Condition definition for a regex-based validation rule */ RegexCondition;
         }
         export interface UpdateValidationRuleRequest {
             /**
@@ -192,10 +356,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-            /**
-             * Matrix of validation rules that must be validated together.
-             */
-            rules?: (/* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType)[][];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
         }
         /**
          * Describes where and how a validation rule is applied.
@@ -230,10 +391,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-            /**
-             * Matrix of validation rules that must be validated together.
-             */
-            rules?: (/* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType)[][];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
             /**
              * Schema version of the validation rule.
              */
@@ -276,10 +434,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-            /**
-             * Matrix of validation rules that must be validated together.
-             */
-            rules?: (/* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType)[][];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
         }
     }
 }
@@ -497,13 +652,14 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRuleRequest;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
-export type NumericPattern = Components.Schemas.NumericPattern;
+export type NumericCondition = Components.Schemas.NumericCondition;
+export type NumericFactCondition = Components.Schemas.NumericFactCondition;
 export type NumericRuleType = Components.Schemas.NumericRuleType;
-export type Pattern = Components.Schemas.Pattern;
-export type PatternAlphanumeric = Components.Schemas.PatternAlphanumeric;
-export type PatternDigits = Components.Schemas.PatternDigits;
+export type PatternCondition = Components.Schemas.PatternCondition;
+export type PatternFactCondition = Components.Schemas.PatternFactCondition;
 export type PatternRuleType = Components.Schemas.PatternRuleType;
-export type PatternStatic = Components.Schemas.PatternStatic;
+export type RegexCondition = Components.Schemas.RegexCondition;
+export type RegexFactCondition = Components.Schemas.RegexFactCondition;
 export type RegexRuleType = Components.Schemas.RegexRuleType;
 export type UpdateValidationRuleRequest = Components.Schemas.UpdateValidationRuleRequest;
 export type UsedBy = Components.Schemas.UsedBy;

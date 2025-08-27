@@ -1,6 +1,6 @@
 {
   "name": "@epilot/validation-rules-client",
-  "version": "1.1.1",
+  "version": "1.1.4",
   "description": "API Client for epilot Validation Rules API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,8 +13,8 @@
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
-    "prepublishOnly": "npm run typegen && npm run build",
-    "lint": "pnpm exec eslint src"
+    "lint": "pnpm exec eslint src",
+    "prepublishOnly": "npm run typegen && npm run build"
   },
   "files": [
     "*.js",

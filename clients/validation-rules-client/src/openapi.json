@@ -340,7 +340,8 @@
             "type": "object",
             "required": [
               "title",
-              "rules"
+              "rule",
+              "type"
             ]
           }
         ]
@@ -372,25 +373,18 @@
                 },
                 "description": "Describes where and how a validation rule is applied."
               },
-              "rules": {
-                "type": "array",
-                "description": "Matrix of validation rules that must be validated together.",
-                "items": {
-                  "type": "array",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/RegexRuleType"
-                      },
-                      {
-                        "$ref": "#/components/schemas/PatternRuleType"
-                      },
-                      {
-                        "$ref": "#/components/schemas/NumericRuleType"
-                      }
-                    ]
+              "rule": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegexRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PatternRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NumericRuleType"
                   }
-                }
+                ]
               }
             }
           }
@@ -448,75 +442,6 @@
         ],
         "description": "The Validation rule definition."
       },
-      "RegexRuleType": {
-        "type": "object",
-        "required": [
-          "type",
-          "regex"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "regex"
-            ],
-            "description": "Indicates this is a regex-based validation rule."
-          },
-          "regex": {
-            "type": "string",
-            "description": "The regular expression pattern to validate against."
-          },
-          "error_message": {
-            "type": "string",
-            "description": "The error message to display when the regex validation fails."
-          }
-        },
-        "description": "Validation rule that uses a regular expression to validate input."
-      },
-      "PatternRuleType": {
-        "type": "object",
-        "required": [
-          "type",
-          "patterns"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "pattern"
-            ],
-            "description": "Indicates this is a pattern-based validation rule."
-          },
-          "patterns": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Pattern"
-            },
-            "description": "List of patterns that define the validation logic."
-          }
-        },
-        "description": "Validation rule that uses a sequence of patterns to validate input."
-      },
-      "NumericRuleType": {
-        "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "numeric"
-            ],
-            "description": "Indicates this is a numeric-based validation rule."
-          },
-          "numeric_pattern": {
-            "description": "Specific pattern for numeric based validation rules, supporting range and digit count constraints.",
-            "$ref": "#/components/schemas/NumericPattern"
-          }
-        },
-        "description": "Validation rule for numeric values, supporting range and digit count constraints."
-      },
       "UsedBy": {
         "type": "object",
         "required": [
@@ -542,151 +467,682 @@
         },
         "description": "Describes where and how a validation rule is applied."
       },
-      "NumericPattern": {
-        "type": "object",
-        "description": "Specific pattern for numeric based validation rules, supporting range and digit count constraints.",
-        "properties": {
-          "min_value": {
-            "type": "number",
-            "description": "Minimum allowed value."
-          },
-          "max_value": {
-            "type": "number",
-            "description": "Maximum allowed value."
-          },
-          "min_integer_count": {
-            "type": "integer",
-            "description": "Minimum number of integer digits."
-          },
-          "max_integer_count": {
-            "type": "integer",
-            "description": "Maximum number of integer digits."
-          },
-          "min_decimal_count": {
-            "type": "integer",
-            "description": "Minimum number of decimal digits."
-          },
-          "max_decimal_count": {
-            "type": "integer",
-            "description": "Maximum number of decimal digits."
-          },
-          "leading_zeroes": {
-            "type": "boolean",
-            "description": "Whether leading zeroes are allowed."
-          }
-        }
-      },
-      "Pattern": {
-        "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "optional": {
-            "type": "boolean",
-            "description": "Whether this pattern is optional in the sequence."
-          },
-          "is_dependent": {
-            "type": "boolean",
-            "description": "Whether this pattern depends on the previous pattern."
-          }
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/PatternStatic"
-          },
-          {
-            "$ref": "#/components/schemas/PatternAlphanumeric"
-          },
-          {
-            "$ref": "#/components/schemas/PatternDigits"
-          }
-        ],
-        "description": "A pattern element used in pattern-based validation rules evaluated in a sequence."
-      },
-      "PatternStatic": {
+      "RegexRuleType": {
+        "description": "Validation rule that uses a regular expression to validate input.",
         "type": "object",
         "required": [
           "type",
+          "conditions"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "regex"
+            ],
+            "description": "Indicates this is a regex-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/RegexCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "PatternRuleType": {
+        "description": "Validation rule that uses a sequence of patterns to validate input.",
+        "type": "object",
+        "required": [
+          "type",
+          "conditions"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "pattern"
+            ],
+            "description": "Indicates this is a pattern-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/PatternCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "NumericRuleType": {
+        "description": "Validation rule for numeric values, supporting range and digit count constraints.",
+        "type": "object",
+        "required": [
+          "type",
+          "conditions"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "numeric"
+            ],
+            "description": "Indicates this is a numeric-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/NumericCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "RegexCondition": {
+        "description": "Condition definition for a regex-based validation rule",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RegexCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexFactCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "all"
+            ]
+          },
+          {
+            "description": "Any condition must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/RegexCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexFactCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ]
+          },
+          {
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegexCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegexFactCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ]
+          }
+        ]
+      },
+      "RegexFactCondition": {
+        "description": "Fact-based condition for regex validation",
+        "type": "object",
+        "required": [
+          "fact",
+          "operator",
           "value"
         ],
         "properties": {
-          "type": {
+          "fact": {
             "type": "string",
             "enum": [
-              "static"
+              "inputValue"
             ],
-            "description": "Indicates a static pattern type."
+            "description": "The name of the value to validate. Should always be 'inputValue' because this property name is passed to the engine"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "regexMatch"
+            ],
+            "description": "The operator to use for comparison"
           },
           "value": {
             "type": "string",
-            "description": "The static value to match."
-          }
-        },
-        "description": "A static pattern that matches a fixed value."
-      },
-      "PatternAlphanumeric": {
-        "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "alphanumeric"
-            ],
-            "description": "Indicates an alphanumeric pattern type."
+            "description": "The actual regex"
           },
-          "options": {
-            "type": "array",
-            "items": {
-              "type": "string"
+          "params": {
+            "description": "Additional parameters for the condition",
+            "type": "object",
+            "properties": {
+              "errorMessage": {
+                "type": "string",
+                "description": "Custom error message"
+              }
+            }
+          }
+        }
+      },
+      "PatternCondition": {
+        "description": "Condition definition for a pattern-based validation rule",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PatternCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternFactCondition"
+                    }
+                  ]
+                }
+              }
             },
-            "description": "List of allowed alphanumeric options."
+            "required": [
+              "all"
+            ]
           },
-          "min_count": {
-            "type": "integer",
-            "description": "Minimum number of alphanumeric characters."
+          {
+            "description": "Any condition must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PatternCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternFactCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ]
           },
-          "count": {
-            "type": "integer",
-            "description": "Exact number of alphanumeric characters."
-          },
-          "max_count": {
-            "type": "integer",
-            "description": "Maximum number of alphanumeric characters."
+          {
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/PatternCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PatternFactCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ]
           }
-        },
-        "description": "A pattern that matches alphanumeric values with optional constraints."
+        ]
       },
-      "PatternDigits": {
+      "PatternFactCondition": {
+        "description": "Fact-based condition for pattern validation",
         "type": "object",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "digits"
+        "oneOf": [
+          {
+            "description": "Numeric condition (totalLength fact)",
+            "required": [
+              "fact",
+              "operator",
+              "value"
             ],
-            "description": "Indicates a digits pattern type."
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "totalLength"
+                ],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "notEqual",
+                  "lessThan",
+                  "lessThanInclusive",
+                  "greaterThan",
+                  "greaterThanInclusive"
+                ],
+                "description": "Numeric comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Numeric value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
           },
-          "min_count": {
-            "type": "integer",
-            "description": "Minimum number of digits."
+          {
+            "description": "Exact digits condition",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "staticCheck",
+                  "totalLength"
+                ],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "exactlyNDigits"
+                ],
+                "description": "Exact digit count operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Number of digits required"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
           },
-          "count": {
-            "type": "integer",
-            "description": "Exact number of digits."
+          {
+            "description": "Array-based condition (in, notIn, contains, doesNotContain)",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "staticCheck"
+                ],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "in",
+                  "notIn",
+                  "contains",
+                  "doesNotContain"
+                ],
+                "description": "Array-based comparison operator"
+              },
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of string values for array-based operators"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
           },
-          "max_count": {
-            "type": "integer",
-            "description": "Maximum number of digits."
+          {
+            "description": "String-based condition",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "staticCheck"
+                ],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "notEqual"
+                ],
+                "description": "String comparison operator"
+              },
+              "value": {
+                "type": "string",
+                "description": "String value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
           }
-        },
-        "description": "A pattern that matches digit sequences with optional constraints."
+        ]
+      },
+      "NumericCondition": {
+        "description": "Condition definition for a numeric validation rule",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NumericCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericFactCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "all"
+            ]
+          },
+          {
+            "description": "Any condition must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NumericCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericFactCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ]
+          },
+          {
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/NumericCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NumericFactCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ]
+          }
+        ]
+      },
+      "NumericFactCondition": {
+        "description": "Fact-based condition for numeric validation",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "Numeric value comparison",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "numericValue"
+                ],
+                "description": "The numeric value extracted from input"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "notEqual",
+                  "lessThan",
+                  "lessThanInclusive",
+                  "greaterThan",
+                  "greaterThanInclusive"
+                ],
+                "description": "Numeric comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Numeric value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Integer digits count validation",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "integerDigitsCount"
+                ],
+                "description": "Count of integer digits (excludes leading zeros unless allowed)"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "exactlyNDigits",
+                  "minIntegerDigits",
+                  "maxIntegerDigits"
+                ],
+                "description": "Digit count comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Expected number of integer digits"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "allowLeadingZeroes": {
+                    "type": "boolean",
+                    "description": "Whether to count leading zeroes in digit count",
+                    "default": false
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Decimal digits count validation",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "decimalDigitsCount"
+                ],
+                "description": "Count of decimal digits"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "minDecimalDigits",
+                  "maxDecimalDigits"
+                ],
+                "description": "Decimal digit count comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Expected number of decimal digits"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Leading zeros validation",
+            "required": [
+              "fact",
+              "operator",
+              "value"
+            ],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": [
+                  "hasLeadingZeroes"
+                ],
+                "description": "Whether the input has leading zeros"
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "equal",
+                  "notAllowed"
+                ],
+                "description": "Leading zeros check operator"
+              },
+              "value": {
+                "type": "boolean",
+                "description": "Whether leading zeros should be present or not"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     }
   },
