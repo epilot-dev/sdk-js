@@ -3,7 +3,7 @@
   "info": {
     "title": "App API",
     "description": "API for managing app publishing and installed app.",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "tags": [
     {
@@ -790,6 +790,110 @@
         }
       }
     },
+    "/v1/app-configurations/{appId}/versions/{version}/review": {
+      "get": {
+        "summary": "getReview",
+        "description": "Retrieve the review status of a specific app version",
+        "operationId": "getReview",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to retrieve the review status for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found or no review exists for this version"
+          }
+        }
+      },
+      "post": {
+        "summary": "createReview",
+        "description": "Submit an app version for review to make it public",
+        "operationId": "createReview",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to submit for review"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateReviewRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Version submitted for review successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
     "/v1/app-configurations/{appId}/versions/{version}/components": {
       "post": {
         "summary": "createComponent",
@@ -1307,6 +1411,34 @@
   },
   "components": {
     "requestBodies": {
+      "CreateReviewRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "technical_contact",
+                "marketing_contact"
+              ],
+              "properties": {
+                "technical_contact": {
+                  "type": "string",
+                  "description": "Email of the technical contact"
+                },
+                "marketing_contact": {
+                  "type": "string",
+                  "description": "Email of the marketing contact"
+                },
+                "demo_url": {
+                  "type": "string",
+                  "description": "URL to a demo of the app"
+                }
+              }
+            }
+          }
+        }
+      },
       "CreateLogoPresignedRequest": {
         "required": true,
         "content": {
@@ -1897,6 +2029,10 @@
           "description": {
             "type": "string",
             "description": "Description of the custom action"
+          },
+          "wait_for_callback": {
+            "type": "boolean",
+            "description": "Wait for callback_url to be called before completing the action"
           }
         }
       },
@@ -2360,6 +2496,47 @@
           }
         }
       },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is under review",
+            "readOnly": true
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
+            "description": "Status of the review"
+          },
+          "requested_at": {
+            "type": "string",
+            "description": "Timestamp of the review",
+            "readOnly": true
+          },
+          "requested_by": {
+            "type": "string",
+            "description": "User ID of the reviewer",
+            "readOnly": true
+          },
+          "technical_contact": {
+            "type": "string",
+            "description": "Email of the technical contact"
+          },
+          "marketing_contact": {
+            "type": "string",
+            "description": "Email of the marketing contact"
+          },
+          "demo_url": {
+            "type": "string",
+            "description": "URL of the demo"
+          }
+        }
+      },
       "ConfigurationMetadata": {
         "description": "Basic metadata about your app configuration which does not get versioned",
         "type": "object",
@@ -2505,9 +2682,20 @@
             },
             "minItems": 0
           },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "description": "Visibility of the app version",
+            "default": "private",
+            "readOnly": true
+          },
           "public": {
             "type": "boolean",
-            "default": true,
+            "default": false,
+            "deprecated": true,
             "description": "Flag to indicate if the app is public.",
             "readOnly": true
           },
@@ -2798,7 +2986,6 @@
           },
           "public": {
             "type": "boolean",
-            "default": true,
             "description": "Flag to indicate if the app is public.",
             "readOnly": true
           },

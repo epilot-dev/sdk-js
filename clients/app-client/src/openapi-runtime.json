@@ -252,6 +252,43 @@
         "responses": {}
       }
     },
+    "/v1/app-configurations/{appId}/versions/{version}/review": {
+      "get": {
+        "operationId": "getReview",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createReview",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateReviewRequest"
+        },
+        "responses": {}
+      }
+    },
     "/v1/app-configurations/{appId}/versions/{version}/components": {
       "post": {
         "operationId": "createComponent",
@@ -452,6 +489,12 @@
   },
   "components": {
     "requestBodies": {
+      "CreateReviewRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
       "CreateLogoPresignedRequest": {
         "required": true,
         "content": {

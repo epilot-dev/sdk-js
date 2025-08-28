@@ -46,6 +46,20 @@ declare namespace Components {
              */
             mime_type: "image/png" | "image/jpeg" | "image/jpg";
         }
+        export interface CreateReviewRequest {
+            /**
+             * Email of the technical contact
+             */
+            technical_contact: string;
+            /**
+             * Email of the marketing contact
+             */
+            marketing_contact: string;
+            /**
+             * URL to a demo of the app
+             */
+            demo_url?: string;
+        }
         export interface InstallRequest {
             /**
              * Version of the app to update to
@@ -282,6 +296,10 @@ declare namespace Components {
              * Description of the custom action
              */
             description?: string;
+            /**
+             * Wait for callback_url to be called before completing the action
+             */
+            wait_for_callback?: boolean;
         }
         export interface BatchEventRequest {
             events: [
@@ -542,6 +560,10 @@ declare namespace Components {
             };
             components: BaseComponent[];
             /**
+             * Visibility of the app version
+             */
+            visibility?: "public" | "private";
+            /**
              * Flag to indicate if the app is public.
              */
             public?: boolean;
@@ -715,6 +737,10 @@ declare namespace Components {
              */
             owner_org_id: string;
             components: BaseComponent[];
+            /**
+             * Visibility of the app version
+             */
+            visibility?: "public" | "private";
             /**
              * Flag to indicate if the app is public.
              */
@@ -926,6 +952,10 @@ declare namespace Components {
              * Description of the custom action
              */
             description?: string;
+            /**
+             * Wait for callback_url to be called before completing the action
+             */
+            wait_for_callback?: boolean;
             type: "external_integration";
             external_integration_settings?: {
                 /**
@@ -1291,6 +1321,36 @@ declare namespace Components {
             type?: "raw";
             events?: AppEventData[];
         }
+        export interface Review {
+            /**
+             * Version of the app that is under review
+             */
+            version?: string;
+            /**
+             * Status of the review
+             */
+            review_status?: "approved" | "rejected" | "pending";
+            /**
+             * Timestamp of the review
+             */
+            requested_at?: string;
+            /**
+             * User ID of the reviewer
+             */
+            requested_by?: string;
+            /**
+             * Email of the technical contact
+             */
+            technical_contact?: string;
+            /**
+             * Email of the marketing contact
+             */
+            marketing_contact?: string;
+            /**
+             * URL of the demo
+             */
+            demo_url?: string;
+        }
         export interface Role {
             /**
              * Name of the role
@@ -1424,6 +1484,26 @@ declare namespace Paths {
                  * Timestamp when the upload URL expires
                  */
                 expires_at?: string; // date-time
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace CreateReview {
+        namespace Parameters {
+            export type AppId = string;
+            export type Version = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            version: Parameters.Version;
+        }
+        export type RequestBody = Components.RequestBodies.CreateReviewRequest;
+        namespace Responses {
+            export interface $200 {
+                review?: Components.Schemas.Review;
+            }
+            export interface $400 {
             }
             export interface $404 {
             }
@@ -1574,6 +1654,23 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 component?: Components.Schemas.BaseComponent;
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetReview {
+        namespace Parameters {
+            export type AppId = string;
+            export type Version = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            version: Parameters.Version;
+        }
+        namespace Responses {
+            export interface $200 {
+                review?: Components.Schemas.Review;
             }
             export interface $404 {
             }
@@ -1998,6 +2095,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteVersion.Responses.$204>
   /**
+   * getReview - getReview
+   * 
+   * Retrieve the review status of a specific app version
+   */
+  'getReview'(
+    parameters?: Parameters<Paths.GetReview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetReview.Responses.$200>
+  /**
+   * createReview - createReview
+   * 
+   * Submit an app version for review to make it public
+   */
+  'createReview'(
+    parameters?: Parameters<Paths.CreateReview.PathParameters> | null,
+    data?: Paths.CreateReview.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateReview.Responses.$200>
+  /**
    * createComponent - createComponent
    * 
    * Patch an existing app version to create/add a component
@@ -2291,6 +2408,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchVersion.Responses.$204>
   }
+  ['/v1/app-configurations/{appId}/versions/{version}/review']: {
+    /**
+     * getReview - getReview
+     * 
+     * Retrieve the review status of a specific app version
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetReview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetReview.Responses.$200>
+    /**
+     * createReview - createReview
+     * 
+     * Submit an app version for review to make it public
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateReview.PathParameters> | null,
+      data?: Paths.CreateReview.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateReview.Responses.$200>
+  }
   ['/v1/app-configurations/{appId}/versions/{version}/components']: {
     /**
      * createComponent - createComponent
@@ -2463,6 +2602,7 @@ export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
 export type RawEvents = Components.Schemas.RawEvents;
+export type Review = Components.Schemas.Review;
 export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TextArg = Components.Schemas.TextArg;
