@@ -340,8 +340,7 @@
             "type": "object",
             "required": [
               "title",
-              "rule",
-              "type"
+              "rule"
             ]
           }
         ]
@@ -531,23 +530,89 @@
         }
       },
       "RegexCondition": {
-        "description": "Condition definition for a regex-based validation rule",
-        "type": "object",
-        "oneOf": [
+        "description": "Condition definition for a regex-based validation rule (2 levels deep)",
+        "anyOf": [
           {
+            "type": "object",
             "description": "All conditions must be true (AND logic)",
             "properties": {
               "all": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/RegexCondition"
-                    },
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/RegexFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexNestedCondition"
                     }
                   ]
+                }
+              }
+            },
+            "required": [
+              "all"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RegexFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RegexFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegexNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "$ref": "#/components/schemas/RegexFactCondition"
+          }
+        ]
+      },
+      "RegexNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RegexFactCondition"
                 }
               }
             },
@@ -556,19 +621,12 @@
             ]
           },
           {
-            "description": "Any condition must be true (OR logic)",
+            "type": "object",
             "properties": {
               "any": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/RegexCondition"
-                    },
-                    {
-                      "$ref": "#/components/schemas/RegexFactCondition"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/RegexFactCondition"
                 }
               }
             },
@@ -577,17 +635,10 @@
             ]
           },
           {
-            "description": "NOT condition (negation)",
+            "type": "object",
             "properties": {
               "not": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/RegexCondition"
-                  },
-                  {
-                    "$ref": "#/components/schemas/RegexFactCondition"
-                  }
-                ]
+                "$ref": "#/components/schemas/RegexFactCondition"
               }
             },
             "required": [
@@ -636,23 +687,89 @@
         }
       },
       "PatternCondition": {
-        "description": "Condition definition for a pattern-based validation rule",
-        "type": "object",
-        "oneOf": [
+        "description": "Condition definition for a pattern-based validation rule (2 levels deep)",
+        "anyOf": [
           {
+            "type": "object",
             "description": "All conditions must be true (AND logic)",
             "properties": {
               "all": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/PatternCondition"
-                    },
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/PatternFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternNestedCondition"
                     }
                   ]
+                }
+              }
+            },
+            "required": [
+              "all"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PatternFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PatternFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PatternNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "$ref": "#/components/schemas/PatternFactCondition"
+          }
+        ]
+      },
+      "PatternNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PatternFactCondition"
                 }
               }
             },
@@ -661,19 +778,12 @@
             ]
           },
           {
-            "description": "Any condition must be true (OR logic)",
+            "type": "object",
             "properties": {
               "any": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/PatternCondition"
-                    },
-                    {
-                      "$ref": "#/components/schemas/PatternFactCondition"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/PatternFactCondition"
                 }
               }
             },
@@ -682,17 +792,10 @@
             ]
           },
           {
-            "description": "NOT condition (negation)",
+            "type": "object",
             "properties": {
               "not": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/PatternCondition"
-                  },
-                  {
-                    "$ref": "#/components/schemas/PatternFactCondition"
-                  }
-                ]
+                "$ref": "#/components/schemas/PatternFactCondition"
               }
             },
             "required": [
@@ -905,23 +1008,89 @@
         ]
       },
       "NumericCondition": {
-        "description": "Condition definition for a numeric validation rule",
-        "type": "object",
-        "oneOf": [
+        "description": "Condition definition for a numeric-based validation rule (2 levels deep)",
+        "anyOf": [
           {
+            "type": "object",
             "description": "All conditions must be true (AND logic)",
             "properties": {
               "all": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/NumericCondition"
-                    },
+                  "anyOf": [
                     {
                       "$ref": "#/components/schemas/NumericFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericNestedCondition"
                     }
                   ]
+                }
+              }
+            },
+            "required": [
+              "all"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/NumericFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "any"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/NumericFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NumericNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "not"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "$ref": "#/components/schemas/NumericFactCondition"
+          }
+        ]
+      },
+      "NumericNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/NumericFactCondition"
                 }
               }
             },
@@ -930,19 +1099,12 @@
             ]
           },
           {
-            "description": "Any condition must be true (OR logic)",
+            "type": "object",
             "properties": {
               "any": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/NumericCondition"
-                    },
-                    {
-                      "$ref": "#/components/schemas/NumericFactCondition"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/NumericFactCondition"
                 }
               }
             },
@@ -951,17 +1113,10 @@
             ]
           },
           {
-            "description": "NOT condition (negation)",
+            "type": "object",
             "properties": {
               "not": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/NumericCondition"
-                  },
-                  {
-                    "$ref": "#/components/schemas/NumericFactCondition"
-                  }
-                ]
+                "$ref": "#/components/schemas/NumericFactCondition"
               }
             },
             "required": [

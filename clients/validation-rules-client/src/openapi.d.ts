@@ -29,15 +29,15 @@ declare namespace Components {
             results?: /* The Validation rule definition. */ ValidationRule[];
         }
         /**
-         * Condition definition for a numeric validation rule
+         * Condition definition for a numeric-based validation rule (2 levels deep)
          */
-        export type NumericCondition = /* Condition definition for a numeric validation rule */ {
-            all: (/* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition)[];
+        export type NumericCondition = /* Condition definition for a numeric-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition)[];
         } | {
-            any: (/* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition)[];
+            any: (/* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition)[];
         } | {
-            not: /* Condition definition for a numeric validation rule */ NumericCondition | /* Fact-based condition for numeric validation */ NumericFactCondition;
-        };
+            not: /* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition;
+        } | /* Fact-based condition for numeric validation */ NumericFactCondition;
         /**
          * Fact-based condition for numeric validation
          */
@@ -135,6 +135,16 @@ declare namespace Components {
             };
         };
         /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type NumericNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for numeric validation */ NumericFactCondition[];
+        } | {
+            any: /* Fact-based condition for numeric validation */ NumericFactCondition[];
+        } | {
+            not: /* Fact-based condition for numeric validation */ NumericFactCondition;
+        };
+        /**
          * Validation rule for numeric values, supporting range and digit count constraints.
          */
         export interface NumericRuleType {
@@ -145,18 +155,18 @@ declare namespace Components {
             /**
              * The conditions that must be met for the rule to trigger
              */
-            conditions: /* Condition definition for a numeric validation rule */ NumericCondition;
+            conditions: /* Condition definition for a numeric-based validation rule (2 levels deep) */ NumericCondition;
         }
         /**
-         * Condition definition for a pattern-based validation rule
+         * Condition definition for a pattern-based validation rule (2 levels deep)
          */
-        export type PatternCondition = /* Condition definition for a pattern-based validation rule */ {
-            all: (/* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition)[];
+        export type PatternCondition = /* Condition definition for a pattern-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition)[];
         } | {
-            any: (/* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition)[];
+            any: (/* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition)[];
         } | {
-            not: /* Condition definition for a pattern-based validation rule */ PatternCondition | /* Fact-based condition for pattern validation */ PatternFactCondition;
-        };
+            not: /* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition;
+        } | /* Fact-based condition for pattern validation */ PatternFactCondition;
         /**
          * Fact-based condition for pattern validation
          */
@@ -282,6 +292,16 @@ declare namespace Components {
             };
         };
         /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type PatternNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for pattern validation */ PatternFactCondition[];
+        } | {
+            any: /* Fact-based condition for pattern validation */ PatternFactCondition[];
+        } | {
+            not: /* Fact-based condition for pattern validation */ PatternFactCondition;
+        };
+        /**
          * Validation rule that uses a sequence of patterns to validate input.
          */
         export interface PatternRuleType {
@@ -292,18 +312,18 @@ declare namespace Components {
             /**
              * The conditions that must be met for the rule to trigger
              */
-            conditions: /* Condition definition for a pattern-based validation rule */ PatternCondition;
+            conditions: /* Condition definition for a pattern-based validation rule (2 levels deep) */ PatternCondition;
         }
         /**
-         * Condition definition for a regex-based validation rule
+         * Condition definition for a regex-based validation rule (2 levels deep)
          */
-        export type RegexCondition = /* Condition definition for a regex-based validation rule */ {
-            all: (/* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition)[];
+        export type RegexCondition = /* Condition definition for a regex-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition)[];
         } | {
-            any: (/* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition)[];
+            any: (/* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition)[];
         } | {
-            not: /* Condition definition for a regex-based validation rule */ RegexCondition | /* Fact-based condition for regex validation */ RegexFactCondition;
-        };
+            not: /* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition;
+        } | /* Fact-based condition for regex validation */ RegexFactCondition;
         /**
          * Fact-based condition for regex validation
          */
@@ -331,6 +351,16 @@ declare namespace Components {
             };
         }
         /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type RegexNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for regex validation */ RegexFactCondition[];
+        } | {
+            any: /* Fact-based condition for regex validation */ RegexFactCondition[];
+        } | {
+            not: /* Fact-based condition for regex validation */ RegexFactCondition;
+        };
+        /**
          * Validation rule that uses a regular expression to validate input.
          */
         export interface RegexRuleType {
@@ -341,7 +371,7 @@ declare namespace Components {
             /**
              * The conditions that must be met for the rule to trigger
              */
-            conditions: /* Condition definition for a regex-based validation rule */ RegexCondition;
+            conditions: /* Condition definition for a regex-based validation rule (2 levels deep) */ RegexCondition;
         }
         export interface UpdateValidationRuleRequest {
             /**
@@ -654,12 +684,15 @@ export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRul
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
 export type NumericCondition = Components.Schemas.NumericCondition;
 export type NumericFactCondition = Components.Schemas.NumericFactCondition;
+export type NumericNestedCondition = Components.Schemas.NumericNestedCondition;
 export type NumericRuleType = Components.Schemas.NumericRuleType;
 export type PatternCondition = Components.Schemas.PatternCondition;
 export type PatternFactCondition = Components.Schemas.PatternFactCondition;
+export type PatternNestedCondition = Components.Schemas.PatternNestedCondition;
 export type PatternRuleType = Components.Schemas.PatternRuleType;
 export type RegexCondition = Components.Schemas.RegexCondition;
 export type RegexFactCondition = Components.Schemas.RegexFactCondition;
+export type RegexNestedCondition = Components.Schemas.RegexNestedCondition;
 export type RegexRuleType = Components.Schemas.RegexRuleType;
 export type UpdateValidationRuleRequest = Components.Schemas.UpdateValidationRuleRequest;
 export type UsedBy = Components.Schemas.UsedBy;
