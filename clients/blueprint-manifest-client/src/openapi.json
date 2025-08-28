@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.0.0",
+    "version": "3.2.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -740,6 +740,49 @@
         "responses": {
           "200": {
             "description": "Created Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprint",
+        "summary": "preInstallBlueprint",
+        "description": "Pre-install a Blueprint based on a blueprint file",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blueprint_file": {
+                    "type": "string",
+                    "description": "URL to the blueprint zip file"
+                  },
+                  "source_blueprint_type": {
+                    "type": "string",
+                    "enum": [
+                      "marketplace"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pre-installed Blueprint",
             "content": {
               "application/json": {
                 "schema": {

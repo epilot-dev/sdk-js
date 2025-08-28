@@ -1918,6 +1918,18 @@ declare namespace Paths {
             }
         }
     }
+    namespace PreInstallBlueprint {
+        export interface RequestBody {
+            /**
+             * URL to the blueprint zip file
+             */
+            blueprint_file?: string;
+            source_blueprint_type?: "marketplace";
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Blueprint;
+        }
+    }
     namespace SyncDependencies {
         namespace Parameters {
             export type BlueprintId = /**
@@ -2144,6 +2156,16 @@ export interface OperationMethods {
     data?: Paths.CreateBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  /**
+   * preInstallBlueprint - preInstallBlueprint
+   * 
+   * Pre-install a Blueprint based on a blueprint file
+   */
+  'preInstallBlueprint'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PreInstallBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
   /**
    * installBlueprint - installBlueprint
    * 
@@ -2457,6 +2479,18 @@ export interface PathsDictionary {
       data?: Paths.CreateBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints:pre-install']: {
+    /**
+     * preInstallBlueprint - preInstallBlueprint
+     * 
+     * Pre-install a Blueprint based on a blueprint file
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PreInstallBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprint:install']: {
     /**

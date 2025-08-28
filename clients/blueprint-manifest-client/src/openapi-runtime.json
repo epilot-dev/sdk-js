@@ -147,6 +147,17 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprint",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprint",
