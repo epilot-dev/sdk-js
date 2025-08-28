@@ -37,7 +37,7 @@ declare namespace Components {
             any: (/* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition)[];
         } | {
             not: /* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition;
-        } | /* Fact-based condition for numeric validation */ NumericFactCondition;
+        };
         /**
          * Fact-based condition for numeric validation
          */
@@ -45,7 +45,7 @@ declare namespace Components {
             /**
              * The numeric value extracted from input
              */
-            fact: "numericValue";
+            fact: "numeric-value";
             /**
              * Numeric comparison operator
              */
@@ -67,7 +67,7 @@ declare namespace Components {
             /**
              * Count of integer digits (excludes leading zeros unless allowed)
              */
-            fact: "integerDigitsCount";
+            fact: "integer-digits-count";
             /**
              * Digit count comparison operator
              */
@@ -93,7 +93,7 @@ declare namespace Components {
             /**
              * Count of decimal digits
              */
-            fact: "decimalDigitsCount";
+            fact: "decimal-digits-count";
             /**
              * Decimal digit count comparison operator
              */
@@ -115,7 +115,7 @@ declare namespace Components {
             /**
              * Whether the input has leading zeros
              */
-            fact: "hasLeadingZeroes";
+            fact: "has-leading-zeroes";
             /**
              * Leading zeros check operator
              */
@@ -166,7 +166,7 @@ declare namespace Components {
             any: (/* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition)[];
         } | {
             not: /* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition;
-        } | /* Fact-based condition for pattern validation */ PatternFactCondition;
+        };
         /**
          * Fact-based condition for pattern validation
          */
@@ -174,7 +174,7 @@ declare namespace Components {
             /**
              * The name of the value to validate.
              */
-            fact: "totalLength";
+            fact: "total-length";
             /**
              * Numeric comparison operator
              */
@@ -204,7 +204,7 @@ declare namespace Components {
             /**
              * The name of the value to validate.
              */
-            fact: "staticCheck" | "totalLength";
+            fact: "static-check" | "total-length";
             /**
              * Exact digit count operator
              */
@@ -234,7 +234,7 @@ declare namespace Components {
             /**
              * The name of the value to validate.
              */
-            fact: "staticCheck";
+            fact: "static-check";
             /**
              * Array-based comparison operator
              */
@@ -264,7 +264,7 @@ declare namespace Components {
             /**
              * The name of the value to validate.
              */
-            fact: "staticCheck";
+            fact: "static-check";
             /**
              * String comparison operator
              */
@@ -323,7 +323,7 @@ declare namespace Components {
             any: (/* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition)[];
         } | {
             not: /* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition;
-        } | /* Fact-based condition for regex validation */ RegexFactCondition;
+        };
         /**
          * Fact-based condition for regex validation
          */

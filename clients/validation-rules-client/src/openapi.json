@@ -597,9 +597,6 @@
               "not"
             ],
             "additionalProperties": false
-          },
-          {
-            "$ref": "#/components/schemas/RegexFactCondition"
           }
         ]
       },
@@ -754,9 +751,6 @@
               "not"
             ],
             "additionalProperties": false
-          },
-          {
-            "$ref": "#/components/schemas/PatternFactCondition"
           }
         ]
       },
@@ -809,7 +803,7 @@
         "type": "object",
         "oneOf": [
           {
-            "description": "Numeric condition (totalLength fact)",
+            "description": "Numeric condition (total-length fact)",
             "required": [
               "fact",
               "operator",
@@ -819,7 +813,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "totalLength"
+                  "total-length"
                 ],
                 "description": "The name of the value to validate."
               },
@@ -870,8 +864,8 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "staticCheck",
-                  "totalLength"
+                  "static-check",
+                  "total-length"
                 ],
                 "description": "The name of the value to validate."
               },
@@ -917,7 +911,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "staticCheck"
+                  "static-check"
                 ],
                 "description": "The name of the value to validate."
               },
@@ -969,7 +963,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "staticCheck"
+                  "static-check"
                 ],
                 "description": "The name of the value to validate."
               },
@@ -1075,9 +1069,6 @@
               "not"
             ],
             "additionalProperties": false
-          },
-          {
-            "$ref": "#/components/schemas/NumericFactCondition"
           }
         ]
       },
@@ -1140,7 +1131,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "numericValue"
+                  "numeric-value"
                 ],
                 "description": "The numeric value extracted from input"
               },
@@ -1183,7 +1174,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "integerDigitsCount"
+                  "integer-digits-count"
                 ],
                 "description": "Count of integer digits (excludes leading zeros unless allowed)"
               },
@@ -1229,7 +1220,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "decimalDigitsCount"
+                  "decimal-digits-count"
                 ],
                 "description": "Count of decimal digits"
               },
@@ -1269,7 +1260,7 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "hasLeadingZeroes"
+                  "has-leading-zeroes"
                 ],
                 "description": "Whether the input has leading zeros"
               },
