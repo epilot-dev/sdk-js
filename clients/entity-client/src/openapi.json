@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -4311,6 +4311,180 @@
           }
         }
       }
+    },
+    "/v1/entity/{id}/collections": {
+      "get": {
+        "operationId": "getFileCollections",
+        "summary": "getFileCollections",
+        "description": "Gets a list of collections that exist for an entity",
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of collections the entity is part of",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FileCollectionItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFileCollection",
+        "summary": "createFileCollection",
+        "description": "Creates a new file collection for the specified entity",
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File collection created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{id}/collections/{collection_id}": {
+      "get": {
+        "operationId": "getFileCollection",
+        "summary": "getFileCollection",
+        "description": "Gets a specific file collection by ID",
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/CollectionIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File collection found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateFileCollection",
+        "summary": "updateFileCollection",
+        "description": "Updates a specific file collection by ID",
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/CollectionIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionAttributes"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File collection updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFileCollection",
+        "summary": "deleteFileCollection",
+        "description": "Deletes a specific file collection by ID",
+        "tags": [
+          "Collections"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/CollectionIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File collection deleted successfully"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8612,6 +8786,121 @@
             "example": "Bad Request"
           }
         }
+      },
+      "FileCollectionId": {
+        "description": "Generated uuid for a file collection",
+        "type": "string",
+        "format": "uuid"
+      },
+      "FileCollectionItem": {
+        "description": "A file collection with identifiers and timestamps",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FileCollectionId"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "123"
+          },
+          "entityId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "type": {
+            "type": "string",
+            "description": "Logical type for this item (e.g. \"collection\")",
+            "example": "collection"
+          },
+          "name": {
+            "type": "string",
+            "example": "MyCollectionOfImportantFiles"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "starred": {
+            "type": "boolean",
+            "example": false
+          },
+          "files": {
+            "type": "array",
+            "description": "Array of file IDs in this collection",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the collection",
+            "example": "17622"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-20T12:01:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-20T12:01:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "orgId",
+          "entityId",
+          "type",
+          "name",
+          "entity_id",
+          "starred",
+          "files",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "FileCollectionAttributes": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the file collection"
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "Whether the collection is starred"
+          },
+          "files": {
+            "type": "array",
+            "description": "Array of file IDs in this collection",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileCollectionCreateRequest": {
+        "description": "Request body for creating a file collection",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileCollectionAttributes"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "starred",
+              "files"
+            ]
+          }
+        ]
       }
     },
     "parameters": {
@@ -8847,6 +9136,16 @@
         "schema": {
           "default": false,
           "type": "boolean"
+        }
+      },
+      "CollectionIdPathParam": {
+        "name": "collection_id",
+        "description": "Collection Id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
