@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -45,6 +45,10 @@
     {
       "name": "Public",
       "description": "Public"
+    },
+    {
+      "name": "File Collections",
+      "description": "Collections of files associated with the entity"
     }
   ],
   "security": [
@@ -4318,7 +4322,7 @@
         "summary": "getFileCollections",
         "description": "Gets a list of collections that exist for an entity",
         "tags": [
-          "Collections"
+          "File Collections"
         ],
         "parameters": [
           {
@@ -4354,7 +4358,7 @@
         "summary": "createFileCollection",
         "description": "Creates a new file collection for the specified entity",
         "tags": [
-          "Collections"
+          "File Collections"
         ],
         "parameters": [
           {
@@ -4394,7 +4398,7 @@
         "summary": "getFileCollection",
         "description": "Gets a specific file collection by ID",
         "tags": [
-          "Collections"
+          "File Collections"
         ],
         "parameters": [
           {
@@ -4425,7 +4429,7 @@
         "summary": "updateFileCollection",
         "description": "Updates a specific file collection by ID",
         "tags": [
-          "Collections"
+          "File Collections"
         ],
         "parameters": [
           {
@@ -4466,7 +4470,7 @@
         "summary": "deleteFileCollection",
         "description": "Deletes a specific file collection by ID",
         "tags": [
-          "Collections"
+          "File Collections"
         ],
         "parameters": [
           {
