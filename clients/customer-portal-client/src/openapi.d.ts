@@ -3236,6 +3236,8 @@ declare namespace Components {
             ReadBy;
             reason?: /**
              * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
              * example:
              * Storing the feed-in record
              */
@@ -4819,10 +4821,12 @@ declare namespace Components {
         export type ReadingStatus = "valid" | "in-validation" | "implausible" | null | "";
         /**
          * The reason for recording the reading
+         * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+         *
          * example:
          * Storing the feed-in record
          */
-        export type Reason = "" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment";
+        export type Reason = "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment";
         export interface RegistrationIdentifier {
             /**
              * Name of the identifier/attribute
@@ -8709,6 +8713,29 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetResolvedSeamlessLink {
+        namespace Parameters {
+            export type AppId = string;
+            export type ExtensionId = string;
+            export type LinkId = string;
+        }
+        export interface QueryParameters {
+            app_id?: Parameters.AppId;
+            extension_id: Parameters.ExtensionId;
+            link_id: Parameters.LinkId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Resolved link
+                 */
+                link?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -9928,13 +9955,23 @@ export interface OperationMethods {
   /**
    * getResolvedExternalLink - getResolvedExternalLink
    * 
-   * Retrieves a resolved portal external link.
+   * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
    */
   'getResolvedExternalLink'(
     parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
+  /**
+   * getResolvedSeamlessLink - getResolvedSeamlessLink
+   * 
+   * Retrieves a resolved seamless portal link.
+   */
+  'getResolvedSeamlessLink'(
+    parameters?: Parameters<Paths.GetResolvedSeamlessLink.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetResolvedSeamlessLink.Responses.$200>
   /**
    * getPublicPortalConfig - getPublicPortalConfig
    * 
@@ -11001,13 +11038,25 @@ export interface PathsDictionary {
     /**
      * getResolvedExternalLink - getResolvedExternalLink
      * 
-     * Retrieves a resolved portal external link.
+     * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetResolvedExternalLink.QueryParameters & Paths.GetResolvedExternalLink.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
+  }
+  ['/v2/portal/resolve:seamless-link']: {
+    /**
+     * getResolvedSeamlessLink - getResolvedSeamlessLink
+     * 
+     * Retrieves a resolved seamless portal link.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetResolvedSeamlessLink.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetResolvedSeamlessLink.Responses.$200>
   }
   ['/v2/portal/public/portal/config']: {
     /**

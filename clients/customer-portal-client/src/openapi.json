@@ -1062,7 +1062,8 @@
       "get": {
         "operationId": "getResolvedExternalLink",
         "summary": "getResolvedExternalLink",
-        "description": "Retrieves a resolved portal external link.",
+        "deprecated": true,
+        "description": "Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.",
         "tags": [
           "ECP Admin",
           "ECP"
@@ -1108,6 +1109,77 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExternalLink"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/resolve:seamless-link": {
+      "get": {
+        "operationId": "getResolvedSeamlessLink",
+        "summary": "getResolvedSeamlessLink",
+        "description": "Retrieves a resolved seamless portal link.",
+        "tags": [
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the App if the Portal Extension was installed from an App"
+          },
+          {
+            "in": "query",
+            "name": "extension_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the Portal Extension"
+          },
+          {
+            "in": "query",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the Seamless Link"
+          }
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved portal seamless link retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "string",
+                      "description": "Resolved link"
+                    }
+                  }
                 }
               }
             }
@@ -11002,9 +11074,10 @@
         "type": "string",
         "nullable": true,
         "example": "Storing the feed-in record",
-        "description": "The reason for recording the reading",
+        "description": "The reason for recording the reading\nIf no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text\n",
         "enum": [
           "",
+          "regular",
           "irregular",
           "last",
           "first",

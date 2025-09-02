@@ -264,6 +264,7 @@
     "/v2/portal/resolve:external-link/{id}": {
       "get": {
         "operationId": "getResolvedExternalLink",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -279,6 +280,29 @@
             "in": "query",
             "name": "contactId",
             "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/resolve:seamless-link": {
+      "get": {
+        "operationId": "getResolvedSeamlessLink",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "extension_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "link_id",
+            "required": true
           }
         ],
         "responses": {}
