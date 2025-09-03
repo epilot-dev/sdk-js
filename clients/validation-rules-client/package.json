@@ -1,6 +1,6 @@
 {
   "name": "@epilot/validation-rules-client",
-  "version": "1.1.7",
+  "version": "1.1.9",
   "description": "API Client for epilot Validation Rules API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

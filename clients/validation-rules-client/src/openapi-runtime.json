@@ -59,6 +59,40 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/validation-rules/{ruleId}/used-by": {
+      "post": {
+        "operationId": "addUsedByReference",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeUsedByReference",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},

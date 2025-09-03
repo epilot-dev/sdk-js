@@ -302,6 +302,196 @@
           }
         }
       }
+    },
+    "/v1/validation-rules/{ruleId}/used-by": {
+      "post": {
+        "operationId": "addUsedByReference",
+        "summary": "Add a reference to the usedBy array",
+        "description": "Adds a single reference to the usedBy array of a validation rule",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsedBy"
+              }
+            }
+          },
+          "description": "The usedBy reference to add"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeUsedByReference",
+        "summary": "Remove a reference from the usedBy array",
+        "description": "Removes a specific reference from the usedBy array of a validation rule",
+        "tags": [
+          "Validation Rules"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsedBy"
+              }
+            }
+          },
+          "description": "The usedBy reference to remove"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1131,9 +1321,10 @@
               "fact": {
                 "type": "string",
                 "enum": [
-                  "numeric-value"
+                  "numeric-value",
+                  "total-length"
                 ],
-                "description": "The numeric value extracted from input"
+                "description": "The numeric value extracted from input; The amount of digits"
               },
               "operator": {
                 "type": "string",

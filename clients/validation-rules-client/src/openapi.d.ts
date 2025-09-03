@@ -43,9 +43,9 @@ declare namespace Components {
          */
         export type NumericFactCondition = /* Fact-based condition for numeric validation */ {
             /**
-             * The numeric value extracted from input
+             * The numeric value extracted from input; The amount of digits
              */
-            fact: "numeric-value";
+            fact: "numeric-value" | "total-length";
             /**
              * Numeric comparison operator
              */
@@ -469,6 +469,39 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AddUsedByReference {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
+    }
     namespace CreateValidationRule {
         export type RequestBody = Components.Schemas.CreateValidationRuleRequest;
         namespace Responses {
@@ -526,6 +559,39 @@ declare namespace Paths {
                 /**
                  * example:
                  * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
+    }
+    namespace RemoveUsedByReference {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
                  */
                 message?: string;
             }
@@ -618,6 +684,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>
+  /**
+   * addUsedByReference - Add a reference to the usedBy array
+   * 
+   * Adds a single reference to the usedBy array of a validation rule
+   */
+  'addUsedByReference'(
+    parameters?: Parameters<Paths.AddUsedByReference.PathParameters> | null,
+    data?: Paths.AddUsedByReference.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddUsedByReference.Responses.$200>
+  /**
+   * removeUsedByReference - Remove a reference from the usedBy array
+   * 
+   * Removes a specific reference from the usedBy array of a validation rule
+   */
+  'removeUsedByReference'(
+    parameters?: Parameters<Paths.RemoveUsedByReference.PathParameters> | null,
+    data?: Paths.RemoveUsedByReference.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -674,6 +760,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>
+  }
+  ['/v1/validation-rules/{ruleId}/used-by']: {
+    /**
+     * addUsedByReference - Add a reference to the usedBy array
+     * 
+     * Adds a single reference to the usedBy array of a validation rule
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddUsedByReference.PathParameters> | null,
+      data?: Paths.AddUsedByReference.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddUsedByReference.Responses.$200>
+    /**
+     * removeUsedByReference - Remove a reference from the usedBy array
+     * 
+     * Removes a specific reference from the usedBy array of a validation rule
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RemoveUsedByReference.PathParameters> | null,
+      data?: Paths.RemoveUsedByReference.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>
   }
 }
 
