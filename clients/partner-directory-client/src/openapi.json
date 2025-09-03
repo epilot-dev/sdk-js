@@ -3,12 +3,32 @@
   "info": {
     "title": "Partner API",
     "description": "Management of Partners in epilot",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "tags": [
     {
       "name": "partners",
-      "description": "Partners"
+      "x-displayName": "Partners",
+      "description": "Partner operations"
+    },
+    {
+      "name": "partner_schema",
+      "x-displayName": "Partner",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Partner\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "partners"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "partner_schema"
+      ]
     }
   ],
   "security": [
@@ -550,6 +570,9 @@
           },
           {
             "$ref": "#/components/schemas/AssignableEcpPlaceholder"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableGroup"
           }
         ]
       },
@@ -614,6 +637,10 @@
               "user_id": {
                 "type": "string",
                 "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "example@example.com"
               }
             }
           }
@@ -642,6 +669,26 @@
                 "$ref": "#/components/schemas/PartnerId"
               },
               "user_id": {
+                "type": "string",
+                "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "example@example.com"
+              }
+            }
+          }
+        ]
+      },
+      "AssignableGroup": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "group_id": {
                 "type": "string",
                 "example": "456"
               }
