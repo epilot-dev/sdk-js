@@ -14,7 +14,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/partners/{id}/reject": {
@@ -26,7 +27,8 @@
             "name": "id",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/partners/assignables:search": {
@@ -36,7 +38,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/partners/assignables:batchGet": {
@@ -46,7 +49,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/partner-directory/public/getPartnerByToken": {
@@ -58,7 +62,8 @@
             "name": "token",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/partner-directory/public/activate": {
@@ -75,7 +80,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/geolocation/text:search": {
@@ -85,7 +91,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v2/partners/{id}/invite": {
@@ -102,14 +109,10 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://partner-directory-api.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

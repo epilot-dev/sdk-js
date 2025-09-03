@@ -81,7 +81,7 @@ declare namespace Components {
              */
             relevance?: number;
         }
-        export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization | AssignableEcpPlaceholder;
+        export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization | AssignableEcpPlaceholder | AssignableGroup;
         export interface AssignableEcpPlaceholder {
             /**
              * example:
@@ -120,6 +120,40 @@ declare namespace Components {
              * Email of ECP Placeholder
              */
             email?: string;
+        }
+        export interface AssignableGroup {
+            /**
+             * example:
+             * user
+             */
+            type: string;
+            /**
+             * example:
+             * Example User
+             */
+            display_name: string;
+            image_uri?: {
+                /**
+                 * example:
+                 * https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                original: string; // uri
+                /**
+                 * example:
+                 * https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png
+                 */
+                thumbnail_32?: string; // uri
+            };
+            org_id: /**
+             * example:
+             * 123
+             */
+            OrganizationId;
+            /**
+             * example:
+             * 456
+             */
+            group_id?: string;
         }
         export interface AssignableOrganization {
             /**
@@ -210,6 +244,11 @@ declare namespace Components {
              * 456
              */
             user_id?: string;
+            /**
+             * example:
+             * example@example.com
+             */
+            email?: string;
         }
         export interface AssignableUser {
             /**
@@ -244,6 +283,11 @@ declare namespace Components {
              * 456
              */
             user_id?: string;
+            /**
+             * example:
+             * example@example.com
+             */
+            email?: string;
         }
         export interface BaseAssignable {
             /**
@@ -538,7 +582,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * approvePartner - approvePartner
@@ -737,12 +780,12 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type ActivatePartnerPayload = Components.Schemas.ActivatePartnerPayload;
 export type Address = Components.Schemas.Address;
 export type AddressGeolocation = Components.Schemas.AddressGeolocation;
 export type Assignable = Components.Schemas.Assignable;
 export type AssignableEcpPlaceholder = Components.Schemas.AssignableEcpPlaceholder;
+export type AssignableGroup = Components.Schemas.AssignableGroup;
 export type AssignableOrganization = Components.Schemas.AssignableOrganization;
 export type AssignablePartnerUser = Components.Schemas.AssignablePartnerUser;
 export type AssignableUser = Components.Schemas.AssignableUser;
