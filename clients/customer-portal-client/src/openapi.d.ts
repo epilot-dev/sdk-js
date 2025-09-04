@@ -9349,25 +9349,57 @@ declare namespace Paths {
     namespace UpdateCampaignPortalBlockStatus {
         namespace Parameters {
             export type CampaignId = string;
-            export type EntityId = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             campaign_id: Parameters.CampaignId;
-            entity_id: Parameters.EntityId;
         }
         export interface RequestBody {
             /**
              * The status to set for the campaign portal block
              */
             status: "seen" | "dismissed" | "clicked";
+            /**
+             * Array of entity references with their schemas
+             */
+            entity_refs: {
+                entity_id: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Schema of the entity (e.g., contact, contract, opportunity, order, meter)
+                 */
+                entity_schema: string;
+            }[];
         }
         namespace Responses {
             export interface $200 {
+                /**
+                 * Whether the operation completed successfully
+                 * example:
+                 * true
+                 */
+                success: boolean;
+                /**
+                 * Number of entities successfully updated
+                 * example:
+                 * 2
+                 */
+                updated: number;
+                /**
+                 * Number of entities that failed to update
+                 * example:
+                 * 0
+                 */
+                failed: number;
+                /**
+                 * Total number of entities processed
+                 * example:
+                 * 2
+                 */
+                total: number;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -10830,7 +10862,7 @@ export interface OperationMethods {
   /**
    * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
    * 
-   * Updates the status of a campaign portal block for a recipient.
+   * Updates the status of a campaign portal block for multiple recipients.
    */
   'updateCampaignPortalBlockStatus'(
     parameters?: Parameters<Paths.UpdateCampaignPortalBlockStatus.PathParameters> | null,
@@ -12051,11 +12083,11 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   }
-  ['/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status']: {
+  ['/v2/portal/campaign/{campaign_id}/entity:status']: {
     /**
      * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
      * 
-     * Updates the status of a campaign portal block for a recipient.
+     * Updates the status of a campaign portal block for multiple recipients.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateCampaignPortalBlockStatus.PathParameters> | null,

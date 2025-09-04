@@ -6507,11 +6507,11 @@
         }
       }
     },
-    "/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status": {
+    "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
         "summary": "Update Campaign Portal Block Status",
-        "description": "Updates the status of a campaign portal block for a recipient.",
+        "description": "Updates the status of a campaign portal block for multiple recipients.",
         "tags": [
           "ECP"
         ],
@@ -6529,15 +6529,6 @@
               "type": "string"
             },
             "description": "ID of the campaign"
-          },
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "description": "ID of the recipient entity"
           }
         ],
         "requestBody": {
@@ -6547,7 +6538,8 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "status"
+                  "status",
+                  "entity_refs"
                 ],
                 "properties": {
                   "status": {
@@ -6558,6 +6550,26 @@
                       "clicked"
                     ],
                     "description": "The status to set for the campaign portal block"
+                  },
+                  "entity_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "entity_id",
+                        "entity_schema"
+                      ],
+                      "properties": {
+                        "entity_id": {
+                          "$ref": "#/components/schemas/EntityId"
+                        },
+                        "entity_schema": {
+                          "type": "string",
+                          "description": "Schema of the entity (e.g., contact, contract, opportunity, order, meter)"
+                        }
+                      }
+                    },
+                    "description": "Array of entity references with their schemas"
                   }
                 }
               }
@@ -6570,7 +6582,35 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "updated",
+                    "failed",
+                    "total"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the operation completed successfully",
+                      "example": true
+                    },
+                    "updated": {
+                      "type": "integer",
+                      "description": "Number of entities successfully updated",
+                      "example": 2
+                    },
+                    "failed": {
+                      "type": "integer",
+                      "description": "Number of entities that failed to update",
+                      "example": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Total number of entities processed",
+                      "example": 2
+                    }
+                  }
                 }
               }
             }
@@ -12289,9 +12329,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

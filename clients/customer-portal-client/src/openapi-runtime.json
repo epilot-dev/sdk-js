@@ -1562,18 +1562,13 @@
         "responses": {}
       }
     },
-    "/v2/portal/campaign/{campaign_id}/entity/{entity_id}:status": {
+    "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
         "parameters": [
           {
             "in": "path",
             "name": "campaign_id",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "entity_id",
             "required": true
           }
         ],
