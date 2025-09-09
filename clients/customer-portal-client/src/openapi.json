@@ -9952,7 +9952,19 @@
         "type": "object",
         "properties": {
           "slug": {
-            "$ref": "#/components/schemas/EntitySlug"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntitySlug"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "Single entity schema slug or array of slugs"
           },
           "q": {
             "type": "string",
@@ -12325,6 +12337,19 @@
             }
           }
         ]
+      },
+      "JuiceSettings": {
+        "type": "object",
+        "properties": {
+          "is_dummy": {
+            "type": "boolean",
+            "description": "Whether the org is in dummy mode"
+          },
+          "is_canary": {
+            "type": "boolean",
+            "description": "Whether the org is in canary mode"
+          }
+        }
       }
     }
   },

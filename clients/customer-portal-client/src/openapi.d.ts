@@ -2090,12 +2090,28 @@ declare namespace Components {
             hits?: number;
         }
         export interface EntitySearchParams {
-            slug: /**
+            /**
+             * Single entity schema slug or array of slugs
+             */
+            slug: /* Single entity schema slug or array of slugs */ /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug | [
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug,
+                .../**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug[]
+            ];
             /**
              * Keyword search query
              * example:
@@ -3157,6 +3173,16 @@ declare namespace Components {
             action_label?: ActionLabel;
             slug?: string | null;
             rules?: Rule[] | null;
+        }
+        export interface JuiceSettings {
+            /**
+             * Whether the org is in dummy mode
+             */
+            is_dummy?: boolean;
+            /**
+             * Whether the org is in canary mode
+             */
+            is_canary?: boolean;
         }
         /**
          * The meter entity
@@ -12213,6 +12239,7 @@ export type Grant = Components.Schemas.Grant;
 export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
+export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
 export type MeterReading = Components.Schemas.MeterReading;
