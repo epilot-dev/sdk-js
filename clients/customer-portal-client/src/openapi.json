@@ -6764,7 +6764,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpsertPortalConfigV3"
+                "$ref": "#/components/schemas/PortalConfigV3"
               }
             }
           }
@@ -6839,6 +6839,50 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/configs": {
+      "get": {
+        "operationId": "listAllPortalConfigs",
+        "summary": "listAllPortalConfigs",
+        "description": "Retrieves all portal configurations.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All portal configs retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfigV3"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7916,6 +7960,11 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
+              },
+              "portal_sk_v3": {
+                "type": "string",
+                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "Key of the portal config"
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
@@ -9952,19 +10001,7 @@
         "type": "object",
         "properties": {
           "slug": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/EntitySlug"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EntitySlug"
-                },
-                "minItems": 1
-              }
-            ],
-            "description": "Single entity schema slug or array of slugs"
+            "$ref": "#/components/schemas/EntitySlug"
           },
           "q": {
             "type": "string",
@@ -11189,7 +11226,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10"
+            "example": "2022-10-10T00:00:00.000Z"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -11798,7 +11835,7 @@
           "blocks": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/Block"
+              "$ref": "#/components/schemas/BlockRequest"
             }
           },
           "order": {
@@ -12242,12 +12279,6 @@
           "is_dummy": {
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
-          },
-          "pages": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Page"
-            }
           }
         }
       },
@@ -12263,6 +12294,12 @@
             "properties": {
               "origin": {
                 "$ref": "#/components/schemas/Origin"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PageRequest"
+                }
               }
             }
           }
@@ -12270,6 +12307,9 @@
       },
       "PortalConfigV3": {
         "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
+          },
           {
             "$ref": "#/components/schemas/CommonConfigAttributesV3"
           },
@@ -12279,6 +12319,11 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
+              },
+              "portal_sk_v3": {
+                "type": "string",
+                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "Key of the portal config"
               },
               "organization_id": {
                 "type": "string",
@@ -12333,23 +12378,16 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderPublicConfig"
                 }
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Page"
+                }
               }
             }
           }
         ]
-      },
-      "JuiceSettings": {
-        "type": "object",
-        "properties": {
-          "is_dummy": {
-            "type": "boolean",
-            "description": "Whether the org is in dummy mode"
-          },
-          "is_canary": {
-            "type": "boolean",
-            "description": "Whether the org is in canary mode"
-          }
-        }
       }
     }
   },

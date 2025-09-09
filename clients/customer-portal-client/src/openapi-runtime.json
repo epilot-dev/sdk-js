@@ -1633,6 +1633,12 @@
         ],
         "responses": {}
       }
+    },
+    "/v3/portal/configs": {
+      "get": {
+        "operationId": "listAllPortalConfigs",
+        "responses": {}
+      }
     }
   },
   "components": {
