@@ -360,6 +360,11 @@ declare namespace Components {
              */
             email_template_id: string;
             /**
+             * If true then include unsubscribe link in the email body
+             *
+             */
+            must_include_unsubscribe_link?: boolean;
+            /**
              * List of entity ids to use as recipients
              * example:
              * [
@@ -385,6 +390,11 @@ declare namespace Components {
              * 511ceb90-f738-47aa-8b1e-915ace0ae13c
              */
             email_template_id: string;
+            /**
+             * If true then include unsubscribe link in the email body
+             *
+             */
+            must_include_unsubscribe_link?: boolean;
             /**
              * Entity search query to select recipients
              * example:
@@ -969,7 +979,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * saveTemplate - saveTemplate
@@ -1135,7 +1144,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type ApproveAction = Components.Schemas.ApproveAction;
 export type ApprovedAt = Components.Schemas.ApprovedAt;
