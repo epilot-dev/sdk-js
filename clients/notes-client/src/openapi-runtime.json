@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/v1/note": {
       "post": {
@@ -146,12 +151,61 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/note/{id}/reaction": {
+      "post": {
+        "operationId": "addNoteReaction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/reaction/{emoji_shortcode}": {
+      "delete": {
+        "operationId": "removeNoteReaction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "emoji_shortcode",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/reactions/toggle": {
+      "post": {
+        "operationId": "toggleNoteReactions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

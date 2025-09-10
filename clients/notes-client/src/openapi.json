@@ -1,10 +1,21 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.2.0",
+    "version": "2.3.0",
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature"
   },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    },
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ],
   "tags": [
     {
       "name": "Notes"
@@ -385,6 +396,136 @@
                   "items": {
                     "$ref": "#/components/schemas/NoteContexts"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reaction": {
+      "post": {
+        "operationId": "addNoteReaction",
+        "summary": "addNoteReaction",
+        "description": "Adds an emoji reaction to a note",
+        "tags": [
+          "Reactions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to add reaction to",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to add reaction to"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reaction/{emoji_shortcode}": {
+      "delete": {
+        "operationId": "removeNoteReaction",
+        "summary": "removeNoteReaction",
+        "description": "Removes an emoji reaction from a note",
+        "tags": [
+          "Reactions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to remove reaction from",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to remove reaction from"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "emoji_shortcode",
+            "description": "The emoji to remove from the note",
+            "schema": {
+              "type": "string",
+              "description": "The emoji to remove from the note"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reactions/toggle": {
+      "post": {
+        "operationId": "toggleNoteReactions",
+        "summary": "toggleNoteReactions",
+        "description": "Toggles multiple emoji reactions on a note. If a user has already reacted with an emoji, it removes the reaction. If a user hasn't reacted with an emoji, it adds the reaction.",
+        "tags": [
+          "Reactions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to toggle reactions on",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to toggle reactions on"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleReactionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
                 }
               }
             }
@@ -1237,15 +1378,44 @@
           "name"
         ],
         "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
+      },
+      "ReactionRequest": {
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The emoji identifier (e.g., 'thumbs-up', 'heart', 'thinking-face')",
+            "example": "thumbs-up"
+          }
+        },
+        "required": [
+          "emoji"
+        ]
+      },
+      "ToggleReactionsRequest": {
+        "type": "object",
+        "properties": {
+          "emojis": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "minItems": 1,
+            "description": "Array of emoji identifiers to toggle (e.g., ['thumbs-up', 'heart', 'thinking-face'])",
+            "example": [
+              "thumbs-up",
+              "heart"
+            ]
+          }
+        },
+        "required": [
+          "emojis"
+        ]
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://notes.sls.epilot.io"
-    },
-    {
-      "url": "https://notes.sls.epilot.io"
-    }
-  ]
+  }
 }

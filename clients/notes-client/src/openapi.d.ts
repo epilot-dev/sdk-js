@@ -512,6 +512,28 @@ declare namespace Components {
              */
             results: /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ NoteEntity[];
         }
+        export interface ReactionRequest {
+            /**
+             * The emoji identifier (e.g., 'thumbs-up', 'heart', 'thinking-face')
+             * example:
+             * thumbs-up
+             */
+            emoji: string;
+        }
+        export interface ToggleReactionsRequest {
+            /**
+             * Array of emoji identifiers to toggle (e.g., ['thumbs-up', 'heart', 'thinking-face'])
+             * example:
+             * [
+             *   "thumbs-up",
+             *   "heart"
+             * ]
+             */
+            emojis: [
+                string,
+                ...string[]
+            ];
+        }
         /**
          * Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data
          */
@@ -524,6 +546,21 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AddNoteReaction {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to add reaction to
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to add reaction to */ Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ReactionRequest;
+        namespace Responses {
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
+        }
+    }
     namespace CreateNote {
         export type RequestBody = Components.Schemas.NotePostRequestBody;
         namespace Responses {
@@ -643,10 +680,44 @@ declare namespace Paths {
             }
         }
     }
+    namespace RemoveNoteReaction {
+        namespace Parameters {
+            /**
+             * The emoji to remove from the note
+             */
+            export type EmojiShortcode = string;
+            /**
+             * The Entity ID of the Note entry to remove reaction from
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to remove reaction from */ Parameters.Id;
+            emoji_shortcode: /* The emoji to remove from the note */ Parameters.EmojiShortcode;
+        }
+        namespace Responses {
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
+        }
+    }
     namespace SearchNotesByContext {
         export type RequestBody = Components.Schemas.NoteSearchByContextRequestBody;
         namespace Responses {
             export type $200 = Components.Schemas.NotesSearchRequestResponse;
+        }
+    }
+    namespace ToggleNoteReactions {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to toggle reactions on
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to toggle reactions on */ Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.ToggleReactionsRequest;
+        namespace Responses {
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
     }
     namespace UpdateNote {
@@ -758,6 +829,36 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNoteContexts.Responses.$200>
+  /**
+   * addNoteReaction - addNoteReaction
+   * 
+   * Adds an emoji reaction to a note
+   */
+  'addNoteReaction'(
+    parameters?: Parameters<Paths.AddNoteReaction.PathParameters> | null,
+    data?: Paths.AddNoteReaction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddNoteReaction.Responses.$200>
+  /**
+   * removeNoteReaction - removeNoteReaction
+   * 
+   * Removes an emoji reaction from a note
+   */
+  'removeNoteReaction'(
+    parameters?: Parameters<Paths.RemoveNoteReaction.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveNoteReaction.Responses.$200>
+  /**
+   * toggleNoteReactions - toggleNoteReactions
+   * 
+   * Toggles multiple emoji reactions on a note. If a user has already reacted with an emoji, it removes the reaction. If a user hasn't reacted with an emoji, it adds the reaction.
+   */
+  'toggleNoteReactions'(
+    parameters?: Parameters<Paths.ToggleNoteReactions.PathParameters> | null,
+    data?: Paths.ToggleNoteReactions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ToggleNoteReactions.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -864,6 +965,42 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetNoteContexts.Responses.$200>
   }
+  ['/v1/note/{id}/reaction']: {
+    /**
+     * addNoteReaction - addNoteReaction
+     * 
+     * Adds an emoji reaction to a note
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddNoteReaction.PathParameters> | null,
+      data?: Paths.AddNoteReaction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddNoteReaction.Responses.$200>
+  }
+  ['/v1/note/{id}/reaction/{emoji_shortcode}']: {
+    /**
+     * removeNoteReaction - removeNoteReaction
+     * 
+     * Removes an emoji reaction from a note
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RemoveNoteReaction.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveNoteReaction.Responses.$200>
+  }
+  ['/v1/note/{id}/reactions/toggle']: {
+    /**
+     * toggleNoteReactions - toggleNoteReactions
+     * 
+     * Toggles multiple emoji reactions on a note. If a user has already reacted with an emoji, it removes the reaction. If a user hasn't reacted with an emoji, it adds the reaction.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ToggleNoteReactions.PathParameters> | null,
+      data?: Paths.ToggleNoteReactions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ToggleNoteReactions.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -880,4 +1017,6 @@ export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
 export type NotePutRequestBody = Components.Schemas.NotePutRequestBody;
 export type NoteSearchByContextRequestBody = Components.Schemas.NoteSearchByContextRequestBody;
 export type NotesSearchRequestResponse = Components.Schemas.NotesSearchRequestResponse;
+export type ReactionRequest = Components.Schemas.ReactionRequest;
+export type ToggleReactionsRequest = Components.Schemas.ToggleReactionsRequest;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
