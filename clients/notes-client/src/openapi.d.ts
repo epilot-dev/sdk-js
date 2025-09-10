@@ -529,10 +529,7 @@ declare namespace Components {
              *   "heart"
              * ]
              */
-            emojis: [
-                string,
-                ...string[]
-            ];
+            emojis: string[];
         }
         /**
          * Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data

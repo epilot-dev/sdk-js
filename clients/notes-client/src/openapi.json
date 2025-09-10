@@ -1404,7 +1404,6 @@
               "minLength": 1,
               "maxLength": 50
             },
-            "minItems": 1,
             "description": "Array of emoji identifiers to toggle (e.g., ['thumbs-up', 'heart', 'thinking-face'])",
             "example": [
               "thumbs-up",
