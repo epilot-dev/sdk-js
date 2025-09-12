@@ -31,19 +31,19 @@ declare namespace Components {
          * example:
          * contact
          */
-        Schemas.EntitySlug;
+        Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         /**
          * URL-friendly identifier for the entity schema
          * example:
          * price
          */
-        export type EntitySlugPathPriceParam = string;
+        export type EntitySlugPathPriceParam = string; // ^[a-zA-Z0-9_-]+$
         export type ExcludeSchemasQueryParam = /**
          * URL-friendly identifier for the entity schema
          * example:
          * contact
          */
-        Schemas.EntitySlug[];
+        Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
         export type FillActivityQueryParam = boolean;
         export type FromPageQueryParam = number;
         export type HydrateEntitiesQueryParam = boolean;
@@ -54,7 +54,7 @@ declare namespace Components {
          * example:
          * contact
          */
-        Schemas.EntitySlug[];
+        Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
         export type SavedViewIdPathParam = /* Generated uuid for a saved view */ Schemas.SavedViewId /* uuid */;
         export type TaxonomyClassificationSlugPathParam = string;
         export type TaxonomySlugPathParam = string;
@@ -70,7 +70,7 @@ declare namespace Components {
          * example:
          * price
          */
-        Parameters.EntitySlugPathPriceParam;
+        Parameters.EntitySlugPathPriceParam /* ^[a-zA-Z0-9_-]+$ */;
         TaxonomySlugPathParam?: Parameters.TaxonomySlugPathParam;
         TaxonomyClassificationSlugPathParam?: Parameters.TaxonomyClassificationSlugPathParam;
         SavedViewIdPathParam?: Parameters.SavedViewIdPathParam;
@@ -615,7 +615,7 @@ declare namespace Components {
              */
             DefaultAddressFields;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -631,7 +631,7 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
         /**
          * Automation entity
          */
@@ -1009,7 +1009,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             /**
              * Title of entity
              */
@@ -2164,7 +2164,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             /**
              * Title of entity
              */
@@ -2631,7 +2631,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             /**
              * Title of entity
              */
@@ -2803,7 +2803,7 @@ declare namespace Components {
                  * example:
                  * contact
                  */
-                EntitySlug;
+                EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             };
             /**
              * example:
@@ -2860,7 +2860,7 @@ declare namespace Components {
                  * example:
                  * contact
                  */
-                EntitySlug;
+                EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
                 /**
                  * Title of entity
                  */
@@ -3022,7 +3022,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             version?: number;
             blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
@@ -3402,7 +3402,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             version?: number;
             blueprint?: /* Reference to blueprint */ BlueprintEntityId /* uuid */;
             /**
@@ -3930,7 +3930,7 @@ declare namespace Components {
          * example:
          * contact
          */
-        export type EntitySlug = string;
+        export type EntitySlug = string; // ^[a-zA-Z0-9_-]+$
         export interface EntityTableFilterOption {
             /**
              * The type of filter option
@@ -4603,7 +4603,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             /**
              * Title of entity
              */
@@ -6504,6 +6504,147 @@ declare namespace Components {
             type: "phone";
         }
         /**
+         * Portal access configuration
+         */
+        export interface PortalAccessAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type: "portal_access";
+        }
+        /**
          * Price component
          */
         export interface PriceComponentAttribute {
@@ -7039,7 +7180,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug[];
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             /**
              * When enable_relation_tags is set to true the user will be able to set tags(labels) in each relation item.
              */
@@ -7107,7 +7248,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             /**
              * Title of entity
              */
@@ -7297,7 +7438,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug[];
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             /**
              * User-friendly identifier for the saved view
              * example:
@@ -7374,7 +7515,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug[];
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             /**
              * User-friendly identifier for the saved view
              * example:
@@ -7444,7 +7585,7 @@ declare namespace Components {
              * example:
              * contact
              */
-            EntitySlug[];
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             /**
              * User-friendly identifier for the saved view
              * example:
@@ -8870,7 +9011,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -8946,7 +9087,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface QueryParameters {
             input?: Parameters.Input;
@@ -9146,7 +9287,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type Validate = boolean;
         }
         export interface PathParameters {
@@ -9350,6 +9491,8 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.TaxonomyClassification;
         namespace Responses {
             export type $201 = Components.Schemas.TaxonomyClassification;
+            export interface $409 {
+            }
             export type $429 = /**
              * A generic error returned by the API
              * example:
@@ -9376,7 +9519,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -9417,7 +9560,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -9480,7 +9623,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -9729,7 +9872,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -9870,7 +10013,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type StartDate = string; // date-time
             /**
              * example:
@@ -9953,7 +10096,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -10030,7 +10173,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10349,14 +10492,14 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10385,7 +10528,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
@@ -10395,14 +10538,14 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10460,7 +10603,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10494,7 +10637,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             export type Fields = /**
              * List of entity fields to include or exclude in the response
              *
@@ -10522,7 +10665,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
             export type Mode = "direct" | "reverse" | "both";
             export type Size = number;
             export type Slug = /**
@@ -10530,7 +10673,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10587,7 +10730,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10671,7 +10814,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10764,7 +10907,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type VersionsFrom = number;
             export type VersionsSize = number;
         }
@@ -10951,7 +11094,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11011,7 +11154,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type Sort = string;
         }
         export interface QueryParameters {
@@ -11069,7 +11212,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type TaxonomySlug = string;
         }
         export interface PathParameters {
@@ -11103,7 +11246,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type Validate = boolean;
         }
         export interface PathParameters {
@@ -11226,7 +11369,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11336,7 +11479,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -11425,7 +11568,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11473,7 +11616,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -11701,7 +11844,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type Validate = boolean;
         }
         export interface PathParameters {
@@ -11818,7 +11961,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11900,7 +12043,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug;
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
             export type Strict = boolean;
             export type Validate = boolean;
         }
@@ -12078,7 +12221,7 @@ declare namespace Paths {
              * example:
              * price
              */
-            export type Slug = string;
+            export type Slug = string; // ^[a-zA-Z0-9_-]+$
         }
         export interface PathParameters {
             slug: /**
@@ -12086,7 +12229,7 @@ declare namespace Paths {
              * example:
              * price
              */
-            Parameters.Slug;
+            Parameters.Slug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export type RequestBody = /**
          * example:
@@ -12145,7 +12288,7 @@ declare namespace Paths {
              * example:
              * price
              */
-            export type Slug = string;
+            export type Slug = string; // ^[a-zA-Z0-9_-]+$
         }
         export interface PathParameters {
             slug: /**
@@ -12153,7 +12296,7 @@ declare namespace Paths {
              * example:
              * price
              */
-            Parameters.Slug;
+            Parameters.Slug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export type RequestBody = /**
          * example:
@@ -12212,7 +12355,7 @@ declare namespace Paths {
              * example:
              * contact
              */
-            Components.Schemas.EntitySlug[];
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
         }
         namespace Responses {
             export interface $201 {
@@ -14595,6 +14738,7 @@ export type PartnerStatusAttribute = Components.Schemas.PartnerStatusAttribute;
 export type PaymentAttribute = Components.Schemas.PaymentAttribute;
 export type PaymentMethodRelationAttribute = Components.Schemas.PaymentMethodRelationAttribute;
 export type PhoneAttribute = Components.Schemas.PhoneAttribute;
+export type PortalAccessAttribute = Components.Schemas.PortalAccessAttribute;
 export type PriceComponentAttribute = Components.Schemas.PriceComponentAttribute;
 export type PurposeAttribute = Components.Schemas.PurposeAttribute;
 export type RedirectEntityView = Components.Schemas.RedirectEntityView;
