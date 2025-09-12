@@ -23,7 +23,6 @@ declare namespace Components {
          */
         Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
         export type AsyncOperationQueryParam = boolean;
-        export type CollectionIdPathParam = string; // uuid
         export type DryRunQueryParam = boolean;
         export type EntityIdPathParam = Schemas.EntityId /* uuid */;
         export type EntityRelationsModeQueryParam = "direct" | "reverse" | "both";
@@ -76,7 +75,6 @@ declare namespace Components {
         TaxonomyClassificationSlugPathParam?: Parameters.TaxonomyClassificationSlugPathParam;
         SavedViewIdPathParam?: Parameters.SavedViewIdPathParam;
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
-        CollectionIdPathParam?: Parameters.CollectionIdPathParam /* uuid */;
     }
     export interface QueryParameters {
         TaxonomySlugQueryParam?: Parameters.TaxonomySlugQueryParam;
@@ -2658,6 +2656,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
         }
         export interface EntityListParams {
+            /**
+             * Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)
+             * example:
+             * status:active
+             */
+            q?: string;
             filter: /**
              * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
              * example:
@@ -2741,6 +2745,10 @@ declare namespace Components {
              *
              */
             EntitySearchIncludeDeletedParam;
+            /**
+             * Adds a `_score` number field to results that can be used to rank by match score
+             */
+            include_scores?: boolean;
             highlight?: any;
             /**
              * A TTL (in seconds) that specifies how long the context should be maintained.
@@ -3699,6 +3707,10 @@ declare namespace Components {
              */
             EntitySearchIncludeDeletedParam;
             /**
+             * Adds a `_score` number field to results that can be used to rank by match score
+             */
+            include_scores?: boolean;
+            /**
              * A TTL (in seconds) that specifies how long the context should be maintained.
              * Defaults to 30 seconds; configurable up to 60 seconds to prevent abuse.
              * A value of 0 can be provided the close the context after the query.
@@ -4280,95 +4292,6 @@ declare namespace Components {
              */
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
-        }
-        export interface FileCollectionAttributes {
-            /**
-             * Name of the file collection
-             */
-            name?: string;
-            /**
-             * Whether the collection is starred
-             */
-            starred?: boolean;
-            /**
-             * Array of file IDs in this collection
-             */
-            files?: string /* uuid */[];
-        }
-        /**
-         * Request body for creating a file collection
-         */
-        export interface FileCollectionCreateRequest {
-            /**
-             * Name of the file collection
-             */
-            name: string;
-            /**
-             * Whether the collection is starred
-             */
-            starred: boolean;
-            /**
-             * Array of file IDs in this collection
-             */
-            files: string /* uuid */[];
-        }
-        /**
-         * Generated uuid for a file collection
-         */
-        export type FileCollectionId = string; // uuid
-        /**
-         * A file collection with identifiers and timestamps
-         */
-        export interface FileCollectionItem {
-            id: /* Generated uuid for a file collection */ FileCollectionId /* uuid */;
-            /**
-             * Organization ID
-             * example:
-             * 123
-             */
-            orgId: string;
-            entityId: EntityId /* uuid */;
-            /**
-             * Logical type for this item (e.g. "collection")
-             * example:
-             * collection
-             */
-            type: string;
-            /**
-             * example:
-             * MyCollectionOfImportantFiles
-             */
-            name: string;
-            entity_id: EntityId /* uuid */;
-            /**
-             * example:
-             * false
-             */
-            starred: boolean;
-            /**
-             * Array of file IDs in this collection
-             * example:
-             * [
-             *   "123e4567-e89b-12d3-a456-426614174000"
-             * ]
-             */
-            files: string /* uuid */[];
-            /**
-             * User ID who created the collection
-             * example:
-             * 17622
-             */
-            created_by: string;
-            /**
-             * example:
-             * 2025-08-20T12:01:00Z
-             */
-            created_at: string; // date-time
-            /**
-             * example:
-             * 2025-08-20T12:01:00Z
-             */
-            updated_at: string; // date-time
         }
         export interface GenerateEntityTableAIFiltersRequest {
             /**
@@ -9331,27 +9254,6 @@ declare namespace Paths {
             Components.Responses.TooManyRequestsError;
         }
     }
-    namespace CreateFileCollection {
-        namespace Parameters {
-            export type Id = Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export type RequestBody = /* Request body for creating a file collection */ Components.Schemas.FileCollectionCreateRequest;
-        namespace Responses {
-            export type $201 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
     namespace CreateSavedView {
         export type RequestBody = /* A saved entity view */ Components.Schemas.SavedView;
         namespace Responses {
@@ -9496,29 +9398,6 @@ declare namespace Paths {
              * }
              */
             Components.Responses.TooManyRequestsError;
-        }
-    }
-    namespace DeleteFileCollection {
-        namespace Parameters {
-            export type CollectionId = string; // uuid
-            export type Id = Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            collection_id: Parameters.CollectionId /* uuid */;
-        }
-        namespace Responses {
-            export interface $200 {
-            }
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
         }
     }
     namespace DeleteRelation {
@@ -10132,50 +10011,6 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EntityItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace GetFileCollection {
-        namespace Parameters {
-            export type CollectionId = string; // uuid
-            export type Id = Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            collection_id: Parameters.CollectionId /* uuid */;
-        }
-        namespace Responses {
-            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace GetFileCollections {
-        namespace Parameters {
-            export type Id = Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        namespace Responses {
-            export interface $200 {
-                results?: /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
-            }
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -11966,29 +11801,6 @@ declare namespace Paths {
             export type $422 = /* Validation result for a failed validation */ Components.Schemas.EntityValidationV2ResultError;
         }
     }
-    namespace UpdateFileCollection {
-        namespace Parameters {
-            export type CollectionId = string; // uuid
-            export type Id = Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            collection_id: Parameters.CollectionId /* uuid */;
-        }
-        export type RequestBody = Components.Schemas.FileCollectionAttributes;
-        namespace Responses {
-            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
     namespace UpdateRelation {
         namespace Parameters {
             export type ActivityId = /**
@@ -13493,56 +13305,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchemaGroupHeadline.Responses.$200>
-  /**
-   * getFileCollections - getFileCollections
-   * 
-   * Gets a list of collections that exist for an entity
-   */
-  'getFileCollections'(
-    parameters?: Parameters<Paths.GetFileCollections.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFileCollections.Responses.$200>
-  /**
-   * createFileCollection - createFileCollection
-   * 
-   * Creates a new file collection for the specified entity
-   */
-  'createFileCollection'(
-    parameters?: Parameters<Paths.CreateFileCollection.PathParameters> | null,
-    data?: Paths.CreateFileCollection.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateFileCollection.Responses.$201>
-  /**
-   * getFileCollection - getFileCollection
-   * 
-   * Gets a specific file collection by ID
-   */
-  'getFileCollection'(
-    parameters?: Parameters<Paths.GetFileCollection.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFileCollection.Responses.$200>
-  /**
-   * updateFileCollection - updateFileCollection
-   * 
-   * Updates a specific file collection by ID
-   */
-  'updateFileCollection'(
-    parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
-    data?: Paths.UpdateFileCollection.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateFileCollection.Responses.$200>
-  /**
-   * deleteFileCollection - deleteFileCollection
-   * 
-   * Deletes a specific file collection by ID
-   */
-  'deleteFileCollection'(
-    parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -14740,60 +14502,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchemaGroupHeadline.Responses.$200>
   }
-  ['/v1/entity/{id}/collections']: {
-    /**
-     * getFileCollections - getFileCollections
-     * 
-     * Gets a list of collections that exist for an entity
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFileCollections.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFileCollections.Responses.$200>
-    /**
-     * createFileCollection - createFileCollection
-     * 
-     * Creates a new file collection for the specified entity
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateFileCollection.PathParameters> | null,
-      data?: Paths.CreateFileCollection.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateFileCollection.Responses.$201>
-  }
-  ['/v1/entity/{id}/collections/{collection_id}']: {
-    /**
-     * getFileCollection - getFileCollection
-     * 
-     * Gets a specific file collection by ID
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFileCollection.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFileCollection.Responses.$200>
-    /**
-     * updateFileCollection - updateFileCollection
-     * 
-     * Updates a specific file collection by ID
-     */
-    'put'(
-      parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
-      data?: Paths.UpdateFileCollection.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateFileCollection.Responses.$200>
-    /**
-     * deleteFileCollection - deleteFileCollection
-     * 
-     * Deletes a specific file collection by ID
-     */
-    'delete'(
-      parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
-  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -14862,10 +14570,6 @@ export type ErrorObject = Components.Schemas.ErrorObject;
 export type ExportJobId = Components.Schemas.ExportJobId;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type FileAttribute = Components.Schemas.FileAttribute;
-export type FileCollectionAttributes = Components.Schemas.FileCollectionAttributes;
-export type FileCollectionCreateRequest = Components.Schemas.FileCollectionCreateRequest;
-export type FileCollectionId = Components.Schemas.FileCollectionId;
-export type FileCollectionItem = Components.Schemas.FileCollectionItem;
 export type GenerateEntityTableAIFiltersRequest = Components.Schemas.GenerateEntityTableAIFiltersRequest;
 export type GenerateEntityTableAIFiltersResponse = Components.Schemas.GenerateEntityTableAIFiltersResponse;
 export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount;

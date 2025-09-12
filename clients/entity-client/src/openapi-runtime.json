@@ -1421,76 +1421,6 @@
         ],
         "responses": {}
       }
-    },
-    "/v1/entity/{id}/collections": {
-      "get": {
-        "operationId": "getFileCollections",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntityIdPathParam"
-          }
-        ],
-        "responses": {}
-      },
-      "post": {
-        "operationId": "createFileCollection",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntityIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/entity/{id}/collections/{collection_id}": {
-      "get": {
-        "operationId": "getFileCollection",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntityIdPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/CollectionIdPathParam"
-          }
-        ],
-        "responses": {}
-      },
-      "put": {
-        "operationId": "updateFileCollection",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntityIdPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/CollectionIdPathParam"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteFileCollection",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/EntityIdPathParam"
-          },
-          {
-            "$ref": "#/components/parameters/CollectionIdPathParam"
-          }
-        ],
-        "responses": {}
-      }
     }
   },
   "components": {
@@ -1598,11 +1528,6 @@
       "ValidateEntityQueryParam": {
         "name": "validate",
         "in": "query"
-      },
-      "CollectionIdPathParam": {
-        "name": "collection_id",
-        "in": "path",
-        "required": true
       }
     },
     "responses": {
