@@ -359,64 +359,45 @@ declare namespace Components {
          * A file folder with identifiers and timestamps
          */
         export interface FileFolderItem {
-            id: /* Generated uuid for a file folder */ FileFolderId /* uuid */;
             /**
-             * Organization ID
+             * Full slug for the folder
              * example:
-             * 123
+             * _system_files_collection_entity-123:documents
              */
-            orgId: string;
-            entityId: /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            EntityId;
+            slug?: string;
             /**
-             * Logical type for this item (e.g. "folder")
+             * Display name of the folder
              * example:
-             * folder
-             */
-            type: string;
-            /**
-             * example:
-             * MyFolderOfImportantFiles
+             * Documents
              */
             name: string;
-            entity_id: /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            EntityId;
+            id?: /* Generated uuid for a file folder */ FileFolderId /* uuid */;
             /**
-             * URL-friendly identifier for the folder
-             * example:
-             * documents
-             */
-            slug: string;
-            /**
-             * Array of file IDs in this folder
+             * Array of parent folder slugs, empty array if top-level folder
              * example:
              * [
-             *   "123e4567-e89b-12d3-a456-426614174000"
+             *   "_system_files_collection_entity-123"
              * ]
              */
-            files: string /* uuid */[];
+            parents?: string[];
             /**
-             * User ID who created the folder
+             * Whether the folder is starred / favorited
              * example:
-             * 17622
+             * false
              */
-            created_by: string;
+            starred?: boolean;
             /**
+             * Timestamp when the folder was created
              * example:
-             * 2025-08-20T12:01:00Z
+             * 2024-01-01T12:00:00Z
              */
-            created_at: string; // date-time
+            created_at?: string; // date-time
             /**
+             * Timestamp when the folder was last updated
              * example:
-             * 2025-08-20T12:01:00Z
+             * 2024-01-02T12:00:00Z
              */
-            updated_at: string; // date-time
+            updated_at?: string; // date-time
         }
         export interface FileItem {
             s3ref?: S3Ref;
@@ -1032,9 +1013,7 @@ declare namespace Paths {
             parents?: Parameters.Parents;
         }
         namespace Responses {
-            export interface $200 {
-                results?: /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
-            }
+            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
             export type $404 = /**
              * A generic error returned by the API
              * example:
