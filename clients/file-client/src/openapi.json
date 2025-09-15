@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "0.2.1",
-    "description": "Upload and manage epilot Files"
+    "version": "1.0.0",
+    "description": "Upload and manage epilot Files\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
     {
@@ -30,6 +30,10 @@
       "name": "file_schema",
       "x-displayName": "File",
       "description": "<SchemaDefinition schemaRef=\"#/components/schemas/FileEntity\" />\n"
+    },
+    {
+      "name": "File Folders",
+      "description": "Folder management for organizing files within entities"
     }
   ],
   "x-tagGroups": [
@@ -40,6 +44,7 @@
         "Preview",
         "Public Links",
         "Session",
+        "File Folders",
         "Deprecated"
       ]
     },
@@ -1076,6 +1081,253 @@
                       "type": "string",
                       "format": "url",
                       "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "File entity not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity/{id}/folders": {
+      "get": {
+        "operationId": "getFileFolders",
+        "summary": "getFileFolders",
+        "description": "Gets a list of folders that exist for an entity",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "parents",
+            "in": "query",
+            "description": "Optional array of parent folder slugs to filter by",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of folders for the entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FileFolderItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFileFolder",
+        "summary": "createFileFolder",
+        "description": "Creates a new file folder for the specified entity",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileFolderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File folder created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileFolderItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{id}/folders/{folderSlug}": {
+      "put": {
+        "operationId": "updateFileFolder",
+        "summary": "updateFileFolder",
+        "description": "Updates a specific file folder by slug",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug identifier for the folder",
+            "schema": {
+              "type": "string",
+              "example": "documents"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileFolderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File folder updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileFolderItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFileFolder",
+        "summary": "deleteFileFolder",
+        "description": "Deletes a specific file folder by slug",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug identifier for the folder",
+            "schema": {
+              "type": "string",
+              "example": "documents"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File folder deleted successfully"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{id}/folders/{folderSlug}/files": {
+      "get": {
+        "operationId": "getFilesInFolder",
+        "summary": "getFilesInFolder",
+        "description": "Gets all files within a specific folder for an entity",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug identifier for the folder",
+            "schema": {
+              "type": "string",
+              "example": "documents"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of files in the folder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileEntity"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User must have permission to view this entity to access its files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "User must have permission to view this entity to access its files"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or folder not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Entity not found"
                     }
                   }
                 }
@@ -1648,9 +1900,148 @@
             }
           }
         }
+      },
+      "FileFolderId": {
+        "description": "Generated uuid for a file folder",
+        "type": "string",
+        "format": "uuid"
+      },
+      "FileFolderItem": {
+        "description": "A file folder with identifiers and timestamps",
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FileFolderId"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "123"
+          },
+          "entityId": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "type": {
+            "type": "string",
+            "description": "Logical type for this item (e.g. \"folder\")",
+            "example": "folder"
+          },
+          "name": {
+            "type": "string",
+            "example": "MyFolderOfImportantFiles"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL-friendly identifier for the folder",
+            "example": "documents"
+          },
+          "files": {
+            "type": "array",
+            "description": "Array of file IDs in this folder",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the folder",
+            "example": "17622"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-20T12:01:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-08-20T12:01:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "orgId",
+          "entityId",
+          "type",
+          "name",
+          "entity_id",
+          "slug",
+          "files",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ErrorObject": {
+        "description": "A generic error returned by the API",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code of the error",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message",
+            "example": "Bad Request"
+          }
+        }
+      },
+      "FileFolderAttributes": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the file folder"
+          },
+          "parent": {
+            "type": "string",
+            "description": "Optional parent folder slug. If not provided, the folder will be created at the top level"
+          },
+          "files": {
+            "type": "array",
+            "description": "Array of file IDs in this folder",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileFolderCreateRequest": {
+        "description": "Request body for creating a file folder",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileFolderAttributes"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ]
+          }
+        ]
       }
     },
     "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "description": "Entity id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/EntityId"
+        }
+      },
       "StrictQueryParam": {
         "name": "strict",
         "in": "query",
@@ -1698,6 +2089,28 @@
         "schema": {
           "type": "boolean",
           "default": true
+        }
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "description": "The requested resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 404,
+                    "error": "Not Found"
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     }
