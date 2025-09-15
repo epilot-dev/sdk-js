@@ -1971,19 +1971,19 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name of the file folder"
+            "description": "Name of the folder"
           },
-          "parent": {
-            "type": "string",
-            "description": "Optional parent folder slug. If not provided, the folder will be created at the top level"
-          },
-          "files": {
+          "parents": {
             "type": "array",
-            "description": "Array of file IDs in this folder",
+            "description": "Array of parent folder slugs, empty array if top-level folder",
             "items": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "Whether the folder is starred / favorited",
+            "default": false
           }
         },
         "additionalProperties": false
