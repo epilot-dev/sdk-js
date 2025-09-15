@@ -1184,6 +1184,18 @@ declare namespace Components {
          * taxonomy-slug:classification-slug
          */
         export type ClassificationId = string;
+        export type ClassificationIdOrPattern = /**
+         * example:
+         * taxonomy-slug:classification-slug
+         */
+        ClassificationId | {
+            /**
+             * Wildcard pattern to match classification IDs starting with the prefix before ':*'
+             * example:
+             * taxonomy-slug:*
+             */
+            pattern: string;
+        };
         /**
          * URL-friendly identifier for the classification
          * example:
@@ -8676,6 +8688,10 @@ declare namespace Components {
              */
             archived?: boolean;
             /**
+             * Starred taxonomy classifications can represent "favorites" or commonly used classifications
+             */
+            starred?: boolean;
+            /**
              * Manifest ID used to create/update the taxonomy classification
              */
             _manifest?: string /* uuid */[] | null;
@@ -11747,11 +11763,7 @@ declare namespace Paths {
             include_archived?: Parameters.IncludeArchived;
         }
         export interface RequestBody {
-            classificationIds?: /**
-             * example:
-             * taxonomy-slug:classification-slug
-             */
-            Components.Schemas.ClassificationId[];
+            classificationIds?: Components.Schemas.ClassificationIdOrPattern[];
         }
         namespace Responses {
             export interface $200 {
@@ -14665,6 +14677,7 @@ export type BaseEntity = Components.Schemas.BaseEntity;
 export type BlueprintEntityId = Components.Schemas.BlueprintEntityId;
 export type BooleanAttribute = Components.Schemas.BooleanAttribute;
 export type ClassificationId = Components.Schemas.ClassificationId;
+export type ClassificationIdOrPattern = Components.Schemas.ClassificationIdOrPattern;
 export type ClassificationSlug = Components.Schemas.ClassificationSlug;
 export type ClassificationsUpdate = Components.Schemas.ClassificationsUpdate;
 export type ComputedAttribute = Components.Schemas.ComputedAttribute;

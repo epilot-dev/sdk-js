@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "1.3.0",
+    "version": "2.0.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -3272,7 +3272,7 @@
                   "classificationIds": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ClassificationId"
+                      "$ref": "#/components/schemas/ClassificationIdOrPattern"
                     }
                   }
                 }
@@ -8438,6 +8438,11 @@
             "description": "Archived classification are not visible in the UI",
             "default": false
           },
+          "starred": {
+            "type": "boolean",
+            "description": "Starred taxonomy classifications can represent \"favorites\" or commonly used classifications",
+            "default": false
+          },
           "_manifest": {
             "type": "array",
             "description": "Manifest ID used to create/update the taxonomy classification",
@@ -8458,6 +8463,26 @@
         "type": "string",
         "example": "taxonomy-slug:classification-slug",
         "readOnly": true
+      },
+      "ClassificationIdOrPattern": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ClassificationId"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "example": "taxonomy-slug:*",
+                "description": "Wildcard pattern to match classification IDs starting with the prefix before ':*'"
+              }
+            },
+            "required": [
+              "pattern"
+            ]
+          }
+        ]
       },
       "ClassificationSlug": {
         "type": "string",
