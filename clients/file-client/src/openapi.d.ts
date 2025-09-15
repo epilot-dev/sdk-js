@@ -322,34 +322,34 @@ declare namespace Components {
         export type FileEntityId = string;
         export interface FileFolderAttributes {
             /**
-             * Name of the file folder
+             * Name of the folder
              */
             name?: string;
             /**
-             * Optional parent folder slug. If not provided, the folder will be created at the top level
+             * Array of parent folder slugs, empty array if top-level folder
              */
-            parent?: string;
+            parents?: string[];
             /**
-             * Array of file IDs in this folder
+             * Whether the folder is starred / favorited
              */
-            files?: string /* uuid */[];
+            starred?: boolean;
         }
         /**
          * Request body for creating a file folder
          */
         export interface FileFolderCreateRequest {
             /**
-             * Name of the file folder
+             * Name of the folder
              */
             name: string;
             /**
-             * Optional parent folder slug. If not provided, the folder will be created at the top level
+             * Array of parent folder slugs, empty array if top-level folder
              */
-            parent?: string;
+            parents?: string[];
             /**
-             * Array of file IDs in this folder
+             * Whether the folder is starred / favorited
              */
-            files?: string /* uuid */[];
+            starred?: boolean;
         }
         /**
          * Generated uuid for a file folder

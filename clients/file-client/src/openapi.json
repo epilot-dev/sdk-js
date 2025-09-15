@@ -1985,8 +1985,7 @@
             "description": "Whether the folder is starred / favorited",
             "default": false
           }
-        },
-        "additionalProperties": false
+        }
       },
       "FileFolderCreateRequest": {
         "description": "Request body for creating a file folder",
@@ -1996,6 +1995,7 @@
           },
           {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "name"
             ]
