@@ -1127,14 +1127,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/FileFolderItem"
-                      }
-                    }
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileFolderItem"
                   }
                 }
               }
@@ -1910,73 +1905,49 @@
         "description": "A file folder with identifiers and timestamps",
         "type": "object",
         "properties": {
-          "id": {
-            "$ref": "#/components/schemas/FileFolderId"
-          },
-          "orgId": {
+          "slug": {
             "type": "string",
-            "description": "Organization ID",
-            "example": "123"
-          },
-          "entityId": {
-            "$ref": "#/components/schemas/EntityId"
-          },
-          "type": {
-            "type": "string",
-            "description": "Logical type for this item (e.g. \"folder\")",
-            "example": "folder"
+            "description": "Full slug for the folder",
+            "example": "_system_files_collection_entity-123:documents"
           },
           "name": {
             "type": "string",
-            "example": "MyFolderOfImportantFiles"
+            "description": "Display name of the folder",
+            "example": "Documents"
           },
-          "entity_id": {
-            "$ref": "#/components/schemas/EntityId"
+          "id": {
+            "$ref": "#/components/schemas/FileFolderId"
           },
-          "slug": {
-            "type": "string",
-            "description": "URL-friendly identifier for the folder",
-            "example": "documents"
-          },
-          "files": {
+          "parents": {
             "type": "array",
-            "description": "Array of file IDs in this folder",
+            "description": "Array of parent folder slugs, empty array if top-level folder",
             "items": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             },
             "example": [
-              "123e4567-e89b-12d3-a456-426614174000"
+              "_system_files_collection_entity-123"
             ]
           },
-          "created_by": {
-            "type": "string",
-            "description": "User ID who created the folder",
-            "example": "17622"
+          "starred": {
+            "type": "boolean",
+            "description": "Whether the folder is starred / favorited",
+            "example": false
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2025-08-20T12:01:00Z"
+            "description": "Timestamp when the folder was created",
+            "example": "2024-01-01T12:00:00Z"
           },
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2025-08-20T12:01:00Z"
+            "description": "Timestamp when the folder was last updated",
+            "example": "2024-01-02T12:00:00Z"
           }
         },
         "required": [
-          "id",
-          "orgId",
-          "entityId",
-          "type",
-          "name",
-          "entity_id",
-          "slug",
-          "files",
-          "created_by",
-          "created_at",
-          "updated_at"
+          "name"
         ]
       },
       "ErrorObject": {
