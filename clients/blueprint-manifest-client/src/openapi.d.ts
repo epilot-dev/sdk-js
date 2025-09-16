@@ -1235,7 +1235,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "usergroup" | "saved_view" | "app" | "role" | "portal_config";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "product_recommendation" | "usergroup" | "saved_view" | "app" | "role" | "portal_config";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -2023,7 +2023,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2679,7 +2678,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
