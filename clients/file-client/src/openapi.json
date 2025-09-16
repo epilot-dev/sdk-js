@@ -1207,7 +1207,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FileFolderCreateRequest"
+                "$ref": "#/components/schemas/FileFolderAttributes"
               }
             }
           }
@@ -1994,7 +1994,6 @@
             "$ref": "#/components/schemas/FileFolderAttributes"
           },
           {
-            "type": "object",
             "additionalProperties": false,
             "required": [
               "name"
