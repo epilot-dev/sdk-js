@@ -1994,7 +1994,7 @@
             "$ref": "#/components/schemas/FileFolderAttributes"
           },
           {
-            "additionalProperties": false,
+            "type": "object",
             "required": [
               "name"
             ]

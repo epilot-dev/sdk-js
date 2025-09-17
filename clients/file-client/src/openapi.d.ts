@@ -1250,7 +1250,7 @@ declare namespace Paths {
              */
             Parameters.FolderSlug;
         }
-        export type RequestBody = /* Request body for creating a file folder */ Components.Schemas.FileFolderCreateRequest;
+        export type RequestBody = Components.Schemas.FileFolderAttributes;
         namespace Responses {
             export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
             export type $404 = /**
