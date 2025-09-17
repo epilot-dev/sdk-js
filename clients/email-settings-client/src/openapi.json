@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Email settings API",
-    "version": "1.0.0"
+    "version": "1.1.1"
   },
   "tags": [
     {
@@ -22,6 +22,156 @@
     }
   ],
   "paths": {
+    "/v2/email-settings/shared-inboxes/{id}": {
+      "get": {
+        "operationId": "getSharedInbox",
+        "summary": "getSharedInbox",
+        "description": "Get shared inbox",
+        "tags": [
+          "Shared inboxes"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetSharedInboxSuccessResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSharedInbox",
+        "summary": "deleteSharedInbox",
+        "description": "Delete shared inbox",
+        "tags": [
+          "Shared inboxes"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSharedInbox",
+        "summary": "updateSharedInbox",
+        "description": "Update shared inbox",
+        "tags": [
+          "Shared inboxes"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSharedInboxPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UpdateSharedInboxSuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/email-settings/shared-inboxes": {
+      "get": {
+        "operationId": "listSharedInboxes",
+        "summary": "listSharedInboxes",
+        "description": "List shared inboxes",
+        "tags": [
+          "Shared inboxes"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListSharedInboxesSuccessResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addSharedInbox",
+        "summary": "addSharedInbox",
+        "description": "Add shared inbox",
+        "tags": [
+          "Shared inboxes"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSharedInboxPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreateSharedInboxSuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/email-settings": {
       "get": {
         "operationId": "getSettings",
@@ -345,6 +495,115 @@
     }
   },
   "components": {
+    "responses": {
+      "NoContent": {
+        "description": "Success"
+      },
+      "CreateSharedInboxSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SharedInboxResponse"
+            }
+          }
+        }
+      },
+      "UpdateSharedInboxSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SharedInboxResponse"
+            }
+          }
+        }
+      },
+      "GetSharedInboxSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SharedInboxResponse"
+            }
+          }
+        }
+      },
+      "ListSharedInboxesSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SharedInboxResponse"
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "SharedInboxId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -366,6 +625,132 @@
       }
     },
     "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "status"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        }
+      },
+      "SettingMeta": {
+        "type": "object",
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateSharedInboxPayload": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateSharedInboxPayload": {
+        "type": "object",
+        "required": [
+          "name",
+          "color"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "assignees": {
+            "type": "array",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SharedInboxResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SettingMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "color",
+              "assignees"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "assignees": {
+                "type": "array",
+                "default": [],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
       "SettingsResponse": {
         "oneOf": [
           {
@@ -484,6 +869,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://email-settings.sls.epilot.io"
+    },
     {
       "url": "https://email-settings.sls.epilot.io"
     }

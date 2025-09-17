@@ -5,6 +5,55 @@
     "version": ""
   },
   "paths": {
+    "/v2/email-settings/shared-inboxes/{id}": {
+      "get": {
+        "operationId": "getSharedInbox",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSharedInbox",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateSharedInbox",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedInboxId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/email-settings/shared-inboxes": {
+      "get": {
+        "operationId": "listSharedInboxes",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addSharedInbox",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/email-settings": {
       "get": {
         "operationId": "getSettings",
@@ -18,7 +67,8 @@
             "name": "id",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "addSetting",
@@ -26,7 +76,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteSetting",
@@ -34,7 +85,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-settings/{id}": {
@@ -51,7 +103,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-settings/domain": {
@@ -61,7 +114,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteDomain",
@@ -69,7 +123,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-settings/domain/name-servers:verify": {
@@ -79,7 +134,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/email-settings/domain:verify": {
@@ -89,11 +145,68 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "NoContent": {},
+      "CreateSharedInboxSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpdateSharedInboxSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetSharedInboxSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ListSharedInboxesSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    },
+    "parameters": {
+      "SharedInboxId": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://email-settings.sls.epilot.io"
