@@ -18,8 +18,16 @@ declare namespace Components {
         Schemas.ActivityId /* ulid */;
         export type AsyncOperationQueryParam = boolean;
         export type DeleteTempFileQueryParam = boolean;
+        export type EntityIdPathParam = /**
+         * example:
+         * ef7d985c-2385-44f4-9c71-ae06a52264f8
+         */
+        Schemas.EntityId;
         export type FillActivityQueryParam = boolean;
         export type StrictQueryParam = boolean;
+    }
+    export interface PathParameters {
+        EntityIdPathParam?: Parameters.EntityIdPathParam;
     }
     export interface QueryParameters {
         StrictQueryParam?: Parameters.StrictQueryParam;
@@ -27,6 +35,30 @@ declare namespace Components {
         FillActivityQueryParam?: Parameters.FillActivityQueryParam;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
         DeleteTempFileQueryParam?: Parameters.DeleteTempFileQueryParam;
+    }
+    namespace Responses {
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 404,
+         *   "error": "Not Found"
+         * }
+         */
+        export interface NotFoundError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
     }
     namespace Schemas {
         /**
@@ -108,6 +140,23 @@ declare namespace Components {
          * contact
          */
         export type EntitySlug = string;
+        /**
+         * A generic error returned by the API
+         */
+        export interface ErrorObject {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
         export interface FileAttributes {
             /**
              * example:
@@ -271,6 +320,85 @@ declare namespace Components {
          * ef7d985c-2385-44f4-9c71-ae06a52264f8
          */
         export type FileEntityId = string;
+        export interface FileFolderAttributes {
+            /**
+             * Name of the folder
+             */
+            name?: string;
+            /**
+             * Array of parent folder slugs, empty array if top-level folder
+             */
+            parents?: string[];
+            /**
+             * Whether the folder is starred / favorited
+             */
+            starred?: boolean;
+        }
+        /**
+         * Request body for creating a file folder
+         */
+        export interface FileFolderCreateRequest {
+            /**
+             * Name of the folder
+             */
+            name: string;
+            /**
+             * Array of parent folder slugs, empty array if top-level folder
+             */
+            parents?: string[];
+            /**
+             * Whether the folder is starred / favorited
+             */
+            starred?: boolean;
+        }
+        /**
+         * Generated uuid for a file folder
+         */
+        export type FileFolderId = string; // uuid
+        /**
+         * A file folder with identifiers and timestamps
+         */
+        export interface FileFolderItem {
+            /**
+             * Full slug for the folder
+             * example:
+             * _system_files_collection_entity-123:documents
+             */
+            slug?: string;
+            /**
+             * Display name of the folder
+             * example:
+             * Documents
+             */
+            name: string;
+            id?: /* Generated uuid for a file folder */ FileFolderId /* uuid */;
+            /**
+             * Array of parent folder slugs, empty array if top-level folder
+             * example:
+             * [
+             *   "_system_files_collection_entity-123"
+             * ]
+             */
+            parents?: string[];
+            /**
+             * Whether the folder is starred / favorited
+             * example:
+             * false
+             */
+            starred?: boolean;
+            /**
+             * Timestamp when the folder was created
+             * example:
+             * 2024-01-01T12:00:00Z
+             */
+            created_at?: string; // date-time
+            /**
+             * Timestamp when the folder was last updated
+             * example:
+             * 2024-01-02T12:00:00Z
+             */
+            updated_at?: string; // date-time
+        }
         export interface FileItem {
             s3ref?: S3Ref;
             /**
@@ -666,6 +794,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateFileFolder {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = /* Request body for creating a file folder */ Components.Schemas.FileFolderCreateRequest;
+        namespace Responses {
+            export type $201 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace DeleteFile {
         namespace Parameters {
             export type ActivityId = /**
@@ -695,6 +848,41 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
+        }
+    }
+    namespace DeleteFileFolder {
+        namespace Parameters {
+            /**
+             * example:
+             * documents
+             */
+            export type FolderSlug = string;
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            folderSlug: /**
+             * example:
+             * documents
+             */
+            Parameters.FolderSlug;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace DeleteSession {
@@ -807,6 +995,73 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
+        }
+    }
+    namespace GetFileFolders {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.EntityId;
+            export type Parents = string[];
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            parents?: Parameters.Parents;
+        }
+        namespace Responses {
+            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
+    namespace GetFilesInFolder {
+        namespace Parameters {
+            /**
+             * example:
+             * documents
+             */
+            export type FolderSlug = string;
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            folderSlug: /**
+             * example:
+             * documents
+             */
+            Parameters.FolderSlug;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileEntity[];
+            export interface $403 {
+                /**
+                 * example:
+                 * User must have permission to view this entity to access its files
+                 */
+                error?: string;
+            }
+            export interface $404 {
+                /**
+                 * example:
+                 * Entity not found
+                 */
+                error?: string;
+            }
         }
     }
     namespace GetSession {
@@ -974,6 +1229,41 @@ declare namespace Paths {
             export type $200 = Components.Schemas.FileEntity;
         }
     }
+    namespace UpdateFileFolder {
+        namespace Parameters {
+            /**
+             * example:
+             * documents
+             */
+            export type FolderSlug = string;
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.EntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            folderSlug: /**
+             * example:
+             * documents
+             */
+            Parameters.FolderSlug;
+        }
+        export type RequestBody = Components.Schemas.FileFolderAttributes;
+        namespace Responses {
+            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace UploadFile {
         namespace Parameters {
             export type FileEntityId = /**
@@ -1013,6 +1303,11 @@ declare namespace Paths {
                  * https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
                  */
                 upload_url?: string; // url
+                /**
+                 * example:
+                 * File entity not found
+                 */
+                error?: string;
             }
         }
     }
@@ -1275,6 +1570,56 @@ export interface OperationMethods {
     data?: Paths.UploadFilePublic.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadFilePublic.Responses.$201>
+  /**
+   * getFileFolders - getFileFolders
+   * 
+   * Gets a list of folders that exist for an entity
+   */
+  'getFileFolders'(
+    parameters?: Parameters<Paths.GetFileFolders.QueryParameters & Paths.GetFileFolders.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileFolders.Responses.$200>
+  /**
+   * createFileFolder - createFileFolder
+   * 
+   * Creates a new file folder for the specified entity
+   */
+  'createFileFolder'(
+    parameters?: Parameters<Paths.CreateFileFolder.PathParameters> | null,
+    data?: Paths.CreateFileFolder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateFileFolder.Responses.$201>
+  /**
+   * updateFileFolder - updateFileFolder
+   * 
+   * Updates a specific file folder by slug
+   */
+  'updateFileFolder'(
+    parameters?: Parameters<Paths.UpdateFileFolder.PathParameters> | null,
+    data?: Paths.UpdateFileFolder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateFileFolder.Responses.$200>
+  /**
+   * deleteFileFolder - deleteFileFolder
+   * 
+   * Deletes a specific file folder by slug
+   */
+  'deleteFileFolder'(
+    parameters?: Parameters<Paths.DeleteFileFolder.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteFileFolder.Responses.$200>
+  /**
+   * getFilesInFolder - getFilesInFolder
+   * 
+   * Gets all files within a specific folder for an entity
+   */
+  'getFilesInFolder'(
+    parameters?: Parameters<Paths.GetFilesInFolder.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1543,6 +1888,62 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UploadFilePublic.Responses.$201>
   }
+  ['/v1/entity/{id}/folders']: {
+    /**
+     * getFileFolders - getFileFolders
+     * 
+     * Gets a list of folders that exist for an entity
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileFolders.QueryParameters & Paths.GetFileFolders.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileFolders.Responses.$200>
+    /**
+     * createFileFolder - createFileFolder
+     * 
+     * Creates a new file folder for the specified entity
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateFileFolder.PathParameters> | null,
+      data?: Paths.CreateFileFolder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateFileFolder.Responses.$201>
+  }
+  ['/v1/entity/{id}/folders/{folderSlug}']: {
+    /**
+     * updateFileFolder - updateFileFolder
+     * 
+     * Updates a specific file folder by slug
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateFileFolder.PathParameters> | null,
+      data?: Paths.UpdateFileFolder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateFileFolder.Responses.$200>
+    /**
+     * deleteFileFolder - deleteFileFolder
+     * 
+     * Deletes a specific file folder by slug
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteFileFolder.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteFileFolder.Responses.$200>
+  }
+  ['/v1/entity/{id}/folders/{folderSlug}/files']: {
+    /**
+     * getFilesInFolder - getFilesInFolder
+     * 
+     * Gets all files within a specific folder for an entity
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFilesInFolder.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1556,9 +1957,14 @@ export type CustomDownloadUrl = Components.Schemas.CustomDownloadUrl;
 export type DownloadFilesPayload = Components.Schemas.DownloadFilesPayload;
 export type EntityId = Components.Schemas.EntityId;
 export type EntitySlug = Components.Schemas.EntitySlug;
+export type ErrorObject = Components.Schemas.ErrorObject;
 export type FileAttributes = Components.Schemas.FileAttributes;
 export type FileEntity = Components.Schemas.FileEntity;
 export type FileEntityId = Components.Schemas.FileEntityId;
+export type FileFolderAttributes = Components.Schemas.FileFolderAttributes;
+export type FileFolderCreateRequest = Components.Schemas.FileFolderCreateRequest;
+export type FileFolderId = Components.Schemas.FileFolderId;
+export type FileFolderItem = Components.Schemas.FileFolderItem;
 export type FileItem = Components.Schemas.FileItem;
 export type FileRelationItem = Components.Schemas.FileRelationItem;
 export type FileType = Components.Schemas.FileType;
