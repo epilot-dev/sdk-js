@@ -2669,11 +2669,39 @@ declare namespace Components {
         }
         export interface EntityListParams {
             /**
-             * Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)
-             * example:
-             * status:active
+             * Query configuration object for searching entities
              */
-            q?: string;
+            query?: {
+                /**
+                 * Query string configuration based on Elasticsearch query_string query
+                 */
+                query_string: {
+                    /**
+                     * The actual query string using Lucene query syntax
+                     * example:
+                     * status:active
+                     */
+                    query: string;
+                    /**
+                     * List of fields to search in. If not provided, searches in default fields
+                     * example:
+                     * [
+                     *   "_title",
+                     *   "_tags",
+                     *   "status"
+                     * ]
+                     */
+                    fields?: string[];
+                    /**
+                     * The default boolean operator used if no explicit operator is specified
+                     */
+                    default_operator?: "AND" | "OR";
+                    /**
+                     * If true, format-based errors are ignored
+                     */
+                    lenient?: boolean;
+                };
+            };
             filter: /**
              * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
              * example:

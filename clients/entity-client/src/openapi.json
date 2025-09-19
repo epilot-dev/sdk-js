@@ -7452,10 +7452,54 @@
           {
             "type": "object",
             "properties": {
-              "q": {
-                "description": "Lucene [queries supported with ElasticSearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax)",
-                "type": "string",
-                "example": "status:active"
+              "query": {
+                "description": "Query configuration object for searching entities",
+                "type": "object",
+                "properties": {
+                  "query_string": {
+                    "description": "Query string configuration based on Elasticsearch query_string query",
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "description": "The actual query string using Lucene query syntax",
+                        "type": "string",
+                        "example": "status:active"
+                      },
+                      "fields": {
+                        "description": "List of fields to search in. If not provided, searches in default fields",
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "example": [
+                          "_title",
+                          "_tags",
+                          "status"
+                        ]
+                      },
+                      "default_operator": {
+                        "description": "The default boolean operator used if no explicit operator is specified",
+                        "type": "string",
+                        "enum": [
+                          "AND",
+                          "OR"
+                        ],
+                        "default": "OR"
+                      },
+                      "lenient": {
+                        "description": "If true, format-based errors are ignored",
+                        "type": "boolean",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "query"
+                    ]
+                  }
+                },
+                "required": [
+                  "query_string"
+                ]
               },
               "filter": {
                 "$ref": "#/components/schemas/SearchFilter"
