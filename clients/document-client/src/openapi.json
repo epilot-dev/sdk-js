@@ -82,7 +82,7 @@
       "post": {
         "operationId": "generateDocumentV2",
         "summary": "generateDocumentV2",
-        "description": "Generates documents from templates with variables.\n\nSupported document types as input:\n- .docx\n- .ics\n\nSupported document types as output:\n- .pdf\n- .docx but limited to only text based variables\n- .ics\n\nUses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.\n",
+        "description": "Generates documents from templates with variables.\n\nSupported document types as input:\n- .docx\n- .ics\n\nSupported document types as output:\n- .pdf\n- .docx but limited to only text based variables\n- .ics\n\nUses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.\n",
         "parameters": [
           {
             "in": "query",
@@ -515,7 +515,7 @@
           "language": {
             "type": "string",
             "description": "Language",
-            "example": "en"
+            "example": "de"
           },
           "variable_payload": {
             "description": "Custom values for variables in the template. Takes the higher precedence than others.",
@@ -646,6 +646,35 @@
               }
             }
           },
+          "xlsx_output": {
+            "type": "object",
+            "properties": {
+              "preview_url": {
+                "description": "Pre-signed S3 GET URL for XLSX preview",
+                "type": "string",
+                "example": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.xlsx"
+              },
+              "output_document": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "description": "Generated document filename for XLSX",
+                    "type": "string",
+                    "example": "my-template-OR-001.xlsx"
+                  },
+                  "s3ref": {
+                    "$ref": "#/components/schemas/S3Reference"
+                  }
+                },
+                "example": {
+                  "s3ref": {
+                    "bucket": "document-api-preview-prod",
+                    "key": "preview/my-template.xlsx"
+                  }
+                }
+              }
+            }
+          },
           "error_output": {
             "$ref": "#/components/schemas/ErrorOutput"
           },
@@ -666,6 +695,11 @@
       "ConvertDocumentRequest": {
         "type": "object",
         "properties": {
+          "language": {
+            "type": "string",
+            "description": "Language",
+            "example": "de"
+          },
           "input_document": {
             "description": "Input document",
             "type": "object",
