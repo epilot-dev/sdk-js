@@ -751,6 +751,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1084,6 +1088,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1334,6 +1342,9 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            pages?: {
+                [name: string]: Page;
+            };
         }
         /**
          * The mapped contact of the portal user
@@ -2087,12 +2098,28 @@ declare namespace Components {
             hits?: number;
         }
         export interface EntitySearchParams {
-            slug: /**
+            /**
+             * Single entity schema slug or array of slugs
+             */
+            slug: /* Single entity schema slug or array of slugs */ /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
              */
-            EntitySlug;
+            EntitySlug | [
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug,
+                .../**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug[]
+            ];
             /**
              * Keyword search query
              * example:
@@ -3155,6 +3182,16 @@ declare namespace Components {
             slug?: string | null;
             rules?: Rule[] | null;
         }
+        export interface JuiceSettings {
+            /**
+             * Whether the org is in dummy mode
+             */
+            is_dummy?: boolean;
+            /**
+             * Whether the org is in canary mode
+             */
+            is_canary?: boolean;
+        }
         /**
          * The meter entity
          */
@@ -3717,7 +3754,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: BlockRequest;
+                [name: string]: Block;
             };
             /**
              * The order of the block
@@ -3802,7 +3839,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: BlockRequest;
+                [name: string]: Block;
             };
             /**
              * The order of the block
@@ -3933,6 +3970,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -4204,12 +4245,6 @@ declare namespace Components {
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
-            /**
-             * Key of the portal config
-             * example:
-             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
-             */
-            portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
@@ -4247,46 +4282,6 @@ declare namespace Components {
             identity_providers?: ProviderPublicConfig[];
         }
         export interface PortalConfigV3 {
-            /**
-             * Journey actions allowed on an entity by a portal user
-             */
-            entity_actions?: {
-                journey_id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */;
-                slug?: /**
-                 * URL-friendly identifier for the entity schema
-                 * example:
-                 * contact
-                 */
-                EntitySlug;
-                action_Label?: {
-                    en?: string;
-                    de?: string;
-                };
-            }[];
-            /**
-             * Configured Portal extensions
-             */
-            extensions?: ExtensionConfig[];
-            /**
-             * Configured Portal extensions hooks
-             */
-            extension_hooks?: {
-                [name: string]: ExtensionHookConfig;
-            };
-            /**
-             * Default 360 user to notify upon an internal notification
-             */
-            default_user_to_notify?: {
-                /**
-                 * Default admin users for pending user notification to notify
-                 */
-                onPendingUser?: AdminUser[];
-            };
             /**
              * Enable/Disable the portal access
              */
@@ -4362,6 +4357,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -4612,18 +4611,15 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            pages?: {
+                [name: string]: Page;
+            };
             /**
              * ID of the portal
              * example:
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
-            /**
-             * Key of the portal config
-             * example:
-             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
-             */
-            portal_sk_v3?: string;
             /**
              * ID of the organization
              * example:
@@ -4665,7 +4661,6 @@ declare namespace Components {
              */
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
-            pages?: Page[];
         }
         /**
          * The portal user entity
@@ -5367,6 +5362,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -5737,6 +5736,10 @@ declare namespace Components {
                  * office-365-login
                  */
                 ProviderSlug /* [0-9a-z-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -5987,8 +5990,10 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            pages?: {
+                [name: string]: Page;
+            };
             origin?: /* Origin of the portal */ Origin;
-            pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -6175,9 +6180,21 @@ declare namespace Paths {
     namespace CanTriggerPortalFlow {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+            /**
+             * Portal ID
+             * example:
+             * 123
+             */
+            export type PortalId = string;
         }
         export interface QueryParameters {
             origin: Parameters.Origin;
+            portal_id: /**
+             * Portal ID
+             * example:
+             * 123
+             */
+            Parameters.PortalId;
         }
         export type RequestBody = Components.Schemas.TriggerPortalFlow;
         namespace Responses {
@@ -6406,6 +6423,22 @@ declare namespace Paths {
                 message: "User created successfully";
             }
             export type $400 = Components.Responses.InvalidRequest;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeRegisterMLoginUser {
+        namespace Parameters {
+            export type ClientId = string;
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            client_id: Parameters.ClientId;
+            user_id: Parameters.UserId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7832,6 +7865,10 @@ declare namespace Paths {
                      * office-365-login
                      */
                     Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                    /**
+                     * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                     */
+                    auto_redirect_to_sso?: boolean;
                 };
                 /**
                  * AWS Cognito Pool details for the portal
@@ -8103,12 +8140,6 @@ declare namespace Paths {
                  * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
                  */
                 portal_id?: string;
-                /**
-                 * Key of the portal config
-                 * example:
-                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
-                 */
-                portal_sk_v3?: string;
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 /**
                  * Organization settings
@@ -8992,16 +9023,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace ListAllPortalConfigs {
-        namespace Responses {
-            export interface $200 {
-                data?: Components.Schemas.PortalConfigV3[];
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -9019,6 +9040,60 @@ declare namespace Paths {
                  */
                 login_as_token?: string;
             }
+        }
+    }
+    namespace NotifyMLoginInterestChange {
+        namespace Parameters {
+            export type ClientId = string;
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            client_id: Parameters.ClientId;
+            user_id: Parameters.UserId;
+        }
+        export interface RequestBody {
+            [name: string]: any;
+            /**
+             * Resource ID
+             */
+            resource_id?: string;
+            /**
+             * Resource type
+             */
+            user_id?: string;
+            /**
+             * Interest tag
+             */
+            interest_tag?: string;
+            /**
+             * Action
+             */
+            action?: string;
+            resource?: {
+                [name: string]: any;
+                /**
+                 * Resource ID
+                 */
+                resource_id?: string;
+                /**
+                 * Description
+                 */
+                description?: string | null;
+                /**
+                 * Contact
+                 */
+                contact?: string;
+                /**
+                 * Kind
+                 */
+                kind?: string;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace PostOrderAcceptance {
@@ -9060,7 +9135,7 @@ declare namespace Paths {
              */
             Parameters.PortalId /* uuid */;
         }
-        export type RequestBody = Components.Schemas.PortalConfigV3;
+        export type RequestBody = Components.Schemas.UpsertPortalConfigV3;
         namespace Responses {
             export type $200 = Components.Schemas.PortalConfigV3;
             export type $400 = Components.Responses.InvalidRequest;
@@ -10930,6 +11005,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
   /**
+   * deRegisterMLoginUser - deRegisterMLoginUser
+   * 
+   * Deregisters a user from the M Login client
+   */
+  'deRegisterMLoginUser'(
+    parameters?: Parameters<Paths.DeRegisterMLoginUser.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeRegisterMLoginUser.Responses.$204>
+  /**
+   * notifyMLoginInterestChange - notifyMLoginInterestChange
+   * 
+   * Notifies the interest change of a user in the M Login client
+   */
+  'notifyMLoginInterestChange'(
+    parameters?: Parameters<Paths.NotifyMLoginInterestChange.PathParameters> | null,
+    data?: Paths.NotifyMLoginInterestChange.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.NotifyMLoginInterestChange.Responses.$200>
+  /**
    * createPortalConfig - createPortalConfig
    * 
    * Creates a new portal configuration.
@@ -10969,16 +11064,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
-  /**
-   * listAllPortalConfigs - listAllPortalConfigs
-   * 
-   * Retrieves all portal configurations.
-   */
-  'listAllPortalConfigs'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -12165,6 +12250,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
   }
+  ['/v2/portal/public/m-login/deregister/{client_id}/{user_id}']: {
+    /**
+     * deRegisterMLoginUser - deRegisterMLoginUser
+     * 
+     * Deregisters a user from the M Login client
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeRegisterMLoginUser.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeRegisterMLoginUser.Responses.$204>
+  }
+  ['/v2/portal/public/m-login/notify-interest-change/{client_id}/{user_id}']: {
+    /**
+     * notifyMLoginInterestChange - notifyMLoginInterestChange
+     * 
+     * Notifies the interest change of a user in the M Login client
+     */
+    'post'(
+      parameters?: Parameters<Paths.NotifyMLoginInterestChange.PathParameters> | null,
+      data?: Paths.NotifyMLoginInterestChange.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.NotifyMLoginInterestChange.Responses.$200>
+  }
   ['/v3/portal/config']: {
     /**
      * createPortalConfig - createPortalConfig
@@ -12208,18 +12317,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
-  }
-  ['/v3/portal/configs']: {
-    /**
-     * listAllPortalConfigs - listAllPortalConfigs
-     * 
-     * Retrieves all portal configurations.
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
   }
 }
 
@@ -12294,6 +12391,7 @@ export type Grant = Components.Schemas.Grant;
 export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
+export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
 export type MeterReading = Components.Schemas.MeterReading;

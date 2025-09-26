@@ -5324,10 +5324,21 @@
             "in": "query",
             "name": "origin",
             "required": true,
+            "deprecated": true,
             "schema": {
               "$ref": "#/components/schemas/Origin"
             },
             "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Portal ID",
+              "example": "123"
+            }
           }
         ],
         "requestBody": {
@@ -6633,6 +6644,142 @@
         }
       }
     },
+    "/v2/portal/public/m-login/deregister/{client_id}/{user_id}": {
+      "delete": {
+        "operationId": "deRegisterMLoginUser",
+        "summary": "deRegisterMLoginUser",
+        "description": "Deregisters a user from the M Login client",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deregistered successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/m-login/notify-interest-change/{client_id}/{user_id}": {
+      "post": {
+        "operationId": "notifyMLoginInterestChange",
+        "summary": "notifyMLoginInterestChange",
+        "description": "Notifies the interest change of a user in the M Login client",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "resource_id": {
+                    "type": "string",
+                    "description": "Resource ID"
+                  },
+                  "user_id": {
+                    "type": "string",
+                    "description": "Resource type"
+                  },
+                  "interest_tag": {
+                    "type": "string",
+                    "description": "Interest tag"
+                  },
+                  "action": {
+                    "type": "string",
+                    "description": "Action"
+                  },
+                  "resource": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "resource_id": {
+                        "type": "string",
+                        "description": "Resource ID"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Description",
+                        "nullable": true
+                      },
+                      "contact": {
+                        "type": "string",
+                        "description": "Contact"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "description": "Kind"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interest change acknowledged successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/config": {
       "post": {
         "operationId": "createPortalConfig",
@@ -6764,7 +6911,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PortalConfigV3"
+                "$ref": "#/components/schemas/UpsertPortalConfigV3"
               }
             }
           }
@@ -6839,50 +6986,6 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v3/portal/configs": {
-      "get": {
-        "operationId": "listAllPortalConfigs",
-        "summary": "listAllPortalConfigs",
-        "description": "Retrieves all portal configurations.",
-        "tags": [
-          "ECP Admin"
-        ],
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All portal configs retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/PortalConfigV3"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7629,6 +7732,10 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderSlug"
                 }
+              },
+              "auto_redirect_to_sso": {
+                "type": "boolean",
+                "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
               }
             }
           },
@@ -7960,11 +8067,6 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
@@ -10001,7 +10103,19 @@
         "type": "object",
         "properties": {
           "slug": {
-            "$ref": "#/components/schemas/EntitySlug"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntitySlug"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "Single entity schema slug or array of slugs"
           },
           "q": {
             "type": "string",
@@ -11835,7 +11949,7 @@
           "blocks": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/BlockRequest"
+              "$ref": "#/components/schemas/Block"
             }
           },
           "order": {
@@ -11992,6 +12106,10 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderSlug"
                 }
+              },
+              "auto_redirect_to_sso": {
+                "type": "boolean",
+                "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
               }
             }
           },
@@ -12279,6 +12397,12 @@
           "is_dummy": {
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
+          },
+          "pages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Page"
+            }
           }
         }
       },
@@ -12294,12 +12418,6 @@
             "properties": {
               "origin": {
                 "$ref": "#/components/schemas/Origin"
-              },
-              "pages": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/PageRequest"
-                }
               }
             }
           }
@@ -12307,9 +12425,6 @@
       },
       "PortalConfigV3": {
         "allOf": [
-          {
-            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
-          },
           {
             "$ref": "#/components/schemas/CommonConfigAttributesV3"
           },
@@ -12319,11 +12434,6 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
               },
               "organization_id": {
                 "type": "string",
@@ -12378,16 +12488,23 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderPublicConfig"
                 }
-              },
-              "pages": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Page"
-                }
               }
             }
           }
         ]
+      },
+      "JuiceSettings": {
+        "type": "object",
+        "properties": {
+          "is_dummy": {
+            "type": "boolean",
+            "description": "Whether the org is in dummy mode"
+          },
+          "is_canary": {
+            "type": "boolean",
+            "description": "Whether the org is in canary mode"
+          }
+        }
       }
     }
   },
