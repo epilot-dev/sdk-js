@@ -1160,6 +1160,41 @@
               "type": "string"
             },
             "description": "ID of the Seamless Link"
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "If the request is in a context of certain entities (i.e. the user in in a context of a specific contract), links can be customized for that. Portal User and Contact entities are automatically part of the context.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Entity schema",
+                    "example": "contract"
+                  },
+                  "entity_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Entity id",
+                    "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+                  }
+                },
+                "required": [
+                  "entity_id",
+                  "entity_schema"
+                ]
+              },
+              "example": [
+                {
+                  "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+                  "entity_schema": "contract"
+                }
+              ]
+            }
           }
         ],
         "security": [
@@ -6005,7 +6040,11 @@
                     "description": "Entity id",
                     "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
                   }
-                }
+                },
+                "required": [
+                  "entity_id",
+                  "entity_schema"
+                ]
               },
               "example": [
                 {
@@ -6911,7 +6950,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpsertPortalConfigV3"
+                "$ref": "#/components/schemas/PortalConfigV3"
               }
             }
           }
@@ -6986,6 +7025,50 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/configs": {
+      "get": {
+        "operationId": "listAllPortalConfigs",
+        "summary": "listAllPortalConfigs",
+        "description": "Retrieves all portal configurations.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All portal configs retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfigV3"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -8067,6 +8150,11 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
+              },
+              "portal_sk_v3": {
+                "type": "string",
+                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "Key of the portal config"
               },
               "origin": {
                 "$ref": "#/components/schemas/Origin"
@@ -11340,7 +11428,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -11434,12 +11522,6 @@
             "type": "string",
             "description": "Recognized sector of the meter.",
             "example": "water"
-          },
-          "meter_number": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.",
-            "example": "00123456"
           },
           "meter_numbers": {
             "type": "array",
@@ -11949,7 +12031,7 @@
           "blocks": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/Block"
+              "$ref": "#/components/schemas/BlockRequest"
             }
           },
           "order": {
@@ -12397,12 +12479,6 @@
           "is_dummy": {
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
-          },
-          "pages": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Page"
-            }
           }
         }
       },
@@ -12418,6 +12494,12 @@
             "properties": {
               "origin": {
                 "$ref": "#/components/schemas/Origin"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PageRequest"
+                }
               }
             }
           }
@@ -12425,6 +12507,9 @@
       },
       "PortalConfigV3": {
         "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
+          },
           {
             "$ref": "#/components/schemas/CommonConfigAttributesV3"
           },
@@ -12434,6 +12519,11 @@
                 "type": "string",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
                 "description": "ID of the portal"
+              },
+              "portal_sk_v3": {
+                "type": "string",
+                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+                "description": "Key of the portal config"
               },
               "organization_id": {
                 "type": "string",
@@ -12488,6 +12578,12 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderPublicConfig"
                 }
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Page"
+                }
               }
             }
           }
@@ -12509,6 +12605,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://customer-portal-api.sls.epilot.io"
+    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }

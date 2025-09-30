@@ -1342,9 +1342,6 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
-            pages?: {
-                [name: string]: Page;
-            };
         }
         /**
          * The mapped contact of the portal user
@@ -3301,7 +3298,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**
@@ -3387,12 +3384,6 @@ declare namespace Components {
              * water
              */
             sector?: string;
-            /**
-             * Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.
-             * example:
-             * 00123456
-             */
-            meter_number?: string;
             /**
              * Recognized list of (potential) meter numbers.
              * example:
@@ -3754,7 +3745,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: Block;
+                [name: string]: BlockRequest;
             };
             /**
              * The order of the block
@@ -3839,7 +3830,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: Block;
+                [name: string]: BlockRequest;
             };
             /**
              * The order of the block
@@ -4245,6 +4236,12 @@ declare namespace Components {
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
@@ -4282,6 +4279,46 @@ declare namespace Components {
             identity_providers?: ProviderPublicConfig[];
         }
         export interface PortalConfigV3 {
+            /**
+             * Journey actions allowed on an entity by a portal user
+             */
+            entity_actions?: {
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                action_Label?: {
+                    en?: string;
+                    de?: string;
+                };
+            }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
+            /**
+             * Configured Portal extensions hooks
+             */
+            extension_hooks?: {
+                [name: string]: ExtensionHookConfig;
+            };
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
             /**
              * Enable/Disable the portal access
              */
@@ -4611,15 +4648,18 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
-            pages?: {
-                [name: string]: Page;
-            };
             /**
              * ID of the portal
              * example:
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
             /**
              * ID of the organization
              * example:
@@ -4661,6 +4701,7 @@ declare namespace Components {
              */
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
+            pages?: Page[];
         }
         /**
          * The portal user entity
@@ -5990,10 +6031,8 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
-            pages?: {
-                [name: string]: Page;
-            };
             origin?: /* Origin of the portal */ Origin;
+            pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
             widgets: PortalWidget[];
@@ -8140,6 +8179,12 @@ declare namespace Paths {
                  * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
                  */
                 portal_id?: string;
+                /**
+                 * Key of the portal config
+                 * example:
+                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                portal_sk_v3?: string;
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 /**
                  * Organization settings
@@ -8343,13 +8388,13 @@ declare namespace Paths {
                  * example:
                  * contract
                  */
-                entity_schema?: string;
+                entity_schema: string;
                 /**
                  * Entity id
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
-                entity_id?: string; // uuid
+                entity_id: string; // uuid
             }[];
             export type ContractId = /**
              * Entity ID
@@ -8798,6 +8843,29 @@ declare namespace Paths {
     namespace GetResolvedSeamlessLink {
         namespace Parameters {
             export type AppId = string;
+            /**
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            export type ContextEntities = {
+                /**
+                 * Entity schema
+                 * example:
+                 * contract
+                 */
+                entity_schema: string;
+                /**
+                 * Entity id
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                entity_id: string; // uuid
+            }[];
             export type ExtensionId = string;
             export type LinkId = string;
         }
@@ -8805,6 +8873,16 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extension_id: Parameters.ExtensionId;
             link_id: Parameters.LinkId;
+            context_entities?: /**
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -9023,6 +9101,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListAllPortalConfigs {
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.PortalConfigV3[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -9135,7 +9223,7 @@ declare namespace Paths {
              */
             Parameters.PortalId /* uuid */;
         }
-        export type RequestBody = Components.Schemas.UpsertPortalConfigV3;
+        export type RequestBody = Components.Schemas.PortalConfigV3;
         namespace Responses {
             export type $200 = Components.Schemas.PortalConfigV3;
             export type $400 = Components.Responses.InvalidRequest;
@@ -9987,6 +10075,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -11064,6 +11153,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
+  /**
+   * listAllPortalConfigs - listAllPortalConfigs
+   * 
+   * Retrieves all portal configurations.
+   */
+  'listAllPortalConfigs'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -12318,9 +12417,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
   }
+  ['/v3/portal/configs']: {
+    /**
+     * listAllPortalConfigs - listAllPortalConfigs
+     * 
+     * Retrieves all portal configurations.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
