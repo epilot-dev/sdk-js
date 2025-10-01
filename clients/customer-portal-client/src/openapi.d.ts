@@ -3745,7 +3745,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: BlockRequest;
+                [name: string]: Block;
             };
             /**
              * The order of the block
@@ -3830,7 +3830,7 @@ declare namespace Components {
                 [name: string]: any;
             };
             blocks?: {
-                [name: string]: BlockRequest;
+                [name: string]: Block;
             };
             /**
              * The order of the block

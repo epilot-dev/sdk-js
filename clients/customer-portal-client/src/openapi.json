@@ -11957,10 +11957,6 @@
         "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
       },
       "Block": {
-        "type": "object",
-        "required": [
-          "id"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/BlockRequest"
@@ -11968,6 +11964,9 @@
           {
             "type": "object",
             "additionalProperties": true,
+            "required": [
+              "id"
+            ],
             "properties": {
               "id": {
                 "type": "string",
@@ -12031,7 +12030,7 @@
           "blocks": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/BlockRequest"
+              "$ref": "#/components/schemas/Block"
             }
           },
           "order": {
@@ -12605,9 +12604,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://customer-portal-api.sls.epilot.io"
-    },
     {
       "url": "https://customer-portal-api.sls.epilot.io"
     }
