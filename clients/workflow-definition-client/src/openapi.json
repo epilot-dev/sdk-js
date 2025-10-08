@@ -1718,6 +1718,9 @@
           },
           {
             "$ref": "#/components/schemas/JourneySubmissionTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/JourneyAutomationTrigger"
           }
         ],
         "example": {

@@ -658,7 +658,7 @@ declare namespace Components {
          *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
          * }
          */
-        ManualTrigger | AutomationTrigger | JourneySubmissionTrigger;
+        ManualTrigger | AutomationTrigger | JourneySubmissionTrigger | JourneyAutomationTrigger;
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
