@@ -158,25 +158,14 @@ declare namespace Components {
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
-            closing_reasons?: ClosingReasonId[];
-            entity_sync?: /**
-             * example:
-             * {
-             *   "trigger": "workflow_started",
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "my_status"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            EntitySync[];
+            update_entity_attributes?: UpdateEntityAttributes[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            closing_reasons?: {
+                id: string;
+            }[];
         }
         export interface DecisionTask {
             id: string;
@@ -274,41 +263,15 @@ declare namespace Components {
          * describe the requirement for a task to be enabled
          */
         export interface EnableRequirement {
+            /**
+             * The id of the task that it points to
+             */
             task_id?: string;
+            /**
+             * The id of the phase that it points to
+             */
             phase_id?: string;
             when: "TASK_FINISHED" | "PHASE_FINISHED";
-        }
-        /**
-         * example:
-         * {
-         *   "trigger": "workflow_started",
-         *   "target": {
-         *     "entitySchema": "opportunity",
-         *     "entityAttribute": "my_status"
-         *   },
-         *   "value": {
-         *     "source": "workflow_name"
-         *   }
-         * }
-         */
-        export interface EntitySync {
-            trigger: "workflow_updated" | "workflow_started" | "workflow_closed" | "workflow_cancelled" | "task_updated" | "task_completed" | "task_skipped" | "task_in_progress" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_in_progress";
-            value: {
-                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to";
-                custom_value?: string;
-            };
-            target: {
-                /**
-                 * example:
-                 * opportunity
-                 */
-                entitySchema: string;
-                /**
-                 * example:
-                 * my_status
-                 */
-                entityAttribute: string;
-            };
         }
         export interface ErrorResp {
             message?: string;
@@ -380,21 +343,68 @@ declare namespace Components {
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
+            update_entity_attributes?: UpdateEntityAttributes[];
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
-            entity_sync?: /**
+        }
+        export interface FlowTemplateBase {
+            id?: string;
+            org_id?: string;
+            name: string;
+            description?: string;
+            trigger?: /**
              * example:
              * {
-             *   "trigger": "workflow_started",
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "my_status"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
              * }
              */
-            EntitySync[];
+            Trigger;
+            /**
+             * Whether the workflow is enabled or not
+             */
+            enabled?: boolean;
+            version?: /**
+             * Version of the workflow schema.
+             *
+             * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
+             * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
+             * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
+             *
+             * example:
+             * 2
+             */
+            Version;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            created_at?: string;
+            /**
+             * ISO String Date & Time
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            updated_at?: string;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            assigned_to?: string[];
+            /**
+             * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
+             */
+            available_in_ecp?: boolean;
+            phases?: Phase[];
+            tasks: Task[];
+            edges: Edge[];
+            update_entity_attributes?: UpdateEntityAttributes[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -413,6 +423,14 @@ declare namespace Components {
             mode?: "immediate";
         }
         export type ItemType = "STEP" | "SECTION";
+        export interface JourneyAutomationTrigger {
+            id?: string;
+            type: "journey_automation";
+            /**
+             * Schema of the main entity where flow will be triggered. The entity will be picked from automation context.
+             */
+            entity_schema?: string;
+        }
         export interface JourneySubmissionTrigger {
             id?: string;
             type: "journey_submission";
@@ -585,7 +603,7 @@ declare namespace Components {
             journeyId?: string;
             name?: string;
             /**
-             * If true, the task be auto completed when the journey is completed
+             * If true, the task be auto completed when the journey is completed. By default it is true.
              */
             complete_task_automatically?: boolean;
         }
@@ -1528,14 +1546,15 @@ export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
-export type entitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
+export type FlowTemplateBase = Components.Schemas.FlowTemplateBase;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
 export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
+export type JourneyAutomationTrigger = Components.Schemas.JourneyAutomationTrigger;
 export type JourneySubmissionTrigger = Components.Schemas.JourneySubmissionTrigger;
 export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;

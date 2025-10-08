@@ -1589,7 +1589,7 @@
       }
     },
     "schemas": {
-      "FlowTemplate": {
+      "FlowTemplateBase": {
         "type": "object",
         "required": [
           "name",
@@ -1665,16 +1665,10 @@
               "$ref": "#/components/schemas/Edge"
             }
           },
-          "closing_reasons": {
+          "update_entity_attributes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ClosingReason"
-            }
-          },
-          "entity_sync": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/entitySync"
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
             }
           },
           "taxonomies": {
@@ -1685,6 +1679,24 @@
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
           }
         }
+      },
+      "FlowTemplate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FlowTemplateBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "closing_reasons": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ClosingReason"
+                }
+              }
+            }
+          }
+        ]
       },
       "Version": {
         "type": "string",
@@ -1755,6 +1767,27 @@
           }
         }
       },
+      "JourneyAutomationTrigger": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "journey_automation"
+            ]
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the main entity where flow will be triggered. The entity will be picked from automation context."
+          }
+        }
+      },
       "JourneySubmissionTrigger": {
         "type": "object",
         "required": [
@@ -1787,7 +1820,7 @@
       "CreateFlowTemplate": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/FlowTemplate"
+            "$ref": "#/components/schemas/FlowTemplateBase"
           },
           {
             "type": "object",
@@ -1795,7 +1828,15 @@
               "closing_reasons": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/ClosingReasonId"
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -2414,10 +2455,12 @@
         "type": "object",
         "properties": {
           "task_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The id of the task that it points to"
           },
           "phase_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The id of the phase that it points to"
           },
           "when": {
             "type": "string",
@@ -2691,7 +2734,8 @@
           },
           "complete_task_automatically": {
             "type": "boolean",
-            "description": "If true, the task be auto completed when the journey is completed"
+            "default": true,
+            "description": "If true, the task be auto completed when the journey is completed. By default it is true."
           }
         }
       },
@@ -2878,85 +2922,6 @@
         "required": [
           "source",
           "target"
-        ]
-      },
-      "entitySync": {
-        "type": "object",
-        "properties": {
-          "trigger": {
-            "type": "string",
-            "enum": [
-              "workflow_updated",
-              "workflow_started",
-              "workflow_closed",
-              "workflow_cancelled",
-              "task_updated",
-              "task_completed",
-              "task_skipped",
-              "task_in_progress",
-              "phase_updated",
-              "phase_completed",
-              "phase_skipped",
-              "phase_in_progress"
-            ]
-          },
-          "value": {
-            "type": "object",
-            "properties": {
-              "source": {
-                "type": "string",
-                "enum": [
-                  "workflow_name",
-                  "workflow_status",
-                  "workflow_assigned_to",
-                  "task_name",
-                  "task_status",
-                  "task_assigned_to",
-                  "phase_name",
-                  "phase_status",
-                  "phase_assigned_to"
-                ]
-              },
-              "custom_value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "source"
-            ]
-          },
-          "target": {
-            "type": "object",
-            "properties": {
-              "entitySchema": {
-                "type": "string",
-                "example": "opportunity"
-              },
-              "entityAttribute": {
-                "type": "string",
-                "example": "my_status"
-              }
-            },
-            "required": [
-              "entitySchema",
-              "entityAttribute"
-            ]
-          }
-        },
-        "example": {
-          "trigger": "workflow_started",
-          "target": {
-            "entitySchema": "opportunity",
-            "entityAttribute": "my_status"
-          },
-          "value": {
-            "source": "workflow_name"
-          }
-        },
-        "required": [
-          "trigger",
-          "target",
-          "value"
         ]
       },
       "DynamicDueDate": {
