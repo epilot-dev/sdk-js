@@ -5,6 +5,77 @@
     "version": ""
   },
   "paths": {
+    "/v2/email-settings/email-addresses/epilot:provision": {
+      "put": {
+        "operationId": "provisionEpilotEmailAddress",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/email-settings/email-addresses/primary": {
+      "post": {
+        "operationId": "setEmailAddressPrimary",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/email-settings/email-addresses/{id}": {
+      "get": {
+        "operationId": "getEmailAddress",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteEmailAddress",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateEmailAddress",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/email-settings/email-addresses": {
+      "get": {
+        "operationId": "listEmailAddresses",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addEmailAddress",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/email-settings/shared-inboxes/{id}": {
       "get": {
         "operationId": "getSharedInbox",
@@ -152,6 +223,36 @@
   },
   "components": {
     "responses": {
+      "ProvisionEpilotEmailAddressSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SetEmailAddressPrimarySuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CreateEmailAddressSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpdateEmailAddressSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetEmailAddressSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ListEmailAddressesSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "NoContent": {},
       "CreateSharedInboxSuccessResponse": {
         "content": {
@@ -200,6 +301,11 @@
       }
     },
     "parameters": {
+      "EmailAddressId": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
       "SharedInboxId": {
         "name": "id",
         "in": "path",

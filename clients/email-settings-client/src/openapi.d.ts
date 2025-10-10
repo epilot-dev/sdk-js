@@ -10,25 +10,41 @@ import type {
 
 declare namespace Components {
     namespace Parameters {
+        export type EmailAddressId = string;
         export type SharedInboxId = string;
     }
     export interface PathParameters {
+        EmailAddressId?: Parameters.EmailAddressId;
         SharedInboxId?: Parameters.SharedInboxId;
     }
     namespace Responses {
         export type BadRequest = Schemas.ErrorResponse;
         export type Conflict = Schemas.ErrorResponse;
+        export type CreateEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
         export type CreateSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
         export type Forbidden = Schemas.ErrorResponse;
+        export type GetEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
         export type GetSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
         export type InternalServerError = Schemas.ErrorResponse;
+        export type ListEmailAddressesSuccessResponse = Schemas.EmailAddressResponse[];
         export type ListSharedInboxesSuccessResponse = Schemas.SharedInboxResponse[];
         export interface NoContent {
         }
         export type NotFound = Schemas.ErrorResponse;
+        export type ProvisionEpilotEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
+        export type SetEmailAddressPrimarySuccessResponse = Schemas.EmailAddressResponse;
+        export type UpdateEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
         export type UpdateSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
     }
     namespace Schemas {
+        export interface CreateEmailAddressPayload {
+            address: string;
+            name?: string;
+            user_ids?: string[];
+            group_ids?: string[];
+            default_signature_id?: string;
+            shared_inbox_id?: string;
+        }
         export interface CreateSharedInboxPayload {
             id?: string;
             color: string;
@@ -43,6 +59,22 @@ declare namespace Components {
              */
             domain?: string;
         }
+        export interface EmailAddressResponse {
+            id: string;
+            created_at: string; // date-time
+            updated_at?: string; // date-time
+            created_by?: string;
+            updated_by?: string;
+            address: string;
+            name?: string;
+            user_ids?: string[];
+            group_ids?: string[];
+            default_signature_id?: string;
+            shared_inbox_id?: string;
+            is_active?: boolean;
+            is_primary?: boolean;
+            is_epilot_email_address?: boolean;
+        }
         /**
          * Setting that allows to add an email address on the custom domain. For e.g; john@doe.com
          */
@@ -54,6 +86,9 @@ declare namespace Components {
         export interface ErrorResponse {
             error: string;
             status: number;
+        }
+        export interface ProvisionEpilotEmailAddressPayload {
+            address: string;
         }
         /**
          * - Restrict duplicates within:
@@ -69,6 +104,9 @@ declare namespace Components {
          *
          */
         export type RestrictDuplicatesWithinSetting = "restrict_duplicates_within";
+        export interface SetEmailAddressPrimaryPayload {
+            address: string;
+        }
         export interface Setting {
             [name: string]: any;
             id?: string;
@@ -124,6 +162,14 @@ declare namespace Components {
          * Setting that allows to add a signature.
          */
         export type SignatureSetting = "signature";
+        export interface UpdateEmailAddressPayload {
+            name?: string;
+            user_ids?: string[];
+            group_ids?: string[];
+            default_signature_id?: string;
+            shared_inbox_id?: string;
+            is_active?: boolean;
+        }
         export interface UpdateSharedInboxPayload {
             color?: string;
             name?: string;
@@ -147,6 +193,16 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+        }
+    }
+    namespace AddEmailAddress {
+        export type RequestBody = Components.Schemas.CreateEmailAddressPayload;
+        namespace Responses {
+            export type $201 = Components.Responses.CreateEmailAddressSuccessResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace AddSetting {
@@ -180,6 +236,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteEmailAddress {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $204 = Components.Responses.NoContent;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace DeleteSetting {
         export interface RequestBody {
             type: Components.Schemas.SettingType;
@@ -208,6 +278,20 @@ declare namespace Paths {
         namespace Responses {
             export type $204 = Components.Responses.NoContent;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetEmailAddress {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.GetEmailAddressSuccessResponse;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -242,10 +326,53 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListEmailAddresses {
+        namespace Responses {
+            export type $200 = Components.Responses.ListEmailAddressesSuccessResponse;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListSharedInboxes {
         namespace Responses {
             export type $200 = Components.Responses.ListSharedInboxesSuccessResponse;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ProvisionEpilotEmailAddress {
+        export type RequestBody = Components.Schemas.ProvisionEpilotEmailAddressPayload;
+        namespace Responses {
+            export type $200 = Components.Responses.ProvisionEpilotEmailAddressSuccessResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace SetEmailAddressPrimary {
+        export type RequestBody = Components.Schemas.SetEmailAddressPrimaryPayload;
+        namespace Responses {
+            export type $200 = Components.Responses.SetEmailAddressPrimarySuccessResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateEmailAddress {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.UpdateEmailAddressPayload;
+        namespace Responses {
+            export type $200 = Components.Responses.UpdateEmailAddressSuccessResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -306,6 +433,76 @@ declare namespace Paths {
 
 
 export interface OperationMethods {
+  /**
+   * provisionEpilotEmailAddress - provisionEpilotEmailAddress
+   * 
+   * Provision or reactivate epilot email address, deactivating other active epilot email addresses.
+   */
+  'provisionEpilotEmailAddress'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ProvisionEpilotEmailAddress.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ProvisionEpilotEmailAddress.Responses.$200>
+  /**
+   * setEmailAddressPrimary - setEmailAddressPrimary
+   * 
+   * Set email address as primary
+   */
+  'setEmailAddressPrimary'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SetEmailAddressPrimary.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetEmailAddressPrimary.Responses.$200>
+  /**
+   * getEmailAddress - getEmailAddress
+   * 
+   * Get email address
+   */
+  'getEmailAddress'(
+    parameters?: Parameters<Paths.GetEmailAddress.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEmailAddress.Responses.$200>
+  /**
+   * updateEmailAddress - updateEmailAddress
+   * 
+   * Update email address
+   */
+  'updateEmailAddress'(
+    parameters?: Parameters<Paths.UpdateEmailAddress.PathParameters> | null,
+    data?: Paths.UpdateEmailAddress.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateEmailAddress.Responses.$200>
+  /**
+   * deleteEmailAddress - deleteEmailAddress
+   * 
+   * Delete email address
+   */
+  'deleteEmailAddress'(
+    parameters?: Parameters<Paths.DeleteEmailAddress.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteEmailAddress.Responses.$204>
+  /**
+   * listEmailAddresses - listEmailAddresses
+   * 
+   * List email addresses
+   */
+  'listEmailAddresses'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListEmailAddresses.Responses.$200>
+  /**
+   * addEmailAddress - addEmailAddress
+   * 
+   * Add email address
+   */
+  'addEmailAddress'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.AddEmailAddress.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddEmailAddress.Responses.$201>
   /**
    * getSharedInbox - getSharedInbox
    * 
@@ -439,6 +636,84 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v2/email-settings/email-addresses/epilot:provision']: {
+    /**
+     * provisionEpilotEmailAddress - provisionEpilotEmailAddress
+     * 
+     * Provision or reactivate epilot email address, deactivating other active epilot email addresses.
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ProvisionEpilotEmailAddress.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ProvisionEpilotEmailAddress.Responses.$200>
+  }
+  ['/v2/email-settings/email-addresses/primary']: {
+    /**
+     * setEmailAddressPrimary - setEmailAddressPrimary
+     * 
+     * Set email address as primary
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SetEmailAddressPrimary.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetEmailAddressPrimary.Responses.$200>
+  }
+  ['/v2/email-settings/email-addresses/{id}']: {
+    /**
+     * getEmailAddress - getEmailAddress
+     * 
+     * Get email address
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEmailAddress.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEmailAddress.Responses.$200>
+    /**
+     * deleteEmailAddress - deleteEmailAddress
+     * 
+     * Delete email address
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteEmailAddress.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteEmailAddress.Responses.$204>
+    /**
+     * updateEmailAddress - updateEmailAddress
+     * 
+     * Update email address
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateEmailAddress.PathParameters> | null,
+      data?: Paths.UpdateEmailAddress.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateEmailAddress.Responses.$200>
+  }
+  ['/v2/email-settings/email-addresses']: {
+    /**
+     * listEmailAddresses - listEmailAddresses
+     * 
+     * List email addresses
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListEmailAddresses.Responses.$200>
+    /**
+     * addEmailAddress - addEmailAddress
+     * 
+     * Add email address
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.AddEmailAddress.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddEmailAddress.Responses.$201>
+  }
   ['/v2/email-settings/shared-inboxes/{id}']: {
     /**
      * getSharedInbox - getSharedInbox
@@ -588,17 +863,22 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;
 export type CreateSharedInboxPayload = Components.Schemas.CreateSharedInboxPayload;
 export type Domain = Components.Schemas.Domain;
+export type EmailAddressResponse = Components.Schemas.EmailAddressResponse;
 export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
+export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
+export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;
 export type Setting = Components.Schemas.Setting;
 export type SettingMeta = Components.Schemas.SettingMeta;
 export type SettingType = Components.Schemas.SettingType;
 export type SettingsResponse = Components.Schemas.SettingsResponse;
 export type SharedInboxResponse = Components.Schemas.SharedInboxResponse;
 export type SignatureSetting = Components.Schemas.SignatureSetting;
+export type UpdateEmailAddressPayload = Components.Schemas.UpdateEmailAddressPayload;
 export type UpdateSharedInboxPayload = Components.Schemas.UpdateSharedInboxPayload;
 export type WhitelistEmailAddressSetting = Components.Schemas.WhitelistEmailAddressSetting;

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Email settings API",
-    "version": "1.1.1"
+    "version": "1.2.0"
   },
   "tags": [
     {
@@ -22,6 +22,228 @@
     }
   ],
   "paths": {
+    "/v2/email-settings/email-addresses/epilot:provision": {
+      "put": {
+        "operationId": "provisionEpilotEmailAddress",
+        "summary": "provisionEpilotEmailAddress",
+        "description": "Provision or reactivate epilot email address, deactivating other active epilot email addresses.",
+        "tags": [
+          "Email addresses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionEpilotEmailAddressPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ProvisionEpilotEmailAddressSuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/email-settings/email-addresses/primary": {
+      "post": {
+        "operationId": "setEmailAddressPrimary",
+        "summary": "setEmailAddressPrimary",
+        "description": "Set email address as primary",
+        "tags": [
+          "Email addresses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEmailAddressPrimaryPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SetEmailAddressPrimarySuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/email-settings/email-addresses/{id}": {
+      "get": {
+        "operationId": "getEmailAddress",
+        "summary": "getEmailAddress",
+        "description": "Get email address",
+        "tags": [
+          "Email addresses"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetEmailAddressSuccessResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEmailAddress",
+        "summary": "deleteEmailAddress",
+        "description": "Delete email address",
+        "tags": [
+          "Email addresses"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateEmailAddress",
+        "summary": "updateEmailAddress",
+        "description": "Update email address",
+        "tags": [
+          "Email addresses"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EmailAddressId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmailAddressPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UpdateEmailAddressSuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/email-settings/email-addresses": {
+      "get": {
+        "operationId": "listEmailAddresses",
+        "summary": "listEmailAddresses",
+        "description": "List email addresses",
+        "tags": [
+          "Email addresses"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListEmailAddressesSuccessResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "addEmailAddress",
+        "summary": "addEmailAddress",
+        "description": "Add email address",
+        "tags": [
+          "Email addresses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmailAddressPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreateEmailAddressSuccessResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/email-settings/shared-inboxes/{id}": {
       "get": {
         "operationId": "getSharedInbox",
@@ -496,6 +718,69 @@
   },
   "components": {
     "responses": {
+      "ProvisionEpilotEmailAddressSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmailAddressResponse"
+            }
+          }
+        }
+      },
+      "SetEmailAddressPrimarySuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmailAddressResponse"
+            }
+          }
+        }
+      },
+      "CreateEmailAddressSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmailAddressResponse"
+            }
+          }
+        }
+      },
+      "UpdateEmailAddressSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmailAddressResponse"
+            }
+          }
+        }
+      },
+      "GetEmailAddressSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmailAddressResponse"
+            }
+          }
+        }
+      },
+      "ListEmailAddressesSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EmailAddressResponse"
+              }
+            }
+          }
+        }
+      },
       "NoContent": {
         "description": "Success"
       },
@@ -594,6 +879,15 @@
       }
     },
     "parameters": {
+      "EmailAddressId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "test@example.com"
+      },
       "SharedInboxId": {
         "name": "id",
         "in": "path",
@@ -625,6 +919,137 @@
       }
     },
     "schemas": {
+      "ProvisionEpilotEmailAddressPayload": {
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "SetEmailAddressPrimaryPayload": {
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEmailAddressPayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "group_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "default_signature_id": {
+            "type": "string"
+          },
+          "shared_inbox_id": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateEmailAddressPayload": {
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "group_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "default_signature_id": {
+            "type": "string"
+          },
+          "shared_inbox_id": {
+            "type": "string"
+          }
+        }
+      },
+      "EmailAddressResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SettingMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "address"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "user_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "group_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "default_signature_id": {
+                "type": "string"
+              },
+              "shared_inbox_id": {
+                "type": "string"
+              },
+              "is_active": {
+                "type": "boolean"
+              },
+              "is_primary": {
+                "type": "boolean"
+              },
+              "is_epilot_email_address": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
       "ErrorResponse": {
         "type": "object",
         "required": [
