@@ -551,6 +551,101 @@ declare namespace Components {
             _updated_at: string; // date-time
         }
         /**
+         * A billing account
+         */
+        export interface BillingAccount {
+            [name: string]: any;
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            /**
+             * Billing account number
+             */
+            billing_account_number?: string;
+            /**
+             * Balance of the billing account
+             */
+            balance?: number;
+            /**
+             * Balance of the billing account in decimal string representation
+             */
+            balance_decimal?: string;
+            balance_currency?: /**
+             * Currency code in ISO 4217 format
+             * example:
+             * EUR
+             */
+            Currency;
+            billing_contact?: {
+                $relation?: {
+                    /**
+                     * Entity ID for the related billing contact.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    entity_id?: string;
+                }[];
+            };
+            billing_address?: {
+                $relation_ref?: {
+                    /**
+                     * Entity ID for the related billing address.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    entity_id?: string;
+                    /**
+                     * Path to the related billing address.
+                     * example:
+                     * address
+                     */
+                    path?: string;
+                    /**
+                     * ID of the related billing address.
+                     * example:
+                     * f589786b-3024-43cd-9cb3-5a3c953f2896
+                     */
+                    _id?: string;
+                }[];
+            };
+        }
+        /**
          * An entity that describes a billing event such as a future installment or a reimbursement back to the customer.
          */
         export type BillingEvent = {
@@ -7278,6 +7373,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetBillingAccount {
+        namespace Responses {
+            export interface $200 {
+                entity?: /* A billing account */ Components.Schemas.BillingAccount;
+                /**
+                 * The related entities of the requested billing account
+                 */
+                relations?: Components.Schemas.EntityItem[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetBillingEvents {
         namespace Parameters {
             /**
@@ -10079,6 +10189,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace V2PortalBillingAccounts$Id {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
+        }
+    }
     namespace V2PortalPages {
         namespace Parameters {
             /**
@@ -10980,6 +11106,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
+  /**
+   * getBillingAccount - getBillingAccount
+   * 
+   * Get a billing account by id.
+   */
+  'getBillingAccount'(
+    parameters?: Parameters<Paths.V2PortalBillingAccounts$Id.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBillingAccount.Responses.$200>
   /**
    * loginToPortalAsUser - loginToPortalAsUser
    * 
@@ -12208,6 +12344,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomerBalance.Responses.$200>
   }
+  ['/v2/portal/billing/accounts/{id}']: {
+    /**
+     * getBillingAccount - getBillingAccount
+     * 
+     * Get a billing account by id.
+     */
+    'get'(
+      parameters?: Parameters<Paths.V2PortalBillingAccounts$Id.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBillingAccount.Responses.$200>
+  }
   ['/v2/portal/admin:login-as-user']: {
     /**
      * loginToPortalAsUser - loginToPortalAsUser
@@ -12619,6 +12767,7 @@ export type AuthConfig = Components.Schemas.AuthConfig;
 export type Balance = Components.Schemas.Balance;
 export type BaseBillingEvent = Components.Schemas.BaseBillingEvent;
 export type BaseEntity = Components.Schemas.BaseEntity;
+export type BillingAccount = Components.Schemas.BillingAccount;
 export type BillingEvent = Components.Schemas.BillingEvent;
 export type Block = Components.Schemas.Block;
 export type BlockId = Components.Schemas.BlockId;

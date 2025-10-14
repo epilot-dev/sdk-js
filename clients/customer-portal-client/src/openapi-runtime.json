@@ -1200,6 +1200,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/billing/accounts/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getBillingAccount",
+        "responses": {}
+      }
+    },
     "/v2/portal/admin:login-as-user": {
       "post": {
         "operationId": "loginToPortalAsUser",

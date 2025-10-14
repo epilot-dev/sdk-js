@@ -5176,6 +5176,70 @@
         }
       }
     },
+    "/v2/portal/billing/accounts/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getBillingAccount",
+        "summary": "getBillingAccount",
+        "description": "Get a billing account by id.",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "Billing Accounts",
+          "ECP"
+        ],
+        "responses": {
+          "200": {
+            "description": "The billing account has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/BillingAccount"
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested billing account",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/admin:login-as-user": {
       "post": {
         "operationId": "loginToPortalAsUser",
@@ -10273,6 +10337,81 @@
             "type": "string",
             "description": "Amount to be paid in cents in decimal string representation",
             "example": "100.50"
+          }
+        }
+      },
+      "BillingAccount": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "description": "A billing account",
+        "type": "object",
+        "properties": {
+          "billing_account_number": {
+            "type": "string",
+            "description": "Billing account number"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Balance of the billing account"
+          },
+          "balance_decimal": {
+            "type": "string",
+            "description": "Balance of the billing account in decimal string representation"
+          },
+          "balance_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "billing_contact": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "Entity ID for the related billing contact.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "billing_address": {
+            "type": "object",
+            "properties": {
+              "$relation_ref": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "Entity ID for the related billing address.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Path to the related billing address.",
+                      "example": "address"
+                    },
+                    "_id": {
+                      "type": "string",
+                      "description": "ID of the related billing address.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
