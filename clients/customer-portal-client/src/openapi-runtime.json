@@ -13,6 +13,11 @@
             "in": "query",
             "name": "origin",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
           }
         ],
         "requestBody": {
@@ -1690,6 +1695,18 @@
     "/v3/portal/configs": {
       "get": {
         "operationId": "listAllPortalConfigs",
+        "responses": {}
+      }
+    },
+    "/v3/portal/config/swap": {
+      "post": {
+        "operationId": "swapPortalConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }

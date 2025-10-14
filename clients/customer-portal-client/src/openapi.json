@@ -74,6 +74,15 @@
               "$ref": "#/components/schemas/Origin"
             },
             "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal ID"
           }
         ],
         "requestBody": {
@@ -602,12 +611,11 @@
                           },
                           "type": {
                             "type": "string",
-                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string."
                           }
                         },
                         "required": [
                           "value",
-                          "unit",
                           "timestamp"
                         ]
                       }
@@ -7075,6 +7083,86 @@
           }
         }
       }
+    },
+    "/v3/portal/config/swap": {
+      "post": {
+        "operationId": "swapPortalConfig",
+        "summary": "swapPortalConfig",
+        "description": "Swaps the portal configuration of two portals.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Source and target portal IDs",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_portal_id",
+                  "target_portal_id"
+                ],
+                "properties": {
+                  "source_portal_id": {
+                    "type": "string",
+                    "description": "Source portal ID"
+                  },
+                  "target_portal_id": {
+                    "type": "string",
+                    "description": "Target portal ID"
+                  },
+                  "items_to_swap": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SwappableConfig"
+                    },
+                    "description": "Items to swap"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain and users swapped successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Domain and users swapped successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7578,11 +7666,7 @@
       },
       "Origin": {
         "type": "string",
-        "description": "Origin of the portal",
-        "enum": [
-          "END_CUSTOMER_PORTAL",
-          "INSTALLER_PORTAL"
-        ]
+        "description": "Origin of the portal"
       },
       "AllowedFileExtensions": {
         "type": "object",
@@ -8107,6 +8191,22 @@
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
           },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Whether this is a v3 portal configuration"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "ID of the portal"
+          },
+          "portal_sk_v3": {
+            "type": "string",
+            "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+            "description": "Key of the portal config"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
           "pages": {
             "type": "object",
             "additionalProperties": {
@@ -8145,19 +8245,6 @@
                 "type": "string",
                 "example": 12345,
                 "description": "ID of the organization"
-              },
-              "portal_id": {
-                "type": "string",
-                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
-              },
-              "origin": {
-                "$ref": "#/components/schemas/Origin"
               },
               "org_settings": {
                 "type": "object",
@@ -8949,6 +9036,23 @@
         "properties": {},
         "additionalProperties": true
       },
+      "EntityTemplates": {
+        "type": "object",
+        "properties": {
+          "templates_output": {
+            "type": "object",
+            "description": "Resolved template strings corresponding to the templates parameter",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "content_top_name": "Customer #123456",
+              "main_content_name": "Orange Flexible A2 (654321)",
+              "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+            }
+          }
+        }
+      },
       "EntityItem": {
         "allOf": [
           {
@@ -8956,6 +9060,9 @@
           },
           {
             "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "$ref": "#/components/schemas/EntityTemplates"
           },
           {
             "type": "object",
@@ -9026,6 +9133,11 @@
                   "type": "string",
                   "description": "Group title",
                   "example": "active"
+                },
+                "group_title": {
+                  "type": "string",
+                  "description": "Resolved group title from variable",
+                  "example": "Account #987654321"
                 },
                 "count": {
                   "type": "number",
@@ -10228,6 +10340,11 @@
             "description": "Field to group results by",
             "example": "customer._title"
           },
+          "group_title": {
+            "type": "string",
+            "description": "Template for group title using variables",
+            "example": "{{customer[Primary].first_name}} {{customer[Primary].last_name}}"
+          },
           "group_size": {
             "type": "integer",
             "minimum": 1,
@@ -10290,6 +10407,18 @@
               "_title"
             ]
           },
+          "templates": {
+            "type": "object",
+            "description": "Template strings to parse and return as synthetic fields",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "content_top_name": "Customer #{{contract.customer_number}}",
+              "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+              "content_bottom_name": "{{custom_contract_delivery_address}}"
+            }
+          },
           "filters": {
             "type": "array",
             "description": "Additional filters to apply to the search query",
@@ -10312,31 +10441,32 @@
               }
             ]
           },
-          "filters_schema": {
+          "filters_context": {
             "type": "array",
-            "description": "Schema-based filters for entity relations.",
+            "description": "Context-based filters for entity relations.",
             "items": {
-              "type": "string",
-              "enum": [
-                "contact",
-                "contract",
-                "portal_user"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
             },
             "example": [
-              "contact",
-              "portal_user"
-            ]
-          },
-          "contracts": {
-            "type": "array",
-            "description": "List of contract IDs to filter by",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": [
-              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+              {
+                "portal_user": true
+              },
+              {
+                "contact": true
+              },
+              {
+                "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+              }
             ]
           },
           "targets": {
@@ -11907,15 +12037,18 @@
         "properties": {
           "visibility": {
             "type": "object",
-            "description": "The conditions that need to be met for the block to be shown"
+            "description": "The conditions that need to be met for the block to be shown",
+            "additionalProperties": true
           },
           "content": {
             "type": "object",
-            "description": "The content of the block"
+            "description": "The content of the block",
+            "additionalProperties": true
           },
           "design": {
             "type": "object",
-            "description": "The design of the block"
+            "description": "The design of the block",
+            "additionalProperties": true
           }
         }
       },
@@ -11964,9 +12097,6 @@
           {
             "type": "object",
             "additionalProperties": true,
-            "required": [
-              "id"
-            ],
             "properties": {
               "id": {
                 "type": "string",
@@ -12067,9 +12197,6 @@
       },
       "Page": {
         "type": "object",
-        "required": [
-          "id"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/PageRequest"
@@ -12478,6 +12605,22 @@
           "is_dummy": {
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
+          },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Whether this is a v3 portal configuration"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "ID of the portal"
+          },
+          "portal_sk_v3": {
+            "type": "string",
+            "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+            "description": "Key of the portal config"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
           }
         }
       },
@@ -12514,23 +12657,10 @@
           },
           {
             "properties": {
-              "portal_id": {
-                "type": "string",
-                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
-              },
               "organization_id": {
                 "type": "string",
                 "example": 12345,
                 "description": "ID of the organization"
-              },
-              "origin": {
-                "$ref": "#/components/schemas/Origin"
               },
               "org_settings": {
                 "type": "object",
@@ -12600,6 +12730,15 @@
             "description": "Whether the org is in canary mode"
           }
         }
+      },
+      "SwappableConfig": {
+        "type": "string",
+        "enum": [
+          "all",
+          "domain",
+          "users",
+          "email_templates"
+        ]
       }
     }
   },

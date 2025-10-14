@@ -587,7 +587,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            id: string; // uuid
+            id?: string; // uuid
         }
         /**
          * The id of the block
@@ -601,19 +601,19 @@ declare namespace Components {
              * The conditions that need to be met for the block to be shown
              */
             visibility?: {
-                [key: string]: any;
+                [name: string]: any;
             };
             /**
              * The content of the block
              */
             content?: {
-                [key: string]: any;
+                [name: string]: any;
             };
             /**
              * The design of the block
              */
             design?: {
-                [key: string]: any;
+                [name: string]: any;
             };
         }
         export interface BlockRequest {
@@ -1005,6 +1005,21 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * ID of the portal
+             */
+            portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
             pages?: {
                 [name: string]: Page;
             };
@@ -1342,6 +1357,21 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * ID of the portal
+             */
+            portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
         }
         /**
          * The mapped contact of the portal user
@@ -1980,6 +2010,18 @@ declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Resolved template strings corresponding to the templates parameter
+             * example:
+             * {
+             *   "content_top_name": "Customer #123456",
+             *   "main_content_name": "Orange Flexible A2 (654321)",
+             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+             * }
+             */
+            templates_output?: {
+                [name: string]: string;
+            };
             _schema: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -1998,6 +2040,12 @@ declare namespace Components {
                  * active
                  */
                 group?: string;
+                /**
+                 * Resolved group title from variable
+                 * example:
+                 * Account #987654321
+                 */
+                group_title?: string;
                 /**
                  * Total number of entities in this group
                  * example:
@@ -2141,6 +2189,12 @@ declare namespace Components {
              */
             group?: string;
             /**
+             * Template for group title using variables
+             * example:
+             * {{customer[Primary].first_name}} {{customer[Primary].last_name}}
+             */
+            group_title?: string;
+            /**
              * Number of groups to return
              */
             group_size?: number;
@@ -2180,6 +2234,18 @@ declare namespace Components {
              */
             fields?: string[];
             /**
+             * Template strings to parse and return as synthetic fields
+             * example:
+             * {
+             *   "content_top_name": "Customer #{{contract.customer_number}}",
+             *   "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+             *   "content_bottom_name": "{{custom_contract_delivery_address}}"
+             * }
+             */
+            templates?: {
+                [name: string]: string;
+            };
+            /**
              * Additional filters to apply to the search query
              * example:
              * [
@@ -2201,22 +2267,23 @@ declare namespace Components {
                 [key: string]: any;
             }[];
             /**
-             * Schema-based filters for entity relations.
+             * Context-based filters for entity relations.
              * example:
              * [
-             *   "contact",
-             *   "portal_user"
+             *   {
+             *     "portal_user": true
+             *   },
+             *   {
+             *     "contact": true
+             *   },
+             *   {
+             *     "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+             *   }
              * ]
              */
-            filters_schema?: ("contact" | "contract" | "portal_user")[];
-            /**
-             * List of contract IDs to filter by
-             * example:
-             * [
-             *   "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
-             * ]
-             */
-            contracts?: string /* uuid */[];
+            filters_context?: {
+                [name: string]: boolean | string;
+            }[];
             /**
              * Filters from these targets will be applied to the search query.
              * example:
@@ -2232,6 +2299,20 @@ declare namespace Components {
          * contact
          */
         export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
+        export interface EntityTemplates {
+            /**
+             * Resolved template strings corresponding to the templates parameter
+             * example:
+             * {
+             *   "content_top_name": "Customer #123456",
+             *   "main_content_name": "Orange Flexible A2 (654321)",
+             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+             * }
+             */
+            templates_output?: {
+                [name: string]: string;
+            };
+        }
         export interface EntityWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
@@ -3710,7 +3791,7 @@ declare namespace Components {
         /**
          * Origin of the portal
          */
-        export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+        export type Origin = string;
         export interface Page {
             [name: string]: any;
             /**
@@ -3788,7 +3869,7 @@ declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            id: string; // uuid
+            id?: string; // uuid
             /**
              * Last modified timestamp of the Page
              * example:
@@ -4215,6 +4296,21 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * ID of the portal
+             */
+            portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
             pages?: {
                 [name: string]: Page;
             };
@@ -4230,19 +4326,6 @@ declare namespace Components {
              * 12345
              */
             organization_id?: string;
-            /**
-             * ID of the portal
-             * example:
-             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
-             */
-            portal_id?: string;
-            /**
-             * Key of the portal config
-             * example:
-             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
-             */
-            portal_sk_v3?: string;
-            origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
              */
@@ -4649,9 +4732,11 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
              * ID of the portal
-             * example:
-             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
             /**
@@ -4660,13 +4745,13 @@ declare namespace Components {
              * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
             /**
              * ID of the organization
              * example:
              * 12345
              */
             organization_id?: string;
-            origin?: /* Origin of the portal */ Origin;
             /**
              * Organization settings
              */
@@ -5195,6 +5280,7 @@ declare namespace Components {
             slug?: string;
         }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
+        export type SwappableConfig = "all" | "domain" | "users" | "email_templates";
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
@@ -5657,6 +5743,21 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * ID of the portal
+             */
+            portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
             pages?: {
                 [name: string]: Page;
             };
@@ -6031,6 +6132,20 @@ declare namespace Components {
              * Whether this is a dummy/test portal configuration
              */
             is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * ID of the portal
+             */
+            portal_id?: string;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
             pages?: PageRequest[];
         }
@@ -7280,7 +7395,7 @@ declare namespace Paths {
                      */
                     value: number;
                     /**
-                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time).
+                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string.
                      */
                     type?: string;
                 }[];
@@ -8158,6 +8273,21 @@ declare namespace Paths {
                  * Whether this is a dummy/test portal configuration
                  */
                 is_dummy?: boolean;
+                /**
+                 * Whether this is a v3 portal configuration
+                 */
+                is_v3_item?: boolean;
+                /**
+                 * ID of the portal
+                 */
+                portal_id?: string;
+                /**
+                 * Key of the portal config
+                 * example:
+                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                portal_sk_v3?: string;
+                origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
                 };
@@ -8173,19 +8303,6 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
-                /**
-                 * ID of the portal
-                 * example:
-                 * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
-                 */
-                portal_id?: string;
-                /**
-                 * Key of the portal config
-                 * example:
-                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
-                 */
-                portal_sk_v3?: string;
-                origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 /**
                  * Organization settings
                  */
@@ -9510,6 +9627,36 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SwapPortalConfig {
+        export interface RequestBody {
+            /**
+             * Source portal ID
+             */
+            source_portal_id: string;
+            /**
+             * Target portal ID
+             */
+            target_portal_id: string;
+            /**
+             * Items to swap
+             */
+            items_to_swap?: Components.Schemas.SwappableConfig[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Domain and users swapped successfully.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TrackFileDownloaded {
         namespace Parameters {
             export type Id = /**
@@ -9857,9 +10004,11 @@ declare namespace Paths {
     namespace UpsertPortal {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+            export type PortalId = string;
         }
         export interface QueryParameters {
             origin: Parameters.Origin;
+            portal_id?: Parameters.PortalId;
         }
         export type RequestBody = Components.Schemas.UpsertPortalConfig;
         namespace Responses {
@@ -11163,6 +11312,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
+  /**
+   * swapPortalConfig - swapPortalConfig
+   * 
+   * Swaps the portal configuration of two portals.
+   */
+  'swapPortalConfig'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SwapPortalConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -12429,6 +12588,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
   }
+  ['/v3/portal/config/swap']: {
+    /**
+     * swapPortalConfig - swapPortalConfig
+     * 
+     * Swaps the portal configuration of two portals.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SwapPortalConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -12479,6 +12650,7 @@ export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGro
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySlug = Components.Schemas.EntitySlug;
+export type EntityTemplates = Components.Schemas.EntityTemplates;
 export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type Exists = Components.Schemas.Exists;
@@ -12547,6 +12719,7 @@ export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
 export type Source = Components.Schemas.Source;
+export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
