@@ -13,6 +13,7 @@
     "/v1/blueprint-manifest/jobs/{job_id}": {
       "get": {
         "operationId": "getJob",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/JobID"
@@ -24,6 +25,7 @@
     "/v1/blueprint-manifest/jobs:createExport": {
       "post": {
         "operationId": "createExport",
+        "deprecated": true,
         "requestBody": {
           "content": {
             "application/json": {}
@@ -35,6 +37,7 @@
     "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
       "post": {
         "operationId": "exportManifest",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/JobID"
@@ -62,6 +65,7 @@
     "/v1/blueprint-manifest/jobs:createPlan": {
       "post": {
         "operationId": "createPlan",
+        "deprecated": true,
         "requestBody": {
           "content": {
             "application/json": {}
@@ -73,6 +77,7 @@
     "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
       "post": {
         "operationId": "applyPlan",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/JobID"
@@ -89,12 +94,14 @@
     "/v1/blueprint-manifest/manifests": {
       "get": {
         "operationId": "listInstalledManifests",
+        "deprecated": true,
         "responses": {}
       }
     },
     "/v1/blueprint-manifest/manifests/{manifest_id}": {
       "get": {
         "operationId": "getManifest",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -106,6 +113,7 @@
       },
       "put": {
         "operationId": "updateManifest",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -122,6 +130,7 @@
       },
       "delete": {
         "operationId": "deleteManifest",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",

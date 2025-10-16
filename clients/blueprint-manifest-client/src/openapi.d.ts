@@ -63,6 +63,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
             source_type: "app";
             resources?: BlueprintResource[];
         }
@@ -267,6 +273,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
         }
         export interface CommonBlueprintJobFields {
             id?: /**
@@ -496,6 +508,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
             resources?: BlueprintResource[];
             source_type: "custom";
         }
@@ -541,6 +559,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
             source_type: "deploy";
             resources?: BlueprintResource[];
         }
@@ -586,6 +610,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
             source_type: "file";
             resources?: BlueprintResource[];
         }
@@ -1152,6 +1182,12 @@ declare namespace Components {
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
             updated_by?: CallerIdentity;
+            installation_job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
             /**
              * URL to the blueprint documentation
              */
@@ -1235,7 +1271,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "coupon" | "product_recommendation" | "usergroup" | "saved_view" | "app" | "role" | "portal_config";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced

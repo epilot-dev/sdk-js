@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.2.1",
+    "version": "3.2.2",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -50,6 +50,7 @@
         "operationId": "getJob",
         "summary": "getJob",
         "description": "Get the current status of a blueprint (export or import)",
+        "deprecated": true,
         "tags": [
           "Jobs"
         ],
@@ -77,6 +78,7 @@
         "operationId": "createExport",
         "summary": "createExport",
         "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n",
+        "deprecated": true,
         "tags": [
           "Export"
         ],
@@ -152,6 +154,7 @@
         "operationId": "exportManifest",
         "summary": "exportManifest",
         "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`",
+        "deprecated": true,
         "tags": [
           "Export"
         ],
@@ -297,6 +300,7 @@
         "operationId": "createPlan",
         "summary": "createPlan",
         "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n",
+        "deprecated": true,
         "tags": [
           "Import"
         ],
@@ -501,6 +505,7 @@
         "operationId": "applyPlan",
         "summary": "applyPlan",
         "description": "Apply a plan returned by `createPlan`.",
+        "deprecated": true,
         "tags": [
           "Import"
         ],
@@ -558,6 +563,7 @@
         "operationId": "listInstalledManifests",
         "summary": "listInstalledManifests",
         "description": "List Blueprint Manifests installed to the organization",
+        "deprecated": true,
         "tags": [
           "Manifests"
         ],
@@ -592,6 +598,7 @@
         "operationId": "getManifest",
         "summary": "getManifest",
         "description": "Get installed Manifest by ID",
+        "deprecated": true,
         "tags": [
           "Manifests"
         ],
@@ -622,6 +629,7 @@
         "operationId": "updateManifest",
         "summary": "updateManifest",
         "description": "Update an installed manifest\n",
+        "deprecated": true,
         "tags": [
           "Manifests"
         ],
@@ -661,6 +669,7 @@
         "operationId": "deleteManifest",
         "summary": "deleteManifest",
         "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n",
+        "deprecated": true,
         "tags": [
           "Manifests"
         ],
@@ -1640,6 +1649,12 @@
           },
           "updated_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "installation_job_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
           }
         },
         "required": [
@@ -2108,6 +2123,8 @@
           "journey",
           "product",
           "price",
+          "product_recommendation",
+          "coupon",
           "tax",
           "automation_flow",
           "entity_mapping",
@@ -2124,13 +2141,12 @@
           "webhook",
           "dashboard",
           "custom_variable",
-          "coupon",
-          "product_recommendation",
           "usergroup",
           "saved_view",
           "app",
           "role",
-          "portal_config"
+          "portal_config",
+          "target"
         ]
       },
       "PlanChanges": {
