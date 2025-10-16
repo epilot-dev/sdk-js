@@ -12,6 +12,12 @@ declare namespace Components {
     namespace Schemas {
         export interface ConvertDocumentRequest {
             /**
+             * Language
+             * example:
+             * de
+             */
+            language?: string;
+            /**
              * Input document
              */
             input_document: {
@@ -67,7 +73,7 @@ declare namespace Components {
             /**
              * Language
              * example:
-             * en
+             * de
              */
             language?: string;
             /**
@@ -161,6 +167,32 @@ declare namespace Components {
                      * Generated document filename for DOCX
                      * example:
                      * my-template-OR-001.docx
+                     */
+                    filename?: string;
+                    s3ref?: S3Reference;
+                };
+            };
+            xlsx_output?: {
+                /**
+                 * Pre-signed S3 GET URL for XLSX preview
+                 * example:
+                 * https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.xlsx
+                 */
+                preview_url?: string;
+                /**
+                 * example:
+                 * {
+                 *   "s3ref": {
+                 *     "bucket": "document-api-preview-prod",
+                 *     "key": "preview/my-template.xlsx"
+                 *   }
+                 * }
+                 */
+                output_document?: {
+                    /**
+                     * Generated document filename for XLSX
+                     * example:
+                     * my-template-OR-001.xlsx
                      */
                     filename?: string;
                     s3ref?: S3Reference;
@@ -477,6 +509,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getTemplateMeta - getTemplateMeta
@@ -506,7 +539,7 @@ export interface OperationMethods {
    * - .docx but limited to only text based variables
    * - .ics
    * 
-   * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
+   * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
    * 
    */
   'generateDocumentV2'(
@@ -565,7 +598,7 @@ export interface PathsDictionary {
      * - .docx but limited to only text based variables
      * - .ics
      * 
-     * Uses [Template Variable API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
+     * Uses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the input document.
      * 
      */
     'post'(
@@ -596,6 +629,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ConvertDocumentRequest = Components.Schemas.ConvertDocumentRequest;
 export type ConvertDocumentResponse = Components.Schemas.ConvertDocumentResponse;

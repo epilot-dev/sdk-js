@@ -74,6 +74,15 @@
               "$ref": "#/components/schemas/Origin"
             },
             "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal ID"
           }
         ],
         "requestBody": {
@@ -602,12 +611,11 @@
                           },
                           "type": {
                             "type": "string",
-                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time)."
+                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string."
                           }
                         },
                         "required": [
                           "value",
-                          "unit",
                           "timestamp"
                         ]
                       }
@@ -1160,6 +1168,41 @@
               "type": "string"
             },
             "description": "ID of the Seamless Link"
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "If the request is in a context of certain entities (i.e. the user in in a context of a specific contract), links can be customized for that. Portal User and Contact entities are automatically part of the context.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Entity schema",
+                    "example": "contract"
+                  },
+                  "entity_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Entity id",
+                    "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+                  }
+                },
+                "required": [
+                  "entity_id",
+                  "entity_schema"
+                ]
+              },
+              "example": [
+                {
+                  "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+                  "entity_schema": "contract"
+                }
+              ]
+            }
           }
         ],
         "security": [
@@ -5133,6 +5176,70 @@
         }
       }
     },
+    "/v2/portal/billing/accounts/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getBillingAccount",
+        "summary": "getBillingAccount",
+        "description": "Get a billing account by id.",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "Billing Accounts",
+          "ECP"
+        ],
+        "responses": {
+          "200": {
+            "description": "The billing account has been fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/BillingAccount"
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested billing account",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/admin:login-as-user": {
       "post": {
         "operationId": "loginToPortalAsUser",
@@ -5324,10 +5431,21 @@
             "in": "query",
             "name": "origin",
             "required": true,
+            "deprecated": true,
             "schema": {
               "$ref": "#/components/schemas/Origin"
             },
             "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Portal ID",
+              "example": "123"
+            }
           }
         ],
         "requestBody": {
@@ -5994,7 +6112,11 @@
                     "description": "Entity id",
                     "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
                   }
-                }
+                },
+                "required": [
+                  "entity_id",
+                  "entity_schema"
+                ]
               },
               "example": [
                 {
@@ -6633,6 +6755,142 @@
         }
       }
     },
+    "/v2/portal/public/m-login/deregister/{client_id}/{user_id}": {
+      "delete": {
+        "operationId": "deRegisterMLoginUser",
+        "summary": "deRegisterMLoginUser",
+        "description": "Deregisters a user from the M Login client",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deregistered successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/public/m-login/notify-interest-change/{client_id}/{user_id}": {
+      "post": {
+        "operationId": "notifyMLoginInterestChange",
+        "summary": "notifyMLoginInterestChange",
+        "description": "Notifies the interest change of a user in the M Login client",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "resource_id": {
+                    "type": "string",
+                    "description": "Resource ID"
+                  },
+                  "user_id": {
+                    "type": "string",
+                    "description": "Resource type"
+                  },
+                  "interest_tag": {
+                    "type": "string",
+                    "description": "Interest tag"
+                  },
+                  "action": {
+                    "type": "string",
+                    "description": "Action"
+                  },
+                  "resource": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "resource_id": {
+                        "type": "string",
+                        "description": "Resource ID"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Description",
+                        "nullable": true
+                      },
+                      "contact": {
+                        "type": "string",
+                        "description": "Contact"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "description": "Kind"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Interest change acknowledged successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/config": {
       "post": {
         "operationId": "createPortalConfig",
@@ -6883,6 +7141,86 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/swap": {
+      "post": {
+        "operationId": "swapPortalConfig",
+        "summary": "swapPortalConfig",
+        "description": "Swaps the portal configuration of two portals.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Source and target portal IDs",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_portal_id",
+                  "target_portal_id"
+                ],
+                "properties": {
+                  "source_portal_id": {
+                    "type": "string",
+                    "description": "Source portal ID"
+                  },
+                  "target_portal_id": {
+                    "type": "string",
+                    "description": "Target portal ID"
+                  },
+                  "items_to_swap": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SwappableConfig"
+                    },
+                    "description": "Items to swap"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain and users swapped successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Domain and users swapped successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7392,11 +7730,7 @@
       },
       "Origin": {
         "type": "string",
-        "description": "Origin of the portal",
-        "enum": [
-          "END_CUSTOMER_PORTAL",
-          "INSTALLER_PORTAL"
-        ]
+        "description": "Origin of the portal"
       },
       "AllowedFileExtensions": {
         "type": "object",
@@ -7629,6 +7963,10 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderSlug"
                 }
+              },
+              "auto_redirect_to_sso": {
+                "type": "boolean",
+                "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
               }
             }
           },
@@ -7917,6 +8255,22 @@
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
           },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Whether this is a v3 portal configuration"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "ID of the portal"
+          },
+          "portal_sk_v3": {
+            "type": "string",
+            "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+            "description": "Key of the portal config"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
           "pages": {
             "type": "object",
             "additionalProperties": {
@@ -7955,19 +8309,6 @@
                 "type": "string",
                 "example": 12345,
                 "description": "ID of the organization"
-              },
-              "portal_id": {
-                "type": "string",
-                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
-              },
-              "origin": {
-                "$ref": "#/components/schemas/Origin"
               },
               "org_settings": {
                 "type": "object",
@@ -8759,6 +9100,23 @@
         "properties": {},
         "additionalProperties": true
       },
+      "EntityTemplates": {
+        "type": "object",
+        "properties": {
+          "templates_output": {
+            "type": "object",
+            "description": "Resolved template strings corresponding to the templates parameter",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "content_top_name": "Customer #123456",
+              "main_content_name": "Orange Flexible A2 (654321)",
+              "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+            }
+          }
+        }
+      },
       "EntityItem": {
         "allOf": [
           {
@@ -8766,6 +9124,9 @@
           },
           {
             "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "$ref": "#/components/schemas/EntityTemplates"
           },
           {
             "type": "object",
@@ -8836,6 +9197,11 @@
                   "type": "string",
                   "description": "Group title",
                   "example": "active"
+                },
+                "group_title": {
+                  "type": "string",
+                  "description": "Resolved group title from variable",
+                  "example": "Account #987654321"
                 },
                 "count": {
                   "type": "number",
@@ -9974,6 +10340,81 @@
           }
         }
       },
+      "BillingAccount": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "description": "A billing account",
+        "type": "object",
+        "properties": {
+          "billing_account_number": {
+            "type": "string",
+            "description": "Billing account number"
+          },
+          "balance": {
+            "type": "number",
+            "description": "Balance of the billing account"
+          },
+          "balance_decimal": {
+            "type": "string",
+            "description": "Balance of the billing account in decimal string representation"
+          },
+          "balance_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "billing_contact": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "Entity ID for the related billing contact.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "billing_address": {
+            "type": "object",
+            "properties": {
+              "$relation_ref": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string",
+                      "description": "Entity ID for the related billing address.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "Path to the related billing address.",
+                      "example": "address"
+                    },
+                    "_id": {
+                      "type": "string",
+                      "description": "ID of the related billing address.",
+                      "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "Balance": {
         "type": "object",
         "properties": {
@@ -10001,7 +10442,19 @@
         "type": "object",
         "properties": {
           "slug": {
-            "$ref": "#/components/schemas/EntitySlug"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntitySlug"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntitySlug"
+                },
+                "minItems": 1
+              }
+            ],
+            "description": "Single entity schema slug or array of slugs"
           },
           "q": {
             "type": "string",
@@ -10025,6 +10478,11 @@
             "type": "string",
             "description": "Field to group results by",
             "example": "customer._title"
+          },
+          "group_title": {
+            "type": "string",
+            "description": "Template for group title using variables",
+            "example": "{{customer[Primary].first_name}} {{customer[Primary].last_name}}"
           },
           "group_size": {
             "type": "integer",
@@ -10088,6 +10546,18 @@
               "_title"
             ]
           },
+          "templates": {
+            "type": "object",
+            "description": "Template strings to parse and return as synthetic fields",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "content_top_name": "Customer #{{contract.customer_number}}",
+              "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+              "content_bottom_name": "{{custom_contract_delivery_address}}"
+            }
+          },
           "filters": {
             "type": "array",
             "description": "Additional filters to apply to the search query",
@@ -10110,31 +10580,32 @@
               }
             ]
           },
-          "filters_schema": {
+          "filters_context": {
             "type": "array",
-            "description": "Schema-based filters for entity relations.",
+            "description": "Context-based filters for entity relations.",
             "items": {
-              "type": "string",
-              "enum": [
-                "contact",
-                "contract",
-                "portal_user"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
             },
             "example": [
-              "contact",
-              "portal_user"
-            ]
-          },
-          "contracts": {
-            "type": "array",
-            "description": "List of contract IDs to filter by",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "example": [
-              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+              {
+                "portal_user": true
+              },
+              {
+                "contact": true
+              },
+              {
+                "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+              }
             ]
           },
           "targets": {
@@ -11226,7 +11697,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -11320,12 +11791,6 @@
             "type": "string",
             "description": "Recognized sector of the meter.",
             "example": "water"
-          },
-          "meter_number": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Recognized meter number. Deprecated: Use `meter_numbers` instead as we can recognize several potential meter numbers.",
-            "example": "00123456"
           },
           "meter_numbers": {
             "type": "array",
@@ -11711,15 +12176,18 @@
         "properties": {
           "visibility": {
             "type": "object",
-            "description": "The conditions that need to be met for the block to be shown"
+            "description": "The conditions that need to be met for the block to be shown",
+            "additionalProperties": true
           },
           "content": {
             "type": "object",
-            "description": "The content of the block"
+            "description": "The content of the block",
+            "additionalProperties": true
           },
           "design": {
             "type": "object",
-            "description": "The design of the block"
+            "description": "The design of the block",
+            "additionalProperties": true
           }
         }
       },
@@ -11761,10 +12229,6 @@
         "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
       },
       "Block": {
-        "type": "object",
-        "required": [
-          "id"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/BlockRequest"
@@ -11835,7 +12299,7 @@
           "blocks": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/BlockRequest"
+              "$ref": "#/components/schemas/Block"
             }
           },
           "order": {
@@ -11872,9 +12336,6 @@
       },
       "Page": {
         "type": "object",
-        "required": [
-          "id"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/PageRequest"
@@ -11992,6 +12453,10 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderSlug"
                 }
+              },
+              "auto_redirect_to_sso": {
+                "type": "boolean",
+                "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
               }
             }
           },
@@ -12279,6 +12744,22 @@
           "is_dummy": {
             "type": "boolean",
             "description": "Whether this is a dummy/test portal configuration"
+          },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Whether this is a v3 portal configuration"
+          },
+          "portal_id": {
+            "type": "string",
+            "description": "ID of the portal"
+          },
+          "portal_sk_v3": {
+            "type": "string",
+            "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+            "description": "Key of the portal config"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
           }
         }
       },
@@ -12315,23 +12796,10 @@
           },
           {
             "properties": {
-              "portal_id": {
-                "type": "string",
-                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "ID of the portal"
-              },
-              "portal_sk_v3": {
-                "type": "string",
-                "example": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-                "description": "Key of the portal config"
-              },
               "organization_id": {
                 "type": "string",
                 "example": 12345,
                 "description": "ID of the organization"
-              },
-              "origin": {
-                "$ref": "#/components/schemas/Origin"
               },
               "org_settings": {
                 "type": "object",
@@ -12387,6 +12855,28 @@
               }
             }
           }
+        ]
+      },
+      "JuiceSettings": {
+        "type": "object",
+        "properties": {
+          "is_dummy": {
+            "type": "boolean",
+            "description": "Whether the org is in dummy mode"
+          },
+          "is_canary": {
+            "type": "boolean",
+            "description": "Whether the org is in canary mode"
+          }
+        }
+      },
+      "SwappableConfig": {
+        "type": "string",
+        "enum": [
+          "all",
+          "domain",
+          "users",
+          "email_templates"
         ]
       }
     }

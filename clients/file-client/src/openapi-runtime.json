@@ -376,10 +376,100 @@
         },
         "responses": {}
       }
+    },
+    "/v1/entity/{id}/folders": {
+      "get": {
+        "operationId": "getFileFolders",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "parents",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createFileFolder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{id}/folders/{folderSlug}": {
+      "put": {
+        "operationId": "updateFileFolder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFileFolder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{id}/folders/{folderSlug}/files": {
+      "get": {
+        "operationId": "getFilesInFolder",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "folderSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
       "StrictQueryParam": {
         "name": "strict",
         "in": "query",
@@ -404,6 +494,13 @@
         "name": "delete_temp_file",
         "in": "query",
         "required": false
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   },

@@ -13,6 +13,11 @@
             "in": "query",
             "name": "origin",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
           }
         ],
         "requestBody": {
@@ -303,6 +308,11 @@
             "in": "query",
             "name": "link_id",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -1190,6 +1200,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/billing/accounts/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getBillingAccount",
+        "responses": {}
+      }
+    },
     "/v2/portal/admin:login-as-user": {
       "post": {
         "operationId": "loginToPortalAsUser",
@@ -1243,6 +1266,12 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true,
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -1581,6 +1610,48 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/m-login/deregister/{client_id}/{user_id}": {
+      "delete": {
+        "operationId": "deRegisterMLoginUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/public/m-login/notify-interest-change/{client_id}/{user_id}": {
+      "post": {
+        "operationId": "notifyMLoginInterestChange",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "client_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/portal/config": {
       "post": {
         "operationId": "createPortalConfig",
@@ -1637,6 +1708,18 @@
     "/v3/portal/configs": {
       "get": {
         "operationId": "listAllPortalConfigs",
+        "responses": {}
+      }
+    },
+    "/v3/portal/config/swap": {
+      "post": {
+        "operationId": "swapPortalConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
