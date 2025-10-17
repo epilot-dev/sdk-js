@@ -18,14 +18,13 @@ declare namespace Components {
                  */
                 event_id: string;
                 /**
-                 * Processing status for the event
+                 * Processing status for the event (skipped indicates duplicate deduplication_id)
                  */
-                status: "success" | "error";
+                status: "success" | "error" | "skipped";
                 message?: string;
             }[];
         }
         export type InternalServerError = Schemas.ErrorResponseBase;
-        export type NotFound = Schemas.ErrorResponseBase;
         export type TriggerWebhookResponse = Schemas.TriggerWebhookResp;
         export type Unauthorized = Schemas.ErrorResponseBase;
     }
@@ -162,6 +161,13 @@ declare namespace Paths {
                  * The serialized object data payload (JSON, XML, etc.) as a string
                  */
                 payload: string;
+                /**
+                 * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same app and component. Must contain only alphanumeric characters, hyphens, and underscores.
+                 *
+                 * example:
+                 * evt-2025-05-01-12345-create-bp
+                 */
+                deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
             }[];
         }
         namespace Responses {

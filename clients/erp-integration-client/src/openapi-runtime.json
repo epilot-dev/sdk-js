@@ -52,11 +52,6 @@
           "application/json": {}
         }
       },
-      "NotFound": {
-        "content": {
-          "application/json": {}
-        }
-      },
       "InternalServerError": {
         "content": {
           "application/json": {}

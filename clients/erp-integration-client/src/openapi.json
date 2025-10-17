@@ -2,12 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "1.0.0"
+    "version": "0.2.0",
+    "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
     {
       "name": "erp",
       "description": "ERP integration endpoints"
+    },
+    {
+      "name": "trigger",
+      "description": "Endpoints to trigger ERP related actions"
     }
   ],
   "security": [
@@ -192,6 +197,14 @@
                         "payload": {
                           "type": "string",
                           "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+                        },
+                        "deduplication_id": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z0-9_-]+$",
+                          "minLength": 1,
+                          "maxLength": 255,
+                          "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same app and component. Must contain only alphanumeric characters, hyphens, and underscores.\n",
+                          "example": "evt-2025-05-01-12345-create-bp"
                         }
                       }
                     }
@@ -201,20 +214,25 @@
               "example": {
                 "app_id": "123e4567-e89b-12d3-a456-426614174000",
                 "component_id": "123e4567-e89b-12d3-a456-426614174000",
+                "meta": {
+                  "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000"
+                },
                 "events": [
                   {
                     "event_type": "CREATE",
                     "object_type": "business_partner",
                     "timestamp": "2025-05-01T08:30:00Z",
                     "format": "json",
-                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}"
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}",
+                    "deduplication_id": "bp-create-20250501-083000-001"
                   },
                   {
                     "event_type": "UPDATE",
                     "object_type": "contract_account",
                     "timestamp": "2025-05-01T08:35:00Z",
                     "format": "json",
-                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}"
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
+                    "deduplication_id": "ca-update-20250501-083500-001"
                   }
                 ]
               }
@@ -247,12 +265,6 @@
         "type": "http",
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
-        "bearerFormat": "JWT"
-      },
-      "EpilotPublicAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization header with epilot public access token",
         "bearerFormat": "JWT"
       }
     },
@@ -383,16 +395,6 @@
           }
         }
       },
-      "NotFound": {
-        "description": "The specified resource was not found",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponseBase"
-            }
-          }
-        }
-      },
       "InternalServerError": {
         "description": "Internal Server Error",
         "content": {
@@ -427,9 +429,10 @@
                         "type": "string",
                         "enum": [
                           "success",
-                          "error"
+                          "error",
+                          "skipped"
                         ],
-                        "description": "Processing status for the event"
+                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id)"
                       },
                       "message": {
                         "type": "string"
