@@ -3398,7 +3398,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -5705,7 +5705,8 @@
                 "properties": {
                   "q": {
                     "type": "string",
-                    "example": "NOT is_composite_price:true"
+                    "example": "NOT is_composite_price:true",
+                    "nullable": true
                   }
                 },
                 "required": [
@@ -7380,6 +7381,9 @@
           "org_id": {
             "type": "string",
             "description": "Organization Id the entity belongs to"
+          },
+          "_schema": {
+            "$ref": "#/components/schemas/EntitySlug"
           },
           "attribute": {
             "type": "string"
