@@ -76,6 +76,10 @@ declare namespace Components {
             shared_with?: string[];
             shared_with_org?: boolean;
         }
+        /**
+         * Dynamic date keywords that resolve to actual dates at runtime
+         */
+        export type DynamicDateValue = "TODAY" | "TOMORROW" | "YESTERDAY" | "IN_THE_FUTURE" | "IN_THE_PAST" | "THIS_WEEK" | "NEXT_WEEK" | "LAST_WEEK" | "THIS_MONTH" | "NEXT_MONTH" | "LAST_MONTH";
         export interface FilterGroup {
             items: FilterItem[];
             /**
@@ -97,7 +101,7 @@ declare namespace Components {
              * EQUALS
              */
             FilterOperator;
-            value?: /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ ValueType;
+            value?: /* The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values */ ValueType;
             /**
              * The data type of the field
              * example:
@@ -155,9 +159,9 @@ declare namespace Components {
             title_chip_variant?: string;
         }
         /**
-         * The value to compare against - can be a single value (string, number, boolean) or an array of values
+         * The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values
          */
-        export type ValueType = /* The value to compare against - can be a single value (string, number, boolean) or an array of values */ string | number | boolean | (string | number | boolean)[];
+        export type ValueType = /* The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values */ string | /* Dynamic date keywords that resolve to actual dates at runtime */ DynamicDateValue | number | boolean | (string | /* Dynamic date keywords that resolve to actual dates at runtime */ DynamicDateValue | number | boolean)[];
     }
 }
 declare namespace Paths {
@@ -254,6 +258,12 @@ declare namespace Paths {
         }
     }
     namespace GetKanbanBoards {
+        namespace Parameters {
+            export type Filter = "owned" | "shared";
+        }
+        export interface QueryParameters {
+            filter?: Parameters.Filter;
+        }
         namespace Responses {
             export type $200 = Components.Schemas.BoardSummary[];
             export interface $401 {
@@ -341,7 +351,7 @@ export interface OperationMethods {
    * Get all Kanban boards
    */
   'getKanbanBoards'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetKanbanBoards.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetKanbanBoards.Responses.$200>
@@ -428,7 +438,7 @@ export interface PathsDictionary {
      * Get all Kanban boards
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetKanbanBoards.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetKanbanBoards.Responses.$200>
@@ -508,6 +518,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type Board = Components.Schemas.Board;
 export type BoardFilter = Components.Schemas.BoardFilter;
 export type BoardSummary = Components.Schemas.BoardSummary;
+export type DynamicDateValue = Components.Schemas.DynamicDateValue;
 export type FilterGroup = Components.Schemas.FilterGroup;
 export type FilterItem = Components.Schemas.FilterItem;
 export type FilterOperator = Components.Schemas.FilterOperator;
