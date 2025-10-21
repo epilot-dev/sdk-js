@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 7842b24: First major release
+
 ## 0.2.1
 
 ### Patch Changes
