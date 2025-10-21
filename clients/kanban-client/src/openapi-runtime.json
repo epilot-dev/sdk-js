@@ -19,6 +19,13 @@
     "/v1/kanban/boards": {
       "get": {
         "operationId": "getKanbanBoards",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false
+          }
+        ],
         "responses": {}
       }
     },

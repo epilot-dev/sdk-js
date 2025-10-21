@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Kanban API",
-    "version": "1.0.0"
+    "version": "1.2.1"
   },
   "tags": [
     {
@@ -13,6 +13,9 @@
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
     }
   ],
   "paths": {
@@ -66,6 +69,21 @@
         "description": "Get all Kanban boards",
         "tags": [
           "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter boards by ownership type. If not provided, returns all accessible boards.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "owned",
+                "shared"
+              ]
+            },
+            "required": false
+          }
         ],
         "responses": {
           "200": {
@@ -413,6 +431,12 @@
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
       }
     },
     "schemas": {
@@ -626,11 +650,31 @@
         "example": "EQUALS",
         "description": "The comparison operator for filtering"
       },
+      "DynamicDateValue": {
+        "type": "string",
+        "enum": [
+          "TODAY",
+          "TOMORROW",
+          "YESTERDAY",
+          "IN_THE_FUTURE",
+          "IN_THE_PAST",
+          "THIS_WEEK",
+          "NEXT_WEEK",
+          "LAST_WEEK",
+          "THIS_MONTH",
+          "NEXT_MONTH",
+          "LAST_MONTH"
+        ],
+        "description": "Dynamic date keywords that resolve to actual dates at runtime"
+      },
       "ValueType": {
-        "oneOf": [
+        "anyOf": [
           {
             "type": "string",
             "example": "100020"
+          },
+          {
+            "$ref": "#/components/schemas/DynamicDateValue"
           },
           {
             "type": "number",
@@ -643,9 +687,12 @@
           {
             "type": "array",
             "items": {
-              "oneOf": [
+              "anyOf": [
                 {
                   "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/DynamicDateValue"
                 },
                 {
                   "type": "number"
@@ -663,7 +710,7 @@
             ]
           }
         ],
-        "description": "The value to compare against - can be a single value (string, number, boolean) or an array of values"
+        "description": "The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values"
       },
       "FlowsQueryRequest": {
         "type": "object",
@@ -743,6 +790,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://kanban.sls.epilot.io"
+    },
     {
       "url": "https://kanban.sls.epilot.io"
     }
