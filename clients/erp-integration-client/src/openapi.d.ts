@@ -178,6 +178,91 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SimulateMapping {
+        export interface RequestBody {
+            /**
+             * The integration mapping configuration
+             */
+            mapping_configuration: {
+                mapping: {
+                    /**
+                     * Object type mappings
+                     */
+                    objects: {
+                        [name: string]: {
+                            /**
+                             * Mapping of entity types to their unique identifier field mappings
+                             */
+                            unique_ids: {
+                                [name: string]: {
+                                    [name: string]: string;
+                                };
+                            };
+                            /**
+                             * Field mapping definitions
+                             */
+                            fields: {
+                                /**
+                                 * Target entity slug
+                                 */
+                                entity: string;
+                                /**
+                                 * Target attribute name
+                                 */
+                                attribute: string;
+                                /**
+                                 * Source field name (mutually exclusive with jsonataExpression)
+                                 */
+                                field?: string;
+                                /**
+                                 * JSONata expression for transformation (mutually exclusive with field)
+                                 */
+                                jsonataExpression?: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+            /**
+             * Type of the object being mapped (must match a key in mapping_configuration.mapping.objects)
+             */
+            object_type: string;
+            /**
+             * Format of the payload data
+             */
+            format: "json" | "xml";
+            /**
+             * The serialized object data payload (JSON, XML, etc.) as a string
+             */
+            payload: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                entity_updates: {
+                    /**
+                     * The entity type slug
+                     */
+                    entity_slug: string;
+                    /**
+                     * Unique identifier mappings for this entity
+                     */
+                    uniqueIdentifiers: {
+                        [name: string]: any;
+                    };
+                    /**
+                     * Mapped attribute values
+                     */
+                    attributes: {
+                        [name: string]: any;
+                    };
+                }[];
+            }
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $422 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TriggerErp {
         export type RequestBody = Components.Schemas.TriggerErpActionRequest;
         namespace Responses {
@@ -224,6 +309,16 @@ export interface OperationMethods {
     data?: Paths.ProcessErpUpdatesEvents.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ProcessErpUpdatesEvents.Responses.$200>
+  /**
+   * simulateMapping - Simulate ERP mapping transformation
+   * 
+   * Test mapping configuration by transforming a payload using the provided mapping rules without persisting data
+   */
+  'simulateMapping'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SimulateMapping.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SimulateMapping.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -262,6 +357,18 @@ export interface PathsDictionary {
       data?: Paths.ProcessErpUpdatesEvents.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ProcessErpUpdatesEvents.Responses.$200>
+  }
+  ['/v1/erp/updates/mapping_simulation']: {
+    /**
+     * simulateMapping - Simulate ERP mapping transformation
+     * 
+     * Test mapping configuration by transforming a payload using the provided mapping rules without persisting data
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SimulateMapping.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SimulateMapping.Responses.$200>
   }
 }
 

@@ -38,6 +38,18 @@
         },
         "responses": {}
       }
+    },
+    "/v1/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMapping",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {

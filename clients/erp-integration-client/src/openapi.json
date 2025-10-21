@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -257,6 +257,214 @@
           }
         }
       }
+    },
+    "/v1/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMapping",
+        "summary": "Simulate ERP mapping transformation",
+        "description": "Test mapping configuration by transforming a payload using the provided mapping rules without persisting data",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "mapping_configuration",
+                  "object_type",
+                  "format",
+                  "payload"
+                ],
+                "properties": {
+                  "mapping_configuration": {
+                    "type": "object",
+                    "description": "The integration mapping configuration",
+                    "required": [
+                      "mapping"
+                    ],
+                    "properties": {
+                      "mapping": {
+                        "type": "object",
+                        "required": [
+                          "objects"
+                        ],
+                        "properties": {
+                          "objects": {
+                            "type": "object",
+                            "description": "Object type mappings",
+                            "additionalProperties": {
+                              "type": "object",
+                              "required": [
+                                "unique_ids",
+                                "fields"
+                              ],
+                              "properties": {
+                                "unique_ids": {
+                                  "type": "object",
+                                  "description": "Mapping of entity types to their unique identifier field mappings",
+                                  "additionalProperties": {
+                                    "type": "object",
+                                    "description": "Map of remote keys to local entity keys",
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "fields": {
+                                  "type": "array",
+                                  "description": "Field mapping definitions",
+                                  "items": {
+                                    "type": "object",
+                                    "required": [
+                                      "entity",
+                                      "attribute"
+                                    ],
+                                    "properties": {
+                                      "entity": {
+                                        "type": "string",
+                                        "description": "Target entity slug"
+                                      },
+                                      "attribute": {
+                                        "type": "string",
+                                        "description": "Target attribute name"
+                                      },
+                                      "field": {
+                                        "type": "string",
+                                        "description": "Source field name (mutually exclusive with jsonataExpression)"
+                                      },
+                                      "jsonataExpression": {
+                                        "type": "string",
+                                        "description": "JSONata expression for transformation (mutually exclusive with field)"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "object_type": {
+                    "type": "string",
+                    "description": "Type of the object being mapped (must match a key in mapping_configuration.mapping.objects)"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "json",
+                      "xml"
+                    ],
+                    "default": "json",
+                    "description": "Format of the payload data"
+                  },
+                  "payload": {
+                    "type": "string",
+                    "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+                  }
+                }
+              },
+              "example": {
+                "mapping_configuration": {
+                  "mapping": {
+                    "objects": {
+                      "business_partner": {
+                        "unique_ids": {
+                          "contact": {
+                            "partner_id": "_id"
+                          }
+                        },
+                        "fields": [
+                          {
+                            "entity": "contact",
+                            "attribute": "first_name",
+                            "field": "firstName"
+                          },
+                          {
+                            "entity": "contact",
+                            "attribute": "last_name",
+                            "field": "lastName"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "object_type": "business_partner",
+                "format": "json",
+                "payload": "{\"partner_id\":\"BP10001\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully simulated mapping",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "entity_updates"
+                  ],
+                  "properties": {
+                    "entity_updates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "entity_slug",
+                          "uniqueIdentifiers",
+                          "attributes"
+                        ],
+                        "properties": {
+                          "entity_slug": {
+                            "type": "string",
+                            "description": "The entity type slug"
+                          },
+                          "uniqueIdentifiers": {
+                            "type": "object",
+                            "description": "Unique identifier mappings for this entity",
+                            "additionalProperties": true
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "description": "Mapped attribute values",
+                            "additionalProperties": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "description": "Unprocessable entity - mapping configuration or payload validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -458,9 +666,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
