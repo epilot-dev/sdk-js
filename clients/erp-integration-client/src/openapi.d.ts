@@ -246,7 +246,7 @@ declare namespace Paths {
                     /**
                      * Unique identifier mappings for this entity
                      */
-                    uniqueIdentifiers: {
+                    unique_identifiers: {
                         [name: string]: any;
                     };
                     /**
@@ -280,7 +280,7 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * acknowledgeTracking - Acknowledge receival of ERP tracking record
+   * acknowledgeTracking - acknowledgeTracking
    * 
    * Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication
    */
@@ -290,7 +290,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AcknowledgeTracking.Responses.$200>
   /**
-   * triggerErp - Trigger ERP integration
+   * triggerErp - triggerErp
    * 
    * Triggers the ERP integration process
    */
@@ -300,7 +300,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerErp.Responses.$200>
   /**
-   * processErpUpdatesEvents - Process ERP system updates
+   * processErpUpdatesEvents - processErpUpdatesEvents
    * 
    * Handles updates from ERP systems and tracks them appropriately
    */
@@ -310,7 +310,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ProcessErpUpdatesEvents.Responses.$200>
   /**
-   * simulateMapping - Simulate ERP mapping transformation
+   * simulateMapping - simulateMapping
    * 
    * Test mapping configuration by transforming a payload using the provided mapping rules without persisting data
    */
@@ -324,7 +324,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/erp/tracking/acknowledgement']: {
     /**
-     * acknowledgeTracking - Acknowledge receival of ERP tracking record
+     * acknowledgeTracking - acknowledgeTracking
      * 
      * Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication
      */
@@ -336,7 +336,7 @@ export interface PathsDictionary {
   }
   ['/v1/erp/trigger']: {
     /**
-     * triggerErp - Trigger ERP integration
+     * triggerErp - triggerErp
      * 
      * Triggers the ERP integration process
      */
@@ -348,7 +348,7 @@ export interface PathsDictionary {
   }
   ['/v1/erp/updates/events']: {
     /**
-     * processErpUpdatesEvents - Process ERP system updates
+     * processErpUpdatesEvents - processErpUpdatesEvents
      * 
      * Handles updates from ERP systems and tracks them appropriately
      */
@@ -360,7 +360,7 @@ export interface PathsDictionary {
   }
   ['/v1/erp/updates/mapping_simulation']: {
     /**
-     * simulateMapping - Simulate ERP mapping transformation
+     * simulateMapping - simulateMapping
      * 
      * Test mapping configuration by transforming a payload using the provided mapping rules without persisting data
      */

@@ -24,7 +24,7 @@
     "/v1/erp/tracking/acknowledgement": {
       "post": {
         "operationId": "acknowledgeTracking",
-        "summary": "Acknowledge receival of ERP tracking record",
+        "summary": "acknowledgeTracking",
         "description": "Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication",
         "tags": [
           "erp"
@@ -81,7 +81,7 @@
     "/v1/erp/trigger": {
       "post": {
         "operationId": "triggerErp",
-        "summary": "Trigger ERP integration",
+        "summary": "triggerErp",
         "description": "Triggers the ERP integration process",
         "tags": [
           "erp",
@@ -116,7 +116,7 @@
     "/v1/erp/updates/events": {
       "post": {
         "operationId": "processErpUpdatesEvents",
-        "summary": "Process ERP system updates",
+        "summary": "processErpUpdatesEvents",
         "description": "Handles updates from ERP systems and tracks them appropriately",
         "tags": [
           "erp"
@@ -261,7 +261,7 @@
     "/v1/erp/updates/mapping_simulation": {
       "post": {
         "operationId": "simulateMapping",
-        "summary": "Simulate ERP mapping transformation",
+        "summary": "simulateMapping",
         "description": "Test mapping configuration by transforming a payload using the provided mapping rules without persisting data",
         "tags": [
           "erp"
@@ -418,7 +418,7 @@
                         "type": "object",
                         "required": [
                           "entity_slug",
-                          "uniqueIdentifiers",
+                          "unique_identifiers",
                           "attributes"
                         ],
                         "properties": {
@@ -426,7 +426,7 @@
                             "type": "string",
                             "description": "The entity type slug"
                           },
-                          "uniqueIdentifiers": {
+                          "unique_identifiers": {
                             "type": "object",
                             "description": "Unique identifier mappings for this entity",
                             "additionalProperties": true
