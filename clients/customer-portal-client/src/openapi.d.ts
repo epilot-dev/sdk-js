@@ -1819,6 +1819,10 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            /**
+             * ID of the account
+             */
+            account_id?: string;
         }
         /**
          * Currency code in ISO 4217 format
@@ -3474,7 +3478,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string;
             /**
@@ -10351,7 +10355,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -12751,7 +12754,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
