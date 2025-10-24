@@ -1,5 +1,11 @@
 # @epilot/customer-portal-client
 
+## 0.29.1
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 0.23.1
 
 ### Patch Changes

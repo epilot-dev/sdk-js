@@ -1,5 +1,11 @@
 # @epilot/automation-client
 
+## 2.24.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 2.24.1
 
 ### Patch Changes

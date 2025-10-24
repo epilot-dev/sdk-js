@@ -1,6 +1,6 @@
 {
   "name": "@epilot/automation-client",
-  "version": "2.24.1",
+  "version": "2.24.2",
   "description": "Client library for epilot automation API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -65,7 +65,7 @@
     "jest": "^29.6.2",
     "json-loader": "^0.5.7",
     "node-fetch": "^3.2.10",
-    "openapi-client-axios": "^7.6.0",
+    "openapi-client-axios": "^7.8.0",
     "openapicmd": "^2.7.0",
     "ts-jest": "^29.4.1",
     "ts-loader": "^8.0.14",

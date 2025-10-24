@@ -1,5 +1,11 @@
 # @epilot/app-client
 
+## 0.9.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 0.8.1
 
 ### Patch Changes

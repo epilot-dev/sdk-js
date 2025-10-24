@@ -76,7 +76,7 @@
     "@epilot/workflow-client": "^1.15.0",
     "@epilot/workflow-definition-client": "^1.17.0",
     "axios": "^1.11.0",
-    "openapi-client-axios": "^7.6.0"
+    "openapi-client-axios": "^7.8.0"
   },
   "overrides": {
     "axios": "^1.11.0"

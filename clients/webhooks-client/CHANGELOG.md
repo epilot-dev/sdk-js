@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.16.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 2.16.1
 
 ### Patch Changes

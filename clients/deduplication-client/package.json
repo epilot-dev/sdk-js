@@ -1,6 +1,6 @@
 {
   "name": "@epilot/deduplication-client",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JavaScript client library for Epilot's Deduplication API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,7 +53,7 @@
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
-    "openapi-client-axios": "^7.6.0",
+    "openapi-client-axios": "^7.8.0",
     "stream-http": "^3.2.0",
     "url": "^0.11.0",
     "util": "^0.12.3"

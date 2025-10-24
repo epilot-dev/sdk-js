@@ -1,5 +1,11 @@
 # @epilot/notes-client
 
+## 0.21.6
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 0.21.2
 
 ### Patch Changes

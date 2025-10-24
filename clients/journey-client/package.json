@@ -1,6 +1,6 @@
 {
   "name": "@epilot/journey-client",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "API Client for epilot Journey API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,7 +40,7 @@
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
     "openapi-backend": "5.11.1",
-    "openapi-client-axios": "^7.5.1",
+    "openapi-client-axios": "^7.8.0",
     "stream-http": "^3.1.1",
     "url": "^0.11.0",
     "util": "^0.12.3"

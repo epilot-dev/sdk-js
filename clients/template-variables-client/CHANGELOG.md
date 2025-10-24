@@ -1,5 +1,11 @@
 # @epilot/template-variables-client
 
+## 1.15.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 1.15.1
 
 ### Patch Changes

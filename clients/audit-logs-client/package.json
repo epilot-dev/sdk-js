@@ -1,6 +1,6 @@
 {
   "name": "@epilot/audit-logs-client",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "JavaScript client library for the epilot Audit Logs API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -54,7 +54,7 @@
     "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
-    "openapi-client-axios": "^7.6.0",
+    "openapi-client-axios": "^7.8.0",
     "stream-http": "^3.1.1",
     "url": "^0.11.0",
     "util": "^0.12.3"

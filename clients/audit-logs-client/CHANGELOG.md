@@ -1,5 +1,11 @@
 # @epilot/audit-logs-client
 
+## 0.4.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 0.4.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @epilot/pricing-tier-client
 
+## 1.2.2
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 1.2.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @epilot/email-template-client
 
+## 2.2.3
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 2.2.1
 
 ### Patch Changes

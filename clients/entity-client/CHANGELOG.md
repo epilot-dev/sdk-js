@@ -1,5 +1,11 @@
 # @epilot/entity-client
 
+## 6.10.1
+
+### Patch Changes
+
+- Upgrade openapi-client-axios to ^7.8.0 across all clients
+
 ## 6.6.1
 
 ### Patch Changes
