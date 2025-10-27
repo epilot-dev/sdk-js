@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/v1/template-variables/categories": {
       "get": {
@@ -123,10 +128,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }

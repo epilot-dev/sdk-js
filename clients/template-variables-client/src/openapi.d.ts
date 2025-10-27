@@ -32,7 +32,7 @@ declare namespace Components {
             /**
              * Custom variable type
              */
-            type?: "order_table" | "custom" | "journey_link";
+            type?: "order_table" | "custom" | "journey_link" | "snippet";
             /**
              * Custom variable name
              * example:
@@ -44,7 +44,7 @@ declare namespace Components {
              * example:
              * my_custom_table
              */
-            key?: string;
+            key: string;
             /**
              * The tags of custom variable
              */
@@ -68,7 +68,271 @@ declare namespace Components {
              * Variable configuration
              * example:
              * {
-             *   "$ref": "#/components/examples/TableConfig/value"
+             *   "header": null,
+             *   "style": {
+             *     "color": "#222",
+             *     "background": "#fff",
+             *     "font-size": "16px",
+             *     "font-family": "",
+             *     "padding-bottom": "4px",
+             *     "font-weight": "bold",
+             *     "border": "none !important",
+             *     "text-align": "left"
+             *   },
+             *   "columns": [
+             *     {
+             *       "id": "item",
+             *       "index": 0,
+             *       "label": {
+             *         "en": "Item",
+             *         "de": "Produkt"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "padding-left": "10px",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "quantity",
+             *       "index": 1,
+             *       "label": {
+             *         "en": "Quanity",
+             *         "de": "Menge"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "tax",
+             *       "index": 2,
+             *       "label": {
+             *         "en": "Tax Rate",
+             *         "de": "Steuerrate"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "unit_amount",
+             *       "index": 3,
+             *       "label": {
+             *         "en": "Unit Net Price",
+             *         "de": "Nettopreis"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "net_total",
+             *       "index": 4,
+             *       "label": {
+             *         "en": "Net total",
+             *         "de": "Nettosumme"
+             *       },
+             *       "enable": "true,",
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "gross_total",
+             *       "index": 5,
+             *       "label": {
+             *         "en": "Total",
+             *         "de": "Gesamt"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     }
+             *   ],
+             *   "body": {
+             *     "product_name": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "14px",
+             *         "font-family": "",
+             *         "font-weight": "bold",
+             *         "font-style": "normal",
+             *         "padding-top": "16px",
+             *         "padding-bottom": "8px",
+             *         "border": "none !important",
+             *         "vertical-align": "top",
+             *         "text-align": "left",
+             *         "max-width": "30%",
+             *         "padding-left": "10px"
+             *       }
+             *     },
+             *     "price_description": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "product_description": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "quantity": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "tax": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "unit_amount": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "net_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "gross_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     }
+             *   },
+             *   "footer": {
+             *     "payment_type": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "net_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "amount_tax": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "gross_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     }
+             *   }
              * }
              */
             config?: {
@@ -185,7 +449,7 @@ declare namespace Components {
              * </table>
              *
              */
-            template?: string;
+            template: string;
             /**
              * Creation time
              * example:
@@ -215,7 +479,7 @@ declare namespace Components {
             /**
              * Variable type
              */
-            type?: "order_table" | "custom" | "journey_link";
+            type?: "order_table" | "custom" | "journey_link" | "snippet";
             /**
              * The tags of custom variable
              */
@@ -231,13 +495,7 @@ declare namespace Components {
             /**
              * Sort by field
              * example:
-             * [
-             *   "created_at",
-             *   "created_at:desc",
-             *   "name",
-             *   "name:desc",
-             *   "key"
-             * ]
+             * created_at, name, key
              */
             sort_by?: string;
             /**
@@ -271,7 +529,107 @@ declare namespace Components {
             /**
              * example:
              * {
-             *   "$ref": "#/components/examples/ExampleMain/value"
+             *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+             *   "_title": "Example Customer",
+             *   "customer_number": 123,
+             *   "first_name": "Example",
+             *   "last_name": "Customer",
+             *   "title": "Prof.",
+             *   "salutation": "Ms. / Mrs.",
+             *   "birthdate": "2018-03-03",
+             *   "email": [
+             *     {
+             *       "email": "contact.primary@domain.com",
+             *       "_tags": [
+             *         "primary"
+             *       ]
+             *     },
+             *     {
+             *       "email": "sale@domain.com"
+             *     }
+             *   ],
+             *   "phone": [
+             *     {
+             *       "phone": "+49123456789",
+             *       "_tags": [
+             *         "primary",
+             *         "support"
+             *       ]
+             *     },
+             *     {
+             *       "phone": "+49504305025"
+             *     }
+             *   ],
+             *   "address": [
+             *     {
+             *       "_tags": [
+             *         "primary",
+             *         "delivery"
+             *       ],
+             *       "country": "Germany",
+             *       "city": "Köln",
+             *       "postal_code": "50825",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": "11th floor"
+             *     },
+             *     {
+             *       "_tags": [
+             *         "billing"
+             *       ],
+             *       "country": "Finland",
+             *       "city": "Köln",
+             *       "postal_code": "50670",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "account": [
+             *     {
+             *       "status": "Active",
+             *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+             *       "tax_id": "123abc",
+             *       "name": "name",
+             *       "email": [
+             *         {
+             *           "email": "account.primary@domain.com",
+             *           "_tags": [
+             *             "primary"
+             *           ]
+             *         },
+             *         {
+             *           "email": "account.sale@domain.com"
+             *         }
+             *       ],
+             *       "phone": [
+             *         {
+             *           "phone": "+49123456789",
+             *           "_tags": [
+             *             "primary",
+             *             "support"
+             *           ]
+             *         },
+             *         {
+             *           "phone": "+49504305025"
+             *         }
+             *       ],
+             *       "address": [
+             *         {
+             *           "_tags": [
+             *             "primary",
+             *             "delivery"
+             *           ],
+             *           "country": "Germany",
+             *           "city": "Köln",
+             *           "postal_code": "50825",
+             *           "street": "Im Mediapark",
+             *           "street_number": "8a",
+             *           "additional_info": "11th floor"
+             *         }
+             *       ]
+             *     }
+             *   ]
              * }
              */
             main?: {
@@ -280,7 +638,107 @@ declare namespace Components {
             /**
              * example:
              * {
-             *   "$ref": "#/components/examples/ExampleContactEntity/value"
+             *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+             *   "_title": "Example Customer",
+             *   "customer_number": 123,
+             *   "first_name": "Example",
+             *   "last_name": "Customer",
+             *   "title": "Prof.",
+             *   "salutation": "Ms. / Mrs.",
+             *   "birthdate": "2018-03-03",
+             *   "email": [
+             *     {
+             *       "email": "contact.primary@domain.com",
+             *       "_tags": [
+             *         "primary"
+             *       ]
+             *     },
+             *     {
+             *       "email": "sale@domain.com"
+             *     }
+             *   ],
+             *   "phone": [
+             *     {
+             *       "phone": "+49123456789",
+             *       "_tags": [
+             *         "primary",
+             *         "support"
+             *       ]
+             *     },
+             *     {
+             *       "phone": "+49504305025"
+             *     }
+             *   ],
+             *   "address": [
+             *     {
+             *       "_tags": [
+             *         "primary",
+             *         "delivery"
+             *       ],
+             *       "country": "Germany",
+             *       "city": "Köln",
+             *       "postal_code": "50825",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": "11th floor"
+             *     },
+             *     {
+             *       "_tags": [
+             *         "billing"
+             *       ],
+             *       "country": "Finland",
+             *       "city": "Köln",
+             *       "postal_code": "50670",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "account": [
+             *     {
+             *       "status": "Active",
+             *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+             *       "tax_id": "123abc",
+             *       "name": "name",
+             *       "email": [
+             *         {
+             *           "email": "account.primary@domain.com",
+             *           "_tags": [
+             *             "primary"
+             *           ]
+             *         },
+             *         {
+             *           "email": "account.sale@domain.com"
+             *         }
+             *       ],
+             *       "phone": [
+             *         {
+             *           "phone": "+49123456789",
+             *           "_tags": [
+             *             "primary",
+             *             "support"
+             *           ]
+             *         },
+             *         {
+             *           "phone": "+49504305025"
+             *         }
+             *       ],
+             *       "address": [
+             *         {
+             *           "_tags": [
+             *             "primary",
+             *             "delivery"
+             *           ],
+             *           "country": "Germany",
+             *           "city": "KölnSS",
+             *           "postal_code": "50825",
+             *           "street": "Im Mediapark",
+             *           "street_number": "8a",
+             *           "additional_info": "11th floor"
+             *         }
+             *       ]
+             *     }
+             *   ]
              * }
              */
             contact?: {
@@ -289,7 +747,9 @@ declare namespace Components {
             /**
              * example:
              * {
-             *   "$ref": "#/components/examples/ExampleBrand/value"
+             *   "id": 123453,
+             *   "name": "Brand name",
+             *   "signature": "Signature"
              * }
              */
             brand?: {
@@ -328,7 +788,7 @@ declare namespace Components {
              */
             custom_variables?: ExternalCustomVariable[];
             /**
-             * If context data is avaialble, this data will be used for variable replace.
+             * If context data is available, this data will be used for variable replace.
              */
             context_data?: {
                 [key: string]: any;
@@ -367,7 +827,6 @@ declare namespace Components {
              */
             description?: string;
         }
-        export type VariableType = "simple" | "partial";
     }
 }
 declare namespace Paths {
@@ -452,14 +911,9 @@ declare namespace Paths {
             export interface $200 {
                 /**
                  * example:
-                 * "[Brand Name GmbH] Order confirmation",
-                 * "Hello Customer Name
-                 *
-                 * <span color="#ccc">Brand Name GmbH</span>
-                 * <img src="https://logobucket.s3.amazonaws.com/brandlogo.png" alt="Brand Name"/>
-                 * <a href="https://company.com/imprint">imprint</a>
-                 * "]
-                 *
+                 * [
+                 *   "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
+                 * ]
                  */
                 outputs?: string[];
             }
@@ -784,4 +1238,3 @@ export type TemplateType = Components.Schemas.TemplateType;
 export type VariableContext = Components.Schemas.VariableContext;
 export type VariableParameters = Components.Schemas.VariableParameters;
 export type VariableResult = Components.Schemas.VariableResult;
-export type VariableType = Components.Schemas.VariableType;

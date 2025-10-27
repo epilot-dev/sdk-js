@@ -5,10 +5,23 @@
     "description": "API to provide variables for email and document templates.",
     "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    },
+    {
+      "url": "https://template-variables-api.dev.sls.epilot.io",
+      "description": "Production server"
+    }
+  ],
   "tags": [
     {
       "name": "variables",
       "description": "Variables"
+    },
+    {
+      "name": "Custom variables",
+      "description": "Custom variables"
     }
   ],
   "security": [
@@ -257,7 +270,9 @@
                       "items": {
                         "type": "string"
                       },
-                      "example": "\"[Brand Name GmbH] Order confirmation\",\n\"Hello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n\"]\n"
+                      "example": [
+                        "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
+                      ]
                     }
                   }
                 }
@@ -564,13 +579,13 @@
             "type": "string",
             "nullable": true,
             "description": "User ID",
-            "example": 50001
+            "example": "50001"
           },
           "user_org_id": {
             "type": "string",
             "nullable": true,
             "description": "Organization ID of the user",
-            "example": 729224
+            "example": "729224"
           },
           "custom_variables": {
             "type": "array",
@@ -581,7 +596,7 @@
           },
           "context_data": {
             "type": "object",
-            "description": "If context data is avaialble, this data will be used for variable replace."
+            "description": "If context data is available, this data will be used for variable replace."
           },
           "template_name": {
             "type": "string",
@@ -597,7 +612,7 @@
           "variables_version": {
             "type": "string",
             "description": "The version of the variables syntax supported. Default is 1.0",
-            "example": 2
+            "example": "2"
           }
         },
         "required": [
@@ -641,7 +656,8 @@
             "enum": [
               "order_table",
               "custom",
-              "journey_link"
+              "journey_link",
+              "snippet"
             ]
           },
           "tags": {
@@ -667,13 +683,7 @@
           "sort_by": {
             "type": "string",
             "description": "Sort by field",
-            "example": [
-              "created_at",
-              "created_at:desc",
-              "name",
-              "name:desc",
-              "key"
-            ]
+            "example": "created_at, name, key"
           },
           "fields": {
             "type": "array",
@@ -695,21 +705,223 @@
             "type": "object",
             "additionalProperties": true,
             "example": {
-              "$ref": "#/components/examples/ExampleMain/value"
+              "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+              "_title": "Example Customer",
+              "customer_number": 123,
+              "first_name": "Example",
+              "last_name": "Customer",
+              "title": "Prof.",
+              "salutation": "Ms. / Mrs.",
+              "birthdate": "2018-03-03",
+              "email": [
+                {
+                  "email": "contact.primary@domain.com",
+                  "_tags": [
+                    "primary"
+                  ]
+                },
+                {
+                  "email": "sale@domain.com"
+                }
+              ],
+              "phone": [
+                {
+                  "phone": "+49123456789",
+                  "_tags": [
+                    "primary",
+                    "support"
+                  ]
+                },
+                {
+                  "phone": "+49504305025"
+                }
+              ],
+              "address": [
+                {
+                  "_tags": [
+                    "primary",
+                    "delivery"
+                  ],
+                  "country": "Germany",
+                  "city": "Köln",
+                  "postal_code": "50825",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": "11th floor"
+                },
+                {
+                  "_tags": [
+                    "billing"
+                  ],
+                  "country": "Finland",
+                  "city": "Köln",
+                  "postal_code": "50670",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": ""
+                }
+              ],
+              "account": [
+                {
+                  "status": "Active",
+                  "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+                  "tax_id": "123abc",
+                  "name": "name",
+                  "email": [
+                    {
+                      "email": "account.primary@domain.com",
+                      "_tags": [
+                        "primary"
+                      ]
+                    },
+                    {
+                      "email": "account.sale@domain.com"
+                    }
+                  ],
+                  "phone": [
+                    {
+                      "phone": "+49123456789",
+                      "_tags": [
+                        "primary",
+                        "support"
+                      ]
+                    },
+                    {
+                      "phone": "+49504305025"
+                    }
+                  ],
+                  "address": [
+                    {
+                      "_tags": [
+                        "primary",
+                        "delivery"
+                      ],
+                      "country": "Germany",
+                      "city": "Köln",
+                      "postal_code": "50825",
+                      "street": "Im Mediapark",
+                      "street_number": "8a",
+                      "additional_info": "11th floor"
+                    }
+                  ]
+                }
+              ]
             }
           },
           "contact": {
             "type": "object",
             "additionalProperties": true,
             "example": {
-              "$ref": "#/components/examples/ExampleContactEntity/value"
+              "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+              "_title": "Example Customer",
+              "customer_number": 123,
+              "first_name": "Example",
+              "last_name": "Customer",
+              "title": "Prof.",
+              "salutation": "Ms. / Mrs.",
+              "birthdate": "2018-03-03",
+              "email": [
+                {
+                  "email": "contact.primary@domain.com",
+                  "_tags": [
+                    "primary"
+                  ]
+                },
+                {
+                  "email": "sale@domain.com"
+                }
+              ],
+              "phone": [
+                {
+                  "phone": "+49123456789",
+                  "_tags": [
+                    "primary",
+                    "support"
+                  ]
+                },
+                {
+                  "phone": "+49504305025"
+                }
+              ],
+              "address": [
+                {
+                  "_tags": [
+                    "primary",
+                    "delivery"
+                  ],
+                  "country": "Germany",
+                  "city": "Köln",
+                  "postal_code": "50825",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": "11th floor"
+                },
+                {
+                  "_tags": [
+                    "billing"
+                  ],
+                  "country": "Finland",
+                  "city": "Köln",
+                  "postal_code": "50670",
+                  "street": "Im Mediapark",
+                  "street_number": "8a",
+                  "additional_info": ""
+                }
+              ],
+              "account": [
+                {
+                  "status": "Active",
+                  "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+                  "tax_id": "123abc",
+                  "name": "name",
+                  "email": [
+                    {
+                      "email": "account.primary@domain.com",
+                      "_tags": [
+                        "primary"
+                      ]
+                    },
+                    {
+                      "email": "account.sale@domain.com"
+                    }
+                  ],
+                  "phone": [
+                    {
+                      "phone": "+49123456789",
+                      "_tags": [
+                        "primary",
+                        "support"
+                      ]
+                    },
+                    {
+                      "phone": "+49504305025"
+                    }
+                  ],
+                  "address": [
+                    {
+                      "_tags": [
+                        "primary",
+                        "delivery"
+                      ],
+                      "country": "Germany",
+                      "city": "KölnSS",
+                      "postal_code": "50825",
+                      "street": "Im Mediapark",
+                      "street_number": "8a",
+                      "additional_info": "11th floor"
+                    }
+                  ]
+                }
+              ]
             }
           },
           "brand": {
             "type": "object",
             "additionalProperties": true,
             "example": {
-              "$ref": "#/components/examples/ExampleBrand/value"
+              "id": 123453,
+              "name": "Brand name",
+              "signature": "Signature"
             }
           }
         }
@@ -719,13 +931,6 @@
         "enum": [
           "email",
           "document"
-        ]
-      },
-      "VariableType": {
-        "type": "string",
-        "enum": [
-          "simple",
-          "partial"
         ]
       },
       "CategoryResult": {
@@ -768,7 +973,8 @@
             "enum": [
               "order_table",
               "custom",
-              "journey_link"
+              "journey_link",
+              "snippet"
             ]
           },
           "name": {
@@ -808,7 +1014,271 @@
             "type": "object",
             "description": "Variable configuration",
             "example": {
-              "$ref": "#/components/examples/TableConfig/value"
+              "header": null,
+              "style": {
+                "color": "#222",
+                "background": "#fff",
+                "font-size": "16px",
+                "font-family": "",
+                "padding-bottom": "4px",
+                "font-weight": "bold",
+                "border": "none !important",
+                "text-align": "left"
+              },
+              "columns": [
+                {
+                  "id": "item",
+                  "index": 0,
+                  "label": {
+                    "en": "Item",
+                    "de": "Produkt"
+                  },
+                  "enable": true,
+                  "draggable": true,
+                  "style": {
+                    "padding-left": "10px",
+                    "max-width": "30%"
+                  }
+                },
+                {
+                  "id": "quantity",
+                  "index": 1,
+                  "label": {
+                    "en": "Quanity",
+                    "de": "Menge"
+                  },
+                  "enable": true,
+                  "draggable": true,
+                  "style": {
+                    "min-width": "60px",
+                    "width": "30%"
+                  }
+                },
+                {
+                  "id": "tax",
+                  "index": 2,
+                  "label": {
+                    "en": "Tax Rate",
+                    "de": "Steuerrate"
+                  },
+                  "enable": true,
+                  "draggable": true,
+                  "style": {
+                    "min-width": "60px",
+                    "width": "30%"
+                  }
+                },
+                {
+                  "id": "unit_amount",
+                  "index": 3,
+                  "label": {
+                    "en": "Unit Net Price",
+                    "de": "Nettopreis"
+                  },
+                  "enable": true,
+                  "draggable": true,
+                  "style": {
+                    "min-width": "60px",
+                    "width": "30%"
+                  }
+                },
+                {
+                  "id": "net_total",
+                  "index": 4,
+                  "label": {
+                    "en": "Net total",
+                    "de": "Nettosumme"
+                  },
+                  "enable": "true,",
+                  "draggable": true,
+                  "style": {
+                    "min-width": "60px",
+                    "width": "30%"
+                  }
+                },
+                {
+                  "id": "gross_total",
+                  "index": 5,
+                  "label": {
+                    "en": "Total",
+                    "de": "Gesamt"
+                  },
+                  "enable": true,
+                  "draggable": true,
+                  "style": {
+                    "min-width": "60px",
+                    "width": "30%"
+                  }
+                }
+              ],
+              "body": {
+                "product_name": {
+                  "parent_column": "item",
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "14px",
+                    "font-family": "",
+                    "font-weight": "bold",
+                    "font-style": "normal",
+                    "padding-top": "16px",
+                    "padding-bottom": "8px",
+                    "border": "none !important",
+                    "vertical-align": "top",
+                    "text-align": "left",
+                    "max-width": "30%",
+                    "padding-left": "10px"
+                  }
+                },
+                "price_description": {
+                  "parent_column": "item",
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "product_description": {
+                  "parent_column": "item",
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "quantity": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "tax": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "unit_amount": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "net_total": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "gross_total": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                }
+              },
+              "footer": {
+                "payment_type": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "net_total": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "amount_tax": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                },
+                "gross_total": {
+                  "enable": true,
+                  "style": {
+                    "color": "#222",
+                    "background": "#fff",
+                    "font-size": "12px",
+                    "font-family": "",
+                    "font-weight": "normal",
+                    "font-style": "normal",
+                    "text-align": "left",
+                    "max-width": "30%"
+                  }
+                }
+              }
             }
           },
           "template": {
@@ -819,716 +1289,33 @@
           "created_at": {
             "type": "string",
             "description": "Creation time",
-            "example": "2022-04-19T12:41:43.662Z"
+            "example": "2022-04-19T12:41:43.662Z",
+            "readOnly": true
           },
           "created_by": {
             "type": "string",
             "description": "Created by",
-            "example": 100042
+            "example": "100042",
+            "readOnly": true
           },
           "updated_at": {
             "type": "string",
             "description": "Last update time",
-            "example": "2022-04-20T12:41:43.662Z"
+            "example": "2022-04-20T12:41:43.662Z",
+            "readOnly": true
           },
           "updated_by": {
             "type": "string",
             "description": "Updated by",
-            "example": 100042
+            "example": "100042",
+            "readOnly": true
           }
-        }
-      }
-    },
-    "examples": {
-      "ExampleMain": {
-        "value": {
-          "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
-          "_title": "Example Customer",
-          "customer_number": 123,
-          "first_name": "Example",
-          "last_name": "Customer",
-          "title": "Prof.",
-          "salutation": "Ms. / Mrs.",
-          "birthdate": "2018-03-03",
-          "email": [
-            {
-              "email": "contact.primary@domain.com",
-              "_tags": [
-                "primary"
-              ]
-            },
-            {
-              "email": "sale@domain.com"
-            }
-          ],
-          "phone": [
-            {
-              "phone": "+49123456789",
-              "_tags": [
-                "primary",
-                "support"
-              ]
-            },
-            {
-              "phone": "+49504305025"
-            }
-          ],
-          "address": [
-            {
-              "_tags": [
-                "primary",
-                "delivery"
-              ],
-              "country": "Germany",
-              "city": "Köln",
-              "postal_code": "50825",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": "11th floor"
-            },
-            {
-              "_tags": [
-                "billing"
-              ],
-              "country": "Finland",
-              "city": "Köln",
-              "postal_code": "50670",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": ""
-            }
-          ],
-          "account": [
-            {
-              "status": "Active",
-              "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
-              "tax_id": "123abc",
-              "name": "name",
-              "email": [
-                {
-                  "email": "account.primary@domain.com",
-                  "_tags": [
-                    "primary"
-                  ]
-                },
-                {
-                  "email": "account.sale@domain.com"
-                }
-              ],
-              "phone": [
-                {
-                  "phone": "+49123456789",
-                  "_tags": [
-                    "primary",
-                    "support"
-                  ]
-                },
-                {
-                  "phone": "+49504305025"
-                }
-              ],
-              "address": [
-                {
-                  "_tags": [
-                    "primary",
-                    "delivery"
-                  ],
-                  "country": "Germany",
-                  "city": "Köln",
-                  "postal_code": "50825",
-                  "street": "Im Mediapark",
-                  "street_number": "8a",
-                  "additional_info": "11th floor"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "ExampleContactEntity": {
-        "value": {
-          "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
-          "_title": "Example Customer",
-          "customer_number": 123,
-          "first_name": "Example",
-          "last_name": "Customer",
-          "title": "Prof.",
-          "salutation": "Ms. / Mrs.",
-          "birthdate": "2018-03-03",
-          "email": [
-            {
-              "email": "contact.primary@domain.com",
-              "_tags": [
-                "primary"
-              ]
-            },
-            {
-              "email": "sale@domain.com"
-            }
-          ],
-          "phone": [
-            {
-              "phone": "+49123456789",
-              "_tags": [
-                "primary",
-                "support"
-              ]
-            },
-            {
-              "phone": "+49504305025"
-            }
-          ],
-          "address": [
-            {
-              "_tags": [
-                "primary",
-                "delivery"
-              ],
-              "country": "Germany",
-              "city": "Köln",
-              "postal_code": "50825",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": "11th floor"
-            },
-            {
-              "_tags": [
-                "billing"
-              ],
-              "country": "Finland",
-              "city": "Köln",
-              "postal_code": "50670",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": ""
-            }
-          ],
-          "account": [
-            {
-              "status": "Active",
-              "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
-              "tax_id": "123abc",
-              "name": "name",
-              "email": [
-                {
-                  "email": "account.primary@domain.com",
-                  "_tags": [
-                    "primary"
-                  ]
-                },
-                {
-                  "email": "account.sale@domain.com"
-                }
-              ],
-              "phone": [
-                {
-                  "phone": "+49123456789",
-                  "_tags": [
-                    "primary",
-                    "support"
-                  ]
-                },
-                {
-                  "phone": "+49504305025"
-                }
-              ],
-              "address": [
-                {
-                  "_tags": [
-                    "primary",
-                    "delivery"
-                  ],
-                  "country": "Germany",
-                  "city": "KölnSS",
-                  "postal_code": "50825",
-                  "street": "Im Mediapark",
-                  "street_number": "8a",
-                  "additional_info": "11th floor"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "ExampleAccountEntity": {
-        "value": {
-          "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
-          "status": "Active",
-          "name": "TestGmbH",
-          "tax_id": "123abc",
-          "email": [
-            {
-              "email": "account.primary@domain.com",
-              "_tags": [
-                "primary"
-              ]
-            },
-            {
-              "email": "account.sale@domain.com"
-            }
-          ],
-          "phone": [
-            {
-              "phone": "+49123456789",
-              "_tags": [
-                "primary",
-                "support"
-              ]
-            },
-            {
-              "phone": "+49504305025"
-            }
-          ],
-          "address": [
-            {
-              "_tags": [
-                "primary",
-                "delivery"
-              ],
-              "country": "Germany",
-              "city": "Köln",
-              "postal_code": "50825",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": "11th floor"
-            },
-            {
-              "_tags": [
-                "billing"
-              ],
-              "country": "Finland",
-              "city": "Köln",
-              "postal_code": "50670",
-              "street": "Im Mediapark",
-              "street_number": "8a",
-              "additional_info": ""
-            }
-          ],
-          "contacts": {
-            "customer_number": 123,
-            "first_name": "Example",
-            "last_name": "Customer",
-            "title": "Prof.",
-            "salutation": "Ms. / Mrs.",
-            "birthdate": "2018-03-03",
-            "email": [
-              {
-                "email": "contact.primary@domain.com",
-                "_tags": [
-                  "primary"
-                ]
-              },
-              {
-                "email": "sale@domain.com"
-              }
-            ],
-            "phone": [
-              {
-                "phone": "+49123456789",
-                "_tags": [
-                  "primary",
-                  "support"
-                ]
-              },
-              {
-                "phone": "+49504305025"
-              }
-            ],
-            "address": [
-              {
-                "_tags": [
-                  "primary",
-                  "delivery"
-                ],
-                "country": "Germany",
-                "city": "Köln",
-                "postal_code": "50825",
-                "street": "Im Mediapark",
-                "street_number": "8a",
-                "additional_info": "11th floor"
-              },
-              {
-                "_tags": [
-                  "billing"
-                ],
-                "country": "Finland",
-                "city": "Köln",
-                "postal_code": "50670",
-                "street": "Im Mediapark",
-                "street_number": "8a",
-                "additional_info": ""
-              }
-            ]
-          }
-        }
-      },
-      "ExampleProductEntity": {
-        "value": {
-          "_id": "fa5292c8-2d0a-44c6-95e8-929e98bd5001",
-          "type": "product",
-          "code": "nbvq7nz03815",
-          "name": "Product name",
-          "active": true,
-          "unitLabel": "Unit label",
-          "shippable": true,
-          "priceOptions": [
-            {
-              "unitAmount": "EUR 349,99",
-              "type": "One Time",
-              "sales_tax\"": "Standard (19%)",
-              "tax_behavior": "Exclusive (Price amount excludes Tax)",
-              "description": "My additional options 1",
-              "billingScheme": "Per Unit",
-              "tiersMode": "Standard",
-              "_id": "d6d1148c-7d6f-4c09-9bba-07d217ecebbc",
-              "_schema": "price",
-              "_org": "749660",
-              "_created_at": "2021-10-13T04:04:46.845Z",
-              "_updated_at": "2021-10-13T04:04:46.845Z",
-              "_title": "My additional options 1",
-              "entity_id": "d6d1148c-7d6f-4c09-9bba-07d217ecebbc"
-            },
-            {
-              "unitAmount": "EUR 99,999.45",
-              "type": "Recurring",
-              "billingPeriod": "Monthly",
-              "active": true,
-              "sales_tax": "Standard (19%)",
-              "tax_behavior": "Inclusive (Price amount includes Tax)",
-              "description": "The fear",
-              "billingScheme": "Per Unit",
-              "tiersMode": "Standard",
-              "_id": "27516b31-dc5a-432f-9ad8-d3678962e104",
-              "_schema": "price",
-              "_org": "749660",
-              "_created_at": "2021-10-13T04:05:52.023Z",
-              "_updated_at": "2021-10-13T04:05:52.023Z",
-              "_title": "The fear",
-              "entity_id": "27516b31-dc5a-432f-9ad8-d3678962e104"
-            }
-          ]
-        }
-      },
-      "ExampleOrganization": {
-        "value": {
-          "id": "123450",
-          "name": "Organization name",
-          "description": "This is description",
-          "email": "my.organization@domain.com",
-          "phone": "+ 49 8888 888",
-          "website": "www.my-website.org",
-          "street": "Im Mediapark",
-          "street_number": "8a",
-          "city": "Köln",
-          "postal_code": "50670",
-          "country": "Finland",
-          "signature": "Organization signature"
-        }
-      },
-      "ExampleBrand": {
-        "value": {
-          "id": 123453,
-          "name": "Brand name",
-          "signature": "Signature"
-        }
-      },
-      "ExampleUser": {
-        "value": {
-          "id": 123452,
-          "name": "User full name",
-          "email": "user@example.email",
-          "organization_id": 123450,
-          "phone": "+ 49 8888 888"
-        }
-      },
-      "ExampleCustomVariables": {
-        "value": [
-          {
-            "variable": {
-              "[object Object]": null
-            },
-            "value": "https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19"
-          }
+        },
+        "required": [
+          "key",
+          "template"
         ]
-      },
-      "TableConfig": {
-        "value": {
-          "header": {
-            "style": {
-              "color": "#222",
-              "background": "#fff",
-              "font-size": "16px",
-              "font-family": "",
-              "padding-bottom": "4px",
-              "font-weight": "bold",
-              "border": "none !important",
-              "text-align": "left"
-            },
-            "columns": [
-              {
-                "id": "item",
-                "index": 0,
-                "label": {
-                  "en": "Item",
-                  "de": "Produkt"
-                },
-                "enable": true,
-                "draggable": true,
-                "style": {
-                  "padding-left": "10px",
-                  "max-width": "30%"
-                }
-              },
-              {
-                "id": "quantity",
-                "index": 1,
-                "label": {
-                  "en": "Quanity",
-                  "de": "Menge"
-                },
-                "enable": true,
-                "draggable": true,
-                "style": {
-                  "min-width": "60px",
-                  "width": "30%"
-                }
-              },
-              {
-                "id": "tax",
-                "index": 2,
-                "label": {
-                  "en": "Tax Rate",
-                  "de": "Steuerrate"
-                },
-                "enable": true,
-                "draggable": true,
-                "style": {
-                  "min-width": "60px",
-                  "width": "30%"
-                }
-              },
-              {
-                "id": "unit_amount",
-                "index": 3,
-                "label": {
-                  "en": "Unit Net Price",
-                  "de": "Nettopreis"
-                },
-                "enable": true,
-                "draggable": true,
-                "style": {
-                  "min-width": "60px",
-                  "width": "30%"
-                }
-              },
-              {
-                "id": "net_total",
-                "index": 4,
-                "label": {
-                  "en": "Net total",
-                  "de": "Nettosumme"
-                },
-                "enable": "true,",
-                "draggable": true,
-                "style": {
-                  "min-width": "60px",
-                  "width": "30%"
-                }
-              },
-              {
-                "id": "gross_total",
-                "index": 5,
-                "label": {
-                  "en": "Total",
-                  "de": "Gesamt"
-                },
-                "enable": true,
-                "draggable": true,
-                "style": {
-                  "min-width": "60px",
-                  "width": "30%"
-                }
-              }
-            ]
-          },
-          "body": {
-            "product_name": {
-              "parent_column": "item",
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "14px",
-                "font-family": "",
-                "font-weight": "bold",
-                "font-style": "normal",
-                "padding-top": "16px",
-                "padding-bottom": "8px",
-                "border": "none !important",
-                "vertical-align": "top",
-                "text-align": "left",
-                "max-width": "30%",
-                "padding-left": "10px"
-              }
-            },
-            "price_description": {
-              "parent_column": "item",
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "product_description": {
-              "parent_column": "item",
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "quantity": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "tax": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "unit_amount": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "net_total": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "gross_total": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            }
-          },
-          "footer": {
-            "payment_type": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "net_total": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "amount_tax": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            },
-            "gross_total": {
-              "enable": true,
-              "style": {
-                "color": "#222",
-                "background": "#fff",
-                "font-size": "12px",
-                "font-family": "",
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-align": "left",
-                "max-width": "30%"
-              }
-            }
-          }
-        }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    },
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    }
-  ]
+  }
 }
