@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Email settings API",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "tags": [
     {
@@ -275,21 +275,37 @@
       "delete": {
         "operationId": "deleteSharedInbox",
         "summary": "deleteSharedInbox",
-        "description": "Delete shared inbox",
+        "description": "Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).",
         "tags": [
           "Shared inboxes"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/SharedInboxId"
+          },
+          {
+            "name": "successorInboxId",
+            "description": "ID of the successor inbox. If not provided, the default inbox will be used.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
           }
         ],
         "responses": {
           "204": {
             "$ref": "#/components/responses/NoContent"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -1150,7 +1166,8 @@
               "id",
               "name",
               "color",
-              "assignees"
+              "assignees",
+              "bucket_id"
             ],
             "properties": {
               "id": {
@@ -1170,6 +1187,9 @@
                 }
               },
               "description": {
+                "type": "string"
+              },
+              "bucket_id": {
                 "type": "string"
               }
             }

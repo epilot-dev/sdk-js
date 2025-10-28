@@ -157,6 +157,7 @@ declare namespace Components {
             color: string;
             assignees: string[];
             description?: string;
+            bucket_id: string;
         }
         /**
          * Setting that allows to add a signature.
@@ -271,13 +272,19 @@ declare namespace Paths {
     namespace DeleteSharedInbox {
         namespace Parameters {
             export type Id = string;
+            export type SuccessorInboxId = string;
         }
         export interface PathParameters {
             id: Parameters.Id;
         }
+        export interface QueryParameters {
+            successorInboxId?: Parameters.SuccessorInboxId;
+        }
         namespace Responses {
             export type $204 = Components.Responses.NoContent;
+            export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -526,10 +533,10 @@ export interface OperationMethods {
   /**
    * deleteSharedInbox - deleteSharedInbox
    * 
-   * Delete shared inbox
+   * Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).
    */
   'deleteSharedInbox'(
-    parameters?: Parameters<Paths.DeleteSharedInbox.PathParameters> | null,
+    parameters?: Parameters<Paths.DeleteSharedInbox.QueryParameters & Paths.DeleteSharedInbox.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSharedInbox.Responses.$204>
@@ -728,10 +735,10 @@ export interface PathsDictionary {
     /**
      * deleteSharedInbox - deleteSharedInbox
      * 
-     * Delete shared inbox
+     * Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteSharedInbox.PathParameters> | null,
+      parameters?: Parameters<Paths.DeleteSharedInbox.QueryParameters & Paths.DeleteSharedInbox.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSharedInbox.Responses.$204>

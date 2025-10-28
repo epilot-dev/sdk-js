@@ -91,6 +91,11 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/SharedInboxId"
+          },
+          {
+            "name": "successorInboxId",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
