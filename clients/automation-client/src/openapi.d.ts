@@ -1335,7 +1335,7 @@ declare namespace Components {
                 repeatableItemOp?: boolean;
                 attributeOperation?: "all" | "updated" | "added" | "deleted";
             };
-            operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "entity_exists" | "entity_does_not_exist";
             values?: string[];
         }
         export interface CopyValueMapper {
@@ -1525,6 +1525,10 @@ declare namespace Components {
                  * 2f1c26a-cc7a-4c1c-92bf-1c6246cbfe88
                  */
                 component_id?: string;
+                /**
+                 * Whether to wait for the callback from the custom action
+                 */
+                wait_for_callback?: boolean;
             };
             /**
              * Whether to stop execution in a failed state if this action fails
@@ -1807,6 +1811,11 @@ declare namespace Components {
                      * END_CUSTOMER_PORTAL
                      */
                     origin?: string;
+                    /**
+                     * example:
+                     * any-portal-id
+                     */
+                    portal_id?: string;
                     file_config?: {
                         /**
                          * example:

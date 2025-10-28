@@ -2512,6 +2512,11 @@
                     "type": "string",
                     "description": "The ID of the component from the app. As the app can potentially have multiple custom actions, this ID is used to identify the component",
                     "example": "2f1c26a-cc7a-4c1c-92bf-1c6246cbfe88"
+                  },
+                  "wait_for_callback": {
+                    "type": "boolean",
+                    "description": "Whether to wait for the callback from the custom action",
+                    "default": false
                   }
                 }
               }
@@ -2860,7 +2865,9 @@
               "greater_than_or_equals",
               "less_than_or_equals",
               "is_empty",
-              "is_not_empty"
+              "is_not_empty",
+              "entity_exists",
+              "entity_does_not_exist"
             ]
           },
           "values": {
@@ -3947,6 +3954,10 @@
                       "origin": {
                         "type": "string",
                         "example": "END_CUSTOMER_PORTAL"
+                      },
+                      "portal_id": {
+                        "type": "string",
+                        "example": "any-portal-id"
                       },
                       "file_config": {
                         "type": "object",
