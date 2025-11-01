@@ -162,7 +162,9 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "FlowStarted",
+             *   "trigger": {
+             *     "event": "FlowStarted"
+             *   },
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"
@@ -287,7 +289,9 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "trigger": "FlowStarted",
+         *   "trigger": {
+         *     "event": "FlowStarted"
+         *   },
          *   "target": {
          *     "entitySchema": "opportunity",
          *     "entityAttribute": "title"
@@ -299,12 +303,35 @@ declare namespace Components {
          */
         export interface EntitySync {
             /**
-             * Event or condition that triggers the entity sync.
-             * Direct triggers match EventBridge event names (PascalCase).
-             * Status triggers are deduced from event + entity status combination.
+             * Trigger configuration that determines when entity sync occurs.
+             * Contains the event type and optional filter to target specific tasks/phases.
              *
              */
-            trigger: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+            trigger: {
+                /**
+                 * Event or condition that triggers the entity sync.
+                 * Direct triggers match EventBridge event names (PascalCase).
+                 * Status triggers are deduced from event + entity status combination.
+                 *
+                 */
+                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+                /**
+                 * Optional filter to target specific tasks or phases.
+                 * Specify either task_template_id OR phase_template_id (mutually exclusive).
+                 * If omitted, trigger applies to all tasks/phases.
+                 *
+                 */
+                filter?: {
+                    /**
+                     * Target a specific task by its template ID (stable across executions)
+                     */
+                    task_template_id?: string;
+                    /**
+                     * Target a specific phase by its template ID (stable across executions)
+                     */
+                    phase_template_id?: string;
+                };
+            };
             value: {
                 source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to" | "custom_value";
                 value?: string;
@@ -396,7 +423,9 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "FlowStarted",
+             *   "trigger": {
+             *     "event": "FlowStarted"
+             *   },
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"
@@ -470,7 +499,9 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "FlowStarted",
+             *   "trigger": {
+             *     "event": "FlowStarted"
+             *   },
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"

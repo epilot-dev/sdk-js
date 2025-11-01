@@ -2937,27 +2937,50 @@
         "type": "object",
         "properties": {
           "trigger": {
-            "type": "string",
-            "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
-            "enum": [
-              "FlowStarted",
-              "FlowCompleted",
-              "FlowCancelled",
-              "FlowReopened",
-              "FlowDeleted",
-              "FlowAssigned",
-              "FlowDueDateChanged",
-              "FlowContextsChanged",
-              "TaskUpdated",
-              "CurrTaskChanged",
-              "TaskCompleted",
-              "TaskSkipped",
-              "TaskMarkedInProgress",
-              "PhaseUpdated",
-              "PhaseCompleted",
-              "PhaseSkipped",
-              "PhaseMarkedInProgress"
-            ]
+            "type": "object",
+            "description": "Trigger configuration that determines when entity sync occurs.\nContains the event type and optional filter to target specific tasks/phases.\n",
+            "required": [
+              "event"
+            ],
+            "properties": {
+              "event": {
+                "type": "string",
+                "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
+                "enum": [
+                  "FlowStarted",
+                  "FlowCompleted",
+                  "FlowCancelled",
+                  "FlowReopened",
+                  "FlowDeleted",
+                  "FlowAssigned",
+                  "FlowDueDateChanged",
+                  "FlowContextsChanged",
+                  "TaskUpdated",
+                  "CurrTaskChanged",
+                  "TaskCompleted",
+                  "TaskSkipped",
+                  "TaskMarkedInProgress",
+                  "PhaseUpdated",
+                  "PhaseCompleted",
+                  "PhaseSkipped",
+                  "PhaseMarkedInProgress"
+                ]
+              },
+              "filter": {
+                "type": "object",
+                "description": "Optional filter to target specific tasks or phases.\nSpecify either task_template_id OR phase_template_id (mutually exclusive).\nIf omitted, trigger applies to all tasks/phases.\n",
+                "properties": {
+                  "task_template_id": {
+                    "type": "string",
+                    "description": "Target a specific task by its template ID (stable across executions)"
+                  },
+                  "phase_template_id": {
+                    "type": "string",
+                    "description": "Target a specific phase by its template ID (stable across executions)"
+                  }
+                }
+              }
+            }
           },
           "value": {
             "type": "object",
@@ -3004,7 +3027,9 @@
           }
         },
         "example": {
-          "trigger": "FlowStarted",
+          "trigger": {
+            "event": "FlowStarted"
+          },
           "target": {
             "entitySchema": "opportunity",
             "entityAttribute": "title"
