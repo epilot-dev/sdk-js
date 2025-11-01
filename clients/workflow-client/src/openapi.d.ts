@@ -394,6 +394,38 @@ declare namespace Components {
              */
             is_primary?: boolean;
         }
+        /**
+         * example:
+         * {
+         *   "trigger": "workflow_started",
+         *   "target": {
+         *     "entitySchema": "opportunity",
+         *     "entityAttribute": "title"
+         *   },
+         *   "value": {
+         *     "source": "workflow_name"
+         *   }
+         * }
+         */
+        export interface EntitySync {
+            trigger: "workflow_started" | "workflow_completed" | "workflow_cancelled" | "workflow_reopened" | "workflow_assigned" | "workflow_due_date_changed" | "workflow_contexts_changed" | "task_updated" | "task_created" | "task_completed" | "task_skipped" | "task_marked_in_progress" | "curr_task_changed" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_marked_in_progress";
+            value: {
+                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to" | "custom_value";
+                value?: string;
+            };
+            target: {
+                /**
+                 * example:
+                 * opportunity
+                 */
+                entitySchema: string;
+                /**
+                 * example:
+                 * title
+                 */
+                entityAttribute: string;
+            };
+        }
         export interface ErrorResp {
             message?: string;
         }
@@ -477,7 +509,20 @@ declare namespace Components {
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
-            update_entity_attributes?: UpdateEntityAttributes[];
+            entity_sync?: /**
+             * example:
+             * {
+             *   "trigger": "workflow_started",
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "title"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            EntitySync[];
             /**
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
@@ -2568,6 +2613,7 @@ export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type EntityRef = Components.Schemas.EntityRef;
+export type entitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;

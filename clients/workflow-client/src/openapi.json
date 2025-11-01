@@ -2545,6 +2545,91 @@
           "target"
         ]
       },
+      "entitySync": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "workflow_started",
+              "workflow_completed",
+              "workflow_cancelled",
+              "workflow_reopened",
+              "workflow_assigned",
+              "workflow_due_date_changed",
+              "workflow_contexts_changed",
+              "task_updated",
+              "task_created",
+              "task_completed",
+              "task_skipped",
+              "task_marked_in_progress",
+              "curr_task_changed",
+              "phase_updated",
+              "phase_completed",
+              "phase_skipped",
+              "phase_marked_in_progress"
+            ]
+          },
+          "value": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "workflow_name",
+                  "workflow_status",
+                  "workflow_assigned_to",
+                  "task_name",
+                  "task_status",
+                  "task_assigned_to",
+                  "phase_name",
+                  "phase_status",
+                  "phase_assigned_to",
+                  "custom_value"
+                ]
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "title"
+              }
+            },
+            "required": [
+              "entitySchema",
+              "entityAttribute"
+            ]
+          }
+        },
+        "example": {
+          "trigger": "workflow_started",
+          "target": {
+            "entitySchema": "opportunity",
+            "entityAttribute": "title"
+          },
+          "value": {
+            "source": "workflow_name"
+          }
+        },
+        "required": [
+          "trigger",
+          "target",
+          "value"
+        ]
+      },
       "DynamicDueDate": {
         "description": "set a Duedate for a step then a specific",
         "type": "object",
@@ -2793,10 +2878,10 @@
             "type": "boolean",
             "description": "Indicates whether this flow execution is available for End Customer Portal or not. By default it's not."
           },
-          "update_entity_attributes": {
+          "entity_sync": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UpdateEntityAttributes"
+              "$ref": "#/components/schemas/entitySync"
             }
           },
           "taxonomies": {
