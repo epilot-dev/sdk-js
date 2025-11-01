@@ -2545,7 +2545,7 @@
           "target"
         ]
       },
-      "entitySync": {
+      "EntitySync": {
         "type": "object",
         "properties": {
           "trigger": {
@@ -2881,7 +2881,7 @@
           "entity_sync": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/entitySync"
+              "$ref": "#/components/schemas/EntitySync"
             }
           },
           "taxonomies": {
