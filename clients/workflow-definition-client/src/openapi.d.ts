@@ -162,7 +162,7 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "workflow_started",
+             *   "trigger": "FlowStarted",
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"
@@ -287,7 +287,7 @@ declare namespace Components {
         /**
          * example:
          * {
-         *   "trigger": "workflow_started",
+         *   "trigger": "FlowStarted",
          *   "target": {
          *     "entitySchema": "opportunity",
          *     "entityAttribute": "title"
@@ -298,7 +298,13 @@ declare namespace Components {
          * }
          */
         export interface EntitySync {
-            trigger: "workflow_started" | "workflow_completed" | "workflow_cancelled" | "workflow_reopened" | "workflow_assigned" | "workflow_due_date_changed" | "workflow_contexts_changed" | "task_updated" | "task_created" | "task_completed" | "task_skipped" | "task_marked_in_progress" | "curr_task_changed" | "phase_updated" | "phase_completed" | "phase_skipped" | "phase_marked_in_progress";
+            /**
+             * Event or condition that triggers the entity sync.
+             * Direct triggers match EventBridge event names (PascalCase).
+             * Status triggers are deduced from event + entity status combination.
+             *
+             */
+            trigger: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
             value: {
                 source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to" | "custom_value";
                 value?: string;
@@ -390,7 +396,7 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "workflow_started",
+             *   "trigger": "FlowStarted",
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"
@@ -464,7 +470,7 @@ declare namespace Components {
             entity_sync?: /**
              * example:
              * {
-             *   "trigger": "workflow_started",
+             *   "trigger": "FlowStarted",
              *   "target": {
              *     "entitySchema": "opportunity",
              *     "entityAttribute": "title"

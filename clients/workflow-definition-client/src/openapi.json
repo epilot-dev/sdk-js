@@ -2938,24 +2938,25 @@
         "properties": {
           "trigger": {
             "type": "string",
+            "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
             "enum": [
-              "workflow_started",
-              "workflow_completed",
-              "workflow_cancelled",
-              "workflow_reopened",
-              "workflow_assigned",
-              "workflow_due_date_changed",
-              "workflow_contexts_changed",
-              "task_updated",
-              "task_created",
-              "task_completed",
-              "task_skipped",
-              "task_marked_in_progress",
-              "curr_task_changed",
-              "phase_updated",
-              "phase_completed",
-              "phase_skipped",
-              "phase_marked_in_progress"
+              "FlowStarted",
+              "FlowCompleted",
+              "FlowCancelled",
+              "FlowReopened",
+              "FlowDeleted",
+              "FlowAssigned",
+              "FlowDueDateChanged",
+              "FlowContextsChanged",
+              "TaskUpdated",
+              "CurrTaskChanged",
+              "TaskCompleted",
+              "TaskSkipped",
+              "TaskMarkedInProgress",
+              "PhaseUpdated",
+              "PhaseCompleted",
+              "PhaseSkipped",
+              "PhaseMarkedInProgress"
             ]
           },
           "value": {
@@ -3003,7 +3004,7 @@
           }
         },
         "example": {
-          "trigger": "workflow_started",
+          "trigger": "FlowStarted",
           "target": {
             "entitySchema": "opportunity",
             "entityAttribute": "title"
