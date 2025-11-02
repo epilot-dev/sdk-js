@@ -1182,51 +1182,424 @@ declare namespace Components {
              */
             override_url?: string;
         }
-        export interface PortalAuth {
-            type?: string;
-            url?: string;
+        export interface PortalExtensionAuthBlock {
+            /**
+             * HTTP method to use for authentication
+             */
             method?: string;
+            /**
+             * URL to use for authentication. Supports variable interpolation.
+             */
+            url: string;
+            /**
+             * Parameters to append to the URL. Supports variable interpolation.
+             */
+            params?: {
+                [name: string]: string;
+            };
+            /**
+             * Headers to use for authentication. Supports variable interpolation.
+             */
             headers?: {
                 [name: string]: string;
+            };
+            /**
+             * JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.
+             */
+            body?: {
+                [name: string]: string;
+            };
+            cache?: {
+                /**
+                 * Key to use to identify the auth response. Supports interpolation.
+                 * example:
+                 * {{Options.api_key}}
+                 */
+                key: string;
+                /**
+                 * Time to live in seconds for the cache. Supports interpolation.
+                 * example:
+                 * {{AuthResponse.data.expires_in}}
+                 */
+                ttl: string;
             };
         }
         export interface PortalExtensionComponent {
             component_type: "PORTAL_EXTENSION";
-            origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
             configuration: PortalExtensionConfig;
         }
         export interface PortalExtensionConfig {
-            id?: string;
-            hooks?: {
+            hooks?: ({
+                /**
+                 * Identifier of the hook. Should not change between updates.
+                 */
                 id?: string;
-                type?: string;
-                name?: TranslatedString;
-                interval?: string[];
-                auth?: PortalAuth;
-                call?: {
-                    url?: string;
-                    headers?: {
-                        [name: string]: string;
-                    };
-                    params?: {
-                        [name: string]: string;
-                    };
-                };
-            }[];
+            } & (/**
+             * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+             *   - 200 with contact id if exactly one contact is found
+             *   - 404 if no contact is found or more than contact is found
+             *
+             */
+            PortalExtensionHookRegistrationIdentifiersCheck | /**
+             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+             *   - 200 if found with either:
+             *     - contract_id array
+             *     - contact_id string
+             *   - 404 if no contract is found
+             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+             *
+             */
+            PortalExtensionHookContractIdentification | /**
+             * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            PortalExtensionHookPriceDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            PortalExtensionHookConsumptionDataRetrieval | /**
+             * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+             *   - 200 with the time series data
+             *
+             */
+            PortalExtensionHookCostDataRetrieval | /**
+             * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+             *   - 200:
+             *     If meter reading is plausible, the response should contain:
+             *       - valid: true
+             *     If meter reading is not plausible, the response should contain:
+             *       - valid: false
+             *
+             */
+            PortalExtensionHookMeterReadingPlausibilityCheck))[];
             links?: {
-                id?: string;
-                type?: string;
-                name?: TranslatedString;
+                /**
+                 * Identifier of the link. Should not change between updates.
+                 */
+                id: string;
+                name: TranslatedString;
                 description?: TranslatedString;
+                type: "seamless";
+                /**
+                 * Controls whether the link should be shown. Supports variable interpolation.
+                 * example:
+                 * {{Contact.customer_number | is_not_empty}}
+                 */
                 condition?: string;
-                auth?: PortalAuth;
-                redirect?: {
+                auth?: PortalExtensionAuthBlock;
+                redirect: {
+                    /**
+                     * URL to redirect to. Supports variable interpolation.
+                     */
                     url?: string;
+                    /**
+                     * Parameters to append to the URL. Supports variable interpolation.
+                     */
                     params?: {
                         [name: string]: string;
                     };
                 };
             }[];
+        }
+        export interface PortalExtensionHook {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string;
+        }
+        /**
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface PortalExtensionHookConsumptionDataRetrieval {
+            type: "consumptionDataRetrieval";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
+         *   - 200 if found with either:
+         *     - contract_id array
+         *     - contact_id string
+         *   - 404 if no contract is found
+         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+         *
+         */
+        export interface PortalExtensionHookContractIdentification {
+            type: "contractIdentification";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * example:
+             * represents_contact
+             */
+            contact_relation_attribute?: string;
+            /**
+             * Explanation of the hook.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * This process will give you access to all Contracts kept
+                 */
+                en: string;
+            };
+        }
+        /**
+         * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface PortalExtensionHookCostDataRetrieval {
+            type: "costDataRetrieval";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
+         *   - 200:
+         *     If meter reading is plausible, the response should contain:
+         *       - valid: true
+         *     If meter reading is not plausible, the response should contain:
+         *       - valid: false
+         *
+         */
+        export interface PortalExtensionHookMeterReadingPlausibilityCheck {
+            type: "meterReadingPlausibilityCheck";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * JSON body to use for the call. Supports variable interpolation.
+                 */
+                body: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Response to the call
+             */
+            resolved: {
+                /**
+                 * Indicate whether the meter reading is plausible
+                 * example:
+                 * {{CallResponse.data.valid}}
+                 */
+                valid?: string;
+                /**
+                 * Upper allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.upper_limit}}
+                 */
+                upper_limit?: string;
+                /**
+                 * Lower allowed limit of the meter reading
+                 * example:
+                 * {{CallResponse.data.lower_limit}}
+                 */
+                lower_limit?: string;
+            };
+        }
+        /**
+         * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
+         *   - 200 with the time series data
+         *
+         */
+        export interface PortalExtensionHookPriceDataRetrieval {
+            type: "priceDataRetrieval";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved: {
+                /**
+                 * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+        }
+        /**
+         * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
+         *   - 200 with contact id if exactly one contact is found
+         *   - 404 if no contact is found or more than contact is found
+         *
+         */
+        export interface PortalExtensionHookRegistrationIdentifiersCheck {
+            type: "registrationIdentifiersCheck";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 */
+                result: string;
+            };
+        }
+        export interface PortalExtensionSeamlessLink {
+            /**
+             * Identifier of the link. Should not change between updates.
+             */
+            id: string;
+            name: TranslatedString;
+            description?: TranslatedString;
+            type: "seamless";
+            /**
+             * Controls whether the link should be shown. Supports variable interpolation.
+             * example:
+             * {{Contact.customer_number | is_not_empty}}
+             */
+            condition?: string;
+            auth?: PortalExtensionAuthBlock;
+            redirect: {
+                /**
+                 * URL to redirect to. Supports variable interpolation.
+                 */
+                url?: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+            };
         }
         export interface Pricing {
             pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
@@ -2596,9 +2969,17 @@ export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
 export type OverrideDevMode = Components.Schemas.OverrideDevMode;
-export type PortalAuth = Components.Schemas.PortalAuth;
+export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
+export type PortalExtensionHook = Components.Schemas.PortalExtensionHook;
+export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
+export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
+export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
+export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.PortalExtensionHookMeterReadingPlausibilityCheck;
+export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
+export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;
+export type PortalExtensionSeamlessLink = Components.Schemas.PortalExtensionSeamlessLink;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
 export type RawEvents = Components.Schemas.RawEvents;

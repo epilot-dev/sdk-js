@@ -2097,13 +2097,6 @@
               "PORTAL_EXTENSION"
             ]
           },
-          "origin": {
-            "type": "string",
-            "enum": [
-              "END_CUSTOMER_PORTAL",
-              "INSTALLER_PORTAL"
-            ]
-          },
           "configuration": {
             "$ref": "#/components/schemas/PortalExtensionConfig"
           }
@@ -2112,116 +2105,597 @@
       "PortalExtensionConfig": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "hooks": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHook"
                 },
-                "type": {
-                  "type": "string"
-                },
-                "name": {
-                  "$ref": "#/components/schemas/TranslatedString"
-                },
-                "interval": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "auth": {
-                  "$ref": "#/components/schemas/PortalAuth"
-                },
-                "call": {
-                  "type": "object",
-                  "properties": {
-                    "url": {
-                      "type": "string"
+                {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookRegistrationIdentifiersCheck"
                     },
-                    "headers": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookContractIdentification"
                     },
-                    "params": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookPriceDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookCostDataRetrieval"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck"
                     }
-                  }
+                  ]
                 }
-              }
+              ]
             }
           },
           "links": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                },
-                "name": {
-                  "$ref": "#/components/schemas/TranslatedString"
-                },
-                "description": {
-                  "$ref": "#/components/schemas/TranslatedString"
-                },
-                "condition": {
-                  "type": "string"
-                },
-                "auth": {
-                  "$ref": "#/components/schemas/PortalAuth"
-                },
-                "redirect": {
-                  "type": "object",
-                  "properties": {
-                    "url": {
-                      "type": "string"
-                    },
-                    "params": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
-                    }
-                  }
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PortalExtensionSeamlessLink"
                 }
-              }
+              ]
             }
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortalExtensionHook": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook. Should not change between updates."
           }
         }
       },
-      "PortalAuth": {
+      "PortalExtensionHookRegistrationIdentifiersCheck": {
+        "description": "Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:\n  - 200 with contact id if exactly one contact is found\n  - 404 if no contact is found or more than contact is found\n",
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "registrationIdentifiersCheck"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "result": {
+                "type": "string",
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "result"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookContractIdentification": {
+        "description": "Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:\n  - 200 if found with either:\n    - contract_id array\n    - contact_id string\n  - 404 if no contract is found\nIf `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "contractIdentification"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          "contact_relation_attribute": {
+            "type": "string",
+            "description": "Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.",
+            "example": "represents_contact"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to all Contracts kept"
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookMeterReadingPlausibilityCheck": {
+        "description": "Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:\n  - 200:\n    If meter reading is plausible, the response should contain:\n      - valid: true\n    If meter reading is not plausible, the response should contain:\n      - valid: false\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meterReadingPlausibilityCheck"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for the call. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "body",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "description": "Response to the call",
+            "properties": {
+              "valid": {
+                "type": "string",
+                "description": "Indicate whether the meter reading is plausible",
+                "example": "{{CallResponse.data.valid}}"
+              },
+              "upper_limit": {
+                "type": "string",
+                "description": "Upper allowed limit of the meter reading",
+                "example": "{{CallResponse.data.upper_limit}}"
+              },
+              "lower_limit": {
+                "type": "string",
+                "description": "Lower allowed limit of the meter reading",
+                "example": "{{CallResponse.data.lower_limit}}"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "resolved"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookPriceDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "priceDataRetrieval"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "resolved"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookConsumptionDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "consumptionDataRetrieval"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "resolved"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookCostDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "costDataRetrieval"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionSeamlessLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the link. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "seamless"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "description": "Controls whether the link should be shown. Supports variable interpolation.",
+            "example": "{{Contact.customer_number | is_not_empty}}"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "redirect": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to redirect to. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "redirect"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionAuthBlock": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use for authentication",
+            "default": "GET"
           },
           "url": {
-            "type": "string"
+            "type": "string",
+            "description": "URL to use for authentication. Supports variable interpolation."
           },
-          "method": {
-            "type": "string"
+          "params": {
+            "type": "object",
+            "description": "Parameters to append to the URL. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
           },
           "headers": {
             "type": "object",
+            "description": "Headers to use for authentication. Supports variable interpolation.",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "default": {}
+          },
+          "body": {
+            "type": "object",
+            "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "cache": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Key to use to identify the auth response. Supports interpolation.",
+                "example": "{{Options.api_key}}"
+              },
+              "ttl": {
+                "type": "string",
+                "description": "Time to live in seconds for the cache. Supports interpolation.",
+                "example": "{{AuthResponse.data.expires_in}}"
+              }
+            },
+            "required": [
+              "key",
+              "ttl"
+            ],
+            "additionalProperties": false
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
       },
       "OverrideDevMode": {
         "type": "object",
