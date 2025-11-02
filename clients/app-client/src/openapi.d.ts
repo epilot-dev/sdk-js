@@ -1234,6 +1234,7 @@ declare namespace Components {
                  * Identifier of the hook. Should not change between updates.
                  */
                 id?: string;
+                name?: TranslatedString;
             } & (/**
              * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
              *   - 200 with contact id if exactly one contact is found
@@ -1308,6 +1309,7 @@ declare namespace Components {
              * Identifier of the hook. Should not change between updates.
              */
             id?: string;
+            name?: TranslatedString;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1316,6 +1318,10 @@ declare namespace Components {
          */
         export interface PortalExtensionHookConsumptionDataRetrieval {
             type: "consumptionDataRetrieval";
+            /**
+             * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1345,7 +1351,7 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
-            resolved: {
+            resolved?: {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
@@ -1408,6 +1414,10 @@ declare namespace Components {
          */
         export interface PortalExtensionHookCostDataRetrieval {
             type: "costDataRetrieval";
+            /**
+             * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1477,7 +1487,7 @@ declare namespace Components {
             /**
              * Response to the call
              */
-            resolved: {
+            resolved?: {
                 /**
                  * Indicate whether the meter reading is plausible
                  * example:
@@ -1505,6 +1515,10 @@ declare namespace Components {
          */
         export interface PortalExtensionHookPriceDataRetrieval {
             type: "priceDataRetrieval";
+            /**
+             * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1534,7 +1548,7 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
-            resolved: {
+            resolved?: {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */

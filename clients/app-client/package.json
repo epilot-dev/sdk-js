@@ -1,6 +1,6 @@
 {
   "name": "@epilot/app-client",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "JavaScript client library for the epilot App API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
