@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Message API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Send and receive email messages via your epilot organization\n"
   },
   "security": [
@@ -66,8 +66,8 @@
             "name": "do_not_create_entities",
             "description": "When true, this flag lets the caller to send only the message and by-pass creating the thread & message entities.",
             "schema": {
-              "default": false,
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -451,8 +451,17 @@
             "name": "email_filter",
             "description": "emails to filter by",
             "schema": {
-              "default": "test@epilot.dev",
-              "type": "array"
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -764,6 +773,57 @@
           },
           "403": {
             "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{id}:move": {
+      "post": {
+        "operationId": "moveThread",
+        "summary": "moveThread",
+        "description": "Move thread to a different Inbox",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveThreadPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -1668,6 +1728,58 @@
     }
   },
   "components": {
+    "responses": {
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -1683,6 +1795,29 @@
       }
     },
     "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Thread not found"
+          }
+        }
+      },
+      "MoveThreadPayload": {
+        "type": "object",
+        "required": [
+          "inbox_id"
+        ],
+        "properties": {
+          "inbox_id": {
+            "type": "string",
+            "description": "Inbox ID",
+            "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+          }
+        }
+      },
       "BaseEntity": {
         "type": "object",
         "required": [
@@ -1753,23 +1888,23 @@
             "type": "array",
             "description": "User ID of who the message is assigned to. Default is the user who sends message.",
             "items": {
-              "type": "string",
-              "example": [
-                "206801",
-                "200109"
-              ]
-            }
+              "type": "string"
+            },
+            "example": [
+              "206801",
+              "200109"
+            ]
           },
           "org_read_message": {
             "type": "array",
             "description": "Organization ID of organization read the message.",
             "items": {
-              "type": "string",
-              "example": [
-                "789372",
-                "210291"
-              ]
-            }
+              "type": "string"
+            },
+            "example": [
+              "789372",
+              "210291"
+            ]
           },
           "done": {
             "type": "boolean",
@@ -1777,13 +1912,9 @@
             "example": false
           },
           "latest_message": {
-            "type": "object",
-            "description": "Latest message of thread",
             "$ref": "#/components/schemas/Message"
           },
           "latest_trash_message": {
-            "type": "object",
-            "description": "Latest trash message of thread",
             "$ref": "#/components/schemas/Message"
           },
           "latest_message_at": {
@@ -1869,23 +2000,23 @@
             "type": "array",
             "description": "User ID of user read the message.",
             "items": {
-              "type": "string",
-              "example": [
-                "206801",
-                "200109"
-              ]
-            }
+              "type": "string"
+            },
+            "example": [
+              "206801",
+              "200109"
+            ]
           },
           "org_read_message": {
             "type": "array",
             "description": "Organization ID of organization read the message.",
             "items": {
-              "type": "string",
-              "example": [
-                "789372",
-                "210291"
-              ]
-            }
+              "type": "string"
+            },
+            "example": [
+              "789372",
+              "210291"
+            ]
           },
           "send_status": {
             "type": "array",
@@ -2141,10 +2272,7 @@
             "example": "subject:\"Request for solar panel price\" AND _tags:INBOX"
           },
           "fields": {
-            "description": "List of entity fields to include in results",
-            "schema": {
-              "$ref": "#/components/schemas/FieldsParam"
-            }
+            "$ref": "#/components/schemas/FieldsParam"
           },
           "from": {
             "type": "integer",
@@ -2269,12 +2397,12 @@
           "user_id": {
             "type": "string",
             "description": "User ID of the user who marked the thread as done",
-            "example": 123
+            "example": "123"
           },
           "organization_id": {
             "type": "string",
             "description": "Organization ID of the organization who marked the thread as done",
-            "example": 456
+            "example": "456"
           }
         }
       },
@@ -2295,12 +2423,12 @@
           "user_id": {
             "type": "string",
             "description": "User ID of the user who marked the thread as open",
-            "example": 123
+            "example": "123"
           },
           "organization_id": {
             "type": "string",
             "description": "Organization ID of the organization who marked the thread as open",
-            "example": 456
+            "example": "456"
           }
         }
       },
@@ -2398,6 +2526,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    },
     {
       "url": "https://message.sls.epilot.io"
     }

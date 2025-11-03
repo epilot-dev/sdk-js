@@ -220,6 +220,25 @@
         "responses": {}
       }
     },
+    "/v1/message/threads/{id}:move": {
+      "post": {
+        "operationId": "moveThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads/{id}:markAsDone": {
       "post": {
         "operationId": "markThreadAsDone",
@@ -569,7 +588,35 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://message.sls.epilot.io"

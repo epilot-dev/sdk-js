@@ -9,6 +9,13 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Responses {
+        export type BadRequest = Schemas.ErrorResponse;
+        export type Conflict = Schemas.ErrorResponse;
+        export type Forbidden = Schemas.ErrorResponse;
+        export type InternalServerError = Schemas.ErrorResponse;
+        export type NotFound = Schemas.ErrorResponse;
+    }
     namespace Schemas {
         export interface Address {
             /**
@@ -123,6 +130,14 @@ declare namespace Components {
              * ]
              */
             scopes?: /* Who is marking an item as read or unread. */ ReadingScope[];
+        }
+        export interface ErrorResponse {
+            /**
+             * Error message
+             * example:
+             * Thread not found
+             */
+            error?: string;
         }
         /**
          * List of entity fields to include or exclude in the response
@@ -242,10 +257,20 @@ declare namespace Components {
             in_reply_to?: string;
             /**
              * User ID of user read the message.
+             * example:
+             * [
+             *   "206801",
+             *   "200109"
+             * ]
              */
             user_read_message?: string[];
             /**
              * Organization ID of organization read the message.
+             * example:
+             * [
+             *   "789372",
+             *   "210291"
+             * ]
              */
             org_read_message?: string[];
             /**
@@ -441,10 +466,20 @@ declare namespace Components {
             in_reply_to?: string;
             /**
              * User ID of user read the message.
+             * example:
+             * [
+             *   "206801",
+             *   "200109"
+             * ]
              */
             user_read_message?: string[];
             /**
              * Organization ID of organization read the message.
+             * example:
+             * [
+             *   "789372",
+             *   "210291"
+             * ]
              */
             org_read_message?: string[];
             /**
@@ -472,6 +507,14 @@ declare namespace Components {
              * https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html
              */
             html_download_url?: string;
+        }
+        export interface MoveThreadPayload {
+            /**
+             * Inbox ID
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            inbox_id: string;
         }
         export interface ReadMessagePayload {
             /**
@@ -514,10 +557,24 @@ declare namespace Components {
              * subject:"Request for solar panel price" AND _tags:INBOX
              */
             q: string;
-            /**
-             * List of entity fields to include in results
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
              */
-            fields?: any;
+            FieldsParam;
             from?: number;
             size?: number;
             hydrate?: boolean;
@@ -537,10 +594,20 @@ declare namespace Components {
             topic: string;
             /**
              * User ID of who the message is assigned to. Default is the user who sends message.
+             * example:
+             * [
+             *   "206801",
+             *   "200109"
+             * ]
              */
             assigned_to?: string[];
             /**
              * Organization ID of organization read the message.
+             * example:
+             * [
+             *   "789372",
+             *   "210291"
+             * ]
              */
             org_read_message?: string[];
             /**
@@ -549,13 +616,7 @@ declare namespace Components {
              * false
              */
             done?: boolean;
-            /**
-             * Latest message of thread
-             */
             latest_message?: Message;
-            /**
-             * Latest trash message of thread
-             */
             latest_trash_message?: Message;
             /**
              * The date of the latest message time in the thread
@@ -784,10 +845,20 @@ declare namespace Paths {
                 in_reply_to?: string;
                 /**
                  * User ID of user read the message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 user_read_message?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -959,10 +1030,20 @@ declare namespace Paths {
                 in_reply_to?: string;
                 /**
                  * User ID of user read the message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 user_read_message?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -1108,10 +1189,20 @@ declare namespace Paths {
                 in_reply_to?: string;
                 /**
                  * User ID of user read the message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 user_read_message?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -1160,7 +1251,7 @@ declare namespace Paths {
     namespace GetUnread {
         namespace Parameters {
             export type Actor = "organization" | "user";
-            export type EmailFilter = any[];
+            export type EmailFilter = string[] | string;
         }
         export interface PathParameters {
             actor: Parameters.Actor;
@@ -1343,6 +1434,24 @@ declare namespace Paths {
             }
         }
     }
+    namespace MoveThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.MoveThreadPayload;
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace PinThread {
         namespace Parameters {
             export type Id = string;
@@ -1500,10 +1609,20 @@ declare namespace Paths {
                     in_reply_to?: string;
                     /**
                      * User ID of user read the message.
+                     * example:
+                     * [
+                     *   "206801",
+                     *   "200109"
+                     * ]
                      */
                     user_read_message?: string[];
                     /**
                      * Organization ID of organization read the message.
+                     * example:
+                     * [
+                     *   "789372",
+                     *   "210291"
+                     * ]
                      */
                     org_read_message?: string[];
                     /**
@@ -1592,10 +1711,20 @@ declare namespace Paths {
                     topic: string;
                     /**
                      * User ID of who the message is assigned to. Default is the user who sends message.
+                     * example:
+                     * [
+                     *   "206801",
+                     *   "200109"
+                     * ]
                      */
                     assigned_to?: string[];
                     /**
                      * Organization ID of organization read the message.
+                     * example:
+                     * [
+                     *   "789372",
+                     *   "210291"
+                     * ]
                      */
                     org_read_message?: string[];
                     /**
@@ -1683,10 +1812,20 @@ declare namespace Paths {
                     topic: string;
                     /**
                      * User ID of who the message is assigned to. Default is the user who sends message.
+                     * example:
+                     * [
+                     *   "206801",
+                     *   "200109"
+                     * ]
                      */
                     assigned_to?: string[];
                     /**
                      * Organization ID of organization read the message.
+                     * example:
+                     * [
+                     *   "789372",
+                     *   "210291"
+                     * ]
                      */
                     org_read_message?: string[];
                     /**
@@ -1816,10 +1955,20 @@ declare namespace Paths {
                 in_reply_to?: string;
                 /**
                  * User ID of user read the message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 user_read_message?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -2151,10 +2300,20 @@ declare namespace Paths {
                 in_reply_to?: string;
                 /**
                  * User ID of user read the message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 user_read_message?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -2234,10 +2393,20 @@ declare namespace Paths {
                 topic: string;
                 /**
                  * User ID of who the message is assigned to. Default is the user who sends message.
+                 * example:
+                 * [
+                 *   "206801",
+                 *   "200109"
+                 * ]
                  */
                 assigned_to?: string[];
                 /**
                  * Organization ID of organization read the message.
+                 * example:
+                 * [
+                 *   "789372",
+                 *   "210291"
+                 * ]
                  */
                 org_read_message?: string[];
                 /**
@@ -2446,6 +2615,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteThread.Responses.$204>
+  /**
+   * moveThread - moveThread
+   * 
+   * Move thread to a different Inbox
+   */
+  'moveThread'(
+    parameters?: Parameters<Paths.MoveThread.PathParameters> | null,
+    data?: Paths.MoveThread.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MoveThread.Responses.$204>
   /**
    * markThreadAsDone - markThreadAsDone
    * 
@@ -2934,6 +3113,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteThread.Responses.$204>
   }
+  ['/v1/message/threads/{id}:move']: {
+    /**
+     * moveThread - moveThread
+     * 
+     * Move thread to a different Inbox
+     */
+    'post'(
+      parameters?: Parameters<Paths.MoveThread.PathParameters> | null,
+      data?: Paths.MoveThread.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MoveThread.Responses.$204>
+  }
   ['/v1/message/threads/{id}:markAsDone']: {
     /**
      * markThreadAsDone - markThreadAsDone
@@ -3266,11 +3457,13 @@ export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkActionsPayload = Components.Schemas.BulkActionsPayload;
 export type BulkActionsPayloadWithScopes = Components.Schemas.BulkActionsPayloadWithScopes;
+export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type File = Components.Schemas.File;
 export type Message = Components.Schemas.Message;
 export type MessageRequestParams = Components.Schemas.MessageRequestParams;
 export type MessageV2 = Components.Schemas.MessageV2;
+export type MoveThreadPayload = Components.Schemas.MoveThreadPayload;
 export type ReadMessagePayload = Components.Schemas.ReadMessagePayload;
 export type ReadingScope = Components.Schemas.ReadingScope;
 export type SearchIDParams = Components.Schemas.SearchIDParams;
