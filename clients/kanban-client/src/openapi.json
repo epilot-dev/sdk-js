@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Kanban API",
-    "version": "1.2.1"
+    "version": "1.2.2"
   },
   "tags": [
     {
@@ -354,6 +354,16 @@
               "minimum": 1,
               "maximum": 250
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Starting offset for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
           }
         ],
         "responses": {
@@ -383,8 +393,17 @@
                       "example": [
                         "value"
                       ]
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of matching items available",
+                      "example": 42
                     }
-                  }
+                  },
+                  "required": [
+                    "results",
+                    "hits"
+                  ]
                 }
               }
             }
