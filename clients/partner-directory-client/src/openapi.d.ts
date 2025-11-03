@@ -112,6 +112,17 @@ declare namespace Components {
             OrganizationId;
             /**
              * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * example:
              * 456
              */
             user_id: string;
@@ -151,6 +162,17 @@ declare namespace Components {
             OrganizationId;
             /**
              * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * example:
              * 456
              */
             group_id?: string;
@@ -183,6 +205,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             partner_id: /**
              * example:
              * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
@@ -234,6 +267,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             partner_id?: /**
              * example:
              * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
@@ -280,6 +324,17 @@ declare namespace Components {
             OrganizationId;
             /**
              * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * example:
              * 456
              */
             user_id?: string;
@@ -317,6 +372,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
         }
         export interface Geolocation {
             /**
@@ -556,7 +622,7 @@ declare namespace Paths {
             /**
              * filter results to specific types of assignables. defaults to all types
              */
-            types?: ("user" | "partner_user" | "partner_organization" | "ecp" | "group")[];
+            types?: ("user" | "partner_user" | "partner_organization" | "ecp" | "group" | "parent_organization_user")[];
         }
         namespace Responses {
             export interface $200 {
