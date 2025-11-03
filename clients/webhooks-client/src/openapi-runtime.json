@@ -230,6 +230,17 @@
         },
         "responses": {}
       }
+    },
+    "/v2/webhooks/configs/{configId}/events": {
+      "post": {
+        "operationId": "getWebhookEventsV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},
