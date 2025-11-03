@@ -870,6 +870,12 @@ declare namespace Paths {
         }
     }
     namespace GetWebhookEventsV2 {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
         export type RequestBody = Components.Schemas.SearchOptions;
         namespace Responses {
             export type $200 = Components.Schemas.EventListResponse;
@@ -1172,7 +1178,7 @@ export interface OperationMethods {
    * List webhook events and filter them by status, timestamp, etc.
    */
   'getWebhookEventsV2'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetWebhookEventsV2.PathParameters> | null,
     data?: Paths.GetWebhookEventsV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetWebhookEventsV2.Responses.$200>
@@ -1351,7 +1357,7 @@ export interface PathsDictionary {
      * List webhook events and filter them by status, timestamp, etc.
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetWebhookEventsV2.PathParameters> | null,
       data?: Paths.GetWebhookEventsV2.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetWebhookEventsV2.Responses.$200>

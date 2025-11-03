@@ -875,6 +875,18 @@
         "tags": [
           "Events"
         ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
