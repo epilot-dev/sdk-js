@@ -27,6 +27,7 @@ declare namespace Components {
         export type GetSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
         export type InternalServerError = Schemas.ErrorResponse;
         export type ListEmailAddressesSuccessResponse = Schemas.EmailAddressResponse[];
+        export type ListInboxBucketsSuccessResponse = Schemas.InboxBucketResponse[];
         export type ListSharedInboxesSuccessResponse = Schemas.SharedInboxResponse[];
         export interface NoContent {
         }
@@ -86,6 +87,10 @@ declare namespace Components {
         export interface ErrorResponse {
             error: string;
             status: number;
+        }
+        export interface InboxBucketResponse {
+            id: string;
+            inbox_id: string;
         }
         export interface ProvisionEpilotEmailAddressPayload {
             address: string;
@@ -340,6 +345,13 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListInboxBuckets {
+        namespace Responses {
+            export type $200 = Components.Responses.ListInboxBucketsSuccessResponse;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListSharedInboxes {
         namespace Responses {
             export type $200 = Components.Responses.ListSharedInboxesSuccessResponse;
@@ -543,7 +555,7 @@ export interface OperationMethods {
   /**
    * listSharedInboxes - listSharedInboxes
    * 
-   * List shared inboxes
+   * List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.
    */
   'listSharedInboxes'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -560,6 +572,16 @@ export interface OperationMethods {
     data?: Paths.AddSharedInbox.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddSharedInbox.Responses.$201>
+  /**
+   * listInboxBuckets - listInboxBuckets
+   * 
+   * List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.
+   */
+  'listInboxBuckets'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListInboxBuckets.Responses.$200>
   /**
    * getSettings - getSettings
    * 
@@ -757,7 +779,7 @@ export interface PathsDictionary {
     /**
      * listSharedInboxes - listSharedInboxes
      * 
-     * List shared inboxes
+     * List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -774,6 +796,18 @@ export interface PathsDictionary {
       data?: Paths.AddSharedInbox.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddSharedInbox.Responses.$201>
+  }
+  ['/v2/email-settings/inbox-buckets']: {
+    /**
+     * listInboxBuckets - listInboxBuckets
+     * 
+     * List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListInboxBuckets.Responses.$200>
   }
   ['/v1/email-settings']: {
     /**
@@ -877,6 +911,7 @@ export type EmailAddressResponse = Components.Schemas.EmailAddressResponse;
 export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
+export type InboxBucketResponse = Components.Schemas.InboxBucketResponse;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
 export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;

@@ -130,6 +130,12 @@
         "responses": {}
       }
     },
+    "/v2/email-settings/inbox-buckets": {
+      "get": {
+        "operationId": "listInboxBuckets",
+        "responses": {}
+      }
+    },
     "/v1/email-settings": {
       "get": {
         "operationId": "getSettings",
@@ -228,6 +234,11 @@
   },
   "components": {
     "responses": {
+      "ListInboxBucketsSuccessResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "ProvisionEpilotEmailAddressSuccessResponse": {
         "content": {
           "application/json": {}
