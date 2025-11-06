@@ -884,6 +884,12 @@ declare namespace Components {
                      */
                     minimum_length?: number;
                     /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
                      * Require lowercase characters
                      * example:
                      * true
@@ -1235,6 +1241,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -2062,6 +2074,95 @@ declare namespace Components {
              */
             file_count: number;
         }
+        export interface EntityGetParams {
+            /**
+             * Single entity schema slug
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * Optional entity ID to filter by. If provided, creates a filter for _id.
+             * example:
+             * 3ec28ab5-8598-41ef-9486-b57fca1d5e2a
+             */
+            entity_id?: string; // uuid
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            /**
+             * List of entity fields to include in search results
+             * example:
+             * [
+             *   "_id",
+             *   "_title"
+             * ]
+             */
+            fields?: string[];
+            /**
+             * Template strings to parse and return as synthetic fields
+             * example:
+             * {
+             *   "content_top_name": "Customer #{{contract.customer_number}}",
+             *   "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+             *   "content_bottom_name": "{{custom_contract_delivery_address}}"
+             * }
+             */
+            templates?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional filters to apply to the search query
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "status.keyword": "active"
+             *     }
+             *   },
+             *   {
+             *     "range": {
+             *       "_created_at": {
+             *         "gte": "2023-01-01"
+             *       }
+             *     }
+             *   }
+             * ]
+             */
+            filters?: {
+                [key: string]: any;
+            }[];
+            /**
+             * Context-based filters for entity relations.
+             * example:
+             * [
+             *   {
+             *     "portal_user": true
+             *   },
+             *   {
+             *     "contact": true
+             *   },
+             *   {
+             *     "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+             *   }
+             * ]
+             */
+            filters_context?: {
+                [name: string]: boolean | string;
+            }[];
+            /**
+             * Filters from these targets will be applied to the search query.
+             * example:
+             * [
+             *   "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+             * ]
+             */
+            targets?: string /* uuid */[];
+        }
         /**
          * Entity ID
          * example:
@@ -2127,6 +2228,12 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+        }
+        /**
+         * Response for entity get request
+         */
+        export interface EntityResponse {
+            result?: EntityItem;
         }
         /**
          * Response for entity search requests, but with groupings
@@ -3478,7 +3585,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**
@@ -3905,7 +4012,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
+            schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -3939,6 +4046,12 @@ declare namespace Components {
              * false
              */
             is_system?: boolean;
+            /**
+             * Whether the page is a detail page
+             * example:
+             * false
+             */
+            is_detail?: boolean;
             /**
              * Whether the page is public
              * example:
@@ -3990,7 +4103,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
+            schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -4024,6 +4137,12 @@ declare namespace Components {
              * false
              */
             is_system?: boolean;
+            /**
+             * Whether the page is a detail page
+             * example:
+             * false
+             */
+            is_detail?: boolean;
             /**
              * Whether the page is public
              * example:
@@ -4178,6 +4297,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -4613,6 +4738,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -5626,6 +5757,12 @@ declare namespace Components {
                      */
                     minimum_length?: number;
                     /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
                      * Require lowercase characters
                      * example:
                      * true
@@ -6014,6 +6151,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -7482,6 +7625,7 @@ declare namespace Paths {
     }
     namespace GetConsumption {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7490,6 +7634,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
@@ -7624,6 +7769,7 @@ declare namespace Paths {
     }
     namespace GetCosts {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7632,6 +7778,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
@@ -8171,6 +8318,12 @@ declare namespace Paths {
                          */
                         minimum_length?: number;
                         /**
+                         * Maximum password length
+                         * example:
+                         * 256
+                         */
+                        maximum_length?: number;
+                        /**
                          * Require lowercase characters
                          * example:
                          * true
@@ -8683,6 +8836,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalUserEntity {
+        export type RequestBody = Components.Schemas.EntityGetParams;
+        namespace Responses {
+            export type $200 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalWidgets {
         namespace Parameters {
             export type ContractId = /**
@@ -8706,6 +8869,7 @@ declare namespace Paths {
     }
     namespace GetPrices {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -8714,6 +8878,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
@@ -10355,6 +10520,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -11142,6 +11308,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
+  /**
+   * getPortalUserEntity - getPortalUserEntity
+   * 
+   * Get a single entity for a portal user
+   */
+  'getPortalUserEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetPortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalUserEntity.Responses.$200>
   /**
    * searchPortalUserEntities - searchPortalUserEntities
    * 
@@ -12386,6 +12562,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   }
+  ['/v2/portal/entity:get']: {
+    /**
+     * getPortalUserEntity - getPortalUserEntity
+     * 
+     * Get a single entity for a portal user
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetPortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalUserEntity.Responses.$200>
+  }
   ['/v2/portal/entity:search']: {
     /**
      * searchPortalUserEntities - searchPortalUserEntities
@@ -12755,6 +12943,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
@@ -12795,8 +12984,10 @@ export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
 export type EntityFileCount = Components.Schemas.EntityFileCount;
+export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
+export type EntityResponse = Components.Schemas.EntityResponse;
 export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGroupedWithHits;
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;

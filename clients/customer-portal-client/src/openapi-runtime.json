@@ -140,6 +140,11 @@
         "parameters": [
           {
             "in": "query",
+            "name": "app_id",
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "extensionId",
             "required": true
           },
@@ -178,6 +183,11 @@
         "parameters": [
           {
             "in": "query",
+            "name": "app_id",
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "extensionId",
             "required": true
           },
@@ -214,6 +224,11 @@
       "get": {
         "operationId": "getPrices",
         "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "required": false
+          },
           {
             "in": "query",
             "name": "extensionId",
@@ -1041,8 +1056,7 @@
             "in": "query",
             "name": "entities",
             "deprecated": true,
-            "style": "form",
-            "explode": false
+            "style": "form"
           }
         ],
         "requestBody": {
@@ -1245,6 +1259,17 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/entity:get": {
+      "post": {
+        "operationId": "getPortalUserEntity",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
