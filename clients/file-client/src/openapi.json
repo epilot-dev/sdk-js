@@ -1331,6 +1331,43 @@
           }
         }
       }
+    },
+    "/v1/folders/{schemaSlug}": {
+      "get": {
+        "operationId": "getGlobalFileFolders",
+        "summary": "getGlobalFileFolders",
+        "description": "Gets all global file folders for a specific schema",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "name": "schemaSlug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "order"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of global folders for the schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileFolderItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
