@@ -387,6 +387,12 @@ declare namespace Components {
              */
             starred?: boolean;
             /**
+             * Display order for the folder
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
              * Timestamp when the folder was created
              * example:
              * 2024-01-01T12:00:00Z

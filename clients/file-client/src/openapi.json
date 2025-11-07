@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Upload and manage epilot Files\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -1969,6 +1969,11 @@
             "type": "boolean",
             "description": "Whether the folder is starred / favorited",
             "example": false
+          },
+          "order": {
+            "type": "number",
+            "description": "Display order for the folder",
+            "example": 0
           },
           "created_at": {
             "type": "string",
