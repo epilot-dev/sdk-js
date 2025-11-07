@@ -461,6 +461,19 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/folders/{schemaSlug}": {
+      "get": {
+        "operationId": "getGlobalFileFolders",
+        "parameters": [
+          {
+            "name": "schemaSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
