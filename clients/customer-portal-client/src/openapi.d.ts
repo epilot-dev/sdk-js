@@ -1962,9 +1962,18 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
-             * ID of the email template for invitation
+             * ID of the email template for invitation when the user is just invited to register on the portal.
              */
             invitation?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for invitation when a partner invites another partner within the portal.
+             */
+            partnerInvitation?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -2074,6 +2083,95 @@ declare namespace Components {
              */
             file_count: number;
         }
+        export interface EntityGetParams {
+            /**
+             * Single entity schema slug
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * Optional entity ID to filter by. If provided, creates a filter for _id.
+             * example:
+             * 3ec28ab5-8598-41ef-9486-b57fca1d5e2a
+             */
+            entity_id?: string; // uuid
+            /**
+             * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
+             */
+            hydrate?: boolean;
+            /**
+             * List of entity fields to include in search results
+             * example:
+             * [
+             *   "_id",
+             *   "_title"
+             * ]
+             */
+            fields?: string[];
+            /**
+             * Template strings to parse and return as synthetic fields
+             * example:
+             * {
+             *   "content_top_name": "Customer #{{contract.customer_number}}",
+             *   "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+             *   "content_bottom_name": "{{custom_contract_delivery_address}}"
+             * }
+             */
+            templates?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional filters to apply to the search query
+             * example:
+             * [
+             *   {
+             *     "term": {
+             *       "status.keyword": "active"
+             *     }
+             *   },
+             *   {
+             *     "range": {
+             *       "_created_at": {
+             *         "gte": "2023-01-01"
+             *       }
+             *     }
+             *   }
+             * ]
+             */
+            filters?: {
+                [key: string]: any;
+            }[];
+            /**
+             * Context-based filters for entity relations.
+             * example:
+             * [
+             *   {
+             *     "portal_user": true
+             *   },
+             *   {
+             *     "contact": true
+             *   },
+             *   {
+             *     "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+             *   }
+             * ]
+             */
+            filters_context?: {
+                [name: string]: boolean | string;
+            }[];
+            /**
+             * Filters from these targets will be applied to the search query.
+             * example:
+             * [
+             *   "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+             * ]
+             */
+            targets?: string /* uuid */[];
+        }
         /**
          * Entity ID
          * example:
@@ -2139,6 +2237,12 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+        }
+        /**
+         * Response for entity get request
+         */
+        export interface EntityResponse {
+            result?: EntityItem;
         }
         /**
          * Response for entity search requests, but with groupings
@@ -8741,6 +8845,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalUserEntity {
+        export type RequestBody = Components.Schemas.EntityGetParams;
+        namespace Responses {
+            export type $200 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalWidgets {
         namespace Parameters {
             export type ContractId = /**
@@ -9392,10 +9506,52 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace InvitePartner {
+        export interface RequestBody {
+            /**
+             * Email address of the partner to invite
+             */
+            email: string;
+            represents_contact_list?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * User invited successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListAllPortalConfigs {
         namespace Responses {
             export interface $200 {
                 data?: Components.Schemas.PortalConfigV3[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListBusinessPartners {
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.EntityItem[];
+                /**
+                 * Total number of business partners
+                 */
+                total?: number;
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -9614,6 +9770,56 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ResendPartnerInvitation {
+        namespace Parameters {
+            /**
+             * ID of the partner to resend invitation to
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to resend invitation to */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner invitation resent successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace RevokePartner {
+        namespace Parameters {
+            /**
+             * ID of the partner to revoke from the portal
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to revoke from the portal */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner revoked from portal successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -11203,6 +11409,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   /**
+   * getPortalUserEntity - getPortalUserEntity
+   * 
+   * Get a single entity for a portal user
+   */
+  'getPortalUserEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetPortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalUserEntity.Responses.$200>
+  /**
    * searchPortalUserEntities - searchPortalUserEntities
    * 
    * Search all entities of a portal user
@@ -11521,6 +11737,46 @@ export interface OperationMethods {
     data?: Paths.SwapPortalConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
+  /**
+   * invitePartner - invitePartner
+   * 
+   * Invites a partner to a portal
+   */
+  'invitePartner'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.InvitePartner.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.InvitePartner.Responses.$200>
+  /**
+   * listBusinessPartners - listBusinessPartners
+   * 
+   * Lists all business partners linked to the businessaccount
+   */
+  'listBusinessPartners'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBusinessPartners.Responses.$200>
+  /**
+   * resendPartnerInvitation - resendPartnerInvitation
+   * 
+   * Resends an invitation email to a partner
+   */
+  'resendPartnerInvitation'(
+    parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  /**
+   * revokePartner - revokePartner
+   * 
+   * Revokes a partner from a portal
+   */
+  'revokePartner'(
+    parameters?: Parameters<Paths.RevokePartner.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RevokePartner.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -12446,6 +12702,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   }
+  ['/v2/portal/entity:get']: {
+    /**
+     * getPortalUserEntity - getPortalUserEntity
+     * 
+     * Get a single entity for a portal user
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetPortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalUserEntity.Responses.$200>
+  }
   ['/v2/portal/entity:search']: {
     /**
      * searchPortalUserEntities - searchPortalUserEntities
@@ -12811,6 +13079,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
   }
+  ['/v3/portal/partner/invite']: {
+    /**
+     * invitePartner - invitePartner
+     * 
+     * Invites a partner to a portal
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.InvitePartner.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.InvitePartner.Responses.$200>
+  }
+  ['/v3/portal/partner/list']: {
+    /**
+     * listBusinessPartners - listBusinessPartners
+     * 
+     * Lists all business partners linked to the businessaccount
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBusinessPartners.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/resend-invitation']: {
+    /**
+     * resendPartnerInvitation - resendPartnerInvitation
+     * 
+     * Resends an invitation email to a partner
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/revoke']: {
+    /**
+     * revokePartner - revokePartner
+     * 
+     * Revokes a partner from a portal
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RevokePartner.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RevokePartner.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -12855,8 +13171,10 @@ export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
 export type EntityFileCount = Components.Schemas.EntityFileCount;
+export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
+export type EntityResponse = Components.Schemas.EntityResponse;
 export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGroupedWithHits;
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;
