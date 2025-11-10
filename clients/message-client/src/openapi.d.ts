@@ -552,6 +552,12 @@ declare namespace Components {
         }
         export interface SearchParamsV2 {
             /**
+             * Inbox ID
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            inbox_id?: string;
+            /**
              * Lucene query syntax supported with ElasticSearch
              * example:
              * subject:"Request for solar panel price" AND _tags:INBOX

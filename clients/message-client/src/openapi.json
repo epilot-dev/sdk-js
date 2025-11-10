@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Message API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Send and receive email messages via your epilot organization\n"
   },
   "security": [
@@ -2266,6 +2266,11 @@
           "q"
         ],
         "properties": {
+          "inbox_id": {
+            "type": "string",
+            "description": "Inbox ID",
+            "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+          },
           "q": {
             "description": "Lucene query syntax supported with ElasticSearch",
             "type": "string",
