@@ -526,6 +526,15 @@
         "parameters": [
           {
             "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
+          {
+            "in": "query",
             "name": "extensionId",
             "schema": {
               "type": "string"
@@ -654,6 +663,15 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
           {
             "in": "query",
             "name": "extensionId",
@@ -809,6 +827,15 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
           {
             "in": "query",
             "name": "extensionId",
@@ -4461,7 +4488,6 @@
             "description": "Comma-separated list of entities which the activity primarily concerns. Deprecated - ignored as the list of entities is automatically determined now.",
             "deprecated": true,
             "style": "form",
-            "explode": false,
             "schema": {
               "type": "array",
               "items": {
@@ -7997,6 +8023,11 @@
                     "type": "integer",
                     "example": 8,
                     "description": "Minimum password length"
+                  },
+                  "maximum_length": {
+                    "type": "integer",
+                    "example": 256,
+                    "description": "Maximum password length"
                   },
                   "require_lowercase": {
                     "type": "boolean",
@@ -12274,15 +12305,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "description": "The schema of the page",
-              "enum": [
-                "contact",
-                "contract",
-                "meter",
-                "order",
-                "opportunity",
-                "meter_counter"
-              ]
+              "description": "The schema of the page"
             }
           },
           "visibility": {
@@ -12314,6 +12337,11 @@
           "is_system": {
             "type": "boolean",
             "description": "Whether the page is a system page",
+            "example": false
+          },
+          "is_detail": {
+            "type": "boolean",
+            "description": "Whether the page is a detail page",
             "example": false
           },
           "is_public": {
@@ -12491,6 +12519,11 @@
                     "type": "integer",
                     "example": 8,
                     "description": "Minimum password length"
+                  },
+                  "maximum_length": {
+                    "type": "integer",
+                    "example": 256,
+                    "description": "Maximum password length"
                   },
                   "require_lowercase": {
                     "type": "boolean",

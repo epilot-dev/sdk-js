@@ -884,6 +884,12 @@ declare namespace Components {
                      */
                     minimum_length?: number;
                     /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
                      * Require lowercase characters
                      * example:
                      * true
@@ -1235,6 +1241,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -3905,7 +3917,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
+            schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -3939,6 +3951,12 @@ declare namespace Components {
              * false
              */
             is_system?: boolean;
+            /**
+             * Whether the page is a detail page
+             * example:
+             * false
+             */
+            is_detail?: boolean;
             /**
              * Whether the page is public
              * example:
@@ -3990,7 +4008,7 @@ declare namespace Components {
              * /dashboard
              */
             path?: string;
-            schema?: ("contact" | "contract" | "meter" | "order" | "opportunity" | "meter_counter")[];
+            schema?: string[];
             /**
              * The conditions that need to be met for the page to be shown
              */
@@ -4024,6 +4042,12 @@ declare namespace Components {
              * false
              */
             is_system?: boolean;
+            /**
+             * Whether the page is a detail page
+             * example:
+             * false
+             */
+            is_detail?: boolean;
             /**
              * Whether the page is public
              * example:
@@ -4178,6 +4202,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -4613,6 +4643,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -5626,6 +5662,12 @@ declare namespace Components {
                      */
                     minimum_length?: number;
                     /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
                      * Require lowercase characters
                      * example:
                      * true
@@ -6014,6 +6056,12 @@ declare namespace Components {
                      * 8
                      */
                     minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
                     /**
                      * Require lowercase characters
                      * example:
@@ -7482,6 +7530,7 @@ declare namespace Paths {
     }
     namespace GetConsumption {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7490,6 +7539,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
@@ -7624,6 +7674,7 @@ declare namespace Paths {
     }
     namespace GetCosts {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7632,6 +7683,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
@@ -8171,6 +8223,12 @@ declare namespace Paths {
                          */
                         minimum_length?: number;
                         /**
+                         * Maximum password length
+                         * example:
+                         * 256
+                         */
+                        maximum_length?: number;
+                        /**
                          * Require lowercase characters
                          * example:
                          * true
@@ -8706,6 +8764,7 @@ declare namespace Paths {
     }
     namespace GetPrices {
         namespace Parameters {
+            export type AppId = string;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -8714,6 +8773,7 @@ declare namespace Paths {
             export type To = string; // date-time
         }
         export interface QueryParameters {
+            app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
             meter_id: Parameters.MeterId;
