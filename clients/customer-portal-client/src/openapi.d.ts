@@ -739,6 +739,40 @@ declare namespace Components {
          * tab
          */
         export type BlockType = string;
+        export interface BusinessPartnerItem {
+            _id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * example:
+             * true
+             */
+            has_portal_user?: boolean;
+            registration_status?: PortalUserRegistrationStatus;
+            /**
+             * example:
+             * john.doe@example.com
+             */
+            email?: string;
+            /**
+             * example:
+             * John Doe
+             */
+            _title?: string;
+            /**
+             * example:
+             * John
+             */
+            first_name?: string;
+            /**
+             * example:
+             * Doe
+             */
+            last_name?: string;
+        }
         export interface CampaignWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
@@ -5073,6 +5107,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
+        export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget;
         /**
          * The product entity
@@ -9547,11 +9582,7 @@ declare namespace Paths {
     namespace ListBusinessPartners {
         namespace Responses {
             export interface $200 {
-                data?: Components.Schemas.EntityItem[];
-                /**
-                 * Total number of business partners
-                 */
-                total?: number;
+                data?: Components.Schemas.BusinessPartnerItem[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -13152,6 +13183,7 @@ export type BlockId = Components.Schemas.BlockId;
 export type BlockProps = Components.Schemas.BlockProps;
 export type BlockRequest = Components.Schemas.BlockRequest;
 export type BlockType = Components.Schemas.BlockType;
+export type BusinessPartnerItem = Components.Schemas.BusinessPartnerItem;
 export type CampaignWidget = Components.Schemas.CampaignWidget;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type CommonConfigAttributesV3 = Components.Schemas.CommonConfigAttributesV3;
@@ -13224,6 +13256,7 @@ export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalUser = Components.Schemas.PortalUser;
+export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
 export type ProviderConfig = Components.Schemas.ProviderConfig;

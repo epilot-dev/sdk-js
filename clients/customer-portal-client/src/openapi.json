@@ -7401,12 +7401,8 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/EntityItem"
+                        "$ref": "#/components/schemas/BusinessPartnerItem"
                       }
-                    },
-                    "total": {
-                      "type": "number",
-                      "description": "Total number of business partners"
                     }
                   }
                 }
@@ -13324,6 +13320,46 @@
           "users",
           "email_templates"
         ]
+      },
+      "PortalUserRegistrationStatus": {
+        "type": "string",
+        "enum": [
+          "Registration Pending",
+          "Confirmation Email Sent",
+          "Registered",
+          "Email Update In Progress"
+        ]
+      },
+      "BusinessPartnerItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "has_portal_user": {
+            "type": "boolean",
+            "example": true
+          },
+          "registration_status": {
+            "$ref": "#/components/schemas/PortalUserRegistrationStatus"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "_title": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe"
+          }
+        }
       }
     }
   },
