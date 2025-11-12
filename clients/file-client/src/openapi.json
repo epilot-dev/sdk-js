@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "description": "Upload and manage epilot Files\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -1331,6 +1331,43 @@
           }
         }
       }
+    },
+    "/v1/folders/{schemaSlug}": {
+      "get": {
+        "operationId": "getGlobalFileFolders",
+        "summary": "getGlobalFileFolders",
+        "description": "Gets all global file folders for a specific schema",
+        "tags": [
+          "File Folders"
+        ],
+        "parameters": [
+          {
+            "name": "schemaSlug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "order"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of global folders for the schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileFolderItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1932,6 +1969,11 @@
             "type": "boolean",
             "description": "Whether the folder is starred / favorited",
             "example": false
+          },
+          "order": {
+            "type": "number",
+            "description": "Display order for the folder",
+            "example": 0
           },
           "created_at": {
             "type": "string",

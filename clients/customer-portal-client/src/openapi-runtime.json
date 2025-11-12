@@ -1747,6 +1747,50 @@
         },
         "responses": {}
       }
+    },
+    "/v3/portal/partner/invite": {
+      "post": {
+        "operationId": "invitePartner",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/partner/list": {
+      "get": {
+        "operationId": "listBusinessPartners",
+        "responses": {}
+      }
+    },
+    "/v3/portal/partner/{partner_id}/resend-invitation": {
+      "post": {
+        "operationId": "resendPartnerInvitation",
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/partner/{partner_id}/revoke": {
+      "delete": {
+        "operationId": "revokePartner",
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

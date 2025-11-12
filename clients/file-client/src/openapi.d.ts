@@ -387,6 +387,12 @@ declare namespace Components {
              */
             starred?: boolean;
             /**
+             * Display order for the folder
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
              * Timestamp when the folder was created
              * example:
              * 2024-01-01T12:00:00Z
@@ -1064,6 +1070,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetGlobalFileFolders {
+        namespace Parameters {
+            /**
+             * example:
+             * order
+             */
+            export type SchemaSlug = string;
+        }
+        export interface PathParameters {
+            schemaSlug: /**
+             * example:
+             * order
+             */
+            Parameters.SchemaSlug;
+        }
+        namespace Responses {
+            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
+        }
+    }
     namespace GetSession {
         namespace Responses {
             export interface $200 {
@@ -1620,6 +1645,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
+  /**
+   * getGlobalFileFolders - getGlobalFileFolders
+   * 
+   * Gets all global file folders for a specific schema
+   */
+  'getGlobalFileFolders'(
+    parameters?: Parameters<Paths.GetGlobalFileFolders.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetGlobalFileFolders.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1943,6 +1978,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
+  }
+  ['/v1/folders/{schemaSlug}']: {
+    /**
+     * getGlobalFileFolders - getGlobalFileFolders
+     * 
+     * Gets all global file folders for a specific schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetGlobalFileFolders.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetGlobalFileFolders.Responses.$200>
   }
 }
 

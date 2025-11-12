@@ -7301,6 +7301,243 @@
           }
         }
       }
+    },
+    "/v3/portal/partner/invite": {
+      "post": {
+        "operationId": "invitePartner",
+        "summary": "invitePartner",
+        "description": "Invites a partner to a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Partner to invite",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the partner to invite"
+                  },
+                  "represents_contact_list": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "List of contact IDs representing the contacts / business partners the invited user should be added to.\nWhen omitted, the user is automatically added to all contacts / business partners linked to the account.\n"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User invited successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/list": {
+      "get": {
+        "operationId": "listBusinessPartners",
+        "summary": "listBusinessPartners",
+        "description": "Lists all business partners linked to the businessaccount",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business partners listed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BusinessPartnerItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/resend-invitation": {
+      "post": {
+        "operationId": "resendPartnerInvitation",
+        "summary": "resendPartnerInvitation",
+        "description": "Resends an invitation email to a partner",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to resend invitation to"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner invitation resent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner invitation resent successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/revoke": {
+      "delete": {
+        "operationId": "revokePartner",
+        "summary": "revokePartner",
+        "description": "Revokes a partner from a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to revoke from the portal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner revoked from portal successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner revoked from portal successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7597,7 +7834,11 @@
           },
           "invitation": {
             "$ref": "#/components/schemas/EntityId",
-            "description": "ID of the email template for invitation"
+            "description": "ID of the email template for invitation when the user is just invited to register on the portal."
+          },
+          "partnerInvitation": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for invitation when a partner invites another partner within the portal."
           },
           "onNewQuote": {
             "$ref": "#/components/schemas/EntityId",
@@ -13079,6 +13320,46 @@
           "users",
           "email_templates"
         ]
+      },
+      "PortalUserRegistrationStatus": {
+        "type": "string",
+        "enum": [
+          "Registration Pending",
+          "Confirmation Email Sent",
+          "Registered",
+          "Email Update In Progress"
+        ]
+      },
+      "BusinessPartnerItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "has_portal_user": {
+            "type": "boolean",
+            "example": true
+          },
+          "registration_status": {
+            "$ref": "#/components/schemas/PortalUserRegistrationStatus"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "_title": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe"
+          }
+        }
       }
     }
   },

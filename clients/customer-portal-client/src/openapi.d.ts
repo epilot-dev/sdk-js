@@ -739,6 +739,40 @@ declare namespace Components {
          * tab
          */
         export type BlockType = string;
+        export interface BusinessPartnerItem {
+            _id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * example:
+             * true
+             */
+            has_portal_user?: boolean;
+            registration_status?: PortalUserRegistrationStatus;
+            /**
+             * example:
+             * john.doe@example.com
+             */
+            email?: string;
+            /**
+             * example:
+             * John Doe
+             */
+            _title?: string;
+            /**
+             * example:
+             * John
+             */
+            first_name?: string;
+            /**
+             * example:
+             * Doe
+             */
+            last_name?: string;
+        }
         export interface CampaignWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
@@ -1962,9 +1996,18 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
-             * ID of the email template for invitation
+             * ID of the email template for invitation when the user is just invited to register on the portal.
              */
             invitation?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the email template for invitation when a partner invites another partner within the portal.
+             */
+            partnerInvitation?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -5064,6 +5107,7 @@ declare namespace Components {
             _updated_at: string; // date-time
             _schema: "portal_user";
         }
+        export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget;
         /**
          * The product entity
@@ -9497,10 +9541,48 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace InvitePartner {
+        export interface RequestBody {
+            /**
+             * Email address of the partner to invite
+             */
+            email: string;
+            represents_contact_list?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * User invited successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListAllPortalConfigs {
         namespace Responses {
             export interface $200 {
                 data?: Components.Schemas.PortalConfigV3[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListBusinessPartners {
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.BusinessPartnerItem[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -9719,6 +9801,56 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ResendPartnerInvitation {
+        namespace Parameters {
+            /**
+             * ID of the partner to resend invitation to
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to resend invitation to */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner invitation resent successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace RevokePartner {
+        namespace Parameters {
+            /**
+             * ID of the partner to revoke from the portal
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to revoke from the portal */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner revoked from portal successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -11637,6 +11769,46 @@ export interface OperationMethods {
     data?: Paths.SwapPortalConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
+  /**
+   * invitePartner - invitePartner
+   * 
+   * Invites a partner to a portal
+   */
+  'invitePartner'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.InvitePartner.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.InvitePartner.Responses.$200>
+  /**
+   * listBusinessPartners - listBusinessPartners
+   * 
+   * Lists all business partners linked to the businessaccount
+   */
+  'listBusinessPartners'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBusinessPartners.Responses.$200>
+  /**
+   * resendPartnerInvitation - resendPartnerInvitation
+   * 
+   * Resends an invitation email to a partner
+   */
+  'resendPartnerInvitation'(
+    parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  /**
+   * revokePartner - revokePartner
+   * 
+   * Revokes a partner from a portal
+   */
+  'revokePartner'(
+    parameters?: Parameters<Paths.RevokePartner.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RevokePartner.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -12939,6 +13111,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
   }
+  ['/v3/portal/partner/invite']: {
+    /**
+     * invitePartner - invitePartner
+     * 
+     * Invites a partner to a portal
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.InvitePartner.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.InvitePartner.Responses.$200>
+  }
+  ['/v3/portal/partner/list']: {
+    /**
+     * listBusinessPartners - listBusinessPartners
+     * 
+     * Lists all business partners linked to the businessaccount
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBusinessPartners.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/resend-invitation']: {
+    /**
+     * resendPartnerInvitation - resendPartnerInvitation
+     * 
+     * Resends an invitation email to a partner
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResendPartnerInvitation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResendPartnerInvitation.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/revoke']: {
+    /**
+     * revokePartner - revokePartner
+     * 
+     * Revokes a partner from a portal
+     */
+    'delete'(
+      parameters?: Parameters<Paths.RevokePartner.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RevokePartner.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -12965,6 +13185,7 @@ export type BlockId = Components.Schemas.BlockId;
 export type BlockProps = Components.Schemas.BlockProps;
 export type BlockRequest = Components.Schemas.BlockRequest;
 export type BlockType = Components.Schemas.BlockType;
+export type BusinessPartnerItem = Components.Schemas.BusinessPartnerItem;
 export type CampaignWidget = Components.Schemas.CampaignWidget;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type CommonConfigAttributesV3 = Components.Schemas.CommonConfigAttributesV3;
@@ -13037,6 +13258,7 @@ export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalUser = Components.Schemas.PortalUser;
+export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
 export type ProviderConfig = Components.Schemas.ProviderConfig;
