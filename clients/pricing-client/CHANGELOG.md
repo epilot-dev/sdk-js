@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.50.4
+
+### Patch Changes
+
+- Updated to match API specification
+
 ## 3.50.3
 
 ### Patch Changes

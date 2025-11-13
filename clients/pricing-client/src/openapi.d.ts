@@ -332,7 +332,7 @@ declare namespace Components {
             /**
              * The billing period duration
              */
-            billing_duration_amount?: number;
+            billing_duration_amount?: number | null;
             /**
              * The billing period duration unit
              */
@@ -340,7 +340,7 @@ declare namespace Components {
             /**
              * The notice period duration
              */
-            notice_time_amount?: number;
+            notice_time_amount?: number | null;
             /**
              * The notice period duration unit
              */
@@ -348,7 +348,7 @@ declare namespace Components {
             /**
              * The termination period duration
              */
-            termination_time_amount?: number;
+            termination_time_amount?: number | null;
             /**
              * The termination period duration unit
              */
@@ -356,7 +356,7 @@ declare namespace Components {
             /**
              * The renewal period duration
              */
-            renewal_duration_amount?: number;
+            renewal_duration_amount?: number | null;
             /**
              * The renewal period duration unit
              */
@@ -4781,7 +4781,7 @@ declare namespace Components {
             /**
              * The billing period duration
              */
-            billing_duration_amount?: number;
+            billing_duration_amount?: number | null;
             /**
              * The billing period duration unit
              */
@@ -4789,7 +4789,7 @@ declare namespace Components {
             /**
              * The notice period duration
              */
-            notice_time_amount?: number;
+            notice_time_amount?: number | null;
             /**
              * The notice period duration unit
              */
@@ -4797,7 +4797,7 @@ declare namespace Components {
             /**
              * The termination period duration
              */
-            termination_time_amount?: number;
+            termination_time_amount?: number | null;
             /**
              * The termination period duration unit
              */
@@ -4805,7 +4805,7 @@ declare namespace Components {
             /**
              * The renewal period duration
              */
-            renewal_duration_amount?: number;
+            renewal_duration_amount?: number | null;
             /**
              * The renewal period duration unit
              */
@@ -5112,7 +5112,7 @@ declare namespace Components {
             /**
              * The billing period duration
              */
-            billing_duration_amount?: number;
+            billing_duration_amount?: number | null;
             /**
              * The billing period duration unit
              */
@@ -5120,7 +5120,7 @@ declare namespace Components {
             /**
              * The notice period duration
              */
-            notice_time_amount?: number;
+            notice_time_amount?: number | null;
             /**
              * The notice period duration unit
              */
@@ -5128,7 +5128,7 @@ declare namespace Components {
             /**
              * The termination period duration
              */
-            termination_time_amount?: number;
+            termination_time_amount?: number | null;
             /**
              * The termination period duration unit
              */
@@ -5136,7 +5136,7 @@ declare namespace Components {
             /**
              * The renewal period duration
              */
-            renewal_duration_amount?: number;
+            renewal_duration_amount?: number | null;
             /**
              * The renewal period duration unit
              */
@@ -6381,7 +6381,7 @@ declare namespace Components {
             /**
              * The billing period duration
              */
-            billing_duration_amount?: number;
+            billing_duration_amount?: number | null;
             /**
              * The billing period duration unit
              */
@@ -6389,7 +6389,7 @@ declare namespace Components {
             /**
              * The notice period duration
              */
-            notice_time_amount?: number;
+            notice_time_amount?: number | null;
             /**
              * The notice period duration unit
              */
@@ -6397,7 +6397,7 @@ declare namespace Components {
             /**
              * The termination period duration
              */
-            termination_time_amount?: number;
+            termination_time_amount?: number | null;
             /**
              * The termination period duration unit
              */
@@ -6405,7 +6405,7 @@ declare namespace Components {
             /**
              * The renewal period duration
              */
-            renewal_duration_amount?: number;
+            renewal_duration_amount?: number | null;
             /**
              * The renewal period duration unit
              */
@@ -6589,7 +6589,7 @@ declare namespace Components {
             /**
              * The billing period duration
              */
-            billing_duration_amount?: number;
+            billing_duration_amount?: number | null;
             /**
              * The billing period duration unit
              */
@@ -6597,7 +6597,7 @@ declare namespace Components {
             /**
              * The notice period duration
              */
-            notice_time_amount?: number;
+            notice_time_amount?: number | null;
             /**
              * The notice period duration unit
              */
@@ -6605,7 +6605,7 @@ declare namespace Components {
             /**
              * The termination period duration
              */
-            termination_time_amount?: number;
+            termination_time_amount?: number | null;
             /**
              * The termination period duration unit
              */
@@ -6613,7 +6613,7 @@ declare namespace Components {
             /**
              * The renewal period duration
              */
-            renewal_duration_amount?: number;
+            renewal_duration_amount?: number | null;
             /**
              * The renewal period duration unit
              */
@@ -7627,7 +7627,7 @@ declare namespace Components {
                 /**
                  * The billing period duration
                  */
-                billing_duration_amount?: number;
+                billing_duration_amount?: number | null;
                 /**
                  * The billing period duration unit
                  */
@@ -7635,7 +7635,7 @@ declare namespace Components {
                 /**
                  * The notice period duration
                  */
-                notice_time_amount?: number;
+                notice_time_amount?: number | null;
                 /**
                  * The notice period duration unit
                  */
@@ -7643,7 +7643,7 @@ declare namespace Components {
                 /**
                  * The termination period duration
                  */
-                termination_time_amount?: number;
+                termination_time_amount?: number | null;
                 /**
                  * The termination period duration unit
                  */
@@ -7651,7 +7651,7 @@ declare namespace Components {
                 /**
                  * The renewal period duration
                  */
-                renewal_duration_amount?: number;
+                renewal_duration_amount?: number | null;
                 /**
                  * The renewal period duration unit
                  */

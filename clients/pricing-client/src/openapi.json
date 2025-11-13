@@ -4598,7 +4598,8 @@
         "properties": {
           "billing_duration_amount": {
             "description": "The billing period duration",
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "billing_duration_unit": {
             "description": "The billing period duration unit",
@@ -4607,11 +4608,13 @@
               "weeks",
               "months",
               "years"
-            ]
+            ],
+            "nullable": true
           },
           "notice_time_amount": {
             "description": "The notice period duration",
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "notice_time_unit": {
             "description": "The notice period duration unit",
@@ -4620,11 +4623,13 @@
               "weeks",
               "months",
               "years"
-            ]
+            ],
+            "nullable": true
           },
           "termination_time_amount": {
             "description": "The termination period duration",
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "termination_time_unit": {
             "description": "The termination period duration unit",
@@ -4633,11 +4638,13 @@
               "weeks",
               "months",
               "years"
-            ]
+            ],
+            "nullable": true
           },
           "renewal_duration_amount": {
             "description": "The renewal period duration",
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "renewal_duration_unit": {
             "description": "The renewal period duration unit",
@@ -4646,7 +4653,8 @@
               "weeks",
               "months",
               "years"
-            ]
+            ],
+            "nullable": true
           }
         }
       },
