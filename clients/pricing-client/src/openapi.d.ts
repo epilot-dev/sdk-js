@@ -3832,6 +3832,10 @@ declare namespace Components {
              * The billing period (defaults to monthly)
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The optional reference date for the price computation (ISO 8601 format)
+             */
+            reference_date?: string; // date
         }
         /**
          * The compute price payload for gas
@@ -3865,6 +3869,10 @@ declare namespace Components {
              * The billing period (defaults to monthly)
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The optional reference date for the price computation (ISO 8601 format)
+             */
+            reference_date?: string; // date
             /**
              * The type of energy to compute the price
              */
@@ -3903,6 +3911,10 @@ declare namespace Components {
              * The billing period (defaults to monthly)
              */
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+            /**
+             * The optional reference date for the price computation (ISO 8601 format)
+             */
+            reference_date?: string; // date
             /**
              * The type of energy to compute the price
              */

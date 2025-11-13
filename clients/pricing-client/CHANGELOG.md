@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.50.3
+
+### Patch Changes
+
+- Add support for reference date to external pricing calculation
+
 ## 3.50.2
 
 ### Patch Changes

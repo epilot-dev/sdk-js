@@ -3,7 +3,7 @@
   "info": {
     "title": "Pricing API",
     "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
       "name": "Support",
@@ -5004,6 +5004,11 @@
               "one_time"
             ],
             "default": "monthly"
+          },
+          "reference_date": {
+            "description": "The optional reference date for the price computation (ISO 8601 format)",
+            "type": "string",
+            "format": "date"
           }
         },
         "required": [
