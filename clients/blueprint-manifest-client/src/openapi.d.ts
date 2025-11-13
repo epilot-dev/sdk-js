@@ -69,6 +69,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
             source_type: "app";
             resources?: BlueprintResource[];
         }
@@ -279,6 +285,15 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
+             */
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
         }
         export interface CommonBlueprintJobFields {
             id?: /**
@@ -514,6 +529,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
             resources?: BlueprintResource[];
             source_type: "custom";
         }
@@ -565,6 +586,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
             source_type: "deploy";
             resources?: BlueprintResource[];
         }
@@ -616,6 +643,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
             source_type: "file";
             resources?: BlueprintResource[];
         }
@@ -1188,6 +1221,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
             /**
              * URL to the blueprint documentation
              */
@@ -1271,7 +1310,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -2059,6 +2098,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2714,6 +2754,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
