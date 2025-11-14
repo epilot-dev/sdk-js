@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.3.0",
+    "version": "0.8.2",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -13,6 +13,10 @@
     {
       "name": "trigger",
       "description": "Endpoints to trigger ERP related actions"
+    },
+    {
+      "name": "integrations",
+      "description": "Integration and Use Case management endpoints"
     }
   ],
   "security": [
@@ -195,8 +199,18 @@
                           "description": "Format of the payload data"
                         },
                         "payload": {
-                          "type": "string",
-                          "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+                          "oneOf": [
+                            {
+                              "type": "string",
+                              "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+                            },
+                            {
+                              "type": "object",
+                              "description": "Direct JSON object (will be automatically serialized)",
+                              "additionalProperties": true
+                            }
+                          ],
+                          "description": "The object data payload - can be either a serialized string or a direct JSON object"
                         },
                         "deduplication_id": {
                           "type": "string",
@@ -262,7 +276,7 @@
       "post": {
         "operationId": "simulateMapping",
         "summary": "simulateMapping",
-        "description": "Test mapping configuration by transforming a payload using the provided mapping rules without persisting data",
+        "description": "Test mapping configuration by transforming a payload using the provided mapping rules without persisting data.\n\nSupports both v1.0 (object-based) and v2.0 (event-based) mapping formats.\nSee documentation at /docs/MAPPING_V2.md for detailed v2.0 format specification.\n",
         "tags": [
           "erp"
         ],
@@ -271,132 +285,214 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "mapping_configuration",
-                  "object_type",
-                  "format",
-                  "payload"
-                ],
-                "properties": {
-                  "mapping_configuration": {
-                    "type": "object",
-                    "description": "The integration mapping configuration",
-                    "required": [
-                      "mapping"
-                    ],
-                    "properties": {
+                "$ref": "#/components/schemas/MappingSimulationRequest"
+              },
+              "examples": {
+                "v1_example": {
+                  "summary": "Version 1.0 Example",
+                  "value": {
+                    "mapping_configuration": {
+                      "version": "1.0",
                       "mapping": {
-                        "type": "object",
-                        "required": [
-                          "objects"
-                        ],
-                        "properties": {
-                          "objects": {
-                            "type": "object",
-                            "description": "Object type mappings",
-                            "additionalProperties": {
-                              "type": "object",
-                              "required": [
-                                "unique_ids",
-                                "fields"
-                              ],
-                              "properties": {
-                                "unique_ids": {
-                                  "type": "object",
-                                  "description": "Mapping of entity types to their unique identifier field mappings",
-                                  "additionalProperties": {
-                                    "type": "object",
-                                    "description": "Map of remote keys to local entity keys",
-                                    "additionalProperties": {
-                                      "type": "string"
-                                    }
-                                  }
-                                },
-                                "fields": {
-                                  "type": "array",
-                                  "description": "Field mapping definitions",
-                                  "items": {
-                                    "type": "object",
-                                    "required": [
-                                      "entity",
-                                      "attribute"
-                                    ],
-                                    "properties": {
-                                      "entity": {
-                                        "type": "string",
-                                        "description": "Target entity slug"
-                                      },
-                                      "attribute": {
-                                        "type": "string",
-                                        "description": "Target attribute name"
-                                      },
-                                      "field": {
-                                        "type": "string",
-                                        "description": "Source field name (mutually exclusive with jsonataExpression)"
-                                      },
-                                      "jsonataExpression": {
-                                        "type": "string",
-                                        "description": "JSONata expression for transformation (mutually exclusive with field)"
-                                      }
-                                    }
-                                  }
-                                }
+                        "objects": {
+                          "business_partner": {
+                            "unique_ids": {
+                              "contact": {
+                                "partner_id": "_id"
                               }
-                            }
+                            },
+                            "fields": [
+                              {
+                                "entity": "contact",
+                                "attribute": "first_name",
+                                "field": "firstName"
+                              },
+                              {
+                                "entity": "contact",
+                                "attribute": "last_name",
+                                "field": "lastName"
+                              }
+                            ]
                           }
                         }
                       }
-                    }
-                  },
-                  "object_type": {
-                    "type": "string",
-                    "description": "Type of the object being mapped (must match a key in mapping_configuration.mapping.objects)"
-                  },
-                  "format": {
-                    "type": "string",
-                    "enum": [
-                      "json",
-                      "xml"
-                    ],
-                    "default": "json",
-                    "description": "Format of the payload data"
-                  },
-                  "payload": {
-                    "type": "string",
-                    "description": "The serialized object data payload (JSON, XML, etc.) as a string"
-                  }
-                }
-              },
-              "example": {
-                "mapping_configuration": {
-                  "mapping": {
-                    "objects": {
-                      "business_partner": {
-                        "unique_ids": {
-                          "contact": {
-                            "partner_id": "_id"
-                          }
-                        },
-                        "fields": [
-                          {
-                            "entity": "contact",
-                            "attribute": "first_name",
-                            "field": "firstName"
-                          },
-                          {
-                            "entity": "contact",
-                            "attribute": "last_name",
-                            "field": "lastName"
-                          }
-                        ]
-                      }
-                    }
+                    },
+                    "object_type": "business_partner",
+                    "format": "json",
+                    "payload": "{\"partner_id\":\"BP10001\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
                   }
                 },
-                "object_type": "business_partner",
-                "format": "json",
-                "payload": "{\"partner_id\":\"BP10001\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+                "v2_simple": {
+                  "summary": "Version 2.0 - Simple Example",
+                  "value": {
+                    "mapping_configuration": {
+                      "version": "2.0",
+                      "mapping": {
+                        "events": {
+                          "CustomerChanged": {
+                            "entities": [
+                              {
+                                "entity_schema": "contact",
+                                "unique_ids": [
+                                  "customer_number"
+                                ],
+                                "fields": [
+                                  {
+                                    "attribute": "customer_number",
+                                    "field": "customerId"
+                                  },
+                                  {
+                                    "attribute": "first_name",
+                                    "field": "firstName"
+                                  },
+                                  {
+                                    "attribute": "last_name",
+                                    "field": "lastName"
+                                  },
+                                  {
+                                    "attribute": "email",
+                                    "field": "email"
+                                  },
+                                  {
+                                    "attribute": "source",
+                                    "constant": "ERP"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "object_type": "CustomerChanged",
+                    "format": "json",
+                    "payload": "{\"customerId\":\"12345\",\"firstName\":\"Anna\",\"lastName\":\"Schmidt\",\"email\":\"anna@example.com\"}"
+                  }
+                },
+                "v2_advanced": {
+                  "summary": "Version 2.0 - Advanced with Relations",
+                  "value": {
+                    "mapping_configuration": {
+                      "version": "2.0",
+                      "mapping": {
+                        "events": {
+                          "ContractChanged": {
+                            "entities": [
+                              {
+                                "entity_schema": "contract",
+                                "unique_ids": [
+                                  "contract_number"
+                                ],
+                                "fields": [
+                                  {
+                                    "attribute": "contract_number",
+                                    "field": "number"
+                                  },
+                                  {
+                                    "attribute": "display_name",
+                                    "field": "displayName"
+                                  },
+                                  {
+                                    "attribute": "billing_account",
+                                    "relations": {
+                                      "operation": "_set",
+                                      "items": [
+                                        {
+                                          "entity_schema": "billing_account",
+                                          "_tags": [
+                                            "PRIMARY"
+                                          ],
+                                          "unique_ids": [
+                                            {
+                                              "attribute": "external_id",
+                                              "field": "customerAccountId"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "entity_schema": "meter",
+                                "unique_ids": [
+                                  "meter_number"
+                                ],
+                                "jsonataExpression": "meters.{\"number\": number, \"type\": meterType}",
+                                "fields": [
+                                  {
+                                    "attribute": "meter_number",
+                                    "field": "number"
+                                  },
+                                  {
+                                    "attribute": "meter_type",
+                                    "field": "type"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "object_type": "ContractChanged",
+                    "format": "json",
+                    "payload": "{\"number\":\"CTR-001\",\"displayName\":\"Premium Contract\",\"customerAccountId\":\"ACC-999\",\"meters\":[{\"number\":\"M-001\",\"meterType\":\"electricity\"},{\"number\":\"M-002\",\"meterType\":\"gas\"}]}"
+                  }
+                },
+                "v2_append_operation": {
+                  "summary": "Version 2.0 - Using _append Operation",
+                  "description": "Example showing how to use _append to add relations to existing entities",
+                  "value": {
+                    "mapping_configuration": {
+                      "version": "2.0",
+                      "mapping": {
+                        "events": {
+                          "ContactAdded": {
+                            "entities": [
+                              {
+                                "entity_schema": "contract",
+                                "unique_ids": [
+                                  "contract_number"
+                                ],
+                                "fields": [
+                                  {
+                                    "attribute": "contract_number",
+                                    "field": "contractNumber"
+                                  },
+                                  {
+                                    "attribute": "additional_contacts",
+                                    "relations": {
+                                      "operation": "_append",
+                                      "items": [
+                                        {
+                                          "entity_schema": "contact",
+                                          "_tags": [
+                                            "ADDITIONAL"
+                                          ],
+                                          "unique_ids": [
+                                            {
+                                              "attribute": "email",
+                                              "field": "contactEmail"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "object_type": "ContactAdded",
+                    "format": "json",
+                    "payload": "{\"contractNumber\":\"CTR-001\",\"contactEmail\":\"new.contact@example.com\"}"
+                  }
+                }
               }
             }
           }
@@ -407,39 +503,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "entity_updates"
-                  ],
-                  "properties": {
-                    "entity_updates": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "entity_slug",
-                          "unique_identifiers",
-                          "attributes"
-                        ],
-                        "properties": {
-                          "entity_slug": {
-                            "type": "string",
-                            "description": "The entity type slug"
-                          },
-                          "unique_identifiers": {
-                            "type": "object",
-                            "description": "Unique identifier mappings for this entity",
-                            "additionalProperties": true
-                          },
-                          "attributes": {
-                            "type": "object",
-                            "description": "Mapped attribute values",
-                            "additionalProperties": true
-                          }
-                        }
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/MappingSimulationResponse"
                 }
               }
             }
@@ -459,6 +523,505 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations": {
+      "get": {
+        "operationId": "listIntegrations",
+        "summary": "List all integrations",
+        "description": "Retrieve all integrations for the authenticated organization",
+        "tags": [
+          "integrations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integrations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "integrations"
+                  ],
+                  "properties": {
+                    "integrations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Integration"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createIntegration",
+        "summary": "Create a new integration",
+        "description": "Create a new integration configuration",
+        "tags": [
+          "integrations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIntegrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Integration created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegration",
+        "summary": "Get an integration by ID",
+        "description": "Retrieve a specific integration by its ID",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateIntegration",
+        "summary": "Update an integration",
+        "description": "Update an existing integration configuration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIntegrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Integration updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteIntegration",
+        "summary": "Delete an integration",
+        "description": "Delete an integration and all its use cases",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/use-cases": {
+      "get": {
+        "operationId": "listUseCases",
+        "summary": "List all use cases for an integration",
+        "description": "Retrieve all use cases for a specific integration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "use_cases"
+                  ],
+                  "properties": {
+                    "use_cases": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UseCase"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUseCase",
+        "summary": "Create a new use case",
+        "description": "Create a new use case for an integration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUseCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Use case created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UseCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}": {
+      "get": {
+        "operationId": "getUseCase",
+        "summary": "Get a use case by ID",
+        "description": "Retrieve a specific use case by its ID",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved use case",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UseCase"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateUseCase",
+        "summary": "Update a use case",
+        "description": "Update an existing use case configuration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUseCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Use case updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UseCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUseCase",
+        "summary": "Delete a use case",
+        "description": "Delete a use case from an integration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Use case deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Use case not found"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -580,6 +1143,658 @@
             "type": "string"
           }
         }
+      },
+      "Integration": {
+        "type": "object",
+        "required": [
+          "id",
+          "orgId",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the integration"
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Integration name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the integration"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the integration was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the integration was last updated"
+          }
+        }
+      },
+      "CreateIntegrationRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Integration name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional description of the integration"
+          }
+        }
+      },
+      "UpdateIntegrationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Integration name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional description of the integration"
+          }
+        }
+      },
+      "UseCase": {
+        "type": "object",
+        "required": [
+          "id",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "configuration": {
+            "type": "object",
+            "description": "Use case specific configuration",
+            "additionalProperties": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was last updated"
+          }
+        }
+      },
+      "CreateUseCaseRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "configuration": {
+            "type": "object",
+            "description": "Use case specific configuration",
+            "additionalProperties": true
+          }
+        }
+      },
+      "UpdateUseCaseRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "configuration": {
+            "type": "object",
+            "description": "Use case specific configuration",
+            "additionalProperties": true
+          }
+        }
+      },
+      "MappingSimulationRequest": {
+        "type": "object",
+        "required": [
+          "mapping_configuration",
+          "object_type",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "mapping_configuration": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationConfigurationV1"
+              },
+              {
+                "$ref": "#/components/schemas/IntegrationConfigurationV2"
+              }
+            ]
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Type of the object/event being mapped.\nFor v1.0: must match a key in mapping_configuration.mapping.objects\nFor v2.0: must match a key in mapping_configuration.mapping.events\n"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          }
+        }
+      },
+      "MappingSimulationResponse": {
+        "type": "object",
+        "required": [
+          "entity_updates"
+        ],
+        "properties": {
+          "entity_updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityUpdate"
+            }
+          },
+          "meter_readings_updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeterReadingUpdate"
+            }
+          }
+        }
+      },
+      "EntityUpdate": {
+        "type": "object",
+        "required": [
+          "entity_slug",
+          "unique_identifiers",
+          "attributes"
+        ],
+        "properties": {
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity type slug"
+          },
+          "unique_identifiers": {
+            "type": "object",
+            "description": "Unique identifier mappings for this entity",
+            "additionalProperties": true
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Mapped attribute values",
+            "additionalProperties": true
+          }
+        }
+      },
+      "MeterReadingUpdate": {
+        "type": "object",
+        "required": [
+          "meter",
+          "attributes"
+        ],
+        "properties": {
+          "meter": {
+            "type": "object",
+            "required": [
+              "$entity_unique_ids"
+            ],
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter"
+              }
+            }
+          },
+          "meter_counter": {
+            "type": "object",
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter counter"
+              }
+            }
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Meter reading attributes (external_id, timestamp, source, value, etc.)"
+          }
+        }
+      },
+      "IntegrationConfigurationV1": {
+        "type": "object",
+        "required": [
+          "mapping"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "enum": [
+              "1.0"
+            ],
+            "default": "1.0",
+            "description": "Mapping specification version"
+          },
+          "mapping": {
+            "type": "object",
+            "required": [
+              "objects"
+            ],
+            "properties": {
+              "objects": {
+                "type": "object",
+                "description": "[v1.0] Object type mappings",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/IntegrationObjectV1"
+                }
+              }
+            }
+          }
+        }
+      },
+      "IntegrationObjectV1": {
+        "type": "object",
+        "required": [
+          "unique_ids",
+          "fields"
+        ],
+        "properties": {
+          "unique_ids": {
+            "type": "object",
+            "description": "Mapping of entity types to their unique identifier field mappings",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "List of local keys (must be present under the mapping \"fields\"!)"
+                  }
+                },
+                {
+                  "type": "object",
+                  "description": "Map of remote keys to local entity keys",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationFieldV1"
+            }
+          }
+        }
+      },
+      "IntegrationFieldV1": {
+        "type": "object",
+        "required": [
+          "entity",
+          "attribute"
+        ],
+        "properties": {
+          "entity": {
+            "type": "string",
+            "description": "Target entity slug"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name (mutually exclusive with jsonataExpression)"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression for transformation (mutually exclusive with field)"
+          }
+        }
+      },
+      "IntegrationConfigurationV2": {
+        "type": "object",
+        "required": [
+          "version",
+          "mapping"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "enum": [
+              "2.0"
+            ],
+            "description": "Mapping specification version"
+          },
+          "mapping": {
+            "type": "object",
+            "required": [
+              "events"
+            ],
+            "properties": {
+              "events": {
+                "type": "object",
+                "description": "[v2.0] Event type mappings",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/IntegrationEvent"
+                }
+              }
+            }
+          }
+        }
+      },
+      "IntegrationEvent": {
+        "type": "object",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Array of entity configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntity"
+            }
+          },
+          "meter_readings": {
+            "type": "array",
+            "description": "Array of meter reading configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationMeterReading"
+            }
+          }
+        }
+      },
+      "IntegrationEntity": {
+        "type": "object",
+        "required": [
+          "entity_schema",
+          "unique_ids",
+          "fields"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Target entity schema (e.g., 'contact', 'contract')"
+          },
+          "unique_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of attribute names that uniquely identify this entity"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "Optional JSONata expression to pre-process the event data before field mapping"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "IntegrationMeterReading": {
+        "type": "object",
+        "required": [
+          "jsonataExpression",
+          "meter",
+          "fields"
+        ],
+        "properties": {
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression to extract meter reading items from the event data"
+          },
+          "meter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "meter_counter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions for meter reading attributes",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "MeterUniqueIdsConfig": {
+        "type": "object",
+        "required": [
+          "unique_ids"
+        ],
+        "properties": {
+          "unique_ids": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Array of unique identifier field mappings",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "IntegrationEntityField": {
+        "type": "object",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name or JSONPath expression (if starts with $)"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression for transformation"
+          },
+          "constant": {
+            "description": "Constant value to assign (any type)"
+          },
+          "relations": {
+            "$ref": "#/components/schemas/RelationConfig"
+          }
+        }
+      },
+      "RelationConfig": {
+        "type": "object",
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "_set",
+              "_append"
+            ],
+            "description": "Relation operation:\n- '_set': Replace all existing relations with the specified items\n- '_append': Add new items to existing relations (fetches current entity first)\n"
+          },
+          "items": {
+            "type": "array",
+            "description": "Array of relation item configurations",
+            "items": {
+              "$ref": "#/components/schemas/RelationItemConfig"
+            }
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression that returns relation items array (alternative to 'items')"
+          }
+        }
+      },
+      "RelationItemConfig": {
+        "type": "object",
+        "required": [
+          "entity_schema",
+          "unique_ids"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Related entity schema"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags for this relation"
+          },
+          "unique_ids": {
+            "type": "array",
+            "description": "Unique identifier mappings for the related entity",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "RelationUniqueIdField": {
+        "type": "object",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name in the related entity"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name from the event data"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression to compute the value"
+          },
+          "constant": {
+            "description": "Constant value (any type)"
+          }
+        }
       }
     },
     "responses": {
@@ -666,6 +1881,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
