@@ -6858,9 +6858,7 @@
           "tax": {
             "type": "object",
             "description": "The taxes applied to the price item.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/TaxAmountBreakdown"
-            }
+            "$ref": "#/components/schemas/TaxAmountBreakdown"
           }
         },
         "required": [

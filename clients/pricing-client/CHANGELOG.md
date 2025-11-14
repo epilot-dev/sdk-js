@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.51.0
+
+### Minor Changes
+
+- Updated pricing client to match Pricing API spec and types
+
 ## 3.50.4
 
 ### Patch Changes

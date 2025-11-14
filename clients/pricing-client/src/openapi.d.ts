@@ -9026,9 +9026,7 @@ declare namespace Components {
             /**
              * The taxes applied to the price item.
              */
-            tax?: {
-                [name: string]: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
-            };
+            tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
         }
         export interface RedeemedPromo {
             /**
