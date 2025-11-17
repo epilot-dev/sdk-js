@@ -101,11 +101,11 @@ declare namespace Components {
          */
         export interface SubmissionPayload {
             /**
-             * organization id
+             * organization id – defaults to token value
              * example:
              * 123
              */
-            organization_id: string;
+            organization_id?: string;
             /**
              * journey submit uid
              * example:
