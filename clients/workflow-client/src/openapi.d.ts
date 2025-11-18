@@ -232,6 +232,13 @@ declare namespace Components {
         export interface CreateStepReq {
             insertionIndex: number;
             name: string;
+            /**
+             * Longer information regarding Task
+             */
+            description?: {
+                enabled: boolean;
+                value: string;
+            };
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -646,6 +653,14 @@ declare namespace Components {
              * Condition to evaluate as true for a decision task with a manual trigger mode
              */
             next_condition_id?: string;
+            /**
+             * When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:
+             * - `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)
+             * - `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected
+             * This parameter is silently ignored when patching the current task or future tasks.
+             *
+             */
+            revert_execution?: boolean;
         }
         export interface Phase {
             id: PhaseId;
@@ -668,6 +683,7 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
         export type PhaseId = string;
         export interface PhaseInEntity {
@@ -1217,6 +1233,13 @@ declare namespace Components {
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             name?: string;
+            /**
+             * Longer information regarding Task
+             */
+            description?: {
+                enabled: boolean;
+                value: string;
+            };
             position?: StepPositionAt;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             startedTime?: string;

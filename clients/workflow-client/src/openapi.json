@@ -2161,6 +2161,22 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "enabled",
+              "value"
+            ],
+            "description": "Longer information regarding Task"
+          },
           "status": {
             "$ref": "#/components/schemas/StepStatus"
           },
@@ -2221,6 +2237,22 @@
           },
           "name": {
             "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "enabled",
+              "value"
+            ],
+            "description": "Longer information regarding Task"
           },
           "position": {
             "$ref": "#/components/schemas/StepPositionAt"
@@ -3290,6 +3322,9 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "loop_config": {
+            "$ref": "#/components/schemas/LoopInfo"
           }
         },
         "required": [
@@ -3654,6 +3689,11 @@
           "next_condition_id": {
             "type": "string",
             "description": "Condition to evaluate as true for a decision task with a manual trigger mode"
+          },
+          "revert_execution": {
+            "type": "boolean",
+            "description": "When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:\n- `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)\n- `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected\nThis parameter is silently ignored when patching the current task or future tasks.\n",
+            "default": false
           }
         }
       },
