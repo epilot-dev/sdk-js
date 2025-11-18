@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.16.0
+
+### Minor Changes
+
+- - Add task/phase descriptions
+  - Add revert_execution param to allow user choosing whether to revert
+    execution to a previous task
+  - Add loop_config to phases
+
 ## 1.15.2
 
 ### Patch Changes
