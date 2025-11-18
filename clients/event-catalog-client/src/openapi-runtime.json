@@ -1,0 +1,16 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/events": {
+      "get": {
+        "operationId": "listEvents",
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

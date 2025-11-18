@@ -1,7 +1,7 @@
 {
-  "name": "@epilot/sandbox-client",
-  "version": "0.4.2",
-  "description": "Client for epilot Sandbox API",
+  "name": "@epilot/event-catalog-client",
+  "version": "0.0.1",
+  "description": "Client for epilot Event Catalog API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "epilot GmbH",
@@ -10,24 +10,24 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/sandbox-client"
+    "directory": "clients/event-catalog-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/sandbox-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/event-catalog-client#readme",
   "keywords": [
     "epilot",
-    "sandbox",
-    "blueprint",
-    "manifest",
-    "terraform"
+    "event-catalog",
+    "event",
+    "webhook",
+    "integration"
   ],
   "scripts": {
     "test": "jest",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/sandbox.yaml",
-    "openapi:local": "node ../../scripts/update-openapi.js ../../../sandbox-api/lambda/TerraformHandlerFunction/openapi.yml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/event-catalog.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../event-catalog-api/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

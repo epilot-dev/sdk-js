@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Event Catalog API",
+    "description": "Manages the catalog of business events available in epilot",
+    "version": "0.0.1"
+  },
+  "tags": [
+    {
+      "name": "Event Catalog",
+      "description": "API for managing business event catalog"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "listEvents",
+        "description": "Retrieve list of available business events",
+        "tags": [
+          "Event Catalog"
+        ],
+        "responses": {
+          "200": {
+            "description": "A JSON array of event objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EventConfig"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "EventConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human readable of the event",
+            "example": "MeterReading"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://event-catalog.sls.epilot.io"
+    }
+  ]
+}
