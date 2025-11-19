@@ -316,7 +316,7 @@
         "operationId": "getFailuresForConfig",
         "deprecated": true,
         "summary": "getFailuresForConfig",
-        "description": "Get failed deliveries for a given config id",
+        "description": "**Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.\n",
         "tags": [
           "webhooks"
         ],
@@ -389,7 +389,7 @@
         "deprecated": true,
         "operationId": "getFailures",
         "summary": "getFailures",
-        "description": "Get saved failures from the webhooks DB, in a paginated way",
+        "description": "**Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.\n",
         "tags": [
           "webhooks"
         ],
@@ -464,7 +464,7 @@
         "deprecated": true,
         "operationId": "resendFailure",
         "summary": "resendFailure",
-        "description": "Resend payload for one failure",
+        "description": "**Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.\n",
         "tags": [
           "webhooks"
         ],
@@ -866,10 +866,148 @@
           }
         }
       }
+    },
+    "/v2/webhooks/configs/{configId}/events": {
+      "post": {
+        "operationId": "getWebhookEventsV2",
+        "summary": "getWebhookEventsV2",
+        "description": "List webhook events and filter them by status, timestamp, etc.",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - events where loaded successfully. Empty array if org has no events.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "SearchOptions": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 25,
+            "default": 25,
+            "minimum": 1,
+            "maximum": 25
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination. Use the next_cursor from the previous response to get the next page.",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page",
+                "example": "2025-10-31T12:34:56Z"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page",
+                "example": "evt_1234567890abcdef"
+              }
+            }
+          },
+          "timestamp": {
+            "type": "object",
+            "description": "Filter events by timestamp range",
+            "properties": {
+              "from": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start timestamp in ISO 8601 format",
+                "example": "2025-10-01T00:00:00Z"
+              },
+              "to": {
+                "type": "string",
+                "format": "date-time",
+                "description": "End timestamp in ISO 8601 format",
+                "example": "2025-10-31T23:59:59Z"
+              }
+            }
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Filter by specific event ID",
+            "example": "evt_1234567890abcdef"
+          },
+          "status": {
+            "type": "string",
+            "description": "Filter by event outcome",
+            "enum": [
+              "succeeded",
+              "failed"
+            ],
+            "example": "succeeded"
+          }
+        }
+      },
+      "EventListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEvent"
+            },
+            "description": "List of webhook events"
+          },
+          "next_cursor": {
+            "type": "object",
+            "nullable": true,
+            "description": "Cursor to fetch the next page. Null if no more results.",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2025-10-31T12:34:56Z"
+              },
+              "event_id": {
+                "type": "string",
+                "example": "evt_1234567890abcdef"
+              }
+            }
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Indicates if more results are available",
+            "example": true
+          }
+        }
+      },
       "HttpMethod": {
         "type": "string",
         "enum": [
@@ -1269,6 +1407,9 @@
       },
       "TriggerWebhookResp": {
         "type": "object",
+        "required": [
+          "event_id"
+        ],
         "properties": {
           "status_code": {
             "type": "string"

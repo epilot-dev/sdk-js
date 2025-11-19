@@ -1615,21 +1615,32 @@
           "flow": [
             {
               "id": "sectionId1",
+              "definitionId": "section_definition_id_1",
               "name": "Initial Information Gathering",
+              "type": "SECTION",
               "steps": [
                 {
-                  "id": "sada5641f3a21"
+                  "id": "sada5641f3a21",
+                  "definitionId": "step_definition_id_1",
+                  "name": "Call client"
                 },
                 {
-                  "id": "sada5641f3a22"
+                  "id": "sada5641f3a22",
+                  "definitionId": "step_definition_id_2",
+                  "name": "Check product availability"
                 },
                 {
-                  "id": "sada5641f3a23"
+                  "id": "sada5641f3a23",
+                  "definitionId": "step_definition_id_3",
+                  "name": "Send email confirming contact with the client"
                 }
               ]
             },
             {
-              "id": "firstLevelStepId1"
+              "id": "firstLevelStepId1",
+              "definitionId": "step_definition_id_4",
+              "name": "Print and send catalog",
+              "type": "STEP"
             }
           ]
         }
@@ -1705,6 +1716,7 @@
                 {
                   "id": "sada5641f3a21",
                   "name": "Call client and confirm address and product",
+                  "definitionId": "step_definition_id_1",
                   "status": "ASSIGNED",
                   "assignedTo": [
                     "11"
@@ -1713,17 +1725,20 @@
                 {
                   "id": "sada5641f3a22",
                   "name": "Check product availability",
-                  "status": "UNASSIGNED"
+                  "status": "UNASSIGNED",
+                  "definitionId": "step_definition_id_2"
                 },
                 {
                   "id": "sada5641f3a23",
                   "name": "Send email confirming contact with the client",
+                  "definitionId": "step_definition_id_3",
                   "status": "SKIPPED"
                 }
               ]
             },
             {
               "id": "firstLevelStepId1",
+              "definitionId": "step_definition_id_4",
               "name": "Print and send catalog",
               "status": "SKIPPED",
               "dueDate": "2023-01-15T20:00:00"
@@ -2146,6 +2161,22 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "enabled",
+              "value"
+            ],
+            "description": "Longer information regarding Task"
+          },
           "status": {
             "$ref": "#/components/schemas/StepStatus"
           },
@@ -2206,6 +2237,22 @@
           },
           "name": {
             "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "enabled",
+              "value"
+            ],
+            "description": "Longer information regarding Task"
           },
           "position": {
             "$ref": "#/components/schemas/StepPositionAt"
@@ -2545,117 +2592,6 @@
           "target"
         ]
       },
-      "EntitySync": {
-        "type": "object",
-        "properties": {
-          "trigger": {
-            "type": "object",
-            "description": "Trigger configuration that determines when entity sync occurs.\nContains the event type and optional filter to target specific tasks/phases.\n",
-            "required": [
-              "event"
-            ],
-            "properties": {
-              "event": {
-                "type": "string",
-                "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
-                "enum": [
-                  "FlowStarted",
-                  "FlowCompleted",
-                  "FlowCancelled",
-                  "FlowReopened",
-                  "FlowDeleted",
-                  "FlowAssigned",
-                  "FlowDueDateChanged",
-                  "FlowContextsChanged",
-                  "TaskUpdated",
-                  "CurrTaskChanged",
-                  "TaskCompleted",
-                  "TaskSkipped",
-                  "TaskMarkedInProgress",
-                  "PhaseUpdated",
-                  "PhaseCompleted",
-                  "PhaseSkipped",
-                  "PhaseMarkedInProgress"
-                ]
-              },
-              "filter": {
-                "type": "object",
-                "description": "Optional filter to target specific tasks or phases.\nSpecify either task_template_id OR phase_template_id (mutually exclusive).\nIf omitted, trigger applies to all tasks/phases.\n",
-                "properties": {
-                  "task_template_id": {
-                    "type": "string",
-                    "description": "Target a specific task by its template ID (stable across executions)"
-                  },
-                  "phase_template_id": {
-                    "type": "string",
-                    "description": "Target a specific phase by its template ID (stable across executions)"
-                  }
-                }
-              }
-            }
-          },
-          "value": {
-            "type": "object",
-            "properties": {
-              "source": {
-                "type": "string",
-                "enum": [
-                  "workflow_name",
-                  "workflow_status",
-                  "workflow_assigned_to",
-                  "task_name",
-                  "task_status",
-                  "task_assigned_to",
-                  "phase_name",
-                  "phase_status",
-                  "phase_assigned_to",
-                  "custom_value"
-                ]
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "source"
-            ]
-          },
-          "target": {
-            "type": "object",
-            "properties": {
-              "entitySchema": {
-                "type": "string",
-                "example": "opportunity"
-              },
-              "entityAttribute": {
-                "type": "string",
-                "example": "title"
-              }
-            },
-            "required": [
-              "entitySchema",
-              "entityAttribute"
-            ]
-          }
-        },
-        "example": {
-          "trigger": {
-            "event": "FlowStarted"
-          },
-          "target": {
-            "entitySchema": "opportunity",
-            "entityAttribute": "title"
-          },
-          "value": {
-            "source": "workflow_name"
-          }
-        },
-        "required": [
-          "trigger",
-          "target",
-          "value"
-        ]
-      },
       "DynamicDueDate": {
         "description": "set a Duedate for a step then a specific",
         "type": "object",
@@ -2904,10 +2840,10 @@
             "type": "boolean",
             "description": "Indicates whether this flow execution is available for End Customer Portal or not. By default it's not."
           },
-          "entity_sync": {
+          "update_entity_attributes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EntitySync"
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
             }
           },
           "taxonomies": {
@@ -3386,6 +3322,9 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "loop_config": {
+            "$ref": "#/components/schemas/LoopInfo"
           }
         },
         "required": [
@@ -3750,6 +3689,11 @@
           "next_condition_id": {
             "type": "string",
             "description": "Condition to evaluate as true for a decision task with a manual trigger mode"
+          },
+          "revert_execution": {
+            "type": "boolean",
+            "description": "When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:\n- `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)\n- `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected\nThis parameter is silently ignored when patching the current task or future tasks.\n",
+            "default": false
           }
         }
       },

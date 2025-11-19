@@ -212,6 +212,7 @@ declare namespace Paths {
              * name
              */
             export type Attribute = string;
+            export type From = number;
             export type Input = string;
             export type Size = number;
         }
@@ -223,6 +224,7 @@ declare namespace Paths {
              */
             Parameters.Attribute;
             size?: Parameters.Size;
+            from?: Parameters.From;
         }
         namespace Responses {
             export interface $200 {
@@ -232,9 +234,15 @@ declare namespace Paths {
                  *   "value"
                  * ]
                  */
-                results?: (string | boolean | {
+                results: (string | boolean | {
                     [name: string]: any;
                 })[];
+                /**
+                 * Total number of matching items available
+                 * example:
+                 * 42
+                 */
+                hits: number;
             }
         }
     }

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Email settings API",
-    "version": "1.3.0"
+    "version": "1.4.0"
   },
   "tags": [
     {
@@ -359,7 +359,7 @@
       "get": {
         "operationId": "listSharedInboxes",
         "summary": "listSharedInboxes",
-        "description": "List shared inboxes",
+        "description": "List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.",
         "tags": [
           "Shared inboxes"
         ],
@@ -403,6 +403,27 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/email-settings/inbox-buckets": {
+      "get": {
+        "operationId": "listInboxBuckets",
+        "summary": "listInboxBuckets",
+        "description": "List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.",
+        "tags": [
+          "Inbox buckets"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ListInboxBucketsSuccessResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -734,6 +755,19 @@
   },
   "components": {
     "responses": {
+      "ListInboxBucketsSuccessResponse": {
+        "description": "Success",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/InboxBucketResponse"
+              }
+            }
+          }
+        }
+      },
       "ProvisionEpilotEmailAddressSuccessResponse": {
         "description": "Success",
         "content": {
@@ -935,6 +969,21 @@
       }
     },
     "schemas": {
+      "InboxBucketResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "inbox_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "inbox_id": {
+            "type": "string"
+          }
+        }
+      },
       "ProvisionEpilotEmailAddressPayload": {
         "type": "object",
         "required": [

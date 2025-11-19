@@ -232,6 +232,13 @@ declare namespace Components {
         export interface CreateStepReq {
             insertionIndex: number;
             name: string;
+            /**
+             * Longer information regarding Task
+             */
+            description?: {
+                enabled: boolean;
+                value: string;
+            };
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -394,69 +401,6 @@ declare namespace Components {
              */
             is_primary?: boolean;
         }
-        /**
-         * example:
-         * {
-         *   "trigger": {
-         *     "event": "FlowStarted"
-         *   },
-         *   "target": {
-         *     "entitySchema": "opportunity",
-         *     "entityAttribute": "title"
-         *   },
-         *   "value": {
-         *     "source": "workflow_name"
-         *   }
-         * }
-         */
-        export interface EntitySync {
-            /**
-             * Trigger configuration that determines when entity sync occurs.
-             * Contains the event type and optional filter to target specific tasks/phases.
-             *
-             */
-            trigger: {
-                /**
-                 * Event or condition that triggers the entity sync.
-                 * Direct triggers match EventBridge event names (PascalCase).
-                 * Status triggers are deduced from event + entity status combination.
-                 *
-                 */
-                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
-                /**
-                 * Optional filter to target specific tasks or phases.
-                 * Specify either task_template_id OR phase_template_id (mutually exclusive).
-                 * If omitted, trigger applies to all tasks/phases.
-                 *
-                 */
-                filter?: {
-                    /**
-                     * Target a specific task by its template ID (stable across executions)
-                     */
-                    task_template_id?: string;
-                    /**
-                     * Target a specific phase by its template ID (stable across executions)
-                     */
-                    phase_template_id?: string;
-                };
-            };
-            value: {
-                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to" | "custom_value";
-                value?: string;
-            };
-            target: {
-                /**
-                 * example:
-                 * opportunity
-                 */
-                entitySchema: string;
-                /**
-                 * example:
-                 * title
-                 */
-                entityAttribute: string;
-            };
-        }
         export interface ErrorResp {
             message?: string;
         }
@@ -540,22 +484,7 @@ declare namespace Components {
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
-            entity_sync?: /**
-             * example:
-             * {
-             *   "trigger": {
-             *     "event": "FlowStarted"
-             *   },
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "title"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            EntitySync[];
+            update_entity_attributes?: UpdateEntityAttributes[];
             /**
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
@@ -724,6 +653,14 @@ declare namespace Components {
              * Condition to evaluate as true for a decision task with a manual trigger mode
              */
             next_condition_id?: string;
+            /**
+             * When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:
+             * - `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)
+             * - `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected
+             * This parameter is silently ignored when patching the current task or future tasks.
+             *
+             */
+            revert_execution?: boolean;
         }
         export interface Phase {
             id: PhaseId;
@@ -746,6 +683,7 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
         export type PhaseId = string;
         export interface PhaseInEntity {
@@ -801,21 +739,32 @@ declare namespace Components {
              *   "flow": [
              *     {
              *       "id": "sectionId1",
+             *       "definitionId": "section_definition_id_1",
              *       "name": "Initial Information Gathering",
+             *       "type": "SECTION",
              *       "steps": [
              *         {
-             *           "id": "sada5641f3a21"
+             *           "id": "sada5641f3a21",
+             *           "definitionId": "step_definition_id_1",
+             *           "name": "Call client"
              *         },
              *         {
-             *           "id": "sada5641f3a22"
+             *           "id": "sada5641f3a22",
+             *           "definitionId": "step_definition_id_2",
+             *           "name": "Check product availability"
              *         },
              *         {
-             *           "id": "sada5641f3a23"
+             *           "id": "sada5641f3a23",
+             *           "definitionId": "step_definition_id_3",
+             *           "name": "Send email confirming contact with the client"
              *         }
              *       ]
              *     },
              *     {
-             *       "id": "firstLevelStepId1"
+             *       "id": "firstLevelStepId1",
+             *       "definitionId": "step_definition_id_4",
+             *       "name": "Print and send catalog",
+             *       "type": "STEP"
              *     }
              *   ]
              * }
@@ -1284,6 +1233,13 @@ declare namespace Components {
             dueDate?: string;
             dynamicDueDate?: /* set a Duedate for a step then a specific */ DynamicDueDate;
             name?: string;
+            /**
+             * Longer information regarding Task
+             */
+            description?: {
+                enabled: boolean;
+                value: string;
+            };
             position?: StepPositionAt;
             automationConfig?: /* Configuration for automation execution to run */ AutomationConfig;
             startedTime?: string;
@@ -1378,6 +1334,7 @@ declare namespace Components {
          *         {
          *           "id": "sada5641f3a21",
          *           "name": "Call client and confirm address and product",
+         *           "definitionId": "step_definition_id_1",
          *           "status": "ASSIGNED",
          *           "assignedTo": [
          *             "11"
@@ -1386,17 +1343,20 @@ declare namespace Components {
          *         {
          *           "id": "sada5641f3a22",
          *           "name": "Check product availability",
-         *           "status": "UNASSIGNED"
+         *           "status": "UNASSIGNED",
+         *           "definitionId": "step_definition_id_2"
          *         },
          *         {
          *           "id": "sada5641f3a23",
          *           "name": "Send email confirming contact with the client",
+         *           "definitionId": "step_definition_id_3",
          *           "status": "SKIPPED"
          *         }
          *       ]
          *     },
          *     {
          *       "id": "firstLevelStepId1",
+         *       "definitionId": "step_definition_id_4",
          *       "name": "Print and send catalog",
          *       "status": "SKIPPED",
          *       "dueDate": "2023-01-15T20:00:00"
@@ -1541,21 +1501,32 @@ declare namespace Components {
          *   "flow": [
          *     {
          *       "id": "sectionId1",
+         *       "definitionId": "section_definition_id_1",
          *       "name": "Initial Information Gathering",
+         *       "type": "SECTION",
          *       "steps": [
          *         {
-         *           "id": "sada5641f3a21"
+         *           "id": "sada5641f3a21",
+         *           "definitionId": "step_definition_id_1",
+         *           "name": "Call client"
          *         },
          *         {
-         *           "id": "sada5641f3a22"
+         *           "id": "sada5641f3a22",
+         *           "definitionId": "step_definition_id_2",
+         *           "name": "Check product availability"
          *         },
          *         {
-         *           "id": "sada5641f3a23"
+         *           "id": "sada5641f3a23",
+         *           "definitionId": "step_definition_id_3",
+         *           "name": "Send email confirming contact with the client"
          *         }
          *       ]
          *     },
          *     {
-         *       "id": "firstLevelStepId1"
+         *       "id": "firstLevelStepId1",
+         *       "definitionId": "step_definition_id_4",
+         *       "name": "Print and send catalog",
+         *       "type": "STEP"
          *     }
          *   ]
          * }
@@ -1742,6 +1713,7 @@ declare namespace Paths {
              *         {
              *           "id": "sada5641f3a21",
              *           "name": "Call client and confirm address and product",
+             *           "definitionId": "step_definition_id_1",
              *           "status": "ASSIGNED",
              *           "assignedTo": [
              *             "11"
@@ -1750,17 +1722,20 @@ declare namespace Paths {
              *         {
              *           "id": "sada5641f3a22",
              *           "name": "Check product availability",
-             *           "status": "UNASSIGNED"
+             *           "status": "UNASSIGNED",
+             *           "definitionId": "step_definition_id_2"
              *         },
              *         {
              *           "id": "sada5641f3a23",
              *           "name": "Send email confirming contact with the client",
+             *           "definitionId": "step_definition_id_3",
              *           "status": "SKIPPED"
              *         }
              *       ]
              *     },
              *     {
              *       "id": "firstLevelStepId1",
+             *       "definitionId": "step_definition_id_4",
              *       "name": "Print and send catalog",
              *       "status": "SKIPPED",
              *       "dueDate": "2023-01-15T20:00:00"
@@ -1899,6 +1874,7 @@ declare namespace Paths {
              *         {
              *           "id": "sada5641f3a21",
              *           "name": "Call client and confirm address and product",
+             *           "definitionId": "step_definition_id_1",
              *           "status": "ASSIGNED",
              *           "assignedTo": [
              *             "11"
@@ -1907,17 +1883,20 @@ declare namespace Paths {
              *         {
              *           "id": "sada5641f3a22",
              *           "name": "Check product availability",
-             *           "status": "UNASSIGNED"
+             *           "status": "UNASSIGNED",
+             *           "definitionId": "step_definition_id_2"
              *         },
              *         {
              *           "id": "sada5641f3a23",
              *           "name": "Send email confirming contact with the client",
+             *           "definitionId": "step_definition_id_3",
              *           "status": "SKIPPED"
              *         }
              *       ]
              *     },
              *     {
              *       "id": "firstLevelStepId1",
+             *       "definitionId": "step_definition_id_4",
              *       "name": "Print and send catalog",
              *       "status": "SKIPPED",
              *       "dueDate": "2023-01-15T20:00:00"
@@ -1952,21 +1931,32 @@ declare namespace Paths {
              *   "flow": [
              *     {
              *       "id": "sectionId1",
+             *       "definitionId": "section_definition_id_1",
              *       "name": "Initial Information Gathering",
+             *       "type": "SECTION",
              *       "steps": [
              *         {
-             *           "id": "sada5641f3a21"
+             *           "id": "sada5641f3a21",
+             *           "definitionId": "step_definition_id_1",
+             *           "name": "Call client"
              *         },
              *         {
-             *           "id": "sada5641f3a22"
+             *           "id": "sada5641f3a22",
+             *           "definitionId": "step_definition_id_2",
+             *           "name": "Check product availability"
              *         },
              *         {
-             *           "id": "sada5641f3a23"
+             *           "id": "sada5641f3a23",
+             *           "definitionId": "step_definition_id_3",
+             *           "name": "Send email confirming contact with the client"
              *         }
              *       ]
              *     },
              *     {
-             *       "id": "firstLevelStepId1"
+             *       "id": "firstLevelStepId1",
+             *       "definitionId": "step_definition_id_4",
+             *       "name": "Print and send catalog",
+             *       "type": "STEP"
              *     }
              *   ]
              * }
@@ -2646,7 +2636,6 @@ export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type EntityRef = Components.Schemas.EntityRef;
-export type EntitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;

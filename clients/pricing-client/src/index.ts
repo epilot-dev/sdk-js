@@ -2,3 +2,4 @@ export type { OpenAPIClient, OpenAPIClientAxios, Document } from 'openapi-client
 
 export * from './client';
 export * from './openapi';
+export * from './additional-types';

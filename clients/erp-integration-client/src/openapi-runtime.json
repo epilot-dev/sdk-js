@@ -50,6 +50,149 @@
         },
         "responses": {}
       }
+    },
+    "/v1/integrations": {
+      "get": {
+        "operationId": "listIntegrations",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createIntegration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegration",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateIntegration",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteIntegration",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/use-cases": {
+      "get": {
+        "operationId": "listUseCases",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createUseCase",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}": {
+      "get": {
+        "operationId": "getUseCase",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateUseCase",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUseCase",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

@@ -526,6 +526,15 @@
         "parameters": [
           {
             "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
+          {
+            "in": "query",
             "name": "extensionId",
             "schema": {
               "type": "string"
@@ -654,6 +663,15 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
           {
             "in": "query",
             "name": "extensionId",
@@ -809,6 +827,15 @@
           }
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "App ID for consumption data."
+          },
           {
             "in": "query",
             "name": "extensionId",
@@ -4461,7 +4488,6 @@
             "description": "Comma-separated list of entities which the activity primarily concerns. Deprecated - ignored as the list of entities is automatically determined now.",
             "deprecated": true,
             "style": "form",
-            "explode": false,
             "schema": {
               "type": "array",
               "items": {
@@ -5354,6 +5380,54 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v2/portal/entity:get": {
+      "post": {
+        "operationId": "getPortalUserEntity",
+        "summary": "getPortalUserEntity",
+        "description": "Get a single entity for a portal user",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityGetParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The entity has been retrieved successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -7227,6 +7301,243 @@
           }
         }
       }
+    },
+    "/v3/portal/partner/invite": {
+      "post": {
+        "operationId": "invitePartner",
+        "summary": "invitePartner",
+        "description": "Invites a partner to a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Partner to invite",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the partner to invite"
+                  },
+                  "represents_contact_list": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "List of contact IDs representing the contacts / business partners the invited user should be added to.\nWhen omitted, the user is automatically added to all contacts / business partners linked to the account.\n"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User invited successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/list": {
+      "get": {
+        "operationId": "listBusinessPartners",
+        "summary": "listBusinessPartners",
+        "description": "Lists all business partners linked to the businessaccount",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business partners listed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BusinessPartnerItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/resend-invitation": {
+      "post": {
+        "operationId": "resendPartnerInvitation",
+        "summary": "resendPartnerInvitation",
+        "description": "Resends an invitation email to a partner",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to resend invitation to"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner invitation resent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner invitation resent successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/revoke": {
+      "delete": {
+        "operationId": "revokePartner",
+        "summary": "revokePartner",
+        "description": "Revokes a partner from a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to revoke from the portal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner revoked from portal successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner revoked from portal successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7523,7 +7834,11 @@
           },
           "invitation": {
             "$ref": "#/components/schemas/EntityId",
-            "description": "ID of the email template for invitation"
+            "description": "ID of the email template for invitation when the user is just invited to register on the portal."
+          },
+          "partnerInvitation": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the email template for invitation when a partner invites another partner within the portal."
           },
           "onNewQuote": {
             "$ref": "#/components/schemas/EntityId",
@@ -7997,6 +8312,11 @@
                     "type": "integer",
                     "example": 8,
                     "description": "Minimum password length"
+                  },
+                  "maximum_length": {
+                    "type": "integer",
+                    "example": 256,
+                    "description": "Maximum password length"
                   },
                   "require_lowercase": {
                     "type": "boolean",
@@ -9145,6 +9465,15 @@
             }
           }
         ]
+      },
+      "EntityResponse": {
+        "type": "object",
+        "description": "Response for entity get request",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/EntityItem"
+          }
+        }
       },
       "EntityResponseWithHits": {
         "type": "object",
@@ -10442,6 +10771,113 @@
         "description": "Currency code in ISO 4217 format",
         "example": "EUR"
       },
+      "EntityGetParams": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/EntitySlug",
+            "description": "Single entity schema slug"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional entity ID to filter by. If provided, creates a filter for _id.",
+            "example": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+          },
+          "hydrate": {
+            "type": "boolean",
+            "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
+            "default": false
+          },
+          "fields": {
+            "type": "array",
+            "description": "List of entity fields to include in search results",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "_id",
+              "_title"
+            ]
+          },
+          "templates": {
+            "type": "object",
+            "description": "Template strings to parse and return as synthetic fields",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "content_top_name": "Customer #{{contract.customer_number}}",
+              "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
+              "content_bottom_name": "{{custom_contract_delivery_address}}"
+            }
+          },
+          "filters": {
+            "type": "array",
+            "description": "Additional filters to apply to the search query",
+            "items": {
+              "type": "object",
+              "description": "Elasticsearch filter object"
+            },
+            "example": [
+              {
+                "term": {
+                  "status.keyword": "active"
+                }
+              },
+              {
+                "range": {
+                  "_created_at": {
+                    "gte": "2023-01-01"
+                  }
+                }
+              }
+            ]
+          },
+          "filters_context": {
+            "type": "array",
+            "description": "Context-based filters for entity relations.",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "example": [
+              {
+                "portal_user": true
+              },
+              {
+                "contact": true
+              },
+              {
+                "contract": "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+              }
+            ]
+          },
+          "targets": {
+            "type": "array",
+            "description": "Filters from these targets will be applied to the search query.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+            ]
+          }
+        },
+        "required": [
+          "slug"
+        ]
+      },
       "EntitySearchParams": {
         "type": "object",
         "properties": {
@@ -11701,7 +12137,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -12274,15 +12710,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "description": "The schema of the page",
-              "enum": [
-                "contact",
-                "contract",
-                "meter",
-                "order",
-                "opportunity",
-                "meter_counter"
-              ]
+              "description": "The schema of the page"
             }
           },
           "visibility": {
@@ -12314,6 +12742,11 @@
           "is_system": {
             "type": "boolean",
             "description": "Whether the page is a system page",
+            "example": false
+          },
+          "is_detail": {
+            "type": "boolean",
+            "description": "Whether the page is a detail page",
             "example": false
           },
           "is_public": {
@@ -12491,6 +12924,11 @@
                     "type": "integer",
                     "example": 8,
                     "description": "Minimum password length"
+                  },
+                  "maximum_length": {
+                    "type": "integer",
+                    "example": 256,
+                    "description": "Maximum password length"
                   },
                   "require_lowercase": {
                     "type": "boolean",
@@ -12882,6 +13320,46 @@
           "users",
           "email_templates"
         ]
+      },
+      "PortalUserRegistrationStatus": {
+        "type": "string",
+        "enum": [
+          "Registration Pending",
+          "Confirmation Email Sent",
+          "Registered",
+          "Email Update In Progress"
+        ]
+      },
+      "BusinessPartnerItem": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "has_portal_user": {
+            "type": "boolean",
+            "example": true
+          },
+          "registration_status": {
+            "$ref": "#/components/schemas/PortalUserRegistrationStatus"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "_title": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe"
+          }
+        }
       }
     }
   },

@@ -68,6 +68,33 @@ declare namespace Components {
          * ]
          */
         export type EventConfigResp = EventConfigEntry[];
+        export interface EventListResponse {
+            /**
+             * List of webhook events
+             */
+            data?: WebhookEvent[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                /**
+                 * example:
+                 * 2025-10-31T12:34:56Z
+                 */
+                created_at?: string; // date-time
+                /**
+                 * example:
+                 * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
+             * example:
+             * true
+             */
+            has_more?: boolean;
+        }
         export interface ExampleRequest {
             /**
              * ID of the automation, if applicable
@@ -317,6 +344,60 @@ declare namespace Components {
             include_changed_attributes?: boolean;
             custom_headers?: /* Object representing custom headers as key-value pairs. */ CustomHeader;
         }
+        export interface SearchOptions {
+            /**
+             * Maximum number of results to return
+             * example:
+             * 25
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination. Use the next_cursor from the previous response to get the next page.
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last event in the previous page
+                 * example:
+                 * 2025-10-31T12:34:56Z
+                 */
+                created_at?: string; // date-time
+                /**
+                 * Event ID from the last event in the previous page
+                 * example:
+                 * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            };
+            /**
+             * Filter events by timestamp range
+             */
+            timestamp?: {
+                /**
+                 * Start timestamp in ISO 8601 format
+                 * example:
+                 * 2025-10-01T00:00:00Z
+                 */
+                from?: string; // date-time
+                /**
+                 * End timestamp in ISO 8601 format
+                 * example:
+                 * 2025-10-31T23:59:59Z
+                 */
+                to?: string; // date-time
+            };
+            /**
+             * Filter by specific event ID
+             * example:
+             * evt_1234567890abcdef
+             */
+            event_id?: string;
+            /**
+             * Filter by event outcome
+             * example:
+             * succeeded
+             */
+            status?: "succeeded" | "failed";
+        }
         export interface TriggerWebhookResp {
             status_code?: string;
             message?: string;
@@ -327,7 +408,7 @@ declare namespace Components {
             status?: "succeeded" | "failed";
             start_date?: string;
             end_date?: string;
-            event_id?: string;
+            event_id: string;
         }
         /**
          * example:
@@ -788,6 +869,18 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetWebhookEventsV2 {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export type RequestBody = Components.Schemas.SearchOptions;
+        namespace Responses {
+            export type $200 = Components.Schemas.EventListResponse;
+        }
+    }
     namespace GetWebhookExample {
         namespace Parameters {
             export type ConfigId = string;
@@ -999,7 +1092,8 @@ export interface OperationMethods {
   /**
    * getFailuresForConfig - getFailuresForConfig
    * 
-   * Get failed deliveries for a given config id
+   * **Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
+   * 
    */
   'getFailuresForConfig'(
     parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
@@ -1009,7 +1103,8 @@ export interface OperationMethods {
   /**
    * getFailures - getFailures
    * 
-   * Get saved failures from the webhooks DB, in a paginated way
+   * **Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
+   * 
    */
   'getFailures'(
     parameters?: Parameters<Paths.GetFailures.QueryParameters> | null,
@@ -1019,7 +1114,8 @@ export interface OperationMethods {
   /**
    * resendFailure - resendFailure
    * 
-   * Resend payload for one failure
+   * **Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.
+   * 
    */
   'resendFailure'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1076,6 +1172,16 @@ export interface OperationMethods {
     data?: Paths.GetWebhookExample.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetWebhookExample.Responses.$200>
+  /**
+   * getWebhookEventsV2 - getWebhookEventsV2
+   * 
+   * List webhook events and filter them by status, timestamp, etc.
+   */
+  'getWebhookEventsV2'(
+    parameters?: Parameters<Paths.GetWebhookEventsV2.PathParameters> | null,
+    data?: Paths.GetWebhookEventsV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetWebhookEventsV2.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1149,7 +1255,8 @@ export interface PathsDictionary {
     /**
      * getFailuresForConfig - getFailuresForConfig
      * 
-     * Get failed deliveries for a given config id
+     * **Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
@@ -1161,7 +1268,8 @@ export interface PathsDictionary {
     /**
      * getFailures - getFailures
      * 
-     * Get saved failures from the webhooks DB, in a paginated way
+     * **Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetFailures.QueryParameters> | null,
@@ -1173,7 +1281,8 @@ export interface PathsDictionary {
     /**
      * resendFailure - resendFailure
      * 
-     * Resend payload for one failure
+     * **Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1241,6 +1350,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetWebhookExample.Responses.$200>
   }
+  ['/v2/webhooks/configs/{configId}/events']: {
+    /**
+     * getWebhookEventsV2 - getWebhookEventsV2
+     * 
+     * List webhook events and filter them by status, timestamp, etc.
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetWebhookEventsV2.PathParameters> | null,
+      data?: Paths.GetWebhookEventsV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetWebhookEventsV2.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1255,6 +1376,7 @@ export type CustomOAuthParameter = Components.Schemas.CustomOAuthParameter;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EventConfigEntry = Components.Schemas.EventConfigEntry;
 export type EventConfigResp = Components.Schemas.EventConfigResp;
+export type EventListResponse = Components.Schemas.EventListResponse;
 export type ExampleRequest = Components.Schemas.ExampleRequest;
 export type ExampleResponse = Components.Schemas.ExampleResponse;
 export type ExecutionPayload = Components.Schemas.ExecutionPayload;
@@ -1266,6 +1388,7 @@ export type HttpMethod = Components.Schemas.HttpMethod;
 export type Metadata = Components.Schemas.Metadata;
 export type OAuthConfig = Components.Schemas.OAuthConfig;
 export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
+export type SearchOptions = Components.Schemas.SearchOptions;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type WebhookConfig = Components.Schemas.WebhookConfig;
 export type WebhookEvent = Components.Schemas.WebhookEvent;

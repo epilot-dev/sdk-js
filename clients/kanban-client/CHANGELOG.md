@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- Added pagination to autocomplete
+
 ## 1.0.1
 
 ### Patch Changes

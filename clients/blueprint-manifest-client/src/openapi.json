@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.2.2",
+    "version": "3.3.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -1655,6 +1655,10 @@
             "items": {
               "$ref": "#/components/schemas/BlueprintJobID"
             }
+          },
+          "source_blueprint_id": {
+            "description": "ID of the blueprint that brought this blueprint to the destination org (deployed or installed)",
+            "$ref": "#/components/schemas/BlueprintID"
           }
         },
         "required": [
@@ -2146,7 +2150,8 @@
           "app",
           "role",
           "portal_config",
-          "target"
+          "target",
+          "kanban"
         ]
       },
       "PlanChanges": {
