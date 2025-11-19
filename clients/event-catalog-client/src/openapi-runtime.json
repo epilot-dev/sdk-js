@@ -10,7 +10,69 @@
         "operationId": "listEvents",
         "responses": {}
       }
+    },
+    "/v1/events/{event_name}": {
+      "get": {
+        "operationId": "getEvent",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}/json_schema": {
+      "get": {
+        "operationId": "getEventJSONSchema",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}/example": {
+      "get": {
+        "operationId": "getEventExample",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}:history": {
+      "post": {
+        "operationId": "searchEventHistory",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://event-catalog.sls.epilot.io"
+    }
+  ]
 }
