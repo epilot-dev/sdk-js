@@ -2209,6 +2209,11 @@
               "result"
             ],
             "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -2283,6 +2288,11 @@
               "en"
             ],
             "description": "Explanation of the hook."
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -2357,6 +2367,11 @@
               }
             },
             "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -2442,6 +2457,11 @@
               }
             },
             "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -2527,6 +2547,11 @@
               }
             },
             "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -2612,6 +2637,11 @@
               }
             },
             "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [

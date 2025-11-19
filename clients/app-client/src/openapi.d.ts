@@ -1357,6 +1357,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
@@ -1406,6 +1410,10 @@ declare namespace Components {
                  */
                 en: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1453,6 +1461,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -1507,6 +1519,10 @@ declare namespace Components {
                  */
                 lower_limit?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1554,6 +1570,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1586,6 +1606,10 @@ declare namespace Components {
                  */
                 result: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         export interface PortalExtensionSeamlessLink {
             /**
