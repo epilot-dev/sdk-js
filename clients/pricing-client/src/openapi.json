@@ -2911,10 +2911,10 @@
               "token": "9e1758a3-2a32-4a5f-b034-a8ab883f8fb9",
               "image_uri": "https://dummy-image.jpg",
               "organization_id": "728",
-              "department": null,
+              "department": "Engineering",
               "preferred_language": "en",
               "status": "Active",
-              "phone": null,
+              "phone": "+49123456789",
               "email_notification_setting": {
                 "added_participant_opportunity": true,
                 "assigned_opportunity": true,
@@ -4605,6 +4605,7 @@
             "description": "The billing period duration unit",
             "type": "string",
             "enum": [
+              "days",
               "weeks",
               "months",
               "years"
@@ -4620,6 +4621,7 @@
             "description": "The notice period duration unit",
             "type": "string",
             "enum": [
+              "days",
               "weeks",
               "months",
               "years"
@@ -4635,6 +4637,7 @@
             "description": "The termination period duration unit",
             "type": "string",
             "enum": [
+              "days",
               "weeks",
               "months",
               "years"
@@ -4650,6 +4653,7 @@
             "description": "The renewal period duration unit",
             "type": "string",
             "enum": [
+              "days",
               "weeks",
               "months",
               "years"
@@ -6856,8 +6860,6 @@
             "description": "Total tax amount of items with same recurrence."
           },
           "tax": {
-            "type": "object",
-            "description": "The taxes applied to the price item.",
             "$ref": "#/components/schemas/TaxAmountBreakdown"
           }
         },

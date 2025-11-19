@@ -336,7 +336,7 @@ declare namespace Components {
             /**
              * The billing period duration unit
              */
-            billing_duration_unit?: "weeks" | "months" | "years";
+            billing_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The notice period duration
              */
@@ -344,7 +344,7 @@ declare namespace Components {
             /**
              * The notice period duration unit
              */
-            notice_time_unit?: "weeks" | "months" | "years";
+            notice_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The termination period duration
              */
@@ -352,7 +352,7 @@ declare namespace Components {
             /**
              * The termination period duration unit
              */
-            termination_time_unit?: "weeks" | "months" | "years";
+            termination_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The renewal period duration
              */
@@ -360,7 +360,7 @@ declare namespace Components {
             /**
              * The renewal period duration unit
              */
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            renewal_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * Whether the price can be used for new purchases.
              */
@@ -4785,7 +4785,7 @@ declare namespace Components {
             /**
              * The billing period duration unit
              */
-            billing_duration_unit?: "weeks" | "months" | "years";
+            billing_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The notice period duration
              */
@@ -4793,7 +4793,7 @@ declare namespace Components {
             /**
              * The notice period duration unit
              */
-            notice_time_unit?: "weeks" | "months" | "years";
+            notice_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The termination period duration
              */
@@ -4801,7 +4801,7 @@ declare namespace Components {
             /**
              * The termination period duration unit
              */
-            termination_time_unit?: "weeks" | "months" | "years";
+            termination_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The renewal period duration
              */
@@ -4809,7 +4809,7 @@ declare namespace Components {
             /**
              * The renewal period duration unit
              */
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            renewal_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * Whether the price can be used for new purchases.
              */
@@ -5116,7 +5116,7 @@ declare namespace Components {
             /**
              * The billing period duration unit
              */
-            billing_duration_unit?: "weeks" | "months" | "years";
+            billing_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The notice period duration
              */
@@ -5124,7 +5124,7 @@ declare namespace Components {
             /**
              * The notice period duration unit
              */
-            notice_time_unit?: "weeks" | "months" | "years";
+            notice_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The termination period duration
              */
@@ -5132,7 +5132,7 @@ declare namespace Components {
             /**
              * The termination period duration unit
              */
-            termination_time_unit?: "weeks" | "months" | "years";
+            termination_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The renewal period duration
              */
@@ -5140,7 +5140,7 @@ declare namespace Components {
             /**
              * The renewal period duration unit
              */
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            renewal_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * Whether the price can be used for new purchases.
              */
@@ -5281,10 +5281,10 @@ declare namespace Components {
          *       "token": "9e1758a3-2a32-4a5f-b034-a8ab883f8fb9",
          *       "image_uri": "https://dummy-image.jpg",
          *       "organization_id": "728",
-         *       "department": null,
+         *       "department": "Engineering",
          *       "preferred_language": "en",
          *       "status": "Active",
-         *       "phone": null,
+         *       "phone": "+49123456789",
          *       "email_notification_setting": {
          *         "added_participant_opportunity": true,
          *         "assigned_opportunity": true,
@@ -6385,7 +6385,7 @@ declare namespace Components {
             /**
              * The billing period duration unit
              */
-            billing_duration_unit?: "weeks" | "months" | "years";
+            billing_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The notice period duration
              */
@@ -6393,7 +6393,7 @@ declare namespace Components {
             /**
              * The notice period duration unit
              */
-            notice_time_unit?: "weeks" | "months" | "years";
+            notice_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The termination period duration
              */
@@ -6401,7 +6401,7 @@ declare namespace Components {
             /**
              * The termination period duration unit
              */
-            termination_time_unit?: "weeks" | "months" | "years";
+            termination_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The renewal period duration
              */
@@ -6409,7 +6409,7 @@ declare namespace Components {
             /**
              * The renewal period duration unit
              */
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            renewal_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * Whether the price can be used for new purchases.
              */
@@ -6593,7 +6593,7 @@ declare namespace Components {
             /**
              * The billing period duration unit
              */
-            billing_duration_unit?: "weeks" | "months" | "years";
+            billing_duration_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The notice period duration
              */
@@ -6601,7 +6601,7 @@ declare namespace Components {
             /**
              * The notice period duration unit
              */
-            notice_time_unit?: "weeks" | "months" | "years";
+            notice_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The termination period duration
              */
@@ -6609,7 +6609,7 @@ declare namespace Components {
             /**
              * The termination period duration unit
              */
-            termination_time_unit?: "weeks" | "months" | "years";
+            termination_time_unit?: "days" | "weeks" | "months" | "years";
             /**
              * The renewal period duration
              */
@@ -6617,7 +6617,7 @@ declare namespace Components {
             /**
              * The renewal period duration unit
              */
-            renewal_duration_unit?: "weeks" | "months" | "years";
+            renewal_duration_unit?: "days" | "weeks" | "months" | "years";
         }
         export interface PriceDynamicTariff {
             mode: /* The mode of the dynamic tariff. `day_ahead_market` uses the Day-Ahead spot market price as base. */ DynamicTariffMode;
@@ -7631,7 +7631,7 @@ declare namespace Components {
                 /**
                  * The billing period duration unit
                  */
-                billing_duration_unit?: "weeks" | "months" | "years";
+                billing_duration_unit?: "days" | "weeks" | "months" | "years";
                 /**
                  * The notice period duration
                  */
@@ -7639,7 +7639,7 @@ declare namespace Components {
                 /**
                  * The notice period duration unit
                  */
-                notice_time_unit?: "weeks" | "months" | "years";
+                notice_time_unit?: "days" | "weeks" | "months" | "years";
                 /**
                  * The termination period duration
                  */
@@ -7647,7 +7647,7 @@ declare namespace Components {
                 /**
                  * The termination period duration unit
                  */
-                termination_time_unit?: "weeks" | "months" | "years";
+                termination_time_unit?: "days" | "weeks" | "months" | "years";
                 /**
                  * The renewal period duration
                  */
@@ -7655,7 +7655,7 @@ declare namespace Components {
                 /**
                  * The renewal period duration unit
                  */
-                renewal_duration_unit?: "weeks" | "months" | "years";
+                renewal_duration_unit?: "days" | "weeks" | "months" | "years";
                 /**
                  * Whether the price can be used for new purchases.
                  */
@@ -9023,9 +9023,6 @@ declare namespace Components {
              * Total tax amount of items with same recurrence.
              */
             amount_tax?: number;
-            /**
-             * The taxes applied to the price item.
-             */
             tax?: /* A tax amount associated with a specific tax rate. */ TaxAmountBreakdown;
         }
         export interface RedeemedPromo {
