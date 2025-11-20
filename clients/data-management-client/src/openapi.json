@@ -1,0 +1,204 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Data Management API",
+    "version": "1.1.0"
+  },
+  "tags": [
+    {
+      "name": "Data Management",
+      "description": "Data Management endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "Health check",
+        "description": "Returns service health status",
+        "security": [],
+        "tags": [
+          "Data Management"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-management/v1/{entity_schema}/query": {
+      "post": {
+        "operationId": "queryEntitiesBySavedView",
+        "summary": "Query entities using a saved view with additional data filters",
+        "description": "Executes a query against the specified entity schema using the saved view definition, optionally combined with additional filters. Returns the entities matching the composed query.\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "Target entity schema to query (for example: \"contact\", \"opportunity\", \"order\").\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "saved_view_id"
+                ],
+                "properties": {
+                  "saved_view_id": {
+                    "type": "string",
+                    "description": "ID of the saved view to use for querying entities"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "description": "Pagination start offset"
+                  },
+                  "size": {
+                    "type": "integer",
+                    "description": "Page size (maximum number of entities to return)"
+                  },
+                  "includeDeleted": {
+                    "type": "boolean",
+                    "description": "Whether to include soft-deleted entities in the result"
+                  },
+                  "hydrate": {
+                    "type": "boolean",
+                    "description": "Whether to hydrate entities with full data instead of returning only indexed / projection fields.\n"
+                  },
+                  "fields": {
+                    "type": "array",
+                    "description": "Optional list of fields to include in each entity.\n",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "filters": {
+                    "$ref": "#/components/schemas/DataManagementFilter"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "DataManagementFilter": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/DataManagementFilterType"
+          },
+          "related_entity_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "workflow_statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entity_statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lookback_period_months": {
+            "type": "integer"
+          }
+        }
+      },
+      "DataManagementFilterType": {
+        "type": "string",
+        "enum": [
+          "entity_workflows_only_in_closed_or_cancelled_status",
+          "no_related_entities",
+          "related_entities_all_in_closed_or_cancelled_status",
+          "related_entities_any_in_closed_or_cancelled_status",
+          "no_email_communication_since"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://data-management.sls.epilot.io"
+    }
+  ]
+}

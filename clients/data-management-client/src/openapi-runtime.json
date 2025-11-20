@@ -1,0 +1,40 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "responses": {}
+      }
+    },
+    "/data-management/v1/{entity_schema}/query": {
+      "post": {
+        "operationId": "queryEntitiesBySavedView",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://data-management.sls.epilot.io"
+    }
+  ]
+}
