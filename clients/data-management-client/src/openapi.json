@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Data Management API",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "tags": [
     {
@@ -19,35 +19,6 @@
     }
   ],
   "paths": {
-    "/health": {
-      "get": {
-        "operationId": "healthCheck",
-        "summary": "Health check",
-        "description": "Returns service health status",
-        "security": [],
-        "tags": [
-          "Data Management"
-        ],
-        "responses": {
-          "200": {
-            "description": "Service is healthy",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "ok"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/data-management/v1/{entity_schema}/query": {
       "post": {
         "operationId": "queryEntitiesBySavedView",
@@ -120,7 +91,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "results": {
+                    "entities": {
                       "type": "array",
                       "items": {
                         "type": "object",

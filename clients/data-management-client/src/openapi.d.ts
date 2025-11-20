@@ -21,17 +21,6 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
-    namespace HealthCheck {
-        namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * ok
-                 */
-                status?: string;
-            }
-        }
-    }
     namespace QueryEntitiesBySavedView {
         namespace Parameters {
             export type EntitySchema = string;
@@ -70,7 +59,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                results?: {
+                entities?: {
                     [name: string]: any;
                 }[];
             }
@@ -80,16 +69,6 @@ declare namespace Paths {
 
 
 export interface OperationMethods {
-  /**
-   * healthCheck - Health check
-   * 
-   * Returns service health status
-   */
-  'healthCheck'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.HealthCheck.Responses.$200>
   /**
    * queryEntitiesBySavedView - Query entities using a saved view with additional data filters
    * 
@@ -104,18 +83,6 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
-  ['/health']: {
-    /**
-     * healthCheck - Health check
-     * 
-     * Returns service health status
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.HealthCheck.Responses.$200>
-  }
   ['/data-management/v1/{entity_schema}/query']: {
     /**
      * queryEntitiesBySavedView - Query entities using a saved view with additional data filters

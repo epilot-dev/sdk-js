@@ -5,12 +5,6 @@
     "version": ""
   },
   "paths": {
-    "/health": {
-      "get": {
-        "operationId": "healthCheck",
-        "responses": {}
-      }
-    },
     "/data-management/v1/{entity_schema}/query": {
       "post": {
         "operationId": "queryEntitiesBySavedView",
