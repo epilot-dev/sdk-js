@@ -1250,6 +1250,11 @@
             "description": "User ID",
             "example": "456"
           },
+          "name": {
+            "type": "string",
+            "description": "User name",
+            "example": "John Doe"
+          },
           "email": {
             "type": "string",
             "format": "email",
@@ -1413,5 +1418,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    }
+  ]
 }

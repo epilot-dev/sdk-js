@@ -540,6 +540,12 @@ declare namespace Components {
              */
             id: string;
             /**
+             * User name
+             * example:
+             * John Doe
+             */
+            name?: string;
+            /**
              * User email
              * example:
              * user@example.com
