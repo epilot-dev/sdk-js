@@ -8164,7 +8164,7 @@
             "type": "object",
             "description": "Configured Portal extensions hooks",
             "additionalProperties": {
-              "$ref": "#/components/schemas/ExtensionHookConfig"
+              "$ref": "#/components/schemas/ExtensionHookSelection"
             }
           },
           "default_user_to_notify": {
@@ -9339,17 +9339,6 @@
       "EntitySlug": {
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
-        "enum": [
-          "contact",
-          "contract",
-          "file",
-          "order",
-          "opportunity",
-          "product",
-          "price",
-          "meter",
-          "meter_counter"
-        ],
         "example": "contact"
       },
       "EntityId": {
@@ -9429,14 +9418,28 @@
         "properties": {
           "templates_output": {
             "type": "object",
-            "description": "Resolved template strings corresponding to the templates parameter",
+            "description": "Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.",
             "additionalProperties": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "example": {
               "content_top_name": "Customer #123456",
               "main_content_name": "Orange Flexible A2 (654321)",
-              "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+              "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+              "nested_content": {
+                "title": "Orange Flexible A2",
+                "subtitle": "654321"
+              }
             }
           }
         }
@@ -10802,14 +10805,28 @@
           },
           "templates": {
             "type": "object",
-            "description": "Template strings to parse and return as synthetic fields",
+            "description": "Template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings.",
             "additionalProperties": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "example": {
               "content_top_name": "Customer #{{contract.customer_number}}",
               "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
-              "content_bottom_name": "{{custom_contract_delivery_address}}"
+              "content_bottom_name": "{{custom_contract_delivery_address}}",
+              "nested_content": {
+                "title": "{{contract.contract_name}}",
+                "subtitle": "{{contract.contract_number}}"
+              }
             }
           },
           "filters": {
@@ -11187,19 +11204,28 @@
           "status"
         ]
       },
-      "ExtensionHookConfig": {
+      "ExtensionHookSelection": {
         "type": "object",
         "nullable": true,
         "properties": {
-          "hook_id": {
-            "type": "string",
-            "description": "The ID of the hook that is being configured."
-          },
           "app_id": {
             "type": "string",
-            "description": "The ID of the app that is being hooked into."
+            "description": "The ID of the selected app."
+          },
+          "extension_id": {
+            "type": "string",
+            "description": "The ID of the selected extension."
+          },
+          "hook_id": {
+            "type": "string",
+            "description": "The ID of the selected hook."
           }
-        }
+        },
+        "required": [
+          "app_id",
+          "extension_id",
+          "hook_id"
+        ]
       },
       "PublicExtensionCapabilities": {
         "type": "object",
@@ -11336,6 +11362,10 @@
           "app_id": {
             "type": "string",
             "description": "Identifier of the app from which the extension was installed. Should not change between updates."
+          },
+          "app_name": {
+            "type": "string",
+            "description": "Name of the app from which the extension was installed. Should not change between updates."
           },
           "name": {
             "type": "object",
@@ -11629,6 +11659,11 @@
               "headers",
               "result"
             ]
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -11701,6 +11736,11 @@
               "en"
             ],
             "description": "Explanation of the hook."
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -11772,6 +11812,11 @@
                 "example": "{{CallResponse.data.lower_limit}}"
               }
             }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -11842,6 +11887,11 @@
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               }
             }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -11911,6 +11961,11 @@
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               }
             }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -11980,6 +12035,11 @@
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               }
             }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
           }
         },
         "required": [
@@ -12137,7 +12197,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10"
+            "example": "2022-10-10T00:00:00.000Z"
           },
           "source": {
             "$ref": "#/components/schemas/Source",

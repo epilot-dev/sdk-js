@@ -2147,16 +2147,22 @@ declare namespace Components {
              */
             fields?: string[];
             /**
-             * Template strings to parse and return as synthetic fields
+             * Template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings.
              * example:
              * {
              *   "content_top_name": "Customer #{{contract.customer_number}}",
              *   "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
-             *   "content_bottom_name": "{{custom_contract_delivery_address}}"
+             *   "content_bottom_name": "{{custom_contract_delivery_address}}",
+             *   "nested_content": {
+             *     "title": "{{contract.contract_name}}",
+             *     "subtitle": "{{contract.contract_number}}"
+             *   }
              * }
              */
             templates?: {
-                [name: string]: string;
+                [name: string]: string | {
+                    [name: string]: string;
+                };
             };
             /**
              * Additional filters to apply to the search query
@@ -2254,16 +2260,22 @@ declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
-             * Resolved template strings corresponding to the templates parameter
+             * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
              * example:
              * {
              *   "content_top_name": "Customer #123456",
              *   "main_content_name": "Orange Flexible A2 (654321)",
-             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+             *   "nested_content": {
+             *     "title": "Orange Flexible A2",
+             *     "subtitle": "654321"
+             *   }
              * }
              */
             templates_output?: {
-                [name: string]: string;
+                [name: string]: string | {
+                    [name: string]: string;
+                };
             };
             _schema: /**
              * URL-friendly identifier for the entity schema
@@ -2547,19 +2559,25 @@ declare namespace Components {
          * example:
          * contact
          */
-        export type EntitySlug = "contact" | "contract" | "file" | "order" | "opportunity" | "product" | "price" | "meter" | "meter_counter";
+        export type EntitySlug = string;
         export interface EntityTemplates {
             /**
-             * Resolved template strings corresponding to the templates parameter
+             * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
              * example:
              * {
              *   "content_top_name": "Customer #123456",
              *   "main_content_name": "Orange Flexible A2 (654321)",
-             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany"
+             *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+             *   "nested_content": {
+             *     "title": "Orange Flexible A2",
+             *     "subtitle": "654321"
+             *   }
              * }
              */
             templates_output?: {
-                [name: string]: string;
+                [name: string]: string | {
+                    [name: string]: string;
+                };
             };
         }
         export interface EntityWidget {
@@ -2611,6 +2629,10 @@ declare namespace Components {
              * Identifier of the app from which the extension was installed. Should not change between updates.
              */
             app_id?: string;
+            /**
+             * Name of the app from which the extension was installed. Should not change between updates.
+             */
+            app_name?: string;
             /**
              * Name of the extension.
              */
@@ -2838,16 +2860,6 @@ declare namespace Components {
              */
             id?: string;
         }
-        export type ExtensionHookConfig = {
-            /**
-             * The ID of the hook that is being configured.
-             */
-            hook_id?: string;
-            /**
-             * The ID of the app that is being hooked into.
-             */
-            app_id?: string;
-        } | null;
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
          *   - 200 with the time series data
@@ -2890,6 +2902,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
@@ -2939,6 +2955,10 @@ declare namespace Components {
                  */
                 en: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -2982,6 +3002,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -3036,6 +3060,10 @@ declare namespace Components {
                  */
                 lower_limit?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -3079,6 +3107,10 @@ declare namespace Components {
                  */
                 dataPath?: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -3111,7 +3143,25 @@ declare namespace Components {
                  */
                 result: string;
             };
+            /**
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             */
+            use_static_ips?: boolean;
         }
+        export type ExtensionHookSelection = {
+            /**
+             * The ID of the selected app.
+             */
+            app_id: string;
+            /**
+             * The ID of the selected extension.
+             */
+            extension_id: string;
+            /**
+             * The ID of the selected hook.
+             */
+            hook_id: string;
+        } | null;
         export interface ExtensionSeamlessLink {
             /**
              * Identifier of the link. Should not change between updates.
@@ -3628,7 +3678,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string;
             /**
@@ -4658,7 +4708,7 @@ declare namespace Components {
              * Configured Portal extensions hooks
              */
             extension_hooks?: {
-                [name: string]: ExtensionHookConfig;
+                [name: string]: ExtensionHookSelection;
             };
             /**
              * Default 360 user to notify upon an internal notification
@@ -5635,7 +5685,7 @@ declare namespace Components {
              * Configured Portal extensions hooks
              */
             extension_hooks?: {
-                [name: string]: ExtensionHookConfig;
+                [name: string]: ExtensionHookSelection;
             };
             /**
              * Default 360 user to notify upon an internal notification
@@ -5677,7 +5727,7 @@ declare namespace Components {
              * Configured Portal extensions hooks
              */
             extension_hooks?: {
-                [name: string]: ExtensionHookConfig;
+                [name: string]: ExtensionHookSelection;
             };
             /**
              * Default 360 user to notify upon an internal notification
@@ -6072,7 +6122,7 @@ declare namespace Components {
              * Configured Portal extensions hooks
              */
             extension_hooks?: {
-                [name: string]: ExtensionHookConfig;
+                [name: string]: ExtensionHookSelection;
             };
             /**
              * Default 360 user to notify upon an internal notification
@@ -13221,13 +13271,13 @@ export type Extension = Components.Schemas.Extension;
 export type ExtensionAuthBlock = Components.Schemas.ExtensionAuthBlock;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
-export type ExtensionHookConfig = Components.Schemas.ExtensionHookConfig;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
 export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
+export type ExtensionHookSelection = Components.Schemas.ExtensionHookSelection;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
 export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
