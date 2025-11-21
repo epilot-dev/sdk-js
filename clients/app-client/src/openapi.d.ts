@@ -1229,11 +1229,15 @@ declare namespace Components {
             configuration: PortalExtensionConfig;
         }
         export interface PortalExtensionConfig {
+            /**
+             * Identifier of the extension. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
             hooks?: ({
                 /**
                  * Identifier of the hook. Should not change between updates.
                  */
-                id?: string;
+                id?: string; // ^[a-zA-Z0-9_-]+$
                 name?: TranslatedString;
             } & (/**
              * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1279,7 +1283,7 @@ declare namespace Components {
                 /**
                  * Identifier of the link. Should not change between updates.
                  */
-                id: string;
+                id: string; // ^[a-zA-Z0-9_-]+$
                 name: TranslatedString;
                 description?: TranslatedString;
                 type: "seamless";
@@ -1308,7 +1312,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string;
+            id?: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
         }
         /**
@@ -1615,7 +1619,7 @@ declare namespace Components {
             /**
              * Identifier of the link. Should not change between updates.
              */
-            id: string;
+            id: string; // ^[a-zA-Z0-9_-]+$
             name: TranslatedString;
             description?: TranslatedString;
             type: "seamless";

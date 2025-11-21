@@ -2105,6 +2105,11 @@
       "PortalExtensionConfig": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the extension. Should not change between updates."
+          },
           "hooks": {
             "type": "array",
             "items": {
@@ -2155,6 +2160,7 @@
         "properties": {
           "id": {
             "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "Identifier of the hook. Should not change between updates."
           },
           "name": {
@@ -2261,8 +2267,7 @@
             },
             "required": [
               "url",
-              "headers",
-              "result"
+              "headers"
             ],
             "additionalProperties": false
           },
@@ -2655,6 +2660,7 @@
         "properties": {
           "id": {
             "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "Identifier of the link. Should not change between updates."
           },
           "name": {
