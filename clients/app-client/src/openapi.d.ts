@@ -1395,6 +1395,12 @@ declare namespace Components {
                 headers: {
                     [name: string]: string;
                 };
+                /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
             };
             /**
              * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
@@ -1603,6 +1609,12 @@ declare namespace Components {
                  * Headers to use. Supports variable interpolation.
                  */
                 headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
                     [name: string]: string;
                 };
                 /**

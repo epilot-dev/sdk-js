@@ -2204,6 +2204,13 @@
                 },
                 "default": {}
               },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
               "result": {
                 "type": "string",
                 "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation."
@@ -2263,6 +2270,13 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                }
               }
             },
             "required": [
