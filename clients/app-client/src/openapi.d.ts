@@ -1399,7 +1399,7 @@ declare namespace Components {
                  * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
                  */
                 body?: {
-                    [name: string]: string;
+                    [key: string]: any;
                 };
             };
             /**
@@ -1615,7 +1615,7 @@ declare namespace Components {
                  * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
                  */
                 body?: {
-                    [name: string]: string;
+                    [key: string]: any;
                 };
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.

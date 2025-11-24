@@ -2206,10 +2206,7 @@
               },
               "body": {
                 "type": "object",
-                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                }
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               },
               "result": {
                 "type": "string",
@@ -2273,10 +2270,7 @@
               },
               "body": {
                 "type": "object",
-                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                }
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               }
             },
             "required": [
