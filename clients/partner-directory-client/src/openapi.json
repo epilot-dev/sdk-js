@@ -500,7 +500,7 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The organization ID of the partner"
+            "description": "The Partner organization ID where the user should be created"
           }
         ],
         "requestBody": {
@@ -1327,15 +1327,26 @@
             "description": "User email address",
             "example": "user@example.com"
           },
-          "display_name": {
+          "language": {
             "type": "string",
-            "description": "User display name",
-            "example": "John Doe"
+            "enum": [
+              "en",
+              "de"
+            ],
+            "description": "User language",
+            "example": "en"
           },
-          "phone": {
-            "type": "string",
-            "description": "User phone number",
-            "example": "+1234567890"
+          "roles": {
+            "type": "array",
+            "description": "Role IDs that should be automatically assigned to this user upon creation",
+            "items": {
+              "type": "string",
+              "description": null
+            },
+            "example": [
+              "role-123",
+              "role-456"
+            ]
           }
         },
         "required": [

@@ -403,17 +403,20 @@ declare namespace Components {
              */
             email: string; // email
             /**
-             * User display name
+             * User language
              * example:
-             * John Doe
+             * en
              */
-            display_name?: string;
+            language?: "en" | "de";
             /**
-             * User phone number
+             * Role IDs that should be automatically assigned to this user upon creation
              * example:
-             * +1234567890
+             * [
+             *   "role-123",
+             *   "role-456"
+             * ]
              */
-            phone?: string;
+            roles?: string[];
         }
         export interface Geolocation {
             /**
