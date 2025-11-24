@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.0.0",
+    "version": "2.2.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -818,6 +818,44 @@
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
+    "/v1/entity:graph": {
+      "post": {
+        "operationId": "queryEntityGraph",
+        "summary": "queryEntityGraph",
+        "description": "Traverse an entity relationship graph starting from a seed entity.\n\nDefine the shape of the graph using nodes (entity schemas) and edges (relationships with cardinality).\nThe API will traverse the graph bidirectionally and return all discovered entity IDs.\n\nExample: Find all entities connected to a contact through portal_user -> contact -> billing_account -> files\n",
+        "tags": [
+          "Entities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Graph traversal result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -2944,11 +2982,13 @@
           },
           {
             "in": "query",
+            "x-implemented": false,
             "name": "permanent",
-            "description": "If true, the taxonomy will be permanently deleted",
+            "description": "⚠️ NOT IMPLEMENTED - If true, the taxonomy will be permanently deleted",
             "schema": {
               "type": "boolean"
-            }
+            },
+            "default": false
           }
         ],
         "responses": {
@@ -3398,7 +3438,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -5148,6 +5188,11 @@
                 "example": "top"
               }
             }
+          },
+          "explicit_searchable": {
+            "type": "boolean",
+            "description": "When set to true, this attribute will always be searchable regardless of\nthe ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields\nthat must always be included in search operations.\n",
+            "default": false
           },
           "repeatable": {
             "description": "The attribute is a repeatable",
@@ -7842,6 +7887,234 @@
         ],
         "description": "The parameters for importing entities."
       },
+      "GraphQueryRequest": {
+        "type": "object",
+        "required": [
+          "seed",
+          "graph"
+        ],
+        "properties": {
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeed"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          },
+          "hydrate": {
+            "type": "boolean",
+            "description": "If true, return full entity objects in entityNodes instead of just entity IDs in nodes",
+            "default": false
+          }
+        }
+      },
+      "GraphSeed": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "node_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The node ID in the graph definition that corresponds to the seed entity",
+            "example": "contact"
+          }
+        }
+      },
+      "GraphDefinition": {
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "List of node definitions in the graph",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            },
+            "example": [
+              {
+                "id": "portal_user",
+                "schema": "portal_user",
+                "cardinality": "one"
+              },
+              {
+                "id": "contact",
+                "schema": "contact",
+                "cardinality": "one"
+              },
+              {
+                "id": "billing_accounts",
+                "schema": "billing_account",
+                "cardinality": "many"
+              }
+            ]
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edge definitions connecting nodes",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "example": [
+              {
+                "from": "portal_user",
+                "to": "contact"
+              },
+              {
+                "from": "contact",
+                "to": "billing_accounts"
+              }
+            ]
+          }
+        }
+      },
+      "GraphNode": {
+        "type": "object",
+        "required": [
+          "id",
+          "schema"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "Optional cardinality for this node when used with hydrate=true:\n- \"one\": Node can only contain one entity, return single Entity object in entityNodes\n- \"many\": Node can contain multiple entities, return array of Entity objects in entityNodes\nIf not specified, defaults to \"many\" (returns array). The seed node always returns a single entity regardless of this setting.\n",
+            "example": "one"
+          },
+          "fields": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FieldsParam"
+              },
+              {
+                "description": "Optional array of field names to include in the hydrated entity response for this node.\nWhen specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.\nOnly applies when hydrate=true.\n"
+              }
+            ]
+          }
+        }
+      },
+      "GraphEdge": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID",
+            "example": "billing_account"
+          }
+        }
+      },
+      "GraphQueryResponse": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "object",
+            "description": "Map of node IDs to arrays of entity IDs found for that node (present when hydrate=false)",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            },
+            "example": {
+              "portal_user": [
+                "550e8400-e29b-41d4-a716-446655440001"
+              ],
+              "contact": [
+                "550e8400-e29b-41d4-a716-446655440002"
+              ],
+              "billing_accounts": [
+                "550e8400-e29b-41d4-a716-446655440003",
+                "550e8400-e29b-41d4-a716-446655440004"
+              ]
+            }
+          },
+          "entityNodes": {
+            "type": "object",
+            "description": "Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).\nThe seed node always returns a single Entity object.\nOther nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.\n",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Entity"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                }
+              ]
+            },
+            "example": {
+              "portal_user": {
+                "_id": "550e8400-e29b-41d4-a716-446655440001",
+                "_schema": "portal_user"
+              },
+              "contact": {
+                "_id": "550e8400-e29b-41d4-a716-446655440002",
+                "_schema": "contact"
+              },
+              "billing_accounts": [
+                {
+                  "_id": "550e8400-e29b-41d4-a716-446655440003",
+                  "_schema": "billing_account"
+                },
+                {
+                  "_id": "550e8400-e29b-41d4-a716-446655440004",
+                  "_schema": "billing_account"
+                }
+              ]
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edges as defined in the request",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            },
+            "example": [
+              {
+                "from": "portal_user",
+                "to": "contact"
+              },
+              {
+                "from": "contact",
+                "to": "billing_accounts"
+              }
+            ]
+          }
+        },
+        "required": [
+          "edges"
+        ]
+      },
       "EntitySearchResults": {
         "type": "object",
         "properties": {
@@ -7996,13 +8269,16 @@
           }
         }
       },
+      "ActivityType": {
+        "type": "string",
+        "description": "A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.\n\nBuilt-in entity activity types (custom activities can be defined as well):\n- EntityCreated\n- EntityUpdated\n- EntityDeleted\n- EntitySoftDeleted\n- EntityRestored\n- RelationsAdded\n- RelationsRemoved\n- RelationsSoftDeleted\n- RelationsRestored\n- RelationsDeleted\n"
+      },
       "Activity": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
           "type": {
-            "type": "string",
-            "example": "MyCustomActivity"
+            "$ref": "#/components/schemas/ActivityType"
           },
           "title": {
             "type": "string",
@@ -8049,6 +8325,9 @@
           },
           "activity_id": {
             "$ref": "#/components/schemas/ActivityId"
+          },
+          "activity_type": {
+            "$ref": "#/components/schemas/ActivityType"
           },
           "operation": {
             "type": "string",
@@ -8349,9 +8628,11 @@
             "type": "string",
             "enum": [
               "entity",
-              "relation"
+              "relation",
+              "system",
+              "file_collection"
             ],
-            "description": "Type of taxonomy. Whether it classifies entities or relations.",
+            "description": "Type of taxonomy. Whether it classifies:\n- entity (default)\n- relation (for relations)\n- system (for system taxonomies - default for all slugs starting with _system_)\n- file_collection (for file collections)\n",
             "default": "entity",
             "example": "entity"
           },
@@ -9612,6 +9893,26 @@
       }
     },
     "responses": {
+      "BadRequestError": {
+        "description": "Bad request - invalid input parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 400,
+                    "error": "Bad Request"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
       "NotFoundError": {
         "description": "The requested resource was not found",
         "content": {
