@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Permissions API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Flexible Role-based Access Control for epilot"
   },
   "tags": [
@@ -106,6 +106,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid role configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "parent_role_invalid_type": {
+                    "summary": "Parent role must be org_role or share_role",
+                    "value": {
+                      "message": "Parent role must be org_role or share_role, got user_role"
+                    }
+                  },
+                  "parent_role_different_org": {
+                    "summary": "Parent org_role must be in the same organization",
+                    "value": {
+                      "message": "Parent org_role must be in the same organization"
+                    }
+                  },
+                  "parent_role_max_hierarchy": {
+                    "summary": "Parent role cannot itself have a parent",
+                    "value": {
+                      "message": "Parent role cannot itself have a parent (max 2 levels of hierarchy)"
+                    }
+                  },
+                  "circular_dependency_self": {
+                    "summary": "Role cannot be its own parent",
+                    "value": {
+                      "message": "Role cannot be its own parent"
+                    }
+                  },
+                  "circular_dependency_detected": {
+                    "summary": "Circular dependency detected",
+                    "value": {
+                      "message": "Circular dependency detected: role 123:child would create a cycle"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parent role does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "parent_role_not_found": {
+                    "summary": "Parent role does not exist",
+                    "value": {
+                      "message": "Parent role 123:nonexistent does not exist"
+                    }
+                  }
                 }
               }
             }
@@ -464,6 +524,27 @@
                       }
                     ]
                   }
+                },
+                "User role with parent": {
+                  "description": "Example user role that inherits from a parent role",
+                  "value": {
+                    "id": "123:limited_manager",
+                    "name": "Limited Manager",
+                    "slug": "limited_manager",
+                    "type": "user_role",
+                    "organization_id": "123",
+                    "parent_role": "123:manager",
+                    "grants": [
+                      {
+                        "action": "entity:view",
+                        "resource": "contact:*"
+                      },
+                      {
+                        "action": "entity:edit",
+                        "resource": "contact:*"
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -476,6 +557,66 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid role configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "parent_role_invalid_type": {
+                    "summary": "Parent role must be org_role or share_role",
+                    "value": {
+                      "message": "Parent role must be org_role or share_role, got user_role"
+                    }
+                  },
+                  "parent_role_different_org": {
+                    "summary": "Parent org_role must be in the same organization",
+                    "value": {
+                      "message": "Parent org_role must be in the same organization"
+                    }
+                  },
+                  "parent_role_max_hierarchy": {
+                    "summary": "Parent role cannot itself have a parent",
+                    "value": {
+                      "message": "Parent role cannot itself have a parent (max 2 levels of hierarchy)"
+                    }
+                  },
+                  "circular_dependency_self": {
+                    "summary": "Role cannot be its own parent",
+                    "value": {
+                      "message": "Role cannot be its own parent"
+                    }
+                  },
+                  "circular_dependency_detected": {
+                    "summary": "Circular dependency detected",
+                    "value": {
+                      "message": "Circular dependency detected: role 123:child would create a cycle"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - Parent role does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "parent_role_not_found": {
+                    "summary": "Parent role does not exist",
+                    "value": {
+                      "message": "Parent role 123:nonexistent does not exist"
+                    }
+                  }
                 }
               }
             }
@@ -925,6 +1066,16 @@
                 "enum": [
                   "user_role"
                 ]
+              },
+              "parent_role": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RoleId"
+                  },
+                  {
+                    "description": "Optional parent role that this role inherits from. Must be an `org_role` or `share_role`."
+                  }
+                ]
               }
             }
           }
@@ -1095,6 +1246,36 @@
           }
         }
       },
+      "OrgAssignments": {
+        "type": "object",
+        "description": "All roles attached to an users of an organization",
+        "properties": {
+          "organizationId": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InternalAssignment"
+            }
+          }
+        }
+      },
+      "OrgRoles": {
+        "type": "object",
+        "description": "All roles attached to an users of an organization",
+        "properties": {
+          "organizationId": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            }
+          }
+        }
+      },
       "Assignments": {
         "type": "array",
         "description": "List of role ids attached to an user",
@@ -1198,6 +1379,16 @@
                     "enum": [
                       "user_role"
                     ]
+                  },
+                  "parent_role": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/RoleId"
+                      },
+                      {
+                        "description": "Optional parent role that this role inherits from. Must be an `org_role` or `share_role`."
+                      }
+                    ]
                   }
                 }
               },
@@ -1259,13 +1450,24 @@
             ]
           }
         ]
+      },
+      "Error": {
+        "type": "object",
+        "description": "Error response",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Parent role 123:nonexistent does not exist"
+          }
+        },
+        "required": [
+          "message"
+        ]
       }
     }
   },
   "servers": [
-    {
-      "url": "https://permissions.sls.epilot.io"
-    },
     {
       "url": "https://permissions.sls.epilot.io"
     }
