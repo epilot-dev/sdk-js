@@ -772,6 +772,11 @@ declare namespace Components {
              * Doe
              */
             last_name?: string;
+            /**
+             * example:
+             * true
+             */
+            access_status?: boolean;
         }
         export interface CampaignWidget {
             id: string;
@@ -831,7 +836,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -1189,7 +1194,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -4324,7 +4329,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -4765,7 +4770,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -5784,7 +5789,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -6179,7 +6184,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
             /**
              * Feature settings for the portal
              */
@@ -8395,7 +8400,7 @@ declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
-                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
                 /**
                  * Feature settings for the portal
                  */

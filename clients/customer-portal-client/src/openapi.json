@@ -8333,6 +8333,7 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
+              "USER_ACCOUNT_SELF_MANAGEMENT",
               "DENY"
             ]
           },
@@ -13023,6 +13024,7 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
+              "USER_ACCOUNT_SELF_MANAGEMENT",
               "DENY"
             ]
           },
@@ -13554,6 +13556,10 @@
           "last_name": {
             "type": "string",
             "example": "Doe"
+          },
+          "access_status": {
+            "type": "boolean",
+            "example": true
           }
         }
       }
