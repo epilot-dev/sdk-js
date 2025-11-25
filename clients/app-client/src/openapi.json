@@ -2184,6 +2184,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
@@ -2248,6 +2253,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
