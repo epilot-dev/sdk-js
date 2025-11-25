@@ -1380,6 +1380,10 @@ declare namespace Components {
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
@@ -1595,6 +1599,10 @@ declare namespace Components {
             type: "registrationIdentifiersCheck";
             auth?: PortalExtensionAuthBlock;
             call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
                 /**
                  * URL to call. Supports variable interpolation.
                  */
