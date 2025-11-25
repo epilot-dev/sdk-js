@@ -7538,6 +7538,124 @@
           }
         }
       }
+    },
+    "/v3/portal/partner/{partner_id}/disable": {
+      "post": {
+        "operationId": "disablePartner",
+        "summary": "disablePartner",
+        "description": "Disables a partner from a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to disable from the portal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner disabled from portal successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner disabled from portal successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/partner/{partner_id}/enable": {
+      "post": {
+        "operationId": "enablePartner",
+        "summary": "enablePartner",
+        "description": "Enables a partner from a portal",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the partner to enable from the portal"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner enabled from portal successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Partner enabled from portal successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -11629,6 +11747,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
@@ -11648,6 +11771,10 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               },
               "result": {
                 "type": "string",
@@ -11687,6 +11814,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
@@ -11706,6 +11838,10 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               }
             },
             "required": [

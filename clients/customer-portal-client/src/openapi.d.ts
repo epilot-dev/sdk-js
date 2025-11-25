@@ -2921,6 +2921,10 @@ declare namespace Components {
             auth?: ExtensionAuthBlock;
             call: {
                 /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
@@ -2935,6 +2939,12 @@ declare namespace Components {
                  */
                 headers: {
                     [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
                 };
             };
             /**
@@ -3123,6 +3133,10 @@ declare namespace Components {
             auth?: ExtensionAuthBlock;
             call: {
                 /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
@@ -3137,6 +3151,12 @@ declare namespace Components {
                  */
                 headers: {
                     [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
                 };
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
@@ -7024,6 +7044,56 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DisablePartner {
+        namespace Parameters {
+            /**
+             * ID of the partner to disable from the portal
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to disable from the portal */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner disabled from portal successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace EnablePartner {
+        namespace Parameters {
+            /**
+             * ID of the partner to enable from the portal
+             */
+            export type PartnerId = string;
+        }
+        export interface PathParameters {
+            partner_id: /* ID of the partner to enable from the portal */ Parameters.PartnerId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Partner enabled from portal successfully
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ExtraPermissionAttributes {
         namespace Responses {
             export interface $200 {
@@ -10702,7 +10772,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -11859,6 +11928,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RevokePartner.Responses.$200>
+  /**
+   * disablePartner - disablePartner
+   * 
+   * Disables a partner from a portal
+   */
+  'disablePartner'(
+    parameters?: Parameters<Paths.DisablePartner.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisablePartner.Responses.$200>
+  /**
+   * enablePartner - enablePartner
+   * 
+   * Enables a partner from a portal
+   */
+  'enablePartner'(
+    parameters?: Parameters<Paths.EnablePartner.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.EnablePartner.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -13209,10 +13298,33 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RevokePartner.Responses.$200>
   }
+  ['/v3/portal/partner/{partner_id}/disable']: {
+    /**
+     * disablePartner - disablePartner
+     * 
+     * Disables a partner from a portal
+     */
+    'post'(
+      parameters?: Parameters<Paths.DisablePartner.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisablePartner.Responses.$200>
+  }
+  ['/v3/portal/partner/{partner_id}/enable']: {
+    /**
+     * enablePartner - enablePartner
+     * 
+     * Enables a partner from a portal
+     */
+    'post'(
+      parameters?: Parameters<Paths.EnablePartner.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.EnablePartner.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
