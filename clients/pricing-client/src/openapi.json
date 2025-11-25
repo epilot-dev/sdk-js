@@ -1682,11 +1682,10 @@
         }
       }
     },
-    "/v1/public/integration/{integrationId}/external-catalog": {
+    "/v1/public/integration/{integrationId}/products": {
       "post": {
-        "deprecated": true,
-        "description": "Returns the list of available products (including computed prices) based on a given context.",
-        "operationId": "$searchExternalCatalog",
+        "description": "Returns the list of available products with computed prices based on a given context and for a given org integration.",
+        "operationId": "$searchExternalProducts",
         "security": [
           {},
           {
@@ -1705,7 +1704,7 @@
             "example": "ikom"
           }
         ],
-        "summary": "searchExternalCatalog",
+        "summary": "searchExternalProducts",
         "tags": [
           "External Integrations API"
         ],
@@ -1845,10 +1844,10 @@
         }
       }
     },
-    "/v1/public/integration/{integrationId}/products": {
+    "/v1/public/integration/{integrationId}/products-recommendation": {
       "post": {
-        "description": "Returns the list of available products with computed prices based on a given context and for a given org integration.",
-        "operationId": "$searchExternalProducts",
+        "description": "Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.",
+        "operationId": "$searchExternalProductsRecommendation",
         "security": [
           {},
           {
@@ -1864,10 +1863,10 @@
               "$ref": "#/components/schemas/IntegrationId"
             },
             "required": true,
-            "example": "ikom"
+            "example": "external-catalog"
           }
         ],
-        "summary": "searchExternalProducts",
+        "summary": "searchExternalProductsRecommendation",
         "tags": [
           "External Integrations API"
         ],
@@ -1877,6 +1876,33 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SearchExternalCatalogParams"
+              },
+              "examples": {
+                "Search recommendations": {
+                  "value": {
+                    "context": {
+                      "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+                      "journey_name": "Energy Provider Selection",
+                      "current_step_name": "product-selection",
+                      "current_block_name": "recommendations-block",
+                      "steps_data": [
+                        {
+                          "step_name": "address",
+                          "step_index": 1,
+                          "blocks": {
+                            "Adresse": {
+                              "countryCode": "DE",
+                              "city": "Koblenz",
+                              "zipCode": "56068",
+                              "streetName": "Am Alten Hospital",
+                              "houseNumber": "123"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
               }
             }
           }
@@ -1887,94 +1913,277 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SearchExternalCatalogResult"
+                  "$ref": "#/components/schemas/SearchExternalCatalogRecommendationsResult"
                 },
                 "examples": {
-                  "External products": {
+                  "External catalog recommendations": {
                     "value": {
-                      "hits": 1,
-                      "results": [
+                      "source": {
+                        "pricing_details": {
+                          "items": [
+                            {
+                              "_id": "price-12312414",
+                              "price_id": "price-12312414",
+                              "product_id": "product-12312414",
+                              "is_composite_price": true,
+                              "description": "Home Energy Package Composite",
+                              "item_components": [
+                                {
+                                  "_id": "price-12312414-component-0",
+                                  "price_id": "price-12312414-component-0",
+                                  "product_id": "product-12312414",
+                                  "description": "Working Price",
+                                  "is_tax_inclusive": true,
+                                  "amount_total_decimal": "50",
+                                  "amount_total": 5000,
+                                  "amount_subtotal_decimal": "50",
+                                  "amount_subtotal": 5000,
+                                  "unit_amount": 5,
+                                  "unit_amount_gross": 5,
+                                  "unit_amount_gross_decimal": "0.05",
+                                  "unit_amount_net": 5,
+                                  "unit_amount_net_decimal": "0.05",
+                                  "billing_period": "monthly",
+                                  "type": "recurring",
+                                  "taxes": [],
+                                  "pricing_model": "per_unit",
+                                  "quantity": 1,
+                                  "_price": {
+                                    "_id": "price-12312414-component-0",
+                                    "unit_amount_currency": "EUR",
+                                    "description": "Working Price",
+                                    "is_tax_inclusive": true,
+                                    "unit_amount": 5,
+                                    "unit_amount_decimal": "0.05",
+                                    "unit": "kWh",
+                                    "billing_period": "monthly",
+                                    "type": "recurring",
+                                    "billing_duration_amount": 24,
+                                    "billing_duration_unit": "months",
+                                    "notice_time_amount": 3,
+                                    "notice_time_unit": "months",
+                                    "termination_time_amount": 3,
+                                    "termination_time_unit": "months",
+                                    "renewal_duration_amount": 12,
+                                    "renewal_duration_unit": "months",
+                                    "active": true,
+                                    "is_composite_price": false,
+                                    "variable_price": true,
+                                    "pricing_model": "per_unit",
+                                    "price_display_in_journeys": "show_price"
+                                  },
+                                  "_product": {
+                                    "_id": "product-12312414",
+                                    "name": "Home Energy Package",
+                                    "description": "Composite home energy solution with solar panels and battery"
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "currency": "EUR",
+                          "amount_subtotal": 5000,
+                          "amount_total": 5000,
+                          "amount_tax": 0,
+                          "total_details": {
+                            "amount_tax": 0,
+                            "breakdown": {
+                              "taxes": [],
+                              "recurrences": [
+                                {
+                                  "type": "recurring",
+                                  "billing_period": "monthly",
+                                  "amount_total": 5000,
+                                  "amount_total_decimal": "50.00",
+                                  "amount_subtotal": 5000,
+                                  "amount_subtotal_decimal": "50.00",
+                                  "amount_tax": 0
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "_meta": {
+                          "signature": "abc123",
+                          "timestamp": 1712049221642
+                        }
+                      },
+                      "offers": [
                         {
                           "pricing_details": {
                             "items": [
                               {
-                                "_id": "price-12312414",
-                                "price_id": "price-12312414",
-                                "is_composite_price": true,
-                                "description": "Home Energy Package Composite",
-                                "item_components": [
-                                  {
-                                    "_id": "price-12312414-component-0",
-                                    "price_id": "price-12312414-component-0",
-                                    "description": "Working Price",
-                                    "is_tax_inclusive": true,
-                                    "amount_total_decimal": "100",
-                                    "amount_total": 10000,
-                                    "amount_subtotal_decimal": "100",
-                                    "amount_subtotal": 10000,
-                                    "unit_amount": 10,
-                                    "unit_amount_gross": 10,
-                                    "unit_amount_gross_decimal": "0.10",
-                                    "unit_amount_net": 10,
-                                    "unit_amount_net_decimal": "0.10",
-                                    "billing_period": "monthly",
-                                    "type": "recurring",
-                                    "taxes": [],
-                                    "pricing_model": "per_unit",
-                                    "quantity": 1,
-                                    "_price": {
-                                      "_id": "price-12312414-component-0",
-                                      "unit_amount_currency": "EUR",
-                                      "description": "Working Price",
-                                      "is_tax_inclusive": true,
-                                      "unit_amount": 10,
-                                      "unit_amount_decimal": "0.10",
-                                      "unit": "kWh",
-                                      "billing_period": "monthly",
-                                      "type": "recurring",
-                                      "billing_duration_amount": 24,
-                                      "billing_duration_unit": "months",
-                                      "notice_time_amount": 3,
-                                      "notice_time_unit": "months",
-                                      "termination_time_amount": 3,
-                                      "termination_time_unit": "months",
-                                      "renewal_duration_amount": 12,
-                                      "renewal_duration_unit": "months",
-                                      "active": true,
-                                      "is_composite_price": false,
-                                      "variable_price": true,
-                                      "pricing_model": "per_unit",
-                                      "price_display_in_journeys": "show_price"
-                                    }
-                                  }
-                                ]
-                              }
-                            ],
-                            "currency": "EUR",
-                            "amount_subtotal": 10000,
-                            "amount_total": 10000,
-                            "amount_tax": 0,
-                            "total_details": {
-                              "amount_tax": 0,
-                              "breakdown": {
+                                "_id": "price-999857a4",
+                                "price_id": "price-999857a4",
+                                "product_id": "product-999857a4",
+                                "is_composite_price": false,
+                                "description": "Single Price",
+                                "is_tax_inclusive": true,
+                                "amount_total_decimal": "25",
+                                "amount_total": 2500,
+                                "amount_subtotal_decimal": "25",
+                                "amount_subtotal": 2500,
+                                "unit_amount": 25,
+                                "unit_amount_gross": 25,
+                                "unit_amount_gross_decimal": "25",
+                                "unit_amount_net": 25,
+                                "unit_amount_net_decimal": "25",
+                                "billing_period": null,
+                                "type": "one_time",
                                 "taxes": [],
-                                "recurrences": [
-                                  {
-                                    "type": "recurring",
-                                    "billing_period": "monthly",
-                                    "amount_total": 10000,
-                                    "amount_total_decimal": "100.00",
-                                    "amount_subtotal": 10000,
-                                    "amount_subtotal_decimal": "100.00",
-                                    "amount_tax": 0
-                                  }
-                                ]
+                                "pricing_model": "per_unit",
+                                "quantity": 1,
+                                "_price": {
+                                  "_id": "price-999857a4",
+                                  "unit_amount_currency": "EUR",
+                                  "description": "Single Price",
+                                  "is_tax_inclusive": true,
+                                  "unit_amount": 25,
+                                  "unit_amount_decimal": "25",
+                                  "billing_duration_amount": 24,
+                                  "billing_duration_unit": "months",
+                                  "notice_time_amount": 3,
+                                  "notice_time_unit": "months",
+                                  "termination_time_amount": 3,
+                                  "termination_time_unit": "months",
+                                  "renewal_duration_amount": 12,
+                                  "renewal_duration_unit": "months",
+                                  "active": true,
+                                  "is_composite_price": false,
+                                  "pricing_model": "per_unit",
+                                  "price_display_in_journeys": "show_price"
+                                },
+                                "_product": {
+                                  "_id": "product-999857a4",
+                                  "name": "Solar Panel X2",
+                                  "description": "High-efficiency solar panel for residential use"
+                                }
                               }
+                            ]
+                          },
+                          "currency": "EUR",
+                          "amount_subtotal": 2500,
+                          "amount_total": 2500,
+                          "amount_tax": 0,
+                          "total_details": {
+                            "amount_tax": 0,
+                            "breakdown": {
+                              "taxes": [],
+                              "recurrences": [
+                                {
+                                  "type": "one_time",
+                                  "amount_total": 2500,
+                                  "amount_total_decimal": "25.00",
+                                  "amount_subtotal": 2500,
+                                  "amount_subtotal_decimal": "25.00",
+                                  "amount_tax": 0
+                                }
+                              ]
                             }
                           },
                           "_meta": {
-                            "signature": "abc123",
-                            "timestamp": 1712049221642
+                            "signature": "def456",
+                            "timestamp": 1712049221643
+                          }
+                        },
+                        {
+                          "pricing_details": {
+                            "items": [
+                              {
+                                "_id": "price-93f857a4",
+                                "price_id": "price-93f857a4",
+                                "product_id": "product-93f857a4",
+                                "is_composite_price": false,
+                                "description": "Single Price",
+                                "is_tax_inclusive": false,
+                                "amount_total_decimal": "29.75",
+                                "amount_total": 2975,
+                                "amount_subtotal_decimal": "25",
+                                "amount_subtotal": 2500,
+                                "unit_amount": 25,
+                                "unit_amount_gross": 29.75,
+                                "unit_amount_gross_decimal": "29.75",
+                                "unit_amount_net": 25,
+                                "unit_amount_net_decimal": "25",
+                                "billing_period": null,
+                                "type": "one_time",
+                                "taxes": [
+                                  {
+                                    "tax": {
+                                      "_id": "tax-vat-19",
+                                      "name": "VAT",
+                                      "type": "VAT",
+                                      "rate": 19,
+                                      "region": "DE"
+                                    },
+                                    "amount": 475
+                                  }
+                                ],
+                                "pricing_model": "per_unit",
+                                "quantity": 1,
+                                "_price": {
+                                  "_id": "price-93f857a4",
+                                  "unit_amount_currency": "EUR",
+                                  "description": "Single Price",
+                                  "is_tax_inclusive": false,
+                                  "unit_amount": 25,
+                                  "unit_amount_decimal": "25",
+                                  "active": true,
+                                  "is_composite_price": false,
+                                  "pricing_model": "per_unit",
+                                  "price_display_in_journeys": "show_price",
+                                  "tax": [
+                                    {
+                                      "_id": "tax-vat-19",
+                                      "name": "VAT",
+                                      "type": "VAT",
+                                      "rate": 19,
+                                      "region": "DE"
+                                    }
+                                  ]
+                                },
+                                "_product": {
+                                  "_id": "product-93f857a4",
+                                  "name": "Solar Panel X3",
+                                  "description": "New generation of high-efficiency solar panel for residential use"
+                                }
+                              }
+                            ]
+                          },
+                          "currency": "EUR",
+                          "amount_subtotal": 2500,
+                          "amount_total": 2975,
+                          "amount_tax": 475,
+                          "total_details": {
+                            "amount_tax": 475,
+                            "breakdown": {
+                              "taxes": [
+                                {
+                                  "tax": {
+                                    "_id": "tax-vat-19",
+                                    "name": "VAT",
+                                    "type": "VAT",
+                                    "rate": 19,
+                                    "region": "DE"
+                                  },
+                                  "amount": 475
+                                }
+                              ],
+                              "recurrences": [
+                                {
+                                  "type": "one_time",
+                                  "amount_total": 2975,
+                                  "amount_total_decimal": "29.75",
+                                  "amount_subtotal": 2500,
+                                  "amount_subtotal_decimal": "25.00",
+                                  "amount_tax": 475
+                                }
+                              ]
+                            }
+                          },
+                          "_meta": {
+                            "signature": "ghi789",
+                            "timestamp": 1712049221644
                           }
                         }
                       ]
@@ -8177,6 +8386,24 @@
         "required": [
           "results",
           "hits"
+        ]
+      },
+      "SearchExternalCatalogRecommendationsResult": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/ExternalCatalogItem"
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalCatalogItem"
+            }
+          }
+        },
+        "required": [
+          "source",
+          "offers"
         ]
       },
       "ExternalCatalogItem": {
