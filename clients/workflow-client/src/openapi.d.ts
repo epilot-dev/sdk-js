@@ -53,6 +53,7 @@ declare namespace Components {
                  * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
                  * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
                  * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+                 * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
                  * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
                  *
                  */
@@ -142,6 +143,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -250,6 +252,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -280,6 +283,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -401,6 +405,69 @@ declare namespace Components {
              */
             is_primary?: boolean;
         }
+        /**
+         * example:
+         * {
+         *   "trigger": {
+         *     "event": "FlowStarted"
+         *   },
+         *   "target": {
+         *     "entitySchema": "opportunity",
+         *     "entityAttribute": "title"
+         *   },
+         *   "value": {
+         *     "source": "workflow_name"
+         *   }
+         * }
+         */
+        export interface EntitySync {
+            /**
+             * Trigger configuration that determines when entity sync occurs.
+             * Contains the event type and optional filter to target specific tasks/phases.
+             *
+             */
+            trigger: {
+                /**
+                 * Event or condition that triggers the entity sync.
+                 * Direct triggers match EventBridge event names (PascalCase).
+                 * Status triggers are deduced from event + entity status combination.
+                 *
+                 */
+                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+                /**
+                 * Optional filter to target specific tasks or phases.
+                 * Specify either task_template_id OR phase_template_id (mutually exclusive).
+                 * If omitted, trigger applies to all tasks/phases.
+                 *
+                 */
+                filter?: {
+                    /**
+                     * Target a specific task by its template ID (stable across executions)
+                     */
+                    task_template_id?: string;
+                    /**
+                     * Target a specific phase by its template ID (stable across executions)
+                     */
+                    phase_template_id?: string;
+                };
+            };
+            value: {
+                source: "workflow_name" | "workflow_status" | "workflow_assigned_to" | "task_name" | "task_status" | "task_assigned_to" | "phase_name" | "phase_status" | "phase_assigned_to" | "custom_value";
+                value?: string;
+            };
+            target: {
+                /**
+                 * example:
+                 * opportunity
+                 */
+                entitySchema: string;
+                /**
+                 * example:
+                 * title
+                 */
+                entityAttribute: string;
+            };
+        }
         export interface ErrorResp {
             message?: string;
         }
@@ -484,7 +551,22 @@ declare namespace Components {
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
-            update_entity_attributes?: UpdateEntityAttributes[];
+            entity_sync?: /**
+             * example:
+             * {
+             *   "trigger": {
+             *     "event": "FlowStarted"
+             *   },
+             *   "target": {
+             *     "entitySchema": "opportunity",
+             *     "entityAttribute": "title"
+             *   },
+             *   "value": {
+             *     "source": "workflow_name"
+             *   }
+             * }
+             */
+            EntitySync[];
             /**
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
@@ -555,6 +637,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -630,6 +713,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -837,6 +921,7 @@ declare namespace Components {
                  * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
                  * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
                  * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+                 * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
                  * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
                  *
                  */
@@ -968,6 +1053,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -1033,6 +1119,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -1116,10 +1203,11 @@ declare namespace Components {
          * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
          * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
          * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+         * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
          * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
          *
          */
-        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "FAILED";
+        export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED";
         export type StepType = "MANUAL" | "AUTOMATION";
         export type Task = ManualTask | AutomationTask | DecisionTask;
         export interface TaskBase {
@@ -1138,6 +1226,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -1226,6 +1315,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -1285,6 +1375,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -1623,6 +1714,7 @@ declare namespace Components {
              * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
              * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
              * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
              * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
              *
              */
@@ -2636,6 +2728,7 @@ export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type EntityRef = Components.Schemas.EntityRef;
+export type EntitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type ExecutionPaginationDynamo = Components.Schemas.ExecutionPaginationDynamo;
