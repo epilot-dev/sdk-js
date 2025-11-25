@@ -39,6 +39,17 @@
         "responses": {}
       }
     },
+    "/v2/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/erp/updates/mapping_simulation": {
       "post": {
         "operationId": "simulateMapping",
@@ -191,6 +202,42 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/app-mapping": {
+      "put": {
+        "operationId": "setIntegrationAppMapping",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteIntegrationAppMapping",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }

@@ -59,6 +59,16 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface DeleteIntegrationAppMappingRequest {
+            /**
+             * UUID of the integration app instance
+             */
+            app_id: string; // uuid
+            /**
+             * UUID of the integration app component instance
+             */
+            component_id: string; // uuid
+        }
         export interface EntityUpdate {
             /**
              * The entity type slug
@@ -77,6 +87,51 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface ErpEvent {
+            /**
+             * Type of event (create, update, delete)
+             */
+            event_type: "CREATE" | "UPDATE" | "DELETE";
+            /**
+             * Type of the object being updated (business_partner, contract_account, etc.)
+             */
+            object_type: string;
+            /**
+             * Timestamp when the event occurred
+             */
+            timestamp: string; // date-time
+            /**
+             * Format of the payload data
+             */
+            format: "json" | "xml";
+            /**
+             * The object data payload - can be either a serialized string or a direct JSON object
+             */
+            payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
+                [name: string]: any;
+            };
+            /**
+             * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.
+             *
+             * example:
+             * evt-2025-05-01-12345-create-bp
+             */
+            deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface ErpUpdatesEventsV2Request {
+            /**
+             * UUID that identifies the integration configuration to use
+             */
+            integration_id: string; // uuid
+            /**
+             * Optional ID that identifies the specific request for debugging purposes
+             */
+            correlation_id?: string;
+            /**
+             * List of ERP events to process
+             */
+            events: ErpEvent[];
+        }
         export interface ErrorResponseBase {
             /**
              * Computer-readable error code
@@ -86,6 +141,37 @@ declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        export interface InboundUseCase {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Use case type
+             */
+            type: "inbound";
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            configuration?: IntegrationEvent;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
         }
         export interface Integration {
             /**
@@ -112,6 +198,12 @@ declare namespace Components {
              * ISO-8601 timestamp when the integration was last updated
              */
             updated_at: string; // date-time
+        }
+        export interface IntegrationAppMapping {
+            /**
+             * The integration ID this app/component is mapped to
+             */
+            integration_id: string; // uuid
         }
         export interface IntegrationConfigurationV1 {
             /**
@@ -180,6 +272,10 @@ declare namespace Components {
              * Constant value to assign (any type)
              */
             constant?: any;
+            /**
+             * Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted.
+             */
+            enabled?: /* Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted. */ boolean | string;
             relations?: RelationConfig;
         }
         export interface IntegrationEvent {
@@ -293,6 +389,42 @@ declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
+        export interface OutboundUseCase {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Use case type
+             */
+            type: "outbound";
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Use case specific configuration
+             */
+            configuration?: {
+                [name: string]: any;
+            };
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
+        }
         export interface RelationConfig {
             /**
              * Relation operation:
@@ -341,6 +473,20 @@ declare namespace Components {
              * Constant value (any type)
              */
             constant?: any;
+        }
+        export interface SetIntegrationAppMappingRequest {
+            /**
+             * UUID of the integration app instance
+             */
+            app_id: string; // uuid
+            /**
+             * UUID of the integration app component instance
+             */
+            component_id: string; // uuid
+            /**
+             * If true, overwrites existing mapping. If false and mapping exists, returns 409 Conflict.
+             */
+            overwrite?: boolean;
         }
         export interface TriggerErpActionRequest {
             /**
@@ -426,42 +572,7 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
-        export interface UseCase {
-            /**
-             * Unique identifier for the use case
-             */
-            id: string; // uuid
-            /**
-             * Parent integration ID
-             */
-            integrationId: string; // uuid
-            /**
-             * Use case name
-             */
-            name: string;
-            /**
-             * Use case type
-             */
-            type: "inbound" | "outbound";
-            /**
-             * Whether the use case is enabled
-             */
-            enabled: boolean;
-            /**
-             * Use case specific configuration
-             */
-            configuration?: {
-                [name: string]: any;
-            };
-            /**
-             * ISO-8601 timestamp when the use case was created
-             */
-            created_at: string; // date-time
-            /**
-             * ISO-8601 timestamp when the use case was last updated
-             */
-            updated_at: string; // date-time
-        }
+        export type UseCase = InboundUseCase | OutboundUseCase;
     }
 }
 declare namespace Paths {
@@ -523,6 +634,25 @@ declare namespace Paths {
             export interface $200 {
                 message?: string;
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteIntegrationAppMapping {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.DeleteIntegrationAppMappingRequest;
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
@@ -627,43 +757,41 @@ declare namespace Paths {
             /**
              * List of ERP events to process
              */
-            events: {
-                /**
-                 * Type of event (create, update, delete)
-                 */
-                event_type: "CREATE" | "UPDATE" | "DELETE";
-                /**
-                 * Type of the object being updated (business_partner, contract_account, etc.)
-                 */
-                object_type: string;
-                /**
-                 * Timestamp when the event occurred
-                 */
-                timestamp: string; // date-time
-                /**
-                 * Format of the payload data
-                 */
-                format: "json" | "xml";
-                /**
-                 * The object data payload - can be either a serialized string or a direct JSON object
-                 */
-                payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
-                    [name: string]: any;
-                };
-                /**
-                 * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same app and component. Must contain only alphanumeric characters, hyphens, and underscores.
-                 *
-                 * example:
-                 * evt-2025-05-01-12345-create-bp
-                 */
-                deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
-            }[];
+            events: Components.Schemas.ErpEvent[];
         }
         namespace Responses {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $422 = Components.Responses.ERPUpdatesResponse;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ProcessErpUpdatesEventsV2 {
+        export type RequestBody = Components.Schemas.ErpUpdatesEventsV2Request;
+        namespace Responses {
+            export type $200 = Components.Responses.ERPUpdatesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $422 = Components.Responses.ERPUpdatesResponse;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace SetIntegrationAppMapping {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.SetIntegrationAppMappingRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.IntegrationAppMapping;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $409 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -759,6 +887,19 @@ export interface OperationMethods {
     data?: Paths.ProcessErpUpdatesEvents.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ProcessErpUpdatesEvents.Responses.$200>
+  /**
+   * processErpUpdatesEventsV2 - processErpUpdatesEventsV2
+   * 
+   * Handles updates from ERP systems using integration_id directly.
+   * This is the v2 version that simplifies the API by accepting integration_id
+   * instead of app_id and component_id.
+   * 
+   */
+  'processErpUpdatesEventsV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ProcessErpUpdatesEventsV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ProcessErpUpdatesEventsV2.Responses.$200>
   /**
    * simulateMapping - simulateMapping
    * 
@@ -873,6 +1014,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUseCase.Responses.$200>
+  /**
+   * setIntegrationAppMapping - Set integration app mapping
+   * 
+   * Creates or updates a mapping from an app/component to an integration.
+   * This allows ERP updates sent via app_id and component_id to be associated
+   * with a specific integration configuration.
+   * 
+   */
+  'setIntegrationAppMapping'(
+    parameters?: Parameters<Paths.SetIntegrationAppMapping.PathParameters> | null,
+    data?: Paths.SetIntegrationAppMapping.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetIntegrationAppMapping.Responses.$200>
+  /**
+   * deleteIntegrationAppMapping - Delete integration app mapping
+   * 
+   * Removes a mapping from an app/component to an integration.
+   * 
+   */
+  'deleteIntegrationAppMapping'(
+    parameters?: Parameters<Paths.DeleteIntegrationAppMapping.PathParameters> | null,
+    data?: Paths.DeleteIntegrationAppMapping.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -911,6 +1076,21 @@ export interface PathsDictionary {
       data?: Paths.ProcessErpUpdatesEvents.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ProcessErpUpdatesEvents.Responses.$200>
+  }
+  ['/v2/erp/updates/events']: {
+    /**
+     * processErpUpdatesEventsV2 - processErpUpdatesEventsV2
+     * 
+     * Handles updates from ERP systems using integration_id directly.
+     * This is the v2 version that simplifies the API by accepting integration_id
+     * instead of app_id and component_id.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ProcessErpUpdatesEventsV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ProcessErpUpdatesEventsV2.Responses.$200>
   }
   ['/v1/erp/updates/mapping_simulation']: {
     /**
@@ -1036,6 +1216,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUseCase.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/app-mapping']: {
+    /**
+     * setIntegrationAppMapping - Set integration app mapping
+     * 
+     * Creates or updates a mapping from an app/component to an integration.
+     * This allows ERP updates sent via app_id and component_id to be associated
+     * with a specific integration configuration.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.SetIntegrationAppMapping.PathParameters> | null,
+      data?: Paths.SetIntegrationAppMapping.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetIntegrationAppMapping.Responses.$200>
+    /**
+     * deleteIntegrationAppMapping - Delete integration app mapping
+     * 
+     * Removes a mapping from an app/component to an integration.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteIntegrationAppMapping.PathParameters> | null,
+      data?: Paths.DeleteIntegrationAppMapping.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1043,9 +1249,14 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
+export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
+export type ErpEvent = Components.Schemas.ErpEvent;
+export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type Integration = Components.Schemas.Integration;
+export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
 export type IntegrationEntity = Components.Schemas.IntegrationEntity;
@@ -1058,9 +1269,11 @@ export type MappingSimulationRequest = Components.Schemas.MappingSimulationReque
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
+export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
+export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;

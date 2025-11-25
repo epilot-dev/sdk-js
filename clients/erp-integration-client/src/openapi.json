@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.8.2",
+    "version": "0.12.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -162,65 +162,7 @@
                     "type": "array",
                     "description": "List of ERP events to process",
                     "items": {
-                      "type": "object",
-                      "required": [
-                        "event_type",
-                        "object_type",
-                        "timestamp",
-                        "format",
-                        "payload"
-                      ],
-                      "properties": {
-                        "event_type": {
-                          "type": "string",
-                          "enum": [
-                            "CREATE",
-                            "UPDATE",
-                            "DELETE"
-                          ],
-                          "description": "Type of event (create, update, delete)"
-                        },
-                        "object_type": {
-                          "type": "string",
-                          "description": "Type of the object being updated (business_partner, contract_account, etc.)"
-                        },
-                        "timestamp": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "Timestamp when the event occurred"
-                        },
-                        "format": {
-                          "type": "string",
-                          "enum": [
-                            "json",
-                            "xml"
-                          ],
-                          "default": "json",
-                          "description": "Format of the payload data"
-                        },
-                        "payload": {
-                          "oneOf": [
-                            {
-                              "type": "string",
-                              "description": "The serialized object data payload (JSON, XML, etc.) as a string"
-                            },
-                            {
-                              "type": "object",
-                              "description": "Direct JSON object (will be automatically serialized)",
-                              "additionalProperties": true
-                            }
-                          ],
-                          "description": "The object data payload - can be either a serialized string or a direct JSON object"
-                        },
-                        "deduplication_id": {
-                          "type": "string",
-                          "pattern": "^[a-zA-Z0-9_-]+$",
-                          "minLength": 1,
-                          "maxLength": 255,
-                          "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same app and component. Must contain only alphanumeric characters, hyphens, and underscores.\n",
-                          "example": "evt-2025-05-01-12345-create-bp"
-                        }
-                      }
+                      "$ref": "#/components/schemas/ErpEvent"
                     }
                   }
                 }
@@ -231,6 +173,64 @@
                 "meta": {
                   "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000"
                 },
+                "events": [
+                  {
+                    "event_type": "CREATE",
+                    "object_type": "business_partner",
+                    "timestamp": "2025-05-01T08:30:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}",
+                    "deduplication_id": "bp-create-20250501-083000-001"
+                  },
+                  {
+                    "event_type": "UPDATE",
+                    "object_type": "contract_account",
+                    "timestamp": "2025-05-01T08:35:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
+                    "deduplication_id": "ca-update-20250501-083500-001"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV2",
+        "summary": "processErpUpdatesEventsV2",
+        "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v2 version that simplifies the API by accepting integration_id\ninstead of app_id and component_id.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErpUpdatesEventsV2Request"
+              },
+              "example": {
+                "integration_id": "123e4567-e89b-12d3-a456-426614174000",
+                "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
                 "events": [
                   {
                     "event_type": "CREATE",
@@ -491,6 +491,81 @@
                     "object_type": "ContactAdded",
                     "format": "json",
                     "payload": "{\"contractNumber\":\"CTR-001\",\"contactEmail\":\"new.contact@example.com\"}"
+                  }
+                },
+                "v2_field_enabled": {
+                  "summary": "Version 2.0 - Field-Level Conditional Processing",
+                  "description": "Example showing how to conditionally enable/disable individual field mappings using the enabled property",
+                  "value": {
+                    "mapping_configuration": {
+                      "version": "2.0",
+                      "mapping": {
+                        "events": {
+                          "CustomerChanged": {
+                            "entities": [
+                              {
+                                "entity_schema": "contact",
+                                "unique_ids": [
+                                  "customer_number"
+                                ],
+                                "fields": [
+                                  {
+                                    "attribute": "customer_number",
+                                    "field": "customerId"
+                                  },
+                                  {
+                                    "attribute": "email",
+                                    "field": "email",
+                                    "enabled": true
+                                  },
+                                  {
+                                    "attribute": "phone",
+                                    "field": "phone",
+                                    "enabled": "$exists(phone) and phone != ''"
+                                  },
+                                  {
+                                    "attribute": "mobile",
+                                    "field": "mobile",
+                                    "enabled": "$exists(mobile)"
+                                  },
+                                  {
+                                    "attribute": "vip_status",
+                                    "constant": "VIP",
+                                    "enabled": "vipFlag = true"
+                                  },
+                                  {
+                                    "attribute": "internal_notes",
+                                    "field": "notes",
+                                    "enabled": false
+                                  },
+                                  {
+                                    "attribute": "billing_account",
+                                    "enabled": "$exists(billingAccountId)",
+                                    "relations": {
+                                      "operation": "_set",
+                                      "items": [
+                                        {
+                                          "entity_schema": "billing_account",
+                                          "unique_ids": [
+                                            {
+                                              "attribute": "external_id",
+                                              "field": "billingAccountId"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "object_type": "CustomerChanged",
+                    "format": "json",
+                    "payload": "{\"customerId\":\"12345\",\"email\":\"user@example.com\",\"phone\":\"\",\"mobile\":\"555-1234\",\"vipFlag\":true,\"notes\":\"Internal only\",\"billingAccountId\":\"ACC-999\"}"
                   }
                 }
               }
@@ -1028,6 +1103,131 @@
           }
         }
       }
+    },
+    "/v1/integrations/{integrationId}/app-mapping": {
+      "put": {
+        "operationId": "setIntegrationAppMapping",
+        "summary": "Set integration app mapping",
+        "description": "Creates or updates a mapping from an app/component to an integration.\nThis allows ERP updates sent via app_id and component_id to be associated\nwith a specific integration configuration.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID to map to",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetIntegrationAppMappingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "App mapping set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationAppMapping"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "409": {
+            "description": "Mapping already exists (use overwrite=true to replace)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteIntegrationAppMapping",
+        "summary": "Delete integration app mapping",
+        "description": "Removes a mapping from an app/component to an integration.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID (used for authorization, must match the mapping)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteIntegrationAppMappingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "App mapping deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "App mapping not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1050,6 +1250,92 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          }
+        }
+      },
+      "ErpEvent": {
+        "type": "object",
+        "required": [
+          "event_type",
+          "object_type",
+          "timestamp",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ],
+            "description": "Type of event (create, update, delete)"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Type of the object being updated (business_partner, contract_account, etc.)"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event occurred"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          },
+          "deduplication_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
+            "example": "evt-2025-05-01-12345-create-bp"
+          }
+        }
+      },
+      "ErpUpdatesEventsV2Request": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "events"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID that identifies the integration configuration to use"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional ID that identifies the specific request for debugging purposes"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of ERP events to process",
+            "items": {
+              "$ref": "#/components/schemas/ErpEvent"
+            }
           }
         }
       },
@@ -1218,7 +1504,80 @@
           }
         }
       },
+      "SetIntegrationAppMappingRequest": {
+        "type": "object",
+        "required": [
+          "app_id",
+          "component_id"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the integration app instance"
+          },
+          "component_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the integration app component instance"
+          },
+          "overwrite": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, overwrites existing mapping. If false and mapping exists, returns 409 Conflict."
+          }
+        }
+      },
+      "DeleteIntegrationAppMappingRequest": {
+        "type": "object",
+        "required": [
+          "app_id",
+          "component_id"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the integration app instance"
+          },
+          "component_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the integration app component instance"
+          }
+        }
+      },
+      "IntegrationAppMapping": {
+        "type": "object",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The integration ID this app/component is mapped to"
+          }
+        }
+      },
       "UseCase": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InboundUseCase"
+          },
+          {
+            "$ref": "#/components/schemas/OutboundUseCase"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/InboundUseCase",
+            "outbound": "#/components/schemas/OutboundUseCase"
+          }
+        }
+      },
+      "InboundUseCase": {
         "type": "object",
         "required": [
           "id",
@@ -1247,7 +1606,58 @@
           "type": {
             "type": "string",
             "enum": [
-              "inbound",
+              "inbound"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/IntegrationEvent"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was last updated"
+          }
+        }
+      },
+      "OutboundUseCase": {
+        "type": "object",
+        "required": [
+          "id",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
               "outbound"
             ],
             "description": "Use case type"
@@ -1714,6 +2124,17 @@
           "constant": {
             "description": "Constant value to assign (any type)"
           },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
+          },
           "relations": {
             "$ref": "#/components/schemas/RelationConfig"
           }
@@ -1881,9 +2302,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
