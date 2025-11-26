@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "description": "Upload and manage epilot Files\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -1385,6 +1385,7 @@
         "operationId": "getFileCollections",
         "summary": "getFileCollections",
         "description": "Gets a list of collections that exist for an entity",
+        "deprecated": true,
         "tags": [
           "File Collections"
         ],
@@ -1430,6 +1431,7 @@
         "operationId": "createFileCollection",
         "summary": "createFileCollection",
         "description": "Creates a new file collection for the specified entity",
+        "deprecated": true,
         "tags": [
           "File Collections"
         ],
@@ -1469,7 +1471,8 @@
       "put": {
         "operationId": "updateFileCollection",
         "summary": "updateFileCollection",
-        "description": "Updates a specific file collection by slug",
+        "description": "Updates a file collection for the specified entity",
+        "deprecated": true,
         "tags": [
           "File Collections"
         ],
@@ -1517,7 +1520,8 @@
       "delete": {
         "operationId": "deleteFileCollection",
         "summary": "deleteFileCollection",
-        "description": "Deletes a specific file collection by slug",
+        "description": "Deletes a file collection for the specified entity",
+        "deprecated": true,
         "tags": [
           "File Collections"
         ],
@@ -1546,11 +1550,185 @@
         }
       }
     },
+    "/v1/{slug}/collections": {
+      "get": {
+        "operationId": "getUserSchemaFileCollections",
+        "summary": "getUserSchemaFileCollections",
+        "description": "Gets a list of file collections for the current user and schema",
+        "tags": [
+          "File Collections"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "opportunity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of collections for the user and schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileCollectionItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUserSchemaFileCollection",
+        "summary": "createUserSchemaFileCollection",
+        "description": "Creates a new file collection for the current user and schema",
+        "tags": [
+          "File Collections"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "opportunity"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File collection created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/{slug}/collections/{collectionSlug}": {
+      "put": {
+        "operationId": "updateUserSchemaFileCollection",
+        "summary": "updateUserSchemaFileCollection",
+        "description": "Updates a file collection for the current user and schema",
+        "tags": [
+          "File Collections"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "opportunity"
+            }
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug identifier for the collection",
+            "schema": {
+              "type": "string",
+              "example": "documents"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionAttributes"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File collection updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserSchemaFileCollection",
+        "summary": "deleteUserSchemaFileCollection",
+        "description": "Deletes a file collection for the current user and schema",
+        "tags": [
+          "File Collections"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "The schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string",
+              "example": "opportunity"
+            }
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true,
+            "description": "The slug identifier for the collection",
+            "schema": {
+              "type": "string",
+              "example": "documents"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File collection deleted successfully"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/v1/entity/{id}/collections/{collectionSlug}/files": {
       "get": {
         "operationId": "getFilesInCollection",
         "summary": "getFilesInCollection",
-        "description": "Gets all files within a specific collection for an entity",
+        "description": "Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)",
         "tags": [
           "File Collections"
         ],
