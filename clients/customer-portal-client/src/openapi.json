@@ -8333,9 +8333,13 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
-              "USER_ACCOUNT_SELF_MANAGEMENT",
               "DENY"
             ]
+          },
+          "user_account_self_management": {
+            "type": "boolean",
+            "description": "Enable or disable user account self management",
+            "example": false
           },
           "feature_settings": {
             "type": "object",
@@ -13024,9 +13028,13 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
-              "USER_ACCOUNT_SELF_MANAGEMENT",
               "DENY"
             ]
+          },
+          "user_account_self_management": {
+            "type": "boolean",
+            "description": "Enable or disable user account self management",
+            "example": false
           },
           "feature_settings": {
             "type": "object",
