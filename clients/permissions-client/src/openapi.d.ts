@@ -122,7 +122,7 @@ declare namespace Components {
              */
             type: "user_role";
             /**
-             * Optional parent role that this role inherits from. Must be an `org_role` or `share_role`.
+             * Optional parent role that this role inherits from. Must be an `org_role` or a sharing role of type `share_role` or `partner_role`.
              * example:
              * 123:owner
              */

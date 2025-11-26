@@ -1386,7 +1386,7 @@
                         "$ref": "#/components/schemas/RoleId"
                       },
                       {
-                        "description": "Optional parent role that this role inherits from. Must be an `org_role` or `share_role`."
+                        "description": "Optional parent role that this role inherits from. Must be an `org_role` or a sharing role of type `share_role` or `partner_role`."
                       }
                     ]
                   }
