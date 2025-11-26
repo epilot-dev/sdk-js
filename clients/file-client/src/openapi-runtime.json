@@ -484,6 +484,7 @@
     "/v1/entity/{id}/collections": {
       "get": {
         "operationId": "getFileCollections",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntityIdPathParam"
@@ -500,6 +501,7 @@
       },
       "post": {
         "operationId": "createFileCollection",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntityIdPathParam"
@@ -517,6 +519,7 @@
     "/v1/entity/{id}/collections/{collectionSlug}": {
       "put": {
         "operationId": "updateFileCollection",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntityIdPathParam"
@@ -537,9 +540,80 @@
       },
       "delete": {
         "operationId": "deleteFileCollection",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/{slug}/collections": {
+      "get": {
+        "operationId": "getUserSchemaFileCollections",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/{slug}/collections/{collectionSlug}": {
+      "put": {
+        "operationId": "updateUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
           },
           {
             "name": "collectionSlug",

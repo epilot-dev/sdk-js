@@ -979,6 +979,26 @@ declare namespace Paths {
             Components.Responses.NotFoundError;
         }
     }
+    namespace CreateUserSchemaFileCollection {
+        namespace Parameters {
+            /**
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = /* Request body for creating a file collection */ Components.Schemas.FileCollectionCreateRequest;
+        namespace Responses {
+            export type $201 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
+        }
+    }
     namespace DeleteFile {
         namespace Parameters {
             export type ActivityId = /**
@@ -1084,6 +1104,45 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+        }
+    }
+    namespace DeleteUserSchemaFileCollection {
+        namespace Parameters {
+            /**
+             * example:
+             * documents
+             */
+            export type CollectionSlug = string;
+            /**
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+            collectionSlug: /**
+             * example:
+             * documents
+             */
+            Parameters.CollectionSlug;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace DownloadFile {
@@ -1370,6 +1429,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetUserSchemaFileCollections {
+        namespace Parameters {
+            /**
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
+        }
+    }
     namespace ListPublicLinksForFile {
         namespace Parameters {
             /**
@@ -1588,6 +1666,45 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.FileFolderAttributes;
         namespace Responses {
             export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
+    namespace UpdateUserSchemaFileCollection {
+        namespace Parameters {
+            /**
+             * example:
+             * documents
+             */
+            export type CollectionSlug = string;
+            /**
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+            collectionSlug: /**
+             * example:
+             * documents
+             */
+            Parameters.CollectionSlug;
+        }
+        export type RequestBody = Components.Schemas.FileCollectionAttributes;
+        namespace Responses {
+            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -1988,7 +2105,7 @@ export interface OperationMethods {
   /**
    * updateFileCollection - updateFileCollection
    * 
-   * Updates a specific file collection by slug
+   * Updates a file collection for the specified entity
    */
   'updateFileCollection'(
     parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
@@ -1998,7 +2115,7 @@ export interface OperationMethods {
   /**
    * deleteFileCollection - deleteFileCollection
    * 
-   * Deletes a specific file collection by slug
+   * Deletes a file collection for the specified entity
    */
   'deleteFileCollection'(
     parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
@@ -2006,9 +2123,49 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
   /**
+   * getUserSchemaFileCollections - getUserSchemaFileCollections
+   * 
+   * Gets a list of file collections for the current user and schema
+   */
+  'getUserSchemaFileCollections'(
+    parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserSchemaFileCollections.Responses.$200>
+  /**
+   * createUserSchemaFileCollection - createUserSchemaFileCollection
+   * 
+   * Creates a new file collection for the current user and schema
+   */
+  'createUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
+    data?: Paths.CreateUserSchemaFileCollection.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateUserSchemaFileCollection.Responses.$201>
+  /**
+   * updateUserSchemaFileCollection - updateUserSchemaFileCollection
+   * 
+   * Updates a file collection for the current user and schema
+   */
+  'updateUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
+    data?: Paths.UpdateUserSchemaFileCollection.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateUserSchemaFileCollection.Responses.$200>
+  /**
+   * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
+   * 
+   * Deletes a file collection for the current user and schema
+   */
+  'deleteUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteUserSchemaFileCollection.Responses.$200>
+  /**
    * getFilesInCollection - getFilesInCollection
    * 
-   * Gets all files within a specific collection for an entity
+   * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
    */
   'getFilesInCollection'(
     parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
@@ -2387,7 +2544,7 @@ export interface PathsDictionary {
     /**
      * updateFileCollection - updateFileCollection
      * 
-     * Updates a specific file collection by slug
+     * Updates a file collection for the specified entity
      */
     'put'(
       parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
@@ -2397,7 +2554,7 @@ export interface PathsDictionary {
     /**
      * deleteFileCollection - deleteFileCollection
      * 
-     * Deletes a specific file collection by slug
+     * Deletes a file collection for the specified entity
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
@@ -2405,11 +2562,55 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
   }
+  ['/v1/{slug}/collections']: {
+    /**
+     * getUserSchemaFileCollections - getUserSchemaFileCollections
+     * 
+     * Gets a list of file collections for the current user and schema
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserSchemaFileCollections.Responses.$200>
+    /**
+     * createUserSchemaFileCollection - createUserSchemaFileCollection
+     * 
+     * Creates a new file collection for the current user and schema
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
+      data?: Paths.CreateUserSchemaFileCollection.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateUserSchemaFileCollection.Responses.$201>
+  }
+  ['/v1/{slug}/collections/{collectionSlug}']: {
+    /**
+     * updateUserSchemaFileCollection - updateUserSchemaFileCollection
+     * 
+     * Updates a file collection for the current user and schema
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
+      data?: Paths.UpdateUserSchemaFileCollection.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateUserSchemaFileCollection.Responses.$200>
+    /**
+     * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
+     * 
+     * Deletes a file collection for the current user and schema
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteUserSchemaFileCollection.Responses.$200>
+  }
   ['/v1/entity/{id}/collections/{collectionSlug}/files']: {
     /**
      * getFilesInCollection - getFilesInCollection
      * 
-     * Gets all files within a specific collection for an entity
+     * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
      */
     'get'(
       parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
