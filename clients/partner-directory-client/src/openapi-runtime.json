@@ -112,7 +112,116 @@
         },
         "responses": {}
       }
+    },
+    "/v2/partners/{orgId}/users": {
+      "get": {
+        "operationId": "getPartnerUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createPartnerUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/partners/{orgId}/users/{userId}": {
+      "delete": {
+        "operationId": "deletePartnerUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/partners/{orgId}/roles": {
+      "get": {
+        "operationId": "getPartnerRoles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/partners/{orgId}/users/{userId}/roles": {
+      "post": {
+        "operationId": "assignPartnerUserRoles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "unassignPartnerUserRoles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    }
+  ]
 }
