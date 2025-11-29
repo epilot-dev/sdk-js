@@ -55,6 +55,17 @@
         "responses": {}
       }
     },
+    "/v2/template:replace": {
+      "post": {
+        "operationId": "replaceTemplatesV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/custom-variables": {
       "get": {
         "operationId": "getCustomVariables",
