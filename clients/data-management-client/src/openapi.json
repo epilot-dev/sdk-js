@@ -21,7 +21,7 @@
   "paths": {
     "/data-management/v1/{entity_schema}/query": {
       "post": {
-        "operationId": "queryEntitiesBySavedView",
+        "operationId": "queryEntities",
         "summary": "Query entities using a saved view with additional data filters",
         "description": "Executes a query against the specified entity schema using the saved view definition, optionally combined with additional filters. Returns the entities matching the composed query.\n",
         "tags": [
@@ -43,42 +43,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "saved_view_id"
-                ],
-                "properties": {
-                  "saved_view_id": {
-                    "type": "string",
-                    "description": "ID of the saved view to use for querying entities"
-                  },
-                  "from": {
-                    "type": "integer",
-                    "description": "Pagination start offset"
-                  },
-                  "size": {
-                    "type": "integer",
-                    "description": "Page size (maximum number of entities to return)"
-                  },
-                  "includeDeleted": {
-                    "type": "boolean",
-                    "description": "Whether to include soft-deleted entities in the result"
-                  },
-                  "hydrate": {
-                    "type": "boolean",
-                    "description": "Whether to hydrate entities with full data instead of returning only indexed / projection fields.\n"
-                  },
-                  "fields": {
-                    "type": "array",
-                    "description": "Optional list of fields to include in each entity.\n",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "filters": {
-                    "$ref": "#/components/schemas/DataManagementFilter"
-                  }
-                }
+                "$ref": "#/components/schemas/QueryEntitiesRequestBody"
               }
             }
           }
@@ -89,16 +54,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "entities": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/QueryEntitiesResult"
                 }
               }
             }
@@ -123,28 +79,16 @@
       }
     },
     "schemas": {
-      "DataManagementFilter": {
+      "QueryFilter": {
         "type": "object",
         "required": [
           "type"
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/DataManagementFilterType"
+            "$ref": "#/components/schemas/QueryFilterType"
           },
           "related_entity_schemas": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "workflow_statuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "entity_statuses": {
             "type": "array",
             "items": {
               "type": "string"
@@ -155,7 +99,7 @@
           }
         }
       },
-      "DataManagementFilterType": {
+      "QueryFilterType": {
         "type": "string",
         "enum": [
           "entity_workflows_only_in_closed_or_cancelled_status",
@@ -164,12 +108,66 @@
           "related_entities_any_in_closed_or_cancelled_status",
           "no_email_communication_since"
         ]
+      },
+      "QueryEntitiesResult": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "QueryEntitiesRequestBody": {
+        "type": "object",
+        "required": [
+          "saved_view_id",
+          "filters"
+        ],
+        "properties": {
+          "saved_view_id": {
+            "type": "string",
+            "description": "ID of the saved view to use for querying entities"
+          },
+          "from": {
+            "type": "integer",
+            "description": "Pagination start offset"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Page size (maximum number of entities to return)"
+          },
+          "include_deleted": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false",
+              "only"
+            ],
+            "description": "Whether to include soft-deleted entities in the result"
+          },
+          "hydrate": {
+            "type": "boolean",
+            "description": "Whether to hydrate entities with full data instead of returning only indexed / projection fields.\n"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional list of fields to include in each entity.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "$ref": "#/components/schemas/QueryFilter"
+          }
+        }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://data-management.sls.epilot.io"
-    }
-  ]
+  }
 }

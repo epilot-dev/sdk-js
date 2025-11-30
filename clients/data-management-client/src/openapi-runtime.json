@@ -7,7 +7,7 @@
   "paths": {
     "/data-management/v1/{entity_schema}/query": {
       "post": {
-        "operationId": "queryEntitiesBySavedView",
+        "operationId": "queryEntities",
         "parameters": [
           {
             "name": "entity_schema",
@@ -25,10 +25,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://data-management.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }
