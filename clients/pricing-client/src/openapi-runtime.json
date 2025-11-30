@@ -223,10 +223,9 @@
         "responses": {}
       }
     },
-    "/v1/public/integration/{integrationId}/external-catalog": {
+    "/v1/public/integration/{integrationId}/products": {
       "post": {
-        "deprecated": true,
-        "operationId": "$searchExternalCatalog",
+        "operationId": "$searchExternalProducts",
         "parameters": [
           {
             "in": "path",
@@ -243,9 +242,9 @@
         "responses": {}
       }
     },
-    "/v1/public/integration/{integrationId}/products": {
+    "/v1/public/integration/{integrationId}/products-recommendation": {
       "post": {
-        "operationId": "$searchExternalProducts",
+        "operationId": "$searchExternalProductsRecommendation",
         "parameters": [
           {
             "in": "path",

@@ -2105,6 +2105,11 @@
       "PortalExtensionConfig": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the extension. Should not change between updates."
+          },
           "hooks": {
             "type": "array",
             "items": {
@@ -2155,6 +2160,7 @@
         "properties": {
           "id": {
             "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "Identifier of the hook. Should not change between updates."
           },
           "name": {
@@ -2178,6 +2184,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
@@ -2197,6 +2208,10 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               },
               "result": {
                 "type": "string",
@@ -2238,6 +2253,11 @@
           "call": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
               "url": {
                 "type": "string",
                 "description": "URL to call. Supports variable interpolation."
@@ -2257,12 +2277,15 @@
                   "type": "string"
                 },
                 "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
               }
             },
             "required": [
               "url",
-              "headers",
-              "result"
+              "headers"
             ],
             "additionalProperties": false
           },
@@ -2655,6 +2678,7 @@
         "properties": {
           "id": {
             "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "Identifier of the link. Should not change between updates."
           },
           "name": {

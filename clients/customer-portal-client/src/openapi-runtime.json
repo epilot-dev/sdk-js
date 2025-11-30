@@ -1791,6 +1791,32 @@
         ],
         "responses": {}
       }
+    },
+    "/v3/portal/partner/{partner_id}/disable": {
+      "post": {
+        "operationId": "disablePartner",
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/partner/{partner_id}/enable": {
+      "post": {
+        "operationId": "enablePartner",
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {

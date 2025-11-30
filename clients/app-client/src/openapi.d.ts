@@ -1229,11 +1229,15 @@ declare namespace Components {
             configuration: PortalExtensionConfig;
         }
         export interface PortalExtensionConfig {
+            /**
+             * Identifier of the extension. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
             hooks?: ({
                 /**
                  * Identifier of the hook. Should not change between updates.
                  */
-                id?: string;
+                id?: string; // ^[a-zA-Z0-9_-]+$
                 name?: TranslatedString;
             } & (/**
              * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1279,7 +1283,7 @@ declare namespace Components {
                 /**
                  * Identifier of the link. Should not change between updates.
                  */
-                id: string;
+                id: string; // ^[a-zA-Z0-9_-]+$
                 name: TranslatedString;
                 description?: TranslatedString;
                 type: "seamless";
@@ -1308,7 +1312,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string;
+            id?: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
         }
         /**
@@ -1376,6 +1380,10 @@ declare namespace Components {
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
@@ -1390,6 +1398,12 @@ declare namespace Components {
                  */
                 headers: {
                     [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
                 };
             };
             /**
@@ -1586,6 +1600,10 @@ declare namespace Components {
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
                  * URL to call. Supports variable interpolation.
                  */
                 url: string;
@@ -1602,6 +1620,12 @@ declare namespace Components {
                     [name: string]: string;
                 };
                 /**
+                 * Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{"contract": {"contract_name": "Name"}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+                /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
                  */
                 result: string;
@@ -1615,7 +1639,7 @@ declare namespace Components {
             /**
              * Identifier of the link. Should not change between updates.
              */
-            id: string;
+            id: string; // ^[a-zA-Z0-9_-]+$
             name: TranslatedString;
             description?: TranslatedString;
             type: "seamless";

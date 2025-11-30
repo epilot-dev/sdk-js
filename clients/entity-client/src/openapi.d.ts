@@ -97,6 +97,28 @@ declare namespace Components {
          * A generic error returned by the API
          * example:
          * {
+         *   "status": 400,
+         *   "error": "Bad Request"
+         * }
+         */
+        export interface BadRequestError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
          *   "status": 404,
          *   "error": "Not Found"
          * }
@@ -140,11 +162,23 @@ declare namespace Components {
     }
     namespace Schemas {
         export interface Activity {
-            /**
-             * example:
-             * MyCustomActivity
+            type: /**
+             * A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.
+             *
+             * Built-in entity activity types (custom activities can be defined as well):
+             * - EntityCreated
+             * - EntityUpdated
+             * - EntityDeleted
+             * - EntitySoftDeleted
+             * - EntityRestored
+             * - RelationsAdded
+             * - RelationsRemoved
+             * - RelationsSoftDeleted
+             * - RelationsRestored
+             * - RelationsDeleted
+             *
              */
-            type: string;
+            ActivityType;
             /**
              * Title for activity. Supports handlebars syntax.
              * example:
@@ -241,11 +275,23 @@ declare namespace Components {
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             timestamp?: string; // date-time
-            /**
-             * example:
-             * MyCustomActivity
+            type: /**
+             * A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.
+             *
+             * Built-in entity activity types (custom activities can be defined as well):
+             * - EntityCreated
+             * - EntityUpdated
+             * - EntityDeleted
+             * - EntitySoftDeleted
+             * - EntityRestored
+             * - RelationsAdded
+             * - RelationsRemoved
+             * - RelationsSoftDeleted
+             * - RelationsRestored
+             * - RelationsDeleted
+             *
              */
-            type: string;
+            ActivityType;
             /**
              * Title for activity. Supports handlebars syntax.
              * example:
@@ -285,6 +331,23 @@ declare namespace Components {
             operations_total?: number;
             operations?: EntityOperation[];
         }
+        /**
+         * A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.
+         *
+         * Built-in entity activity types (custom activities can be defined as well):
+         * - EntityCreated
+         * - EntityUpdated
+         * - EntityDeleted
+         * - EntitySoftDeleted
+         * - EntityRestored
+         * - RelationsAdded
+         * - RelationsRemoved
+         * - RelationsSoftDeleted
+         * - RelationsRestored
+         * - RelationsDeleted
+         *
+         */
+        export type ActivityType = string;
         /**
          * Address attribute
          */
@@ -419,6 +482,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -584,6 +654,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -767,6 +844,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -781,11 +865,23 @@ declare namespace Components {
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
             timestamp?: string; // date-time
-            /**
-             * example:
-             * MyCustomActivity
+            type: /**
+             * A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.
+             *
+             * Built-in entity activity types (custom activities can be defined as well):
+             * - EntityCreated
+             * - EntityUpdated
+             * - EntityDeleted
+             * - EntitySoftDeleted
+             * - EntityRestored
+             * - RelationsAdded
+             * - RelationsRemoved
+             * - RelationsSoftDeleted
+             * - RelationsRestored
+             * - RelationsDeleted
+             *
              */
-            type: string;
+            ActivityType;
             /**
              * Title for activity. Supports handlebars syntax.
              * example:
@@ -949,6 +1045,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -1172,6 +1275,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1356,6 +1466,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1506,6 +1623,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1649,6 +1773,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1789,6 +1920,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -1940,6 +2078,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -2115,6 +2260,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -2828,6 +2980,23 @@ declare namespace Components {
              * 01F130Q52Q6MWSNS8N2AVXV4JN
              */
             ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */;
+            activity_type?: /**
+             * A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.
+             *
+             * Built-in entity activity types (custom activities can be defined as well):
+             * - EntityCreated
+             * - EntityUpdated
+             * - EntityDeleted
+             * - EntitySoftDeleted
+             * - EntityRestored
+             * - RelationsAdded
+             * - RelationsRemoved
+             * - RelationsSoftDeleted
+             * - RelationsRestored
+             * - RelationsDeleted
+             *
+             */
+            ActivityType;
             operation: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted";
             /**
              * example:
@@ -4311,6 +4480,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -4399,6 +4575,252 @@ declare namespace Components {
              */
             hits?: number;
             relations?: GetRelationsResp;
+        }
+        export interface GraphDefinition {
+            /**
+             * List of node definitions in the graph
+             * example:
+             * [
+             *   {
+             *     "id": "portal_user",
+             *     "schema": "portal_user",
+             *     "cardinality": "one"
+             *   },
+             *   {
+             *     "id": "contact",
+             *     "schema": "contact",
+             *     "cardinality": "one"
+             *   },
+             *   {
+             *     "id": "billing_accounts",
+             *     "schema": "billing_account",
+             *     "cardinality": "many"
+             *   }
+             * ]
+             */
+            nodes: GraphNode[];
+            /**
+             * List of edge definitions connecting nodes
+             * example:
+             * [
+             *   {
+             *     "from": "portal_user",
+             *     "to": "contact"
+             *   },
+             *   {
+             *     "from": "contact",
+             *     "to": "billing_accounts"
+             *   }
+             * ]
+             */
+            edges: GraphEdge[];
+        }
+        export interface GraphEdge {
+            /**
+             * Source node ID
+             * example:
+             * contact
+             */
+            from: string;
+            /**
+             * Target node ID
+             * example:
+             * billing_account
+             */
+            to: string;
+        }
+        export interface GraphNode {
+            /**
+             * Unique identifier for this node in the graph definition
+             * example:
+             * contact
+             */
+            id: string;
+            /**
+             * Entity schema slug for this node
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * Optional cardinality for this node when used with hydrate=true:
+             * - "one": Node can only contain one entity, return single Entity object in entityNodes
+             * - "many": Node can contain multiple entities, return array of Entity objects in entityNodes
+             * If not specified, defaults to "many" (returns array). The seed node always returns a single entity regardless of this setting.
+             *
+             * example:
+             * one
+             */
+            cardinality?: "one" | "many";
+            /**
+             * Optional array of field names to include in the hydrated entity response for this node.
+             * When specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.
+             * Only applies when hydrate=true.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            fields?: string[];
+        }
+        export interface GraphQueryRequest {
+            seed: GraphSeed;
+            graph: GraphDefinition;
+            /**
+             * If true, return full entity objects in entityNodes instead of just entity IDs in nodes
+             */
+            hydrate?: boolean;
+        }
+        export interface GraphQueryResponse {
+            /**
+             * Map of node IDs to arrays of entity IDs found for that node (present when hydrate=false)
+             * example:
+             * {
+             *   "portal_user": [
+             *     "550e8400-e29b-41d4-a716-446655440001"
+             *   ],
+             *   "contact": [
+             *     "550e8400-e29b-41d4-a716-446655440002"
+             *   ],
+             *   "billing_accounts": [
+             *     "550e8400-e29b-41d4-a716-446655440003",
+             *     "550e8400-e29b-41d4-a716-446655440004"
+             *   ]
+             * }
+             */
+            nodes?: {
+                [name: string]: EntityId /* uuid */[];
+            };
+            /**
+             * Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).
+             * The seed node always returns a single Entity object.
+             * Other nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.
+             *
+             * example:
+             * {
+             *   "portal_user": {
+             *     "_id": "550e8400-e29b-41d4-a716-446655440001",
+             *     "_schema": "portal_user"
+             *   },
+             *   "contact": {
+             *     "_id": "550e8400-e29b-41d4-a716-446655440002",
+             *     "_schema": "contact"
+             *   },
+             *   "billing_accounts": [
+             *     {
+             *       "_id": "550e8400-e29b-41d4-a716-446655440003",
+             *       "_schema": "billing_account"
+             *     },
+             *     {
+             *       "_id": "550e8400-e29b-41d4-a716-446655440004",
+             *       "_schema": "billing_account"
+             *     }
+             *   ]
+             * }
+             */
+            entityNodes?: {
+                [name: string]: /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456"
+                 *     ]
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
+                 * }
+                 */
+                Entity | /**
+                 * example:
+                 * {
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "_org": "123",
+                 *   "_owners": [
+                 *     {
+                 *       "org_id": "123",
+                 *       "user_id": "123"
+                 *     }
+                 *   ],
+                 *   "_schema": "contact",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z",
+                 *   "_acl": {
+                 *     "view": [
+                 *       "org:456",
+                 *       "org:789"
+                 *     ],
+                 *     "edit": [
+                 *       "org:456"
+                 *     ],
+                 *     "delete": [
+                 *       "org:456"
+                 *     ]
+                 *   },
+                 *   "_manifest": [
+                 *     "123e4567-e89b-12d3-a456-426614174000"
+                 *   ]
+                 * }
+                 */
+                Entity[];
+            };
+            /**
+             * List of edges as defined in the request
+             * example:
+             * [
+             *   {
+             *     "from": "portal_user",
+             *     "to": "contact"
+             *   },
+             *   {
+             *     "from": "contact",
+             *     "to": "billing_accounts"
+             *   }
+             * ]
+             */
+            edges: GraphEdge[];
+        }
+        export interface GraphSeed {
+            entity_id: EntityId /* uuid */;
+            /**
+             * The node ID in the graph definition that corresponds to the seed entity
+             * example:
+             * contact
+             */
+            node_id: string;
         }
         export interface GroupHeadline {
             id?: string; // uuid
@@ -4805,6 +5227,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -4946,6 +5375,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5086,6 +5522,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -5236,6 +5679,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5385,6 +5835,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5528,6 +5985,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -5686,6 +6150,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5832,6 +6303,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5972,6 +6450,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -6114,6 +6599,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6254,6 +6746,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -6396,6 +6895,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6536,6 +7042,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -6678,6 +7191,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6819,6 +7339,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6959,6 +7486,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -7115,6 +7649,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * Relations are always repeatables
              */
@@ -7466,6 +8007,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -8008,6 +8556,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -8156,6 +8711,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -8314,6 +8876,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -8552,6 +9121,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -8586,11 +9162,16 @@ declare namespace Components {
              */
             kind?: "system" | "user_defined";
             /**
-             * Type of taxonomy. Whether it classifies entities or relations.
+             * Type of taxonomy. Whether it classifies:
+             * - entity (default)
+             * - relation (for relations)
+             * - system (for system taxonomies - default for all slugs starting with _system_)
+             * - file_collection (for file collections)
+             *
              * example:
              * entity
              */
-            type?: "entity" | "relation";
+            type?: "entity" | "relation" | "system" | "file_collection";
             /**
              * Icon name for the taxonomy (from epilot360/icons icon set)
              * example:
@@ -8882,6 +9463,13 @@ declare namespace Components {
                 hint_tooltip_placement?: string;
             };
             /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -9035,6 +9623,13 @@ declare namespace Components {
                  */
                 hint_tooltip_placement?: string;
             };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -11042,7 +11637,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -11068,7 +11663,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -11519,6 +12114,30 @@ declare namespace Paths {
         export type RequestBody = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
         namespace Responses {
             export type $200 = /* a readonly computed ID for the entity group headline including schema slug and the headline ID */ Components.Schemas.GroupHeadlineWithCompositeID;
+        }
+    }
+    namespace QueryEntityGraph {
+        export type RequestBody = Components.Schemas.GraphQueryRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GraphQueryResponse;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
         }
     }
     namespace ReindexEntity {
@@ -12410,6 +13029,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * listSchemas - listSchemas
@@ -12589,6 +13209,22 @@ export interface OperationMethods {
     data?: Paths.ListEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListEntities.Responses.$200>
+  /**
+   * queryEntityGraph - queryEntityGraph
+   * 
+   * Traverse an entity relationship graph starting from a seed entity.
+   * 
+   * Define the shape of the graph using nodes (entity schemas) and edges (relationships with cardinality).
+   * The API will traverse the graph bidirectionally and return all discovered entity IDs.
+   * 
+   * Example: Find all entities connected to a contact through portal_user -> contact -> billing_account -> files
+   * 
+   */
+  'queryEntityGraph'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.QueryEntityGraph.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryEntityGraph.Responses.$200>
   /**
    * createEntity - createEntity
    * 
@@ -13692,6 +14328,24 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListEntities.Responses.$200>
   }
+  ['/v1/entity:graph']: {
+    /**
+     * queryEntityGraph - queryEntityGraph
+     * 
+     * Traverse an entity relationship graph starting from a seed entity.
+     * 
+     * Define the shape of the graph using nodes (entity schemas) and edges (relationships with cardinality).
+     * The API will traverse the graph bidirectionally and return all discovered entity IDs.
+     * 
+     * Example: Find all entities connected to a contact through portal_user -> contact -> billing_account -> files
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.QueryEntityGraph.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryEntityGraph.Responses.$200>
+  }
   ['/v1/entity/{slug}']: {
     /**
      * createEntity - createEntity
@@ -14694,10 +15348,12 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
+export type ActivityType = Components.Schemas.ActivityType;
 export type AddressAttribute = Components.Schemas.AddressAttribute;
 export type AddressRelationAttribute = Components.Schemas.AddressRelationAttribute;
 export type Attribute = Components.Schemas.Attribute;
@@ -14763,6 +15419,12 @@ export type GenerateEntityTableAIFiltersResponse = Components.Schemas.GenerateEn
 export type GetRelatedEntitiesCount = Components.Schemas.GetRelatedEntitiesCount;
 export type GetRelationsResp = Components.Schemas.GetRelationsResp;
 export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsRespWithPagination;
+export type GraphDefinition = Components.Schemas.GraphDefinition;
+export type GraphEdge = Components.Schemas.GraphEdge;
+export type GraphNode = Components.Schemas.GraphNode;
+export type GraphQueryRequest = Components.Schemas.GraphQueryRequest;
+export type GraphQueryResponse = Components.Schemas.GraphQueryResponse;
+export type GraphSeed = Components.Schemas.GraphSeed;
 export type GroupHeadline = Components.Schemas.GroupHeadline;
 export type GroupHeadlineWithCompositeID = Components.Schemas.GroupHeadlineWithCompositeID;
 export type HydratedEntity = Components.Schemas.HydratedEntity;

@@ -9071,6 +9071,10 @@ declare namespace Components {
         export interface SearchExternalCatalogParams {
             context: JourneyContext;
         }
+        export interface SearchExternalCatalogRecommendationsResult {
+            source: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem;
+            offers: /* An external product & price information (already computed) from an external catalog. */ ExternalCatalogItem[];
+        }
         export interface SearchExternalCatalogResult {
             /**
              * The number of results returned.
@@ -9633,7 +9637,7 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
-    namespace $SearchExternalCatalog {
+    namespace $SearchExternalProducts {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
         }
@@ -9647,7 +9651,7 @@ declare namespace Paths {
             export type $403 = Components.Schemas.Error;
         }
     }
-    namespace $SearchExternalProducts {
+    namespace $SearchExternalProductsRecommendation {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
         }
@@ -9656,7 +9660,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
         namespace Responses {
-            export type $200 = Components.Schemas.SearchExternalCatalogResult;
+            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
         }
@@ -11012,16 +11016,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$AverageMarketPrice.Responses.$200>
   /**
-   * $searchExternalCatalog - searchExternalCatalog
-   * 
-   * Returns the list of available products (including computed prices) based on a given context.
-   */
-  '$searchExternalCatalog'(
-    parameters?: Parameters<Paths.$SearchExternalCatalog.PathParameters> | null,
-    data?: Paths.$SearchExternalCatalog.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
-  /**
    * $searchExternalProducts - searchExternalProducts
    * 
    * Returns the list of available products with computed prices based on a given context and for a given org integration.
@@ -11031,6 +11025,16 @@ export interface OperationMethods {
     data?: Paths.$SearchExternalProducts.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
+  /**
+   * $searchExternalProductsRecommendation - searchExternalProductsRecommendation
+   * 
+   * Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.
+   */
+  '$searchExternalProductsRecommendation'(
+    parameters?: Parameters<Paths.$SearchExternalProductsRecommendation.PathParameters> | null,
+    data?: Paths.$SearchExternalProductsRecommendation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchExternalProductsRecommendation.Responses.$200>
   /**
    * $searchProviders - searchProviders
    * 
@@ -11247,18 +11251,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$AverageMarketPrice.Responses.$200>
   }
-  ['/v1/public/integration/{integrationId}/external-catalog']: {
-    /**
-     * $searchExternalCatalog - searchExternalCatalog
-     * 
-     * Returns the list of available products (including computed prices) based on a given context.
-     */
-    'post'(
-      parameters?: Parameters<Paths.$SearchExternalCatalog.PathParameters> | null,
-      data?: Paths.$SearchExternalCatalog.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$SearchExternalCatalog.Responses.$200>
-  }
   ['/v1/public/integration/{integrationId}/products']: {
     /**
      * $searchExternalProducts - searchExternalProducts
@@ -11270,6 +11262,18 @@ export interface PathsDictionary {
       data?: Paths.$SearchExternalProducts.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
+  }
+  ['/v1/public/integration/{integrationId}/products-recommendation']: {
+    /**
+     * $searchExternalProductsRecommendation - searchExternalProductsRecommendation
+     * 
+     * Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.
+     */
+    'post'(
+      parameters?: Parameters<Paths.$SearchExternalProductsRecommendation.PathParameters> | null,
+      data?: Paths.$SearchExternalProductsRecommendation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchExternalProductsRecommendation.Responses.$200>
   }
   ['/v1/public/integration/{integrationId}/providers:search']: {
     /**
@@ -11472,6 +11476,7 @@ export type RedeemedPromo = Components.Schemas.RedeemedPromo;
 export type SalesTax = Components.Schemas.SalesTax;
 export type SaveIntegrationCredentialsParams = Components.Schemas.SaveIntegrationCredentialsParams;
 export type SearchExternalCatalogParams = Components.Schemas.SearchExternalCatalogParams;
+export type SearchExternalCatalogRecommendationsResult = Components.Schemas.SearchExternalCatalogRecommendationsResult;
 export type SearchExternalCatalogResult = Components.Schemas.SearchExternalCatalogResult;
 export type SearchProvidersParams = Components.Schemas.SearchProvidersParams;
 export type SearchProvidersResult = Components.Schemas.SearchProvidersResult;

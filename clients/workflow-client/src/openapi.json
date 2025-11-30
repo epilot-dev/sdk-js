@@ -2049,9 +2049,10 @@
           "PENDING",
           "CONDITION_PENDING",
           "WAITING_FOR_CONFIRMATION",
+          "ON_HOLD",
           "FAILED"
         ],
-        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
+        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
       },
       "SectionStatus": {
         "type": "string",
@@ -2592,6 +2593,117 @@
           "target"
         ]
       },
+      "EntitySync": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "object",
+            "description": "Trigger configuration that determines when entity sync occurs.\nContains the event type and optional filter to target specific tasks/phases.\n",
+            "required": [
+              "event"
+            ],
+            "properties": {
+              "event": {
+                "type": "string",
+                "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
+                "enum": [
+                  "FlowStarted",
+                  "FlowCompleted",
+                  "FlowCancelled",
+                  "FlowReopened",
+                  "FlowDeleted",
+                  "FlowAssigned",
+                  "FlowDueDateChanged",
+                  "FlowContextsChanged",
+                  "TaskUpdated",
+                  "CurrTaskChanged",
+                  "TaskCompleted",
+                  "TaskSkipped",
+                  "TaskMarkedInProgress",
+                  "PhaseUpdated",
+                  "PhaseCompleted",
+                  "PhaseSkipped",
+                  "PhaseMarkedInProgress"
+                ]
+              },
+              "filter": {
+                "type": "object",
+                "description": "Optional filter to target specific tasks or phases.\nSpecify either task_template_id OR phase_template_id (mutually exclusive).\nIf omitted, trigger applies to all tasks/phases.\n",
+                "properties": {
+                  "task_template_id": {
+                    "type": "string",
+                    "description": "Target a specific task by its template ID (stable across executions)"
+                  },
+                  "phase_template_id": {
+                    "type": "string",
+                    "description": "Target a specific phase by its template ID (stable across executions)"
+                  }
+                }
+              }
+            }
+          },
+          "value": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "workflow_name",
+                  "workflow_status",
+                  "workflow_assigned_to",
+                  "task_name",
+                  "task_status",
+                  "task_assigned_to",
+                  "phase_name",
+                  "phase_status",
+                  "phase_assigned_to",
+                  "custom_value"
+                ]
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "title"
+              }
+            },
+            "required": [
+              "entitySchema",
+              "entityAttribute"
+            ]
+          }
+        },
+        "example": {
+          "trigger": {
+            "event": "FlowStarted"
+          },
+          "target": {
+            "entitySchema": "opportunity",
+            "entityAttribute": "title"
+          },
+          "value": {
+            "source": "workflow_name"
+          }
+        },
+        "required": [
+          "trigger",
+          "target",
+          "value"
+        ]
+      },
       "DynamicDueDate": {
         "description": "set a Duedate for a step then a specific",
         "type": "object",
@@ -2840,10 +2952,10 @@
             "type": "boolean",
             "description": "Indicates whether this flow execution is available for End Customer Portal or not. By default it's not."
           },
-          "update_entity_attributes": {
+          "entity_sync": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UpdateEntityAttributes"
+              "$ref": "#/components/schemas/EntitySync"
             }
           },
           "taxonomies": {

@@ -158,6 +158,18 @@
         "responses": {}
       }
     },
+    "/v1/entity:graph": {
+      "post": {
+        "operationId": "queryEntityGraph",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/entity/{slug}": {
       "post": {
         "operationId": "createEntity",
@@ -993,7 +1005,8 @@
           },
           {
             "in": "query",
-            "name": "permanent"
+            "name": "permanent",
+            "default": false
           }
         ],
         "responses": {}
@@ -1531,6 +1544,11 @@
       }
     },
     "responses": {
+      "BadRequestError": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "NotFoundError": {
         "content": {
           "application/json": {}
