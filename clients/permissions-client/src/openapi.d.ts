@@ -881,6 +881,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * listCurrentRoles - listCurrentRoles
@@ -1170,6 +1171,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Assignment = Components.Schemas.Assignment;
 export type Assignments = Components.Schemas.Assignments;
