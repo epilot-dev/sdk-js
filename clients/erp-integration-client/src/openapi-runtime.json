@@ -205,6 +205,29 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}/history": {
+      "get": {
+        "operationId": "listUseCaseHistory",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -270,10 +293,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    }
-  ]
+  }
 }

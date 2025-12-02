@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.12.0",
+    "version": "0.13.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -1104,6 +1104,85 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}/history": {
+      "get": {
+        "operationId": "listUseCaseHistory",
+        "summary": "List use case configuration history",
+        "description": "Retrieve historical versions of a use case's configuration.\nHistory entries are returned in reverse chronological order (newest first).\nUse the 'cursor' parameter for pagination to fetch additional entries.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque pagination cursor. Pass the 'next_cursor' value from a previous\nresponse to fetch the next page of results.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJwayI6Ik9SRyMxMjM0NSIsInNrIjoiSU5URUdSQVRJT04jLi4uIn0="
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved use case history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "history"
+                  ],
+                  "properties": {
+                    "history": {
+                      "type": "array",
+                      "description": "History entries in reverse chronological order (newest first)",
+                      "items": {
+                        "$ref": "#/components/schemas/UseCaseHistoryEntry"
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "description": "Opaque cursor for fetching the next page. Absent if no more pages."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -1615,7 +1694,12 @@
             "description": "Whether the use case is enabled"
           },
           "configuration": {
-            "$ref": "#/components/schemas/IntegrationEvent"
+            "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Description of the last change made to this use case"
           },
           "created_at": {
             "type": "string",
@@ -1667,9 +1751,12 @@
             "description": "Whether the use case is enabled"
           },
           "configuration": {
-            "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
+            "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Description of the last change made to this use case"
           },
           "created_at": {
             "type": "string",
@@ -1684,6 +1771,23 @@
         }
       },
       "CreateUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreateInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/CreateOutboundUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/CreateInboundUseCaseRequest",
+            "outbound": "#/components/schemas/CreateOutboundUseCaseRequest"
+          }
+        }
+      },
+      "CreateUseCaseRequestBase": {
         "type": "object",
         "required": [
           "name",
@@ -1697,26 +1801,80 @@
             "maxLength": 255,
             "description": "Use case name"
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Use case type"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the use case is enabled"
-          },
-          "configuration": {
-            "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
           }
         }
       },
+      "CreateInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "CreateOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UpdateUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UpdateInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateOutboundUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/UpdateInboundUseCaseRequest",
+            "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest"
+          }
+        }
+      },
+      "UpdateUseCaseRequestBase": {
         "type": "object",
         "properties": {
           "name": {
@@ -1725,24 +1883,185 @@
             "maxLength": 255,
             "description": "Use case name"
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Use case type"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the use case is enabled"
           },
-          "configuration": {
-            "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional description of this change (like a commit message)"
           }
         }
+      },
+      "UpdateInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UseCaseHistoryEntry": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InboundUseCaseHistoryEntry"
+          },
+          {
+            "$ref": "#/components/schemas/OutboundUseCaseHistoryEntry"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/InboundUseCaseHistoryEntry",
+            "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry"
+          }
+        }
+      },
+      "UseCaseHistoryEntryBase": {
+        "type": "object",
+        "required": [
+          "id",
+          "useCaseId",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at",
+          "history_created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this history entry"
+          },
+          "useCaseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Reference to the parent use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name at this point in history"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case was enabled at this point in history"
+          },
+          "change_description": {
+            "type": "string",
+            "description": "Description of the change that was made at this point in history"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was originally created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp of this historical snapshot (before the update)"
+          },
+          "history_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when this history entry was created"
+          }
+        }
+      },
+      "InboundUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "OutboundUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
       },
       "MappingSimulationRequest": {
         "type": "object",
@@ -1991,15 +2310,16 @@
                 "type": "object",
                 "description": "[v2.0] Event type mappings",
                 "additionalProperties": {
-                  "$ref": "#/components/schemas/IntegrationEvent"
+                  "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
                 }
               }
             }
           }
         }
       },
-      "IntegrationEvent": {
+      "InboundIntegrationEventConfiguration": {
         "type": "object",
+        "description": "Configuration for inbound use cases (ERP to epilot)",
         "properties": {
           "entities": {
             "type": "array",
@@ -2016,6 +2336,11 @@
             }
           }
         }
+      },
+      "OutboundIntegrationEventConfiguration": {
+        "type": "object",
+        "description": "Configuration for outbound use cases (epilot to ERP). Structure TBD.",
+        "additionalProperties": true
       },
       "IntegrationEntity": {
         "type": "object",
@@ -2300,10 +2625,5 @@
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    }
-  ]
+  }
 }

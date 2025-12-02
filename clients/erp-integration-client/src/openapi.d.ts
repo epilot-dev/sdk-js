@@ -29,6 +29,21 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResponseBase;
     }
     namespace Schemas {
+        export interface CreateInboundUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Use case type
+             */
+            type: "inbound";
+            configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+        }
         export interface CreateIntegrationRequest {
             /**
              * Integration name
@@ -39,25 +54,31 @@ declare namespace Components {
              */
             description?: string;
         }
-        export interface CreateUseCaseRequest {
+        export interface CreateOutboundUseCaseRequest {
             /**
              * Use case name
              */
             name: string;
             /**
-             * Use case type
-             */
-            type: "inbound" | "outbound";
-            /**
              * Whether the use case is enabled
              */
             enabled: boolean;
             /**
-             * Use case specific configuration
+             * Use case type
              */
-            configuration?: {
-                [name: string]: any;
-            };
+            type: "outbound";
+            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+        }
+        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest;
+        export interface CreateUseCaseRequestBase {
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
         }
         export interface DeleteIntegrationAppMappingRequest {
             /**
@@ -142,6 +163,19 @@ declare namespace Components {
              */
             message?: string;
         }
+        /**
+         * Configuration for inbound use cases (ERP to epilot)
+         */
+        export interface InboundIntegrationEventConfiguration {
+            /**
+             * Array of entity configurations for this event
+             */
+            entities?: IntegrationEntity[];
+            /**
+             * Array of meter reading configurations for this event
+             */
+            meter_readings?: IntegrationMeterReading[];
+        }
         export interface InboundUseCase {
             /**
              * Unique identifier for the use case
@@ -163,7 +197,11 @@ declare namespace Components {
              * Whether the use case is enabled
              */
             enabled: boolean;
-            configuration?: IntegrationEvent;
+            configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -172,6 +210,49 @@ declare namespace Components {
              * ISO-8601 timestamp when the use case was last updated
              */
             updated_at: string; // date-time
+        }
+        export interface InboundUseCaseHistoryEntry {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+            /**
+             * Use case type
+             */
+            type: "inbound";
+            configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
         }
         export interface Integration {
             /**
@@ -229,7 +310,7 @@ declare namespace Components {
                  * [v2.0] Event type mappings
                  */
                 events: {
-                    [name: string]: IntegrationEvent;
+                    [name: string]: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
                 };
             };
         }
@@ -277,16 +358,6 @@ declare namespace Components {
              */
             enabled?: /* Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted. */ boolean | string;
             relations?: RelationConfig;
-        }
-        export interface IntegrationEvent {
-            /**
-             * Array of entity configurations for this event
-             */
-            entities?: IntegrationEntity[];
-            /**
-             * Array of meter reading configurations for this event
-             */
-            meter_readings?: IntegrationMeterReading[];
         }
         export interface IntegrationFieldV1 {
             /**
@@ -389,6 +460,12 @@ declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
+        /**
+         * Configuration for outbound use cases (epilot to ERP). Structure TBD.
+         */
+        export interface OutboundIntegrationEventConfiguration {
+            [name: string]: any;
+        }
         export interface OutboundUseCase {
             /**
              * Unique identifier for the use case
@@ -410,12 +487,11 @@ declare namespace Components {
              * Whether the use case is enabled
              */
             enabled: boolean;
+            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
             /**
-             * Use case specific configuration
+             * Description of the last change made to this use case
              */
-            configuration?: {
-                [name: string]: any;
-            };
+            change_description?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -424,6 +500,49 @@ declare namespace Components {
              * ISO-8601 timestamp when the use case was last updated
              */
             updated_at: string; // date-time
+        }
+        export interface OutboundUseCaseHistoryEntry {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+            /**
+             * Use case type
+             */
+            type: "outbound";
+            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
         }
         export interface RelationConfig {
             /**
@@ -542,6 +661,25 @@ declare namespace Components {
             end_date?: string;
             event_id?: string;
         }
+        export interface UpdateInboundUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name?: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type?: "inbound";
+            configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+        }
         export interface UpdateIntegrationRequest {
             /**
              * Integration name
@@ -552,27 +690,80 @@ declare namespace Components {
              */
             description?: string;
         }
-        export interface UpdateUseCaseRequest {
+        export interface UpdateOutboundUseCaseRequest {
             /**
              * Use case name
              */
             name?: string;
             /**
+             * Whether the use case is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
              * Use case type
              */
-            type?: "inbound" | "outbound";
+            type?: "outbound";
+            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+        }
+        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest;
+        export interface UpdateUseCaseRequestBase {
+            /**
+             * Use case name
+             */
+            name?: string;
             /**
              * Whether the use case is enabled
              */
             enabled?: boolean;
             /**
-             * Use case specific configuration
+             * Optional description of this change (like a commit message)
              */
-            configuration?: {
-                [name: string]: any;
-            };
+            change_description?: string;
         }
         export type UseCase = InboundUseCase | OutboundUseCase;
+        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry;
+        export interface UseCaseHistoryEntryBase {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+        }
     }
 }
 declare namespace Paths {
@@ -716,6 +907,36 @@ declare namespace Paths {
                 integrations: Components.Schemas.Integration[];
             }
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListUseCaseHistory {
+        namespace Parameters {
+            export type Cursor = string;
+            export type IntegrationId = string; // uuid
+            export type UseCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            useCaseId: Parameters.UseCaseId /* uuid */;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * History entries in reverse chronological order (newest first)
+                 */
+                history: Components.Schemas.UseCaseHistoryEntry[];
+                /**
+                 * Opaque cursor for fetching the next page. Absent if no more pages.
+                 */
+                next_cursor?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -1015,6 +1236,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUseCase.Responses.$200>
   /**
+   * listUseCaseHistory - List use case configuration history
+   * 
+   * Retrieve historical versions of a use case's configuration.
+   * History entries are returned in reverse chronological order (newest first).
+   * Use the 'cursor' parameter for pagination to fetch additional entries.
+   * 
+   */
+  'listUseCaseHistory'(
+    parameters?: Parameters<Paths.ListUseCaseHistory.QueryParameters & Paths.ListUseCaseHistory.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
+  /**
    * setIntegrationAppMapping - Set integration app mapping
    * 
    * Creates or updates a mapping from an app/component to an integration.
@@ -1216,6 +1450,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUseCase.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/use-cases/{useCaseId}/history']: {
+    /**
+     * listUseCaseHistory - List use case configuration history
+     * 
+     * Retrieve historical versions of a use case's configuration.
+     * History entries are returned in reverse chronological order (newest first).
+     * Use the 'cursor' parameter for pagination to fetch additional entries.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListUseCaseHistory.QueryParameters & Paths.ListUseCaseHistory.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/app-mapping']: {
     /**
      * setIntegrationAppMapping - Set integration app mapping
@@ -1247,21 +1496,25 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
+export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseCaseRequest;
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
+export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
+export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
 export type Integration = Components.Schemas.Integration;
 export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
 export type IntegrationEntity = Components.Schemas.IntegrationEntity;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
-export type IntegrationEvent = Components.Schemas.IntegrationEvent;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
@@ -1269,13 +1522,20 @@ export type MappingSimulationRequest = Components.Schemas.MappingSimulationReque
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
+export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
+export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
+export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
+export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
 export type UseCase = Components.Schemas.UseCase;
+export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
+export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
