@@ -844,6 +844,11 @@
             "type": "string",
             "format": "email"
           },
+          "owner_email": {
+            "description": "A separate email where the invitation should be sent",
+            "type": "string",
+            "format": "email"
+          },
           "signed_up_email": {
             "description": "Email using to sign up",
             "type": "string",
@@ -1340,8 +1345,7 @@
             "type": "array",
             "description": "Role IDs that should be automatically assigned to this user upon creation",
             "items": {
-              "type": "string",
-              "description": null
+              "type": "string"
             },
             "example": [
               "role-123",
