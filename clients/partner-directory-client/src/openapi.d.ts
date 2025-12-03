@@ -487,6 +487,10 @@ declare namespace Components {
              */
             email?: string; // email
             /**
+             * A separate email where the invitation should be sent
+             */
+            owner_email?: string; // email
+            /**
              * Email using to sign up
              */
             signed_up_email?: string; // email
