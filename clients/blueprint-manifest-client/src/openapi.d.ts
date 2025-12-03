@@ -79,6 +79,24 @@ declare namespace Components {
             resources?: BlueprintResource[];
         }
         export type Blueprint = CustomBlueprint | FileBlueprint | MarketplaceBlueprint | DeployedBlueprint | AppBlueprint;
+        export interface BlueprintDependenciesSyncJob {
+            id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            events?: BlueprintJobEvent[];
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED";
+        }
         export interface BlueprintExportJob {
             id?: /**
              * ID of a job
@@ -139,7 +157,7 @@ declare namespace Components {
              */
             resources_to_ignore?: string[];
         }
-        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob;
+        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
             message?: string;
@@ -2018,8 +2036,13 @@ declare namespace Paths {
             blueprint_id: Parameters.BlueprintId;
         }
         namespace Responses {
-            export interface $200 {
-                resources?: Components.Schemas.BlueprintResource[];
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
             }
         }
     }
@@ -2312,7 +2335,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.SyncDependencies.Responses.$200>
+  ): OperationResponse<Paths.SyncDependencies.Responses.$202>
   /**
    * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
    * 
@@ -2647,7 +2670,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.SyncDependencies.Responses.$200>
+    ): OperationResponse<Paths.SyncDependencies.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk']: {
     /**
@@ -2758,6 +2781,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
+export type BlueprintDependenciesSyncJob = Components.Schemas.BlueprintDependenciesSyncJob;
 export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
 export type BlueprintID = Components.Schemas.BlueprintID;
 export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
