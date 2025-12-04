@@ -1,4 +1,4 @@
-# @epilot/notes-client
+# @epilot/purpose-client
 
 [![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)]()
 [![npm version](https://img.shields.io/npm/v/@epilot/purpose-client.svg)](https://www.npmjs.com/package/@epilot/purpose-client)
