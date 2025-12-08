@@ -2040,9 +2040,32 @@ declare namespace Components {
             AutomationExecutionId;
             execution_status: ExecutionStatus;
             /**
+             * Timestamp in UTC ISO format
+             * example:
+             * 2025-10-30T15:56:47.842Z
+             */
+            timestamp?: string; // date-time
+            /**
              * Error message for the failed automation execution
              */
             error?: string;
+        }
+        /**
+         * [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers.
+         */
+        export interface ExecutionChain {
+            /**
+             * ID of the parent flow execution that triggered this one
+             */
+            parent_execution_id?: string;
+            /**
+             * ID of the automation task that triggered this execution
+             */
+            parent_task_id?: string;
+            /**
+             * Current depth in the execution chain (0 = manual start)
+             */
+            depth?: number;
         }
         export type ExecutionStatus = "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
         export interface ExistsCondition {
@@ -3638,6 +3661,7 @@ declare namespace Components {
             workflow_exec_id: string;
             workflow_exec_task_id?: string;
             workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
+            _execution_chain?: /* [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers. */ ExecutionChain;
         }
     }
 }
@@ -4496,6 +4520,7 @@ export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
 export type ExecItem = Components.Schemas.ExecItem;
+export type ExecutionChain = Components.Schemas.ExecutionChain;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;

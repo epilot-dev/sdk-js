@@ -3099,6 +3099,27 @@
           },
           "workflow_role": {
             "$ref": "#/components/schemas/WorkflowContextRole"
+          },
+          "_execution_chain": {
+            "$ref": "#/components/schemas/ExecutionChain"
+          }
+        }
+      },
+      "ExecutionChain": {
+        "type": "object",
+        "description": "[Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers.",
+        "properties": {
+          "parent_execution_id": {
+            "type": "string",
+            "description": "ID of the parent flow execution that triggered this one"
+          },
+          "parent_task_id": {
+            "type": "string",
+            "description": "ID of the automation task that triggered this execution"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "Current depth in the execution chain (0 = manual start)"
           }
         }
       },
@@ -3608,6 +3629,12 @@
           },
           "execution_status": {
             "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp in UTC ISO format",
+            "example": "2025-10-30T15:56:47.842Z"
           },
           "error": {
             "type": "string",
@@ -4590,6 +4617,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://automation.sls.epilot.io"
+    },
     {
       "url": "https://automation.sls.epilot.io"
     }
