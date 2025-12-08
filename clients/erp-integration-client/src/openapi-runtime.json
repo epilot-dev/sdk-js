@@ -50,6 +50,18 @@
         "responses": {}
       }
     },
+    "/v2/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMappingV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/erp/updates/mapping_simulation": {
       "post": {
         "operationId": "simulateMapping",
