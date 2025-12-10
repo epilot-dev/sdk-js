@@ -19,6 +19,14 @@
       "description": "Integration and Use Case management endpoints"
     }
   ],
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    },
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    }
+  ],
   "security": [
     {
       "EpilotAuth": []
@@ -1090,6 +1098,55 @@
           },
           "404": {
             "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/events": {
+      "post": {
+        "operationId": "queryEvents",
+        "summary": "queryEvents",
+        "description": "Query events for a specific integration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -2945,11 +3002,72 @@
             "description": "Constant value (any type)"
           }
         }
+      },
+      "QueryEventsRequest": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "Filter by event ID"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ],
+            "description": "Filter by event type"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Filter by correlation ID"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Filter by object type"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 25,
+            "default": 25,
+            "minimum": 1,
+            "maximum": 25
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination. Use the next_cursor from the previous response to get the next page.",
+            "properties": {
+              "event_time": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page",
+                "example": "2025-10-31T12:34:56Z"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page",
+                "example": "evt_1234567890abcdef"
+              }
+            }
+          }
+        }
       }
     },
     "responses": {
       "BadRequest": {
         "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
         "content": {
           "application/json": {
             "schema": {
@@ -3024,6 +3142,46 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/TriggerWebhookResp"
+            }
+          }
+        }
+      },
+      "QueryEventsResponse": {
+        "description": "Events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ErpEvent"
+                  },
+                  "description": "List of erp events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-10-31T12:34:56Z"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "example": "evt_1234567890abcdef"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available",
+                  "example": true
+                }
+              }
             }
           }
         }
