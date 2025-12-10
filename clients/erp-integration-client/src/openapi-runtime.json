@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/v1/erp/tracking/acknowledgement": {
       "post": {
@@ -43,6 +48,18 @@
       "post": {
         "operationId": "processErpUpdatesEventsV2",
         "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMappingV2",
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -116,6 +133,25 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/events": {
+      "post": {
+        "operationId": "queryEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -272,6 +308,11 @@
           "application/json": {}
         }
       },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "Unauthorized": {
         "content": {
           "application/json": {}
@@ -288,6 +329,11 @@
         }
       },
       "TriggerWebhookResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryEventsResponse": {
         "content": {
           "application/json": {}
         }

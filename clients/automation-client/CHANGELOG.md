@@ -1,5 +1,11 @@
 # @epilot/automation-client
 
+## 2.25.0
+
+### Minor Changes
+
+- Add support for internal execution chain to prevent infinite loops
+
 ## 2.24.2
 
 ### Patch Changes
