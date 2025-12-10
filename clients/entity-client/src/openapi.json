@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
