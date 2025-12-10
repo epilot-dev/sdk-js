@@ -9307,6 +9307,10 @@ declare namespace Components {
              */
             starred?: boolean;
             /**
+             * List of locations where the classification is enabled to be used. If empty, it's enabled for all locations.
+             */
+            enabled_locations?: (TaxonomyLocationId | string)[];
+            /**
              * Manifest ID used to create/update the taxonomy classification
              */
             _manifest?: string /* uuid */[] | null;

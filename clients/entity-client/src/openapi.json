@@ -8772,6 +8772,20 @@
             "description": "Starred taxonomy classifications can represent \"favorites\" or commonly used classifications",
             "default": false
           },
+          "enabled_locations": {
+            "description": "List of locations where the classification is enabled to be used. If empty, it's enabled for all locations.",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TaxonomyLocationId"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
           "_manifest": {
             "type": "array",
             "description": "Manifest ID used to create/update the taxonomy classification",
