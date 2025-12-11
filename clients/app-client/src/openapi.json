@@ -2070,17 +2070,52 @@
           }
         ]
       },
+      "SandboxCustomActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCustomActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "sandbox"
+                ]
+              },
+              "sandbox_settings": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.\n",
+                    "maxLength": 307200
+                  }
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
       "CustomFlowConfig": {
         "type": "object",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/SandboxCustomActionConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig",
+            "sandbox": "#/components/schemas/SandboxCustomActionConfig"
           }
         }
       },

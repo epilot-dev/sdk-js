@@ -821,7 +821,7 @@ declare namespace Components {
                 flow_action_config?: AppBridgeSurfaceConfig;
             };
         }
-        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig;
+        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig | SandboxCustomActionConfig;
         export interface EnumArg {
             type?: "enum";
             /**
@@ -1806,6 +1806,28 @@ declare namespace Components {
              * manifest.json
              */
             key: string;
+        }
+        export interface SandboxCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * Wait for callback_url to be called before completing the action
+             */
+            wait_for_callback?: boolean;
+            type: "sandbox";
+            sandbox_settings?: {
+                /**
+                 * JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.
+                 *
+                 */
+                code?: string;
+            };
         }
         export interface TextArg {
             type?: "text";
@@ -3048,5 +3070,6 @@ export type RawEvents = Components.Schemas.RawEvents;
 export type Review = Components.Schemas.Review;
 export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
+export type SandboxCustomActionConfig = Components.Schemas.SandboxCustomActionConfig;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
