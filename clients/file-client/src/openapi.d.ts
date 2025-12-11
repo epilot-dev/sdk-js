@@ -304,6 +304,15 @@ declare namespace Components {
              */
             order?: number;
             /**
+             * List of purpose slugs where the collection is enabled. If empty, enabled for all.
+             * example:
+             * [
+             *   "order",
+             *   "opportunity"
+             * ]
+             */
+            enabled_locations?: string[];
+            /**
              * Timestamp when the collection was created
              * example:
              * 2024-01-01T12:00:00Z
