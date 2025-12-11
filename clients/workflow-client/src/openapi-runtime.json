@@ -324,9 +324,24 @@
         "responses": {}
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "delete": {
+        "operationId": "cancelTaskSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
       "post": {
         "operationId": "cancelSchedule",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/ExecutionIdParam"

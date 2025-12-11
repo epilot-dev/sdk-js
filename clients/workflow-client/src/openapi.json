@@ -1257,11 +1257,11 @@
         }
       }
     },
-    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
-      "post": {
-        "operationId": "cancelSchedule",
-        "summary": "cancelSchedule",
-        "description": "Cancels a flow schedule, marking it as canceled.",
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "delete": {
+        "operationId": "cancelTaskSchedule",
+        "summary": "cancelTaskSchedule",
+        "description": "Cancels a scheduled task, deleting the schedule and marking the task as skipped.",
         "tags": [
           "Flows V2"
         ],
@@ -1270,11 +1270,11 @@
             "$ref": "#/components/parameters/ExecutionIdParam"
           },
           {
-            "$ref": "#/components/parameters/ScheduleIdParam"
+            "$ref": "#/components/parameters/TaskIdParam"
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Success - when schedule has been successfully canceled"
           },
           "400": {
@@ -1289,6 +1289,80 @@
           },
           "401": {
             "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "summary": "cancelSchedule",
+        "deprecated": true,
+        "description": "Cancels a flow schedule, marking it as canceled.\n\n**Deprecated**: Use DELETE /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule instead.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - when schedule has been successfully canceled"
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1963,6 +2037,10 @@
               },
               "lastUpdated": {
                 "type": "string"
+              },
+              "statusLastUpdated": {
+                "type": "string",
+                "description": "Last updated timestamp of the status"
               },
               "startedTime": {
                 "type": "string"
@@ -2945,6 +3023,27 @@
               "$ref": "#/components/schemas/Edge"
             }
           },
+          "_execution_chain": {
+            "type": "object",
+            "description": "[Internal] Tracks the chain of automation-originated executions to prevent infinite loops. This is an internal property and should not be used by external consumers.",
+            "properties": {
+              "parent_execution_id": {
+                "type": "string",
+                "description": "ID of the parent flow execution that triggered this execution via automation"
+              },
+              "parent_task_id": {
+                "type": "string",
+                "description": "ID of the automation task in the parent execution that triggered this"
+              },
+              "depth": {
+                "type": "integer",
+                "description": "The depth in the execution chain (0 for manual triggers, 1+ for automation-triggered)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 10
+              }
+            }
+          },
           "closing_reason": {
             "$ref": "#/components/schemas/FlowClosingReason"
           },
@@ -3508,6 +3607,11 @@
           "completed_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "status_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last updated timestamp of the status"
           },
           "in_progress_by": {
             "$ref": "#/components/schemas/UserId",

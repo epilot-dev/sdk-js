@@ -79,6 +79,10 @@ declare namespace Components {
             in_progress_at?: string; // date-time
             completed_at?: string; // date-time
             /**
+             * Last updated timestamp of the status
+             */
+            status_updated_at?: string; // date-time
+            /**
              * The user which moved the task/phase to IN_PROGRESS state.
              */
             in_progress_by?: /* The user id */ UserId;
@@ -546,6 +550,23 @@ declare namespace Components {
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
+            /**
+             * [Internal] Tracks the chain of automation-originated executions to prevent infinite loops. This is an internal property and should not be used by external consumers.
+             */
+            _execution_chain?: {
+                /**
+                 * ID of the parent flow execution that triggered this execution via automation
+                 */
+                parent_execution_id?: string;
+                /**
+                 * ID of the automation task in the parent execution that triggered this
+                 */
+                parent_task_id?: string;
+                /**
+                 * The depth in the execution chain (0 for manual triggers, 1+ for automation-triggered)
+                 */
+                depth?: number;
+            };
             closing_reason?: FlowClosingReason;
             /**
              * Indicates whether this flow execution is available for End Customer Portal or not. By default it's not.
@@ -928,6 +949,10 @@ declare namespace Components {
                 StepStatus;
                 created?: string;
                 lastUpdated?: string;
+                /**
+                 * Last updated timestamp of the status
+                 */
+                statusLastUpdated?: string;
                 startedTime?: string;
                 completedTime?: string;
                 dueDate?: string;
@@ -1060,6 +1085,10 @@ declare namespace Components {
             StepStatus;
             created?: string;
             lastUpdated?: string;
+            /**
+             * Last updated timestamp of the status
+             */
+            statusLastUpdated?: string;
             startedTime?: string;
             completedTime?: string;
             dueDate?: string;
@@ -1126,6 +1155,10 @@ declare namespace Components {
             StepStatus;
             created?: string;
             lastUpdated?: string;
+            /**
+             * Last updated timestamp of the status
+             */
+            statusLastUpdated?: string;
             startedTime?: string;
             completedTime?: string;
             dueDate?: string;
@@ -1382,6 +1415,10 @@ declare namespace Components {
             StepStatus;
             created?: string;
             lastUpdated?: string;
+            /**
+             * Last updated timestamp of the status
+             */
+            statusLastUpdated?: string;
             startedTime?: string;
             completedTime?: string;
             dueDate?: string;
@@ -1756,10 +1793,29 @@ declare namespace Paths {
             schedule_id: Parameters.ScheduleId;
         }
         namespace Responses {
-            export interface $200 {
+            export interface $204 {
             }
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace CancelTaskSchedule {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -2436,15 +2492,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddTask.Responses.$201>
   /**
+   * cancelTaskSchedule - cancelTaskSchedule
+   * 
+   * Cancels a scheduled task, deleting the schedule and marking the task as skipped.
+   */
+  'cancelTaskSchedule'(
+    parameters?: Parameters<Paths.CancelTaskSchedule.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
+  /**
    * cancelSchedule - cancelSchedule
    * 
    * Cancels a flow schedule, marking it as canceled.
+   * 
+   * **Deprecated**: Use DELETE /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule instead.
+   * 
    */
   'cancelSchedule'(
     parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CancelSchedule.Responses.$200>
+  ): OperationResponse<Paths.CancelSchedule.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -2691,17 +2760,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddTask.Responses.$201>
   }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule']: {
+    /**
+     * cancelTaskSchedule - cancelTaskSchedule
+     * 
+     * Cancels a scheduled task, deleting the schedule and marking the task as skipped.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.CancelTaskSchedule.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
+  }
   ['/v2/flows/executions/{execution_id}/schedules/{schedule_id}']: {
     /**
      * cancelSchedule - cancelSchedule
      * 
      * Cancels a flow schedule, marking it as canceled.
+     * 
+     * **Deprecated**: Use DELETE /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule instead.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CancelSchedule.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CancelSchedule.Responses.$200>
+    ): OperationResponse<Paths.CancelSchedule.Responses.$204>
   }
 }
 
