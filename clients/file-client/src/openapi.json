@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "Upload and manage epilot Files\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -2009,6 +2009,17 @@
             "type": "number",
             "description": "Display order for the collection",
             "example": 0
+          },
+          "enabled_locations": {
+            "description": "List of purpose slugs where the collection is enabled. If empty, enabled for all.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "purpose:9eefcb98-93cf-4c5b-a040-f1d26d57c177",
+              "purpose:5c544c09-a691-43ed-a7fa-0a8b44b5b161"
+            ]
           },
           "created_at": {
             "type": "string",
