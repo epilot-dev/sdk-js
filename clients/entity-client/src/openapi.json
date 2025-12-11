@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -8771,6 +8771,20 @@
             "type": "boolean",
             "description": "Starred taxonomy classifications can represent \"favorites\" or commonly used classifications",
             "default": false
+          },
+          "enabled_locations": {
+            "description": "List of locations where the classification is enabled to be used. If empty, it's enabled for all locations.",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TaxonomyLocationId"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
           },
           "_manifest": {
             "type": "array",

@@ -25,6 +25,34 @@ declare namespace Components {
             }[];
         }
         export type InternalServerError = Schemas.ErrorResponseBase;
+        export type NotFound = Schemas.ErrorResponseBase;
+        export interface QueryEventsResponse {
+            /**
+             * List of erp events
+             */
+            data?: Schemas.ErpEvent[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                /**
+                 * example:
+                 * 2025-10-31T12:34:56Z
+                 */
+                created_at?: string; // date-time
+                /**
+                 * example:
+                 * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
+             * example:
+             * true
+             */
+            has_more?: boolean;
+        }
         export type TriggerWebhookResponse = Schemas.TriggerWebhookResp;
         export type Unauthorized = Schemas.ErrorResponseBase;
     }
@@ -569,6 +597,47 @@ declare namespace Components {
             type: "outbound";
             configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
         }
+        export interface QueryEventsRequest {
+            /**
+             * Filter by event ID
+             */
+            event_id?: string;
+            /**
+             * Filter by event type
+             */
+            event_type?: "CREATE" | "UPDATE" | "DELETE";
+            /**
+             * Filter by correlation ID
+             */
+            correlation_id?: string;
+            /**
+             * Filter by object type
+             */
+            object_type?: string;
+            /**
+             * Maximum number of results to return
+             * example:
+             * 25
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination. Use the next_cursor from the previous response to get the next page.
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last event in the previous page
+                 * example:
+                 * 2025-10-31T12:34:56Z
+                 */
+                event_time?: string; // date-time
+                /**
+                 * Event ID from the last event in the previous page
+                 * example:
+                 * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            };
+        }
         export interface RelationConfig {
             /**
              * Relation operation:
@@ -1095,6 +1164,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace QueryEvents {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.QueryEventsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.QueryEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SetIntegrationAppMapping {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -1313,6 +1398,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegration.Responses.$200>
+  /**
+   * queryEvents - queryEvents
+   * 
+   * Query events for a specific integration
+   */
+  'queryEvents'(
+    parameters?: Parameters<Paths.QueryEvents.PathParameters> | null,
+    data?: Paths.QueryEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryEvents.Responses.$200>
   /**
    * listUseCases - listUseCases
    * 
@@ -1542,6 +1637,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegration.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/events']: {
+    /**
+     * queryEvents - queryEvents
+     * 
+     * Query events for a specific integration
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryEvents.PathParameters> | null,
+      data?: Paths.QueryEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryEvents.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/use-cases']: {
     /**
      * listUseCases - listUseCases
@@ -1672,6 +1779,7 @@ export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
+export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationRefItemConfig = Components.Schemas.RelationRefItemConfig;
