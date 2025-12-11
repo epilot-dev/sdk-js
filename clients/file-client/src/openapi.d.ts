@@ -307,8 +307,8 @@ declare namespace Components {
              * List of purpose slugs where the collection is enabled. If empty, enabled for all.
              * example:
              * [
-             *   "order",
-             *   "opportunity"
+             *   "purpose:9eefcb98-93cf-4c5b-a040-f1d26d57c177",
+             *   "purpose:5c544c09-a691-43ed-a7fa-0a8b44b5b161"
              * ]
              */
             enabled_locations?: string[];
