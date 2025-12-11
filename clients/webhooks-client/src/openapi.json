@@ -311,201 +311,6 @@
         }
       }
     },
-    "/v1/webhooks/configs/{configId}/failures": {
-      "get": {
-        "operationId": "getFailuresForConfig",
-        "deprecated": true,
-        "summary": "getFailuresForConfig",
-        "description": "**Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.\n",
-        "tags": [
-          "webhooks"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "configId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "Short uuid to identify the webhook configuration.",
-            "example": "7hj28aasgag2gha2"
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedEventId",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, if pagination is needed.",
-            "example": "1f143bd2-f816-4d7d-b33d-056db6e1ef7b"
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedTimestamp",
-            "schema": {
-              "type": "string"
-            },
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FailuresResp"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No configuration found for this id",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/webhooks/failures": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getFailures",
-        "summary": "getFailures",
-        "description": "**Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.\n",
-        "tags": [
-          "webhooks"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "lastLoadedEventId",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, is pagination is needed.",
-            "example": "1f143bd2-f816-4d7d-b33d-056db6e1ef7b"
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedTimestamp",
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "description": "Optional Key. To be provided when loading paginated data. It is always returned initially by this API, is pagination is needed.",
-            "example": "2021:05:06T12:00:26.000Z"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success - if the API call returned successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FailuresResp"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/webhooks/failures/resend": {
-      "post": {
-        "deprecated": true,
-        "operationId": "resendFailure",
-        "summary": "resendFailure",
-        "description": "**Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.\n",
-        "tags": [
-          "webhooks"
-        ],
-        "requestBody": {
-          "description": "Resend payload",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FailureEntry"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Success - Payload has been resend"
-          },
-          "401": {
-            "description": "Authentication Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",
@@ -582,9 +387,10 @@
     },
     "/v1/webhooks/configs/{configId}/events": {
       "get": {
+        "deprecated": true,
         "operationId": "getWehookEvents",
         "summary": "getWehookEvents",
-        "description": "Get sent events for a given webhook config",
+        "description": "This endpoint is deprecated and will be removed on 2025-12-31. Use /v2/webhooks/configs/{configId}/events instead.",
         "tags": [
           "webhooks",
           "events"
@@ -649,6 +455,91 @@
           },
           "404": {
             "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/replay-batch": {
+      "post": {
+        "operationId": "batchReplayEvents",
+        "summary": "batchReplayEvents",
+        "description": "Replay a batch of webhook events",
+        "tags": [
+          "webhooks",
+          "events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "requestBody": {
+          "description": "Batch replay request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchReplayRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Success - enqueued events for replay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "replayed_event_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of event ids that were enqueued for replay"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No webhook config found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1237,166 +1128,6 @@
           }
         }
       },
-      "FailureLastKey": {
-        "type": "object",
-        "description": "Key of last loaded item previously returned via paginated response",
-        "properties": {
-          "orgId": {
-            "type": "string"
-          },
-          "eventId": {
-            "type": "string"
-          },
-          "creationTimestamp": {
-            "type": "string"
-          },
-          "webhookConfigId": {
-            "type": "string"
-          }
-        }
-      },
-      "FailuresResp": {
-        "type": "object",
-        "description": "Response for get errors request.",
-        "properties": {
-          "lastLoadedKey": {
-            "$ref": "#/components/schemas/FailureLastKey"
-          },
-          "failures": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FailureEntry"
-            }
-          }
-        },
-        "required": [
-          "failures"
-        ],
-        "example": {
-          "failures": [
-            {
-              "eventName": "customer_request_created,",
-              "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
-              "errorCode": "502",
-              "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
-              "creationTimestamp": "2021-04-13T17:43:40.576Z",
-              "orgId": "728",
-              "errorPayload": "Failed to store data",
-              "url": "https://63b2de56be27.ngrok.io",
-              "payload": {
-                "metadata": {
-                  "action": "created",
-                  "creation_timestamp": "2021-04-13T17:43:40.576Z",
-                  "event_name": "customer_request_created",
-                  "object": "customer_request",
-                  "organization_id": "728",
-                  "version": "1.0.0"
-                },
-                "customer_request": {
-                  "id": "TEST",
-                  "payment_details": {
-                    "account_owner_name": "Test",
-                    "bank_name": "Test Bank",
-                    "bic": "BIC",
-                    "iban": "IBAN",
-                    "payment_method": "sepa"
-                  },
-                  "request_items": [
-                    {
-                      "id": "TEST",
-                      "otherProp1": "test1",
-                      "otherProp2": "test2"
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "eventName": "customer_request_created",
-              "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-              "errorCode": "404",
-              "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
-              "creationTimestamp": "2021-04-13T17:43:40.576Z",
-              "orgId": "728",
-              "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
-              "url": "https://ef68038e3af9.ngrok.io",
-              "payload": {
-                "metadata": {
-                  "action": "created",
-                  "creation_timestamp": "2021-04-13T17:43:40.576Z",
-                  "event_name": "customer_request_created",
-                  "object": "customer_request",
-                  "organization_id": "728",
-                  "version": "1.0.0"
-                },
-                "customer_request": {
-                  "id": "TEST",
-                  "payment_details": {
-                    "account_owner_name": "Test",
-                    "bank_name": "Test Bank",
-                    "bic": "BIC",
-                    "iban": "IBAN",
-                    "payment_method": "sepa"
-                  },
-                  "request_items": [
-                    {
-                      "id": "TEST",
-                      "otherProp1": "test1",
-                      "otherProp2": true
-                    }
-                  ]
-                }
-              }
-            }
-          ],
-          "lastLoadedKey": {
-            "orgId": 6122,
-            "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-            "creationTimestamp": "2022:01:01T00:00:00.000Z"
-          }
-        }
-      },
-      "FailureEntry": {
-        "type": "object",
-        "description": "Failures stored in the database.",
-        "properties": {
-          "orgId": {
-            "type": "string",
-            "description": "The ID of the given organization"
-          },
-          "eventId": {
-            "type": "string",
-            "description": "ID of event. Unique"
-          },
-          "eventName": {
-            "type": "string",
-            "description": "Name for identifying the event. Unique."
-          },
-          "creationTimestamp": {
-            "type": "string",
-            "description": "Time of event creation"
-          },
-          "payload": {
-            "type": "object",
-            "description": "Contains the metadata about the configured event"
-          },
-          "webhookConfigId": {
-            "type": "string",
-            "description": "The ID of the webhook configuration"
-          },
-          "errorCode": {
-            "type": "string"
-          },
-          "errorPayload": {
-            "type": "string",
-            "description": "The error message encountered during webhook delivery"
-          },
-          "url": {
-            "type": "string",
-            "description": "destination url of configured webhook"
-          }
-        }
-      },
       "ErrorResp": {
         "type": "object",
         "properties": {
@@ -1552,6 +1283,7 @@
       "ExecutionPayload": {
         "type": "object",
         "description": "Payload for triggering a webhook",
+        "additionalProperties": true,
         "properties": {
           "metadata": {
             "$ref": "#/components/schemas/Metadata"
@@ -1661,6 +1393,27 @@
           }
         },
         "additionalProperties": true
+      },
+      "BatchReplayRequest": {
+        "type": "object",
+        "properties": {
+          "eventIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of event IDs to replay",
+            "minItems": 1,
+            "maxItems": 100,
+            "example": [
+              "2f1b7cf8-ff55-4359-966f-e56f39a52c94",
+              "48c984bf-466b-470b-b743-d07cea168243"
+            ]
+          }
+        },
+        "required": [
+          "eventIds"
+        ]
       }
     },
     "securitySchemes": {

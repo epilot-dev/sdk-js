@@ -1130,18 +1130,23 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Synced dependencies of all root resources in a Blueprint",
+          "202": {
+            "description": "Dependencies sync job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "resources": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BlueprintResource"
-                      }
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
                     }
                   }
                 }
@@ -1986,6 +1991,33 @@
           },
           {
             "$ref": "#/components/schemas/BlueprintInstallationJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintDependenciesSyncJob"
+          }
+        ]
+      },
+      "BlueprintDependenciesSyncJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "IN_PROGRESS",
+                  "SUCCESS",
+                  "FAILED",
+                  "CANCELED"
+                ]
+              }
+            }
           }
         ]
       },

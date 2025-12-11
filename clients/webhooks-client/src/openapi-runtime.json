@@ -75,62 +75,6 @@
         "responses": {}
       }
     },
-    "/v1/webhooks/configs/{configId}/failures": {
-      "get": {
-        "operationId": "getFailuresForConfig",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "configId",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedEventId",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedTimestamp",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v1/webhooks/failures": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getFailures",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "lastLoadedEventId",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "lastLoadedTimestamp",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v1/webhooks/failures/resend": {
-      "post": {
-        "deprecated": true,
-        "operationId": "resendFailure",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",
@@ -156,6 +100,7 @@
     },
     "/v1/webhooks/configs/{configId}/events": {
       "get": {
+        "deprecated": true,
         "operationId": "getWehookEvents",
         "parameters": [
           {
@@ -173,6 +118,25 @@
             "required": false
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/replay-batch": {
+      "post": {
+        "operationId": "batchReplayEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.18.0
+
+### Minor Changes
+
+- Add new cancel schedule endpoint & deprecate old one
+
 ## 1.16.0
 
 ### Minor Changes

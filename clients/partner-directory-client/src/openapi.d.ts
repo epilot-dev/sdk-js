@@ -81,6 +81,17 @@ declare namespace Components {
              */
             relevance?: number;
         }
+        export interface AssignRolesPayload {
+            /**
+             * Array of role IDs to assign/unassign
+             * example:
+             * [
+             *   "role-123",
+             *   "role-456"
+             * ]
+             */
+            roleIds: string[];
+        }
         export type Assignable = AssignableUser | AssignablePartnerUser | AssignableOrganization | AssignableEcpPlaceholder | AssignableGroup;
         export interface AssignableEcpPlaceholder {
             /**
@@ -110,6 +121,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             /**
              * example:
              * 456
@@ -151,6 +173,17 @@ declare namespace Components {
             OrganizationId;
             /**
              * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * example:
              * 456
              */
             group_id?: string;
@@ -183,6 +216,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             partner_id: /**
              * example:
              * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
@@ -234,6 +278,17 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
             partner_id?: /**
              * example:
              * e45a6dc2-3795-43a3-ae0f-6b6760f310fc
@@ -280,6 +335,17 @@ declare namespace Components {
             OrganizationId;
             /**
              * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+            /**
+             * example:
              * 456
              */
             user_id?: string;
@@ -317,6 +383,40 @@ declare namespace Components {
              * 123
              */
             OrganizationId;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            created_at?: string;
+            /**
+             * example:
+             * 2022-02-08T04:44:32.246Z
+             */
+            activated_at?: string;
+            status?: "Active" | "Pending" | "Deactivated" | "Deleted";
+        }
+        export interface CreatePartnerUserPayload {
+            /**
+             * User email address
+             * example:
+             * user@example.com
+             */
+            email: string; // email
+            /**
+             * User language
+             * example:
+             * en
+             */
+            language?: "en" | "de";
+            /**
+             * Role IDs that should be automatically assigned to this user upon creation
+             * example:
+             * [
+             *   "role-123",
+             *   "role-456"
+             * ]
+             */
+            roles?: string[];
         }
         export interface Geolocation {
             /**
@@ -387,6 +487,10 @@ declare namespace Components {
              */
             email?: string; // email
             /**
+             * A separate email where the invitation should be sent
+             */
+            owner_email?: string; // email
+            /**
              * Email using to sign up
              */
             signed_up_email?: string; // email
@@ -409,6 +513,91 @@ declare namespace Components {
              */
             language?: "en" | "de";
         }
+        export interface PartnerRole {
+            /**
+             * Role ID
+             * example:
+             * role-123
+             */
+            id: string;
+            /**
+             * Role slug
+             * example:
+             * admin
+             */
+            slug: string;
+            /**
+             * Role name
+             * example:
+             * Administrator
+             */
+            name: string;
+            /**
+             * Role type
+             * example:
+             * share_role
+             */
+            type?: string;
+        }
+        export interface PartnerUser {
+            /**
+             * User ID
+             * example:
+             * 456
+             */
+            id: string;
+            /**
+             * User name
+             * example:
+             * John Doe
+             */
+            name?: string;
+            /**
+             * User email
+             * example:
+             * user@example.com
+             */
+            email: string; // email
+            /**
+             * User status
+             * example:
+             * Active
+             */
+            status: string;
+            image?: {
+                /**
+                 * Original image URI
+                 */
+                original?: string; // uri
+                /**
+                 * Thumbnail image URI (32x32)
+                 */
+                thumbnail_32?: string; // uri
+            };
+            /**
+             * List of roles assigned to the user
+             */
+            roles: {
+                /**
+                 * Role ID
+                 * example:
+                 * role-123
+                 */
+                id: string;
+                /**
+                 * Role slug
+                 * example:
+                 * admin
+                 */
+                slug: string;
+                /**
+                 * Role name
+                 * example:
+                 * Administrator
+                 */
+                name: string;
+            }[];
+        }
         export interface SearchGeolocation {
             /**
              * Address text to convert into geolocation coordinates
@@ -416,6 +605,32 @@ declare namespace Components {
              * Auweg 1, 93055 Regensburg, DE
              */
             address: string;
+        }
+        export interface User {
+            /**
+             * User ID
+             * example:
+             * 456
+             */
+            id?: string;
+            /**
+             * User email
+             * example:
+             * user@example.com
+             */
+            email?: string; // email
+            /**
+             * User display name
+             * example:
+             * John Doe
+             */
+            display_name?: string;
+            /**
+             * User status
+             * example:
+             * Active
+             */
+            status?: string;
         }
     }
 }
@@ -452,6 +667,39 @@ declare namespace Paths {
             }
         }
     }
+    namespace AssignPartnerUserRoles {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+            userId: Parameters.UserId;
+        }
+        export type RequestBody = Components.Schemas.AssignRolesPayload;
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    roleId?: string;
+                    success?: boolean;
+                    data?: {
+                        [key: string]: any;
+                    };
+                    error?: {
+                        [key: string]: any;
+                    };
+                }[];
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace BatchGetAssignable {
         export type RequestBody = {
             /**
@@ -479,6 +727,50 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreatePartnerUser {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+        }
+        export type RequestBody = Components.Schemas.CreatePartnerUserPayload;
+        namespace Responses {
+            export type $201 = Components.Schemas.User;
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace DeletePartnerUser {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+            userId: Parameters.UserId;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetPartnerByToken {
         namespace Parameters {
             export type Token = Components.Schemas.InviteToken;
@@ -489,6 +781,48 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Partner;
             export interface $404 {
+            }
+        }
+    }
+    namespace GetPartnerRoles {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.PartnerRole[];
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace GetPartnerUsers {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.PartnerUser[];
+            }
+            export interface $400 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -556,7 +890,7 @@ declare namespace Paths {
             /**
              * filter results to specific types of assignables. defaults to all types
              */
-            types?: ("user" | "partner_user" | "partner_organization" | "ecp" | "group")[];
+            types?: ("user" | "partner_user" | "partner_organization" | "ecp" | "group" | "parent_organization_user")[];
         }
         namespace Responses {
             export interface $200 {
@@ -577,6 +911,39 @@ declare namespace Paths {
             export interface $400 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace UnassignPartnerUserRoles {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+            userId: Parameters.UserId;
+        }
+        export type RequestBody = Components.Schemas.AssignRolesPayload;
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    roleId?: string;
+                    success?: boolean;
+                    data?: {
+                        [key: string]: any;
+                    };
+                    error?: {
+                        [key: string]: any;
+                    };
+                }[];
+            }
+            export interface $400 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -670,6 +1037,66 @@ export interface OperationMethods {
     data?: Paths.InvitePartnerV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.InvitePartnerV2.Responses.$200>
+  /**
+   * getPartnerUsers - getPartnerUsers
+   * 
+   * Get all users for a partner organization with their roles
+   */
+  'getPartnerUsers'(
+    parameters?: Parameters<Paths.GetPartnerUsers.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPartnerUsers.Responses.$200>
+  /**
+   * createPartnerUser - createPartnerUser
+   * 
+   * Create a new user in a partner organization
+   */
+  'createPartnerUser'(
+    parameters?: Parameters<Paths.CreatePartnerUser.PathParameters> | null,
+    data?: Paths.CreatePartnerUser.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePartnerUser.Responses.$201>
+  /**
+   * deletePartnerUser - deletePartnerUser
+   * 
+   * Delete a user from a partner organization
+   */
+  'deletePartnerUser'(
+    parameters?: Parameters<Paths.DeletePartnerUser.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeletePartnerUser.Responses.$200>
+  /**
+   * getPartnerRoles - getPartnerRoles
+   * 
+   * Get all roles for a partner organization
+   */
+  'getPartnerRoles'(
+    parameters?: Parameters<Paths.GetPartnerRoles.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPartnerRoles.Responses.$200>
+  /**
+   * assignPartnerUserRoles - assignPartnerUserRoles
+   * 
+   * Assign roles to a user in a partner organization
+   */
+  'assignPartnerUserRoles'(
+    parameters?: Parameters<Paths.AssignPartnerUserRoles.PathParameters> | null,
+    data?: Paths.AssignPartnerUserRoles.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignPartnerUserRoles.Responses.$200>
+  /**
+   * unassignPartnerUserRoles - unassignPartnerUserRoles
+   * 
+   * Unassign roles from a user in a partner organization
+   */
+  'unassignPartnerUserRoles'(
+    parameters?: Parameters<Paths.UnassignPartnerUserRoles.PathParameters> | null,
+    data?: Paths.UnassignPartnerUserRoles.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -776,6 +1203,74 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.InvitePartnerV2.Responses.$200>
   }
+  ['/v2/partners/{orgId}/users']: {
+    /**
+     * getPartnerUsers - getPartnerUsers
+     * 
+     * Get all users for a partner organization with their roles
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPartnerUsers.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPartnerUsers.Responses.$200>
+    /**
+     * createPartnerUser - createPartnerUser
+     * 
+     * Create a new user in a partner organization
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePartnerUser.PathParameters> | null,
+      data?: Paths.CreatePartnerUser.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePartnerUser.Responses.$201>
+  }
+  ['/v2/partners/{orgId}/users/{userId}']: {
+    /**
+     * deletePartnerUser - deletePartnerUser
+     * 
+     * Delete a user from a partner organization
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeletePartnerUser.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeletePartnerUser.Responses.$200>
+  }
+  ['/v2/partners/{orgId}/roles']: {
+    /**
+     * getPartnerRoles - getPartnerRoles
+     * 
+     * Get all roles for a partner organization
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPartnerRoles.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPartnerRoles.Responses.$200>
+  }
+  ['/v2/partners/{orgId}/users/{userId}/roles']: {
+    /**
+     * assignPartnerUserRoles - assignPartnerUserRoles
+     * 
+     * Assign roles to a user in a partner organization
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignPartnerUserRoles.PathParameters> | null,
+      data?: Paths.AssignPartnerUserRoles.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignPartnerUserRoles.Responses.$200>
+    /**
+     * unassignPartnerUserRoles - unassignPartnerUserRoles
+     * 
+     * Unassign roles from a user in a partner organization
+     */
+    'delete'(
+      parameters?: Parameters<Paths.UnassignPartnerUserRoles.PathParameters> | null,
+      data?: Paths.UnassignPartnerUserRoles.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -783,6 +1278,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type ActivatePartnerPayload = Components.Schemas.ActivatePartnerPayload;
 export type Address = Components.Schemas.Address;
 export type AddressGeolocation = Components.Schemas.AddressGeolocation;
+export type AssignRolesPayload = Components.Schemas.AssignRolesPayload;
 export type Assignable = Components.Schemas.Assignable;
 export type AssignableEcpPlaceholder = Components.Schemas.AssignableEcpPlaceholder;
 export type AssignableGroup = Components.Schemas.AssignableGroup;
@@ -790,10 +1286,14 @@ export type AssignableOrganization = Components.Schemas.AssignableOrganization;
 export type AssignablePartnerUser = Components.Schemas.AssignablePartnerUser;
 export type AssignableUser = Components.Schemas.AssignableUser;
 export type BaseAssignable = Components.Schemas.BaseAssignable;
+export type CreatePartnerUserPayload = Components.Schemas.CreatePartnerUserPayload;
 export type Geolocation = Components.Schemas.Geolocation;
 export type InviteToken = Components.Schemas.InviteToken;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type Partner = Components.Schemas.Partner;
 export type PartnerId = Components.Schemas.PartnerId;
 export type PartnerInvitationPayload = Components.Schemas.PartnerInvitationPayload;
+export type PartnerRole = Components.Schemas.PartnerRole;
+export type PartnerUser = Components.Schemas.PartnerUser;
 export type SearchGeolocation = Components.Schemas.SearchGeolocation;
+export type User = Components.Schemas.User;

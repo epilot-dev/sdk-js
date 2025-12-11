@@ -1,6 +1,6 @@
 {
   "name": "@epilot/partner-directory-client",
-  "version": "0.11.1",
+  "version": "0.13.1",
   "description": "API Client for epilot Partner API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

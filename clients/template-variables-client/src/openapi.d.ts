@@ -519,6 +519,40 @@ declare namespace Components {
          * 2-letter language code (ISO 639-1)
          */
         export type Language = string;
+        export interface ReplacementOutput {
+            /**
+             * example:
+             * [
+             *   "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
+             * ]
+             */
+            outputs?: string[];
+        }
+        export interface ReplacementOutputV2 {
+            /**
+             * Dictionary mapping input templates and variable names to their resolved output values.
+             * Values preserve their original types (string, array, object) instead of being stringified.
+             *
+             * Keys include:
+             * - Original input templates (e.g., "Hello {{name}}")
+             * - Individual variables found in templates (e.g., "{{name}}", "{{product_images[*].public_url}}")
+             *
+             * example:
+             * {
+             *   "Hello {{first_name}}": "Hello John",
+             *   "{{first_name}}": "John",
+             *   "{{product_images[*].public_url}}": [
+             *     "http://myimage.server.com/img1.png",
+             *     "http://myimage.server.com/img2.png"
+             *   ]
+             * }
+             */
+            outputs?: {
+                [name: string]: string | number | boolean | any[] | {
+                    [name: string]: any;
+                };
+            };
+        }
         export type TemplateType = "email" | "document";
         export interface VariableContext {
             /**
@@ -908,15 +942,16 @@ declare namespace Paths {
             parameters?: Components.Schemas.VariableParameters;
         }
         namespace Responses {
-            export interface $200 {
-                /**
-                 * example:
-                 * [
-                 *   "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
-                 * ]
-                 */
-                outputs?: string[];
-            }
+            export type $200 = Components.Schemas.ReplacementOutput;
+        }
+    }
+    namespace ReplaceTemplatesV2 {
+        export interface RequestBody {
+            inputs?: string[];
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ReplacementOutputV2;
         }
     }
     namespace SearchCustomVariables {
@@ -1019,6 +1054,24 @@ export interface OperationMethods {
     data?: Paths.ReplaceTemplates.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>
+  /**
+   * replaceTemplatesV2 - Replace variables in templates (V2)
+   * 
+   * Replace variables in handlebars templates with raw value preservation
+   * 
+   * V2 returns parsed outputs that preserve the original data types (arrays, objects, strings)
+   * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format. 
+   * Alongside the parsed outputs for every single variable.
+   * 
+   * Takes in an array of input templates and outputs an object mapping each input and variable
+   * to their rendered values with type preservation.
+   * 
+   */
+  'replaceTemplatesV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ReplaceTemplatesV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>
   /**
    * getCustomVariables - Get custom variables
    * 
@@ -1146,6 +1199,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>
   }
+  ['/v2/template:replace']: {
+    /**
+     * replaceTemplatesV2 - Replace variables in templates (V2)
+     * 
+     * Replace variables in handlebars templates with raw value preservation
+     * 
+     * V2 returns parsed outputs that preserve the original data types (arrays, objects, strings)
+     * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format. 
+     * Alongside the parsed outputs for every single variable.
+     * 
+     * Takes in an array of input templates and outputs an object mapping each input and variable
+     * to their rendered values with type preservation.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ReplaceTemplatesV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>
+  }
   ['/v1/custom-variables']: {
     /**
      * getCustomVariables - Get custom variables
@@ -1234,6 +1307,8 @@ export type CustomVariable = Components.Schemas.CustomVariable;
 export type CustomVariablesSearchParams = Components.Schemas.CustomVariablesSearchParams;
 export type ExternalCustomVariable = Components.Schemas.ExternalCustomVariable;
 export type Language = Components.Schemas.Language;
+export type ReplacementOutput = Components.Schemas.ReplacementOutput;
+export type ReplacementOutputV2 = Components.Schemas.ReplacementOutputV2;
 export type TemplateType = Components.Schemas.TemplateType;
 export type VariableContext = Components.Schemas.VariableContext;
 export type VariableParameters = Components.Schemas.VariableParameters;
