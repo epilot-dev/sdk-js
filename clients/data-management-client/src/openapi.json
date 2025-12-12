@@ -1,0 +1,481 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Data Management API",
+    "version": "1.2.0"
+  },
+  "tags": [
+    {
+      "name": "Data Management",
+      "description": "Data Management endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/data-management/v1/{entity_schema}/query": {
+      "post": {
+        "operationId": "queryEntities",
+        "summary": "Query entities using a saved view with additional data filters",
+        "description": "Executes a query against the specified entity schema using the saved view definition, optionally combined with additional filters. Returns the entities matching the composed query.\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "Target entity schema to query (for example: \"contact\", \"opportunity\", \"order\").\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryEntitiesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryEntitiesResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-management/v1/{entity_schema}/configs": {
+      "post": {
+        "operationId": "upsertConfig",
+        "summary": "Upsert config",
+        "description": "Creates or updates a config for the given entity schema. The config is later used by a scheduled background process to periodically query and act on matching entities (for example, deletion).\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "Target entity schema for the config\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Config updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Config created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-management/v1/configs": {
+      "get": {
+        "operationId": "listConfigs",
+        "summary": "List configs",
+        "description": "Returns a paginated list of configs\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false,
+            "description": "Optional entity schema to filter configs.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional config type to filter configs.",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConfigsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "ConfigType": {
+        "type": "string",
+        "description": "Type of configuration (e.g. deletion)",
+        "enum": [
+          "deletion"
+        ]
+      },
+      "QueryFilterType": {
+        "type": "string",
+        "enum": [
+          "entity_workflows_only_in_closed_or_cancelled_status",
+          "no_related_entities",
+          "related_entities_all_in_closed_or_cancelled_status",
+          "related_entities_any_in_closed_or_cancelled_status",
+          "no_email_communication_since"
+        ]
+      },
+      "QueryFilter": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QueryFilterType"
+          },
+          "related_entity_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lookback_period_months": {
+            "type": "integer"
+          }
+        }
+      },
+      "QueryConfig": {
+        "type": "object",
+        "required": [
+          "saved_view_id",
+          "filters"
+        ],
+        "properties": {
+          "saved_view_id": {
+            "type": "string"
+          },
+          "include_deleted": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false",
+              "only"
+            ]
+          },
+          "filters": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/QueryFilter"
+            }
+          }
+        }
+      },
+      "QueryEntitiesRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer"
+              },
+              "size": {
+                "type": "integer"
+              },
+              "hydrate": {
+                "type": "boolean"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "QueryEntitiesResult": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ConfigSchedule": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DailyConfigSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/WeeklyConfigSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/MonthlyConfigSchedule"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "frequency",
+          "mapping": {
+            "daily": "#/components/schemas/DailyConfigSchedule",
+            "weekly": "#/components/schemas/WeeklyConfigSchedule",
+            "monthly": "#/components/schemas/MonthlyConfigSchedule"
+          }
+        }
+      },
+      "DailyConfigSchedule": {
+        "type": "object",
+        "required": [
+          "frequency"
+        ],
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "daily"
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "WeeklyConfigSchedule": {
+        "type": "object",
+        "required": [
+          "frequency",
+          "day_of_week"
+        ],
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "weekly"
+            ]
+          },
+          "day_of_week": {
+            "type": "string",
+            "description": "Day of week when the rule runs",
+            "enum": [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday"
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MonthlyConfigSchedule": {
+        "type": "object",
+        "required": [
+          "frequency",
+          "day_of_month"
+        ],
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "monthly"
+            ]
+          },
+          "day_of_month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 31,
+            "description": "Day of month on which the rule runs"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "UpsertConfigRequest": {
+        "type": "object",
+        "required": [
+          "type",
+          "query",
+          "schedule"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "query": {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ConfigSchedule"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this configuration is active"
+          }
+        }
+      },
+      "Config": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConfigType",
+            "description": "Type of configuration. Currently only 'deletion' is supported."
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ConfigSchedule"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListConfigsResponse": {
+        "type": "object",
+        "properties": {
+          "configs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Config"
+            }
+          },
+          "cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}
