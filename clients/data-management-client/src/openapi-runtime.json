@@ -23,6 +23,53 @@
         },
         "responses": {}
       }
+    },
+    "/data-management/v1/{entity_schema}/configs": {
+      "post": {
+        "operationId": "upsertConfig",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/data-management/v1/configs": {
+      "get": {
+        "operationId": "listConfigs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {}
