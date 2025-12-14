@@ -72,10 +72,5 @@
       }
     }
   },
-  "components": {},
-  "servers": [
-    {
-      "url": "https://data-management.sls.epilot.io"
-    }
-  ]
+  "components": {}
 }
