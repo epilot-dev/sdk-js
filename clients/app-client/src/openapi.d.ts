@@ -1246,12 +1246,17 @@ declare namespace Components {
              *
              */
             PortalExtensionHookRegistrationIdentifiersCheck | /**
-             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-             *   - 200 if found with either:
-             *     - contract_id array
-             *     - contact_id string
-             *   - 404 if no contract is found
-             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+             * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+             * The expected response http status code to the call is:
+             *   - 200 if found
+             *   - 404 if not found
+             *
+             * The following assignment modes are supported:
+             *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+             *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+             *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+             *
+             * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
              *
              */
             PortalExtensionHookContractIdentification | /**
@@ -1367,12 +1372,17 @@ declare namespace Components {
             use_static_ips?: boolean;
         }
         /**
-         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-         *   - 200 if found with either:
-         *     - contract_id array
-         *     - contact_id string
-         *   - 404 if no contract is found
-         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+         * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+         * The expected response http status code to the call is:
+         *   - 200 if found
+         *   - 404 if not found
+         *
+         * The following assignment modes are supported:
+         *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+         *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+         *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+         *
+         * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
          *
          */
         export interface PortalExtensionHookContractIdentification {
@@ -1407,7 +1417,11 @@ declare namespace Components {
                 };
             };
             /**
-             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * Mode of contract assignment. See hook description for mode details.
+             */
+            assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user";
+            /**
+             * Name of the Contact attribute to update with the matched Contact ID when using `contact_to_contracts` mode. Must be a Contact relation attribute supporting multiple entities.
              * example:
              * represents_contact
              */
@@ -1420,7 +1434,7 @@ declare namespace Components {
                 /**
                  * Explanation of the functionality shown to the end user.
                  * example:
-                 * This process will give you access to all Contracts kept
+                 * This process will give you access to the matching Contracts.
                  */
                 en: string;
             };

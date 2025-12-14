@@ -2238,7 +2238,7 @@
         "additionalProperties": false
       },
       "PortalExtensionHookContractIdentification": {
-        "description": "Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:\n  - 200 if found with either:\n    - contract_id array\n    - contact_id string\n  - 404 if no contract is found\nIf `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.\n",
+        "description": "Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).\nThe expected response http status code to the call is:\n  - 200 if found\n  - 404 if not found\n\nThe following assignment modes are supported:\n  - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).\n  - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.\n  - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.\n\nDefaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.\n",
         "type": "object",
         "properties": {
           "type": {
@@ -2289,9 +2289,19 @@
             ],
             "additionalProperties": false
           },
+          "assignment_mode": {
+            "type": "string",
+            "enum": [
+              "contracts",
+              "contact_to_contracts",
+              "contact_to_portal_user"
+            ],
+            "description": "Mode of contract assignment. See hook description for mode details.",
+            "default": "contact_to_contracts"
+          },
           "contact_relation_attribute": {
             "type": "string",
-            "description": "Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.",
+            "description": "Name of the Contact attribute to update with the matched Contact ID when using `contact_to_contracts` mode. Must be a Contact relation attribute supporting multiple entities.",
             "example": "represents_contact"
           },
           "explanation": {
@@ -2300,7 +2310,7 @@
               "en": {
                 "type": "string",
                 "description": "Explanation of the functionality shown to the end user.",
-                "example": "This process will give you access to all Contracts kept"
+                "example": "This process will give you access to the matching Contracts."
               }
             },
             "additionalProperties": {
