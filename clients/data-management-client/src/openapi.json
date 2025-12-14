@@ -458,6 +458,10 @@
           "last_updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "next_run_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

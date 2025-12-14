@@ -22,6 +22,7 @@ declare namespace Components {
             enabled?: boolean;
             created_at?: string; // date-time
             last_updated_at?: string; // date-time
+            next_run_at?: string; // date-time
         }
         export type ConfigSchedule = DailyConfigSchedule | WeeklyConfigSchedule | MonthlyConfigSchedule;
         /**
