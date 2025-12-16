@@ -1,6 +1,6 @@
 {
   "name": "@epilot/app-client",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "JavaScript client library for the epilot App API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,6 +25,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../app-api/openapi.yml",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/app.yaml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
