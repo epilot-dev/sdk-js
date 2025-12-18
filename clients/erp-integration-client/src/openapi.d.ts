@@ -39,7 +39,7 @@ declare namespace Components {
                  * example:
                  * 2025-10-31T12:34:56Z
                  */
-                created_at?: string; // date-time
+                event_time?: string; // date-time
                 /**
                  * example:
                  * evt_1234567890abcdef
@@ -52,6 +52,12 @@ declare namespace Components {
              * true
              */
             has_more?: boolean;
+        }
+        export interface ReplayEventsResponse {
+            /**
+             * List of event IDs for which replay was requested
+             */
+            event_ids?: string[];
         }
         export type TriggerWebhookResponse = Schemas.TriggerWebhookResp;
         export type Unauthorized = Schemas.ErrorResponseBase;
@@ -192,6 +198,25 @@ declare namespace Components {
             message?: string;
         }
         /**
+         * Extended unique identifier field configuration with type hints for repeatable fields
+         */
+        export interface ExtendedUniqueIdField {
+            /**
+             * The attribute name to use as unique identifier
+             */
+            attribute: string;
+            _type?: /**
+             * Type hint for repeatable fields that require special search handling.
+             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
+             *
+             */
+            RepeatableFieldType;
+            /**
+             * Which array item to use (0-indexed, default first)
+             */
+            index?: number;
+        }
+        /**
          * Configuration for inbound use cases (ERP to epilot)
          */
         export interface InboundIntegrationEventConfiguration {
@@ -206,38 +231,10 @@ declare namespace Components {
         }
         export interface InboundUseCase {
             /**
-             * Unique identifier for the use case
-             */
-            id: string; // uuid
-            /**
-             * Parent integration ID
-             */
-            integrationId: string; // uuid
-            /**
-             * Use case name
-             */
-            name: string;
-            /**
              * Use case type
              */
             type: "inbound";
-            /**
-             * Whether the use case is enabled
-             */
-            enabled: boolean;
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
-            /**
-             * Description of the last change made to this use case
-             */
-            change_description?: string;
-            /**
-             * ISO-8601 timestamp when the use case was created
-             */
-            created_at: string; // date-time
-            /**
-             * ISO-8601 timestamp when the use case was last updated
-             */
-            updated_at: string; // date-time
         }
         export interface InboundUseCaseHistoryEntry {
             /**
@@ -348,7 +345,10 @@ declare namespace Components {
              */
             entity_schema: string;
             /**
-             * Array of attribute names that uniquely identify this entity
+             * Array of attribute names that uniquely identify this entity.
+             * The _type hint for repeatable fields (e.g., email, phone) should be specified
+             * on the corresponding field definition in the fields array.
+             *
              */
             unique_ids: string[];
             /**
@@ -381,6 +381,18 @@ declare namespace Components {
              * Constant value to assign (any type)
              */
             constant?: any;
+            /**
+             * Type hint for repeatable fields (email, phone).
+             * When this attribute is used as a unique identifier, specifying the _type
+             * enables correct search path generation (e.g., email.email.keyword).
+             *
+             */
+            _type?: /**
+             * Type hint for repeatable fields that require special search handling.
+             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
+             *
+             */
+            RepeatableFieldType;
             /**
              * Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted.
              */
@@ -521,38 +533,10 @@ declare namespace Components {
         }
         export interface OutboundUseCase {
             /**
-             * Unique identifier for the use case
-             */
-            id: string; // uuid
-            /**
-             * Parent integration ID
-             */
-            integrationId: string; // uuid
-            /**
-             * Use case name
-             */
-            name: string;
-            /**
              * Use case type
              */
             type: "outbound";
-            /**
-             * Whether the use case is enabled
-             */
-            enabled: boolean;
             configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
-            /**
-             * Description of the last change made to this use case
-             */
-            change_description?: string;
-            /**
-             * ISO-8601 timestamp when the use case was created
-             */
-            created_at: string; // date-time
-            /**
-             * ISO-8601 timestamp when the use case was last updated
-             */
-            updated_at: string; // date-time
         }
         export interface OutboundUseCaseHistoryEntry {
             /**
@@ -746,6 +730,12 @@ declare namespace Components {
              * Target attribute name in the related entity
              */
             attribute: string;
+            _type?: /**
+             * Type hint for repeatable fields that require special search handling.
+             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
+             *
+             */
+            RepeatableFieldType;
             /**
              * Source field name from the event data
              */
@@ -758,6 +748,119 @@ declare namespace Components {
              * Constant value (any type)
              */
             constant?: any;
+        }
+        /**
+         * Type hint for repeatable fields that require special search handling.
+         * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
+         *
+         */
+        export type RepeatableFieldType = "email" | "phone";
+        export interface ReplayEventsRequest {
+            /**
+             * List of event IDs to replay. Maximum 100 events per request.
+             */
+            event_ids: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
         }
         export interface SetIntegrationAppMappingRequest {
             /**
@@ -827,6 +930,34 @@ declare namespace Components {
             end_date?: string;
             event_id?: string;
         }
+        /**
+         * Unique identifier field configuration. Can be either:
+         * - A simple string (attribute name)
+         * - An extended object with type hints for repeatable fields
+         *
+         */
+        export type UniqueIdField = /**
+         * Unique identifier field configuration. Can be either:
+         * - A simple string (attribute name)
+         * - An extended object with type hints for repeatable fields
+         *
+         */
+        string | /* Extended unique identifier field configuration with type hints for repeatable fields */ ExtendedUniqueIdField;
+        /**
+         * Metadata about a unique identifier field (used in message payloads)
+         */
+        export interface UniqueIdMetadata {
+            fieldType?: /**
+             * Type hint for repeatable fields that require special search handling.
+             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
+             *
+             */
+            RepeatableFieldType;
+            /**
+             * Which array item was used (0-indexed)
+             */
+            index?: number;
+        }
         export interface UpdateInboundUseCaseRequest {
             /**
              * Use case name
@@ -890,7 +1021,40 @@ declare namespace Components {
              */
             change_description?: string;
         }
-        export type UseCase = InboundUseCase | OutboundUseCase;
+        export type UseCase = {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Use case type
+             */
+            type: "inbound" | "outbound";
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
+        } & (InboundUseCase | OutboundUseCase);
         export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
             /**
@@ -1180,6 +1344,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ReplayEvents {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.ReplayEventsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.ReplayEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SetIntegrationAppMapping {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -1408,6 +1588,16 @@ export interface OperationMethods {
     data?: Paths.QueryEvents.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryEvents.Responses.$200>
+  /**
+   * replayEvents - replayEvents
+   * 
+   * Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with a new correlation ID for traceability.
+   */
+  'replayEvents'(
+    parameters?: Parameters<Paths.ReplayEvents.PathParameters> | null,
+    data?: Paths.ReplayEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplayEvents.Responses.$200>
   /**
    * listUseCases - listUseCases
    * 
@@ -1649,6 +1839,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.QueryEvents.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/events/replay']: {
+    /**
+     * replayEvents - replayEvents
+     * 
+     * Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with a new correlation ID for traceability.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplayEvents.PathParameters> | null,
+      data?: Paths.ReplayEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplayEvents.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/use-cases']: {
     /**
      * listUseCases - listUseCases
@@ -1759,6 +1961,7 @@ export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type ExtendedUniqueIdField = Components.Schemas.ExtendedUniqueIdField;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
@@ -1786,9 +1989,13 @@ export type RelationRefItemConfig = Components.Schemas.RelationRefItemConfig;
 export type RelationRefValueConfig = Components.Schemas.RelationRefValueConfig;
 export type RelationRefsConfig = Components.Schemas.RelationRefsConfig;
 export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
+export type RepeatableFieldType = Components.Schemas.RepeatableFieldType;
+export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type UniqueIdField = Components.Schemas.UniqueIdField;
+export type UniqueIdMetadata = Components.Schemas.UniqueIdMetadata;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;

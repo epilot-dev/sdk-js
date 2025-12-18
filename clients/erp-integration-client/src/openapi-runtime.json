@@ -155,6 +155,25 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/events/replay": {
+      "post": {
+        "operationId": "replayEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/use-cases": {
       "get": {
         "operationId": "listUseCases",
@@ -319,6 +338,11 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ReplayEventsResponse": {
         "content": {
           "application/json": {}
         }

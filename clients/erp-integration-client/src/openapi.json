@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.15.0",
+    "version": "0.17.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -1154,6 +1154,55 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/events/replay": {
+      "post": {
+        "operationId": "replayEvents",
+        "summary": "replayEvents",
+        "description": "Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with a new correlation ID for traceability.",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReplayEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/use-cases": {
       "get": {
         "operationId": "listUseCases",
@@ -1968,7 +2017,60 @@
         }
       },
       "UseCase": {
-        "oneOf": [
+        "type": "object",
+        "required": [
+          "id",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Description of the last change made to this use case"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was last updated"
+          }
+        },
+        "anyOf": [
           {
             "$ref": "#/components/schemas/InboundUseCase"
           },
@@ -1987,29 +2089,9 @@
       "InboundUseCase": {
         "type": "object",
         "required": [
-          "id",
-          "integrationId",
-          "name",
-          "type",
-          "enabled",
-          "created_at",
-          "updated_at"
+          "type"
         ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the use case"
-          },
-          "integrationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Parent integration ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Use case name"
-          },
           "type": {
             "type": "string",
             "enum": [
@@ -2017,56 +2099,17 @@
             ],
             "description": "Use case type"
           },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the use case is enabled"
-          },
           "configuration": {
             "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
-          },
-          "change_description": {
-            "type": "string",
-            "maxLength": 2000,
-            "description": "Description of the last change made to this use case"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was last updated"
           }
         }
       },
       "OutboundUseCase": {
         "type": "object",
         "required": [
-          "id",
-          "integrationId",
-          "name",
-          "type",
-          "enabled",
-          "created_at",
-          "updated_at"
+          "type"
         ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the use case"
-          },
-          "integrationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Parent integration ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Use case name"
-          },
           "type": {
             "type": "string",
             "enum": [
@@ -2074,27 +2117,8 @@
             ],
             "description": "Use case type"
           },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the use case is enabled"
-          },
           "configuration": {
             "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
-          },
-          "change_description": {
-            "type": "string",
-            "maxLength": 2000,
-            "description": "Description of the last change made to this use case"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was last updated"
           }
         }
       },
@@ -2724,7 +2748,7 @@
             "items": {
               "type": "string"
             },
-            "description": "Array of attribute names that uniquely identify this entity"
+            "description": "Array of attribute names that uniquely identify this entity.\nThe _type hint for repeatable fields (e.g., email, phone) should be specified\non the corresponding field definition in the fields array.\n"
           },
           "jsonataExpression": {
             "type": "string",
@@ -2814,6 +2838,10 @@
           "constant": {
             "description": "Constant value to assign (any type)"
           },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType",
+            "description": "Type hint for repeatable fields (email, phone).\nWhen this attribute is used as a unique identifier, specifying the _type\nenables correct search path generation (e.g., email.email.keyword).\n"
+          },
           "enabled": {
             "oneOf": [
               {
@@ -2897,6 +2925,9 @@
           "attribute": {
             "type": "string",
             "description": "Target attribute name in the related entity"
+          },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
           },
           "field": {
             "type": "string",
@@ -3003,6 +3034,79 @@
           }
         }
       },
+      "RepeatableFieldType": {
+        "type": "string",
+        "enum": [
+          "email",
+          "phone"
+        ],
+        "description": "Type hint for repeatable fields that require special search handling.\nThese fields are stored as arrays of objects (e.g., email: [{ email: \"value\" }]).\n"
+      },
+      "ExtendedUniqueIdField": {
+        "type": "object",
+        "description": "Extended unique identifier field configuration with type hints for repeatable fields",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "The attribute name to use as unique identifier"
+          },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
+          },
+          "index": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Which array item to use (0-indexed, default first)"
+          }
+        }
+      },
+      "UniqueIdField": {
+        "description": "Unique identifier field configuration. Can be either:\n- A simple string (attribute name)\n- An extended object with type hints for repeatable fields\n",
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Simple attribute name"
+          },
+          {
+            "$ref": "#/components/schemas/ExtendedUniqueIdField"
+          }
+        ]
+      },
+      "UniqueIdMetadata": {
+        "type": "object",
+        "description": "Metadata about a unique identifier field (used in message payloads)",
+        "properties": {
+          "fieldType": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
+          },
+          "index": {
+            "type": "integer",
+            "default": 0,
+            "description": "Which array item was used (0-indexed)"
+          }
+        }
+      },
+      "ReplayEventsRequest": {
+        "type": "object",
+        "required": [
+          "event_ids"
+        ],
+        "properties": {
+          "event_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "List of event IDs to replay. Maximum 100 events per request."
+          }
+        }
+      },
       "QueryEventsRequest": {
         "type": "object",
         "properties": {
@@ -3096,6 +3200,29 @@
           }
         }
       },
+      "ReplayEventsResponse": {
+        "description": "Events replay initiated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "replayed",
+                "results"
+              ],
+              "properties": {
+                "event_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of event IDs for which replay was requested"
+                }
+              }
+            }
+          }
+        }
+      },
       "ERPUpdatesResponse": {
         "description": "Some events failed to process",
         "content": {
@@ -3165,7 +3292,7 @@
                   "nullable": true,
                   "description": "Cursor to fetch the next page. Null if no more results.",
                   "properties": {
-                    "created_at": {
+                    "event_time": {
                       "type": "string",
                       "format": "date-time",
                       "example": "2025-10-31T12:34:56Z"
