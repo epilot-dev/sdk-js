@@ -1807,6 +1807,13 @@
                 "items": {
                   "$ref": "#/components/schemas/BlueprintResource"
                 }
+              },
+              "compatible_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of compatible app IDs for the blueprint"
               }
             }
           }
@@ -2175,6 +2182,8 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
+          "erp_integration",
+          "erp_integration_use_case",
           "dashboard",
           "custom_variable",
           "usergroup",
@@ -2183,7 +2192,9 @@
           "role",
           "portal_config",
           "target",
-          "kanban"
+          "kanban",
+          "validation_rule",
+          "flow_template"
         ]
       },
       "PlanChanges": {

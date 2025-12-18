@@ -1251,6 +1251,10 @@ declare namespace Components {
             docs_url?: string;
             source_type: "marketplace";
             resources?: BlueprintResource[];
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
         /**
@@ -1328,7 +1332,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "erp_integration" | "erp_integration_use_case" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -2121,7 +2125,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2777,7 +2780,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
