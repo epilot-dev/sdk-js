@@ -156,7 +156,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -172,6 +173,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -199,7 +205,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -215,6 +222,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -242,7 +254,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -258,6 +271,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
