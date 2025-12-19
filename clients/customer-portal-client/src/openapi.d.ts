@@ -1634,6 +1634,34 @@ declare namespace Components {
             content?: string;
         }
         /**
+         * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+         * example:
+         * [
+         *   {
+         *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+         *     "entity_schema": "contract"
+         *   }
+         * ]
+         */
+        export type ContextEntities = /* An entity reference for context-aware operations */ ContextEntity[];
+        /**
+         * An entity reference for context-aware operations
+         */
+        export interface ContextEntity {
+            /**
+             * Entity schema
+             * example:
+             * contract
+             */
+            entity_schema: string;
+            /**
+             * Entity id
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            entity_id: string; // uuid
+        }
+        /**
          * The contract entity
          */
         export interface Contract {
@@ -2302,6 +2330,36 @@ declare namespace Components {
             EntitySlug;
         }
         /**
+         * Configuration for matching existing entities during SSO login using token claims
+         */
+        export interface EntityMatchingConfig {
+            /**
+             * Mapping of portal_user attributes to token claim paths. All configured fields must match (AND logic).
+             * example:
+             * {
+             *   "external_id": "sub"
+             * }
+             */
+            portal_user?: {
+                [name: string]: string;
+            };
+            /**
+             * Mapping of contact attributes to token claim paths. All configured fields must match (AND logic).
+             * example:
+             * {
+             *   "customer_number": "customer_id",
+             *   "external_id": "sub"
+             * }
+             */
+            contact?: {
+                [name: string]: string;
+            };
+            /**
+             * Whether to automatically create Cognito user when matched portal_user has no authentication data. Defaults to true.
+             */
+            auto_create_cognito_user?: boolean;
+        }
+        /**
          * Response for entity get request
          */
         export interface EntityResponse {
@@ -2779,12 +2837,17 @@ declare namespace Components {
              *
              */
             ExtensionHookRegistrationIdentifiersCheck | /**
-             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-             *   - 200 if found with either:
-             *     - contract_id array
-             *     - contact_id string
-             *   - 404 if no contract is found
-             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+             * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+             * The expected response http status code to the call is:
+             *   - 200 if found
+             *   - 404 if not found
+             *
+             * The following assignment modes are supported:
+             *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+             *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+             *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+             *
+             * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
              *
              */
             ExtensionHookContractIdentification | /**
@@ -2925,12 +2988,17 @@ declare namespace Components {
             use_static_ips?: boolean;
         }
         /**
-         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-         *   - 200 if found with either:
-         *     - contract_id array
-         *     - contact_id string
-         *   - 404 if no contract is found
-         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+         * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+         * The expected response http status code to the call is:
+         *   - 200 if found
+         *   - 404 if not found
+         *
+         * The following assignment modes are supported:
+         *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+         *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+         *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+         *
+         * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
          *
          */
         export interface ExtensionHookContractIdentification {
@@ -2963,9 +3031,17 @@ declare namespace Components {
                 body?: {
                     [key: string]: any;
                 };
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 */
+                result?: string;
             };
             /**
-             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * Mode of contract assignment. See hook description for mode details.
+             */
+            assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user";
+            /**
+             * Name of the Contact attribute to update with the matched Contact ID when using `contact_to_contracts` mode. Must be a Contact relation attribute supporting multiple entities.
              * example:
              * represents_contact
              */
@@ -2978,7 +3054,7 @@ declare namespace Components {
                 /**
                  * Explanation of the functionality shown to the end user.
                  * example:
-                 * This process will give you access to all Contracts kept
+                 * This process will give you access to the matching Contracts.
                  */
                 en: string;
             };
@@ -3176,9 +3252,9 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
-                result: string;
+                result?: string;
             };
             /**
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
@@ -3715,7 +3791,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**
@@ -3730,6 +3806,12 @@ declare namespace Components {
              * The external ID of the reading
              */
             external_id?: string;
+            /**
+             * A note or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            note?: string | null;
             /**
              * Additional metadata for the reading
              * example:
@@ -5269,6 +5351,7 @@ declare namespace Components {
             ProviderDisplayName;
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
+            entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
             oidc_config?: OIDCProviderConfig;
             mobile_oidc_config?: MoblieOIDCConfig;
         }
@@ -7831,6 +7914,17 @@ declare namespace Paths {
     namespace GetConsumption {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7842,10 +7936,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -7975,6 +8070,17 @@ declare namespace Paths {
     namespace GetCosts {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7986,10 +8092,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -8968,7 +9075,8 @@ declare namespace Paths {
     }
     namespace GetPortalPages {
         namespace Parameters {
-            /**
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
              * example:
              * [
              *   {
@@ -8977,20 +9085,7 @@ declare namespace Paths {
              *   }
              * ]
              */
-            export type ContextEntities = {
-                /**
-                 * Entity schema
-                 * example:
-                 * contract
-                 */
-                entity_schema: string;
-                /**
-                 * Entity id
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                entity_id: string; // uuid
-            }[];
+            Components.Schemas.ContextEntities;
             export type ContractId = /**
              * Entity ID
              * example:
@@ -9020,16 +9115,7 @@ declare namespace Paths {
              */
             Parameters.Filter;
             contract_id?: Parameters.ContractId;
-            context_entities?: /**
-             * example:
-             * [
-             *   {
-             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-             *     "entity_schema": "contract"
-             *   }
-             * ]
-             */
-            Parameters.ContextEntities;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Page[];
@@ -9081,6 +9167,17 @@ declare namespace Paths {
     namespace GetPrices {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -9092,10 +9189,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -9450,7 +9548,8 @@ declare namespace Paths {
     namespace GetResolvedSeamlessLink {
         namespace Parameters {
             export type AppId = string;
-            /**
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
              * example:
              * [
              *   {
@@ -9459,20 +9558,7 @@ declare namespace Paths {
              *   }
              * ]
              */
-            export type ContextEntities = {
-                /**
-                 * Entity schema
-                 * example:
-                 * contract
-                 */
-                entity_schema: string;
-                /**
-                 * Entity id
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                entity_id: string; // uuid
-            }[];
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type LinkId = string;
         }
@@ -9480,16 +9566,7 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extension_id: Parameters.ExtensionId;
             link_id: Parameters.LinkId;
-            context_entities?: /**
-             * example:
-             * [
-             *   {
-             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-             *     "entity_schema": "contract"
-             *   }
-             * ]
-             */
-            Parameters.ContextEntities;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -10818,6 +10895,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -13373,6 +13451,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
@@ -13402,6 +13481,8 @@ export type Contact = Components.Schemas.Contact;
 export type ContactCountRequest = Components.Schemas.ContactCountRequest;
 export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
 export type ContentWidget = Components.Schemas.ContentWidget;
+export type ContextEntities = Components.Schemas.ContextEntities;
+export type ContextEntity = Components.Schemas.ContextEntity;
 export type Contract = Components.Schemas.Contract;
 export type ContractIdentifier = Components.Schemas.ContractIdentifier;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
@@ -13417,6 +13498,7 @@ export type EntityFileCount = Components.Schemas.EntityFileCount;
 export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
+export type EntityMatchingConfig = Components.Schemas.EntityMatchingConfig;
 export type EntityResponse = Components.Schemas.EntityResponse;
 export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGroupedWithHits;
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;

@@ -2175,6 +2175,8 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
+          "erp_integration",
+          "erp_integration_use_case",
           "dashboard",
           "custom_variable",
           "usergroup",
@@ -2183,7 +2185,8 @@
           "role",
           "portal_config",
           "target",
-          "kanban"
+          "kanban",
+          "validation_rule"
         ]
       },
       "PlanChanges": {
@@ -2689,25 +2692,29 @@
           "terraform_plan_error",
           "terraform_apply_error",
           "terraform_show_error",
-          "generic_error"
+          "generic_error",
+          "forbidden",
+          "not_found",
+          "undeclared_resource",
+          "invalid_readonly_attribute",
+          "invalid_attribute_value",
+          "unsupported_attribute",
+          "self_referential_block",
+          "circular_dependency",
+          "state_mismatch"
         ]
       },
       "FormattedErrorData": {
         "type": "object",
         "properties": {
-          "resource": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              }
-            }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
           }
         }
       },
@@ -2728,7 +2735,24 @@
             "$ref": "#/components/schemas/FormattedErrorCodes"
           },
           "data": {
-            "$ref": "#/components/schemas/FormattedErrorData"
+            "type": "object",
+            "properties": {
+              "formattedResource": {
+                "$ref": "#/components/schemas/FormattedErrorData"
+              },
+              "resource": {
+                "type": "string"
+              },
+              "resourceDependency": {
+                "type": "string"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },

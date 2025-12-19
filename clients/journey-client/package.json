@@ -1,6 +1,6 @@
 {
   "name": "@epilot/journey-client",
-  "version": "0.4.6",
+  "version": "0.5.0",
   "description": "API Client for epilot Journey API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -247,7 +247,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent);
+        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -451,7 +451,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG";
         /**
          * Configuration of the published app
          */
@@ -821,7 +821,7 @@ declare namespace Components {
                 flow_action_config?: AppBridgeSurfaceConfig;
             };
         }
-        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig;
+        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig | SandboxCustomActionConfig;
         export interface EnumArg {
             type?: "enum";
             /**
@@ -964,6 +964,131 @@ declare namespace Components {
                 url?: string;
                 headers?: {
                     [name: string]: any;
+                };
+            };
+        }
+        export interface ExternalProductCatalogAuthBlock {
+            /**
+             * HTTP method to use for authentication
+             */
+            method?: string;
+            /**
+             * URL to use for authentication. Supports variable interpolation.
+             */
+            url: string;
+            /**
+             * Parameters to append to the URL. Supports variable interpolation.
+             */
+            params?: {
+                [name: string]: string;
+            };
+            /**
+             * Headers to use for authentication. Supports variable interpolation.
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.
+             */
+            body?: {
+                [name: string]: string;
+            };
+        }
+        export interface ExternalProductCatalogComponent {
+            component_type: "EXTERNAL_PRODUCT_CATALOG";
+            configuration: ExternalProductCatalogConfig;
+        }
+        export interface ExternalProductCatalogConfig {
+            hooks?: (/**
+             * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+             *
+             */
+            ExternalProductCatalogHookProducts | /**
+             * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+             *
+             */
+            ExternalProductCatalogHookProductsRecommendation)[];
+        }
+        /**
+         * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         *
+         */
+        export interface ExternalProductCatalogHookProducts {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name: TranslatedString;
+            type: "products";
+            auth?: ExternalProductCatalogAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+        }
+        /**
+         * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         *
+         */
+        export interface ExternalProductCatalogHookProductsRecommendation {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name: TranslatedString;
+            type: "products-recommendation";
+            auth?: ExternalProductCatalogAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).
+                 */
+                body?: {
+                    [name: string]: string;
                 };
             };
         }
@@ -1229,17 +1354,7 @@ declare namespace Components {
             configuration: PortalExtensionConfig;
         }
         export interface PortalExtensionConfig {
-            /**
-             * Identifier of the extension. Should not change between updates.
-             */
-            id?: string; // ^[a-zA-Z0-9_-]+$
-            hooks?: ({
-                /**
-                 * Identifier of the hook. Should not change between updates.
-                 */
-                id?: string; // ^[a-zA-Z0-9_-]+$
-                name?: TranslatedString;
-            } & (/**
+            hooks?: (/**
              * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
              *   - 200 with contact id if exactly one contact is found
              *   - 404 if no contact is found or more than contact is found
@@ -1283,7 +1398,7 @@ declare namespace Components {
              *       - valid: false
              *
              */
-            PortalExtensionHookMeterReadingPlausibilityCheck))[];
+            PortalExtensionHookMeterReadingPlausibilityCheck)[];
             links?: {
                 /**
                  * Identifier of the link. Should not change between updates.
@@ -1313,19 +1428,17 @@ declare namespace Components {
                 };
             }[];
         }
-        export interface PortalExtensionHook {
-            /**
-             * Identifier of the hook. Should not change between updates.
-             */
-            id?: string; // ^[a-zA-Z0-9_-]+$
-            name?: TranslatedString;
-        }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
          *   - 200 with the time series data
          *
          */
         export interface PortalExtensionHookConsumptionDataRetrieval {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "consumptionDataRetrieval";
             /**
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
@@ -1386,6 +1499,11 @@ declare namespace Components {
          *
          */
         export interface PortalExtensionHookContractIdentification {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "contractIdentification";
             auth?: PortalExtensionAuthBlock;
             call: {
@@ -1415,6 +1533,10 @@ declare namespace Components {
                 body?: {
                     [key: string]: any;
                 };
+                /**
+                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 */
+                result?: string;
             };
             /**
              * Mode of contract assignment. See hook description for mode details.
@@ -1449,6 +1571,11 @@ declare namespace Components {
          *
          */
         export interface PortalExtensionHookCostDataRetrieval {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "costDataRetrieval";
             /**
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
@@ -1504,6 +1631,11 @@ declare namespace Components {
          *
          */
         export interface PortalExtensionHookMeterReadingPlausibilityCheck {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "meterReadingPlausibilityCheck";
             auth?: PortalExtensionAuthBlock;
             call: {
@@ -1558,6 +1690,11 @@ declare namespace Components {
          *
          */
         export interface PortalExtensionHookPriceDataRetrieval {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "priceDataRetrieval";
             /**
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
@@ -1610,6 +1747,11 @@ declare namespace Components {
          *
          */
         export interface PortalExtensionHookRegistrationIdentifiersCheck {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id?: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
             type: "registrationIdentifiersCheck";
             auth?: PortalExtensionAuthBlock;
             call: {
@@ -1820,6 +1962,28 @@ declare namespace Components {
              * manifest.json
              */
             key: string;
+        }
+        export interface SandboxCustomActionConfig {
+            /**
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * Wait for callback_url to be called before completing the action
+             */
+            wait_for_callback?: boolean;
+            type: "sandbox";
+            sandbox_settings?: {
+                /**
+                 * JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.
+                 *
+                 */
+                code?: string;
+            };
         }
         export interface TextArg {
             type?: "text";
@@ -3034,6 +3198,11 @@ export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitCompo
 export type EventsQuery = Components.Schemas.EventsQuery;
 export type EventsQueryResponse = Components.Schemas.EventsQueryResponse;
 export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalIntegrationCustomActionConfig;
+export type ExternalProductCatalogAuthBlock = Components.Schemas.ExternalProductCatalogAuthBlock;
+export type ExternalProductCatalogComponent = Components.Schemas.ExternalProductCatalogComponent;
+export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCatalogConfig;
+export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
+export type ExternalProductCatalogHookProductsRecommendation = Components.Schemas.ExternalProductCatalogHookProductsRecommendation;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
@@ -3048,7 +3217,6 @@ export type OverrideDevMode = Components.Schemas.OverrideDevMode;
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
-export type PortalExtensionHook = Components.Schemas.PortalExtensionHook;
 export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
 export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
 export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
@@ -3062,5 +3230,6 @@ export type RawEvents = Components.Schemas.RawEvents;
 export type Review = Components.Schemas.Review;
 export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
+export type SandboxCustomActionConfig = Components.Schemas.SandboxCustomActionConfig;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
