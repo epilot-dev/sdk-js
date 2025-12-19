@@ -62,6 +62,169 @@
         }
       }
     },
+    "/data-management/v1/{entity_schema}/jobs": {
+      "post": {
+        "operationId": "createJob",
+        "summary": "Create a new job run",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-management/v1/{entity_schema}/jobs/{job_id}": {
+      "patch": {
+        "operationId": "updateJob",
+        "summary": "Update an existing job run",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    },
+    "/data-management/v1/jobs/{job_id}/report-url": {
+      "get": {
+        "operationId": "getJobReportUrl",
+        "summary": "Get report download URL for a job",
+        "description": "Returns a short-lived, pre-signed URL to download the report file for the given job.\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pre-signed report download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobReportUrlResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job or report not found"
+          }
+        }
+      }
+    },
+    "/data-management/v1/configs/{config_id}": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Get a config by id",
+        "description": "Returns a data management config by its id.\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Config not found"
+          }
+        }
+      }
+    },
     "/data-management/v1/{entity_schema}/configs": {
       "post": {
         "operationId": "upsertConfig",
@@ -158,6 +321,25 @@
             "schema": {
               "$ref": "#/components/schemas/ConfigType"
             }
+          },
+          {
+            "name": "next_run_at",
+            "in": "query",
+            "required": false,
+            "description": "Optional next run date (YYYY-MM-DD) to filter configs.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "description": "Optional enabled status to filter configs.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -167,6 +349,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListConfigsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-management/v1/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "summary": "List jobs",
+        "description": "Returns a paginated list of jobs\n",
+        "tags": [
+          "Data Management"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false,
+            "description": "Optional entity schema to filter jobs.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional job type to filter jobs.",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigType"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Optional job status to filter jobs.",
+            "schema": {
+              "$ref": "#/components/schemas/JobStatus"
+            }
+          },
+          {
+            "name": "config_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional config id to filter jobs.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListJobsResponse"
                 }
               }
             }
@@ -198,6 +457,177 @@
           "deletion"
         ]
       },
+      "JobStatus": {
+        "type": "string",
+        "enum": [
+          "in_progress",
+          "success",
+          "failed"
+        ]
+      },
+      "JobReportFormat": {
+        "type": "string",
+        "enum": [
+          "csv"
+        ]
+      },
+      "JobReport": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "format": {
+            "$ref": "#/components/schemas/JobReportFormat"
+          }
+        }
+      },
+      "CreateJobRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "config_id",
+          "scheduled_for"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "config_id": {
+            "type": "string"
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus",
+            "default": "in_progress"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JobDetails": {
+        "type": "object",
+        "description": "Generic, type-specific job details payload (e.g. matched count, deleted count, failed count, etc.).",
+        "additionalProperties": true
+      },
+      "UpdateJobRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "details": {
+            "$ref": "#/components/schemas/JobDetails"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/JobReport"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "config_id",
+          "entity_schema",
+          "scheduled_for",
+          "status",
+          "created_at",
+          "last_updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "config_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "details": {
+            "$ref": "#/components/schemas/JobDetails"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/JobReport"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListJobsResponse": {
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
+          "cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JobReportUrlResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer"
+          }
+        }
+      },
       "QueryFilterType": {
         "type": "string",
         "enum": [
@@ -223,7 +653,7 @@
               "type": "string"
             }
           },
-          "lookback_period_months": {
+          "lookback_period_days": {
             "type": "integer"
           }
         }
@@ -298,102 +728,25 @@
         }
       },
       "ConfigSchedule": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/DailyConfigSchedule"
-          },
-          {
-            "$ref": "#/components/schemas/WeeklyConfigSchedule"
-          },
-          {
-            "$ref": "#/components/schemas/MonthlyConfigSchedule"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "frequency",
-          "mapping": {
-            "daily": "#/components/schemas/DailyConfigSchedule",
-            "weekly": "#/components/schemas/WeeklyConfigSchedule",
-            "monthly": "#/components/schemas/MonthlyConfigSchedule"
-          }
-        }
+        "$ref": "#/components/schemas/IntervalConfigSchedule"
       },
-      "DailyConfigSchedule": {
-        "type": "object",
-        "required": [
-          "frequency"
-        ],
-        "properties": {
-          "frequency": {
-            "type": "string",
-            "enum": [
-              "daily"
-            ]
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date"
-          }
-        }
-      },
-      "WeeklyConfigSchedule": {
+      "IntervalConfigSchedule": {
         "type": "object",
         "required": [
           "frequency",
-          "day_of_week"
+          "interval_days"
         ],
         "properties": {
           "frequency": {
             "type": "string",
             "enum": [
-              "weekly"
+              "interval"
             ]
           },
-          "day_of_week": {
-            "type": "string",
-            "description": "Day of week when the rule runs",
-            "enum": [
-              "monday",
-              "tuesday",
-              "wednesday",
-              "thursday",
-              "friday",
-              "saturday",
-              "sunday"
-            ]
-          },
-          "start_date": {
-            "type": "string",
-            "format": "date"
-          },
-          "end_date": {
-            "type": "string",
-            "format": "date"
-          }
-        }
-      },
-      "MonthlyConfigSchedule": {
-        "type": "object",
-        "required": [
-          "frequency",
-          "day_of_month"
-        ],
-        "properties": {
-          "frequency": {
-            "type": "string",
-            "enum": [
-              "monthly"
-            ]
-          },
-          "day_of_month": {
+          "interval_days": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 31,
-            "description": "Day of month on which the rule runs"
+            "description": "Interval in days between executions"
           },
           "start_date": {
             "type": "string",
@@ -422,6 +775,12 @@
           "schedule": {
             "$ref": "#/components/schemas/ConfigSchedule"
           },
+          "relations_for_deletion": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeletionRelationEntitySchema"
+            }
+          },
           "enabled": {
             "type": "boolean",
             "default": true,
@@ -431,6 +790,12 @@
       },
       "Config": {
         "type": "object",
+        "required": [
+          "id",
+          "entity_schema",
+          "query",
+          "type"
+        ],
         "properties": {
           "id": {
             "type": "string"
@@ -461,9 +826,29 @@
           },
           "next_run_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
+          },
+          "relations_for_deletion": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeletionRelationEntitySchema"
+            }
           }
         }
+      },
+      "DeletionRelationEntitySchema": {
+        "type": "string",
+        "enum": [
+          "contact",
+          "file",
+          "opportunity",
+          "order",
+          "meter",
+          "ticket",
+          "email",
+          "account",
+          "submission"
+        ]
       },
       "ListConfigsResponse": {
         "type": "object",
