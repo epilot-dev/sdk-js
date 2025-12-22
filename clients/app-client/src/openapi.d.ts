@@ -1019,7 +1019,7 @@ declare namespace Components {
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
-            name: TranslatedString;
+            name?: TranslatedString;
             type: "products";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
@@ -1060,7 +1060,7 @@ declare namespace Components {
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
-            name: TranslatedString;
+            name?: TranslatedString;
             type: "products-recommendation";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
