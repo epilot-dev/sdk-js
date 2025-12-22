@@ -376,6 +376,30 @@
         "responses": {}
       }
     },
+    "/v1/public/external-catalog/products": {
+      "post": {
+        "operationId": "$getExternalCatalogProducts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/external-catalog/products-recommendation": {
+      "post": {
+        "operationId": "$getExternalCatalogProductsRecommendation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/public/product-recommendations": {
       "post": {
         "operationId": "$productRecommendations",

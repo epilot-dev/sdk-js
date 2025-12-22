@@ -4356,6 +4356,16 @@ declare namespace Components {
          * EUR
          */
         export type Currency = string;
+        /**
+         * A custom context object. E.g. for Portal context.
+         * example:
+         * {
+         *   "custom_context_key": "custom_context_value"
+         * }
+         */
+        export interface CustomContext {
+            [name: string]: any;
+        }
         export interface Customer {
             first_name?: string;
             last_name?: string;
@@ -4507,12 +4517,182 @@ declare namespace Components {
             cause?: string;
         }
         /**
+         * The request payload for the external catalog configuration service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   }
+         * }
+         */
+        export interface ExternalCatalogConfigurationRequest {
+            config?: {
+                /**
+                 * The app id.
+                 * example:
+                 * 1234567890
+                 */
+                appId: string;
+                /**
+                 * The component id.
+                 * example:
+                 * 1234567890
+                 */
+                componentId: string;
+                /**
+                 * The hook id. If not provided, the first valid hook will be used.
+                 * example:
+                 * 1234567890
+                 */
+                hookId?: string;
+            };
+        }
+        /**
+         * The request payload for the external catalog service with a custom context. E.g. for requests from the Portal.
+         */
+        export interface ExternalCatalogCustomRequest {
+            /**
+             * The origin of the request.
+             * example:
+             * custom
+             */
+            origin: "custom";
+            context: /**
+             * A custom context object. E.g. for Portal context.
+             * example:
+             * {
+             *   "custom_context_key": "custom_context_value"
+             * }
+             */
+            CustomContext;
+        }
+        /**
          * An external product & price information (already computed) from an external catalog.
          */
         export interface ExternalCatalogItem {
             pricing_details: /* The result from the calculation of a set of price items. */ PricingDetails;
             _meta: /* Signature meta data payload */ SignatureMeta;
         }
+        /**
+         * The request payload for the external catalog service with a journey context.
+         */
+        export interface ExternalCatalogJourneyRequest {
+            /**
+             * The origin of the request.
+             * example:
+             * journey
+             */
+            origin: "journey";
+            context: JourneyContext;
+        }
+        /**
+         * The request payload for the external catalog service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   },
+         *   "origin": "journey",
+         *   "context": {
+         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+         *     "journey_name": "Product Selection Journey",
+         *     "journey_tags": [
+         *       "electricity",
+         *       "residential"
+         *     ],
+         *     "journey_url_params": {
+         *       "utm_source": "google",
+         *       "utm_campaign": "spring2024"
+         *     },
+         *     "current_step_name": "Product Selection",
+         *     "current_block_name": "Energy Products",
+         *     "steps_data": [
+         *       {
+         *         "step_name": "Address Information",
+         *         "step_index": 0,
+         *         "blocks": {
+         *           "Adresse": {
+         *             "countryCode": "DE",
+         *             "city": "Koblenz",
+         *             "zipCode": "56068",
+         *             "streetName": "Am Alten Hospital",
+         *             "houseNumber": "123"
+         *           }
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export type ExternalCatalogRequest = {
+            config?: {
+                /**
+                 * The app id.
+                 * example:
+                 * 1234567890
+                 */
+                appId: string;
+                /**
+                 * The component id.
+                 * example:
+                 * 1234567890
+                 */
+                componentId: string;
+                /**
+                 * The hook id. If not provided, the first valid hook will be used.
+                 * example:
+                 * 1234567890
+                 */
+                hookId?: string;
+            };
+        } & (/**
+         * The request payload for the external catalog service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   },
+         *   "origin": "journey",
+         *   "context": {
+         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+         *     "journey_name": "Product Selection Journey",
+         *     "journey_tags": [
+         *       "electricity",
+         *       "residential"
+         *     ],
+         *     "journey_url_params": {
+         *       "utm_source": "google",
+         *       "utm_campaign": "spring2024"
+         *     },
+         *     "current_step_name": "Product Selection",
+         *     "current_block_name": "Energy Products",
+         *     "steps_data": [
+         *       {
+         *         "step_name": "Address Information",
+         *         "step_index": 0,
+         *         "blocks": {
+         *           "Adresse": {
+         *             "countryCode": "DE",
+         *             "city": "Koblenz",
+         *             "zipCode": "56068",
+         *             "streetName": "Am Alten Hospital",
+         *             "houseNumber": "123"
+         *           }
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        /* The request payload for the external catalog service with a journey context. */ ExternalCatalogJourneyRequest | /* The request payload for the external catalog service with a custom context. E.g. for requests from the Portal. */ ExternalCatalogCustomRequest);
         /**
          * example:
          * {
@@ -4923,7 +5103,7 @@ declare namespace Components {
          */
         export type IntegrationAuthCredentials = /* The auth credentials for external integrations */ BasicAuthIntegration | OAuthIntegration;
         export type IntegrationCredentialsResult = /* The auth credentials for external integrations */ IntegrationAuthCredentials;
-        export type IntegrationId = "getag" | "ikom" | "external-catalog";
+        export type IntegrationId = "getag" | "external-catalog";
         export interface JourneyContext {
             /**
              * The ID of the journey.
@@ -9514,6 +9694,106 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $GetExternalCatalogProducts {
+        export type RequestBody = /**
+         * The request payload for the external catalog service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   },
+         *   "origin": "journey",
+         *   "context": {
+         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+         *     "journey_name": "Product Selection Journey",
+         *     "journey_tags": [
+         *       "electricity",
+         *       "residential"
+         *     ],
+         *     "journey_url_params": {
+         *       "utm_source": "google",
+         *       "utm_campaign": "spring2024"
+         *     },
+         *     "current_step_name": "Product Selection",
+         *     "current_block_name": "Energy Products",
+         *     "steps_data": [
+         *       {
+         *         "step_name": "Address Information",
+         *         "step_index": 0,
+         *         "blocks": {
+         *           "Adresse": {
+         *             "countryCode": "DE",
+         *             "city": "Koblenz",
+         *             "zipCode": "56068",
+         *             "streetName": "Am Alten Hospital",
+         *             "houseNumber": "123"
+         *           }
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        Components.Schemas.ExternalCatalogRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
+    namespace $GetExternalCatalogProductsRecommendation {
+        export type RequestBody = /**
+         * The request payload for the external catalog service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   },
+         *   "origin": "journey",
+         *   "context": {
+         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+         *     "journey_name": "Product Selection Journey",
+         *     "journey_tags": [
+         *       "electricity",
+         *       "residential"
+         *     ],
+         *     "journey_url_params": {
+         *       "utm_source": "google",
+         *       "utm_campaign": "spring2024"
+         *     },
+         *     "current_step_name": "Product Selection",
+         *     "current_block_name": "Energy Products",
+         *     "steps_data": [
+         *       {
+         *         "step_name": "Address Information",
+         *         "step_index": 0,
+         *         "blocks": {
+         *           "Adresse": {
+         *             "countryCode": "DE",
+         *             "city": "Koblenz",
+         *             "zipCode": "56068",
+         *             "streetName": "Am Alten Hospital",
+         *             "houseNumber": "123"
+         *           }
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        Components.Schemas.ExternalCatalogRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $HistoricMarketPrices {
         namespace Parameters {
             export type BiddingZone = /* The bidding zone for a spot market price. */ Components.Schemas.SpotMarketBiddingZone;
@@ -11096,6 +11376,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
   /**
+   * $getExternalCatalogProducts - getExternalCatalogProducts
+   * 
+   * Returns the list of available external catalog products with computed prices based on a given context
+   */
+  '$getExternalCatalogProducts'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$GetExternalCatalogProducts.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
+  /**
+   * $getExternalCatalogProductsRecommendation - getExternalCatalogProductsRecommendation
+   * 
+   * Returns the list of available external catalog products recommendations based on a given context
+   */
+  '$getExternalCatalogProductsRecommendation'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$GetExternalCatalogProductsRecommendation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetExternalCatalogProductsRecommendation.Responses.$200>
+  /**
    * $productRecommendations - productRecommendations
    * 
    * Get a list of product recommendations based on the search parameters.
@@ -11347,6 +11647,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
   }
+  ['/v1/public/external-catalog/products']: {
+    /**
+     * $getExternalCatalogProducts - getExternalCatalogProducts
+     * 
+     * Returns the list of available external catalog products with computed prices based on a given context
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$GetExternalCatalogProducts.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
+  }
+  ['/v1/public/external-catalog/products-recommendation']: {
+    /**
+     * $getExternalCatalogProductsRecommendation - getExternalCatalogProductsRecommendation
+     * 
+     * Returns the list of available external catalog products recommendations based on a given context
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$GetExternalCatalogProductsRecommendation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetExternalCatalogProductsRecommendation.Responses.$200>
+  }
   ['/v1/public/product-recommendations']: {
     /**
      * $productRecommendations - productRecommendations
@@ -11406,6 +11730,7 @@ export type Coupon = Components.Schemas.Coupon;
 export type CouponItem = Components.Schemas.CouponItem;
 export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
 export type Currency = Components.Schemas.Currency;
+export type CustomContext = Components.Schemas.CustomContext;
 export type Customer = Components.Schemas.Customer;
 export type DiscountAmounts = Components.Schemas.DiscountAmounts;
 export type DynamicTariffInterval = Components.Schemas.DynamicTariffInterval;
@@ -11414,7 +11739,11 @@ export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type Error = Components.Schemas.Error;
+export type ExternalCatalogConfigurationRequest = Components.Schemas.ExternalCatalogConfigurationRequest;
+export type ExternalCatalogCustomRequest = Components.Schemas.ExternalCatalogCustomRequest;
 export type ExternalCatalogItem = Components.Schemas.ExternalCatalogItem;
+export type ExternalCatalogJourneyRequest = Components.Schemas.ExternalCatalogJourneyRequest;
+export type ExternalCatalogRequest = Components.Schemas.ExternalCatalogRequest;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
