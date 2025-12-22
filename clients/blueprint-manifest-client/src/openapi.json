@@ -1697,6 +1697,11 @@
             "type": "boolean",
             "description": "When a resource is marked as hidden, it's used to hide it from the UI"
           },
+          "is_disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "When a resource is marked as disabled, it will be skipped during export"
+          },
           "hard_dependencies": {
             "type": "array",
             "items": {
@@ -1807,6 +1812,13 @@
                 "items": {
                   "$ref": "#/components/schemas/BlueprintResource"
                 }
+              },
+              "compatible_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of compatible app IDs for the blueprint"
               }
             }
           }
@@ -2186,7 +2198,8 @@
           "portal_config",
           "target",
           "kanban",
-          "validation_rule"
+          "validation_rule",
+          "flow_template"
         ]
       },
       "PlanChanges": {
