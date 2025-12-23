@@ -2198,7 +2198,8 @@
           "portal_config",
           "target",
           "kanban",
-          "validation_rule"
+          "validation_rule",
+          "flow_template"
         ]
       },
       "PlanChanges": {
