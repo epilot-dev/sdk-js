@@ -2198,8 +2198,7 @@
           "portal_config",
           "target",
           "kanban",
-          "validation_rule",
-          "flow_template"
+          "validation_rule"
         ]
       },
       "PlanChanges": {
@@ -2706,6 +2705,7 @@
           "terraform_apply_error",
           "terraform_show_error",
           "generic_error",
+          "bad_request",
           "forbidden",
           "not_found",
           "undeclared_resource",
