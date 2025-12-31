@@ -1683,6 +1683,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Whether only a single closing reason can be selected"
           }
         }
       },
@@ -2566,6 +2570,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Whether only a single closing reason can be selected"
           }
         },
         "required": [

@@ -179,6 +179,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         export interface DecisionTask {
             id: string;
@@ -440,6 +444,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         export interface FlowTemplateBase {
             id?: string;
@@ -516,6 +524,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -836,6 +848,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
     }
 }
