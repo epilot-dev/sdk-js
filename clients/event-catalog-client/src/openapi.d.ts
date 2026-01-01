@@ -56,6 +56,64 @@ declare namespace Components {
             required?: boolean;
         }
         /**
+         * Configuration for triggering an event based on entity operations.
+         *
+         * When an entity operation matches the configured criteria, the event will be triggered.
+         * - On createEntity: the attribute must be present in the entity payload
+         * - On updateEntity: the attribute must be in diff.added, diff.updated, or diff.deleted
+         * - On deleteEntity: the event triggers when the entity is deleted (attributes not checked)
+         *
+         */
+        export interface EntityOperationTrigger {
+            /**
+             * List of entity operations that can trigger this event
+             * example:
+             * [
+             *   "createEntity",
+             *   "updateEntity"
+             * ]
+             */
+            operation: ("createEntity" | "updateEntity" | "deleteEntity")[];
+            /**
+             * List of entity schema slugs that can trigger this event
+             * example:
+             * [
+             *   "contact",
+             *   "contract",
+             *   "order"
+             * ]
+             */
+            schema: string[];
+            /**
+             * Optional list of entity attributes to track for changes.
+             * If specified, the event only triggers when these attributes are affected.
+             * - On createEntity: attribute must be defined in the entity payload
+             * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
+             * If not specified, all changes to matching entities will trigger the event.
+             *
+             * example:
+             * [
+             *   "email",
+             *   "phone",
+             *   "status"
+             * ]
+             */
+            attribute?: string[];
+            /**
+             * Optional list of purpose names to filter by.
+             * The entity must have at least one matching purpose in its _purpose array.
+             * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
+             * If not specified, the event triggers regardless of entity purpose.
+             *
+             * example:
+             * [
+             *   "Kündigung",
+             *   "Umzug/Auszug"
+             * ]
+             */
+            purpose?: string[];
+        }
+        /**
          * An event instance in the event history
          * example:
          * {
@@ -63,7 +121,7 @@ declare namespace Components {
          *   "_event_time": "2024-01-01T12:00:00Z",
          *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
          *   "_event_name": "MeterReading",
-         *   "_event_version": 1,
+         *   "_event_version": "1.0.0",
          *   "_event_source": "api",
          *   "reading_value": 123.45,
          *   "reading_date": "2024-01-01T11:59:00Z",
@@ -99,165 +157,271 @@ declare namespace Components {
              */
             _event_name: string;
             /**
-             * Schema version number
+             * Event version (semver)
+             * example:
+             * 1.0.0
              */
-            _event_version: number;
+            _event_version: string;
             /**
              * Source that triggered the event
              */
             _event_source: string;
         }
+        /**
+         * Event configuration with required fields
+         */
         export interface EventConfig {
             /**
              * Unique human readable name of the event
              * example:
-             * MeterReading
+             * AddMeterReading
              */
             event_name: string;
             /**
-             * Version of the event schema
+             * Human-friendly title for the event
              * example:
-             * 1
+             * Add Meter Reading
              */
-            event_version?: number;
+            event_title?: string;
+            /**
+             * Description of when the event is triggered
+             * example:
+             * Triggered when a new meter reading is added
+             */
+            event_description?: string;
+            /**
+             * Event version (semver)
+             * example:
+             * 1.0.0
+             */
+            event_version: string;
+            /**
+             * Status of the event
+             * example:
+             * active
+             */
+            event_status?: "active" | "deprecated" | "draft" | "disabled";
+            /**
+             * Tags associated with the event for categorization and filtering
+             *
+             * The "builtin" tag indicates events that are built into the epilot system.
+             *
+             * example:
+             * [
+             *   "builtin",
+             *   "metering",
+             *   "erp"
+             * ]
+             */
+            event_tags?: string[];
             /**
              * Fields that define the event schema
-             * example:
-             * {
-             *   "reading_value": {
-             *     "json_schema": {
-             *       "type": "number",
-             *       "description": "The meter reading value"
-             *     },
-             *     "required": true
-             *   },
-             *   "reading_date": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "date-time",
-             *       "description": "ISO 8601 timestamp when reading was taken"
-             *     },
-             *     "required": true
-             *   },
-             *   "read_by": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "description": "Name or identifier of who submitted the reading"
-             *     },
-             *     "required": false
-             *   },
-             *   "reason": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "enum": [
-             *         "regular",
-             *         "move-in",
-             *         "move-out",
-             *         "supplier-change",
-             *         "correction",
-             *         "final"
-             *       ],
-             *       "description": "Reason for the meter reading"
-             *     },
-             *     "required": true
-             *   },
-             *   "direction": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "enum": [
-             *         "feed-in",
-             *         "feed-out"
-             *       ],
-             *       "description": "Direction of energy flow"
-             *     },
-             *     "required": true
-             *   },
-             *   "source": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "enum": [
-             *         "portal",
-             *         "360",
-             *         "api",
-             *         "automation"
-             *       ],
-             *       "description": "Source system where reading was submitted"
-             *     },
-             *     "required": true
-             *   },
-             *   "meter_id": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "uuid",
-             *       "description": "Entity ID of the meter"
-             *     },
-             *     "required": true
-             *   },
-             *   "counter_id": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "uuid",
-             *       "description": "Entity ID of the meter counter"
-             *     },
-             *     "required": true
-             *   },
-             *   "meter_number": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "description": "Human-readable meter number"
-             *     },
-             *     "required": false
-             *   },
-             *   "obis_number": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "description": "OBIS code of the counter"
-             *     },
-             *     "required": false
-             *   },
-             *   "unit": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "description": "Unit of measurement (e.g., kWh, m3)"
-             *     },
-             *     "required": false
-             *   },
-             *   "customer_id": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "uuid",
-             *       "description": "Entity ID of the customer"
-             *     },
-             *     "required": false
-             *   },
-             *   "contract_id": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "uuid",
-             *       "description": "Entity ID of the contract"
-             *     },
-             *     "required": false
-             *   },
-             *   "user_id": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "description": "ID of the user who submitted the reading"
-             *     },
-             *     "required": false
-             *   },
-             *   "user_email": {
-             *     "json_schema": {
-             *       "type": "string",
-             *       "format": "email",
-             *       "description": "Email of the user who submitted the reading"
-             *     },
-             *     "required": false
-             *   }
-             * }
              */
             schema_fields: {
                 [name: string]: SchemaField;
             };
+            /**
+             * Optional entity graph definition for resolving related entities
+             */
+            entity_graph?: {
+                /**
+                 * List of node definitions in the graph
+                 */
+                nodes: /* A node in the entity graph */ GraphNode[];
+                /**
+                 * List of edge definitions connecting nodes
+                 */
+                edges: /* An edge connecting two nodes in the graph */ GraphEdge[];
+            };
+            /**
+             * Optional configuration for triggering this event based on entity operations
+             */
+            entity_operation?: {
+                /**
+                 * List of entity operations that can trigger this event
+                 * example:
+                 * [
+                 *   "createEntity",
+                 *   "updateEntity"
+                 * ]
+                 */
+                operation: ("createEntity" | "updateEntity" | "deleteEntity")[];
+                /**
+                 * List of entity schema slugs that can trigger this event
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract",
+                 *   "order"
+                 * ]
+                 */
+                schema: string[];
+                /**
+                 * Optional list of entity attributes to track for changes.
+                 * If specified, the event only triggers when these attributes are affected.
+                 * - On createEntity: attribute must be defined in the entity payload
+                 * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
+                 * If not specified, all changes to matching entities will trigger the event.
+                 *
+                 * example:
+                 * [
+                 *   "email",
+                 *   "phone",
+                 *   "status"
+                 * ]
+                 */
+                attribute?: string[];
+                /**
+                 * Optional list of purpose names to filter by.
+                 * The entity must have at least one matching purpose in its _purpose array.
+                 * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
+                 * If not specified, the event triggers regardless of entity purpose.
+                 *
+                 * example:
+                 * [
+                 *   "Kündigung",
+                 *   "Umzug/Auszug"
+                 * ]
+                 */
+                purpose?: string[];
+            };
+            /**
+             * Whether this event is enabled for the organization.
+             * When disabled, the event will not be triggered.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            enabled?: boolean;
+        }
+        /**
+         * Base properties shared between EventConfig and UpdateEventPayload
+         */
+        export interface EventConfigBase {
+            /**
+             * Unique human readable name of the event
+             * example:
+             * AddMeterReading
+             */
+            event_name?: string;
+            /**
+             * Human-friendly title for the event
+             * example:
+             * Add Meter Reading
+             */
+            event_title?: string;
+            /**
+             * Description of when the event is triggered
+             * example:
+             * Triggered when a new meter reading is added
+             */
+            event_description?: string;
+            /**
+             * Event version (semver)
+             * example:
+             * 1.0.0
+             */
+            event_version?: string;
+            /**
+             * Status of the event
+             * example:
+             * active
+             */
+            event_status?: "active" | "deprecated" | "draft" | "disabled";
+            /**
+             * Tags associated with the event for categorization and filtering
+             *
+             * The "builtin" tag indicates events that are built into the epilot system.
+             *
+             * example:
+             * [
+             *   "builtin",
+             *   "metering",
+             *   "erp"
+             * ]
+             */
+            event_tags?: string[];
+            /**
+             * Fields that define the event schema
+             */
+            schema_fields?: {
+                [name: string]: SchemaField;
+            };
+            /**
+             * Optional entity graph definition for resolving related entities
+             */
+            entity_graph?: {
+                /**
+                 * List of node definitions in the graph
+                 */
+                nodes: /* A node in the entity graph */ GraphNode[];
+                /**
+                 * List of edge definitions connecting nodes
+                 */
+                edges: /* An edge connecting two nodes in the graph */ GraphEdge[];
+            };
+            /**
+             * Optional configuration for triggering this event based on entity operations
+             */
+            entity_operation?: {
+                /**
+                 * List of entity operations that can trigger this event
+                 * example:
+                 * [
+                 *   "createEntity",
+                 *   "updateEntity"
+                 * ]
+                 */
+                operation: ("createEntity" | "updateEntity" | "deleteEntity")[];
+                /**
+                 * List of entity schema slugs that can trigger this event
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract",
+                 *   "order"
+                 * ]
+                 */
+                schema: string[];
+                /**
+                 * Optional list of entity attributes to track for changes.
+                 * If specified, the event only triggers when these attributes are affected.
+                 * - On createEntity: attribute must be defined in the entity payload
+                 * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
+                 * If not specified, all changes to matching entities will trigger the event.
+                 *
+                 * example:
+                 * [
+                 *   "email",
+                 *   "phone",
+                 *   "status"
+                 * ]
+                 */
+                attribute?: string[];
+                /**
+                 * Optional list of purpose names to filter by.
+                 * The entity must have at least one matching purpose in its _purpose array.
+                 * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
+                 * If not specified, the event triggers regardless of entity purpose.
+                 *
+                 * example:
+                 * [
+                 *   "Kündigung",
+                 *   "Umzug/Auszug"
+                 * ]
+                 */
+                purpose?: string[];
+            };
+            /**
+             * Whether this event is enabled for the organization.
+             * When disabled, the event will not be triggered.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            enabled?: boolean;
         }
         /**
          * JSON Schema declaring the event payload structure
@@ -283,8 +447,8 @@ declare namespace Components {
          *       "description": "Event name from catalog"
          *     },
          *     "_event_version": {
-         *       "type": "integer",
-         *       "description": "Schema version number"
+         *       "type": "string",
+         *       "description": "Event version (semver)"
          *     },
          *     "_event_source": {
          *       "type": "string",
@@ -401,6 +565,97 @@ declare namespace Components {
         export interface EventJsonSchema {
         }
         /**
+         * List of entity fields to include or exclude in the response
+         *
+         * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+         *
+         * Globbing and globstart (**) is supported for nested fields.
+         *
+         * example:
+         * [
+         *   "_id",
+         *   "_title",
+         *   "first_name",
+         *   "account",
+         *   "!account.*._files",
+         *   "**._product"
+         * ]
+         */
+        export type FieldsParam = string[];
+        /**
+         * Entity graph definition for resolving related entities
+         */
+        export interface GraphDefinition {
+            /**
+             * List of node definitions in the graph
+             */
+            nodes: /* A node in the entity graph */ GraphNode[];
+            /**
+             * List of edge definitions connecting nodes
+             */
+            edges: /* An edge connecting two nodes in the graph */ GraphEdge[];
+        }
+        /**
+         * An edge connecting two nodes in the graph
+         */
+        export interface GraphEdge {
+            /**
+             * Source node ID
+             * example:
+             * contact
+             */
+            from: string;
+            /**
+             * Target node ID
+             * example:
+             * billing_account
+             */
+            to: string;
+        }
+        /**
+         * A node in the entity graph
+         */
+        export interface GraphNode {
+            /**
+             * Unique identifier for this node in the graph definition
+             * example:
+             * contact
+             */
+            id: string;
+            /**
+             * Entity schema slug for this node
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * Cardinality for this node when hydrated:
+             * - "one": Node can only contain one entity, returns single Entity object
+             * - "many": Node can contain multiple entities, returns array of Entity objects
+             * If not specified, defaults to "many" (returns array)
+             *
+             * example:
+             * one
+             */
+            cardinality?: "one" | "many";
+            /**
+             * Optional array of field names to include in the hydrated entity response for this node.
+             * When specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.
+             * Only applies when hydrate=true.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            fields?: string[];
+        }
+        /**
          * A primitive JSON Schema field definition
          */
         export interface PrimitiveField {
@@ -468,6 +723,137 @@ declare namespace Components {
              */
             event_id?: string;
         }
+        /**
+         * Payload for updating an event configuration.
+         * Accepts the same fields as EventConfig (all optional for PATCH).
+         * Currently only the `enabled` field is processed, other fields are ignored.
+         *
+         */
+        export interface UpdateEventPayload {
+            /**
+             * Unique human readable name of the event
+             * example:
+             * AddMeterReading
+             */
+            event_name?: string;
+            /**
+             * Human-friendly title for the event
+             * example:
+             * Add Meter Reading
+             */
+            event_title?: string;
+            /**
+             * Description of when the event is triggered
+             * example:
+             * Triggered when a new meter reading is added
+             */
+            event_description?: string;
+            /**
+             * Event version (semver)
+             * example:
+             * 1.0.0
+             */
+            event_version?: string;
+            /**
+             * Status of the event
+             * example:
+             * active
+             */
+            event_status?: "active" | "deprecated" | "draft" | "disabled";
+            /**
+             * Tags associated with the event for categorization and filtering
+             *
+             * The "builtin" tag indicates events that are built into the epilot system.
+             *
+             * example:
+             * [
+             *   "builtin",
+             *   "metering",
+             *   "erp"
+             * ]
+             */
+            event_tags?: string[];
+            /**
+             * Fields that define the event schema
+             */
+            schema_fields?: {
+                [name: string]: SchemaField;
+            };
+            /**
+             * Optional entity graph definition for resolving related entities
+             */
+            entity_graph?: {
+                /**
+                 * List of node definitions in the graph
+                 */
+                nodes: /* A node in the entity graph */ GraphNode[];
+                /**
+                 * List of edge definitions connecting nodes
+                 */
+                edges: /* An edge connecting two nodes in the graph */ GraphEdge[];
+            };
+            /**
+             * Optional configuration for triggering this event based on entity operations
+             */
+            entity_operation?: {
+                /**
+                 * List of entity operations that can trigger this event
+                 * example:
+                 * [
+                 *   "createEntity",
+                 *   "updateEntity"
+                 * ]
+                 */
+                operation: ("createEntity" | "updateEntity" | "deleteEntity")[];
+                /**
+                 * List of entity schema slugs that can trigger this event
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract",
+                 *   "order"
+                 * ]
+                 */
+                schema: string[];
+                /**
+                 * Optional list of entity attributes to track for changes.
+                 * If specified, the event only triggers when these attributes are affected.
+                 * - On createEntity: attribute must be defined in the entity payload
+                 * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
+                 * If not specified, all changes to matching entities will trigger the event.
+                 *
+                 * example:
+                 * [
+                 *   "email",
+                 *   "phone",
+                 *   "status"
+                 * ]
+                 */
+                attribute?: string[];
+                /**
+                 * Optional list of purpose names to filter by.
+                 * The entity must have at least one matching purpose in its _purpose array.
+                 * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
+                 * If not specified, the event triggers regardless of entity purpose.
+                 *
+                 * example:
+                 * [
+                 *   "Kündigung",
+                 *   "Umzug/Auszug"
+                 * ]
+                 */
+                purpose?: string[];
+            };
+            /**
+             * Whether this event is enabled for the organization.
+             * When disabled, the event will not be triggered.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            enabled?: boolean;
+        }
     }
 }
 declare namespace Paths {
@@ -479,7 +865,7 @@ declare namespace Paths {
             event_name: Parameters.EventName;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.EventConfig;
+            export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
         }
     }
     namespace GetEventExample {
@@ -529,8 +915,8 @@ declare namespace Paths {
              *       "description": "Event name from catalog"
              *     },
              *     "_event_version": {
-             *       "type": "integer",
-             *       "description": "Schema version number"
+             *       "type": "string",
+             *       "description": "Event version (semver)"
              *     },
              *     "_event_source": {
              *       "type": "string",
@@ -650,7 +1036,27 @@ declare namespace Paths {
     namespace ListEvents {
         namespace Responses {
             export interface $200 {
-                results?: Components.Schemas.EventConfig[];
+                results?: /* Event configuration with required fields */ Components.Schemas.EventConfig[];
+            }
+        }
+    }
+    namespace PatchEvent {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /**
+         * Payload for updating an event configuration.
+         * Accepts the same fields as EventConfig (all optional for PATCH).
+         * Currently only the `enabled` field is processed, other fields are ignored.
+         *
+         */
+        Components.Schemas.UpdateEventPayload;
+        namespace Responses {
+            export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export interface $404 {
             }
         }
     }
@@ -672,7 +1078,7 @@ declare namespace Paths {
                  *   "_event_time": "2024-01-01T12:00:00Z",
                  *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
                  *   "_event_name": "MeterReading",
-                 *   "_event_version": 1,
+                 *   "_event_version": "1.0.0",
                  *   "_event_source": "api",
                  *   "reading_value": 123.45,
                  *   "reading_date": "2024-01-01T11:59:00Z",
@@ -735,6 +1141,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEvent.Responses.$200>
   /**
+   * patchEvent - patchEvent
+   * 
+   * Update the configuration of a specific business event for the organization
+   */
+  'patchEvent'(
+    parameters?: Parameters<Paths.PatchEvent.PathParameters> | null,
+    data?: Paths.PatchEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchEvent.Responses.$200>
+  /**
    * getEventJSONSchema - getEventJSONSchema
    * 
    * Retrieve the JSON Schema of a specific business event
@@ -790,6 +1206,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEvent.Responses.$200>
+    /**
+     * patchEvent - patchEvent
+     * 
+     * Update the configuration of a specific business event for the organization
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchEvent.PathParameters> | null,
+      data?: Paths.PatchEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchEvent.Responses.$200>
   }
   ['/v1/events/{event_name}/json_schema']: {
     /**
@@ -834,9 +1260,16 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type CommonEventMetadata = Components.Schemas.CommonEventMetadata;
 export type ContextEntity = Components.Schemas.ContextEntity;
+export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type Event = Components.Schemas.Event;
 export type EventConfig = Components.Schemas.EventConfig;
+export type EventConfigBase = Components.Schemas.EventConfigBase;
 export type EventJsonSchema = Components.Schemas.EventJsonSchema;
+export type FieldsParam = Components.Schemas.FieldsParam;
+export type GraphDefinition = Components.Schemas.GraphDefinition;
+export type GraphEdge = Components.Schemas.GraphEdge;
+export type GraphNode = Components.Schemas.GraphNode;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
+export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
