@@ -760,6 +760,40 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "summary": "listInstalledMarketplaceBlueprints",
+        "description": "List installed Marketplace Blueprints for the organization.\nWhen multiple blueprints have the same slug, returns only the most recently created one.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Marketplace Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledMarketplaceBlueprintItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",
@@ -783,6 +817,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 }
               }
@@ -850,6 +888,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 },
                 "required": [
@@ -1825,6 +1867,43 @@
         ],
         "required": [
           "source_type"
+        ]
+      },
+      "InstalledMarketplaceBlueprintItem": {
+        "type": "object",
+        "description": "Summary of an installed marketplace blueprint for version tracking",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug of the blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the installed blueprint",
+            "example": "v1.0.0"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
         ]
       },
       "DeployedBlueprint": {

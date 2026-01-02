@@ -692,6 +692,33 @@ declare namespace Components {
             name?: string;
             type?: string;
         }
+        /**
+         * Summary of an installed marketplace blueprint for version tracking
+         */
+        export interface InstalledMarketplaceBlueprintItem {
+            id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            /**
+             * URL slug of the blueprint from the epilot marketplace
+             * example:
+             * solar-b2b
+             */
+            slug: string;
+            /**
+             * Version of the installed blueprint
+             * example:
+             * v1.0.0
+             */
+            version?: string;
+            created_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_at?: string; // date-time
+            updated_by?: CallerIdentity;
+        }
         export interface Job {
             job_id?: /**
              * ID of an import or export job (state machine)
@@ -1968,6 +1995,10 @@ declare namespace Paths {
              */
             mode: "simple" | "advanced";
             source_blueprint_type?: "marketplace";
+            /**
+             * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
+             */
+            slug?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -2022,6 +2053,18 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListInstalledMarketplaceBlueprints {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: /* Summary of an installed marketplace blueprint for version tracking */ Components.Schemas.InstalledMarketplaceBlueprintItem[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -2029,6 +2072,10 @@ declare namespace Paths {
              */
             blueprint_file?: string;
             source_blueprint_type?: "marketplace";
+            /**
+             * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
+             */
+            slug?: string;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
@@ -2265,6 +2312,18 @@ export interface OperationMethods {
     data?: Paths.CreateBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  /**
+   * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
+   * 
+   * List installed Marketplace Blueprints for the organization.
+   * When multiple blueprints have the same slug, returns only the most recently created one.
+   * 
+   */
+  'listInstalledMarketplaceBlueprints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
   /**
    * preInstallBlueprint - preInstallBlueprint
    * 
@@ -2589,6 +2648,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints:marketplace']: {
+    /**
+     * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
+     * 
+     * List installed Marketplace Blueprints for the organization.
+     * When multiple blueprints have the same slug, returns only the most recently created one.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
+  }
   ['/v2/blueprint-manifest/blueprints:pre-install']: {
     /**
      * preInstallBlueprint - preInstallBlueprint
@@ -2816,6 +2889,7 @@ export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
 export type FormattedErrorData = Components.Schemas.FormattedErrorData;
+export type InstalledMarketplaceBlueprintItem = Components.Schemas.InstalledMarketplaceBlueprintItem;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;

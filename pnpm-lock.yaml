@@ -32,6 +32,9 @@ importers:
       typescript:
         specifier: ^4.9.3
         version: 4.9.5
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.101.0)
 
   clients/access-token-client:
     dependencies:
@@ -2696,7 +2699,7 @@ importers:
         specifier: ^5.18.0
         version: 5.101.0(webpack-cli@4.10.0)
       webpack-cli:
-        specifier: ^4.4.0
+        specifier: ^4.10.0
         version: 4.10.0(webpack@5.101.0)
 
   packages/app-bridge:
@@ -2762,7 +2765,7 @@ importers:
     dependencies:
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
       amazon-cognito-identity-js:
         specifier: ^5.2.5
         version: 5.2.14(encoding@0.1.13)
@@ -2826,7 +2829,7 @@ importers:
         version: 0.5.0(axios@1.11.0)(js-yaml@4.1.0)
       '@epilot/blueprint-manifest-client':
         specifier: ^3.1.0
-        version: 3.1.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.6.4(axios@1.11.0)(js-yaml@4.1.0)
       '@epilot/customer-portal-client':
         specifier: ^0.23.0
         version: 0.23.0(axios@1.11.0)(js-yaml@4.1.0)
@@ -2886,7 +2889,7 @@ importers:
         version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
       '@epilot/workflow-client':
         specifier: ^1.15.0
         version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
@@ -3266,8 +3269,8 @@ packages:
     peerDependencies:
       axios: ^1.0.0 || >=0.25.0 <1.0.0
 
-  '@epilot/blueprint-manifest-client@3.1.0':
-    resolution: {integrity: sha512-1cR4ssjNpgkvTfEve0O6i3zpZMvHKNxfj5dLD1mid3IDO5Wu5FvYIaEwLJLsKE2yki6Vly3Se/FsdlVoeBSVOA==}
+  '@epilot/blueprint-manifest-client@3.6.4':
+    resolution: {integrity: sha512-H8U7lfdVw/FNxMEiNmCzyTfiHNWLEoWOowDjWlDaSDp6iAguEbMAg0n5gaMmVFYaexVqEfOThRjGGU9qqaGYvw==}
     peerDependencies:
       axios: ^1.0.0 || >=0.25.0 <1.0.0
 
@@ -9006,7 +9009,7 @@ snapshots:
 
   '@epilot/auth@0.8.0(axios@1.11.0)(encoding@0.1.13)(js-yaml@4.1.0)':
     dependencies:
-      '@epilot/user-client': 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+      '@epilot/user-client': 3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
       amazon-cognito-identity-js: 5.2.14(encoding@0.1.13)
       axios: 1.11.0(debug@4.4.1)
       debug: 4.4.1(supports-color@8.1.1)
@@ -9037,7 +9040,7 @@ snapshots:
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/blueprint-manifest-client@3.1.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/blueprint-manifest-client@3.6.4(axios@1.11.0)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
       axios: 1.11.0(debug@4.4.1)
@@ -9308,7 +9311,7 @@ snapshots:
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/user-client@3.12.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/user-client@3.12.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
       axios: 1.11.0(debug@4.4.1)
@@ -14562,7 +14565,7 @@ snapshots:
       schema-utils: 4.3.2
       serialize-javascript: 6.0.2
       terser: 5.43.1
-      webpack: 5.101.0(webpack-cli@4.10.0)
+      webpack: 5.101.0(webpack-cli@5.1.4)
 
   terser@5.43.1:
     dependencies:
