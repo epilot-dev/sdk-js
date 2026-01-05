@@ -718,6 +718,18 @@ declare namespace Components {
             created_by?: CallerIdentity;
             updated_at?: string; // date-time
             updated_by?: CallerIdentity;
+            /**
+             * Whether a newer version is available in the marketplace
+             * example:
+             * true
+             */
+            has_update_available?: boolean;
+            /**
+             * The latest version available in the marketplace
+             * example:
+             * v2.0.0
+             */
+            latest_marketplace_version?: string;
         }
         export interface Job {
             job_id?: /**

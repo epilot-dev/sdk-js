@@ -1899,6 +1899,16 @@
           },
           "updated_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "has_update_available": {
+            "type": "boolean",
+            "description": "Whether a newer version is available in the marketplace",
+            "example": true
+          },
+          "latest_marketplace_version": {
+            "type": "string",
+            "description": "The latest version available in the marketplace",
+            "example": "v2.0.0"
           }
         },
         "required": [
