@@ -686,11 +686,50 @@ declare namespace Components {
                 resources?: string[];
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "forbidden" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
             type?: string;
+        }
+        /**
+         * Summary of an installed marketplace blueprint for version tracking
+         */
+        export interface InstalledMarketplaceBlueprintItem {
+            id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            /**
+             * URL slug of the blueprint from the epilot marketplace
+             * example:
+             * solar-b2b
+             */
+            slug: string;
+            /**
+             * Version of the installed blueprint
+             * example:
+             * v1.0.0
+             */
+            version?: string;
+            created_at?: string; // date-time
+            created_by?: CallerIdentity;
+            updated_at?: string; // date-time
+            updated_by?: CallerIdentity;
+            /**
+             * Whether a newer version is available in the marketplace
+             * example:
+             * true
+             */
+            has_update_available?: boolean;
+            /**
+             * The latest version available in the marketplace
+             * example:
+             * v2.0.0
+             */
+            latest_marketplace_version?: string;
         }
         export interface Job {
             job_id?: /**
@@ -1339,7 +1378,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "erp_integration" | "erp_integration_use_case" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "erp_integration" | "erp_integration_use_case" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -1968,6 +2007,10 @@ declare namespace Paths {
              */
             mode: "simple" | "advanced";
             source_blueprint_type?: "marketplace";
+            /**
+             * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
+             */
+            slug?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -2022,6 +2065,18 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListInstalledMarketplaceBlueprints {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 1
+                 */
+                total?: number;
+                results?: /* Summary of an installed marketplace blueprint for version tracking */ Components.Schemas.InstalledMarketplaceBlueprintItem[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -2029,6 +2084,10 @@ declare namespace Paths {
              */
             blueprint_file?: string;
             source_blueprint_type?: "marketplace";
+            /**
+             * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
+             */
+            slug?: string;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
@@ -2264,6 +2323,18 @@ export interface OperationMethods {
     data?: Paths.CreateBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
+  /**
+   * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
+   * 
+   * List installed Marketplace Blueprints for the organization.
+   * When multiple blueprints have the same slug, returns only the most recently created one.
+   * 
+   */
+  'listInstalledMarketplaceBlueprints'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
   /**
    * preInstallBlueprint - preInstallBlueprint
    * 
@@ -2588,6 +2659,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints:marketplace']: {
+    /**
+     * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
+     * 
+     * List installed Marketplace Blueprints for the organization.
+     * When multiple blueprints have the same slug, returns only the most recently created one.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
+  }
   ['/v2/blueprint-manifest/blueprints:pre-install']: {
     /**
      * preInstallBlueprint - preInstallBlueprint
@@ -2814,6 +2899,7 @@ export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
 export type FormattedErrorData = Components.Schemas.FormattedErrorData;
+export type InstalledMarketplaceBlueprintItem = Components.Schemas.InstalledMarketplaceBlueprintItem;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;

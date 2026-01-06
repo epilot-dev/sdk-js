@@ -156,6 +156,12 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",

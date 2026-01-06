@@ -760,6 +760,40 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "summary": "listInstalledMarketplaceBlueprints",
+        "description": "List installed Marketplace Blueprints for the organization.\nWhen multiple blueprints have the same slug, returns only the most recently created one.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Marketplace Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledMarketplaceBlueprintItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",
@@ -783,6 +817,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 }
               }
@@ -850,6 +888,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 },
                 "required": [
@@ -1827,6 +1869,53 @@
           "source_type"
         ]
       },
+      "InstalledMarketplaceBlueprintItem": {
+        "type": "object",
+        "description": "Summary of an installed marketplace blueprint for version tracking",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug of the blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the installed blueprint",
+            "example": "v1.0.0"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "has_update_available": {
+            "type": "boolean",
+            "description": "Whether a newer version is available in the marketplace",
+            "example": true
+          },
+          "latest_marketplace_version": {
+            "type": "string",
+            "description": "The latest version available in the marketplace",
+            "example": "v2.0.0"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
+        ]
+      },
       "DeployedBlueprint": {
         "allOf": [
           {
@@ -2199,7 +2288,8 @@
           "target",
           "kanban",
           "validation_rule",
-          "flow_template"
+          "flow_template",
+          "taxonomy"
         ]
       },
       "PlanChanges": {
@@ -2706,6 +2796,7 @@
           "terraform_apply_error",
           "terraform_show_error",
           "generic_error",
+          "bad_request",
           "forbidden",
           "not_found",
           "undeclared_resource",
