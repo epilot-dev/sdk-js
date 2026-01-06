@@ -164,7 +164,7 @@ declare namespace Components {
             country?: string;
         }
         /**
-         * The availability check result payload
+         * The product availability check result payload
          * example:
          * {
          *   "available_products": [],
@@ -5436,9 +5436,11 @@ declare namespace Components {
             base_url?: string;
         }
         export interface Offer {
-            product_id?: string;
-            price_id?: string;
             target_id?: string;
+            items?: {
+                price_id: string;
+                product_id: string;
+            }[];
         }
         /**
          * The opportunity entity
@@ -8933,6 +8935,7 @@ declare namespace Components {
              * The contract id to be used as source for the recommendation
              */
             contract_id?: string;
+            filters?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
          * example:
@@ -9589,7 +9592,7 @@ declare namespace Paths {
         export type RequestBody = /* Availability check request payload */ Components.Schemas.AvailabilityCheckParams;
         namespace Responses {
             export type $200 = /**
-             * The availability check result payload
+             * The product availability check result payload
              * example:
              * {
              *   "available_products": [],

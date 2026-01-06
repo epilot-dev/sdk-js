@@ -845,9 +845,10 @@
           "order",
           "meter",
           "ticket",
-          "email",
+          "message",
           "account",
-          "submission"
+          "submission",
+          "contract"
         ]
       },
       "ListConfigsResponse": {
@@ -866,5 +867,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://data-management.sls.epilot.io"
+    }
+  ]
 }

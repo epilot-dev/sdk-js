@@ -37,7 +37,7 @@ declare namespace Components {
             status?: JobStatus;
             started_at?: string; // date-time
         }
-        export type DeletionRelationEntitySchema = "contact" | "file" | "opportunity" | "order" | "meter" | "ticket" | "email" | "account" | "submission";
+        export type DeletionRelationEntitySchema = "contact" | "file" | "opportunity" | "order" | "meter" | "ticket" | "message" | "account" | "submission" | "contract";
         export interface IntervalConfigSchedule {
             frequency: "interval";
             /**

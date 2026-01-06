@@ -1330,22 +1330,6 @@
                       }
                     }
                   }
-                },
-                "Check availability with location & available date dimension": {
-                  "value": {
-                    "products": [
-                      "cd75456a-30e4-4912-95be-e743d5ea175b"
-                    ],
-                    "filters": {
-                      "location": {
-                        "postal_code": "57008",
-                        "city": "Cologne",
-                        "street": "Media Park",
-                        "street_number": "8a"
-                      },
-                      "available_date": "2022-05-01"
-                    }
-                  }
                 }
               }
             }
@@ -3222,8 +3206,21 @@
                 "Search product recommendations by id": {
                   "value": {
                     "product_recommendation_ids": [
-                      "bae8d40a-0093-483a-b4f9-3653800b6781"
+                      "22c134b7-8dd8-4872-a5c1-8fc6dd4ac2ee"
                     ]
+                  }
+                },
+                "Search product recommendations by id with location filter": {
+                  "value": {
+                    "product_recommendation_ids": [
+                      "22c134b7-8dd8-4872-a5c1-8fc6dd4ac2ee"
+                    ],
+                    "filters": {
+                      "location": {
+                        "postal_code": "50670",
+                        "city": "Köln"
+                      }
+                    }
                   }
                 },
                 "Search product recommendations by source product and price": {
@@ -5586,7 +5583,7 @@
         ]
       },
       "AvailabilityResult": {
-        "description": "The availability check result payload",
+        "description": "The product availability check result payload",
         "type": "object",
         "properties": {
           "available_products": {
@@ -9086,6 +9083,9 @@
           "contract_id": {
             "type": "string",
             "description": "The contract id to be used as source for the recommendation"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AvailabilityFilters"
           }
         }
       },
@@ -9112,14 +9112,26 @@
       "Offer": {
         "type": "object",
         "properties": {
-          "product_id": {
-            "type": "string"
-          },
-          "price_id": {
-            "type": "string"
-          },
           "target_id": {
             "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "price_id": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price_id",
+                "product_id"
+              ]
+            }
           }
         }
       },

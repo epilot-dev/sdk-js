@@ -2191,6 +2191,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2872,6 +2873,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
