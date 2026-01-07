@@ -2798,6 +2798,7 @@
           "generic_error",
           "bad_request",
           "forbidden",
+          "conflict",
           "not_found",
           "undeclared_resource",
           "invalid_readonly_attribute",
