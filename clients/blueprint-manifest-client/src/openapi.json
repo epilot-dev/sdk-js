@@ -2288,7 +2288,8 @@
           "target",
           "kanban",
           "validation_rule",
-          "flow_template"
+          "flow_template",
+          "taxonomy"
         ]
       },
       "PlanChanges": {

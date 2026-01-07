@@ -45,7 +45,7 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-            reason?: "too_many_records" | "timestamp_future" | "duplicate_reading" | "less_than_previous";
+            reason?: "too_many_records" | "timestamp_future" | "duplicate_reading" | "less_than_previous" | "invalid_identifiers" | "multiple_readings_found";
         }
         export interface InvalidRequestCreateReadingWithMeter {
             /**
@@ -426,14 +426,132 @@ declare namespace Components {
             ReadBy;
             reason?: /**
              * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
+             */
+            Reason;
+            meter_id: EntityId /* uuid */;
+            counter_id?: EntityId /* uuid */;
+            direction?: Direction;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * Storing the feed-in record
+             * 2022-10-10T00:00:00.000Z
+             */
+            timestamp?: string; // date-time
+            source: Source;
+            status?: ReadingStatus;
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * Notes to record a meter reading
+             */
+            note?: string;
+        }
+        export interface PortalMeterReading {
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
+             */
+            Reason;
+            meter_id?: EntityId /* uuid */;
+            counter_id: EntityId /* uuid */;
+            direction?: Direction;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T00:00:00.000Z
+             */
+            timestamp?: string; // date-time
+            source: Source;
+            status?: ReadingStatus;
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * Notes to record a meter reading
+             */
+            note?: string;
+        }
+        /**
+         * The person who recorded the reading
+         * example:
+         * John Doe
+         */
+        export type ReadBy = string | null;
+        export interface Reading {
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
              */
             Reason;
             /**
              * The ID of the associated meter
              */
-            meter_id: EntityId /* uuid */;
+            meter_id?: EntityId /* uuid */;
             /**
              * The ID of the associated meter counter
              */
@@ -447,7 +565,7 @@ declare namespace Components {
              * example:
              * 2022-10-10T00:00:00.000Z
              */
-            timestamp?: string;
+            timestamp?: string; // date-time
             /**
              * The source of the reading
              */
@@ -456,13 +574,32 @@ declare namespace Components {
              * The status of the reading
              */
             status?: ReadingStatus;
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * Notes to record a meter reading
+             */
+            note?: string;
         }
-        /**
-         * The person who recorded the reading
-         * example:
-         * John Doe
-         */
-        export type ReadBy = string | null;
         export type ReadingStatus = "valid" | "in-validation" | "implausible" | null | "";
         export interface ReadingWithMeter {
             /**
@@ -507,8 +644,8 @@ declare namespace Components {
             ReadBy;
             reason?: /**
              * The reason for recording the reading
-             * example:
-             * Storing the feed-in record
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
              */
             Reason;
             /**
@@ -524,10 +661,15 @@ declare namespace Components {
         }
         /**
          * The reason for recording the reading
-         * example:
-         * Storing the feed-in record
+         * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+         *
          */
-        export type Reason = string | null;
+        export type Reason = "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment";
+        /**
+         * This field is deprecated. Please use the Reason enum instead.
+         *
+         */
+        export type ReasonString = string | null;
         export interface Rule {
             entity?: string | null;
             attribute?: string | null;
@@ -565,8 +707,8 @@ declare namespace Components {
             readBy?: string;
             reason?: /**
              * The reason for recording the reading
-             * example:
-             * Storing the feed-in record
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
              */
             Reason;
             /**
@@ -616,6 +758,72 @@ declare namespace Components {
         } | null;
         export type TariffType = "ht" | "nt";
         export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
+        export interface UpdateMeterReading {
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * This field is deprecated. Please use the Reason enum instead.
+             *
+             */
+            ReasonString;
+            /**
+             * The ID of the associated meter
+             */
+            meter_id: EntityId /* uuid */;
+            /**
+             * The ID of the associated meter counter
+             */
+            counter_id?: EntityId /* uuid */;
+            /**
+             * The direction of the reading (feed-in or feed-out)
+             */
+            direction?: Direction;
+            /**
+             * If the value is not provided, the system will be set with the time the request is processed.
+             * example:
+             * 2022-10-10T00:00:00.000Z
+             */
+            timestamp?: string; // date-time
+            /**
+             * The source of the reading
+             */
+            source: Source;
+            /**
+             * The status of the reading
+             */
+            status?: ReadingStatus;
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+        }
     }
 }
 declare namespace Paths {
@@ -636,6 +844,15 @@ declare namespace Paths {
             activity_id?: Parameters.ActivityId;
         }
         export interface RequestBody {
+            /**
+             * - By default, the system will use combination of counter_id, meter_id, direction, and timestamp to identify a meter reading.
+             * - Additional identifiers can be provided to identify a meter reading uniquely.
+             * - Example:
+             *   - ["metadata.registration_id", "metadata.business_unit"]
+             *   - ["metadata.registration_id", "metadata.business_unit", "external_id"]
+             *
+             */
+            identifiers?: string[];
             readings?: {
                 /**
                  * The reading value of the meter
@@ -651,8 +868,8 @@ declare namespace Paths {
                 Components.Schemas.ReadBy;
                 reason?: /**
                  * The reason for recording the reading
-                 * example:
-                 * Storing the feed-in record
+                 * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+                 *
                  */
                 Components.Schemas.Reason;
                 meter_id: Components.Schemas.EntityId /* uuid */;
@@ -663,9 +880,34 @@ declare namespace Paths {
                  * example:
                  * 2022-10-10T00:00:00.000Z
                  */
-                timestamp?: string;
+                timestamp?: string; // date-time
                 source: Components.Schemas.Source;
                 status?: Components.Schemas.ReadingStatus;
+                /**
+                 * The external ID of the reading
+                 */
+                external_id?: string;
+                /**
+                 * A remark or comment for the reading
+                 * example:
+                 * Customer reported unusual consumption
+                 */
+                remark?: string | null;
+                /**
+                 * Additional metadata for the reading
+                 * example:
+                 * {
+                 *   "registration_id": "1234567890",
+                 *   "business_unit": "ABC"
+                 * }
+                 */
+                metadata?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Notes to record a meter reading
+                 */
+                note?: string;
                 operation?: "create" | "update" | "delete";
             }[];
         }
@@ -739,6 +981,26 @@ declare namespace Paths {
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReading[];
+            }
+            export type $400 = Components.Responses.InvalidRequestCreateMeterReadings;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreatePortalMeterReadings {
+        namespace Parameters {
+            export type MeterId = Components.Schemas.Id;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface RequestBody {
+            readings?: Components.Schemas.PortalMeterReading[];
         }
         namespace Responses {
             export interface $200 {
@@ -1172,7 +1434,7 @@ declare namespace Paths {
              */
             Parameters.Timestamp;
         }
-        export type RequestBody = Components.Schemas.MeterReading;
+        export type RequestBody = Components.Schemas.UpdateMeterReading;
         namespace Responses {
             export interface $200 {
                 data?: Components.Schemas.MeterReading;
@@ -1184,7 +1446,6 @@ declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -1267,6 +1528,16 @@ export interface OperationMethods {
     data?: Paths.CreateMeterReadings.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
+  /**
+   * createPortalMeterReadings - createPortalMeterReadings
+   * 
+   * Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+   */
+  'createPortalMeterReadings'(
+    parameters?: Parameters<Paths.CreatePortalMeterReadings.PathParameters> | null,
+    data?: Paths.CreatePortalMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalMeterReadings.Responses.$200>
   /**
    * batchWriteMeterReadings - Batch Write Readings
    * 
@@ -1437,6 +1708,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
   }
+  ['/v1/metering/readings/{meter_id}']: {
+    /**
+     * createPortalMeterReadings - createPortalMeterReadings
+     * 
+     * Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePortalMeterReadings.PathParameters> | null,
+      data?: Paths.CreatePortalMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalMeterReadings.Responses.$200>
+  }
   ['/v2/metering/readings']: {
     /**
      * batchWriteMeterReadings - Batch Write Readings
@@ -1524,7 +1807,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActivityId = Components.Schemas.ActivityId;
 export type BaseEntity = Components.Schemas.BaseEntity;
@@ -1541,12 +1823,16 @@ export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
 export type MeterCounter = Components.Schemas.MeterCounter;
 export type MeterReading = Components.Schemas.MeterReading;
+export type PortalMeterReading = Components.Schemas.PortalMeterReading;
 export type ReadBy = Components.Schemas.ReadBy;
+export type Reading = Components.Schemas.Reading;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type ReadingWithMeter = Components.Schemas.ReadingWithMeter;
 export type Reason = Components.Schemas.Reason;
+export type ReasonString = Components.Schemas.ReasonString;
 export type Rule = Components.Schemas.Rule;
 export type Source = Components.Schemas.Source;
 export type SubmissionMeterReading = Components.Schemas.SubmissionMeterReading;
 export type TariffType = Components.Schemas.TariffType;
 export type Unit = Components.Schemas.Unit;
+export type UpdateMeterReading = Components.Schemas.UpdateMeterReading;
