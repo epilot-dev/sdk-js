@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Kanban API",
-    "version": "1.2.2"
+    "version": "1.2.3"
   },
   "tags": [
     {
@@ -115,7 +115,7 @@
       "get": {
         "operationId": "getKanbanBoard",
         "summary": "Get a Kanban board",
-        "description": "Get a Kanban board",
+        "description": "Get a Kanban board by ID. Use \"default\" as the boardId to get the organization's default board.\n",
         "tags": [
           "Kanban"
         ],
@@ -126,7 +126,9 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The board ID, or \"default\" to get the organization's default board.\n",
+            "example": "board-123"
           }
         ],
         "responses": {
@@ -247,6 +249,13 @@
                   },
                   "shared_with_org": {
                     "type": "boolean"
+                  },
+                  "owners": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
                   }
                 }
               }
@@ -310,6 +319,100 @@
           },
           "404": {
             "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/org/default-board": {
+      "put": {
+        "operationId": "setDefaultKanbanBoard",
+        "summary": "Set default board for organization",
+        "description": "Set a board as the default board for the organization",
+        "tags": [
+          "Kanban"
+        ],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the board to set as default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully set default board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "default_board_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data or boardId missing"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "clearDefaultKanbanBoard",
+        "summary": "Clear default board for organization",
+        "description": "Remove the default board setting for the organization",
+        "tags": [
+          "Kanban"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully cleared default board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "default_board_id": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
           },
           "500": {
             "description": "Internal server error"
@@ -498,6 +601,13 @@
           },
           "shared_with_org": {
             "type": "boolean"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
           }
         }
       },
