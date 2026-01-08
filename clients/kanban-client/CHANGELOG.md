@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- cc0ded2: Add endpoints for org-wide default boards operations
+
 ## 1.1.0
 
 ### Minor Changes
