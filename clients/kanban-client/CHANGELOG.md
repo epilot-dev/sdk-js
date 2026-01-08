@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- Added endpoints for default org board management
+
 ## 1.1.0
 
 ### Minor Changes

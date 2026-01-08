@@ -29,6 +29,10 @@ declare namespace Components {
             updated_by?: string;
             shared_with?: string[];
             shared_with_org?: boolean;
+            /**
+             * Array of user IDs who have full ownership rights for this board (view, edit, delete)
+             */
+            owners?: string[];
             config: {
                 /**
                  * example:
@@ -75,6 +79,10 @@ declare namespace Components {
             updated_by?: string;
             shared_with?: string[];
             shared_with_org?: boolean;
+            /**
+             * Array of user IDs who have full ownership rights for this board (view, edit, delete)
+             */
+            owners?: string[];
         }
         /**
          * Dynamic date keywords that resolve to actual dates at runtime
@@ -165,6 +173,20 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace ClearDefaultKanbanBoard {
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+                default_board_id?: string | null;
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace CreateKanbanBoard {
         export type RequestBody = Components.Schemas.Board;
         namespace Responses {
@@ -302,9 +324,37 @@ declare namespace Paths {
             description?: string;
             shared_with?: string[];
             shared_with_org?: boolean;
+            /**
+             * Array of user IDs who have full ownership rights for this board (view, edit, delete)
+             */
+            owners?: string[];
         }
         namespace Responses {
             export type $200 = Components.Schemas.Board;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace SetDefaultKanbanBoard {
+        namespace Parameters {
+            export type BoardId = string;
+        }
+        export interface QueryParameters {
+            boardId: Parameters.BoardId;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+                default_board_id?: string;
+            }
             export interface $400 {
             }
             export interface $401 {
@@ -366,7 +416,8 @@ export interface OperationMethods {
   /**
    * getKanbanBoard - Get a Kanban board
    * 
-   * Get a Kanban board
+   * Get a Kanban board by ID. Use "default" as the boardId to get the organization's default board.
+   * 
    */
   'getKanbanBoard'(
     parameters?: Parameters<Paths.GetKanbanBoard.PathParameters> | null,
@@ -403,6 +454,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteKanbanBoard.Responses.$200>
+  /**
+   * setDefaultKanbanBoard - Set default board for organization
+   * 
+   * Set a board as the default board for the organization
+   */
+  'setDefaultKanbanBoard'(
+    parameters?: Parameters<Paths.SetDefaultKanbanBoard.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetDefaultKanbanBoard.Responses.$200>
+  /**
+   * clearDefaultKanbanBoard - Clear default board for organization
+   * 
+   * Remove the default board setting for the organization
+   */
+  'clearDefaultKanbanBoard'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ClearDefaultKanbanBoard.Responses.$200>
   /**
    * flowsAutocomplete - flowsAutocomplete
    * 
@@ -455,7 +526,8 @@ export interface PathsDictionary {
     /**
      * getKanbanBoard - Get a Kanban board
      * 
-     * Get a Kanban board
+     * Get a Kanban board by ID. Use "default" as the boardId to get the organization's default board.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetKanbanBoard.PathParameters> | null,
@@ -492,6 +564,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteKanbanBoard.Responses.$200>
+  }
+  ['/v1/kanban/org/default-board']: {
+    /**
+     * setDefaultKanbanBoard - Set default board for organization
+     * 
+     * Set a board as the default board for the organization
+     */
+    'put'(
+      parameters?: Parameters<Paths.SetDefaultKanbanBoard.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetDefaultKanbanBoard.Responses.$200>
+    /**
+     * clearDefaultKanbanBoard - Clear default board for organization
+     * 
+     * Remove the default board setting for the organization
+     */
+    'delete'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ClearDefaultKanbanBoard.Responses.$200>
   }
   ['/v1/kanban/query/flows:autocomplete']: {
     /**
