@@ -4795,7 +4795,8 @@
       "get": {
         "operationId": "getAllFiles",
         "summary": "getAllFiles",
-        "description": "Fetch all documents under the related entities of a contact",
+        "description": "Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -5014,6 +5015,7 @@
         "operationId": "getFilesCountByEntity",
         "summary": "getFileCountByEntity",
         "description": "Fetch file counts for all ECP user related entities",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -5508,7 +5510,7 @@
           {
             "in": "query",
             "name": "origin",
-            "required": true,
+            "required": false,
             "deprecated": true,
             "schema": {
               "$ref": "#/components/schemas/Origin"
@@ -8345,7 +8347,10 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
-              "DENY"
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY",
+              "BLOCK_IF_PORTAL_USER_EXISTS"
             ]
           },
           "user_account_self_management": {
@@ -12362,7 +12367,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10"
+            "example": "2022-10-10T00:00:00.000Z"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -12376,10 +12381,10 @@
             "type": "string",
             "description": "The external ID of the reading"
           },
-          "note": {
+          "remark": {
             "type": "string",
             "nullable": true,
-            "description": "A note or comment for the reading",
+            "description": "A remark or comment for the reading",
             "example": "Customer reported unusual consumption"
           },
           "metadata": {
@@ -12770,6 +12775,21 @@
             "description": "URL of the userinfo endpoint",
             "example": "https://graph.facebook.com/me"
           },
+          "logout_uri": {
+            "type": "string",
+            "description": "URL of the logout/end session endpoint",
+            "example": "https://login.microsoftonline.com/common/oauth2/v2.0/logout"
+          },
+          "logout_redirect_uri": {
+            "type": "string",
+            "description": "URL to redirect to after logout completes",
+            "example": "https://customer-portal.com/login"
+          },
+          "skip_login_as_logout": {
+            "type": "boolean",
+            "description": "When true, skip SSO logout redirect during \"login as\" flow. Use this for providers that cannot redirect back after logout and would break log in as.",
+            "default": false
+          },
           "mobile_redirect_uri": {
             "type": "string",
             "description": "URL of the mobile redirect URI",
@@ -13015,6 +13035,11 @@
             "description": "Whether the page is a detail page",
             "example": false
           },
+          "detail_schema": {
+            "type": "string",
+            "description": "The schema of the detail page",
+            "example": "contact"
+          },
           "is_public": {
             "type": "boolean",
             "description": "Whether the page is public",
@@ -13093,7 +13118,10 @@
             "enum": [
               "ALLOW_WITH_CONTACT_CREATION",
               "ALLOW_WITHOUT_CONTACT_CREATION",
-              "DENY"
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY",
+              "BLOCK_IF_PORTAL_USER_EXISTS"
             ]
           },
           "user_account_self_management": {

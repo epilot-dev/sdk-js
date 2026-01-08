@@ -1128,6 +1128,7 @@
     "/v2/portal/user/files": {
       "get": {
         "operationId": "getAllFiles",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1180,6 +1181,7 @@
     "/v2/portal/user/files/count-by-entity": {
       "get": {
         "operationId": "getFilesCountByEntity",
+        "deprecated": true,
         "responses": {}
       }
     },
@@ -1309,7 +1311,7 @@
           {
             "in": "query",
             "name": "origin",
-            "required": true,
+            "required": false,
             "deprecated": true
           },
           {

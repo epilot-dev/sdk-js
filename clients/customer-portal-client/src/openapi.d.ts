@@ -836,7 +836,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -1200,7 +1200,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -3791,7 +3791,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string;
             /**
@@ -3807,11 +3807,11 @@ declare namespace Components {
              */
             external_id?: string;
             /**
-             * A note or comment for the reading
+             * A remark or comment for the reading
              * example:
              * Customer reported unusual consumption
              */
-            note?: string | null;
+            remark?: string | null;
             /**
              * Additional metadata for the reading
              * example:
@@ -3981,6 +3981,22 @@ declare namespace Components {
              * https://graph.facebook.com/me
              */
             userinfo_endpoint?: string;
+            /**
+             * URL of the logout/end session endpoint
+             * example:
+             * https://login.microsoftonline.com/common/oauth2/v2.0/logout
+             */
+            logout_uri?: string;
+            /**
+             * URL to redirect to after logout completes
+             * example:
+             * https://customer-portal.com/login
+             */
+            logout_redirect_uri?: string;
+            /**
+             * When true, skip SSO logout redirect during "login as" flow. Use this for providers that cannot redirect back after logout and would break log in as.
+             */
+            skip_login_as_logout?: boolean;
             /**
              * URL of the mobile redirect URI
              * example:
@@ -4265,6 +4281,12 @@ declare namespace Components {
              */
             is_detail?: boolean;
             /**
+             * The schema of the detail page
+             * example:
+             * contact
+             */
+            detail_schema?: string;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4356,6 +4378,12 @@ declare namespace Components {
              */
             is_detail?: boolean;
             /**
+             * The schema of the detail page
+             * example:
+             * contact
+             */
+            detail_schema?: string;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4423,7 +4451,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -4870,7 +4898,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -5896,7 +5924,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -6297,7 +6325,7 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
              * example:
@@ -6822,7 +6850,7 @@ declare namespace Paths {
             export type PortalId = string;
         }
         export interface QueryParameters {
-            origin: Parameters.Origin;
+            origin?: Parameters.Origin;
             portal_id: /**
              * Portal ID
              * example:
@@ -8543,7 +8571,7 @@ declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
-                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY";
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -10896,7 +10924,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -11594,7 +11621,7 @@ export interface OperationMethods {
   /**
    * getAllFiles - getAllFiles
    * 
-   * Fetch all documents under the related entities of a contact
+   * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
    */
   'getAllFiles'(
     parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
@@ -12891,7 +12918,7 @@ export interface PathsDictionary {
     /**
      * getAllFiles - getAllFiles
      * 
-     * Fetch all documents under the related entities of a contact
+     * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
@@ -13450,7 +13477,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
