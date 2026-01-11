@@ -841,6 +841,41 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "summary": "getBlueprintPreview",
+        "description": "Get Blueprint Preview by ID",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint Preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPreview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint Preview not found"
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprint",

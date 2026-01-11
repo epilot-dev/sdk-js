@@ -173,6 +173,19 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprint",

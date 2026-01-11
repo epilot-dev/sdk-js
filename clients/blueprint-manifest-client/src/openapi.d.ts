@@ -1997,6 +1997,19 @@ declare namespace Paths {
             export type $200 = Components.Schemas.BlueprintJob;
         }
     }
+    namespace GetBlueprintPreview {
+        namespace Parameters {
+            export type PreviewId = string;
+        }
+        export interface PathParameters {
+            preview_id: Parameters.PreviewId;
+        }
+        namespace Responses {
+            export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetJob {
         namespace Parameters {
             export type JobId = /**
@@ -2395,6 +2408,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
   /**
+   * getBlueprintPreview - getBlueprintPreview
+   * 
+   * Get Blueprint Preview by ID
+   */
+  'getBlueprintPreview'(
+    parameters?: Parameters<Paths.GetBlueprintPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
+  /**
    * installBlueprint - installBlueprint
    * 
    * Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
@@ -2733,6 +2756,18 @@ export interface PathsDictionary {
       data?: Paths.PreInstallBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints:preview/{preview_id}']: {
+    /**
+     * getBlueprintPreview - getBlueprintPreview
+     * 
+     * Get Blueprint Preview by ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprint:install']: {
     /**
