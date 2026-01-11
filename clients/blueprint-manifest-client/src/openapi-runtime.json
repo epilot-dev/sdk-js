@@ -193,11 +193,6 @@
             "in": "path",
             "required": true,
             "name": "blueprint_id"
-          },
-          {
-            "in": "query",
-            "name": "include_marketplace_info",
-            "required": false
           }
         ],
         "responses": {}
