@@ -730,6 +730,16 @@ declare namespace Components {
              * v2.0.0
              */
             latest_marketplace_version?: string;
+            /**
+             * URL to install/update the blueprint from the marketplace
+             */
+            installation_link?: string;
+            /**
+             * Localized slug of the blueprint from the epilot marketplace used to reconstruct the details page URL in the frontend
+             * example:
+             * solar-b2b-de
+             */
+            localized_slug?: string;
         }
         export interface Job {
             job_id?: /**
@@ -1301,6 +1311,26 @@ declare namespace Components {
              * List of compatible app IDs for the blueprint
              */
             compatible_apps?: string[];
+            /**
+             * Whether a newer version is available in the marketplace. Only present when include_marketplace_info=true.
+             */
+            has_update_available?: boolean;
+            /**
+             * The latest version available in the marketplace. Only present when include_marketplace_info=true.
+             * example:
+             * v2.0.0
+             */
+            latest_marketplace_version?: string;
+            /**
+             * URL to install/update the blueprint from the marketplace. Only present when include_marketplace_info=true.
+             */
+            installation_link?: string;
+            /**
+             * Localized slug of the blueprint from the epilot marketplace used to reconstruct the details page URL in the frontend. Only present when include_marketplace_info=true.
+             * example:
+             * solar-b2b-de
+             */
+            localized_slug?: string;
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
         /**
@@ -1925,9 +1955,13 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
+            export type IncludeMarketplaceInfo = boolean;
         }
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            include_marketplace_info?: Parameters.IncludeMarketplaceInfo;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
@@ -2363,7 +2397,7 @@ export interface OperationMethods {
    * Get Blueprint by ID
    */
   'getBlueprint'(
-    parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
+    parameters?: Parameters<Paths.GetBlueprint.QueryParameters & Paths.GetBlueprint.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprint.Responses.$200>
@@ -2706,7 +2740,7 @@ export interface PathsDictionary {
      * Get Blueprint by ID
      */
     'get'(
-      parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
+      parameters?: Parameters<Paths.GetBlueprint.QueryParameters & Paths.GetBlueprint.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprint.Responses.$200>

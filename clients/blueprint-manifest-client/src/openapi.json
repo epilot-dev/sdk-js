@@ -947,6 +947,16 @@
             "schema": {
               "$ref": "#/components/schemas/BlueprintID"
             }
+          },
+          {
+            "in": "query",
+            "name": "include_marketplace_info",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "When true and the blueprint is a marketplace blueprint, includes marketplace CMS item info fields (has_update_available, latest_marketplace_version, installation_link)"
           }
         ],
         "responses": {
@@ -1861,6 +1871,24 @@
                   "type": "string"
                 },
                 "description": "List of compatible app IDs for the blueprint"
+              },
+              "has_update_available": {
+                "type": "boolean",
+                "description": "Whether a newer version is available in the marketplace. Only present when include_marketplace_info=true."
+              },
+              "latest_marketplace_version": {
+                "type": "string",
+                "description": "The latest version available in the marketplace. Only present when include_marketplace_info=true.",
+                "example": "v2.0.0"
+              },
+              "installation_link": {
+                "type": "string",
+                "description": "URL to install/update the blueprint from the marketplace. Only present when include_marketplace_info=true."
+              },
+              "localized_slug": {
+                "type": "string",
+                "description": "Localized slug of the blueprint from the epilot marketplace used to reconstruct the details page URL in the frontend. Only present when include_marketplace_info=true.",
+                "example": "solar-b2b-de"
               }
             }
           }
@@ -1909,6 +1937,15 @@
             "type": "string",
             "description": "The latest version available in the marketplace",
             "example": "v2.0.0"
+          },
+          "installation_link": {
+            "type": "string",
+            "description": "URL to install/update the blueprint from the marketplace"
+          },
+          "localized_slug": {
+            "type": "string",
+            "description": "Localized slug of the blueprint from the epilot marketplace used to reconstruct the details page URL in the frontend",
+            "example": "solar-b2b-de"
           }
         },
         "required": [
