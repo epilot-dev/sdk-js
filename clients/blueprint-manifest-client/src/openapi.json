@@ -829,11 +829,11 @@
         },
         "responses": {
           "200": {
-            "description": "Pre-installed Blueprint",
+            "description": "Blueprint preview data for UI display",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Blueprint"
+                  "$ref": "#/components/schemas/BlueprintPreview"
                 }
               }
             }
@@ -1781,6 +1781,84 @@
         "required": [
           "id",
           "type"
+        ]
+      },
+      "BlueprintPreview": {
+        "type": "object",
+        "description": "Preview data for a blueprint before installation. Stored temporarily with TTL.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique preview ID"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "marketplace",
+              "file"
+            ]
+          },
+          "blueprint_file_s3_key": {
+            "type": "string",
+            "description": "S3 key of the blueprint zip file"
+          },
+          "is_verified": {
+            "type": "boolean"
+          },
+          "docs_url": {
+            "type": "string"
+          },
+          "compatible_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResource"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "org_id",
+          "title",
+          "source_type",
+          "blueprint_file_s3_key",
+          "is_verified",
+          "created_at",
+          "created_by",
+          "resources"
         ]
       },
       "CustomBlueprint": {

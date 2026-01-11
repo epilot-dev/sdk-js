@@ -185,6 +185,36 @@ declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintJobID = string;
+        /**
+         * Preview data for a blueprint before installation. Stored temporarily with TTL.
+         */
+        export interface BlueprintPreview {
+            /**
+             * Unique preview ID
+             */
+            id: string;
+            /**
+             * Organization ID
+             */
+            org_id: string;
+            title: string;
+            description?: {
+                preinstall?: string;
+            };
+            version?: string;
+            slug?: string;
+            source_type: "marketplace" | "file";
+            /**
+             * S3 key of the blueprint zip file
+             */
+            blueprint_file_s3_key: string;
+            is_verified: boolean;
+            docs_url?: string;
+            compatible_apps?: string[];
+            created_at: string; // date-time
+            created_by: CallerIdentity;
+            resources: BlueprintResource[];
+        }
         export interface BlueprintResource {
             id: /**
              * ID of a blueprint resource
@@ -2108,7 +2138,7 @@ declare namespace Paths {
             slug?: string;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Blueprint;
+            export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
         }
     }
     namespace SyncDependencies {
@@ -2904,6 +2934,7 @@ export type BlueprintInstallationJobOptions = Components.Schemas.BlueprintInstal
 export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;
+export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
