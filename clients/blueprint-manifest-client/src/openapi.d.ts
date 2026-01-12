@@ -213,6 +213,10 @@ declare namespace Components {
             compatible_apps?: string[];
             created_at: string; // date-time
             created_by: CallerIdentity;
+            /**
+             * Whether the blueprint is updating to the latest version in the marketplace
+             */
+            is_updating: boolean;
             resources: BlueprintResource[];
         }
         export interface BlueprintResource {

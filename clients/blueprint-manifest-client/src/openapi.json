@@ -1877,6 +1877,10 @@
           "created_by": {
             "$ref": "#/components/schemas/CallerIdentity"
           },
+          "is_updating": {
+            "type": "boolean",
+            "description": "Whether the blueprint is updating to the latest version in the marketplace"
+          },
           "resources": {
             "type": "array",
             "items": {
@@ -1893,7 +1897,8 @@
           "is_verified",
           "created_at",
           "created_by",
-          "resources"
+          "resources",
+          "is_updating"
         ]
       },
       "CustomBlueprint": {
