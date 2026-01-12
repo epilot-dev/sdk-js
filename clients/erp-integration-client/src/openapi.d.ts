@@ -198,25 +198,6 @@ declare namespace Components {
             message?: string;
         }
         /**
-         * Extended unique identifier field configuration with type hints for repeatable fields
-         */
-        export interface ExtendedUniqueIdField {
-            /**
-             * The attribute name to use as unique identifier
-             */
-            attribute: string;
-            _type?: /**
-             * Type hint for repeatable fields that require special search handling.
-             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
-             *
-             */
-            RepeatableFieldType;
-            /**
-             * Which array item to use (0-indexed, default first)
-             */
-            index?: number;
-        }
-        /**
          * Configuration for inbound use cases (ERP to epilot)
          */
         export interface InboundIntegrationEventConfiguration {
@@ -381,12 +362,6 @@ declare namespace Components {
              * Constant value to assign (any type)
              */
             constant?: any;
-            /**
-             * Type hint for repeatable fields (email, phone).
-             * When this attribute is used as a unique identifier, specifying the _type
-             * enables correct search path generation (e.g., email.email.keyword).
-             *
-             */
             _type?: /**
              * Type hint for repeatable fields that require special search handling.
              * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
@@ -429,6 +404,14 @@ declare namespace Components {
              * JSONata expression to extract meter reading items from the event data
              */
             jsonataExpression: string;
+            /**
+             * Strategy for matching incoming readings against existing readings.
+             * - 'external_id': Match readings by external_id attribute (default behavior)
+             * - 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).
+             *   Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.
+             *
+             */
+            reading_matching?: "external_id" | "strict-date";
             meter: MeterUniqueIdsConfig;
             meter_counter?: MeterUniqueIdsConfig;
             /**
@@ -929,34 +912,6 @@ declare namespace Components {
             start_date?: string;
             end_date?: string;
             event_id?: string;
-        }
-        /**
-         * Unique identifier field configuration. Can be either:
-         * - A simple string (attribute name)
-         * - An extended object with type hints for repeatable fields
-         *
-         */
-        export type UniqueIdField = /**
-         * Unique identifier field configuration. Can be either:
-         * - A simple string (attribute name)
-         * - An extended object with type hints for repeatable fields
-         *
-         */
-        string | /* Extended unique identifier field configuration with type hints for repeatable fields */ ExtendedUniqueIdField;
-        /**
-         * Metadata about a unique identifier field (used in message payloads)
-         */
-        export interface UniqueIdMetadata {
-            fieldType?: /**
-             * Type hint for repeatable fields that require special search handling.
-             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
-             *
-             */
-            RepeatableFieldType;
-            /**
-             * Which array item was used (0-indexed)
-             */
-            index?: number;
         }
         export interface UpdateInboundUseCaseRequest {
             /**
@@ -1961,7 +1916,6 @@ export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
-export type ExtendedUniqueIdField = Components.Schemas.ExtendedUniqueIdField;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
@@ -1994,8 +1948,6 @@ export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
-export type UniqueIdField = Components.Schemas.UniqueIdField;
-export type UniqueIdMetadata = Components.Schemas.UniqueIdMetadata;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;

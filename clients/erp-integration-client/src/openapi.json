@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.17.0",
+    "version": "0.17.2",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -20,9 +20,6 @@
     }
   ],
   "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
@@ -2786,6 +2783,15 @@
             "type": "string",
             "description": "JSONata expression to extract meter reading items from the event data"
           },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "default": "external_id",
+            "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
+          },
           "meter": {
             "$ref": "#/components/schemas/MeterUniqueIdsConfig"
           },
@@ -2839,8 +2845,7 @@
             "description": "Constant value to assign (any type)"
           },
           "_type": {
-            "$ref": "#/components/schemas/RepeatableFieldType",
-            "description": "Type hint for repeatable fields (email, phone).\nWhen this attribute is used as a unique identifier, specifying the _type\nenables correct search path generation (e.g., email.email.keyword).\n"
+            "$ref": "#/components/schemas/RepeatableFieldType"
           },
           "enabled": {
             "oneOf": [
@@ -3041,54 +3046,6 @@
           "phone"
         ],
         "description": "Type hint for repeatable fields that require special search handling.\nThese fields are stored as arrays of objects (e.g., email: [{ email: \"value\" }]).\n"
-      },
-      "ExtendedUniqueIdField": {
-        "type": "object",
-        "description": "Extended unique identifier field configuration with type hints for repeatable fields",
-        "required": [
-          "attribute"
-        ],
-        "properties": {
-          "attribute": {
-            "type": "string",
-            "description": "The attribute name to use as unique identifier"
-          },
-          "_type": {
-            "$ref": "#/components/schemas/RepeatableFieldType"
-          },
-          "index": {
-            "type": "integer",
-            "default": 0,
-            "minimum": 0,
-            "description": "Which array item to use (0-indexed, default first)"
-          }
-        }
-      },
-      "UniqueIdField": {
-        "description": "Unique identifier field configuration. Can be either:\n- A simple string (attribute name)\n- An extended object with type hints for repeatable fields\n",
-        "oneOf": [
-          {
-            "type": "string",
-            "description": "Simple attribute name"
-          },
-          {
-            "$ref": "#/components/schemas/ExtendedUniqueIdField"
-          }
-        ]
-      },
-      "UniqueIdMetadata": {
-        "type": "object",
-        "description": "Metadata about a unique identifier field (used in message payloads)",
-        "properties": {
-          "fieldType": {
-            "$ref": "#/components/schemas/RepeatableFieldType"
-          },
-          "index": {
-            "type": "integer",
-            "default": 0,
-            "description": "Which array item was used (0-indexed)"
-          }
-        }
       },
       "ReplayEventsRequest": {
         "type": "object",
