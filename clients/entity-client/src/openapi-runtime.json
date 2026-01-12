@@ -723,6 +723,11 @@
           {
             "in": "query",
             "name": "fields"
+          },
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "required": false
           }
         ],
         "responses": {}
@@ -1005,8 +1010,7 @@
           },
           {
             "in": "query",
-            "name": "permanent",
-            "default": false
+            "name": "permanent"
           }
         ],
         "responses": {}

@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.3.0",
+    "version": "2.6.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -2284,6 +2284,15 @@
             "schema": {
               "$ref": "#/components/schemas/FieldsParam"
             }
+          },
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "description": "Whether to include relations to/from deleted entities\n- `true`: include relations to/from deleted entities\n- `false`: exclude relations to/from deleted entities (default)\n- `only`: include only relations to/from deleted entities\n",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
+            }
           }
         ],
         "responses": {
@@ -2986,9 +2995,9 @@
             "name": "permanent",
             "description": "⚠️ NOT IMPLEMENTED - If true, the taxonomy will be permanently deleted",
             "schema": {
-              "type": "boolean"
-            },
-            "default": false
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -3438,7 +3447,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -5194,6 +5203,11 @@
             "description": "When set to true, this attribute will always be searchable regardless of\nthe ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields\nthat must always be included in search operations.\n",
             "default": false
           },
+          "exclude_from_search": {
+            "type": "boolean",
+            "description": "When set to true, this attribute will be excluded from search fields.\nUse this for fields that should not be matched during entity search operations,\nsuch as internal hashes or identifiers that might accidentally match search terms.\n",
+            "default": false
+          },
           "repeatable": {
             "description": "The attribute is a repeatable",
             "type": "boolean"
@@ -5938,7 +5952,7 @@
       "DefaultAddressFields": {
         "type": "array",
         "nullable": true,
-        "description": "Default fields visible on addresses\n\nValid values are:\n  - postal_code (default)\n  - city (default)\n  - street (default)\n  - street_number (default)\n  - plot_area\n  - plot_of_land\n  - suburb\n  - country\n  - additional_info\n  - coordinates\n  - start_date\n  - end_date\n  - salutation\n  - title\n  - first_name\n  - last_name\n  - company_name\n",
+        "description": "Default fields visible on addresses\n\nValid values are:\n  - postal_code (default)\n  - city (default)\n  - street (default)\n  - street_number (default)\n  - plot_area\n  - plot_of_land\n  - suburb\n  - country\n  - postbox\n  - additional_info\n  - coordinates\n  - start_date\n  - end_date\n  - salutation\n  - title\n  - first_name\n  - last_name\n  - name_suffix\n  - company_name\n",
         "items": {
           "type": "string"
         }
@@ -6976,6 +6990,14 @@
             ]
           },
           "_purpose": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "_purpose_name": {
+            "description": "Automatically computed purpose names from _purpose attribute",
             "type": "array",
             "items": {
               "type": "string"
@@ -8386,13 +8408,34 @@
             "type": "object",
             "properties": {
               "added": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "New attributes added to the entity as part of the operation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               },
               "updated": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "Attributes updated in the entity. Note: These values contain the previous values before the update!"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               },
               "deleted": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "Attributes removed from the entity as part of the operation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               }
             }
           }
@@ -8793,6 +8836,13 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          "enabled_purposes": {
+            "description": "List of purpose slugs where the classification is enabled to be used. If empty, it's enabled for all purposes.",
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           },
           "_manifest": {
