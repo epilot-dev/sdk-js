@@ -132,10 +132,7 @@ declare namespace Components {
              * The direction of the reading (feed-in or feed-out)
              */
             direction: Direction;
-            /**
-             * The unit of measurement for the reading
-             */
-            unit?: "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
+            unit?: Unit;
             /**
              * The reading value of the meter counter
              * example:
@@ -466,6 +463,7 @@ declare namespace Components {
              * Notes to record a meter reading
              */
             note?: string;
+            unit?: Unit;
         }
         export interface PortalMeterReading {
             /**
@@ -522,6 +520,7 @@ declare namespace Components {
              * Notes to record a meter reading
              */
             note?: string;
+            unit?: Unit;
         }
         /**
          * The person who recorded the reading
@@ -599,6 +598,10 @@ declare namespace Components {
              * Notes to record a meter reading
              */
             note?: string;
+            /**
+             * The unit of measurement for the reading
+             */
+            unit?: Unit;
         }
         export type ReadingStatus = "valid" | "in-validation" | "implausible" | null | "";
         export interface ReadingWithMeter {
@@ -757,7 +760,7 @@ declare namespace Components {
             ntValue?: number;
         } | null;
         export type TariffType = "ht" | "nt";
-        export type Unit = "w" | "wh" | "kw" | "kWh" | "kvarh" | "mw" | "mWh" | "unit" | "cubic-meter" | "hour" | "day" | "month" | "year" | "percentage";
+        export type Unit = string;
         export interface UpdateMeterReading {
             /**
              * The reading value of the meter
@@ -908,6 +911,7 @@ declare namespace Paths {
                  * Notes to record a meter reading
                  */
                 note?: string;
+                unit?: Components.Schemas.Unit;
                 operation?: "create" | "update" | "delete";
             }[];
         }

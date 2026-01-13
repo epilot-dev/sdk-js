@@ -1889,6 +1889,10 @@
           "note": {
             "type": "string",
             "description": "Notes to record a meter reading"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
           }
         }
       },
@@ -2072,24 +2076,7 @@
             "description": "The direction of the reading (feed-in or feed-out)"
           },
           "unit": {
-            "type": "string",
-            "enum": [
-              "w",
-              "wh",
-              "kw",
-              "kWh",
-              "kvarh",
-              "mw",
-              "mWh",
-              "unit",
-              "cubic-meter",
-              "hour",
-              "day",
-              "month",
-              "year",
-              "percentage"
-            ],
-            "description": "The unit of measurement for the reading"
+            "$ref": "#/components/schemas/Unit"
           },
           "value": {
             "type": "number",
@@ -2180,23 +2167,7 @@
         }
       },
       "Unit": {
-        "type": "string",
-        "enum": [
-          "w",
-          "wh",
-          "kw",
-          "kWh",
-          "kvarh",
-          "mw",
-          "mWh",
-          "unit",
-          "cubic-meter",
-          "hour",
-          "day",
-          "month",
-          "year",
-          "percentage"
-        ]
+        "type": "string"
       },
       "Source": {
         "type": "string",
