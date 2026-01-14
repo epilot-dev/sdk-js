@@ -283,6 +283,53 @@
         "responses": {}
       }
     },
+    "/v2/integrations": {
+      "get": {
+        "operationId": "listIntegrationsV2",
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "upsertIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
