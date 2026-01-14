@@ -11097,9 +11097,12 @@ declare namespace Paths {
             export type StartDate = string; // date-time
             /**
              * example:
-             * SyncActivity
+             * [
+             *   "EntityUpdated",
+             *   "EntityCreated"
+             * ]
              */
-            export type Type = string;
+            export type Type = string[];
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11119,7 +11122,10 @@ declare namespace Paths {
             size?: Parameters.Size;
             type?: /**
              * example:
-             * SyncActivity
+             * [
+             *   "EntityUpdated",
+             *   "EntityCreated"
+             * ]
              */
             Parameters.Type;
             include_relations?: Parameters.IncludeRelations;
@@ -12083,7 +12089,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -12109,7 +12115,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;

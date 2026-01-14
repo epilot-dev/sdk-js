@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.6.0",
+    "version": "2.7.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -1883,10 +1883,18 @@
           {
             "in": "query",
             "name": "type",
-            "description": "Filter by activity type",
+            "description": "Filter by activity type(s)",
+            "style": "form",
+            "explode": false,
             "schema": {
-              "type": "string",
-              "example": "SyncActivity"
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "EntityUpdated",
+                "EntityCreated"
+              ]
             }
           },
           {
@@ -3447,7 +3455,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
