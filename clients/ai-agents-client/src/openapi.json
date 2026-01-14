@@ -1,0 +1,870 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "3.0.0",
+    "title": "AI Agents API - OpenAPI 3.0",
+    "description": "API for configuring and invoking AI agents in epilot platform",
+    "termsOfService": "https://epilot.cloud/agb",
+    "contact": {
+      "name": "Support",
+      "email": "info@epilot.cloud",
+      "url": "https://help.epilot.cloud"
+    }
+  },
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://ai-agents.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Agents Configuration",
+      "description": "Everything about AI Agent configuration"
+    },
+    {
+      "name": "Agent Execution",
+      "description": "Execute AI agents and manage executions"
+    }
+  ],
+  "paths": {
+    "/v1/agents": {
+      "post": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Create Agent definition",
+        "operationId": "createAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Agent Created Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while creating the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "List all agent configurations",
+        "operationId": "listAgents",
+        "responses": {
+          "200": {
+            "description": "List of agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAgentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error fetching the agent configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}": {
+      "get": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Get the agent configuration by ID",
+        "operationId": "getAgentById",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent fetched Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while creating the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "update the agent configuration by ID",
+        "operationId": "updateAgentById",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent updated Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while updating the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Delete the agent configuration by ID",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "operationId": "deleteAgentById",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Agent deleted Successfully"
+          },
+          "400": {
+            "description": "Error while deleting the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/execute": {
+      "post": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Execute an agent",
+        "operationId": "executeAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent execution initiated or completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while executing the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token. Supports RFC8725 for JWT validation.",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "CreateAgentRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "system_prompt",
+          "execution_pattern"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Email Reply Generator"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "category": {
+            "$ref": "#/components/schemas/SkillCategory"
+          },
+          "icon": {
+            "type": "string",
+            "example": "mail-reply"
+          },
+          "system_prompt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Core LLM instructions"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tool IDs this agent can use",
+            "example": [
+              "entity.search",
+              "email.draft"
+            ]
+          },
+          "model_config": {
+            "$ref": "#/components/schemas/ModelConfig"
+          },
+          "max_iterations": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10,
+            "description": "Max ReAct loop iterations"
+          },
+          "execution_pattern": {
+            "$ref": "#/components/schemas/ExecutionPattern"
+          },
+          "execution_mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "output_schema": {
+            "type": "object",
+            "description": "JSON Schema for expected output"
+          },
+          "parameters_schema": {
+            "type": "object",
+            "description": "JSON Schema for configurable parameters"
+          }
+        }
+      },
+      "UpdateAgentRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "category": {
+            "$ref": "#/components/schemas/SkillCategory"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "system_prompt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "model_config": {
+            "$ref": "#/components/schemas/ModelConfig"
+          },
+          "max_iterations": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "execution_pattern": {
+            "$ref": "#/components/schemas/ExecutionPattern"
+          },
+          "execution_mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "output_schema": {
+            "type": "object"
+          },
+          "parameters_schema": {
+            "type": "object"
+          }
+        }
+      },
+      "AgentDefinition": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SkillCategory"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/AgentSource"
+          },
+          "system_prompt": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "model_config": {
+            "$ref": "#/components/schemas/ModelConfig"
+          },
+          "max_iterations": {
+            "type": "integer"
+          },
+          "execution_pattern": {
+            "$ref": "#/components/schemas/ExecutionPattern"
+          },
+          "execution_mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "output_schema": {
+            "type": "object"
+          },
+          "parameters_schema": {
+            "type": "object"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          }
+        }
+      },
+      "ListAgentsResponse": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentDefinition"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExecuteAgentRequest": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "entity_id": {
+                "type": "string",
+                "description": "Primary entity ID for context"
+              },
+              "workflow_id": {
+                "type": "string"
+              },
+              "workflow_execution_id": {
+                "type": "string"
+              },
+              "task_id": {
+                "type": "string"
+              },
+              "custom_data": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Runtime parameters (validated against parameters_schema)"
+          },
+          "execution_mode_override": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Webhook URL for async completion notification"
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "default": 30000,
+            "maximum": 300000,
+            "description": "Execution timeout in milliseconds"
+          }
+        }
+      },
+      "ExecutionResponse": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "input": {
+            "type": "object"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "result": {
+            "type": "object",
+            "nullable": true,
+            "description": "Execution result (when status=completed)"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ExecutionError"
+          },
+          "pending_action": {
+            "$ref": "#/components/schemas/PendingAction"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/ExecutionMetrics"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ExecutionTrace": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "iterations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionIteration"
+            }
+          },
+          "total_iterations": {
+            "type": "integer"
+          }
+        }
+      },
+      "ExecutionIteration": {
+        "type": "object",
+        "properties": {
+          "iteration_index": {
+            "type": "integer"
+          },
+          "thought": {
+            "type": "string",
+            "description": "LLM reasoning/thinking"
+          },
+          "action": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "tool": {
+                "type": "string"
+              },
+              "input": {
+                "type": "object"
+              }
+            }
+          },
+          "observation": {
+            "type": "object",
+            "nullable": true,
+            "description": "Tool result"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tokens_used": {
+            "type": "integer"
+          },
+          "latency_ms": {
+            "type": "integer"
+          }
+        }
+      },
+      "PendingAction": {
+        "type": "object",
+        "nullable": true,
+        "description": "Action waiting for approval (when status=waiting_approval)",
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "input": {
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ExecutionError": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "TIMEOUT",
+              "MAX_ITERATIONS_EXCEEDED",
+              "TOOL_EXECUTION_FAILED",
+              "LLM_ERROR",
+              "INVALID_OUTPUT",
+              "REJECTED",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "ExecutionMetrics": {
+        "type": "object",
+        "properties": {
+          "total_tokens": {
+            "type": "integer"
+          },
+          "input_tokens": {
+            "type": "integer"
+          },
+          "output_tokens": {
+            "type": "integer"
+          },
+          "total_cost_usd": {
+            "type": "number",
+            "format": "float"
+          },
+          "duration_ms": {
+            "type": "integer"
+          },
+          "iteration_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "ToolDefinition": {
+        "type": "object",
+        "properties": {
+          "tool_id": {
+            "type": "string",
+            "example": "entity.search"
+          },
+          "name": {
+            "type": "string",
+            "example": "Search Entities"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description for LLM to understand tool purpose"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "entity",
+              "email",
+              "taxonomy",
+              "rag",
+              "workflow"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "description": "JSON Schema for tool input"
+          },
+          "returns": {
+            "type": "object",
+            "description": "JSON Schema for tool output"
+          },
+          "requires_approval": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this tool always requires human approval"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "SkillCategory": {
+        "type": "string",
+        "enum": [
+          "email",
+          "entity",
+          "document",
+          "classification",
+          "custom"
+        ]
+      },
+      "AgentSource": {
+        "type": "string",
+        "enum": [
+          "system",
+          "custom"
+        ],
+        "description": "- system: Pre-built by epilot\n- custom: Created by organization\n"
+      },
+      "ExecutionPattern": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "react"
+        ],
+        "description": "- direct: Single LLM call, no tools\n- react: Multi-step reasoning with tool use\n"
+      },
+      "ExecutionMode": {
+        "type": "string",
+        "enum": [
+          "automatic",
+          "approval",
+          "draft"
+        ],
+        "description": "- automatic: Execute without human intervention\n- approval: Pause for human approval before tool execution\n- draft: Execute but mark output as draft for review\n"
+      },
+      "ExecutionStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "running",
+          "waiting_approval",
+          "completed",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "ModelConfig": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "default": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "description": "AWS Bedrock model ID"
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.7
+          },
+          "max_tokens": {
+            "type": "integer",
+            "default": 4096,
+            "maximum": 8192
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
