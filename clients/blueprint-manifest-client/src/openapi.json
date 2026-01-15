@@ -39,9 +39,6 @@
   "servers": [
     {
       "url": "https://blueprint-manifest.sls.epilot.io"
-    },
-    {
-      "url": "https://blueprint-manifest.sls.epilot.io"
     }
   ],
   "paths": {
@@ -2411,8 +2408,7 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
-          "erp_integration",
-          "erp_integration_use_case",
+          "integration",
           "dashboard",
           "custom_variable",
           "usergroup",

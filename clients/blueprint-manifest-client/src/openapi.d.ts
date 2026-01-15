@@ -1430,7 +1430,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "erp_integration" | "erp_integration_use_case" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -2256,7 +2256,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2960,7 +2959,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
