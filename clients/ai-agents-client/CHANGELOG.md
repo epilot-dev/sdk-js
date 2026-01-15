@@ -1,5 +1,11 @@
 # @epilot/address-client
 
+## 0.1.0
+
+### Minor Changes
+
+- Added execution
+
 ## 0.2.2
 
 ### Patch Changes

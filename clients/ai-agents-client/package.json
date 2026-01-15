@@ -1,6 +1,6 @@
 {
   "name": "@epilot/ai-agents-client",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Client for AI Agents API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
