@@ -85,6 +85,100 @@
         },
         "responses": {}
       }
+    },
+    "/v1/executions": {
+      "get": {
+        "operationId": "listExecutions",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query"
+          },
+          {
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}": {
+      "get": {
+        "operationId": "getExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "cancelExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/trace": {
+      "get": {
+        "operationId": "getExecutionTrace",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/approve": {
+      "post": {
+        "operationId": "approveExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/reject": {
+      "post": {
+        "operationId": "rejectExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {}

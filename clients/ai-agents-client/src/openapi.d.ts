@@ -43,9 +43,43 @@ declare namespace Components {
             output_schema?: {
                 [key: string]: any;
             };
-            parameters_schema?: {
-                [key: string]: any;
-            };
+            input_parameters_schema?: /**
+             * example:
+             * {
+             *   "type": "object",
+             *   "parameters": [
+             *     {
+             *       "name": "target_schema",
+             *       "label": "Target Schema",
+             *       "type": "entity-schema",
+             *       "description": "Entity type to create"
+             *     },
+             *     {
+             *       "name": "confidence_threshold",
+             *       "label": "Confidence Threshold",
+             *       "type": "number",
+             *       "minimum": 0,
+             *       "maximum": 1,
+             *       "default": 0.8
+             *     },
+             *     {
+             *       "name": "categories",
+             *       "label": "Categories",
+             *       "type": "select",
+             *       "enum": [
+             *         "invoice",
+             *         "contract",
+             *         "letter"
+             *       ],
+             *       "multi": true
+             *     }
+             *   ],
+             *   "required": [
+             *     "target_schema"
+             *   ]
+             * }
+             */
+            InputParametersSchema;
             version?: number;
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -57,6 +91,12 @@ declare namespace Components {
          *
          */
         export type AgentSource = "system" | "custom";
+        export interface ApproveExecutionRequest {
+            /**
+             * Optional reason for approval
+             */
+            reason?: string;
+        }
         export interface CreateAgentRequest {
             /**
              * example:
@@ -79,7 +119,7 @@ declare namespace Components {
              * example:
              * [
              *   "entity.search",
-             *   "email.draft"
+             *   "message.draft"
              * ]
              */
             tools?: string[];
@@ -107,12 +147,43 @@ declare namespace Components {
             output_schema?: {
                 [key: string]: any;
             };
-            /**
-             * JSON Schema for configurable parameters
+            input_parameters_schema?: /**
+             * example:
+             * {
+             *   "type": "object",
+             *   "parameters": [
+             *     {
+             *       "name": "target_schema",
+             *       "label": "Target Schema",
+             *       "type": "entity-schema",
+             *       "description": "Entity type to create"
+             *     },
+             *     {
+             *       "name": "confidence_threshold",
+             *       "label": "Confidence Threshold",
+             *       "type": "number",
+             *       "minimum": 0,
+             *       "maximum": 1,
+             *       "default": 0.8
+             *     },
+             *     {
+             *       "name": "categories",
+             *       "label": "Categories",
+             *       "type": "select",
+             *       "enum": [
+             *         "invoice",
+             *         "contract",
+             *         "letter"
+             *       ],
+             *       "multi": true
+             *     }
+             *   ],
+             *   "required": [
+             *     "target_schema"
+             *   ]
+             * }
              */
-            parameters_schema?: {
-                [key: string]: any;
-            };
+            InputParametersSchema;
         }
         export interface Error {
             error?: string;
@@ -135,7 +206,7 @@ declare namespace Components {
                 };
             };
             /**
-             * Runtime parameters (validated against parameters_schema)
+             * Runtime parameters (validated against input_parameters_schema)
              */
             parameters?: {
                 [name: string]: any;
@@ -221,7 +292,16 @@ declare namespace Components {
              * Execution result (when status=completed)
              */
             result?: {
-                [key: string]: any;
+                /**
+                 * Text response from the agent
+                 */
+                response?: string;
+                /**
+                 * Parsed structured output (only for direct mode with output_schema)
+                 */
+                structured_output?: {
+                    [key: string]: any;
+                } | null;
             } | null;
             error?: ExecutionError;
             pending_action?: /* Action waiting for approval (when status=waiting_approval) */ PendingAction;
@@ -235,8 +315,146 @@ declare namespace Components {
             iterations?: ExecutionIteration[];
             total_iterations?: number;
         }
+        export interface InputParameterDefinition {
+            /**
+             * Unique identifier for the parameter (used in API)
+             * example:
+             * target_schema
+             */
+            name: string;
+            /**
+             * Human-readable display label
+             * example:
+             * Target Schema
+             */
+            label: string;
+            type: /**
+             * Base types:
+             * - text: Text input field
+             * - number: Numeric input field
+             * - boolean: Toggle switch
+             * - select: Dropdown selection (requires enum array)
+             *
+             * Custom types (domain-specific):
+             * - entity-schema: Entity schema selector (fetches from Entity API)
+             * - entity-attribute: Entity attribute selector (requires dependsOn)
+             * - entity-id: Entity picker (search and select entities)
+             * - taxonomy: Taxonomy selector (fetches from Taxonomy API)
+             * - taxonomy-classification: Classification selector (requires dependsOn)
+             *
+             */
+            ParameterType;
+            /**
+             * Help text for the parameter
+             */
+            description?: string;
+            /**
+             * Default value for the parameter
+             */
+            default?: any;
+            /**
+             * Allow multiple selections (value becomes array)
+             */
+            multi?: boolean;
+            /**
+             * Parent parameter this depends on (for entity-attribute, taxonomy-classification)
+             */
+            dependsOn?: string;
+            /**
+             * Conditional visibility rules (show when parent has specific values)
+             */
+            visibleWhen?: {
+                [name: string]: any[];
+            };
+            /**
+             * Allowed values (required for 'select' type)
+             */
+            enum?: string[];
+            /**
+             * Minimum value (for number type)
+             */
+            minimum?: number;
+            /**
+             * Maximum value (for number type)
+             */
+            maximum?: number;
+            /**
+             * Step increment (for number type)
+             */
+            step?: number;
+            /**
+             * Minimum length (for text type)
+             */
+            minLength?: number;
+            /**
+             * Maximum length (for text type)
+             */
+            maxLength?: number;
+            /**
+             * Filter to specific schemas (for entity-schema, entity-id)
+             */
+            schemaFilter?: string[];
+            /**
+             * Filter to specific attribute types (for entity-attribute)
+             */
+            attributeTypeFilter?: string[];
+        }
+        /**
+         * example:
+         * {
+         *   "type": "object",
+         *   "parameters": [
+         *     {
+         *       "name": "target_schema",
+         *       "label": "Target Schema",
+         *       "type": "entity-schema",
+         *       "description": "Entity type to create"
+         *     },
+         *     {
+         *       "name": "confidence_threshold",
+         *       "label": "Confidence Threshold",
+         *       "type": "number",
+         *       "minimum": 0,
+         *       "maximum": 1,
+         *       "default": 0.8
+         *     },
+         *     {
+         *       "name": "categories",
+         *       "label": "Categories",
+         *       "type": "select",
+         *       "enum": [
+         *         "invoice",
+         *         "contract",
+         *         "letter"
+         *       ],
+         *       "multi": true
+         *     }
+         *   ],
+         *   "required": [
+         *     "target_schema"
+         *   ]
+         * }
+         */
+        export interface InputParametersSchema {
+            /**
+             * Always "object"
+             */
+            type: "object";
+            /**
+             * Array of parameter definitions
+             */
+            parameters: InputParameterDefinition[];
+            /**
+             * Array of parameter names that are required
+             */
+            required?: string[];
+        }
         export interface ListAgentsResponse {
             agents?: AgentDefinition[];
+            next_cursor?: string | null;
+        }
+        export interface ListExecutionsResponse {
+            executions?: ExecutionResponse[];
             next_cursor?: string | null;
         }
         export interface ModelConfig {
@@ -248,6 +466,22 @@ declare namespace Components {
             max_tokens?: number;
         }
         /**
+         * Base types:
+         * - text: Text input field
+         * - number: Numeric input field
+         * - boolean: Toggle switch
+         * - select: Dropdown selection (requires enum array)
+         *
+         * Custom types (domain-specific):
+         * - entity-schema: Entity schema selector (fetches from Entity API)
+         * - entity-attribute: Entity attribute selector (requires dependsOn)
+         * - entity-id: Entity picker (search and select entities)
+         * - taxonomy: Taxonomy selector (fetches from Taxonomy API)
+         * - taxonomy-classification: Classification selector (requires dependsOn)
+         *
+         */
+        export type ParameterType = "text" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification";
+        /**
          * Action waiting for approval (when status=waiting_approval)
          */
         export type PendingAction = {
@@ -257,7 +491,13 @@ declare namespace Components {
             };
             description?: string;
         } | null;
-        export type SkillCategory = "email" | "entity" | "document" | "classification" | "custom";
+        export interface RejectExecutionRequest {
+            /**
+             * Reason for rejection
+             */
+            reason: string;
+        }
+        export type SkillCategory = "message" | "entity" | "document" | "classification" | "custom";
         export interface ToolDefinition {
             /**
              * example:
@@ -317,13 +557,74 @@ declare namespace Components {
             output_schema?: {
                 [key: string]: any;
             };
-            parameters_schema?: {
-                [key: string]: any;
-            };
+            input_parameters_schema?: /**
+             * example:
+             * {
+             *   "type": "object",
+             *   "parameters": [
+             *     {
+             *       "name": "target_schema",
+             *       "label": "Target Schema",
+             *       "type": "entity-schema",
+             *       "description": "Entity type to create"
+             *     },
+             *     {
+             *       "name": "confidence_threshold",
+             *       "label": "Confidence Threshold",
+             *       "type": "number",
+             *       "minimum": 0,
+             *       "maximum": 1,
+             *       "default": 0.8
+             *     },
+             *     {
+             *       "name": "categories",
+             *       "label": "Categories",
+             *       "type": "select",
+             *       "enum": [
+             *         "invoice",
+             *         "contract",
+             *         "letter"
+             *       ],
+             *       "multi": true
+             *     }
+             *   ],
+             *   "required": [
+             *     "target_schema"
+             *   ]
+             * }
+             */
+            InputParametersSchema;
         }
     }
 }
 declare namespace Paths {
+    namespace ApproveExecution {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.ApproveExecutionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace CancelExecution {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace CreateAgent {
         export type RequestBody = Components.Schemas.CreateAgentRequest;
         namespace Responses {
@@ -370,10 +671,64 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace GetExecution {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionResponse;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace GetExecutionTrace {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionTrace;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace ListAgents {
         namespace Responses {
             export type $200 = Components.Schemas.ListAgentsResponse;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace ListExecutions {
+        namespace Parameters {
+            export type AgentId = string;
+            export type Limit = number;
+            export type Status = Components.Schemas.ExecutionStatus;
+        }
+        export interface QueryParameters {
+            agent_id?: Parameters.AgentId;
+            status?: Parameters.Status;
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ListExecutionsResponse;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace RejectExecution {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.RejectExecutionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
         }
     }
     namespace UpdateAgentById {
@@ -441,6 +796,60 @@ export interface OperationMethods {
     data?: Paths.ExecuteAgent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteAgent.Responses.$200>
+  /**
+   * listExecutions - List executions
+   */
+  'listExecutions'(
+    parameters?: Parameters<Paths.ListExecutions.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListExecutions.Responses.$200>
+  /**
+   * getExecution - Get execution by ID
+   */
+  'getExecution'(
+    parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExecution.Responses.$200>
+  /**
+   * cancelExecution - Cancel execution
+   */
+  'cancelExecution'(
+    parameters?: Parameters<Paths.CancelExecution.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelExecution.Responses.$200>
+  /**
+   * getExecutionTrace - Get execution trace/iterations
+   * 
+   * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
+   */
+  'getExecutionTrace'(
+    parameters?: Parameters<Paths.GetExecutionTrace.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExecutionTrace.Responses.$200>
+  /**
+   * approveExecution - Approve pending action
+   * 
+   * Approves a pending tool action when execution is in waiting_approval status
+   */
+  'approveExecution'(
+    parameters?: Parameters<Paths.ApproveExecution.PathParameters> | null,
+    data?: Paths.ApproveExecution.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApproveExecution.Responses.$200>
+  /**
+   * rejectExecution - Reject pending action
+   * 
+   * Rejects a pending tool action when execution is in waiting_approval status
+   */
+  'rejectExecution'(
+    parameters?: Parameters<Paths.RejectExecution.PathParameters> | null,
+    data?: Paths.RejectExecution.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RejectExecution.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -498,6 +907,70 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExecuteAgent.Responses.$200>
   }
+  ['/v1/executions']: {
+    /**
+     * listExecutions - List executions
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListExecutions.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListExecutions.Responses.$200>
+  }
+  ['/v1/executions/{execution_id}']: {
+    /**
+     * getExecution - Get execution by ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExecution.Responses.$200>
+    /**
+     * cancelExecution - Cancel execution
+     */
+    'delete'(
+      parameters?: Parameters<Paths.CancelExecution.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelExecution.Responses.$200>
+  }
+  ['/v1/executions/{execution_id}/trace']: {
+    /**
+     * getExecutionTrace - Get execution trace/iterations
+     * 
+     * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExecutionTrace.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExecutionTrace.Responses.$200>
+  }
+  ['/v1/executions/{execution_id}/approve']: {
+    /**
+     * approveExecution - Approve pending action
+     * 
+     * Approves a pending tool action when execution is in waiting_approval status
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApproveExecution.PathParameters> | null,
+      data?: Paths.ApproveExecution.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApproveExecution.Responses.$200>
+  }
+  ['/v1/executions/{execution_id}/reject']: {
+    /**
+     * rejectExecution - Reject pending action
+     * 
+     * Rejects a pending tool action when execution is in waiting_approval status
+     */
+    'post'(
+      parameters?: Parameters<Paths.RejectExecution.PathParameters> | null,
+      data?: Paths.RejectExecution.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RejectExecution.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -505,6 +978,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AgentDefinition = Components.Schemas.AgentDefinition;
 export type AgentSource = Components.Schemas.AgentSource;
+export type ApproveExecutionRequest = Components.Schemas.ApproveExecutionRequest;
 export type CreateAgentRequest = Components.Schemas.CreateAgentRequest;
 export type Error = Components.Schemas.Error;
 export type ExecuteAgentRequest = Components.Schemas.ExecuteAgentRequest;
@@ -516,9 +990,14 @@ export type ExecutionPattern = Components.Schemas.ExecutionPattern;
 export type ExecutionResponse = Components.Schemas.ExecutionResponse;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExecutionTrace = Components.Schemas.ExecutionTrace;
+export type InputParameterDefinition = Components.Schemas.InputParameterDefinition;
+export type InputParametersSchema = Components.Schemas.InputParametersSchema;
 export type ListAgentsResponse = Components.Schemas.ListAgentsResponse;
+export type ListExecutionsResponse = Components.Schemas.ListExecutionsResponse;
 export type ModelConfig = Components.Schemas.ModelConfig;
+export type ParameterType = Components.Schemas.ParameterType;
 export type PendingAction = Components.Schemas.PendingAction;
+export type RejectExecutionRequest = Components.Schemas.RejectExecutionRequest;
 export type SkillCategory = Components.Schemas.SkillCategory;
 export type ToolDefinition = Components.Schemas.ToolDefinition;
 export type UpdateAgentRequest = Components.Schemas.UpdateAgentRequest;

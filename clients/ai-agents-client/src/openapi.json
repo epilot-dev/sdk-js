@@ -313,6 +313,354 @@
           }
         }
       }
+    },
+    "/v1/executions": {
+      "get": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "List executions",
+        "operationId": "listExecutions",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by agent ID"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ExecutionStatus"
+            },
+            "description": "Filter by status"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            },
+            "description": "Maximum number of executions to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListExecutionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error fetching executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/executions/{execution_id}": {
+      "get": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Get execution by ID",
+        "operationId": "getExecution",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Execution details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Cancel execution",
+        "operationId": "cancelExecution",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Execution cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot cancel execution (already completed or failed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/executions/{execution_id}/trace": {
+      "get": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Get execution trace/iterations",
+        "description": "Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.",
+        "operationId": "getExecutionTrace",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Execution trace",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionTrace"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/executions/{execution_id}/approve": {
+      "post": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Approve pending action",
+        "description": "Approves a pending tool action when execution is in waiting_approval status",
+        "operationId": "approveExecution",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveExecutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action approved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No pending action to approve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/executions/{execution_id}/reject": {
+      "post": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Reject pending action",
+        "description": "Rejects a pending tool action when execution is in waiting_approval status",
+        "operationId": "rejectExecution",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectExecutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No pending action to reject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -363,7 +711,7 @@
             "description": "Tool IDs this agent can use",
             "example": [
               "entity.search",
-              "email.draft"
+              "message.draft"
             ]
           },
           "model_config": {
@@ -386,9 +734,8 @@
             "type": "object",
             "description": "JSON Schema for expected output"
           },
-          "parameters_schema": {
-            "type": "object",
-            "description": "JSON Schema for configurable parameters"
+          "input_parameters_schema": {
+            "$ref": "#/components/schemas/InputParametersSchema"
           }
         }
       },
@@ -437,8 +784,8 @@
           "output_schema": {
             "type": "object"
           },
-          "parameters_schema": {
-            "type": "object"
+          "input_parameters_schema": {
+            "$ref": "#/components/schemas/InputParametersSchema"
           }
         }
       },
@@ -491,8 +838,8 @@
           "output_schema": {
             "type": "object"
           },
-          "parameters_schema": {
-            "type": "object"
+          "input_parameters_schema": {
+            "$ref": "#/components/schemas/InputParametersSchema"
           },
           "version": {
             "type": "integer"
@@ -525,6 +872,42 @@
           }
         }
       },
+      "ListExecutionsResponse": {
+        "type": "object",
+        "properties": {
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionResponse"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApproveExecutionRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for approval"
+          }
+        }
+      },
+      "RejectExecutionRequest": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Reason for rejection"
+          }
+        }
+      },
       "ExecuteAgentRequest": {
         "type": "object",
         "properties": {
@@ -553,7 +936,7 @@
           "parameters": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Runtime parameters (validated against parameters_schema)"
+            "description": "Runtime parameters (validated against input_parameters_schema)"
           },
           "execution_mode_override": {
             "$ref": "#/components/schemas/ExecutionMode"
@@ -597,7 +980,18 @@
           "result": {
             "type": "object",
             "nullable": true,
-            "description": "Execution result (when status=completed)"
+            "description": "Execution result (when status=completed)",
+            "properties": {
+              "response": {
+                "type": "string",
+                "description": "Text response from the agent"
+              },
+              "structured_output": {
+                "type": "object",
+                "nullable": true,
+                "description": "Parsed structured output (only for direct mode with output_schema)"
+              }
+            }
           },
           "error": {
             "$ref": "#/components/schemas/ExecutionError"
@@ -787,7 +1181,7 @@
       "SkillCategory": {
         "type": "string",
         "enum": [
-          "email",
+          "message",
           "entity",
           "document",
           "classification",
@@ -829,6 +1223,171 @@
           "failed",
           "cancelled"
         ]
+      },
+      "ParameterType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "number",
+          "boolean",
+          "select",
+          "entity-schema",
+          "entity-attribute",
+          "entity-id",
+          "taxonomy",
+          "taxonomy-classification"
+        ],
+        "description": "Base types:\n- text: Text input field\n- number: Numeric input field\n- boolean: Toggle switch\n- select: Dropdown selection (requires enum array)\n\nCustom types (domain-specific):\n- entity-schema: Entity schema selector (fetches from Entity API)\n- entity-attribute: Entity attribute selector (requires dependsOn)\n- entity-id: Entity picker (search and select entities)\n- taxonomy: Taxonomy selector (fetches from Taxonomy API)\n- taxonomy-classification: Classification selector (requires dependsOn)\n"
+      },
+      "InputParameterDefinition": {
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique identifier for the parameter (used in API)",
+            "example": "target_schema"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable display label",
+            "example": "Target Schema"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ParameterType"
+          },
+          "description": {
+            "type": "string",
+            "description": "Help text for the parameter"
+          },
+          "default": {
+            "description": "Default value for the parameter"
+          },
+          "multi": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow multiple selections (value becomes array)"
+          },
+          "dependsOn": {
+            "type": "string",
+            "description": "Parent parameter this depends on (for entity-attribute, taxonomy-classification)"
+          },
+          "visibleWhen": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array"
+            },
+            "description": "Conditional visibility rules (show when parent has specific values)"
+          },
+          "enum": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed values (required for 'select' type)"
+          },
+          "minimum": {
+            "type": "number",
+            "description": "Minimum value (for number type)"
+          },
+          "maximum": {
+            "type": "number",
+            "description": "Maximum value (for number type)"
+          },
+          "step": {
+            "type": "number",
+            "description": "Step increment (for number type)"
+          },
+          "minLength": {
+            "type": "integer",
+            "description": "Minimum length (for text type)"
+          },
+          "maxLength": {
+            "type": "integer",
+            "description": "Maximum length (for text type)"
+          },
+          "schemaFilter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter to specific schemas (for entity-schema, entity-id)"
+          },
+          "attributeTypeFilter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter to specific attribute types (for entity-attribute)"
+          }
+        }
+      },
+      "InputParametersSchema": {
+        "type": "object",
+        "required": [
+          "type",
+          "parameters"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "object"
+            ],
+            "description": "Always \"object\""
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InputParameterDefinition"
+            },
+            "description": "Array of parameter definitions"
+          },
+          "required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of parameter names that are required"
+          }
+        },
+        "example": {
+          "type": "object",
+          "parameters": [
+            {
+              "name": "target_schema",
+              "label": "Target Schema",
+              "type": "entity-schema",
+              "description": "Entity type to create"
+            },
+            {
+              "name": "confidence_threshold",
+              "label": "Confidence Threshold",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.8
+            },
+            {
+              "name": "categories",
+              "label": "Categories",
+              "type": "select",
+              "enum": [
+                "invoice",
+                "contract",
+                "letter"
+              ],
+              "multi": true
+            }
+          ],
+          "required": [
+            "target_schema"
+          ]
+        }
       },
       "ModelConfig": {
         "type": "object",
