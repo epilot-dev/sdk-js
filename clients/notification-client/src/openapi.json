@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Notification API",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "Notification API for epilot 360"
   },
   "security": [
@@ -14,6 +14,10 @@
     {
       "name": "Notification",
       "description": "Notification"
+    },
+    {
+      "name": "Template",
+      "description": "Notification Template"
     }
   ],
   "paths": {
@@ -267,6 +271,432 @@
           }
         }
       }
+    },
+    "/v1/notification/templates": {
+      "get": {
+        "operationId": "listNotificationTemplates",
+        "summary": "listNotificationTemplates",
+        "description": "List notification templates with optional filtering and pagination",
+        "tags": [
+          "Template"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Lucene query string for filtering",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Pagination offset (0-based)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "description": "Results per page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 25
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort fields (prefix with - for descending)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated fields to include",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false,
+            "description": "Resolve nested relations",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplateListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createNotificationTemplate",
+        "summary": "createNotificationTemplate",
+        "description": "Create a new notification template",
+        "tags": [
+          "Template"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationTemplateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notification/templates/{id}": {
+      "get": {
+        "operationId": "getNotificationTemplate",
+        "summary": "getNotificationTemplate",
+        "description": "Get a single notification template by ID",
+        "tags": [
+          "Template"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplate"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateNotificationTemplate",
+        "summary": "updateNotificationTemplate",
+        "description": "Update a notification template (full replacement)",
+        "tags": [
+          "Template"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationTemplateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchNotificationTemplate",
+        "summary": "patchNotificationTemplate",
+        "description": "Partially update a notification template",
+        "tags": [
+          "Template"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationTemplateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteNotificationTemplate",
+        "summary": "deleteNotificationTemplate",
+        "description": "Delete a notification template permanently",
+        "tags": [
+          "Template"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTemplate"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -278,7 +708,35 @@
         "bearerFormat": "JWT"
       }
     },
+    "parameters": {
+      "TemplateIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Template ID (UUID)",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
     "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "code": {
+            "type": "string",
+            "description": "Error code"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
       "EntityOperation": {
         "type": "object",
         "properties": {
@@ -370,7 +828,6 @@
         ]
       },
       "Notification": {
-        "additionalProperties": true,
         "allOf": [
           {
             "$ref": "#/components/schemas/NotificationBase"
@@ -378,6 +835,10 @@
           {
             "type": "object",
             "properties": {
+              "read_state": {
+                "type": "boolean",
+                "example": false
+              },
               "visibility_user_ids": {
                 "description": "The person who is the corresponding event recipient.",
                 "type": "array",
@@ -398,8 +859,10 @@
       },
       "NotificationBase": {
         "type": "object",
-        "additionalProperties": true,
         "properties": {
+          "notification_id": {
+            "type": "number"
+          },
           "timestamp": {
             "type": "string",
             "format": "date-time"
@@ -561,6 +1024,245 @@
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
         "example": "contact"
+      },
+      "EntityOwner": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          }
+        }
+      },
+      "EntityAcl": {
+        "type": "object",
+        "description": "Access control list",
+        "properties": {
+          "view": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "edit": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "NotificationTemplate": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "Entity schema type"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Display title"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization"
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of creation"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of last update"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityOwner"
+            },
+            "description": "Entity owners",
+            "readOnly": true
+          },
+          "_acl": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityAcl"
+              }
+            ],
+            "description": "Access control list",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal template name"
+          },
+          "type": {
+            "type": "string",
+            "description": "Notification type key"
+          },
+          "notification_title": {
+            "type": "string",
+            "description": "Notification title (Lexical editor JSON, supports variables)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Notification body (Lexical editor JSON, supports variables)"
+          },
+          "action_label": {
+            "type": "string",
+            "description": "CTA button text (supports variables)"
+          },
+          "action_url": {
+            "type": "string",
+            "description": "CTA button URL (supports variables)"
+          },
+          "style": {
+            "type": "string",
+            "description": "JSON string with style config"
+          },
+          "system_template": {
+            "type": "boolean",
+            "description": "Whether this is a system template",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the template",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "User ID who last updated the template",
+            "readOnly": true
+          }
+        }
+      },
+      "CreateNotificationTemplateInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Internal template name (required)"
+          },
+          "type": {
+            "type": "string",
+            "description": "Notification type key (required)"
+          },
+          "notification_title": {
+            "type": "string",
+            "description": "Notification title (Lexical editor JSON, supports variables)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Notification body (Lexical editor JSON, supports variables)"
+          },
+          "action_label": {
+            "type": "string",
+            "description": "CTA button text (supports variables)"
+          },
+          "action_url": {
+            "type": "string",
+            "description": "CTA button URL (supports variables)"
+          },
+          "style": {
+            "type": "string",
+            "description": "JSON string with style config"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Display title"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization"
+          }
+        }
+      },
+      "UpdateNotificationTemplateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Internal template name"
+          },
+          "notification_title": {
+            "type": "string",
+            "description": "Notification title (Lexical editor JSON, supports variables)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Notification body (Lexical editor JSON, supports variables)"
+          },
+          "action_label": {
+            "type": "string",
+            "description": "CTA button text (supports variables)"
+          },
+          "action_url": {
+            "type": "string",
+            "description": "CTA button URL (supports variables)"
+          },
+          "style": {
+            "type": "string",
+            "description": "JSON string with style config"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Display title"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorization"
+          }
+        }
+      },
+      "NotificationTemplateListResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationTemplate"
+            }
+          },
+          "hits": {
+            "type": "integer",
+            "description": "Total number of matching results"
+          }
+        }
       }
     }
   },

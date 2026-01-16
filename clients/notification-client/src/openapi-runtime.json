@@ -92,9 +92,115 @@
         "operationId": "getTotalUnread",
         "responses": {}
       }
+    },
+    "/v1/notification/templates": {
+      "get": {
+        "operationId": "listNotificationTemplates",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createNotificationTemplate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/notification/templates/{id}": {
+      "get": {
+        "operationId": "getNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "TemplateIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://notification.sls.epilot.io"

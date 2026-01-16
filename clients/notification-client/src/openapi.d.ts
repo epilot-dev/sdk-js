@@ -9,9 +9,61 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Parameters {
+        export type TemplateIdPathParam = string; // uuid
+    }
+    export interface PathParameters {
+        TemplateIdPathParam?: Parameters.TemplateIdPathParam /* uuid */;
+    }
     namespace Schemas {
+        export interface CreateNotificationTemplateInput {
+            /**
+             * Internal template name (required)
+             */
+            name: string;
+            /**
+             * Notification type key (required)
+             */
+            type: string;
+            /**
+             * Notification title (Lexical editor JSON, supports variables)
+             */
+            notification_title?: string;
+            /**
+             * Notification body (Lexical editor JSON, supports variables)
+             */
+            message?: string;
+            /**
+             * CTA button text (supports variables)
+             */
+            action_label?: string;
+            /**
+             * CTA button URL (supports variables)
+             */
+            action_url?: string;
+            /**
+             * JSON string with style config
+             */
+            style?: string;
+            /**
+             * Display title
+             */
+            _title?: string;
+            /**
+             * Tags for categorization
+             */
+            _tags?: string[];
+        }
         export interface Entity {
             [name: string]: any;
+        }
+        /**
+         * Access control list
+         */
+        export interface EntityAcl {
+            view?: string[];
+            edit?: string[];
+            delete?: string[];
         }
         export type EntityId = string; // uuid
         export interface EntityOperation {
@@ -49,19 +101,39 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface EntityOwner {
+            /**
+             * Organization ID
+             */
+            org_id?: string;
+            /**
+             * User ID
+             */
+            user_id?: string;
+        }
         /**
          * URL-friendly identifier for the entity schema
          * example:
          * contact
          */
         export type EntitySlug = string;
+        export interface Error {
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * Error code
+             */
+            code?: string;
+        }
         /**
          * example:
          * 123456789
          */
         export type Id = number;
         export interface Notification {
-            [name: string]: any;
+            notification_id?: number;
             timestamp?: string; // date-time
             /**
              * Type of notification
@@ -136,6 +208,11 @@ declare namespace Components {
                 [name: string]: any;
             };
             /**
+             * example:
+             * false
+             */
+            read_state?: boolean;
+            /**
              * The person who is the corresponding event recipient.
              * example:
              * [
@@ -149,7 +226,7 @@ declare namespace Components {
             visibility_user_ids?: string[];
         }
         export interface NotificationBase {
-            [name: string]: any;
+            notification_id?: number;
             timestamp?: string; // date-time
             /**
              * Type of notification
@@ -281,7 +358,6 @@ declare namespace Components {
          */
         export type NotificationId = number;
         export interface NotificationItem {
-            [name: string]: any;
             id?: /**
              * example:
              * 123456789
@@ -371,6 +447,129 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        export interface NotificationTemplate {
+            /**
+             * Unique identifier
+             */
+            _id?: string; // uuid
+            /**
+             * Entity schema type
+             */
+            _schema?: string;
+            /**
+             * Display title
+             */
+            _title?: string;
+            /**
+             * Organization ID
+             */
+            _org?: string;
+            /**
+             * Tags for categorization
+             */
+            _tags?: string[];
+            /**
+             * ISO timestamp of creation
+             */
+            _created_at?: string; // date-time
+            /**
+             * ISO timestamp of last update
+             */
+            _updated_at?: string; // date-time
+            /**
+             * Entity owners
+             */
+            _owners?: EntityOwner[];
+            /**
+             * Access control list
+             */
+            _acl?: {
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
+            /**
+             * Internal template name
+             */
+            name?: string;
+            /**
+             * Notification type key
+             */
+            type?: string;
+            /**
+             * Notification title (Lexical editor JSON, supports variables)
+             */
+            notification_title?: string;
+            /**
+             * Notification body (Lexical editor JSON, supports variables)
+             */
+            message?: string;
+            /**
+             * CTA button text (supports variables)
+             */
+            action_label?: string;
+            /**
+             * CTA button URL (supports variables)
+             */
+            action_url?: string;
+            /**
+             * JSON string with style config
+             */
+            style?: string;
+            /**
+             * Whether this is a system template
+             */
+            system_template?: boolean;
+            /**
+             * User ID who created the template
+             */
+            created_by?: string;
+            /**
+             * User ID who last updated the template
+             */
+            updated_by?: string;
+        }
+        export interface NotificationTemplateListResponse {
+            results?: NotificationTemplate[];
+            /**
+             * Total number of matching results
+             */
+            hits?: number;
+        }
+        export interface UpdateNotificationTemplateInput {
+            /**
+             * Internal template name
+             */
+            name?: string;
+            /**
+             * Notification title (Lexical editor JSON, supports variables)
+             */
+            notification_title?: string;
+            /**
+             * Notification body (Lexical editor JSON, supports variables)
+             */
+            message?: string;
+            /**
+             * CTA button text (supports variables)
+             */
+            action_label?: string;
+            /**
+             * CTA button URL (supports variables)
+             */
+            action_url?: string;
+            /**
+             * JSON string with style config
+             */
+            style?: string;
+            /**
+             * Display title
+             */
+            _title?: string;
+            /**
+             * Tags for categorization
+             */
+            _tags?: string[];
+        }
     }
 }
 declare namespace Paths {
@@ -379,6 +578,29 @@ declare namespace Paths {
         namespace Responses {
             export interface $202 {
             }
+        }
+    }
+    namespace CreateNotificationTemplate {
+        export type RequestBody = Components.Schemas.CreateNotificationTemplateInput;
+        namespace Responses {
+            export type $201 = Components.Schemas.NotificationTemplate;
+            export type $400 = Components.Schemas.Error;
+            export type $401 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
+        }
+    }
+    namespace DeleteNotificationTemplate {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationTemplate;
+            export type $401 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
         }
     }
     namespace GetNotification {
@@ -390,6 +612,20 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.NotificationItem;
+        }
+    }
+    namespace GetNotificationTemplate {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationTemplate;
+            export type $401 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
         }
     }
     namespace GetNotifications {
@@ -461,6 +697,29 @@ declare namespace Paths {
             export type $200 = number;
         }
     }
+    namespace ListNotificationTemplates {
+        namespace Parameters {
+            export type Fields = string;
+            export type From = number;
+            export type Hydrate = boolean;
+            export type Q = string;
+            export type Size = number;
+            export type Sort = string;
+        }
+        export interface QueryParameters {
+            q?: Parameters.Q;
+            from?: Parameters.From;
+            size?: Parameters.Size;
+            sort?: Parameters.Sort;
+            fields?: Parameters.Fields;
+            hydrate?: Parameters.Hydrate;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationTemplateListResponse;
+            export type $401 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
+        }
+    }
     namespace MarkAllAsRead {
         namespace Responses {
             export interface $204 {
@@ -477,6 +736,38 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+        }
+    }
+    namespace PatchNotificationTemplate {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.UpdateNotificationTemplateInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationTemplate;
+            export type $400 = Components.Schemas.Error;
+            export type $401 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
+        }
+    }
+    namespace UpdateNotificationTemplate {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.UpdateNotificationTemplateInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationTemplate;
+            export type $400 = Components.Schemas.Error;
+            export type $401 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
         }
     }
 }
@@ -553,6 +844,66 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTotalUnread.Responses.$200>
+  /**
+   * listNotificationTemplates - listNotificationTemplates
+   * 
+   * List notification templates with optional filtering and pagination
+   */
+  'listNotificationTemplates'(
+    parameters?: Parameters<Paths.ListNotificationTemplates.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListNotificationTemplates.Responses.$200>
+  /**
+   * createNotificationTemplate - createNotificationTemplate
+   * 
+   * Create a new notification template
+   */
+  'createNotificationTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateNotificationTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateNotificationTemplate.Responses.$201>
+  /**
+   * getNotificationTemplate - getNotificationTemplate
+   * 
+   * Get a single notification template by ID
+   */
+  'getNotificationTemplate'(
+    parameters?: Parameters<Paths.GetNotificationTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNotificationTemplate.Responses.$200>
+  /**
+   * updateNotificationTemplate - updateNotificationTemplate
+   * 
+   * Update a notification template (full replacement)
+   */
+  'updateNotificationTemplate'(
+    parameters?: Parameters<Paths.UpdateNotificationTemplate.PathParameters> | null,
+    data?: Paths.UpdateNotificationTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateNotificationTemplate.Responses.$200>
+  /**
+   * patchNotificationTemplate - patchNotificationTemplate
+   * 
+   * Partially update a notification template
+   */
+  'patchNotificationTemplate'(
+    parameters?: Parameters<Paths.PatchNotificationTemplate.PathParameters> | null,
+    data?: Paths.PatchNotificationTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchNotificationTemplate.Responses.$200>
+  /**
+   * deleteNotificationTemplate - deleteNotificationTemplate
+   * 
+   * Delete a notification template permanently
+   */
+  'deleteNotificationTemplate'(
+    parameters?: Parameters<Paths.DeleteNotificationTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteNotificationTemplate.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -638,18 +989,89 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetTotalUnread.Responses.$200>
   }
+  ['/v1/notification/templates']: {
+    /**
+     * listNotificationTemplates - listNotificationTemplates
+     * 
+     * List notification templates with optional filtering and pagination
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListNotificationTemplates.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListNotificationTemplates.Responses.$200>
+    /**
+     * createNotificationTemplate - createNotificationTemplate
+     * 
+     * Create a new notification template
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateNotificationTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateNotificationTemplate.Responses.$201>
+  }
+  ['/v1/notification/templates/{id}']: {
+    /**
+     * getNotificationTemplate - getNotificationTemplate
+     * 
+     * Get a single notification template by ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNotificationTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNotificationTemplate.Responses.$200>
+    /**
+     * updateNotificationTemplate - updateNotificationTemplate
+     * 
+     * Update a notification template (full replacement)
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateNotificationTemplate.PathParameters> | null,
+      data?: Paths.UpdateNotificationTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateNotificationTemplate.Responses.$200>
+    /**
+     * patchNotificationTemplate - patchNotificationTemplate
+     * 
+     * Partially update a notification template
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchNotificationTemplate.PathParameters> | null,
+      data?: Paths.PatchNotificationTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchNotificationTemplate.Responses.$200>
+    /**
+     * deleteNotificationTemplate - deleteNotificationTemplate
+     * 
+     * Delete a notification template permanently
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteNotificationTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteNotificationTemplate.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type CreateNotificationTemplateInput = Components.Schemas.CreateNotificationTemplateInput;
 export type Entity = Components.Schemas.Entity;
+export type EntityAcl = Components.Schemas.EntityAcl;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityOperation = Components.Schemas.EntityOperation;
+export type EntityOwner = Components.Schemas.EntityOwner;
 export type EntitySlug = Components.Schemas.EntitySlug;
+export type Error = Components.Schemas.Error;
 export type Id = Components.Schemas.Id;
 export type Notification = Components.Schemas.Notification;
 export type NotificationBase = Components.Schemas.NotificationBase;
 export type NotificationCallerContext = Components.Schemas.NotificationCallerContext;
 export type NotificationId = Components.Schemas.NotificationId;
 export type NotificationItem = Components.Schemas.NotificationItem;
+export type NotificationTemplate = Components.Schemas.NotificationTemplate;
+export type NotificationTemplateListResponse = Components.Schemas.NotificationTemplateListResponse;
+export type UpdateNotificationTemplateInput = Components.Schemas.UpdateNotificationTemplateInput;
