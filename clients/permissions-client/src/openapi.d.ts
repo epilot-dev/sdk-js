@@ -122,6 +122,12 @@ declare namespace Components {
              */
             type: "user_role";
             /**
+             * Optional parent role that this role inherits from. Must be an `org_role` or a sharing role of type `share_role` or `partner_role`.
+             * example:
+             * 123:owner
+             */
+            parent_role?: string;
+            /**
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
@@ -336,6 +342,17 @@ declare namespace Components {
             operation: "equals";
             values: any[];
         }
+        /**
+         * Error response
+         */
+        export interface Error {
+            /**
+             * Error message
+             * example:
+             * Parent role 123:nonexistent does not exist
+             */
+            message: string;
+        }
         export interface Grant {
             /**
              * example:
@@ -390,6 +407,18 @@ declare namespace Components {
             RoleId[];
         }
         /**
+         * All roles attached to an users of an organization
+         */
+        export interface OrgAssignments {
+            organizationId?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            assignments?: /* A role attached to an user */ InternalAssignment[];
+        }
+        /**
          * A role automatically applied to all users in an organization.
          */
         export interface OrgRole {
@@ -437,6 +466,18 @@ declare namespace Components {
              * Professional
              */
             pricing_tier?: string;
+        }
+        /**
+         * All roles attached to an users of an organization
+         */
+        export interface OrgRoles {
+            organizationId?: /**
+             * Id of an organization
+             * example:
+             * 123
+             */
+            OrganizationId;
+            roles?: Role[];
         }
         /**
          * Id of an organization
@@ -492,6 +533,10 @@ declare namespace Components {
              * 123
              */
             partner_org_id?: string;
+            /**
+             * Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)
+             */
+            vendor_enforced_user_limit?: number;
         }
         /**
          * A role that is applied to end customers and installers using the Portals
@@ -705,6 +750,12 @@ declare namespace Components {
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
+            /**
+             * Optional parent role that this role inherits from. Must be an `org_role` or `share_role`.
+             * example:
+             * 123:owner
+             */
+            parent_role?: string;
         }
     }
 }
@@ -753,6 +804,8 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.CreateRolePayload;
         namespace Responses {
             export type $200 = Components.Schemas.Role;
+            export type $400 = /* Error response */ Components.Schemas.Error;
+            export type $404 = /* Error response */ Components.Schemas.Error;
         }
     }
     namespace DeleteRole {
@@ -839,6 +892,8 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.RolePayload;
         namespace Responses {
             export type $200 = Components.Schemas.Role;
+            export type $400 = /* Error response */ Components.Schemas.Error;
+            export type $404 = /* Error response */ Components.Schemas.Error;
         }
     }
     namespace RefreshPermissions {
@@ -880,7 +935,6 @@ declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -1172,18 +1226,20 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type Assignment = Components.Schemas.Assignment;
 export type Assignments = Components.Schemas.Assignments;
 export type BaseRole = Components.Schemas.BaseRole;
 export type BaseRoleForCreate = Components.Schemas.BaseRoleForCreate;
 export type CreateRolePayload = Components.Schemas.CreateRolePayload;
 export type EqualsCondition = Components.Schemas.EqualsCondition;
+export type Error = Components.Schemas.Error;
 export type Grant = Components.Schemas.Grant;
 export type GrantCondition = Components.Schemas.GrantCondition;
 export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
 export type InternalAssignment = Components.Schemas.InternalAssignment;
+export type OrgAssignments = Components.Schemas.OrgAssignments;
 export type OrgRole = Components.Schemas.OrgRole;
+export type OrgRoles = Components.Schemas.OrgRoles;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type PartnerRole = Components.Schemas.PartnerRole;
 export type PortalRole = Components.Schemas.PortalRole;
