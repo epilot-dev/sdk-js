@@ -23,6 +23,20 @@
       },
       "get": {
         "operationId": "listAgents",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query"
+          },
+          {
+            "name": "availability",
+            "in": "query"
+          },
+          {
+            "name": "entity_schema",
+            "in": "query"
+          }
+        ],
         "responses": {}
       }
     },

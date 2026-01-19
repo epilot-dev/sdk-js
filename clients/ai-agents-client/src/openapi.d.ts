@@ -11,18 +11,50 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export interface AgentDefinition {
-            agent_id?: string; // uuid
+            agent_id?: /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            AgentId;
             org_id?: string;
             name?: string;
             description?: string;
             category?: SkillCategory;
             icon?: string;
             source?: /**
-             * - system: Pre-built by epilot
+             * - system: Pre-built by epilot (system skills)
              * - custom: Created by organization
              *
              */
             AgentSource;
+            /**
+             * Where this agent/skill is available (flows, copilot, or both)
+             * example:
+             * [
+             *   "flows",
+             *   "copilot"
+             * ]
+             */
+            availability?: /**
+             * Where the skill/agent is available:
+             * - flows: Available in workflow automations
+             * - copilot: Available as a sub-agent in copilot
+             * - all: Available everywhere
+             *
+             */
+            SkillAvailability[];
+            /**
+             * Entity schemas this skill is allowed to work with (e.g., ["message"] for email skills)
+             * example:
+             * [
+             *   "message"
+             * ]
+             */
+            allowed_entity_schemas?: string[];
             system_prompt?: string;
             tools?: string[];
             model_config?: ModelConfig;
@@ -86,7 +118,16 @@ declare namespace Components {
             created_by?: string;
         }
         /**
-         * - system: Pre-built by epilot
+         * Agent identifier. Can be either:
+         * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+         * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+         *
+         * example:
+         * skill:email-categorizer
+         */
+        export type AgentId = string;
+        /**
+         * - system: Pre-built by epilot (system skills)
          * - custom: Created by organization
          *
          */
@@ -198,12 +239,23 @@ declare namespace Components {
                  * Primary entity ID for context
                  */
                 entity_id?: string;
+                /**
+                 * Schema of the primary entity (e.g., "message", "contact")
+                 */
+                entity_schema?: string;
                 workflow_id?: string;
                 workflow_execution_id?: string;
                 task_id?: string;
                 custom_data?: {
                     [name: string]: any;
                 };
+                /**
+                 * Array of entities from the flow trigger context (e.g., the message entity when triggered by email receive)
+                 */
+                flow_context?: {
+                    entity_id: string;
+                    entity_schema: string;
+                }[];
             };
             /**
              * Runtime parameters (validated against input_parameters_schema)
@@ -218,6 +270,14 @@ declare namespace Components {
              *
              */
             ExecutionMode;
+            execution_context?: /**
+             * Where the execution was triggered from:
+             * - flows: Triggered from workflow automation
+             * - copilot: Triggered from copilot assistant
+             * - api: Direct API call
+             *
+             */
+            ExecutionContext;
             /**
              * Webhook URL for async completion notification
              */
@@ -227,6 +287,14 @@ declare namespace Components {
              */
             timeout_ms?: number;
         }
+        /**
+         * Where the execution was triggered from:
+         * - flows: Triggered from workflow automation
+         * - copilot: Triggered from copilot assistant
+         * - api: Direct API call
+         *
+         */
+        export type ExecutionContext = "flows" | "copilot" | "api";
         export type ExecutionError = {
             code?: "TIMEOUT" | "MAX_ITERATIONS_EXCEEDED" | "TOOL_EXECUTION_FAILED" | "LLM_ERROR" | "INVALID_OUTPUT" | "REJECTED" | "INTERNAL_ERROR";
             message?: string;
@@ -279,7 +347,33 @@ declare namespace Components {
         export type ExecutionPattern = "direct" | "react";
         export interface ExecutionResponse {
             execution_id?: string; // uuid
-            agent_id?: string; // uuid
+            agent_id?: /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            AgentId;
+            agent_source?: /**
+             * - system: Pre-built by epilot (system skills)
+             * - custom: Created by organization
+             *
+             */
+            AgentSource;
+            /**
+             * Human-readable agent name (denormalized for display)
+             */
+            agent_name?: string;
+            execution_context?: /**
+             * Where the execution was triggered from:
+             * - flows: Triggered from workflow automation
+             * - copilot: Triggered from copilot assistant
+             * - api: Direct API call
+             *
+             */
+            ExecutionContext;
             org_id?: string;
             status?: ExecutionStatus;
             input?: {
@@ -331,6 +425,7 @@ declare namespace Components {
             type: /**
              * Base types:
              * - text: Text input field
+             * - textarea: Multi-line text input field
              * - number: Numeric input field
              * - boolean: Toggle switch
              * - select: Dropdown selection (requires enum array)
@@ -341,6 +436,7 @@ declare namespace Components {
              * - entity-id: Entity picker (search and select entities)
              * - taxonomy: Taxonomy selector (fetches from Taxonomy API)
              * - taxonomy-classification: Classification selector (requires dependsOn)
+             * - shared-inbox: Shared inbox selector (fetches from Email Settings API)
              *
              */
             ParameterType;
@@ -468,6 +564,7 @@ declare namespace Components {
         /**
          * Base types:
          * - text: Text input field
+         * - textarea: Multi-line text input field
          * - number: Numeric input field
          * - boolean: Toggle switch
          * - select: Dropdown selection (requires enum array)
@@ -478,25 +575,129 @@ declare namespace Components {
          * - entity-id: Entity picker (search and select entities)
          * - taxonomy: Taxonomy selector (fetches from Taxonomy API)
          * - taxonomy-classification: Classification selector (requires dependsOn)
+         * - shared-inbox: Shared inbox selector (fetches from Email Settings API)
          *
          */
-        export type ParameterType = "text" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification";
+        export type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label";
         /**
          * Action waiting for approval (when status=waiting_approval)
          */
         export type PendingAction = {
+            /**
+             * Tool ID that requires approval
+             */
             tool?: string;
+            /**
+             * Tool input parameters
+             */
             input?: {
                 [key: string]: any;
             };
+            /**
+             * Human-readable description of the action
+             */
             description?: string;
+            preview?: /* Structured preview data for approval UI. Provides a generic format that any tool can populate. */ ToolPreview;
         } | null;
+        /**
+         * Type of action being previewed
+         */
+        export type PreviewActionType = "move" | "create" | "update" | "delete" | "apply" | "send" | "link" | "unlink";
+        /**
+         * A single field change in the preview
+         */
+        export interface PreviewChange {
+            /**
+             * Field identifier
+             */
+            field?: string;
+            /**
+             * Human-readable field label
+             */
+            label?: string;
+            from?: /* Typed value for preview display */ PreviewValue;
+            to?: /* Typed value for preview display */ PreviewValue;
+        }
+        /**
+         * Entity reference for preview display
+         */
+        export interface PreviewEntity {
+            /**
+             * Entity type (e.g., "inbox", "email", "contact", "label")
+             * example:
+             * inbox
+             */
+            type?: string;
+            /**
+             * Entity ID
+             */
+            id?: string;
+            /**
+             * Human-readable name for display
+             * example:
+             * Support Inbox
+             */
+            name?: string;
+            /**
+             * Entity schema (for epilot entities)
+             */
+            schema?: string;
+            /**
+             * Icon hint for UI
+             */
+            icon?: string;
+            /**
+             * Optional URL to view the entity
+             */
+            url?: string;
+        }
+        /**
+         * Typed value for preview display
+         */
+        export interface PreviewValue {
+            /**
+             * Value type for proper rendering
+             */
+            type: "text" | "number" | "boolean" | "list" | "entity" | "badge";
+            /**
+             * The actual value (type depends on "type" field)
+             */
+            value?: any;
+            /**
+             * Array of values (for list type)
+             */
+            values?: string[];
+            /**
+             * Entity ID (for entity type)
+             */
+            id?: string;
+            /**
+             * Display name (for entity type)
+             */
+            name?: string;
+            /**
+             * Entity schema (for entity type)
+             */
+            schema?: string;
+            /**
+             * Badge color (for badge type)
+             */
+            color?: "success" | "warning" | "error" | "info";
+        }
         export interface RejectExecutionRequest {
             /**
              * Reason for rejection
              */
             reason: string;
         }
+        /**
+         * Where the skill/agent is available:
+         * - flows: Available in workflow automations
+         * - copilot: Available as a sub-agent in copilot
+         * - all: Available everywhere
+         *
+         */
+        export type SkillAvailability = "flows" | "copilot" | "all";
         export type SkillCategory = "message" | "entity" | "document" | "classification" | "custom";
         export interface ToolDefinition {
             /**
@@ -531,6 +732,38 @@ declare namespace Components {
              */
             requires_approval?: boolean;
             enabled?: boolean;
+        }
+        /**
+         * Structured preview data for approval UI. Provides a generic format that any tool can populate.
+         */
+        export interface ToolPreview {
+            action?: {
+                type: /* Type of action being previewed */ PreviewActionType;
+                /**
+                 * Human-readable action verb
+                 * example:
+                 * Move Thread
+                 */
+                verb: string;
+            };
+            source?: /* Entity reference for preview display */ PreviewEntity;
+            target?: /* Entity reference for preview display */ PreviewEntity;
+            /**
+             * List of changes/modifications being made
+             */
+            changes?: /* A single field change in the preview */ PreviewChange[];
+            /**
+             * Additional context information
+             */
+            metadata?: {
+                [name: string]: /* Typed value for preview display */ PreviewValue;
+            };
+            /**
+             * AI reasoning for why this action is recommended
+             * example:
+             * This email discusses solar panel installation and should be handled by the Service team.
+             */
+            summary?: string;
         }
         export interface UpdateAgentRequest {
             name?: string;
@@ -634,10 +867,18 @@ declare namespace Paths {
     }
     namespace DeleteAgentById {
         namespace Parameters {
-            export type AgentId = string; // uuid
+            export type AgentId = /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            Components.Schemas.AgentId;
         }
         export interface PathParameters {
-            agent_id: Parameters.AgentId /* uuid */;
+            agent_id: Parameters.AgentId;
         }
         namespace Responses {
             export interface $204 {
@@ -647,10 +888,18 @@ declare namespace Paths {
     }
     namespace ExecuteAgent {
         namespace Parameters {
-            export type AgentId = string; // uuid
+            export type AgentId = /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            Components.Schemas.AgentId;
         }
         export interface PathParameters {
-            agent_id: Parameters.AgentId /* uuid */;
+            agent_id: Parameters.AgentId;
         }
         export type RequestBody = Components.Schemas.ExecuteAgentRequest;
         namespace Responses {
@@ -661,10 +910,18 @@ declare namespace Paths {
     }
     namespace GetAgentById {
         namespace Parameters {
-            export type AgentId = string; // uuid
+            export type AgentId = /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            Components.Schemas.AgentId;
         }
         export interface PathParameters {
-            agent_id: Parameters.AgentId /* uuid */;
+            agent_id: Parameters.AgentId;
         }
         namespace Responses {
             export type $200 = Components.Schemas.AgentDefinition;
@@ -696,6 +953,28 @@ declare namespace Paths {
         }
     }
     namespace ListAgents {
+        namespace Parameters {
+            export type Availability = /**
+             * Where the skill/agent is available:
+             * - flows: Available in workflow automations
+             * - copilot: Available as a sub-agent in copilot
+             * - all: Available everywhere
+             *
+             */
+            Components.Schemas.SkillAvailability;
+            export type EntitySchema = string;
+            export type Source = /**
+             * - system: Pre-built by epilot (system skills)
+             * - custom: Created by organization
+             *
+             */
+            Components.Schemas.AgentSource;
+        }
+        export interface QueryParameters {
+            source?: Parameters.Source;
+            availability?: Parameters.Availability;
+            entity_schema?: Parameters.EntitySchema;
+        }
         namespace Responses {
             export type $200 = Components.Schemas.ListAgentsResponse;
             export type $400 = Components.Schemas.Error;
@@ -733,10 +1012,18 @@ declare namespace Paths {
     }
     namespace UpdateAgentById {
         namespace Parameters {
-            export type AgentId = string; // uuid
+            export type AgentId = /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            Components.Schemas.AgentId;
         }
         export interface PathParameters {
-            agent_id: Parameters.AgentId /* uuid */;
+            agent_id: Parameters.AgentId;
         }
         export type RequestBody = Components.Schemas.UpdateAgentRequest;
         namespace Responses {
@@ -750,14 +1037,20 @@ declare namespace Paths {
 export interface OperationMethods {
   /**
    * listAgents - List all agent configurations
+   * 
+   * Lists agents from both system skills and custom agents.
+   * Use query parameters to filter by source, availability, or entity schema.
+   * 
    */
   'listAgents'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListAgents.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAgents.Responses.$200>
   /**
    * createAgent - Create Agent definition
+   * 
+   * Creates a new custom agent. System skills cannot be created via this endpoint.
    */
   'createAgent'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -766,6 +1059,11 @@ export interface OperationMethods {
   ): OperationResponse<Paths.CreateAgent.Responses.$201>
   /**
    * getAgentById - Get the agent configuration by ID
+   * 
+   * Retrieves an agent by ID. Supports both:
+   * - System skill IDs (prefixed): "skill:email-categorizer"
+   * - Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+   * 
    */
   'getAgentById'(
     parameters?: Parameters<Paths.GetAgentById.PathParameters> | null,
@@ -773,7 +1071,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAgentById.Responses.$200>
   /**
-   * updateAgentById - update the agent configuration by ID
+   * updateAgentById - Update the agent configuration by ID
+   * 
+   * Updates a custom agent. System skills cannot be updated via this endpoint.
    */
   'updateAgentById'(
     parameters?: Parameters<Paths.UpdateAgentById.PathParameters> | null,
@@ -782,6 +1082,8 @@ export interface OperationMethods {
   ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
   /**
    * deleteAgentById - Delete the agent configuration by ID
+   * 
+   * Deletes a custom agent. System skills cannot be deleted via this endpoint.
    */
   'deleteAgentById'(
     parameters?: Parameters<Paths.DeleteAgentById.PathParameters> | null,
@@ -790,6 +1092,12 @@ export interface OperationMethods {
   ): OperationResponse<Paths.DeleteAgentById.Responses.$204>
   /**
    * executeAgent - Execute an agent
+   * 
+   * Executes an agent (system skill or custom agent).
+   * Supports both:
+   * - System skill IDs (prefixed): "skill:email-categorizer"
+   * - Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+   * 
    */
   'executeAgent'(
     parameters?: Parameters<Paths.ExecuteAgent.PathParameters> | null,
@@ -856,6 +1164,8 @@ export interface PathsDictionary {
   ['/v1/agents']: {
     /**
      * createAgent - Create Agent definition
+     * 
+     * Creates a new custom agent. System skills cannot be created via this endpoint.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -864,9 +1174,13 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.CreateAgent.Responses.$201>
     /**
      * listAgents - List all agent configurations
+     * 
+     * Lists agents from both system skills and custom agents.
+     * Use query parameters to filter by source, availability, or entity schema.
+     * 
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListAgents.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListAgents.Responses.$200>
@@ -874,6 +1188,11 @@ export interface PathsDictionary {
   ['/v1/agents/{agent_id}']: {
     /**
      * getAgentById - Get the agent configuration by ID
+     * 
+     * Retrieves an agent by ID. Supports both:
+     * - System skill IDs (prefixed): "skill:email-categorizer"
+     * - Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetAgentById.PathParameters> | null,
@@ -881,7 +1200,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAgentById.Responses.$200>
     /**
-     * updateAgentById - update the agent configuration by ID
+     * updateAgentById - Update the agent configuration by ID
+     * 
+     * Updates a custom agent. System skills cannot be updated via this endpoint.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateAgentById.PathParameters> | null,
@@ -890,6 +1211,8 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
     /**
      * deleteAgentById - Delete the agent configuration by ID
+     * 
+     * Deletes a custom agent. System skills cannot be deleted via this endpoint.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteAgentById.PathParameters> | null,
@@ -900,6 +1223,12 @@ export interface PathsDictionary {
   ['/v1/agents/{agent_id}/execute']: {
     /**
      * executeAgent - Execute an agent
+     * 
+     * Executes an agent (system skill or custom agent).
+     * Supports both:
+     * - System skill IDs (prefixed): "skill:email-categorizer"
+     * - Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ExecuteAgent.PathParameters> | null,
@@ -977,11 +1306,13 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AgentDefinition = Components.Schemas.AgentDefinition;
+export type AgentId = Components.Schemas.AgentId;
 export type AgentSource = Components.Schemas.AgentSource;
 export type ApproveExecutionRequest = Components.Schemas.ApproveExecutionRequest;
 export type CreateAgentRequest = Components.Schemas.CreateAgentRequest;
 export type Error = Components.Schemas.Error;
 export type ExecuteAgentRequest = Components.Schemas.ExecuteAgentRequest;
+export type ExecutionContext = Components.Schemas.ExecutionContext;
 export type ExecutionError = Components.Schemas.ExecutionError;
 export type ExecutionIteration = Components.Schemas.ExecutionIteration;
 export type ExecutionMetrics = Components.Schemas.ExecutionMetrics;
@@ -997,7 +1328,13 @@ export type ListExecutionsResponse = Components.Schemas.ListExecutionsResponse;
 export type ModelConfig = Components.Schemas.ModelConfig;
 export type ParameterType = Components.Schemas.ParameterType;
 export type PendingAction = Components.Schemas.PendingAction;
+export type PreviewActionType = Components.Schemas.PreviewActionType;
+export type PreviewChange = Components.Schemas.PreviewChange;
+export type PreviewEntity = Components.Schemas.PreviewEntity;
+export type PreviewValue = Components.Schemas.PreviewValue;
 export type RejectExecutionRequest = Components.Schemas.RejectExecutionRequest;
+export type SkillAvailability = Components.Schemas.SkillAvailability;
 export type SkillCategory = Components.Schemas.SkillCategory;
 export type ToolDefinition = Components.Schemas.ToolDefinition;
+export type ToolPreview = Components.Schemas.ToolPreview;
 export type UpdateAgentRequest = Components.Schemas.UpdateAgentRequest;

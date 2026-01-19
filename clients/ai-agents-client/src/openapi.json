@@ -38,6 +38,7 @@
           "Agents Configuration"
         ],
         "summary": "Create Agent definition",
+        "description": "Creates a new custom agent. System skills cannot be created via this endpoint.",
         "operationId": "createAgent",
         "security": [
           {
@@ -82,7 +83,34 @@
           "Agents Configuration"
         ],
         "summary": "List all agent configurations",
+        "description": "Lists agents from both system skills and custom agents.\nUse query parameters to filter by source, availability, or entity schema.\n",
         "operationId": "listAgents",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AgentSource"
+            },
+            "description": "Filter by agent source (system = pre-built skills, custom = user-created)"
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SkillAvailability"
+            },
+            "description": "Filter by availability context (flows, copilot)"
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by allowed entity schema (e.g., \"message\" for email-related skills)"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of agents",
@@ -113,6 +141,7 @@
           "Agents Configuration"
         ],
         "summary": "Get the agent configuration by ID",
+        "description": "Retrieves an agent by ID. Supports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "getAgentById",
         "security": [
           {
@@ -125,8 +154,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/AgentId"
             }
           }
         ],
@@ -157,7 +185,8 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "update the agent configuration by ID",
+        "summary": "Update the agent configuration by ID",
+        "description": "Updates a custom agent. System skills cannot be updated via this endpoint.",
         "operationId": "updateAgentById",
         "security": [
           {
@@ -170,8 +199,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/AgentId"
             }
           }
         ],
@@ -213,6 +241,7 @@
           "Agents Configuration"
         ],
         "summary": "Delete the agent configuration by ID",
+        "description": "Deletes a custom agent. System skills cannot be deleted via this endpoint.",
         "security": [
           {
             "EpilotAuth": []
@@ -225,8 +254,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/AgentId"
             }
           }
         ],
@@ -253,6 +281,7 @@
           "Agent Execution"
         ],
         "summary": "Execute an agent",
+        "description": "Executes an agent (system skill or custom agent).\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "executeAgent",
         "security": [
           {
@@ -265,8 +294,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/AgentId"
             }
           }
         ],
@@ -673,6 +701,11 @@
       }
     },
     "schemas": {
+      "AgentId": {
+        "type": "string",
+        "description": "Agent identifier. Can be either:\n- System skill ID (prefixed): \"skill:email-categorizer\", \"skill:email-labeler\"\n- Custom agent UUID: \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
+        "example": "skill:email-categorizer"
+      },
       "CreateAgentRequest": {
         "type": "object",
         "required": [
@@ -793,8 +826,7 @@
         "type": "object",
         "properties": {
           "agent_id": {
-            "type": "string",
-            "format": "uuid"
+            "$ref": "#/components/schemas/AgentId"
           },
           "org_id": {
             "type": "string"
@@ -813,6 +845,27 @@
           },
           "source": {
             "$ref": "#/components/schemas/AgentSource"
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillAvailability"
+            },
+            "description": "Where this agent/skill is available (flows, copilot, or both)",
+            "example": [
+              "flows",
+              "copilot"
+            ]
+          },
+          "allowed_entity_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Entity schemas this skill is allowed to work with (e.g., [\"message\"] for email skills)",
+            "example": [
+              "message"
+            ]
           },
           "system_prompt": {
             "type": "string"
@@ -918,6 +971,10 @@
                 "type": "string",
                 "description": "Primary entity ID for context"
               },
+              "entity_schema": {
+                "type": "string",
+                "description": "Schema of the primary entity (e.g., \"message\", \"contact\")"
+              },
               "workflow_id": {
                 "type": "string"
               },
@@ -930,6 +987,25 @@
               "custom_data": {
                 "type": "object",
                 "additionalProperties": true
+              },
+              "flow_context": {
+                "type": "array",
+                "description": "Array of entities from the flow trigger context (e.g., the message entity when triggered by email receive)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    },
+                    "entity_schema": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "entity_id",
+                    "entity_schema"
+                  ]
+                }
               }
             }
           },
@@ -940,6 +1016,9 @@
           },
           "execution_mode_override": {
             "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/ExecutionContext"
           },
           "callback_url": {
             "type": "string",
@@ -962,8 +1041,17 @@
             "format": "uuid"
           },
           "agent_id": {
+            "$ref": "#/components/schemas/AgentId"
+          },
+          "agent_source": {
+            "$ref": "#/components/schemas/AgentSource"
+          },
+          "agent_name": {
             "type": "string",
-            "format": "uuid"
+            "description": "Human-readable agent name (denormalized for display)"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/ExecutionContext"
           },
           "org_id": {
             "type": "string"
@@ -1076,13 +1164,19 @@
         "description": "Action waiting for approval (when status=waiting_approval)",
         "properties": {
           "tool": {
-            "type": "string"
+            "type": "string",
+            "description": "Tool ID that requires approval"
           },
           "input": {
-            "type": "object"
+            "type": "object",
+            "description": "Tool input parameters"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable description of the action"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ToolPreview"
           }
         }
       },
@@ -1131,6 +1225,173 @@
           },
           "iteration_count": {
             "type": "integer"
+          }
+        }
+      },
+      "ToolPreview": {
+        "type": "object",
+        "description": "Structured preview data for approval UI. Provides a generic format that any tool can populate.",
+        "properties": {
+          "action": {
+            "type": "object",
+            "required": [
+              "type",
+              "verb"
+            ],
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/PreviewActionType"
+              },
+              "verb": {
+                "type": "string",
+                "description": "Human-readable action verb",
+                "example": "Move Thread"
+              }
+            }
+          },
+          "source": {
+            "$ref": "#/components/schemas/PreviewEntity"
+          },
+          "target": {
+            "$ref": "#/components/schemas/PreviewEntity"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewChange"
+            },
+            "description": "List of changes/modifications being made"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PreviewValue"
+            },
+            "description": "Additional context information"
+          },
+          "summary": {
+            "type": "string",
+            "description": "AI reasoning for why this action is recommended",
+            "example": "This email discusses solar panel installation and should be handled by the Service team."
+          }
+        }
+      },
+      "PreviewActionType": {
+        "type": "string",
+        "enum": [
+          "move",
+          "create",
+          "update",
+          "delete",
+          "apply",
+          "send",
+          "link",
+          "unlink"
+        ],
+        "description": "Type of action being previewed"
+      },
+      "PreviewEntity": {
+        "type": "object",
+        "description": "Entity reference for preview display",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Entity type (e.g., \"inbox\", \"email\", \"contact\", \"label\")",
+            "example": "inbox"
+          },
+          "id": {
+            "type": "string",
+            "description": "Entity ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for display",
+            "example": "Support Inbox"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema (for epilot entities)"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon hint for UI"
+          },
+          "url": {
+            "type": "string",
+            "description": "Optional URL to view the entity"
+          }
+        }
+      },
+      "PreviewChange": {
+        "type": "object",
+        "description": "A single field change in the preview",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Field identifier"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable field label"
+          },
+          "from": {
+            "$ref": "#/components/schemas/PreviewValue"
+          },
+          "to": {
+            "$ref": "#/components/schemas/PreviewValue"
+          }
+        }
+      },
+      "PreviewValue": {
+        "type": "object",
+        "description": "Typed value for preview display",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "boolean",
+              "list",
+              "entity",
+              "badge"
+            ],
+            "description": "Value type for proper rendering"
+          },
+          "value": {
+            "description": "The actual value (type depends on \"type\" field)"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of values (for list type)"
+          },
+          "id": {
+            "type": "string",
+            "description": "Entity ID (for entity type)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name (for entity type)"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema (for entity type)"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "success",
+              "warning",
+              "error",
+              "info"
+            ],
+            "description": "Badge color (for badge type)"
           }
         }
       },
@@ -1194,7 +1455,25 @@
           "system",
           "custom"
         ],
-        "description": "- system: Pre-built by epilot\n- custom: Created by organization\n"
+        "description": "- system: Pre-built by epilot (system skills)\n- custom: Created by organization\n"
+      },
+      "SkillAvailability": {
+        "type": "string",
+        "enum": [
+          "flows",
+          "copilot",
+          "all"
+        ],
+        "description": "Where the skill/agent is available:\n- flows: Available in workflow automations\n- copilot: Available as a sub-agent in copilot\n- all: Available everywhere\n"
+      },
+      "ExecutionContext": {
+        "type": "string",
+        "enum": [
+          "flows",
+          "copilot",
+          "api"
+        ],
+        "description": "Where the execution was triggered from:\n- flows: Triggered from workflow automation\n- copilot: Triggered from copilot assistant\n- api: Direct API call\n"
       },
       "ExecutionPattern": {
         "type": "string",
@@ -1228,6 +1507,7 @@
         "type": "string",
         "enum": [
           "text",
+          "textarea",
           "number",
           "boolean",
           "select",
@@ -1235,9 +1515,11 @@
           "entity-attribute",
           "entity-id",
           "taxonomy",
-          "taxonomy-classification"
+          "taxonomy-classification",
+          "shared-inbox",
+          "label"
         ],
-        "description": "Base types:\n- text: Text input field\n- number: Numeric input field\n- boolean: Toggle switch\n- select: Dropdown selection (requires enum array)\n\nCustom types (domain-specific):\n- entity-schema: Entity schema selector (fetches from Entity API)\n- entity-attribute: Entity attribute selector (requires dependsOn)\n- entity-id: Entity picker (search and select entities)\n- taxonomy: Taxonomy selector (fetches from Taxonomy API)\n- taxonomy-classification: Classification selector (requires dependsOn)\n"
+        "description": "Base types:\n- text: Text input field\n- textarea: Multi-line text input field\n- number: Numeric input field\n- boolean: Toggle switch\n- select: Dropdown selection (requires enum array)\n\nCustom types (domain-specific):\n- entity-schema: Entity schema selector (fetches from Entity API)\n- entity-attribute: Entity attribute selector (requires dependsOn)\n- entity-id: Entity picker (search and select entities)\n- taxonomy: Taxonomy selector (fetches from Taxonomy API)\n- taxonomy-classification: Classification selector (requires dependsOn)\n- shared-inbox: Shared inbox selector (fetches from Email Settings API)\n"
       },
       "InputParameterDefinition": {
         "type": "object",
