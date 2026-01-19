@@ -48,6 +48,25 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user": {
+      "post": {
+        "operationId": "createUserV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/token/validate": {
       "post": {
         "operationId": "validateToken",
@@ -128,6 +147,37 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/extensions": {
+      "get": {
+        "operationId": "getPortalExtensionsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetailsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -323,6 +373,48 @@
         "responses": {}
       }
     },
+    "/v3/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinksV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/resolve:external-link/{id}": {
+      "get": {
+        "operationId": "getResolvedExternalLinkV3",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/resolve:seamless-link": {
       "get": {
         "operationId": "getResolvedSeamlessLink",
@@ -382,6 +474,37 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/portal/config": {
+      "get": {
+        "operationId": "getPublicPortalConfigV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/org/portal/config": {
+      "get": {
+        "operationId": "getOrgPortalConfigV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/configs": {
       "get": {
         "operationId": "getAllPortalConfigs",
@@ -412,6 +535,36 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/email-templates/{portal_id}": {
+      "post": {
+        "operationId": "upsertEmailTemplatesByPortalId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getEmailTemplatesByPortalId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -540,6 +693,19 @@
         "responses": {}
       }
     },
+    "/v3/portal/validate/caa-records": {
+      "post": {
+        "operationId": "validateCaaRecordsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/contact": {
       "get": {
         "operationId": "getContact",
@@ -575,6 +741,25 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/contact/exists": {
+      "post": {
+        "operationId": "checkContactExistsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -719,6 +904,29 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user/exists": {
+      "get": {
+        "operationId": "userExistsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/recipients-to-notify": {
       "post": {
         "operationId": "getRecipientsToNotifyOnAutomation",
@@ -737,6 +945,19 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/configure-distribution": {
+      "get": {
+        "operationId": "configureDistributionV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -1282,6 +1503,29 @@
         "responses": {}
       }
     },
+    "/v3/portal/entity/{schema}/access": {
+      "post": {
+        "operationId": "triggerEntityAccessEventV3",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "portal_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/entity:get": {
       "post": {
         "operationId": "getPortalUserEntity",
@@ -1403,6 +1647,34 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contact_id",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/sso/login": {
+      "post": {
+        "operationId": "ssoLoginV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           },
           {
