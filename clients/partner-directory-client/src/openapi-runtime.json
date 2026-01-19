@@ -216,6 +216,17 @@
         },
         "responses": {}
       }
+    },
+    "/v2/partners/users/limit": {
+      "post": {
+        "operationId": "setPartnerUsersLimit",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},

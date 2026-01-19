@@ -3,7 +3,7 @@
   "info": {
     "title": "Partner API",
     "description": "Management of Partners in epilot",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "tags": [
     {
@@ -785,6 +785,49 @@
           }
         }
       }
+    },
+    "/v2/partners/users/limit": {
+      "post": {
+        "operationId": "setPartnerUsersLimit",
+        "summary": "setPartnerUsersLimit",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Set user limit for a partner organization enforced by the vendor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPartnerUsersLimitPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User limit set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetPartnerUsersLimitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload"
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions"
+          },
+          "404": {
+            "description": "Partner role not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1431,6 +1474,51 @@
             "example": "Active"
           }
         }
+      },
+      "SetPartnerUsersLimitPayload": {
+        "type": "object",
+        "properties": {
+          "partner_organization_id": {
+            "type": "string",
+            "description": "The partner organization ID",
+            "example": "456"
+          },
+          "user_limit": {
+            "type": "number",
+            "description": "The maximum number of users allowed for this partnership",
+            "example": 10,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "partner_organization_id",
+          "user_limit"
+        ]
+      },
+      "SetPartnerUsersLimitResponse": {
+        "type": "object",
+        "properties": {
+          "vendor_organization_id": {
+            "type": "string",
+            "description": "The vendor organization ID",
+            "example": "123"
+          },
+          "partner_organization_id": {
+            "type": "string",
+            "description": "The partner organization ID",
+            "example": "456"
+          },
+          "user_limit_number": {
+            "type": "number",
+            "description": "The maximum number of users allowed for this partnership",
+            "example": 10
+          }
+        },
+        "required": [
+          "vendor_organization_id",
+          "partner_organization_id",
+          "user_limit_number"
+        ]
       }
     }
   },

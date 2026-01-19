@@ -606,6 +606,40 @@ declare namespace Components {
              */
             address: string;
         }
+        export interface SetPartnerUsersLimitPayload {
+            /**
+             * The partner organization ID
+             * example:
+             * 456
+             */
+            partner_organization_id: string;
+            /**
+             * The maximum number of users allowed for this partnership
+             * example:
+             * 10
+             */
+            user_limit: number;
+        }
+        export interface SetPartnerUsersLimitResponse {
+            /**
+             * The vendor organization ID
+             * example:
+             * 123
+             */
+            vendor_organization_id: string;
+            /**
+             * The partner organization ID
+             * example:
+             * 456
+             */
+            partner_organization_id: string;
+            /**
+             * The maximum number of users allowed for this partnership
+             * example:
+             * 10
+             */
+            user_limit_number: number;
+        }
         export interface User {
             /**
              * User ID
@@ -914,6 +948,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace SetPartnerUsersLimit {
+        export type RequestBody = Components.Schemas.SetPartnerUsersLimitPayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.SetPartnerUsersLimitResponse;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace UnassignPartnerUserRoles {
         namespace Parameters {
             export type OrgId = /**
@@ -1097,6 +1145,16 @@ export interface OperationMethods {
     data?: Paths.UnassignPartnerUserRoles.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
+  /**
+   * setPartnerUsersLimit - setPartnerUsersLimit
+   * 
+   * Set user limit for a partner organization enforced by the vendor
+   */
+  'setPartnerUsersLimit'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SetPartnerUsersLimit.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetPartnerUsersLimit.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1271,6 +1329,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
   }
+  ['/v2/partners/users/limit']: {
+    /**
+     * setPartnerUsersLimit - setPartnerUsersLimit
+     * 
+     * Set user limit for a partner organization enforced by the vendor
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SetPartnerUsersLimit.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetPartnerUsersLimit.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1296,4 +1366,6 @@ export type PartnerInvitationPayload = Components.Schemas.PartnerInvitationPaylo
 export type PartnerRole = Components.Schemas.PartnerRole;
 export type PartnerUser = Components.Schemas.PartnerUser;
 export type SearchGeolocation = Components.Schemas.SearchGeolocation;
+export type SetPartnerUsersLimitPayload = Components.Schemas.SetPartnerUsersLimitPayload;
+export type SetPartnerUsersLimitResponse = Components.Schemas.SetPartnerUsersLimitResponse;
 export type User = Components.Schemas.User;
