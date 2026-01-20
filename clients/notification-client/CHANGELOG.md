@@ -1,5 +1,11 @@
 # @epilot/notification-client
 
+## 0.9.0
+
+### Minor Changes
+
+- Added `sendPreview` endpoint (experimental, unstable - do not use)
+
 ## 0.7.2
 
 ### Patch Changes
