@@ -62,6 +62,25 @@
         "responses": {}
       }
     },
+    "/outlook/shared-mailboxes/mappings": {
+      "get": {
+        "operationId": "getSharedMailboxMappings",
+        "responses": {}
+      }
+    },
+    "/outlook/shared-mailboxes/mappings/{shared_inbox_id}": {
+      "get": {
+        "operationId": "getSharedMailboxMappingById",
+        "parameters": [
+          {
+            "name": "shared_inbox_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/outlook/oauth/callback": {
       "get": {
         "operationId": "outlookOAuthCallback",

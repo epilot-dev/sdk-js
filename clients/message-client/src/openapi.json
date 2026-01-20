@@ -313,6 +313,13 @@
                     "tenant_id": {
                       "type": "string",
                       "description": "The tenant ID that was disconnected"
+                    },
+                    "affected_shared_inboxes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of shared inbox IDs that were affected by the disconnection"
                     }
                   }
                 }
@@ -415,12 +422,20 @@
                       "format": "email",
                       "description": "The Outlook shared mailbox email address"
                     },
+                    "tenant_id": {
+                      "type": "string",
+                      "description": "Azure AD Tenant ID that provisions this mailbox"
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": [
+                        "outlook"
+                      ],
+                      "description": "The provider type"
+                    },
                     "display_name": {
                       "type": "string",
                       "description": "Display name of the shared mailbox"
-                    },
-                    "message": {
-                      "type": "string"
                     }
                   }
                 }
@@ -435,6 +450,92 @@
           },
           "403": {
             "description": "Access denied - user does not have access to the shared mailbox"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/outlook/shared-mailboxes/mappings": {
+      "get": {
+        "operationId": "getSharedMailboxMappings",
+        "summary": "Get Shared Mailbox Mappings",
+        "description": "Returns all shared mailbox mappings for the organization.\nUseful to determine which shared inboxes are connected to Outlook\nand which tenant provisions each one.\n",
+        "tags": [
+          "M365 Integration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Mappings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "mappings",
+                    "count"
+                  ],
+                  "properties": {
+                    "mappings": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SharedMailboxMapping"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of mappings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing organization ID"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/outlook/shared-mailboxes/mappings/{shared_inbox_id}": {
+      "get": {
+        "operationId": "getSharedMailboxMappingById",
+        "summary": "Get Shared Mailbox Mapping by ID",
+        "description": "Returns the mapping for a specific shared inbox.\nUseful to check if a specific inbox is connected to Outlook.\n",
+        "tags": [
+          "M365 Integration"
+        ],
+        "parameters": [
+          {
+            "name": "shared_inbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The shared inbox entity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mapping retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedMailboxMapping"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing organization ID or shared_inbox_id"
+          },
+          "404": {
+            "description": "Mapping not found"
           },
           "500": {
             "description": "Internal server error"
@@ -2974,6 +3075,52 @@
           "!account.*._files",
           "**._product"
         ]
+      },
+      "SharedMailboxMapping": {
+        "type": "object",
+        "description": "Mapping between a shared inbox and its Outlook shared mailbox.\nThis tracks which provider/tenant provisions each shared mailbox.\n",
+        "required": [
+          "shared_inbox_id",
+          "outlook_email",
+          "tenant_id",
+          "provider",
+          "connected_at"
+        ],
+        "properties": {
+          "shared_inbox_id": {
+            "type": "string",
+            "description": "The email-settings shared inbox entity ID"
+          },
+          "outlook_email": {
+            "type": "string",
+            "format": "email",
+            "description": "The Outlook shared mailbox email address"
+          },
+          "tenant_id": {
+            "type": "string",
+            "description": "Azure AD Tenant ID that provisions this mailbox"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "outlook"
+            ],
+            "description": "Provider type (for future extensibility)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Display name from Outlook"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the mailbox was connected"
+          },
+          "connected_by_user_id": {
+            "type": "string",
+            "description": "User who connected this mailbox"
+          }
+        }
       }
     }
   },
