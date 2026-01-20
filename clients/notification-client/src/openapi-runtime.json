@@ -190,6 +190,18 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/notification/templates/send-preview": {
+      "post": {
+        "operationId": "sendPreview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
