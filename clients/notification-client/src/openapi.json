@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Notification API",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "Notification API for epilot 360"
   },
   "security": [
@@ -697,6 +697,68 @@
           }
         }
       }
+    },
+    "/v1/notification/templates/send-preview": {
+      "post": {
+        "operationId": "sendPreview",
+        "summary": "sendPreview",
+        "description": "Send a preview notification (both email and in-app) to the requesting user.\nUsed to test notification templates before saving.\n",
+        "tags": [
+          "Template"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendPreviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preview notification sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1261,6 +1323,43 @@
           "hits": {
             "type": "integer",
             "description": "Total number of matching results"
+          }
+        }
+      },
+      "SendPreviewInput": {
+        "type": "object",
+        "required": [
+          "template"
+        ],
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/UpdateNotificationTemplateInput"
+          },
+          "context_ids": {
+            "type": "object",
+            "description": "Optional context IDs for variable replacement",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SendPreviewResponse": {
+        "type": "array",
+        "description": "Array of results for each notification channel (email, in-app)",
+        "items": {
+          "type": "object",
+          "required": [
+            "success"
+          ],
+          "properties": {
+            "success": {
+              "type": "boolean",
+              "description": "Whether this notification was sent successfully"
+            },
+            "data": {
+              "description": "Result data"
+            }
           }
         }
       }
