@@ -536,6 +536,28 @@ declare namespace Components {
              */
             hits?: number;
         }
+        export interface SendPreviewInput {
+            template: UpdateNotificationTemplateInput;
+            /**
+             * Optional context IDs for variable replacement
+             */
+            context_ids?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * Array of results for each notification channel (email, in-app)
+         */
+        export type SendPreviewResponse = {
+            /**
+             * Whether this notification was sent successfully
+             */
+            success: boolean;
+            /**
+             * Result data
+             */
+            data?: any;
+        }[];
         export interface UpdateNotificationTemplateInput {
             /**
              * Internal template name
@@ -754,6 +776,15 @@ declare namespace Paths {
             export type $500 = Components.Schemas.Error;
         }
     }
+    namespace SendPreview {
+        export type RequestBody = Components.Schemas.SendPreviewInput;
+        namespace Responses {
+            export type $200 = /* Array of results for each notification channel (email, in-app) */ Components.Schemas.SendPreviewResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $401 = Components.Schemas.Error;
+            export type $500 = Components.Schemas.Error;
+        }
+    }
     namespace UpdateNotificationTemplate {
         namespace Parameters {
             export type Id = string; // uuid
@@ -904,6 +935,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteNotificationTemplate.Responses.$200>
+  /**
+   * sendPreview - sendPreview
+   * 
+   * Send a preview notification (both email and in-app) to the requesting user.
+   * Used to test notification templates before saving.
+   * 
+   */
+  'sendPreview'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SendPreview.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SendPreview.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1053,6 +1096,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteNotificationTemplate.Responses.$200>
   }
+  ['/v1/notification/templates/send-preview']: {
+    /**
+     * sendPreview - sendPreview
+     * 
+     * Send a preview notification (both email and in-app) to the requesting user.
+     * Used to test notification templates before saving.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SendPreview.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SendPreview.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1074,4 +1131,6 @@ export type NotificationId = Components.Schemas.NotificationId;
 export type NotificationItem = Components.Schemas.NotificationItem;
 export type NotificationTemplate = Components.Schemas.NotificationTemplate;
 export type NotificationTemplateListResponse = Components.Schemas.NotificationTemplateListResponse;
+export type SendPreviewInput = Components.Schemas.SendPreviewInput;
+export type SendPreviewResponse = Components.Schemas.SendPreviewResponse;
 export type UpdateNotificationTemplateInput = Components.Schemas.UpdateNotificationTemplateInput;
