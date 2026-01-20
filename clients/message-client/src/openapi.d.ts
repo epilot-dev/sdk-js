@@ -664,7 +664,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
         }
@@ -735,6 +735,68 @@ declare namespace Paths {
             export interface $204 {
             }
             export interface $403 {
+            }
+        }
+    }
+    namespace ConnectOutlook {
+        namespace Responses {
+            export interface $200 {
+                authorization_url?: string;
+            }
+        }
+    }
+    namespace ConnectSharedMailbox {
+        export interface RequestBody {
+            /**
+             * Email address of the Outlook shared mailbox to connect
+             */
+            email: string; // email
+            /**
+             * Display name for the shared inbox (defaults to mailbox display name)
+             */
+            name?: string;
+            /**
+             * Color for the shared inbox (hex code, defaults to green)
+             */
+            color?: string;
+            /**
+             * User IDs to assign to this shared inbox
+             */
+            assignees?: string[];
+            /**
+             * Description for the shared inbox
+             */
+            description?: string;
+        }
+        namespace Responses {
+            export interface $201 {
+                /**
+                 * The created shared inbox from email-settings
+                 */
+                shared_inbox?: {
+                    id?: string;
+                    name?: string;
+                    color?: string;
+                    assignees?: string[];
+                    description?: string;
+                };
+                /**
+                 * The Outlook shared mailbox email address
+                 */
+                outlook_email?: string; // email
+                /**
+                 * Display name of the shared mailbox
+                 */
+                display_name?: string;
+                message?: string;
+            }
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -907,6 +969,29 @@ declare namespace Paths {
             export interface $204 {
             }
             export interface $403 {
+            }
+        }
+    }
+    namespace DisconnectOutlook {
+        export interface RequestBody {
+            /**
+             * Azure AD Tenant ID of the connection to disconnect
+             */
+            tenant_id: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                success?: boolean;
+                /**
+                 * The tenant ID that was disconnected
+                 */
+                tenant_id?: string;
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -1236,6 +1321,78 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetOutlookConnectionStatus {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * List of Outlook connections (one per tenant)
+                 */
+                connections: {
+                    /**
+                     * Current connection status:
+                     * - pending_auth: Admin consent granted, waiting for user OAuth
+                     * - connected: Fully connected with valid tokens
+                     * - expired: Tokens expired, need to re-authenticate
+                     *
+                     */
+                    status: "connected" | "expired" | "pending_auth";
+                    /**
+                     * Action for UI to take (all call GET /outlook/connect):
+                     * - connect: No connection, initiate OAuth
+                     * - authorize: Admin consent done, complete OAuth
+                     * - reconnect: Re-authenticate expired session
+                     * - none: Fully connected, no action needed
+                     *
+                     */
+                    action: "connect" | "authorize" | "reconnect" | "none";
+                    /**
+                     * Display name of user who connected
+                     */
+                    connected_by_display_name?: string;
+                    /**
+                     * Email of the user who connected
+                     */
+                    connected_by_email?: string; // email
+                    /**
+                     * Azure AD Object ID of user who connected
+                     */
+                    connected_by_user_id?: string;
+                    /**
+                     * When the connection was established
+                     */
+                    connected_at?: string; // date-time
+                    /**
+                     * When the connection was last updated
+                     */
+                    updated_at?: string; // date-time
+                    /**
+                     * Microsoft Azure AD tenant ID
+                     */
+                    tenant_id: string;
+                    /**
+                     * Granted permission scopes
+                     */
+                    scopes?: string[];
+                    /**
+                     * When the current access token expires
+                     */
+                    expires_at?: string; // date-time
+                    /**
+                     * Whether the current token is still valid
+                     */
+                    is_token_valid?: boolean;
+                }[];
+                /**
+                 * Whether any connections exist
+                 */
+                has_connections: boolean;
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetThreadTimeline {
         namespace Parameters {
             export type Id = string;
@@ -1451,6 +1608,39 @@ declare namespace Paths {
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace OutlookOAuthCallback {
+        namespace Parameters {
+            export type AdminConsent = string;
+            export type ClientInfo = string;
+            export type Code = string;
+            export type Error = string;
+            export type ErrorDescription = string;
+            export type ErrorSubcode = string;
+            export type ErrorUri = string;
+            export type SessionState = string;
+            export type State = string;
+            export type Tenant = string;
+        }
+        export interface QueryParameters {
+            code?: Parameters.Code;
+            state: Parameters.State;
+            session_state?: Parameters.SessionState;
+            error?: Parameters.Error;
+            error_description?: Parameters.ErrorDescription;
+            error_subcode?: Parameters.ErrorSubcode;
+            client_info?: Parameters.ClientInfo;
+            error_uri?: Parameters.ErrorUri;
+            admin_consent?: Parameters.AdminConsent;
+            tenant?: Parameters.Tenant;
+        }
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+                expires_at?: string; // date-time
+                scope?: string;
+            }
         }
     }
     namespace PinThread {
@@ -2454,6 +2644,66 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendMessage.Responses.$201>
   /**
+   * connectOutlook - Connect Outlook
+   * 
+   * Returns Microsoft authorization URL for Outlook OAuth.
+   */
+  'connectOutlook'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
+  /**
+   * getOutlookConnectionStatus - Get Outlook Connection Status
+   * 
+   * Returns all Microsoft 365 / Outlook connections for the organization.
+   * Supports multiple connections (one per Azure AD tenant).
+   * 
+   * Each connection includes an `action` field that tells the UI what button to show
+   * and what endpoint to call. All actions use GET /outlook/connect.
+   * 
+   */
+  'getOutlookConnectionStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
+  /**
+   * disconnectOutlook - Disconnect Outlook
+   * 
+   * Removes the Microsoft 365 / Outlook connection for a specific tenant.
+   * This deletes the stored tokens and disconnects the integration.
+   * 
+   */
+  'disconnectOutlook'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.DisconnectOutlook.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
+  /**
+   * connectSharedMailbox - Connect Outlook Shared Mailbox
+   * 
+   * Connects an Outlook shared mailbox as a shared inbox.
+   * 1. Validates the user has access to the shared mailbox via Microsoft Graph API
+   * 2. Creates a shared inbox entry in email-settings with the Outlook provider info
+   * 
+   */
+  'connectSharedMailbox'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ConnectSharedMailbox.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectSharedMailbox.Responses.$201>
+  /**
+   * outlookOAuthCallback - Outlook OAuth callback
+   * 
+   * Exchanges authorization code for tokens and stores them.
+   */
+  'outlookOAuthCallback'(
+    parameters?: Parameters<Paths.OutlookOAuthCallback.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.OutlookOAuthCallback.Responses.$200>
+  /**
    * getMessage - getMessage
    * 
    * Get an email message by id
@@ -2922,6 +3172,76 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMessage.Responses.$201>
+  }
+  ['/outlook/connect']: {
+    /**
+     * connectOutlook - Connect Outlook
+     * 
+     * Returns Microsoft authorization URL for Outlook OAuth.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
+  }
+  ['/outlook/connection/status']: {
+    /**
+     * getOutlookConnectionStatus - Get Outlook Connection Status
+     * 
+     * Returns all Microsoft 365 / Outlook connections for the organization.
+     * Supports multiple connections (one per Azure AD tenant).
+     * 
+     * Each connection includes an `action` field that tells the UI what button to show
+     * and what endpoint to call. All actions use GET /outlook/connect.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
+  }
+  ['/outlook/connection/disconnect']: {
+    /**
+     * disconnectOutlook - Disconnect Outlook
+     * 
+     * Removes the Microsoft 365 / Outlook connection for a specific tenant.
+     * This deletes the stored tokens and disconnects the integration.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.DisconnectOutlook.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
+  }
+  ['/outlook/shared-mailboxes/connect']: {
+    /**
+     * connectSharedMailbox - Connect Outlook Shared Mailbox
+     * 
+     * Connects an Outlook shared mailbox as a shared inbox.
+     * 1. Validates the user has access to the shared mailbox via Microsoft Graph API
+     * 2. Creates a shared inbox entry in email-settings with the Outlook provider info
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ConnectSharedMailbox.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectSharedMailbox.Responses.$201>
+  }
+  ['/outlook/oauth/callback']: {
+    /**
+     * outlookOAuthCallback - Outlook OAuth callback
+     * 
+     * Exchanges authorization code for tokens and stores them.
+     */
+    'get'(
+      parameters?: Parameters<Paths.OutlookOAuthCallback.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.OutlookOAuthCallback.Responses.$200>
   }
   ['/v1/message/messages/{id}']: {
     /**

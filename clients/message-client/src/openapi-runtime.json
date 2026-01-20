@@ -26,6 +26,100 @@
         "responses": {}
       }
     },
+    "/outlook/connect": {
+      "get": {
+        "operationId": "connectOutlook",
+        "responses": {}
+      }
+    },
+    "/outlook/connection/status": {
+      "get": {
+        "operationId": "getOutlookConnectionStatus",
+        "responses": {}
+      }
+    },
+    "/outlook/connection/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/outlook/shared-mailboxes/connect": {
+      "post": {
+        "operationId": "connectSharedMailbox",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/outlook/oauth/callback": {
+      "get": {
+        "operationId": "outlookOAuthCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "session_state",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "error_subcode",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "client_info",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "error_uri",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "admin_consent",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/message/messages/{id}": {
       "get": {
         "operationId": "getMessage",
