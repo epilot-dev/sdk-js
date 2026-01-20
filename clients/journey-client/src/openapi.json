@@ -1405,6 +1405,10 @@
           "createdBy": {
             "type": "string"
           },
+          "updatedBy": {
+            "type": "string",
+            "nullable": true
+          },
           "__lastModifiedAt": {
             "type": "string",
             "description": "If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey",

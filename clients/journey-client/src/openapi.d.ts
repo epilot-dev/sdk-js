@@ -346,6 +346,7 @@ declare namespace Components {
              */
             ValidationRuleRef;
             createdBy?: string;
+            updatedBy?: string | null;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
@@ -573,6 +574,7 @@ declare namespace Components {
              */
             ValidationRuleRef;
             createdBy?: string;
+            updatedBy?: string | null;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
