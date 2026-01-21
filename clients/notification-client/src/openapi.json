@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Notification API",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "Notification API for epilot 360"
   },
   "security": [
@@ -1134,7 +1134,9 @@
           "_id",
           "_org",
           "_schema",
-          "_title"
+          "_title",
+          "_created_at",
+          "_updated_at"
         ],
         "properties": {
           "_id": {
@@ -1160,16 +1162,19 @@
             "items": {
               "type": "string"
             },
+            "nullable": true,
             "description": "Tags for categorization"
           },
           "_created_at": {
             "type": "string",
             "format": "date-time",
+            "nullable": true,
             "description": "ISO timestamp of creation"
           },
           "_updated_at": {
             "type": "string",
             "format": "date-time",
+            "nullable": true,
             "description": "ISO timestamp of last update"
           },
           "_owners": {

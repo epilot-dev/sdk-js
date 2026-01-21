@@ -467,15 +467,15 @@ declare namespace Components {
             /**
              * Tags for categorization
              */
-            _tags?: string[];
+            _tags?: string[] | null;
             /**
              * ISO timestamp of creation
              */
-            _created_at?: string; // date-time
+            _created_at: string | null; // date-time
             /**
              * ISO timestamp of last update
              */
-            _updated_at?: string; // date-time
+            _updated_at: string | null; // date-time
             /**
              * Entity owners
              */
