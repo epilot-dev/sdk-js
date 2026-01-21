@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -2420,7 +2420,8 @@
           "kanban",
           "validation_rule",
           "flow_template",
-          "taxonomy"
+          "taxonomy",
+          "notification_template"
         ]
       },
       "PlanChanges": {
