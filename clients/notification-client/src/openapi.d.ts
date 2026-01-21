@@ -451,19 +451,19 @@ declare namespace Components {
             /**
              * Unique identifier
              */
-            _id?: string; // uuid
+            _id: string; // uuid
             /**
              * Entity schema type
              */
-            _schema?: string;
+            _schema: string;
             /**
              * Display title
              */
-            _title?: string;
+            _title: string | null;
             /**
              * Organization ID
              */
-            _org?: string;
+            _org: string;
             /**
              * Tags for categorization
              */
