@@ -105,11 +105,11 @@ declare namespace Components {
             /**
              * Organization ID
              */
-            org_id?: string;
+            org_id: string;
             /**
              * User ID
              */
-            user_id?: string;
+            user_id: string;
         }
         /**
          * URL-friendly identifier for the entity schema
