@@ -67,6 +67,19 @@
         "responses": {}
       }
     },
+    "/data-management/v1/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/data-management/v1/jobs/{job_id}/report-url": {
       "get": {
         "operationId": "getJobReportUrl",
@@ -83,6 +96,19 @@
     "/data-management/v1/configs/{config_id}": {
       "get": {
         "operationId": "getConfig",
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/configs/{config_id}/jobs": {
+      "post": {
+        "operationId": "createJobForConfig",
         "parameters": [
           {
             "name": "config_id",

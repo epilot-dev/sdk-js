@@ -24,6 +24,7 @@ declare namespace Components {
             last_updated_at?: string; // date-time
             next_run_at?: string; // date
             relations_for_deletion?: DeletionRelationEntitySchema[];
+            last_run_at?: string; // date-time
         }
         export type ConfigSchedule = IntervalConfigSchedule;
         /**
@@ -37,7 +38,7 @@ declare namespace Components {
             status?: JobStatus;
             started_at?: string; // date-time
         }
-        export type DeletionRelationEntitySchema = "contact" | "file" | "opportunity" | "order" | "meter" | "ticket" | "email" | "account" | "submission";
+        export type DeletionRelationEntitySchema = "contact" | "file" | "opportunity" | "order" | "meter" | "ticket" | "message" | "account" | "submission" | "contract";
         export interface IntervalConfigSchedule {
             frequency: "interval";
             /**
@@ -61,6 +62,8 @@ declare namespace Components {
             report?: JobReport;
             created_at: string; // date-time
             last_updated_at: string; // date-time
+            trigger?: JobTrigger;
+            triggered_by?: string | null;
         }
         /**
          * Generic, type-specific job details payload (e.g. matched count, deleted count, failed count, etc.).
@@ -79,6 +82,7 @@ declare namespace Components {
             expires_in?: number;
         }
         export type JobStatus = "in_progress" | "success" | "failed";
+        export type JobTrigger = "schedule" | "manual";
         export interface ListConfigsResponse {
             configs?: Config[];
             cursor?: string | null;
@@ -90,18 +94,12 @@ declare namespace Components {
         export interface QueryConfig {
             saved_view_id: string;
             include_deleted?: "true" | "false" | "only";
-            filters: [
-                QueryFilter,
-                ...QueryFilter[]
-            ];
+            filters?: QueryFilter[];
         }
         export interface QueryEntitiesRequest {
             saved_view_id: string;
             include_deleted?: "true" | "false" | "only";
-            filters: [
-                QueryFilter,
-                ...QueryFilter[]
-            ];
+            filters?: QueryFilter[];
             from?: number;
             size?: number;
             hydrate?: boolean;
@@ -118,7 +116,7 @@ declare namespace Components {
             related_entity_schemas?: string[];
             lookback_period_days?: number;
         }
-        export type QueryFilterType = "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_any_in_closed_or_cancelled_status" | "no_email_communication_since";
+        export type QueryFilterType = "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_workflows_only_in_closed_or_cancelled_status" | "no_email_communication_since";
         export interface UpdateJobRequest {
             status?: JobStatus;
             details?: /* Generic, type-specific job details payload (e.g. matched count, deleted count, failed count, etc.). */ JobDetails;
@@ -151,6 +149,19 @@ declare namespace Paths {
             export type $201 = Components.Schemas.Job;
         }
     }
+    namespace CreateJobForConfig {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            config_id: Parameters.ConfigId;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.Job;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetConfig {
         namespace Parameters {
             export type ConfigId = string;
@@ -160,6 +171,19 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Config;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetJob {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Job;
             export interface $404 {
             }
         }
@@ -292,6 +316,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateJob.Responses.$200>
   /**
+   * getJob - Get a job by id
+   * 
+   * Returns details of a single job run.
+   * 
+   */
+  'getJob'(
+    parameters?: Parameters<Paths.GetJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJob.Responses.$200>
+  /**
    * getJobReportUrl - Get report download URL for a job
    * 
    * Returns a short-lived, pre-signed URL to download the report file for the given job.
@@ -313,6 +348,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfig.Responses.$200>
+  /**
+   * createJobForConfig - Trigger a manual job run for a config
+   * 
+   * Creates a job run for the given config and triggers asynchronous execution. Returns a job id which can be used to poll job status.
+   * 
+   */
+  'createJobForConfig'(
+    parameters?: Parameters<Paths.CreateJobForConfig.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateJobForConfig.Responses.$201>
   /**
    * upsertConfig - Upsert config
    * 
@@ -382,6 +428,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateJob.Responses.$200>
   }
+  ['/data-management/v1/jobs/{job_id}']: {
+    /**
+     * getJob - Get a job by id
+     * 
+     * Returns details of a single job run.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJob.Responses.$200>
+  }
   ['/data-management/v1/jobs/{job_id}/report-url']: {
     /**
      * getJobReportUrl - Get report download URL for a job
@@ -407,6 +466,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfig.Responses.$200>
+  }
+  ['/data-management/v1/configs/{config_id}/jobs']: {
+    /**
+     * createJobForConfig - Trigger a manual job run for a config
+     * 
+     * Creates a job run for the given config and triggers asynchronous execution. Returns a job id which can be used to poll job status.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateJobForConfig.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateJobForConfig.Responses.$201>
   }
   ['/data-management/v1/{entity_schema}/configs']: {
     /**
@@ -464,6 +536,7 @@ export type JobReport = Components.Schemas.JobReport;
 export type JobReportFormat = Components.Schemas.JobReportFormat;
 export type JobReportUrlResponse = Components.Schemas.JobReportUrlResponse;
 export type JobStatus = Components.Schemas.JobStatus;
+export type JobTrigger = Components.Schemas.JobTrigger;
 export type ListConfigsResponse = Components.Schemas.ListConfigsResponse;
 export type ListJobsResponse = Components.Schemas.ListJobsResponse;
 export type QueryConfig = Components.Schemas.QueryConfig;
