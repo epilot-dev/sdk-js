@@ -1,6 +1,6 @@
 {
   "name": "@epilot/erp-integration-client",
-  "version": "0.14.0",
+  "version": "0.15.1",
   "description": "Client library for ePilot ERP Integration API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

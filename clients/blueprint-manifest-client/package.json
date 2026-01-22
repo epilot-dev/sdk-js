@@ -1,6 +1,6 @@
 {
   "name": "@epilot/blueprint-manifest-client",
-  "version": "3.6.0",
+  "version": "4.3.0",
   "description": "Client for epilot Terraform Blueprint Manifest API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

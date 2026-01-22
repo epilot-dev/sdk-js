@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.17.0",
+    "version": "0.18.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -20,9 +20,6 @@
     }
   ],
   "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    },
     {
       "url": "https://erp-integration-api.sls.epilot.io"
     }
@@ -1560,6 +1557,185 @@
         }
       }
     },
+    "/v2/integrations": {
+      "get": {
+        "operationId": "listIntegrationsV2",
+        "summary": "listIntegrationsV2",
+        "description": "Retrieve all integrations with embedded use cases for the authenticated organization",
+        "tags": [
+          "integrations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integrations with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "integrations"
+                  ],
+                  "properties": {
+                    "integrations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IntegrationWithUseCases"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegrationV2",
+        "summary": "getIntegrationV2",
+        "description": "Retrieve a specific integration with all its embedded use cases",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integration with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationWithUseCases"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "upsertIntegrationV2",
+        "summary": "upsertIntegrationV2",
+        "description": "Create or update an integration with embedded use cases (upsert).\nIf the integration does not exist, it will be created with the specified ID.\nIf it exists, it will be updated declaratively:\n- Use cases in the request with matching IDs are updated\n- Use cases in the request without matching IDs are created\n- Existing use cases not in the request are deleted\nThis is ideal for Infrastructure-as-Code tools like Terraform.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID (client-provided)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertIntegrationWithUseCasesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Integration created or updated successfully with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationWithUseCases"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteIntegrationV2",
+        "summary": "deleteIntegrationV2",
+        "description": "Delete an integration and all its use cases",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -2777,14 +2953,22 @@
       "IntegrationMeterReading": {
         "type": "object",
         "required": [
-          "jsonataExpression",
           "meter",
           "fields"
         ],
         "properties": {
           "jsonataExpression": {
             "type": "string",
-            "description": "JSONata expression to extract meter reading items from the event data"
+            "description": "Optional JSONata expression to extract meter reading items from the event data.\nIf not provided, the entire payload is used as the reading data.\nUseful when you need to extract an array of readings from a nested structure (e.g., \"$.readings\").\n"
+          },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "default": "external_id",
+            "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
           },
           "meter": {
             "$ref": "#/components/schemas/MeterUniqueIdsConfig"
@@ -2839,8 +3023,7 @@
             "description": "Constant value to assign (any type)"
           },
           "_type": {
-            "$ref": "#/components/schemas/RepeatableFieldType",
-            "description": "Type hint for repeatable fields (email, phone).\nWhen this attribute is used as a unique identifier, specifying the _type\nenables correct search path generation (e.g., email.email.keyword).\n"
+            "$ref": "#/components/schemas/RepeatableFieldType"
           },
           "enabled": {
             "oneOf": [
@@ -3042,53 +3225,177 @@
         ],
         "description": "Type hint for repeatable fields that require special search handling.\nThese fields are stored as arrays of objects (e.g., email: [{ email: \"value\" }]).\n"
       },
-      "ExtendedUniqueIdField": {
+      "IntegrationWithUseCases": {
         "type": "object",
-        "description": "Extended unique identifier field configuration with type hints for repeatable fields",
+        "description": "Integration with embedded use cases for atomic CRUD operations",
         "required": [
-          "attribute"
+          "id",
+          "orgId",
+          "name",
+          "use_cases",
+          "created_at",
+          "updated_at"
         ],
         "properties": {
-          "attribute": {
+          "id": {
             "type": "string",
-            "description": "The attribute name to use as unique identifier"
+            "format": "uuid",
+            "description": "Unique identifier for the integration"
           },
-          "_type": {
-            "$ref": "#/components/schemas/RepeatableFieldType"
+          "orgId": {
+            "type": "string",
+            "description": "Organization ID"
           },
-          "index": {
-            "type": "integer",
-            "default": 0,
-            "minimum": 0,
-            "description": "Which array item to use (0-indexed, default first)"
+          "name": {
+            "type": "string",
+            "description": "Integration name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the integration"
+          },
+          "use_cases": {
+            "type": "array",
+            "description": "All use cases belonging to this integration",
+            "items": {
+              "$ref": "#/components/schemas/UseCase"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the integration was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the integration was last updated"
           }
         }
       },
-      "UniqueIdField": {
-        "description": "Unique identifier field configuration. Can be either:\n- A simple string (attribute name)\n- An extended object with type hints for repeatable fields\n",
+      "UpsertIntegrationWithUseCasesRequest": {
+        "type": "object",
+        "description": "Request to create or update an integration with embedded use cases (upsert).\nThis is a declarative operation - the request represents the desired state.\n",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Integration name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional description of the integration"
+          },
+          "use_cases": {
+            "type": "array",
+            "description": "Full list of use cases (declarative). This replaces ALL existing use cases.\n- Use cases with an `id` field matching an existing use case will be updated\n- Use cases without an `id` or with a non-matching `id` will be created\n- Existing use cases not in this list will be deleted\n",
+            "items": {
+              "$ref": "#/components/schemas/EmbeddedUseCaseRequest"
+            }
+          }
+        }
+      },
+      "EmbeddedUseCaseRequest": {
         "oneOf": [
           {
-            "type": "string",
-            "description": "Simple attribute name"
+            "$ref": "#/components/schemas/EmbeddedInboundUseCaseRequest"
           },
           {
-            "$ref": "#/components/schemas/ExtendedUniqueIdField"
+            "$ref": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
+            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        }
+      },
+      "EmbeddedUseCaseRequestBase": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional use case ID for update matching.\n- If provided and matches an existing use case, that use case is updated\n- If provided but no match, a new use case with this ID is created\n- If omitted, a new use case with auto-generated ID is created\n"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Use case name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional description of this change (like a commit message)"
+          }
+        }
+      },
+      "EmbeddedInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
           }
         ]
       },
-      "UniqueIdMetadata": {
-        "type": "object",
-        "description": "Metadata about a unique identifier field (used in message payloads)",
-        "properties": {
-          "fieldType": {
-            "$ref": "#/components/schemas/RepeatableFieldType"
+      "EmbeddedOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
           },
-          "index": {
-            "type": "integer",
-            "default": 0,
-            "description": "Which array item was used (0-indexed)"
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
           }
-        }
+        ]
       },
       "ReplayEventsRequest": {
         "type": "object",

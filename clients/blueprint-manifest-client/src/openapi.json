@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -37,9 +37,6 @@
     }
   ],
   "servers": [
-    {
-      "url": "https://blueprint-manifest.sls.epilot.io"
-    },
     {
       "url": "https://blueprint-manifest.sls.epilot.io"
     }
@@ -760,6 +757,40 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "summary": "listInstalledMarketplaceBlueprints",
+        "description": "List installed Marketplace Blueprints for the organization.\nWhen multiple blueprints have the same slug, returns only the most recently created one.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Marketplace Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledMarketplaceBlueprintItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",
@@ -783,6 +814,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 }
               }
@@ -791,14 +826,49 @@
         },
         "responses": {
           "200": {
-            "description": "Pre-installed Blueprint",
+            "description": "Blueprint preview data for UI display",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Blueprint"
+                  "$ref": "#/components/schemas/BlueprintPreview"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "summary": "getBlueprintPreview",
+        "description": "Get Blueprint Preview by ID",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint Preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPreview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint Preview not found"
           }
         }
       }
@@ -850,6 +920,10 @@
                     "enum": [
                       "marketplace"
                     ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
                   }
                 },
                 "required": [
@@ -1697,6 +1771,11 @@
             "type": "boolean",
             "description": "When a resource is marked as hidden, it's used to hide it from the UI"
           },
+          "is_disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "When a resource is marked as disabled, it will be skipped during export"
+          },
           "hard_dependencies": {
             "type": "array",
             "items": {
@@ -1734,6 +1813,89 @@
         "required": [
           "id",
           "type"
+        ]
+      },
+      "BlueprintPreview": {
+        "type": "object",
+        "description": "Preview data for a blueprint before installation. Stored temporarily with TTL.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique preview ID"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "marketplace",
+              "file"
+            ]
+          },
+          "blueprint_file_s3_key": {
+            "type": "string",
+            "description": "S3 key of the blueprint zip file"
+          },
+          "is_verified": {
+            "type": "boolean"
+          },
+          "docs_url": {
+            "type": "string"
+          },
+          "compatible_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "is_updating": {
+            "type": "boolean",
+            "description": "Whether the blueprint is updating to the latest version in the marketplace"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResource"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "org_id",
+          "title",
+          "source_type",
+          "blueprint_file_s3_key",
+          "is_verified",
+          "created_at",
+          "created_by",
+          "resources",
+          "is_updating"
         ]
       },
       "CustomBlueprint": {
@@ -1807,12 +1969,83 @@
                 "items": {
                   "$ref": "#/components/schemas/BlueprintResource"
                 }
+              },
+              "compatible_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of compatible app IDs for the blueprint"
+              },
+              "has_update_available": {
+                "type": "boolean",
+                "description": "Whether a newer version is available in the marketplace."
+              },
+              "latest_marketplace_version": {
+                "type": "string",
+                "description": "The latest version available in the marketplace.",
+                "example": "v2.0.0"
+              },
+              "installation_link": {
+                "type": "string",
+                "description": "URL to install/update the blueprint from the marketplace."
               }
             }
           }
         ],
         "required": [
           "source_type"
+        ]
+      },
+      "InstalledMarketplaceBlueprintItem": {
+        "type": "object",
+        "description": "Summary of an installed marketplace blueprint for version tracking",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug of the blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the installed blueprint",
+            "example": "v1.0.0"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "has_update_available": {
+            "type": "boolean",
+            "description": "Whether a newer version is available in the marketplace",
+            "example": true
+          },
+          "latest_marketplace_version": {
+            "type": "string",
+            "description": "The latest version available in the marketplace",
+            "example": "v2.0.0"
+          },
+          "installation_link": {
+            "type": "string",
+            "description": "URL to install/update the blueprint from the marketplace"
+          }
+        },
+        "required": [
+          "id",
+          "slug"
         ]
       },
       "DeployedBlueprint": {
@@ -2175,8 +2408,7 @@
           "closing_reason",
           "taxonomy_classification",
           "webhook",
-          "erp_integration",
-          "erp_integration_use_case",
+          "integration",
           "dashboard",
           "custom_variable",
           "usergroup",
@@ -2186,7 +2418,10 @@
           "portal_config",
           "target",
           "kanban",
-          "validation_rule"
+          "validation_rule",
+          "flow_template",
+          "taxonomy",
+          "notification_template"
         ]
       },
       "PlanChanges": {
@@ -2693,7 +2928,9 @@
           "terraform_apply_error",
           "terraform_show_error",
           "generic_error",
+          "bad_request",
           "forbidden",
+          "conflict",
           "not_found",
           "undeclared_resource",
           "invalid_readonly_attribute",

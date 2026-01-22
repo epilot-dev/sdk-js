@@ -2032,6 +2032,35 @@
           "value_json"
         ]
       },
+      "MoveThreadAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "move-thread"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/MoveThreadConfig"
+              }
+            }
+          }
+        ]
+      },
+      "MoveThreadConfig": {
+        "type": "object",
+        "properties": {
+          "target_inbox_id": {
+            "type": "string",
+            "description": "ID of the inbox where the thread should be moved to"
+          }
+        }
+      },
       "SendEmailActionConfig": {
         "allOf": [
           {

@@ -12,6 +12,42 @@ declare namespace Components {
     namespace Schemas {
         export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
         /**
+         * Configuration for AI Agent to run
+         */
+        export interface AgentConfig {
+            [name: string]: any;
+            /**
+             * Id of the configured AI Agent to run
+             */
+            agent_id: string;
+        }
+        export interface AiAgentTask {
+            id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: string[];
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            agent_config?: /* Configuration for AI Agent to run */ AgentConfig;
+        }
+        /**
          * Configuration for automation execution to run
          */
         export interface AutomationConfig {
@@ -179,6 +215,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         export interface DecisionTask {
             id: string;
@@ -440,6 +480,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         export interface FlowTemplateBase {
             id?: string;
@@ -516,6 +560,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -723,7 +771,7 @@ declare namespace Components {
             condition: "CLOSED";
         }
         export type StepType = "MANUAL" | "AUTOMATION";
-        export type Task = ManualTask | AutomationTask | DecisionTask;
+        export type Task = ManualTask | AutomationTask | DecisionTask | AiAgentTask;
         export interface TaskBase {
             id: string;
             name: string;
@@ -749,7 +797,7 @@ declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
         }
-        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
+        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT";
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
         /**
          * example:
@@ -836,6 +884,10 @@ declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Whether only a single closing reason can be selected
+             */
+            singleClosingReasonSelection?: boolean;
         }
     }
 }
@@ -1633,6 +1685,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type ActionSchedule = Components.Schemas.ActionSchedule;
+export type AgentConfig = Components.Schemas.AgentConfig;
+export type AiAgentTask = Components.Schemas.AiAgentTask;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;

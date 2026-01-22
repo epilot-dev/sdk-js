@@ -8,9 +8,6 @@
   "servers": [
     {
       "url": "https://workflows-definition.sls.epilot.io"
-    },
-    {
-      "url": "https://workflows-definition.sls.epilot.io"
     }
   ],
   "security": [
@@ -1683,6 +1680,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Whether only a single closing reason can be selected"
           }
         }
       },
@@ -1925,6 +1926,9 @@
           },
           {
             "$ref": "#/components/schemas/DecisionTask"
+          },
+          {
+            "$ref": "#/components/schemas/AiAgentTask"
           }
         ]
       },
@@ -1936,28 +1940,31 @@
         ]
       },
       "AutomationTask": {
-        "required": [
-          "automation_config"
-        ],
-        "properties": {
-          "automation_config": {
-            "$ref": "#/components/schemas/AutomationConfig"
-          },
-          "trigger_mode": {
-            "$ref": "#/components/schemas/TriggerMode"
-          },
-          "schedule": {
-            "$ref": "#/components/schemas/ActionSchedule"
-          },
-          "created_automatically": {
-            "type": "boolean",
-            "description": "Indicates whether this task was created automatically by journeys or manually by an user",
-            "default": false
-          }
-        },
         "allOf": [
           {
             "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "automation_config"
+            ],
+            "properties": {
+              "automation_config": {
+                "$ref": "#/components/schemas/AutomationConfig"
+              },
+              "trigger_mode": {
+                "$ref": "#/components/schemas/TriggerMode"
+              },
+              "schedule": {
+                "$ref": "#/components/schemas/ActionSchedule"
+              },
+              "created_automatically": {
+                "type": "boolean",
+                "description": "Indicates whether this task was created automatically by journeys or manually by an user",
+                "default": false
+              }
+            }
           }
         ]
       },
@@ -1973,6 +1980,35 @@
             "description": "Id of the configured automation to run"
           }
         }
+      },
+      "AiAgentTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "agent_config": {
+                "$ref": "#/components/schemas/AgentConfig"
+              }
+            }
+          }
+        ]
+      },
+      "AgentConfig": {
+        "type": "object",
+        "description": "Configuration for AI Agent to run",
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Id of the configured AI Agent to run"
+          }
+        },
+        "additionalProperties": true
       },
       "TriggerMode": {
         "type": "string",
@@ -2245,7 +2281,8 @@
         "enum": [
           "MANUAL",
           "AUTOMATION",
-          "DECISION"
+          "DECISION",
+          "AI_AGENT"
         ]
       },
       "Edge": {
@@ -2566,6 +2603,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Whether only a single closing reason can be selected"
           }
         },
         "required": [

@@ -2479,7 +2479,7 @@
           "timestamp": {
             "type": "string",
             "description": "Timestamp of the event",
-            "example": "2024-01-01T00:00:00.000Z"
+            "example": "2024-01-01T00:00:00Z"
           }
         }
       },
@@ -2546,9 +2546,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://message.sls.epilot.io"
-    },
     {
       "url": "https://message.sls.epilot.io"
     }

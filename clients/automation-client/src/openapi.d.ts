@@ -2718,6 +2718,73 @@ declare namespace Components {
              */
             version?: number;
         }
+        export interface MoveThreadAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "move-thread";
+            config?: MoveThreadConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        export interface MoveThreadConfig {
+            /**
+             * ID of the inbox where the thread should be moved to
+             */
+            target_inbox_id?: string;
+        }
         export interface NumericCondition {
             numeric?: (string | number)[];
         }
@@ -4542,6 +4609,8 @@ export type MappingAttribute = Components.Schemas.MappingAttribute;
 export type MappingAttributeMode = Components.Schemas.MappingAttributeMode;
 export type MappingAttributeV2 = Components.Schemas.MappingAttributeV2;
 export type MappingConfigRef = Components.Schemas.MappingConfigRef;
+export type MoveThreadAction = Components.Schemas.MoveThreadAction;
+export type MoveThreadConfig = Components.Schemas.MoveThreadConfig;
 export type NumericCondition = Components.Schemas.NumericCondition;
 export type OperationNode = Components.Schemas.OperationNode;
 export type OperationObjectNode = Components.Schemas.OperationObjectNode;

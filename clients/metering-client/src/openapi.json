@@ -567,6 +567,83 @@
         }
       }
     },
+    "/v1/metering/readings/{meter_id}": {
+      "post": {
+        "operationId": "createPortalMeterReadings",
+        "summary": "createPortalMeterReadings",
+        "description": "Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          }
+        ],
+        "requestBody": {
+          "description": "Meter readings payload. Limited to 2 readings per request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PortalMeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/metering/readings": {
       "post": {
         "operationId": "batchWriteMeterReadings",
@@ -606,6 +683,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "identifiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "The identifier of the meter reading."
+                    },
+                    "description": "- By default, the system will use combination of counter_id, meter_id, direction, and timestamp to identify a meter reading.\n- Additional identifiers can be provided to identify a meter reading uniquely.\n- Example:\n  - [\"metadata.registration_id\", \"metadata.business_unit\"]\n  - [\"metadata.registration_id\", \"metadata.business_unit\", \"external_id\"]\n"
+                  },
                   "readings": {
                     "type": "array",
                     "items": {
@@ -1088,7 +1173,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MeterReading"
+                "$ref": "#/components/schemas/UpdateMeterReading"
               }
             }
           }
@@ -1332,7 +1417,9 @@
                         "too_many_records",
                         "timestamp_future",
                         "duplicate_reading",
-                        "less_than_previous"
+                        "less_than_previous",
+                        "invalid_identifiers",
+                        "multiple_readings_found"
                       ]
                     }
                   }
@@ -1699,8 +1786,23 @@
       "Reason": {
         "type": "string",
         "nullable": true,
-        "example": "Storing the feed-in record",
-        "description": "The reason for recording the reading"
+        "description": "The reason for recording the reading\nIf no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text\n",
+        "enum": [
+          "",
+          "regular",
+          "irregular",
+          "last",
+          "first",
+          "meter_change",
+          "contract_change",
+          "meter_adjustment"
+        ]
+      },
+      "ReasonString": {
+        "type": "string",
+        "nullable": true,
+        "deprecated": true,
+        "description": "This field is deprecated. Please use the Reason enum instead.\n"
       },
       "ReadBy": {
         "type": "string",
@@ -1719,11 +1821,10 @@
           ""
         ]
       },
-      "MeterReading": {
+      "Reading": {
         "type": "object",
         "required": [
           "value",
-          "meter_id",
           "source"
         ],
         "properties": {
@@ -1753,7 +1854,8 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10T00:00:00.000Z",
+            "format": "date-time"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -1762,6 +1864,127 @@
           "status": {
             "$ref": "#/components/schemas/ReadingStatus",
             "description": "The status of the reading"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true,
+            "description": "A remark or comment for the reading",
+            "example": "Customer reported unusual consumption"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "Notes to record a meter reading"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
+          }
+        }
+      },
+      "MeterReading": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reading"
+          },
+          {
+            "required": [
+              "meter_id"
+            ]
+          }
+        ]
+      },
+      "PortalMeterReading": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reading"
+          },
+          {
+            "required": [
+              "counter_id"
+            ]
+          }
+        ]
+      },
+      "UpdateMeterReading": {
+        "type": "object",
+        "required": [
+          "value",
+          "meter_id",
+          "source"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReasonString"
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "The source of the reading"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus",
+            "description": "The status of the reading"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true,
+            "description": "A remark or comment for the reading",
+            "example": "Customer reported unusual consumption"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
           }
         }
       },
@@ -1853,24 +2076,7 @@
             "description": "The direction of the reading (feed-in or feed-out)"
           },
           "unit": {
-            "type": "string",
-            "enum": [
-              "w",
-              "wh",
-              "kw",
-              "kWh",
-              "kvarh",
-              "mw",
-              "mWh",
-              "unit",
-              "cubic-meter",
-              "hour",
-              "day",
-              "month",
-              "year",
-              "percentage"
-            ],
-            "description": "The unit of measurement for the reading"
+            "$ref": "#/components/schemas/Unit"
           },
           "value": {
             "type": "number",
@@ -1961,23 +2167,7 @@
         }
       },
       "Unit": {
-        "type": "string",
-        "enum": [
-          "w",
-          "wh",
-          "kw",
-          "kWh",
-          "kvarh",
-          "mw",
-          "mWh",
-          "unit",
-          "cubic-meter",
-          "hour",
-          "day",
-          "month",
-          "year",
-          "percentage"
-        ]
+        "type": "string"
       },
       "Source": {
         "type": "string",

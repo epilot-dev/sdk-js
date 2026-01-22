@@ -2236,8 +2236,7 @@
         "required": [
           "type",
           "call",
-          "id",
-          "name"
+          "id"
         ],
         "additionalProperties": false
       },
@@ -2308,8 +2307,7 @@
         "required": [
           "type",
           "call",
-          "id",
-          "name"
+          "id"
         ],
         "additionalProperties": false
       },

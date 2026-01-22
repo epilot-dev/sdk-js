@@ -664,7 +664,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
         }

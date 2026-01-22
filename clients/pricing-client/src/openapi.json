@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n",
     "version": "1.1.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -38,7 +38,11 @@
     },
     {
       "name": "External Integrations API",
-      "description": "Provides endpoints for external integrations.\n"
+      "description": "Provides endpoints for external integrations. E.g. GetAG.\n"
+    },
+    {
+      "name": "External Catalog API",
+      "description": "Provides endpoints for external catalog.\n"
     },
     {
       "name": "Product Recommendations API",
@@ -1326,22 +1330,6 @@
                       }
                     }
                   }
-                },
-                "Check availability with location & available date dimension": {
-                  "value": {
-                    "products": [
-                      "cd75456a-30e4-4912-95be-e743d5ea175b"
-                    ],
-                    "filters": {
-                      "location": {
-                        "postal_code": "57008",
-                        "city": "Cologne",
-                        "street": "Media Park",
-                        "street_number": "8a"
-                      },
-                      "available_date": "2022-05-01"
-                    }
-                  }
                 }
               }
             }
@@ -1701,7 +1689,7 @@
               "$ref": "#/components/schemas/IntegrationId"
             },
             "required": true,
-            "example": "ikom"
+            "example": "external-catalog"
           }
         ],
         "summary": "searchExternalProducts",
@@ -2700,6 +2688,489 @@
         }
       }
     },
+    "/v1/public/external-catalog/products": {
+      "post": {
+        "description": "Returns the list of available external catalog products with computed prices based on a given context",
+        "operationId": "$getExternalCatalogProducts",
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "summary": "getExternalCatalogProducts",
+        "tags": [
+          "External Catalog API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalCatalogRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The available external catalog products response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExternalCatalogResult"
+                },
+                "examples": {
+                  "External products": {
+                    "value": {
+                      "hits": 1,
+                      "results": [
+                        {
+                          "pricing_details": {
+                            "items": [
+                              {
+                                "_id": "price-12312414",
+                                "price_id": "price-12312414",
+                                "is_composite_price": true,
+                                "description": "Home Energy Package Composite",
+                                "item_components": [
+                                  {
+                                    "_id": "price-12312414-component-0",
+                                    "price_id": "price-12312414-component-0",
+                                    "description": "Working Price",
+                                    "is_tax_inclusive": true,
+                                    "amount_total_decimal": "100",
+                                    "amount_total": 10000,
+                                    "amount_subtotal_decimal": "100",
+                                    "amount_subtotal": 10000,
+                                    "unit_amount": 10,
+                                    "unit_amount_gross": 10,
+                                    "unit_amount_gross_decimal": "0.10",
+                                    "unit_amount_net": 10,
+                                    "unit_amount_net_decimal": "0.10",
+                                    "billing_period": "monthly",
+                                    "type": "recurring",
+                                    "taxes": [],
+                                    "pricing_model": "per_unit",
+                                    "quantity": 1,
+                                    "_price": {
+                                      "_id": "price-12312414-component-0",
+                                      "unit_amount_currency": "EUR",
+                                      "description": "Working Price",
+                                      "is_tax_inclusive": true,
+                                      "unit_amount": 10,
+                                      "unit_amount_decimal": "0.10",
+                                      "unit": "kWh",
+                                      "billing_period": "monthly",
+                                      "type": "recurring",
+                                      "billing_duration_amount": 24,
+                                      "billing_duration_unit": "months",
+                                      "notice_time_amount": 3,
+                                      "notice_time_unit": "months",
+                                      "termination_time_amount": 3,
+                                      "termination_time_unit": "months",
+                                      "renewal_duration_amount": 12,
+                                      "renewal_duration_unit": "months",
+                                      "active": true,
+                                      "is_composite_price": false,
+                                      "variable_price": true,
+                                      "pricing_model": "per_unit",
+                                      "price_display_in_journeys": "show_price"
+                                    }
+                                  }
+                                ]
+                              }
+                            ],
+                            "currency": "EUR",
+                            "amount_subtotal": 10000,
+                            "amount_total": 10000,
+                            "amount_tax": 0,
+                            "total_details": {
+                              "amount_tax": 0,
+                              "breakdown": {
+                                "taxes": [],
+                                "recurrences": [
+                                  {
+                                    "type": "recurring",
+                                    "billing_period": "monthly",
+                                    "amount_total": 10000,
+                                    "amount_total_decimal": "100.00",
+                                    "amount_subtotal": 10000,
+                                    "amount_subtotal_decimal": "100.00",
+                                    "amount_tax": 0
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "_meta": {
+                            "signature": "abc123",
+                            "timestamp": 1712049221642
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no valid configuration found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/public/external-catalog/products-recommendation": {
+      "post": {
+        "description": "Returns the list of available external catalog products recommendations based on a given context",
+        "operationId": "$getExternalCatalogProductsRecommendation",
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "summary": "getExternalCatalogProductsRecommendation",
+        "tags": [
+          "External Catalog API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalCatalogRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The available products response payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExternalCatalogRecommendationsResult"
+                },
+                "examples": {
+                  "External catalog recommendations": {
+                    "value": {
+                      "source": {
+                        "pricing_details": {
+                          "items": [
+                            {
+                              "_id": "price-12312414",
+                              "price_id": "price-12312414",
+                              "product_id": "product-12312414",
+                              "is_composite_price": true,
+                              "description": "Home Energy Package Composite",
+                              "item_components": [
+                                {
+                                  "_id": "price-12312414-component-0",
+                                  "price_id": "price-12312414-component-0",
+                                  "product_id": "product-12312414",
+                                  "description": "Working Price",
+                                  "is_tax_inclusive": true,
+                                  "amount_total_decimal": "50",
+                                  "amount_total": 5000,
+                                  "amount_subtotal_decimal": "50",
+                                  "amount_subtotal": 5000,
+                                  "unit_amount": 5,
+                                  "unit_amount_gross": 5,
+                                  "unit_amount_gross_decimal": "0.05",
+                                  "unit_amount_net": 5,
+                                  "unit_amount_net_decimal": "0.05",
+                                  "billing_period": "monthly",
+                                  "type": "recurring",
+                                  "taxes": [],
+                                  "pricing_model": "per_unit",
+                                  "quantity": 1,
+                                  "_price": {
+                                    "_id": "price-12312414-component-0",
+                                    "unit_amount_currency": "EUR",
+                                    "description": "Working Price",
+                                    "is_tax_inclusive": true,
+                                    "unit_amount": 5,
+                                    "unit_amount_decimal": "0.05",
+                                    "unit": "kWh",
+                                    "billing_period": "monthly",
+                                    "type": "recurring",
+                                    "billing_duration_amount": 24,
+                                    "billing_duration_unit": "months",
+                                    "notice_time_amount": 3,
+                                    "notice_time_unit": "months",
+                                    "termination_time_amount": 3,
+                                    "termination_time_unit": "months",
+                                    "renewal_duration_amount": 12,
+                                    "renewal_duration_unit": "months",
+                                    "active": true,
+                                    "is_composite_price": false,
+                                    "variable_price": true,
+                                    "pricing_model": "per_unit",
+                                    "price_display_in_journeys": "show_price"
+                                  },
+                                  "_product": {
+                                    "_id": "product-12312414",
+                                    "name": "Home Energy Package",
+                                    "description": "Composite home energy solution with solar panels and battery"
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "currency": "EUR",
+                          "amount_subtotal": 5000,
+                          "amount_total": 5000,
+                          "amount_tax": 0,
+                          "total_details": {
+                            "amount_tax": 0,
+                            "breakdown": {
+                              "taxes": [],
+                              "recurrences": [
+                                {
+                                  "type": "recurring",
+                                  "billing_period": "monthly",
+                                  "amount_total": 5000,
+                                  "amount_total_decimal": "50.00",
+                                  "amount_subtotal": 5000,
+                                  "amount_subtotal_decimal": "50.00",
+                                  "amount_tax": 0
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "_meta": {
+                          "signature": "abc123",
+                          "timestamp": 1712049221642
+                        }
+                      },
+                      "offers": [
+                        {
+                          "pricing_details": {
+                            "items": [
+                              {
+                                "_id": "price-999857a4",
+                                "price_id": "price-999857a4",
+                                "product_id": "product-999857a4",
+                                "is_composite_price": false,
+                                "description": "Single Price",
+                                "is_tax_inclusive": true,
+                                "amount_total_decimal": "25",
+                                "amount_total": 2500,
+                                "amount_subtotal_decimal": "25",
+                                "amount_subtotal": 2500,
+                                "unit_amount": 25,
+                                "unit_amount_gross": 25,
+                                "unit_amount_gross_decimal": "25",
+                                "unit_amount_net": 25,
+                                "unit_amount_net_decimal": "25",
+                                "billing_period": null,
+                                "type": "one_time",
+                                "taxes": [],
+                                "pricing_model": "per_unit",
+                                "quantity": 1,
+                                "_price": {
+                                  "_id": "price-999857a4",
+                                  "unit_amount_currency": "EUR",
+                                  "description": "Single Price",
+                                  "is_tax_inclusive": true,
+                                  "unit_amount": 25,
+                                  "unit_amount_decimal": "25",
+                                  "billing_duration_amount": 24,
+                                  "billing_duration_unit": "months",
+                                  "notice_time_amount": 3,
+                                  "notice_time_unit": "months",
+                                  "termination_time_amount": 3,
+                                  "termination_time_unit": "months",
+                                  "renewal_duration_amount": 12,
+                                  "renewal_duration_unit": "months",
+                                  "active": true,
+                                  "is_composite_price": false,
+                                  "pricing_model": "per_unit",
+                                  "price_display_in_journeys": "show_price"
+                                },
+                                "_product": {
+                                  "_id": "product-999857a4",
+                                  "name": "Solar Panel X2",
+                                  "description": "High-efficiency solar panel for residential use"
+                                }
+                              }
+                            ]
+                          },
+                          "currency": "EUR",
+                          "amount_subtotal": 2500,
+                          "amount_total": 2500,
+                          "amount_tax": 0,
+                          "total_details": {
+                            "amount_tax": 0,
+                            "breakdown": {
+                              "taxes": [],
+                              "recurrences": [
+                                {
+                                  "type": "one_time",
+                                  "amount_total": 2500,
+                                  "amount_total_decimal": "25.00",
+                                  "amount_subtotal": 2500,
+                                  "amount_subtotal_decimal": "25.00",
+                                  "amount_tax": 0
+                                }
+                              ]
+                            }
+                          },
+                          "_meta": {
+                            "signature": "def456",
+                            "timestamp": 1712049221643
+                          }
+                        },
+                        {
+                          "pricing_details": {
+                            "items": [
+                              {
+                                "_id": "price-93f857a4",
+                                "price_id": "price-93f857a4",
+                                "product_id": "product-93f857a4",
+                                "is_composite_price": false,
+                                "description": "Single Price",
+                                "is_tax_inclusive": false,
+                                "amount_total_decimal": "29.75",
+                                "amount_total": 2975,
+                                "amount_subtotal_decimal": "25",
+                                "amount_subtotal": 2500,
+                                "unit_amount": 25,
+                                "unit_amount_gross": 29.75,
+                                "unit_amount_gross_decimal": "29.75",
+                                "unit_amount_net": 25,
+                                "unit_amount_net_decimal": "25",
+                                "billing_period": null,
+                                "type": "one_time",
+                                "taxes": [
+                                  {
+                                    "tax": {
+                                      "_id": "tax-vat-19",
+                                      "name": "VAT",
+                                      "type": "VAT",
+                                      "rate": 19,
+                                      "region": "DE"
+                                    },
+                                    "amount": 475
+                                  }
+                                ],
+                                "pricing_model": "per_unit",
+                                "quantity": 1,
+                                "_price": {
+                                  "_id": "price-93f857a4",
+                                  "unit_amount_currency": "EUR",
+                                  "description": "Single Price",
+                                  "is_tax_inclusive": false,
+                                  "unit_amount": 25,
+                                  "unit_amount_decimal": "25",
+                                  "active": true,
+                                  "is_composite_price": false,
+                                  "pricing_model": "per_unit",
+                                  "price_display_in_journeys": "show_price",
+                                  "tax": [
+                                    {
+                                      "_id": "tax-vat-19",
+                                      "name": "VAT",
+                                      "type": "VAT",
+                                      "rate": 19,
+                                      "region": "DE"
+                                    }
+                                  ]
+                                },
+                                "_product": {
+                                  "_id": "product-93f857a4",
+                                  "name": "Solar Panel X3",
+                                  "description": "New generation of high-efficiency solar panel for residential use"
+                                }
+                              }
+                            ]
+                          },
+                          "currency": "EUR",
+                          "amount_subtotal": 2500,
+                          "amount_total": 2975,
+                          "amount_tax": 475,
+                          "total_details": {
+                            "amount_tax": 475,
+                            "breakdown": {
+                              "taxes": [
+                                {
+                                  "tax": {
+                                    "_id": "tax-vat-19",
+                                    "name": "VAT",
+                                    "type": "VAT",
+                                    "rate": 19,
+                                    "region": "DE"
+                                  },
+                                  "amount": 475
+                                }
+                              ],
+                              "recurrences": [
+                                {
+                                  "type": "one_time",
+                                  "amount_total": 2975,
+                                  "amount_total_decimal": "29.75",
+                                  "amount_subtotal": 2500,
+                                  "amount_subtotal_decimal": "25.00",
+                                  "amount_tax": 475
+                                }
+                              ]
+                            }
+                          },
+                          "_meta": {
+                            "signature": "ghi789",
+                            "timestamp": 1712049221644
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, no credentials found for the given integration / organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/public/product-recommendations": {
       "post": {
         "description": "Get a list of product recommendations based on the search parameters.",
@@ -2735,8 +3206,21 @@
                 "Search product recommendations by id": {
                   "value": {
                     "product_recommendation_ids": [
-                      "bae8d40a-0093-483a-b4f9-3653800b6781"
+                      "22c134b7-8dd8-4872-a5c1-8fc6dd4ac2ee"
                     ]
+                  }
+                },
+                "Search product recommendations by id with location filter": {
+                  "value": {
+                    "product_recommendation_ids": [
+                      "22c134b7-8dd8-4872-a5c1-8fc6dd4ac2ee"
+                    ],
+                    "filters": {
+                      "location": {
+                        "postal_code": "50670",
+                        "city": "Köln"
+                      }
+                    }
                   }
                 },
                 "Search product recommendations by source product and price": {
@@ -2852,7 +3336,6 @@
         "type": "string",
         "enum": [
           "getag",
-          "ikom",
           "external-catalog"
         ]
       },
@@ -5100,7 +5583,7 @@
         ]
       },
       "AvailabilityResult": {
-        "description": "The availability check result payload",
+        "description": "The product availability check result payload",
         "type": "object",
         "properties": {
           "available_products": {
@@ -8282,6 +8765,156 @@
           "context"
         ]
       },
+      "ExternalCatalogRequest": {
+        "description": "The request payload for the external catalog service.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ExternalCatalogConfigurationRequest"
+          },
+          {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ExternalCatalogJourneyRequest"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalCatalogCustomRequest"
+              }
+            ]
+          }
+        ],
+        "discriminator": {
+          "propertyName": "origin",
+          "mapping": {
+            "journey": "#/components/schemas/ExternalCatalogJourneyRequest",
+            "custom": "#/components/schemas/ExternalCatalogCustomRequest"
+          }
+        },
+        "example": {
+          "config": {
+            "appId": "1234567890",
+            "componentId": "1234567890",
+            "hookId": "1234567890"
+          },
+          "origin": "journey",
+          "context": {
+            "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+            "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+            "journey_name": "Product Selection Journey",
+            "journey_tags": [
+              "electricity",
+              "residential"
+            ],
+            "journey_url_params": {
+              "utm_source": "google",
+              "utm_campaign": "spring2024"
+            },
+            "current_step_name": "Product Selection",
+            "current_block_name": "Energy Products",
+            "steps_data": [
+              {
+                "step_name": "Address Information",
+                "step_index": 0,
+                "blocks": {
+                  "Adresse": {
+                    "countryCode": "DE",
+                    "city": "Koblenz",
+                    "zipCode": "56068",
+                    "streetName": "Am Alten Hospital",
+                    "houseNumber": "123"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "ExternalCatalogConfigurationRequest": {
+        "type": "object",
+        "description": "The request payload for the external catalog configuration service.",
+        "properties": {
+          "config": {
+            "type": "object",
+            "properties": {
+              "appId": {
+                "type": "string",
+                "description": "The app id.",
+                "example": "1234567890"
+              },
+              "componentId": {
+                "type": "string",
+                "description": "The component id.",
+                "example": "1234567890"
+              },
+              "hookId": {
+                "type": "string",
+                "description": "The hook id. If not provided, the first valid hook will be used.",
+                "example": "1234567890"
+              }
+            },
+            "required": [
+              "appId",
+              "componentId"
+            ]
+          }
+        },
+        "example": {
+          "config": {
+            "appId": "1234567890",
+            "componentId": "1234567890",
+            "hookId": "1234567890"
+          }
+        }
+      },
+      "ExternalCatalogJourneyRequest": {
+        "type": "object",
+        "description": "The request payload for the external catalog service with a journey context.",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "The origin of the request.",
+            "enum": [
+              "journey"
+            ],
+            "example": "journey"
+          },
+          "context": {
+            "$ref": "#/components/schemas/JourneyContext"
+          }
+        },
+        "required": [
+          "origin",
+          "context"
+        ]
+      },
+      "ExternalCatalogCustomRequest": {
+        "type": "object",
+        "description": "The request payload for the external catalog service with a custom context. E.g. for requests from the Portal.",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "The origin of the request.",
+            "enum": [
+              "custom"
+            ],
+            "example": "custom"
+          },
+          "context": {
+            "$ref": "#/components/schemas/CustomContext"
+          }
+        },
+        "required": [
+          "origin",
+          "context"
+        ]
+      },
+      "CustomContext": {
+        "type": "object",
+        "description": "A custom context object. E.g. for Portal context.",
+        "additionalProperties": true,
+        "example": {
+          "custom_context_key": "custom_context_value"
+        }
+      },
       "JourneyContext": {
         "type": "object",
         "additionalProperties": false,
@@ -8450,6 +9083,9 @@
           "contract_id": {
             "type": "string",
             "description": "The contract id to be used as source for the recommendation"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AvailabilityFilters"
           }
         }
       },
@@ -8476,14 +9112,26 @@
       "Offer": {
         "type": "object",
         "properties": {
-          "product_id": {
-            "type": "string"
-          },
-          "price_id": {
-            "type": "string"
-          },
           "target_id": {
             "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "price_id": {
+                  "type": "string"
+                },
+                "product_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price_id",
+                "product_id"
+              ]
+            }
           }
         }
       },

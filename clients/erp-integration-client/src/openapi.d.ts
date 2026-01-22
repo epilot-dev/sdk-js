@@ -124,6 +124,83 @@ declare namespace Components {
              */
             component_id: string; // uuid
         }
+        export interface EmbeddedInboundUseCaseRequest {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type: "inbound";
+            configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+        }
+        export interface EmbeddedOutboundUseCaseRequest {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type: "outbound";
+            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+        }
+        export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest;
+        export interface EmbeddedUseCaseRequestBase {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+        }
         export interface EntityUpdate {
             /**
              * The entity type slug
@@ -196,25 +273,6 @@ declare namespace Components {
              * Error message
              */
             message?: string;
-        }
-        /**
-         * Extended unique identifier field configuration with type hints for repeatable fields
-         */
-        export interface ExtendedUniqueIdField {
-            /**
-             * The attribute name to use as unique identifier
-             */
-            attribute: string;
-            _type?: /**
-             * Type hint for repeatable fields that require special search handling.
-             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
-             *
-             */
-            RepeatableFieldType;
-            /**
-             * Which array item to use (0-indexed, default first)
-             */
-            index?: number;
         }
         /**
          * Configuration for inbound use cases (ERP to epilot)
@@ -381,12 +439,6 @@ declare namespace Components {
              * Constant value to assign (any type)
              */
             constant?: any;
-            /**
-             * Type hint for repeatable fields (email, phone).
-             * When this attribute is used as a unique identifier, specifying the _type
-             * enables correct search path generation (e.g., email.email.keyword).
-             *
-             */
             _type?: /**
              * Type hint for repeatable fields that require special search handling.
              * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
@@ -426,9 +478,20 @@ declare namespace Components {
         }
         export interface IntegrationMeterReading {
             /**
-             * JSONata expression to extract meter reading items from the event data
+             * Optional JSONata expression to extract meter reading items from the event data.
+             * If not provided, the entire payload is used as the reading data.
+             * Useful when you need to extract an array of readings from a nested structure (e.g., "$.readings").
+             *
              */
-            jsonataExpression: string;
+            jsonataExpression?: string;
+            /**
+             * Strategy for matching incoming readings against existing readings.
+             * - 'external_id': Match readings by external_id attribute (default behavior)
+             * - 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).
+             *   Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.
+             *
+             */
+            reading_matching?: "external_id" | "strict-date";
             meter: MeterUniqueIdsConfig;
             meter_counter?: MeterUniqueIdsConfig;
             /**
@@ -449,6 +512,39 @@ declare namespace Components {
              * Field mapping definitions
              */
             fields: IntegrationFieldV1[];
+        }
+        /**
+         * Integration with embedded use cases for atomic CRUD operations
+         */
+        export interface IntegrationWithUseCases {
+            /**
+             * Unique identifier for the integration
+             */
+            id: string; // uuid
+            /**
+             * Organization ID
+             */
+            orgId: string;
+            /**
+             * Integration name
+             */
+            name: string;
+            /**
+             * Optional description of the integration
+             */
+            description?: string;
+            /**
+             * All use cases belonging to this integration
+             */
+            use_cases: UseCase[];
+            /**
+             * ISO-8601 timestamp when the integration was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the integration was last updated
+             */
+            updated_at: string; // date-time
         }
         export interface MappingSimulationRequest {
             mapping_configuration: IntegrationConfigurationV1 | IntegrationConfigurationV2;
@@ -930,34 +1026,6 @@ declare namespace Components {
             end_date?: string;
             event_id?: string;
         }
-        /**
-         * Unique identifier field configuration. Can be either:
-         * - A simple string (attribute name)
-         * - An extended object with type hints for repeatable fields
-         *
-         */
-        export type UniqueIdField = /**
-         * Unique identifier field configuration. Can be either:
-         * - A simple string (attribute name)
-         * - An extended object with type hints for repeatable fields
-         *
-         */
-        string | /* Extended unique identifier field configuration with type hints for repeatable fields */ ExtendedUniqueIdField;
-        /**
-         * Metadata about a unique identifier field (used in message payloads)
-         */
-        export interface UniqueIdMetadata {
-            fieldType?: /**
-             * Type hint for repeatable fields that require special search handling.
-             * These fields are stored as arrays of objects (e.g., email: [{ email: "value" }]).
-             *
-             */
-            RepeatableFieldType;
-            /**
-             * Which array item was used (0-indexed)
-             */
-            index?: number;
-        }
         export interface UpdateInboundUseCaseRequest {
             /**
              * Use case name
@@ -1020,6 +1088,29 @@ declare namespace Components {
              * Optional description of this change (like a commit message)
              */
             change_description?: string;
+        }
+        /**
+         * Request to create or update an integration with embedded use cases (upsert).
+         * This is a declarative operation - the request represents the desired state.
+         *
+         */
+        export interface UpsertIntegrationWithUseCasesRequest {
+            /**
+             * Integration name
+             */
+            name: string;
+            /**
+             * Optional description of the integration
+             */
+            description?: string;
+            /**
+             * Full list of use cases (declarative). This replaces ALL existing use cases.
+             * - Use cases with an `id` field matching an existing use case will be updated
+             * - Use cases without an `id` or with a non-matching `id` will be created
+             * - Existing use cases not in this list will be deleted
+             *
+             */
+            use_cases?: EmbeddedUseCaseRequest[];
         }
         export type UseCase = {
             /**
@@ -1180,6 +1271,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DeleteIntegrationV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace DeleteUseCase {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -1214,6 +1322,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetIntegrationV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* Integration with embedded use cases for atomic CRUD operations */ Components.Schemas.IntegrationWithUseCases;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetUseCase {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -1235,6 +1358,15 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 integrations: Components.Schemas.Integration[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListIntegrationsV2 {
+        namespace Responses {
+            export interface $200 {
+                integrations: /* Integration with embedded use cases for atomic CRUD operations */ Components.Schemas.IntegrationWithUseCases[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
@@ -1451,6 +1583,26 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpsertIntegrationV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = /**
+         * Request to create or update an integration with embedded use cases (upsert).
+         * This is a declarative operation - the request represents the desired state.
+         *
+         */
+        Components.Schemas.UpsertIntegrationWithUseCasesRequest;
+        namespace Responses {
+            export type $200 = /* Integration with embedded use cases for atomic CRUD operations */ Components.Schemas.IntegrationWithUseCases;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
 }
 
 
@@ -1661,6 +1813,53 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
+  /**
+   * listIntegrationsV2 - listIntegrationsV2
+   * 
+   * Retrieve all integrations with embedded use cases for the authenticated organization
+   */
+  'listIntegrationsV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListIntegrationsV2.Responses.$200>
+  /**
+   * getIntegrationV2 - getIntegrationV2
+   * 
+   * Retrieve a specific integration with all its embedded use cases
+   */
+  'getIntegrationV2'(
+    parameters?: Parameters<Paths.GetIntegrationV2.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetIntegrationV2.Responses.$200>
+  /**
+   * upsertIntegrationV2 - upsertIntegrationV2
+   * 
+   * Create or update an integration with embedded use cases (upsert).
+   * If the integration does not exist, it will be created with the specified ID.
+   * If it exists, it will be updated declaratively:
+   * - Use cases in the request with matching IDs are updated
+   * - Use cases in the request without matching IDs are created
+   * - Existing use cases not in the request are deleted
+   * This is ideal for Infrastructure-as-Code tools like Terraform.
+   * 
+   */
+  'upsertIntegrationV2'(
+    parameters?: Parameters<Paths.UpsertIntegrationV2.PathParameters> | null,
+    data?: Paths.UpsertIntegrationV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpsertIntegrationV2.Responses.$200>
+  /**
+   * deleteIntegrationV2 - deleteIntegrationV2
+   * 
+   * Delete an integration and all its use cases
+   */
+  'deleteIntegrationV2'(
+    parameters?: Parameters<Paths.DeleteIntegrationV2.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
   /**
    * setIntegrationAppMapping - setIntegrationAppMapping
    * 
@@ -1920,6 +2119,57 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
   }
+  ['/v2/integrations']: {
+    /**
+     * listIntegrationsV2 - listIntegrationsV2
+     * 
+     * Retrieve all integrations with embedded use cases for the authenticated organization
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListIntegrationsV2.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}']: {
+    /**
+     * getIntegrationV2 - getIntegrationV2
+     * 
+     * Retrieve a specific integration with all its embedded use cases
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetIntegrationV2.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetIntegrationV2.Responses.$200>
+    /**
+     * upsertIntegrationV2 - upsertIntegrationV2
+     * 
+     * Create or update an integration with embedded use cases (upsert).
+     * If the integration does not exist, it will be created with the specified ID.
+     * If it exists, it will be updated declaratively:
+     * - Use cases in the request with matching IDs are updated
+     * - Use cases in the request without matching IDs are created
+     * - Existing use cases not in the request are deleted
+     * This is ideal for Infrastructure-as-Code tools like Terraform.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpsertIntegrationV2.PathParameters> | null,
+      data?: Paths.UpsertIntegrationV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpsertIntegrationV2.Responses.$200>
+    /**
+     * deleteIntegrationV2 - deleteIntegrationV2
+     * 
+     * Delete an integration and all its use cases
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteIntegrationV2.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/app-mapping']: {
     /**
      * setIntegrationAppMapping - setIntegrationAppMapping
@@ -1957,11 +2207,14 @@ export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseC
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
+export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
+export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutboundUseCaseRequest;
+export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
+export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
-export type ExtendedUniqueIdField = Components.Schemas.ExtendedUniqueIdField;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
@@ -1974,6 +2227,7 @@ export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
+export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases;
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
@@ -1994,13 +2248,12 @@ export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
-export type UniqueIdField = Components.Schemas.UniqueIdField;
-export type UniqueIdMetadata = Components.Schemas.UniqueIdMetadata;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
+export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
 export type UseCase = Components.Schemas.UseCase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;

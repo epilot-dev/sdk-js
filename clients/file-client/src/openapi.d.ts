@@ -234,6 +234,14 @@ declare namespace Components {
              * Whether the collection is starred / favorited
              */
             starred?: boolean;
+            /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
+             * List of purpose IDs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_purposes?: string[];
         }
         /**
          * Request body for creating a file collection
@@ -251,6 +259,14 @@ declare namespace Components {
              * Whether the collection is starred / favorited
              */
             starred?: boolean;
+            /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
+             * List of purpose IDs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_purposes?: string[];
         }
         /**
          * Generated uuid for a file collection
@@ -304,6 +320,10 @@ declare namespace Components {
              */
             order?: number;
             /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
              * List of purpose slugs where the collection is enabled. If empty, enabled for all.
              * example:
              * [
@@ -311,7 +331,7 @@ declare namespace Components {
              *   "purpose:5c544c09-a691-43ed-a7fa-0a8b44b5b161"
              * ]
              */
-            enabled_locations?: string[];
+            enabled_purposes?: string[];
             /**
              * Timestamp when the collection was created
              * example:
