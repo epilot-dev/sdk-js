@@ -53,6 +53,10 @@ declare namespace Components {
              * Tags for categorization
              */
             _tags?: string[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
         }
         export interface Entity {
             [name: string]: any;
@@ -477,6 +481,10 @@ declare namespace Components {
              */
             _updated_at: string | null; // date-time
             /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
+            /**
              * Entity owners
              */
             _owners?: EntityOwner[];
@@ -591,6 +599,10 @@ declare namespace Components {
              * Tags for categorization
              */
             _tags?: string[];
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
         }
     }
 }

@@ -2,12 +2,15 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Notification API",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "description": "Notification API for epilot 360"
   },
   "security": [
     {
       "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
     }
   ],
   "tags": [
@@ -768,6 +771,12 @@
         "scheme": "bearer",
         "description": "Authorization header with epilot OAuth2 bearer token",
         "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenant access",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
       }
     },
     "parameters": {
@@ -1177,6 +1186,15 @@
             "nullable": true,
             "description": "ISO timestamp of last update"
           },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          },
           "_owners": {
             "type": "array",
             "items": {
@@ -1284,6 +1302,15 @@
               "type": "string"
             },
             "description": "Tags for categorization"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
           }
         }
       },
@@ -1324,6 +1351,15 @@
               "type": "string"
             },
             "description": "Tags for categorization"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
           }
         }
       },
