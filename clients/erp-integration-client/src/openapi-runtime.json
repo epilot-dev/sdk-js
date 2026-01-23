@@ -287,6 +287,16 @@
       "get": {
         "operationId": "listIntegrationsV2",
         "responses": {}
+      },
+      "post": {
+        "operationId": "createIntegrationV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v2/integrations/{integrationId}": {
@@ -302,7 +312,7 @@
         "responses": {}
       },
       "put": {
-        "operationId": "upsertIntegrationV2",
+        "operationId": "updateIntegrationV2",
         "parameters": [
           {
             "name": "integrationId",
@@ -365,6 +375,44 @@
         },
         "responses": {}
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/events": {
+      "post": {
+        "operationId": "queryMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/stats": {
+      "post": {
+        "operationId": "getMonitoringStats",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -385,6 +433,16 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryMonitoringEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringStatsResponse": {
         "content": {
           "application/json": {}
         }

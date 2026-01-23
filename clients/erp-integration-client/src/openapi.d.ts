@@ -24,6 +24,7 @@ declare namespace Components {
                 message?: string;
             }[];
         }
+        export type GetMonitoringStatsResponse = Schemas.MonitoringStats;
         export type InternalServerError = Schemas.ErrorResponseBase;
         export type NotFound = Schemas.ErrorResponseBase;
         export interface QueryEventsResponse {
@@ -50,6 +51,23 @@ declare namespace Components {
              * Indicates if more results are available
              * example:
              * true
+             */
+            has_more?: boolean;
+        }
+        export interface QueryMonitoringEventsResponse {
+            /**
+             * List of monitoring events
+             */
+            data?: Schemas.MonitoringEvent[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                completed_at?: string; // date-time
+                event_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
              */
             has_more?: boolean;
         }
@@ -225,7 +243,7 @@ declare namespace Components {
              */
             event_type: "CREATE" | "UPDATE" | "DELETE";
             /**
-             * Type of the object being updated (business_partner, contract_account, etc.)
+             * Type of the object being updated (business_partner, contract_account, etc.). Corresponds to "Event Name" from the integration UI.
              */
             object_type: string;
             /**
@@ -274,6 +292,37 @@ declare namespace Components {
              */
             message?: string;
         }
+        export interface GetMonitoringStatsRequest {
+            /**
+             * Filter by use case ID
+             */
+            use_case_id?: string; // uuid
+            /**
+             * Filter by sync direction
+             */
+            direction?: "inbound" | "outbound";
+            /**
+             * Start date for statistics period (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * End date for statistics period (inclusive)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Fields to group statistics by
+             * example:
+             * [
+             *   "direction",
+             *   "status"
+             * ]
+             */
+            group_by?: ("direction" | "use_case_id" | "sync_type" | "status" | "error_category" | "object_type" | "date")[];
+        }
         /**
          * Configuration for inbound use cases (ERP to epilot)
          */
@@ -289,9 +338,34 @@ declare namespace Components {
         }
         export interface InboundUseCase {
             /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
              * Use case type
              */
-            type: "inbound";
+            type: "inbound" | "outbound" | "inbound";
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
         }
         export interface InboundUseCaseHistoryEntry {
@@ -621,6 +695,112 @@ declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
+        export interface MonitoringEvent {
+            /**
+             * Organization ID
+             */
+            org_id: string;
+            /**
+             * Unique event identifier
+             */
+            event_id: string;
+            /**
+             * Correlation ID for tracing related events
+             */
+            correlation_id?: string | null;
+            /**
+             * Integration ID
+             */
+            integration_id?: string | null;
+            /**
+             * Use case ID
+             */
+            use_case_id?: string | null;
+            /**
+             * Sync direction
+             */
+            direction: "inbound" | "outbound";
+            /**
+             * Type of event
+             */
+            event_type: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
+            /**
+             * Type of object being synced (e.g., 'contract', 'meter')
+             */
+            object_type: string;
+            /**
+             * Type of sync operation
+             */
+            sync_type: "entity" | "meter_reading" | "webhook";
+            /**
+             * Processing status
+             */
+            status: "success" | "error" | "skipped";
+            /**
+             * Error code (when status=error)
+             */
+            error_code?: string | null;
+            /**
+             * Error message (when status=error)
+             */
+            error_message?: string | null;
+            /**
+             * Error category (when status=error)
+             */
+            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system" | "webhook_delivery";
+            /**
+             * Processing duration in milliseconds
+             */
+            processing_duration_ms?: number | null;
+            /**
+             * Target URL for outbound requests
+             */
+            target_url?: string | null;
+            /**
+             * HTTP status code from target (outbound only)
+             */
+            http_status_code?: number | null;
+            /**
+             * When the event was received
+             */
+            received_at: string; // date-time
+            /**
+             * When processing completed
+             */
+            completed_at: string; // date-time
+        }
+        export interface MonitoringStats {
+            /**
+             * Total number of events in the period
+             */
+            total_events: number;
+            /**
+             * Number of successful events
+             */
+            success_count: number;
+            /**
+             * Number of failed events
+             */
+            error_count: number;
+            /**
+             * Number of skipped events
+             */
+            skipped_count: number;
+            /**
+             * Success rate as percentage (0-100)
+             */
+            success_rate?: number; // float
+            /**
+             * Timestamp of the most recent error
+             */
+            last_error_at?: string | null; // date-time
+            /**
+             * Statistics breakdown by requested group_by fields
+             */
+            breakdown?: {
+                [name: string]: any;
+            }[];
+        }
         /**
          * Configuration for outbound use cases (epilot to ERP). Structure TBD.
          */
@@ -629,9 +809,34 @@ declare namespace Components {
         }
         export interface OutboundUseCase {
             /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
              * Use case type
              */
-            type: "outbound";
+            type: "inbound" | "outbound" | "outbound";
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
             configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
         }
         export interface OutboundUseCaseHistoryEntry {
@@ -714,6 +919,75 @@ declare namespace Components {
                  * Event ID from the last event in the previous page
                  * example:
                  * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            };
+        }
+        export interface QueryMonitoringEventsRequest {
+            /**
+             * Filter by use case ID
+             */
+            use_case_id?: string; // uuid
+            /**
+             * Filter by sync direction
+             */
+            direction?: "inbound" | "outbound";
+            /**
+             * Filter by event type
+             */
+            event_type?: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
+            /**
+             * Filter by sync type
+             */
+            sync_type?: "entity" | "meter_reading" | "webhook";
+            /**
+             * Filter by processing status
+             */
+            status?: "success" | "error" | "skipped";
+            /**
+             * Filter by error category (only applicable when status=error)
+             */
+            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system" | "webhook_delivery";
+            /**
+             * Filter by correlation ID
+             */
+            correlation_id?: string;
+            /**
+             * Filter by object type (e.g., 'contract', 'meter')
+             */
+            object_type?: string;
+            /**
+             * Filter by event ID to find a specific event
+             */
+            event_id?: string;
+            /**
+             * Filter events from this date (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * Filter events until this date (inclusive)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Maximum number of results to return
+             * example:
+             * 50
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last event in the previous page
+                 */
+                completed_at?: string; // date-time
+                /**
+                 * Event ID from the last event in the previous page
                  */
                 event_id?: string;
             };
@@ -1112,7 +1386,8 @@ declare namespace Components {
              */
             use_cases?: EmbeddedUseCaseRequest[];
         }
-        export type UseCase = {
+        export type UseCase = InboundUseCase | OutboundUseCase;
+        export interface UseCaseBase {
             /**
              * Unique identifier for the use case
              */
@@ -1129,9 +1404,6 @@ declare namespace Components {
              * Use case type
              */
             type: "inbound" | "outbound";
-            /**
-             * Whether the use case is enabled
-             */
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -1145,7 +1417,7 @@ declare namespace Components {
              * ISO-8601 timestamp when the use case was last updated
              */
             updated_at: string; // date-time
-        } & (InboundUseCase | OutboundUseCase);
+        }
         export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
             /**
@@ -1213,6 +1485,20 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.CreateIntegrationRequest;
         namespace Responses {
             export type $201 = Components.Schemas.Integration;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateIntegrationV2 {
+        export type RequestBody = /**
+         * Request to create or update an integration with embedded use cases (upsert).
+         * This is a declarative operation - the request represents the desired state.
+         *
+         */
+        Components.Schemas.UpsertIntegrationWithUseCasesRequest;
+        namespace Responses {
+            export type $201 = /* Integration with embedded use cases for atomic CRUD operations */ Components.Schemas.IntegrationWithUseCases;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
@@ -1334,6 +1620,22 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMonitoringStats {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GetMonitoringStatsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.GetMonitoringStatsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -1476,6 +1778,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace QueryMonitoringEvents {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.QueryMonitoringEventsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.QueryMonitoringEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ReplayEvents {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -1564,26 +1882,7 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace UpdateUseCase {
-        namespace Parameters {
-            export type IntegrationId = string; // uuid
-            export type UseCaseId = string; // uuid
-        }
-        export interface PathParameters {
-            integrationId: Parameters.IntegrationId /* uuid */;
-            useCaseId: Parameters.UseCaseId /* uuid */;
-        }
-        export type RequestBody = Components.Schemas.UpdateUseCaseRequest;
-        namespace Responses {
-            export type $200 = Components.Schemas.UseCase;
-            export type $400 = Components.Responses.BadRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export interface $404 {
-            }
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace UpsertIntegrationV2 {
+    namespace UpdateIntegrationV2 {
         namespace Parameters {
             export type IntegrationId = string; // uuid
         }
@@ -1600,6 +1899,27 @@ declare namespace Paths {
             export type $200 = /* Integration with embedded use cases for atomic CRUD operations */ Components.Schemas.IntegrationWithUseCases;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateUseCase {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+            export type UseCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            useCaseId: Parameters.UseCaseId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.UpdateUseCaseRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.UseCase;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -1824,6 +2144,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListIntegrationsV2.Responses.$200>
   /**
+   * createIntegrationV2 - createIntegrationV2
+   * 
+   * Create a new integration with embedded use cases.
+   * 
+   */
+  'createIntegrationV2'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateIntegrationV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateIntegrationV2.Responses.$201>
+  /**
    * getIntegrationV2 - getIntegrationV2
    * 
    * Retrieve a specific integration with all its embedded use cases
@@ -1834,22 +2165,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetIntegrationV2.Responses.$200>
   /**
-   * upsertIntegrationV2 - upsertIntegrationV2
+   * updateIntegrationV2 - updateIntegrationV2
    * 
-   * Create or update an integration with embedded use cases (upsert).
-   * If the integration does not exist, it will be created with the specified ID.
-   * If it exists, it will be updated declaratively:
+   * Update an existing integration with embedded use cases.
+   * The integration must already exist.
+   * Use cases are updated declaratively:
    * - Use cases in the request with matching IDs are updated
    * - Use cases in the request without matching IDs are created
    * - Existing use cases not in the request are deleted
-   * This is ideal for Infrastructure-as-Code tools like Terraform.
    * 
    */
-  'upsertIntegrationV2'(
-    parameters?: Parameters<Paths.UpsertIntegrationV2.PathParameters> | null,
-    data?: Paths.UpsertIntegrationV2.RequestBody,
+  'updateIntegrationV2'(
+    parameters?: Parameters<Paths.UpdateIntegrationV2.PathParameters> | null,
+    data?: Paths.UpdateIntegrationV2.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpsertIntegrationV2.Responses.$200>
+  ): OperationResponse<Paths.UpdateIntegrationV2.Responses.$200>
   /**
    * deleteIntegrationV2 - deleteIntegrationV2
    * 
@@ -1884,6 +2214,32 @@ export interface OperationMethods {
     data?: Paths.DeleteIntegrationAppMapping.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
+  /**
+   * queryMonitoringEvents - queryMonitoringEvents
+   * 
+   * Query ERP sync monitoring events for a specific integration.
+   * Returns detailed information about inbound/outbound sync events,
+   * including success rates, error breakdowns, and processing metrics.
+   * 
+   */
+  'queryMonitoringEvents'(
+    parameters?: Parameters<Paths.QueryMonitoringEvents.PathParameters> | null,
+    data?: Paths.QueryMonitoringEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryMonitoringEvents.Responses.$200>
+  /**
+   * getMonitoringStats - getMonitoringStats
+   * 
+   * Get aggregated statistics for ERP sync monitoring events for a specific integration.
+   * Returns summary metrics like total events, success/error counts,
+   * and breakdowns by use case, direction, and sync type.
+   * 
+   */
+  'getMonitoringStats'(
+    parameters?: Parameters<Paths.GetMonitoringStats.PathParameters> | null,
+    data?: Paths.GetMonitoringStats.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2130,6 +2486,17 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListIntegrationsV2.Responses.$200>
+    /**
+     * createIntegrationV2 - createIntegrationV2
+     * 
+     * Create a new integration with embedded use cases.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateIntegrationV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateIntegrationV2.Responses.$201>
   }
   ['/v2/integrations/{integrationId}']: {
     /**
@@ -2143,22 +2510,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetIntegrationV2.Responses.$200>
     /**
-     * upsertIntegrationV2 - upsertIntegrationV2
+     * updateIntegrationV2 - updateIntegrationV2
      * 
-     * Create or update an integration with embedded use cases (upsert).
-     * If the integration does not exist, it will be created with the specified ID.
-     * If it exists, it will be updated declaratively:
+     * Update an existing integration with embedded use cases.
+     * The integration must already exist.
+     * Use cases are updated declaratively:
      * - Use cases in the request with matching IDs are updated
      * - Use cases in the request without matching IDs are created
      * - Existing use cases not in the request are deleted
-     * This is ideal for Infrastructure-as-Code tools like Terraform.
      * 
      */
     'put'(
-      parameters?: Parameters<Paths.UpsertIntegrationV2.PathParameters> | null,
-      data?: Paths.UpsertIntegrationV2.RequestBody,
+      parameters?: Parameters<Paths.UpdateIntegrationV2.PathParameters> | null,
+      data?: Paths.UpdateIntegrationV2.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpsertIntegrationV2.Responses.$200>
+    ): OperationResponse<Paths.UpdateIntegrationV2.Responses.$200>
     /**
      * deleteIntegrationV2 - deleteIntegrationV2
      * 
@@ -2196,6 +2562,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/monitoring/events']: {
+    /**
+     * queryMonitoringEvents - queryMonitoringEvents
+     * 
+     * Query ERP sync monitoring events for a specific integration.
+     * Returns detailed information about inbound/outbound sync events,
+     * including success rates, error breakdowns, and processing metrics.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryMonitoringEvents.PathParameters> | null,
+      data?: Paths.QueryMonitoringEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryMonitoringEvents.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/monitoring/stats']: {
+    /**
+     * getMonitoringStats - getMonitoringStats
+     * 
+     * Get aggregated statistics for ERP sync monitoring events for a specific integration.
+     * Returns summary metrics like total events, success/error counts,
+     * and breakdowns by use case, direction, and sync type.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetMonitoringStats.PathParameters> | null,
+      data?: Paths.GetMonitoringStats.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -2215,6 +2611,7 @@ export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
@@ -2233,10 +2630,13 @@ export type MappingSimulationResponse = Components.Schemas.MappingSimulationResp
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
+export type MonitoringEvent = Components.Schemas.MonitoringEvent;
+export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
+export type QueryMonitoringEventsRequest = Components.Schemas.QueryMonitoringEventsRequest;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationRefItemConfig = Components.Schemas.RelationRefItemConfig;
@@ -2255,5 +2655,6 @@ export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
 export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
 export type UseCase = Components.Schemas.UseCase;
+export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
