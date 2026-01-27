@@ -401,9 +401,13 @@ declare namespace Components {
             origin_type?: "entity" | "workflow" | "journey_block";
             schema?: string;
             attribute?: string;
-            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
+            /**
+             * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
+             */
+            attribute_sub_field?: string;
         }
         export interface FlowTemplate {
             id?: string;
