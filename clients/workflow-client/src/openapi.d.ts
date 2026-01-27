@@ -74,6 +74,99 @@ declare namespace Components {
                 task_type?: TaskType;
             };
         }
+        /**
+         * Configuration for AI Agent to run
+         */
+        export interface AgentConfig {
+            [name: string]: any;
+            /**
+             * Id of the configured AI Agent to run
+             */
+            agent_id: string;
+            /**
+             * Parameters to customize the AI Agent behavior
+             */
+            parameters?: {
+                [key: string]: any;
+            };
+        }
+        export interface AgentExecutionInfo {
+            /**
+             * Id of the agent execution started by this task
+             */
+            execution_id?: string;
+            /**
+             * Status of the agent execution, when it already ran
+             */
+            execution_status?: string;
+            error_reason?: string;
+        }
+        export interface AiAgentTask {
+            id: TaskId;
+            template_id: string;
+            name: string;
+            description?: /* Longer information regarding Task */ StepDescription;
+            status: /**
+             * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
+             * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
+             * - **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)
+             * - **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution
+             * - **IN_PROGRESS**: Step/Task is currently being worked on by a user
+             * - **COMPLETED**: Step/Task has been finished successfully
+             * - **SKIPPED**: Step/Task was intentionally bypassed and will not be executed
+             * - **SCHEDULED**: Task is scheduled to run at a specific time in the future
+             * - **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed
+             * - **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.
+             * - **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed
+             * - **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.
+             *
+             */
+            StepStatus;
+            journey?: StepJourney;
+            /**
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            due_date?: string;
+            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            /**
+             * requirements that need to be fulfilled in order to enable the task while flow instances are running
+             */
+            requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            assigned_to?: /* The user ids */ Assignees;
+            analytics: AnalyticsInfo;
+            /**
+             * Time when the task was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Last Update timestamp
+             */
+            updated_at?: string; // date-time
+            /**
+             * Flag to indicate if the task was created manually
+             */
+            manually_created?: boolean;
+            /**
+             * enabled flag results from calculating the requirements
+             */
+            enabled: boolean;
+            ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Taxonomy ids that are associated with this workflow and used for filtering
+             */
+            taxonomies?: string[];
+            phase_id?: string;
+            task_type: TaskType;
+            agent_config?: /* Configuration for AI Agent to run */ AgentConfig;
+            loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
+            agent_execution?: AgentExecutionInfo;
+            /**
+             * ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing.
+             */
+            agent_execution_id?: string;
+        }
         export interface AnalyticsInfo {
             started_at?: string; // date-time
             in_progress_at?: string; // date-time
@@ -484,9 +577,13 @@ declare namespace Components {
             origin_type?: "entity" | "workflow" | "journey_block";
             schema?: string;
             attribute?: string;
-            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label";
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
+            /**
+             * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
+             */
+            attribute_sub_field?: string;
         }
         export interface ExecutionPaginationDynamo {
             orgId?: string;
@@ -593,6 +690,10 @@ declare namespace Components {
              */
             taxonomies?: string[];
             trigger: FlowTrigger;
+            /**
+             * Indicates whether only a single closing reason can be selected when closing the flow execution
+             */
+            singleClosingReasonSelection?: boolean;
         }
         export type FlowExecutionId = string;
         export interface FlowSlim {
@@ -1242,7 +1343,7 @@ declare namespace Components {
          */
         export type StepStatus = "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED";
         export type StepType = "MANUAL" | "AUTOMATION";
-        export type Task = ManualTask | AutomationTask | DecisionTask;
+        export type Task = ManualTask | AutomationTask | DecisionTask | AiAgentTask;
         export interface TaskBase {
             id: TaskId;
             template_id: string;
@@ -1303,7 +1404,7 @@ declare namespace Components {
             task_type: TaskType;
         }
         export type TaskId = string;
-        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION";
+        export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT";
         export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
@@ -1539,6 +1640,10 @@ declare namespace Components {
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Indicates whether only a single closing reason can be selected when closing the workflow execution
+             */
+            singleClosingReasonSelection?: boolean;
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionBase {
@@ -1588,6 +1693,10 @@ declare namespace Components {
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Indicates whether only a single closing reason can be selected when closing the workflow execution
+             */
+            singleClosingReasonSelection?: boolean;
         }
         /**
          * example:
@@ -1706,6 +1815,10 @@ declare namespace Components {
              * Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+            /**
+             * Indicates whether only a single closing reason can be selected when closing the workflow execution
+             */
+            singleClosingReasonSelection?: boolean;
             flow: (/* A group of Steps that define the progress of the Workflow */ Section | Step)[];
         }
         export interface WorkflowExecutionUpdateReq {
@@ -2794,6 +2907,9 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AddTaskReq = Components.Schemas.AddTaskReq;
+export type AgentConfig = Components.Schemas.AgentConfig;
+export type AgentExecutionInfo = Components.Schemas.AgentExecutionInfo;
+export type AiAgentTask = Components.Schemas.AiAgentTask;
 export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;

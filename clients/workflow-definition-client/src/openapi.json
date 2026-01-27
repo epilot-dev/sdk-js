@@ -2420,7 +2420,8 @@
               "radio",
               "relation_user",
               "purpose",
-              "label"
+              "label",
+              "message_email_address"
             ]
           },
           "attribute_repeatable": {
@@ -2433,6 +2434,10 @@
               "added",
               "deleted"
             ]
+          },
+          "attribute_sub_field": {
+            "type": "string",
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
           }
         }
       },
