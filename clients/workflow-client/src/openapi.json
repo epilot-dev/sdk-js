@@ -8,9 +8,6 @@
   "servers": [
     {
       "url": "https://workflows-execution.sls.epilot.io"
-    },
-    {
-      "url": "https://workflows-execution.sls.epilot.io"
     }
   ],
   "tags": [
@@ -1666,6 +1663,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the workflow execution"
           }
         }
       },
@@ -3066,6 +3067,10 @@
           },
           "trigger": {
             "$ref": "#/components/schemas/FlowTrigger"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the flow execution"
           }
         }
       },
@@ -3139,6 +3144,9 @@
           },
           {
             "$ref": "#/components/schemas/DecisionTask"
+          },
+          {
+            "$ref": "#/components/schemas/AiAgentTask"
           }
         ]
       },
@@ -3147,7 +3155,8 @@
         "enum": [
           "MANUAL",
           "AUTOMATION",
-          "DECISION"
+          "DECISION",
+          "AI_AGENT"
         ]
       },
       "ManualTask": {
@@ -3405,6 +3414,65 @@
             ]
           }
         ]
+      },
+      "AiAgentTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "agent_config": {
+                "$ref": "#/components/schemas/AgentConfig"
+              },
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopInfo"
+              },
+              "agent_execution": {
+                "$ref": "#/components/schemas/AgentExecutionInfo"
+              },
+              "agent_execution_id": {
+                "type": "string",
+                "description": "ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing."
+              }
+            }
+          }
+        ]
+      },
+      "AgentConfig": {
+        "type": "object",
+        "description": "Configuration for AI Agent to run",
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Id of the configured AI Agent to run"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameters to customize the AI Agent behavior"
+          }
+        },
+        "additionalProperties": true
+      },
+      "AgentExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the agent execution started by this task"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the agent execution, when it already ran"
+          },
+          "error_reason": {
+            "type": "string"
+          }
+        }
       },
       "TaskBase": {
         "type": "object",
@@ -3750,7 +3818,8 @@
               "radio",
               "relation_user",
               "purpose",
-              "label"
+              "label",
+              "message_email_address"
             ]
           },
           "attribute_repeatable": {
@@ -3763,6 +3832,10 @@
               "added",
               "deleted"
             ]
+          },
+          "attribute_sub_field": {
+            "type": "string",
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
           }
         }
       },
