@@ -171,6 +171,45 @@
           }
         ],
         "responses": {}
+      },
+      "post": {
+        "operationId": "createPartnerRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/partners/{orgId}/roles/{roleId}": {
+      "put": {
+        "operationId": "updatePartnerRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "roleId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v2/partners/{orgId}/users/{userId}/roles": {
@@ -209,17 +248,6 @@
             "required": true
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/partners/users/limit": {
-      "post": {
-        "operationId": "setPartnerUsersLimit",
         "requestBody": {
           "content": {
             "application/json": {}
