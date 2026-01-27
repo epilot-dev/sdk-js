@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.19.0
+
+### Minor Changes
+
+- Add support for AI agent configs and condition attribute sub-fields
+
 ## 1.17.4
 
 ### Patch Changes
