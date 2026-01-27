@@ -413,6 +413,25 @@
         },
         "responses": {}
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/access-logs": {
+      "post": {
+        "operationId": "queryAccessLogs",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -443,6 +462,11 @@
         }
       },
       "GetMonitoringStatsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryAccessLogsResponse": {
         "content": {
           "application/json": {}
         }

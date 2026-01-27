@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.22.0",
+    "version": "0.24.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2006,6 +2006,56 @@
           }
         }
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/access-logs": {
+      "post": {
+        "operationId": "queryAccessLogs",
+        "summary": "queryAccessLogs",
+        "description": "Query API access logs for a specific integration's organization.\nReturns access token usage analytics filtered by user_id (access token).\nSupports infinite scroll pagination with cursor-based navigation.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID (used for tenant authorization)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryAccessLogsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryAccessLogsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3731,6 +3781,140 @@
           }
         }
       },
+      "QueryAccessLogsRequest": {
+        "type": "object",
+        "required": [
+          "token_id"
+        ],
+        "properties": {
+          "token_id": {
+            "type": "string",
+            "description": "Filter by access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk')",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          },
+          "service": {
+            "type": "string",
+            "description": "Filter by service name (e.g., 'entity', 'metering', 'submission-api')",
+            "example": "entity"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "OPTIONS",
+              "HEAD"
+            ],
+            "description": "Filter by HTTP method"
+          },
+          "path": {
+            "type": "string",
+            "description": "Filter by request path (partial match)",
+            "example": "/v1/entity"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Filter by HTTP status code",
+            "example": 200
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter logs from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter logs until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination (infinite scroll)",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last log entry in the previous page"
+              },
+              "request_id": {
+                "type": "string",
+                "description": "Request ID from the last log entry in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "AccessLogEntry": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request was made"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment (e.g., 'dev', 'prod')"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name (e.g., 'entity', 'metering')"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Unique request identifier"
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method"
+          },
+          "path": {
+            "type": "string",
+            "description": "Request path"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "response_latency_ms": {
+            "type": "integer",
+            "description": "Response latency in milliseconds"
+          },
+          "response_length": {
+            "type": "integer",
+            "description": "Response body length in bytes"
+          },
+          "token_id": {
+            "type": "string",
+            "description": "Access token identifier"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Request origin header"
+          },
+          "source_ip": {
+            "type": "string",
+            "description": "Client IP address"
+          }
+        }
+      },
       "GetMonitoringStatsRequest": {
         "type": "object",
         "properties": {
@@ -3912,6 +4096,7 @@
         "type": "object",
         "required": [
           "total_events",
+          "total_correlations",
           "success_count",
           "error_count",
           "skipped_count"
@@ -3920,6 +4105,10 @@
           "total_events": {
             "type": "integer",
             "description": "Total number of events in the period"
+          },
+          "total_correlations": {
+            "type": "integer",
+            "description": "Total number of unique correlation IDs (a correlation_id groups multiple event_ids)"
           },
           "success_count": {
             "type": "integer",
@@ -4039,6 +4228,43 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/MonitoringStats"
+            }
+          }
+        }
+      },
+      "QueryAccessLogsResponse": {
+        "description": "Access logs queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessLogEntry"
+                  },
+                  "description": "List of access log entries"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "request_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
             }
           }
         }

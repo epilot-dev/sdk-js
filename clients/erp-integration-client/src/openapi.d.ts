@@ -27,6 +27,23 @@ declare namespace Components {
         export type GetMonitoringStatsResponse = Schemas.MonitoringStats;
         export type InternalServerError = Schemas.ErrorResponseBase;
         export type NotFound = Schemas.ErrorResponseBase;
+        export interface QueryAccessLogsResponse {
+            /**
+             * List of access log entries
+             */
+            data?: Schemas.AccessLogEntry[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                timestamp?: string; // date-time
+                request_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
+             */
+            has_more?: boolean;
+        }
         export interface QueryEventsResponse {
             /**
              * List of erp events
@@ -81,6 +98,60 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResponseBase;
     }
     namespace Schemas {
+        export interface AccessLogEntry {
+            /**
+             * When the request was made
+             */
+            timestamp?: string; // date-time
+            /**
+             * Environment (e.g., 'dev', 'prod')
+             */
+            environment?: string;
+            /**
+             * Service name (e.g., 'entity', 'metering')
+             */
+            service?: string;
+            /**
+             * Unique request identifier
+             */
+            request_id?: string;
+            /**
+             * HTTP method
+             */
+            method?: string;
+            /**
+             * Request path
+             */
+            path?: string;
+            /**
+             * HTTP status code
+             */
+            status?: number;
+            /**
+             * Response latency in milliseconds
+             */
+            response_latency_ms?: number;
+            /**
+             * Response body length in bytes
+             */
+            response_length?: number;
+            /**
+             * Access token identifier
+             */
+            token_id?: string;
+            /**
+             * Organization ID
+             */
+            org_id?: string;
+            /**
+             * Request origin header
+             */
+            origin?: string;
+            /**
+             * Client IP address
+             */
+            source_ip?: string;
+        }
         export interface CreateInboundUseCaseRequest {
             /**
              * Use case name
@@ -775,6 +846,10 @@ declare namespace Components {
              */
             total_events: number;
             /**
+             * Total number of unique correlation IDs (a correlation_id groups multiple event_ids)
+             */
+            total_correlations: number;
+            /**
              * Number of successful events
              */
             success_count: number;
@@ -881,6 +956,67 @@ declare namespace Components {
              */
             type: "outbound";
             configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+        }
+        export interface QueryAccessLogsRequest {
+            /**
+             * Filter by access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk')
+             * example:
+             * api_5ZugdRXasLfWBypHi93Fk
+             */
+            token_id: string;
+            /**
+             * Filter by service name (e.g., 'entity', 'metering', 'submission-api')
+             * example:
+             * entity
+             */
+            service?: string;
+            /**
+             * Filter by HTTP method
+             */
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
+            /**
+             * Filter by request path (partial match)
+             * example:
+             * /v1/entity
+             */
+            path?: string;
+            /**
+             * Filter by HTTP status code
+             * example:
+             * 200
+             */
+            status?: number;
+            /**
+             * Filter logs from this date (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * Filter logs until this date (inclusive)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Maximum number of results to return
+             * example:
+             * 50
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination (infinite scroll)
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last log entry in the previous page
+                 */
+                timestamp?: string; // date-time
+                /**
+                 * Request ID from the last log entry in the previous page
+                 */
+                request_id?: string;
+            };
         }
         export interface QueryEventsRequest {
             /**
@@ -1762,6 +1898,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace QueryAccessLogs {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.QueryAccessLogsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.QueryAccessLogsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace QueryEvents {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -2240,6 +2392,19 @@ export interface OperationMethods {
     data?: Paths.GetMonitoringStats.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
+  /**
+   * queryAccessLogs - queryAccessLogs
+   * 
+   * Query API access logs for a specific integration's organization.
+   * Returns access token usage analytics filtered by user_id (access token).
+   * Supports infinite scroll pagination with cursor-based navigation.
+   * 
+   */
+  'queryAccessLogs'(
+    parameters?: Parameters<Paths.QueryAccessLogs.PathParameters> | null,
+    data?: Paths.QueryAccessLogs.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryAccessLogs.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2592,11 +2757,27 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/monitoring/access-logs']: {
+    /**
+     * queryAccessLogs - queryAccessLogs
+     * 
+     * Query API access logs for a specific integration's organization.
+     * Returns access token usage analytics filtered by user_id (access token).
+     * Supports infinite scroll pagination with cursor-based navigation.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryAccessLogs.PathParameters> | null,
+      data?: Paths.QueryAccessLogs.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryAccessLogs.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AccessLogEntry = Components.Schemas.AccessLogEntry;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
 export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseCaseRequest;
@@ -2635,6 +2816,7 @@ export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
+export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type QueryMonitoringEventsRequest = Components.Schemas.QueryMonitoringEventsRequest;
 export type RelationConfig = Components.Schemas.RelationConfig;
