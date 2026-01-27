@@ -395,6 +395,48 @@ declare namespace Components {
             activated_at?: string;
             status?: "Active" | "Pending" | "Deactivated" | "Deleted";
         }
+        export interface BaseRoleForCreate {
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
+            /**
+             * Human-friendly name for the role
+             * example:
+             * Owner
+             */
+            name: string;
+            /**
+             * URL-friendly name for the role
+             * example:
+             * owner
+             */
+            slug: string;
+            /**
+             * List of grants (permissions) applied to the role
+             */
+            grants: Grant[];
+        }
+        export interface CreatePartnerRolePayload {
+            /**
+             * Role name
+             * example:
+             * Partner Admin
+             */
+            name: string;
+            /**
+             * Role slug
+             * example:
+             * partner_admin
+             */
+            slug: string;
+            /**
+             * Permission grants for the role
+             */
+            grants: GrantWithDependencies[];
+        }
         export interface CreatePartnerUserPayload {
             /**
              * User email address
@@ -418,6 +460,18 @@ declare namespace Components {
              */
             roles?: string[];
         }
+        /**
+         * Check if attribute equals to any of the values
+         */
+        export interface EqualsCondition {
+            /**
+             * example:
+             * workflows.primary.task_name
+             */
+            attribute: string;
+            operation: "equals";
+            values: any[];
+        }
         export interface Geolocation {
             /**
              * Latitude
@@ -439,6 +493,42 @@ declare namespace Components {
              * Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant
              */
             relevance?: number;
+        }
+        export interface Grant {
+            /**
+             * example:
+             * entity-read
+             */
+            action: string;
+            /**
+             * example:
+             * entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947
+             */
+            resource?: string;
+            effect?: "allow" | "deny";
+            conditions?: /* An additional condition that must be met for the grant */ GrantCondition[];
+        }
+        /**
+         * An additional condition that must be met for the grant
+         */
+        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition;
+        export interface GrantWithDependencies {
+            /**
+             * example:
+             * entity-read
+             */
+            action: string;
+            /**
+             * example:
+             * entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947
+             */
+            resource?: string;
+            effect?: "allow" | "deny";
+            conditions?: /* An additional condition that must be met for the grant */ GrantCondition[];
+            /**
+             * Provided additional dependencies, exploded when storing the role
+             */
+            dependencies?: Grant[];
         }
         export type InviteToken = string;
         /**
@@ -598,6 +688,12 @@ declare namespace Components {
                 name: string;
             }[];
         }
+        /**
+         * Format: <organization_id>:<slug>
+         * example:
+         * 123:owner
+         */
+        export type RoleId = string;
         export interface SearchGeolocation {
             /**
              * Address text to convert into geolocation coordinates
@@ -606,39 +702,29 @@ declare namespace Components {
              */
             address: string;
         }
-        export interface SetPartnerUsersLimitPayload {
+        export interface UpdatePartnerRolePayload {
             /**
-             * The partner organization ID
-             * example:
-             * 456
+             * List of grants (permissions) applied to the role
              */
-            partner_organization_id: string;
+            grants: Grant[];
+            id?: /**
+             * Format: <organization_id>:<slug>
+             * example:
+             * 123:owner
+             */
+            RoleId;
             /**
-             * The maximum number of users allowed for this partnership
+             * Human-friendly name for the role
              * example:
-             * 10
+             * Owner
              */
-            user_limit: number;
-        }
-        export interface SetPartnerUsersLimitResponse {
+            name: string;
             /**
-             * The vendor organization ID
+             * URL-friendly name for the role
              * example:
-             * 123
+             * owner
              */
-            vendor_organization_id: string;
-            /**
-             * The partner organization ID
-             * example:
-             * 456
-             */
-            partner_organization_id: string;
-            /**
-             * The maximum number of users allowed for this partnership
-             * example:
-             * 10
-             */
-            user_limit_number: number;
+            slug: string;
         }
         export interface User {
             /**
@@ -758,6 +844,26 @@ declare namespace Paths {
                  */
                 hits?: number;
                 results?: Components.Schemas.Assignable[];
+            }
+        }
+    }
+    namespace CreatePartnerRole {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+        }
+        export type RequestBody = Components.Schemas.CreatePartnerRolePayload;
+        namespace Responses {
+            export type $201 = Components.Schemas.PartnerRole;
+            export interface $400 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -948,20 +1054,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace SetPartnerUsersLimit {
-        export type RequestBody = Components.Schemas.SetPartnerUsersLimitPayload;
-        namespace Responses {
-            export type $200 = Components.Schemas.SetPartnerUsersLimitResponse;
-            export interface $400 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
-        }
-    }
     namespace UnassignPartnerUserRoles {
         namespace Parameters {
             export type OrgId = /**
@@ -989,6 +1081,28 @@ declare namespace Paths {
                     };
                 }[];
             }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace UpdatePartnerRole {
+        namespace Parameters {
+            export type OrgId = /**
+             * example:
+             * 123
+             */
+            Components.Schemas.OrganizationId;
+            export type RoleId = string;
+        }
+        export interface PathParameters {
+            orgId: Parameters.OrgId;
+            roleId: Parameters.RoleId;
+        }
+        export type RequestBody = Components.Schemas.UpdatePartnerRolePayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.PartnerRole;
             export interface $400 {
             }
             export interface $500 {
@@ -1126,6 +1240,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPartnerRoles.Responses.$200>
   /**
+   * createPartnerRole - createPartnerRole
+   * 
+   * Create a role for a partner organization
+   */
+  'createPartnerRole'(
+    parameters?: Parameters<Paths.CreatePartnerRole.PathParameters> | null,
+    data?: Paths.CreatePartnerRole.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePartnerRole.Responses.$201>
+  /**
+   * updatePartnerRole - updatePartnerRole
+   * 
+   * Update a role for a partner organization
+   */
+  'updatePartnerRole'(
+    parameters?: Parameters<Paths.UpdatePartnerRole.PathParameters> | null,
+    data?: Paths.UpdatePartnerRole.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePartnerRole.Responses.$200>
+  /**
    * assignPartnerUserRoles - assignPartnerUserRoles
    * 
    * Assign roles to a user in a partner organization
@@ -1145,16 +1279,6 @@ export interface OperationMethods {
     data?: Paths.UnassignPartnerUserRoles.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
-  /**
-   * setPartnerUsersLimit - setPartnerUsersLimit
-   * 
-   * Set user limit for a partner organization enforced by the vendor
-   */
-  'setPartnerUsersLimit'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.SetPartnerUsersLimit.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.SetPartnerUsersLimit.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1306,6 +1430,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPartnerRoles.Responses.$200>
+    /**
+     * createPartnerRole - createPartnerRole
+     * 
+     * Create a role for a partner organization
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePartnerRole.PathParameters> | null,
+      data?: Paths.CreatePartnerRole.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePartnerRole.Responses.$201>
+  }
+  ['/v2/partners/{orgId}/roles/{roleId}']: {
+    /**
+     * updatePartnerRole - updatePartnerRole
+     * 
+     * Update a role for a partner organization
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdatePartnerRole.PathParameters> | null,
+      data?: Paths.UpdatePartnerRole.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePartnerRole.Responses.$200>
   }
   ['/v2/partners/{orgId}/users/{userId}/roles']: {
     /**
@@ -1329,18 +1475,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UnassignPartnerUserRoles.Responses.$200>
   }
-  ['/v2/partners/users/limit']: {
-    /**
-     * setPartnerUsersLimit - setPartnerUsersLimit
-     * 
-     * Set user limit for a partner organization enforced by the vendor
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.SetPartnerUsersLimit.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.SetPartnerUsersLimit.Responses.$200>
-  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1356,8 +1490,14 @@ export type AssignableOrganization = Components.Schemas.AssignableOrganization;
 export type AssignablePartnerUser = Components.Schemas.AssignablePartnerUser;
 export type AssignableUser = Components.Schemas.AssignableUser;
 export type BaseAssignable = Components.Schemas.BaseAssignable;
+export type BaseRoleForCreate = Components.Schemas.BaseRoleForCreate;
+export type CreatePartnerRolePayload = Components.Schemas.CreatePartnerRolePayload;
 export type CreatePartnerUserPayload = Components.Schemas.CreatePartnerUserPayload;
+export type EqualsCondition = Components.Schemas.EqualsCondition;
 export type Geolocation = Components.Schemas.Geolocation;
+export type Grant = Components.Schemas.Grant;
+export type GrantCondition = Components.Schemas.GrantCondition;
+export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
 export type InviteToken = Components.Schemas.InviteToken;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type Partner = Components.Schemas.Partner;
@@ -1365,7 +1505,7 @@ export type PartnerId = Components.Schemas.PartnerId;
 export type PartnerInvitationPayload = Components.Schemas.PartnerInvitationPayload;
 export type PartnerRole = Components.Schemas.PartnerRole;
 export type PartnerUser = Components.Schemas.PartnerUser;
+export type RoleId = Components.Schemas.RoleId;
 export type SearchGeolocation = Components.Schemas.SearchGeolocation;
-export type SetPartnerUsersLimitPayload = Components.Schemas.SetPartnerUsersLimitPayload;
-export type SetPartnerUsersLimitResponse = Components.Schemas.SetPartnerUsersLimitResponse;
+export type UpdatePartnerRolePayload = Components.Schemas.UpdatePartnerRolePayload;
 export type User = Components.Schemas.User;
