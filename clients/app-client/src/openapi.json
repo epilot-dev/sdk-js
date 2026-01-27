@@ -22,9 +22,6 @@
   "servers": [
     {
       "url": "https://app.sls.epilot.io"
-    },
-    {
-      "url": "https://app.sls.epilot.io"
     }
   ],
   "security": [
@@ -2454,6 +2451,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "call"
         ],
@@ -2563,6 +2561,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "call"
         ],
@@ -2616,8 +2615,7 @@
             "required": [
               "url",
               "headers",
-              "body",
-              "result"
+              "body"
             ],
             "additionalProperties": false
           },
@@ -2650,8 +2648,10 @@
           }
         },
         "required": [
+          "id",
           "type",
-          "call"
+          "call",
+          "resolved"
         ],
         "additionalProperties": false
       },
@@ -2748,6 +2748,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "call"
         ],
@@ -2846,6 +2847,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "call"
         ],
@@ -2944,6 +2946,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "call"
         ],

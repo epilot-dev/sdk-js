@@ -1437,7 +1437,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "consumptionDataRetrieval";
             /**
@@ -1502,7 +1502,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "contractIdentification";
             auth?: PortalExtensionAuthBlock;
@@ -1574,7 +1574,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "costDataRetrieval";
             /**
@@ -1634,7 +1634,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "meterReadingPlausibilityCheck";
             auth?: PortalExtensionAuthBlock;
@@ -1659,7 +1659,7 @@ declare namespace Components {
             /**
              * Response to the call
              */
-            resolved?: {
+            resolved: {
                 /**
                  * Indicate whether the meter reading is plausible
                  * example:
@@ -1693,7 +1693,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "priceDataRetrieval";
             /**
@@ -1750,7 +1750,7 @@ declare namespace Components {
             /**
              * Identifier of the hook. Should not change between updates.
              */
-            id?: string; // ^[a-zA-Z0-9_-]+$
+            id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "registrationIdentifiersCheck";
             auth?: PortalExtensionAuthBlock;
