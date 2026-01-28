@@ -190,7 +190,7 @@ declare namespace Components {
              * Use case type
              */
             type: "outbound";
-            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+            configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
         export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest;
         export interface CreateUseCaseRequestBase {
@@ -212,6 +212,27 @@ declare namespace Components {
              * UUID of the integration app component instance
              */
             component_id: string; // uuid
+        }
+        /**
+         * Configuration for how the transformed event should be delivered
+         */
+        export interface DeliveryConfig {
+            /**
+             * Delivery mechanism type (currently only webhook is supported)
+             */
+            type: "webhook";
+            /**
+             * Reference to the webhook configuration in svc-webhooks
+             */
+            webhook_id: string;
+            /**
+             * Cached webhook name for display purposes
+             */
+            webhook_name?: string;
+            /**
+             * Cached webhook URL for display purposes
+             */
+            webhook_url?: string;
         }
         export interface EmbeddedInboundUseCaseRequest {
             /**
@@ -265,7 +286,7 @@ declare namespace Components {
              * Use case type
              */
             type: "outbound";
-            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+            configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
         export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest;
         export interface EmbeddedUseCaseRequestBase {
@@ -876,11 +897,79 @@ declare namespace Components {
                 [name: string]: any;
             }[];
         }
+        export interface OutboundConflict {
+            /**
+             * Type of conflict:
+             * - 'event_disabled': Event catalog event is disabled while use case is enabled
+             * - 'all_webhooks_disabled': All webhooks are disabled while use case is enabled
+             * - 'event_enabled_while_disabled': Event is enabled while use case is disabled
+             * - 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled
+             *
+             */
+            type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled";
+            /**
+             * Webhook ID (only present for webhook_enabled_while_disabled conflicts)
+             */
+            webhookId?: string;
+            /**
+             * Human-readable description of the conflict
+             */
+            message: string;
+        }
         /**
-         * Configuration for outbound use cases (epilot to ERP). Structure TBD.
+         * Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.
          */
         export interface OutboundIntegrationEventConfiguration {
-            [name: string]: any;
+            /**
+             * The Event Catalog event name that triggers this outbound flow
+             * example:
+             * contract.created
+             */
+            event_catalog_event: string;
+            /**
+             * List of mappings that transform and deliver the event
+             */
+            mappings: [
+                /* A mapping that transforms an event and delivers it to a webhook */ OutboundMapping,
+                .../* A mapping that transforms an event and delivers it to a webhook */ OutboundMapping[]
+            ];
+        }
+        /**
+         * A mapping that transforms an event and delivers it to a webhook
+         */
+        export interface OutboundMapping {
+            /**
+             * Unique identifier for this mapping
+             */
+            id: string; // uuid
+            /**
+             * Human-readable name for this mapping
+             * example:
+             * ERP Contract Sync
+             */
+            name: string;
+            /**
+             * JSONata expression to transform the event payload
+             * example:
+             * { "id": entity._id, "customer": entity.customer_name }
+             */
+            jsonata_expression: string;
+            /**
+             * Whether this mapping is active
+             */
+            enabled: boolean;
+            delivery: /* Configuration for how the transformed event should be delivered */ DeliveryConfig;
+            /**
+             * Timestamp when the mapping was created
+             */
+            created_at?: string; // date-time
+            /**
+             * Timestamp when the mapping was last updated
+             */
+            updated_at?: string; // date-time
+        }
+        export interface OutboundStatusResponse {
+            useCases: OutboundUseCaseStatus[];
         }
         export interface OutboundUseCase {
             /**
@@ -912,7 +1001,7 @@ declare namespace Components {
              * ISO-8601 timestamp when the use case was last updated
              */
             updated_at: string; // date-time
-            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+            configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
         export interface OutboundUseCaseHistoryEntry {
             /**
@@ -955,7 +1044,44 @@ declare namespace Components {
              * Use case type
              */
             type: "outbound";
-            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+            configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
+        }
+        export interface OutboundUseCaseStatus {
+            /**
+             * Unique identifier for the use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Human-readable name of the use case
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            useCaseEnabled: boolean;
+            /**
+             * The Event Catalog event name that triggers this outbound flow
+             * example:
+             * contract.created
+             */
+            eventCatalogEvent?: string;
+            /**
+             * Whether the event is enabled in Event Catalog. Null if the API is unreachable.
+             */
+            eventEnabled?: boolean | null;
+            webhooks?: WebhookStatus[];
+            /**
+             * Overall status of the use case:
+             * - 'ok': Use case is enabled and all dependencies are properly configured
+             * - 'conflict': Use case has configuration issues (disabled events/webhooks while enabled)
+             * - 'disabled': Use case is disabled
+             *
+             */
+            status: "ok" | "conflict" | "disabled";
+            /**
+             * List of detected conflicts, if any
+             */
+            conflicts?: OutboundConflict[];
         }
         export interface QueryAccessLogsRequest {
             /**
@@ -1482,7 +1608,7 @@ declare namespace Components {
              * Use case type
              */
             type?: "outbound";
-            configuration?: /* Configuration for outbound use cases (epilot to ERP). Structure TBD. */ OutboundIntegrationEventConfiguration;
+            configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
         export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest;
         export interface UpdateUseCaseRequestBase {
@@ -1592,6 +1718,20 @@ declare namespace Components {
              * ISO-8601 timestamp when this history entry was created
              */
             history_created_at: string; // date-time
+        }
+        export interface WebhookStatus {
+            /**
+             * Unique identifier for the webhook
+             */
+            webhookId: string;
+            /**
+             * Human-readable name of the webhook
+             */
+            webhookName?: string;
+            /**
+             * Whether the webhook is enabled. Null if the API is unreachable.
+             */
+            enabled?: boolean | null;
         }
     }
 }
@@ -1770,6 +1910,20 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.GetMonitoringStatsResponse;
             export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetOutboundStatus {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.OutboundStatusResponse;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
@@ -2393,6 +2547,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
   /**
+   * getOutboundStatus - getOutboundStatus
+   * 
+   * Get the status of all outbound use cases for a specific integration.
+   * Returns conflict information when events or webhooks are disabled but the use case is enabled.
+   * 
+   */
+  'getOutboundStatus'(
+    parameters?: Parameters<Paths.GetOutboundStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
+  /**
    * queryAccessLogs - queryAccessLogs
    * 
    * Query API access logs for a specific integration's organization.
@@ -2757,6 +2923,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/outbound-status']: {
+    /**
+     * getOutboundStatus - getOutboundStatus
+     * 
+     * Get the status of all outbound use cases for a specific integration.
+     * Returns conflict information when events or webhooks are disabled but the use case is enabled.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetOutboundStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/monitoring/access-logs']: {
     /**
      * queryAccessLogs - queryAccessLogs
@@ -2784,6 +2964,7 @@ export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseC
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
+export type DeliveryConfig = Components.Schemas.DeliveryConfig;
 export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
 export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutboundUseCaseRequest;
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
@@ -2813,9 +2994,13 @@ export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringEvent = Components.Schemas.MonitoringEvent;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
+export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
+export type OutboundMapping = Components.Schemas.OutboundMapping;
+export type OutboundStatusResponse = Components.Schemas.OutboundStatusResponse;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
+export type OutboundUseCaseStatus = Components.Schemas.OutboundUseCaseStatus;
 export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type QueryMonitoringEventsRequest = Components.Schemas.QueryMonitoringEventsRequest;
@@ -2840,3 +3025,4 @@ export type UseCase = Components.Schemas.UseCase;
 export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
+export type WebhookStatus = Components.Schemas.WebhookStatus;

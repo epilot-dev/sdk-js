@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2007,6 +2007,49 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/outbound-status": {
+      "get": {
+        "operationId": "getOutboundStatus",
+        "summary": "getOutboundStatus",
+        "description": "Get the status of all outbound use cases for a specific integration.\nReturns conflict information when events or webhooks are disabled but the use case is enabled.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved outbound status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/monitoring/access-logs": {
       "post": {
         "operationId": "queryAccessLogs",
@@ -3115,8 +3158,219 @@
       },
       "OutboundIntegrationEventConfiguration": {
         "type": "object",
-        "description": "Configuration for outbound use cases (epilot to ERP). Structure TBD.",
-        "additionalProperties": true
+        "required": [
+          "event_catalog_event",
+          "mappings"
+        ],
+        "description": "Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.",
+        "properties": {
+          "event_catalog_event": {
+            "type": "string",
+            "description": "The Event Catalog event name that triggers this outbound flow",
+            "example": "contract.created"
+          },
+          "mappings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/OutboundMapping"
+            },
+            "description": "List of mappings that transform and deliver the event"
+          }
+        }
+      },
+      "OutboundMapping": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "jsonata_expression",
+          "enabled",
+          "delivery"
+        ],
+        "description": "A mapping that transforms an event and delivers it to a webhook",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this mapping"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for this mapping",
+            "example": "ERP Contract Sync"
+          },
+          "jsonata_expression": {
+            "type": "string",
+            "description": "JSONata expression to transform the event payload",
+            "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this mapping is active",
+            "default": true
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryConfig"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the mapping was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the mapping was last updated"
+          }
+        }
+      },
+      "DeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type",
+          "webhook_id"
+        ],
+        "description": "Configuration for how the transformed event should be delivered",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "webhook"
+            ],
+            "description": "Delivery mechanism type (currently only webhook is supported)"
+          },
+          "webhook_id": {
+            "type": "string",
+            "description": "Reference to the webhook configuration in svc-webhooks"
+          },
+          "webhook_name": {
+            "type": "string",
+            "description": "Cached webhook name for display purposes"
+          },
+          "webhook_url": {
+            "type": "string",
+            "description": "Cached webhook URL for display purposes"
+          }
+        }
+      },
+      "OutboundStatusResponse": {
+        "type": "object",
+        "required": [
+          "useCases"
+        ],
+        "properties": {
+          "useCases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUseCaseStatus"
+            }
+          }
+        }
+      },
+      "OutboundUseCaseStatus": {
+        "type": "object",
+        "required": [
+          "useCaseId",
+          "name",
+          "useCaseEnabled",
+          "status"
+        ],
+        "properties": {
+          "useCaseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name of the use case"
+          },
+          "useCaseEnabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "eventCatalogEvent": {
+            "type": "string",
+            "description": "The Event Catalog event name that triggers this outbound flow",
+            "example": "contract.created"
+          },
+          "eventEnabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the event is enabled in Event Catalog. Null if the API is unreachable."
+          },
+          "webhooks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookStatus"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "conflict",
+              "disabled"
+            ],
+            "description": "Overall status of the use case:\n- 'ok': Use case is enabled and all dependencies are properly configured\n- 'conflict': Use case has configuration issues (disabled events/webhooks while enabled)\n- 'disabled': Use case is disabled\n"
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundConflict"
+            },
+            "description": "List of detected conflicts, if any"
+          }
+        }
+      },
+      "WebhookStatus": {
+        "type": "object",
+        "required": [
+          "webhookId"
+        ],
+        "properties": {
+          "webhookId": {
+            "type": "string",
+            "description": "Unique identifier for the webhook"
+          },
+          "webhookName": {
+            "type": "string",
+            "description": "Human-readable name of the webhook"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the webhook is enabled. Null if the API is unreachable."
+          }
+        }
+      },
+      "OutboundConflict": {
+        "type": "object",
+        "required": [
+          "type",
+          "message"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event_disabled",
+              "all_webhooks_disabled",
+              "event_enabled_while_disabled",
+              "webhook_enabled_while_disabled"
+            ],
+            "description": "Type of conflict:\n- 'event_disabled': Event catalog event is disabled while use case is enabled\n- 'all_webhooks_disabled': All webhooks are disabled while use case is enabled\n- 'event_enabled_while_disabled': Event is enabled while use case is disabled\n- 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled\n"
+          },
+          "webhookId": {
+            "type": "string",
+            "description": "Webhook ID (only present for webhook_enabled_while_disabled conflicts)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the conflict"
+          }
+        }
       },
       "IntegrationEntity": {
         "type": "object",

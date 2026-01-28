@@ -414,6 +414,19 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/outbound-status": {
+      "get": {
+        "operationId": "getOutboundStatus",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/monitoring/access-logs": {
       "post": {
         "operationId": "queryAccessLogs",
