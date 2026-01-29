@@ -26,7 +26,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js /Users/sauerer/epilot/erp-integration-api/lambda/ApiHandlerFunction/openapi.yml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/erp-integration.yaml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
