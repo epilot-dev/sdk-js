@@ -3125,6 +3125,13 @@ declare namespace Components {
          */
         export interface ExtensionHookMeterReadingPlausibilityCheck {
             type: "meterReadingPlausibilityCheck";
+            /**
+             * Mode for plausibility check:
+             * - "check": Validates meter reading and returns valid: boolean (used during submission)
+             * - "range": Returns min/max allowed values for each counter for validation before submission
+             *
+             */
+            plausibility_mode?: "check" | "range";
             auth?: ExtensionAuthBlock;
             call: {
                 /**
@@ -3149,7 +3156,33 @@ declare namespace Components {
              */
             resolved: {
                 /**
-                 * Indicate whether the meter reading is plausible
+                 * Optional path to an array in the response. If specified and the path points to an array,
+                 * the hook will map over each item using 'Item' variable for interpolation.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 * example:
+                 * data.results
+                 */
+                dataPath?: string;
+                /**
+                 * Counter identifier(s) used to match against the meter's counters.
+                 * Can be a string (counter ID) or an object with counter properties.
+                 * The backend resolves this to meter_counter_id in the final response.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 */
+                counter_identifiers?: /**
+                 * Counter identifier(s) used to match against the meter's counters.
+                 * Can be a string (counter ID) or an object with counter properties.
+                 * The backend resolves this to meter_counter_id in the final response.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 */
+                string | {
+                    [name: string]: string;
+                };
+                /**
+                 * Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is "check".
                  * example:
                  * {{CallResponse.data.valid}}
                  */
@@ -3795,7 +3828,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**
@@ -5464,6 +5497,10 @@ declare namespace Components {
                 extension?: PublicExtensionDetails;
                 hook?: PublicContractIdentificationDetails;
             };
+            meterReadingPlausibilityCheck?: {
+                extension?: PublicExtensionDetails;
+                hook?: PublicMeterReadingPlausibilityCheckDetails;
+            };
         }
         export interface PublicExtensionDetails {
             /**
@@ -5477,6 +5514,15 @@ declare namespace Components {
                  */
                 en: string;
             };
+        }
+        export interface PublicMeterReadingPlausibilityCheckDetails {
+            /**
+             * Mode for plausibility check:
+             * - "check": Validates meter reading and returns valid: boolean (used during submission)
+             * - "range": Returns min/max allowed values for validation before submission
+             *
+             */
+            plausibility_mode?: "check" | "range";
         }
         /**
          * The person who recorded the reading
@@ -7915,6 +7961,62 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetAllowedMeterReadingRange {
+        namespace Parameters {
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+            export type MeterId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+            /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            export type Timestamp = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            timestamp?: /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            Parameters.Timestamp;
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    /**
+                     * The ID of the counter
+                     */
+                    meter_counter_id?: string;
+                    /**
+                     * Minimum allowed reading value
+                     */
+                    min_value?: number | null;
+                    /**
+                     * Maximum allowed reading value
+                     */
+                    max_value?: number | null;
+                }[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAutomationContext {
         namespace Parameters {
             export type ActivityId = /**
@@ -10059,8 +10161,8 @@ declare namespace Paths {
     }
     namespace GetPublicPortalExtensionDetailsV3 {
         namespace Parameters {
+            export type Domain = string;
             /**
-             * Organization ID
              * example:
              * 12324
              */
@@ -10073,13 +10175,13 @@ declare namespace Paths {
             Components.Schemas.PortalId;
         }
         export interface QueryParameters {
-            org_id: /**
-             * Organization ID
+            org_id?: /**
              * example:
              * 12324
              */
             Parameters.OrgId;
-            portal_id: Parameters.PortalId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         namespace Responses {
             export type $200 = Components.Schemas.PublicExtensionCapabilities;
@@ -11849,6 +11951,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -11964,6 +12067,10 @@ export interface OperationMethods {
    * getPublicPortalExtensionDetailsV3 - getPublicPortalExtensionDetailsV3
    * 
    * Get public extension details shown to end customers and configuring users.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
    */
   'getPublicPortalExtensionDetailsV3'(
     parameters?: Parameters<Paths.GetPublicPortalExtensionDetailsV3.QueryParameters> | null,
@@ -12847,6 +12954,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
+   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
+   * third-party plausibility check hook using 'range' mode. This endpoint requires 
+   * a plausibility check hook to be configured for the portal.
+   * 
+   */
+  'getAllowedMeterReadingRange'(
+    parameters?: Parameters<Paths.GetAllowedMeterReadingRange.QueryParameters & Paths.GetAllowedMeterReadingRange.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -13318,6 +13436,10 @@ export interface PathsDictionary {
      * getPublicPortalExtensionDetailsV3 - getPublicPortalExtensionDetailsV3
      * 
      * Get public extension details shown to end customers and configuring users.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetPublicPortalExtensionDetailsV3.QueryParameters> | null,
@@ -14355,6 +14477,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
+  ['/v2/portal/metering/reading/allowed-range/{meter_id}']: {
+    /**
+     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
+     * third-party plausibility check hook using 'range' mode. This endpoint requires 
+     * a plausibility check hook to be configured for the portal.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllowedMeterReadingRange.QueryParameters & Paths.GetAllowedMeterReadingRange.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -14741,6 +14876,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
@@ -14850,6 +14986,7 @@ export type PublicContractIdentificationDetails = Components.Schemas.PublicContr
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
 export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
+export type PublicMeterReadingPlausibilityCheckDetails = Components.Schemas.PublicMeterReadingPlausibilityCheckDetails;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;

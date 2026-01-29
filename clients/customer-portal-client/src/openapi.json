@@ -627,7 +627,7 @@
       "get": {
         "operationId": "getPublicPortalExtensionDetailsV3",
         "summary": "getPublicPortalExtensionDetailsV3",
-        "description": "Get public extension details shown to end customers and configuring users.",
+        "description": "Get public extension details shown to end customers and configuring users.\nSupports two identification methods:\n1. Using org_id + portal_id\n2. Using domain\n",
         "tags": [
           "Public"
         ],
@@ -636,21 +636,30 @@
           {
             "in": "query",
             "name": "org_id",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string",
-              "example": 12324,
-              "description": "Organization ID"
-            }
+              "example": 12324
+            },
+            "description": "Organization ID (required if domain is not provided)"
           },
           {
             "in": "query",
             "name": "portal_id",
-            "required": true,
+            "required": false,
             "schema": {
               "$ref": "#/components/schemas/PortalId"
             },
-            "description": "Portal ID"
+            "description": "Portal ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to org_id + portal_id)"
           }
         ],
         "responses": {
@@ -6670,6 +6679,107 @@
         }
       }
     },
+    "/v2/portal/metering/reading/allowed-range/{meter_id}": {
+      "get": {
+        "operationId": "getAllowedMeterReadingRange",
+        "description": "Get allowed reading range for all counters of a meter from the configured \nthird-party plausibility check hook using 'range' mode. This endpoint requires \na plausibility check hook to be configured for the portal.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Origin"
+            },
+            "description": "Origin of the portal"
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false,
+            "description": "If not provided, the system will default to now.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T10:10:00.000Z"
+            }
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "Additional entities to include in the context for variable interpolation in the hook.",
+            "schema": {
+              "$ref": "#/components/schemas/ContextEntities"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Allowed reading ranges for the meter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "meter_counter_id": {
+                            "type": "string",
+                            "description": "The ID of the counter"
+                          },
+                          "min_value": {
+                            "type": "number",
+                            "description": "Minimum allowed reading value",
+                            "nullable": true
+                          },
+                          "max_value": {
+                            "type": "number",
+                            "description": "Maximum allowed reading value",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -12359,6 +12469,17 @@
                 "$ref": "#/components/schemas/PublicContractIdentificationDetails"
               }
             }
+          },
+          "meterReadingPlausibilityCheck": {
+            "type": "object",
+            "properties": {
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicMeterReadingPlausibilityCheckDetails"
+              }
+            }
           }
         }
       },
@@ -12450,6 +12571,19 @@
               "en"
             ],
             "description": "Explanation of the hook."
+          }
+        }
+      },
+      "PublicMeterReadingPlausibilityCheckDetails": {
+        "type": "object",
+        "properties": {
+          "plausibility_mode": {
+            "type": "string",
+            "enum": [
+              "check",
+              "range"
+            ],
+            "description": "Mode for plausibility check:\n- \"check\": Validates meter reading and returns valid: boolean (used during submission)\n- \"range\": Returns min/max allowed values for validation before submission\n"
           }
         }
       },
@@ -12889,6 +13023,15 @@
               "meterReadingPlausibilityCheck"
             ]
           },
+          "plausibility_mode": {
+            "type": "string",
+            "enum": [
+              "check",
+              "range"
+            ],
+            "default": "check",
+            "description": "Mode for plausibility check:\n- \"check\": Validates meter reading and returns valid: boolean (used during submission)\n- \"range\": Returns min/max allowed values for each counter for validation before submission\n"
+          },
           "auth": {
             "$ref": "#/components/schemas/ExtensionAuthBlock"
           },
@@ -12919,17 +13062,39 @@
             "required": [
               "url",
               "headers",
-              "body",
-              "result"
+              "body"
             ]
           },
           "resolved": {
             "type": "object",
             "description": "Response to the call",
             "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to an array in the response. If specified and the path points to an array,\nthe hook will map over each item using 'Item' variable for interpolation.\nRelevant only if plausibility_mode is \"range\".\n",
+                "example": "data.results"
+              },
+              "counter_identifiers": {
+                "description": "Counter identifier(s) used to match against the meter's counters.\nCan be a string (counter ID) or an object with counter properties.\nThe backend resolves this to meter_counter_id in the final response.\nRelevant only if plausibility_mode is \"range\".\n",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "example": "{{Item.counter_id}}"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "example": {
+                      "obis_code": "{{Item.obis}}"
+                    }
+                  }
+                ]
+              },
               "valid": {
                 "type": "string",
-                "description": "Indicate whether the meter reading is plausible",
+                "description": "Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is \"check\".",
                 "example": "{{CallResponse.data.valid}}"
               },
               "upper_limit": {
@@ -13328,7 +13493,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
