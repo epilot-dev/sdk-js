@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.25.0",
+    "version": "0.26.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -1907,11 +1907,11 @@
         }
       }
     },
-    "/v1/integrations/{integrationId}/monitoring/events": {
+    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
-        "operationId": "queryMonitoringEvents",
-        "summary": "queryMonitoringEvents",
-        "description": "Query ERP sync monitoring events for a specific integration.\nReturns detailed information about inbound/outbound sync events,\nincluding success rates, error breakdowns, and processing metrics.\n",
+        "operationId": "queryInboundMonitoringEvents",
+        "summary": "queryInboundMonitoringEvents",
+        "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -1933,14 +1933,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/QueryMonitoringEventsRequest"
+                "$ref": "#/components/schemas/QueryInboundMonitoringEventsRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/QueryMonitoringEventsResponse"
+            "$ref": "#/components/responses/QueryInboundMonitoringEventsResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1961,7 +1961,7 @@
       "post": {
         "operationId": "getMonitoringStats",
         "summary": "getMonitoringStats",
-        "description": "Get aggregated statistics for ERP sync monitoring events for a specific integration.\nReturns summary metrics like total events, success/error counts,\nand breakdowns by use case, direction, and sync type.\n",
+        "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2084,6 +2084,56 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/QueryAccessLogsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
+      "post": {
+        "operationId": "queryOutboundMonitoringEvents",
+        "summary": "queryOutboundMonitoringEvents",
+        "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryOutboundMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryOutboundMonitoringEventsResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -3930,21 +3980,13 @@
           }
         }
       },
-      "QueryMonitoringEventsRequest": {
+      "QueryInboundMonitoringEventsRequest": {
         "type": "object",
         "properties": {
           "use_case_id": {
             "type": "string",
             "format": "uuid",
             "description": "Filter by use case ID"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Filter by sync direction"
           },
           "event_type": {
             "type": "string",
@@ -3960,8 +4002,7 @@
             "type": "string",
             "enum": [
               "entity",
-              "meter_reading",
-              "webhook"
+              "meter_reading"
             ],
             "description": "Filter by sync type"
           },
@@ -3981,8 +4022,7 @@
               "configuration",
               "downstream_api",
               "timeout",
-              "system",
-              "webhook_delivery"
+              "system"
             ],
             "description": "Filter by error category (only applicable when status=error)"
           },
@@ -4172,19 +4212,6 @@
       "GetMonitoringStatsRequest": {
         "type": "object",
         "properties": {
-          "use_case_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Filter by use case ID"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Filter by sync direction"
-          },
           "from_date": {
             "type": "string",
             "format": "date-time",
@@ -4197,12 +4224,11 @@
             "description": "End date for statistics period (inclusive)",
             "example": "2025-01-31T23:59:59Z"
           },
-          "group_by": {
+          "inbound_group_by": {
             "type": "array",
             "items": {
               "type": "string",
               "enum": [
-                "direction",
                 "use_case_id",
                 "sync_type",
                 "status",
@@ -4211,20 +4237,275 @@
                 "date"
               ]
             },
-            "description": "Fields to group statistics by",
+            "description": "Fields to group inbound statistics by",
             "example": [
-              "direction",
+              "use_case_id",
+              "status"
+            ]
+          },
+          "outbound_group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "event_name",
+                "status",
+                "webhook_config_id",
+                "date"
+              ]
+            },
+            "description": "Fields to group outbound statistics by",
+            "example": [
+              "event_name",
               "status"
             ]
           }
         }
       },
-      "MonitoringEvent": {
+      "QueryOutboundMonitoringEventsRequest": {
+        "type": "object",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (event_catalog_event). If not specified, returns events for all linked event names in the integration's outbound use cases.",
+            "example": "automation_flow_target"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Filter by delivery status"
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Filter by webhook configuration ID"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "OutboundMonitoringEvent": {
         "type": "object",
         "required": [
           "org_id",
           "event_id",
-          "direction",
+          "event_name",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique event identifier"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Event name (event_catalog_event)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Delivery status"
+          },
+          "url": {
+            "type": "string",
+            "description": "Target URL"
+          },
+          "http_method": {
+            "type": "string",
+            "description": "HTTP method used (e.g., POST)"
+          },
+          "http_response": {
+            "type": "object",
+            "description": "HTTP response details (status_code, message, headers)",
+            "additionalProperties": true
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Webhook configuration ID"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata (webhook_id, organization details, correlation_id, etc.)",
+            "additionalProperties": true
+          },
+          "execution_context": {
+            "type": "object",
+            "description": "Execution context (execution_arn, state_machine_arn, etc.)",
+            "additionalProperties": true
+          },
+          "payload": {
+            "type": "object",
+            "description": "Payload that was sent",
+            "additionalProperties": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was last updated"
+          }
+        }
+      },
+      "MonitoringStats": {
+        "type": "object",
+        "required": [
+          "inbound",
+          "outbound"
+        ],
+        "properties": {
+          "inbound": {
+            "type": "object",
+            "description": "Statistics for inbound (ERP sync) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count",
+              "skipped_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of inbound events in the period"
+              },
+              "total_correlations": {
+                "type": "integer",
+                "description": "Total number of unique correlation IDs"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful events"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed events"
+              },
+              "skipped_count": {
+                "type": "integer",
+                "description": "Number of skipped events"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested inbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "description": "Statistics for outbound (webhook delivery) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of outbound events in the period"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful deliveries"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed deliveries"
+              },
+              "pending_count": {
+                "type": "integer",
+                "description": "Number of pending deliveries"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested outbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "InboundMonitoringEvent": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "event_id",
           "event_type",
           "object_type",
           "sync_type",
@@ -4256,14 +4537,6 @@
             "nullable": true,
             "description": "Use case ID"
           },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Sync direction"
-          },
           "event_type": {
             "type": "string",
             "enum": [
@@ -4282,8 +4555,7 @@
             "type": "string",
             "enum": [
               "entity",
-              "meter_reading",
-              "webhook"
+              "meter_reading"
             ],
             "description": "Type of sync operation"
           },
@@ -4314,8 +4586,7 @@
               "configuration",
               "downstream_api",
               "timeout",
-              "system",
-              "webhook_delivery"
+              "system"
             ],
             "description": "Error category (when status=error)"
           },
@@ -4323,16 +4594,6 @@
             "type": "integer",
             "nullable": true,
             "description": "Processing duration in milliseconds"
-          },
-          "target_url": {
-            "type": "string",
-            "nullable": true,
-            "description": "Target URL for outbound requests"
-          },
-          "http_status_code": {
-            "type": "integer",
-            "nullable": true,
-            "description": "HTTP status code from target (outbound only)"
           },
           "received_at": {
             "type": "string",
@@ -4343,57 +4604,6 @@
             "type": "string",
             "format": "date-time",
             "description": "When processing completed"
-          }
-        }
-      },
-      "MonitoringStats": {
-        "type": "object",
-        "required": [
-          "total_events",
-          "total_correlations",
-          "success_count",
-          "error_count",
-          "skipped_count"
-        ],
-        "properties": {
-          "total_events": {
-            "type": "integer",
-            "description": "Total number of events in the period"
-          },
-          "total_correlations": {
-            "type": "integer",
-            "description": "Total number of unique correlation IDs (a correlation_id groups multiple event_ids)"
-          },
-          "success_count": {
-            "type": "integer",
-            "description": "Number of successful events"
-          },
-          "error_count": {
-            "type": "integer",
-            "description": "Number of failed events"
-          },
-          "skipped_count": {
-            "type": "integer",
-            "description": "Number of skipped events"
-          },
-          "success_rate": {
-            "type": "number",
-            "format": "float",
-            "description": "Success rate as percentage (0-100)"
-          },
-          "last_error_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "Timestamp of the most recent error"
-          },
-          "breakdown": {
-            "type": "array",
-            "description": "Statistics breakdown by requested group_by fields",
-            "items": {
-              "type": "object",
-              "additionalProperties": true
-            }
           }
         }
       }
@@ -4439,8 +4649,8 @@
           }
         }
       },
-      "QueryMonitoringEventsResponse": {
-        "description": "Monitoring events queried successfully",
+      "QueryInboundMonitoringEventsResponse": {
+        "description": "Inbound monitoring events queried successfully",
         "content": {
           "application/json": {
             "schema": {
@@ -4449,9 +4659,9 @@
                 "data": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MonitoringEvent"
+                    "$ref": "#/components/schemas/InboundMonitoringEvent"
                   },
-                  "description": "List of monitoring events"
+                  "description": "List of inbound monitoring events"
                 },
                 "next_cursor": {
                   "type": "object",
@@ -4510,6 +4720,43 @@
                       "format": "date-time"
                     },
                     "request_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryOutboundMonitoringEventsResponse": {
+        "description": "Outbound monitoring events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutboundMonitoringEvent"
+                  },
+                  "description": "List of outbound monitoring events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "event_id": {
                       "type": "string"
                     }
                   }

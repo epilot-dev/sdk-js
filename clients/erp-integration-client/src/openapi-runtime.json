@@ -376,9 +376,9 @@
         "responses": {}
       }
     },
-    "/v1/integrations/{integrationId}/monitoring/events": {
+    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
-        "operationId": "queryMonitoringEvents",
+        "operationId": "queryInboundMonitoringEvents",
         "parameters": [
           {
             "name": "integrationId",
@@ -445,6 +445,25 @@
         },
         "responses": {}
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
+      "post": {
+        "operationId": "queryOutboundMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -469,7 +488,7 @@
           "application/json": {}
         }
       },
-      "QueryMonitoringEventsResponse": {
+      "QueryInboundMonitoringEventsResponse": {
         "content": {
           "application/json": {}
         }
@@ -480,6 +499,11 @@
         }
       },
       "QueryAccessLogsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryOutboundMonitoringEventsResponse": {
         "content": {
           "application/json": {}
         }

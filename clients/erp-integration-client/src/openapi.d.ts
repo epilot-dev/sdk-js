@@ -71,16 +71,33 @@ declare namespace Components {
              */
             has_more?: boolean;
         }
-        export interface QueryMonitoringEventsResponse {
+        export interface QueryInboundMonitoringEventsResponse {
             /**
-             * List of monitoring events
+             * List of inbound monitoring events
              */
-            data?: Schemas.MonitoringEvent[];
+            data?: Schemas.InboundMonitoringEvent[];
             /**
              * Cursor to fetch the next page. Null if no more results.
              */
             next_cursor?: {
                 completed_at?: string; // date-time
+                event_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
+             */
+            has_more?: boolean;
+        }
+        export interface QueryOutboundMonitoringEventsResponse {
+            /**
+             * List of outbound monitoring events
+             */
+            data?: Schemas.OutboundMonitoringEvent[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                created_at?: string; // date-time
                 event_id?: string;
             } | null;
             /**
@@ -386,14 +403,6 @@ declare namespace Components {
         }
         export interface GetMonitoringStatsRequest {
             /**
-             * Filter by use case ID
-             */
-            use_case_id?: string; // uuid
-            /**
-             * Filter by sync direction
-             */
-            direction?: "inbound" | "outbound";
-            /**
              * Start date for statistics period (inclusive)
              * example:
              * 2025-01-01T00:00:00Z
@@ -406,14 +415,23 @@ declare namespace Components {
              */
             to_date?: string; // date-time
             /**
-             * Fields to group statistics by
+             * Fields to group inbound statistics by
              * example:
              * [
-             *   "direction",
+             *   "use_case_id",
              *   "status"
              * ]
              */
-            group_by?: ("direction" | "use_case_id" | "sync_type" | "status" | "error_category" | "object_type" | "date")[];
+            inbound_group_by?: ("use_case_id" | "sync_type" | "status" | "error_category" | "object_type" | "date")[];
+            /**
+             * Fields to group outbound statistics by
+             * example:
+             * [
+             *   "event_name",
+             *   "status"
+             * ]
+             */
+            outbound_group_by?: ("event_name" | "status" | "webhook_config_id" | "date")[];
         }
         /**
          * Configuration for inbound use cases (ERP to epilot)
@@ -427,6 +445,68 @@ declare namespace Components {
              * Array of meter reading configurations for this event
              */
             meter_readings?: IntegrationMeterReading[];
+        }
+        export interface InboundMonitoringEvent {
+            /**
+             * Organization ID
+             */
+            org_id: string;
+            /**
+             * Unique event identifier
+             */
+            event_id: string;
+            /**
+             * Correlation ID for tracing related events
+             */
+            correlation_id?: string | null;
+            /**
+             * Integration ID
+             */
+            integration_id?: string | null;
+            /**
+             * Use case ID
+             */
+            use_case_id?: string | null;
+            /**
+             * Type of event
+             */
+            event_type: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
+            /**
+             * Type of object being synced (e.g., 'contract', 'meter')
+             */
+            object_type: string;
+            /**
+             * Type of sync operation
+             */
+            sync_type: "entity" | "meter_reading";
+            /**
+             * Processing status
+             */
+            status: "success" | "error" | "skipped";
+            /**
+             * Error code (when status=error)
+             */
+            error_code?: string | null;
+            /**
+             * Error message (when status=error)
+             */
+            error_message?: string | null;
+            /**
+             * Error category (when status=error)
+             */
+            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system";
+            /**
+             * Processing duration in milliseconds
+             */
+            processing_duration_ms?: number | null;
+            /**
+             * When the event was received
+             */
+            received_at: string; // date-time
+            /**
+             * When processing completed
+             */
+            completed_at: string; // date-time
         }
         export interface InboundUseCase {
             /**
@@ -787,115 +867,81 @@ declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
-        export interface MonitoringEvent {
-            /**
-             * Organization ID
-             */
-            org_id: string;
-            /**
-             * Unique event identifier
-             */
-            event_id: string;
-            /**
-             * Correlation ID for tracing related events
-             */
-            correlation_id?: string | null;
-            /**
-             * Integration ID
-             */
-            integration_id?: string | null;
-            /**
-             * Use case ID
-             */
-            use_case_id?: string | null;
-            /**
-             * Sync direction
-             */
-            direction: "inbound" | "outbound";
-            /**
-             * Type of event
-             */
-            event_type: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
-            /**
-             * Type of object being synced (e.g., 'contract', 'meter')
-             */
-            object_type: string;
-            /**
-             * Type of sync operation
-             */
-            sync_type: "entity" | "meter_reading" | "webhook";
-            /**
-             * Processing status
-             */
-            status: "success" | "error" | "skipped";
-            /**
-             * Error code (when status=error)
-             */
-            error_code?: string | null;
-            /**
-             * Error message (when status=error)
-             */
-            error_message?: string | null;
-            /**
-             * Error category (when status=error)
-             */
-            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system" | "webhook_delivery";
-            /**
-             * Processing duration in milliseconds
-             */
-            processing_duration_ms?: number | null;
-            /**
-             * Target URL for outbound requests
-             */
-            target_url?: string | null;
-            /**
-             * HTTP status code from target (outbound only)
-             */
-            http_status_code?: number | null;
-            /**
-             * When the event was received
-             */
-            received_at: string; // date-time
-            /**
-             * When processing completed
-             */
-            completed_at: string; // date-time
-        }
         export interface MonitoringStats {
             /**
-             * Total number of events in the period
+             * Statistics for inbound (ERP sync) events
              */
-            total_events: number;
+            inbound: {
+                /**
+                 * Total number of inbound events in the period
+                 */
+                total_events: number;
+                /**
+                 * Total number of unique correlation IDs
+                 */
+                total_correlations?: number;
+                /**
+                 * Number of successful events
+                 */
+                success_count: number;
+                /**
+                 * Number of failed events
+                 */
+                error_count: number;
+                /**
+                 * Number of skipped events
+                 */
+                skipped_count: number;
+                /**
+                 * Success rate as percentage (0-100)
+                 */
+                success_rate?: number; // float
+                /**
+                 * Timestamp of the most recent error
+                 */
+                last_error_at?: string | null; // date-time
+                /**
+                 * Statistics breakdown by requested inbound_group_by fields
+                 */
+                breakdown?: {
+                    [name: string]: any;
+                }[];
+            };
             /**
-             * Total number of unique correlation IDs (a correlation_id groups multiple event_ids)
+             * Statistics for outbound (webhook delivery) events
              */
-            total_correlations: number;
-            /**
-             * Number of successful events
-             */
-            success_count: number;
-            /**
-             * Number of failed events
-             */
-            error_count: number;
-            /**
-             * Number of skipped events
-             */
-            skipped_count: number;
-            /**
-             * Success rate as percentage (0-100)
-             */
-            success_rate?: number; // float
-            /**
-             * Timestamp of the most recent error
-             */
-            last_error_at?: string | null; // date-time
-            /**
-             * Statistics breakdown by requested group_by fields
-             */
-            breakdown?: {
-                [name: string]: any;
-            }[];
+            outbound: {
+                /**
+                 * Total number of outbound events in the period
+                 */
+                total_events: number;
+                /**
+                 * Number of successful deliveries
+                 */
+                success_count: number;
+                /**
+                 * Number of failed deliveries
+                 */
+                error_count: number;
+                /**
+                 * Number of pending deliveries
+                 */
+                pending_count?: number;
+                /**
+                 * Success rate as percentage (0-100)
+                 */
+                success_rate?: number; // float
+                /**
+                 * Timestamp of the most recent error
+                 */
+                last_error_at?: string | null; // date-time
+                /**
+                 * Statistics breakdown by requested outbound_group_by fields
+                 */
+                breakdown?: {
+                    [name: string]: any;
+                }[];
+            };
         }
         export interface OutboundConflict {
             /**
@@ -965,6 +1011,68 @@ declare namespace Components {
             created_at?: string; // date-time
             /**
              * Timestamp when the mapping was last updated
+             */
+            updated_at?: string; // date-time
+        }
+        export interface OutboundMonitoringEvent {
+            /**
+             * Organization ID
+             */
+            org_id: string;
+            /**
+             * Unique event identifier
+             */
+            event_id: string;
+            /**
+             * Event name (event_catalog_event)
+             */
+            event_name: string;
+            /**
+             * Delivery status
+             */
+            status: "succeeded" | "failed" | "pending";
+            /**
+             * Target URL
+             */
+            url?: string;
+            /**
+             * HTTP method used (e.g., POST)
+             */
+            http_method?: string;
+            /**
+             * HTTP response details (status_code, message, headers)
+             */
+            http_response?: {
+                [name: string]: any;
+            };
+            /**
+             * Webhook configuration ID
+             */
+            webhook_config_id?: string;
+            /**
+             * Additional metadata (webhook_id, organization details, correlation_id, etc.)
+             */
+            metadata?: {
+                [name: string]: any;
+            };
+            /**
+             * Execution context (execution_arn, state_machine_arn, etc.)
+             */
+            execution_context?: {
+                [name: string]: any;
+            };
+            /**
+             * Payload that was sent
+             */
+            payload?: {
+                [name: string]: any;
+            };
+            /**
+             * When the event was created
+             */
+            created_at: string; // date-time
+            /**
+             * When the event was last updated
              */
             updated_at?: string; // date-time
         }
@@ -1185,15 +1293,11 @@ declare namespace Components {
                 event_id?: string;
             };
         }
-        export interface QueryMonitoringEventsRequest {
+        export interface QueryInboundMonitoringEventsRequest {
             /**
              * Filter by use case ID
              */
             use_case_id?: string; // uuid
-            /**
-             * Filter by sync direction
-             */
-            direction?: "inbound" | "outbound";
             /**
              * Filter by event type
              */
@@ -1201,7 +1305,7 @@ declare namespace Components {
             /**
              * Filter by sync type
              */
-            sync_type?: "entity" | "meter_reading" | "webhook";
+            sync_type?: "entity" | "meter_reading";
             /**
              * Filter by processing status
              */
@@ -1209,7 +1313,7 @@ declare namespace Components {
             /**
              * Filter by error category (only applicable when status=error)
              */
-            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system" | "webhook_delivery";
+            error_category?: "validation" | "configuration" | "downstream_api" | "timeout" | "system";
             /**
              * Filter by correlation ID
              */
@@ -1248,6 +1352,53 @@ declare namespace Components {
                  * Timestamp from the last event in the previous page
                  */
                 completed_at?: string; // date-time
+                /**
+                 * Event ID from the last event in the previous page
+                 */
+                event_id?: string;
+            };
+        }
+        export interface QueryOutboundMonitoringEventsRequest {
+            /**
+             * Filter by event name (event_catalog_event). If not specified, returns events for all linked event names in the integration's outbound use cases.
+             * example:
+             * automation_flow_target
+             */
+            event_name?: string;
+            /**
+             * Filter by delivery status
+             */
+            status?: "succeeded" | "failed" | "pending";
+            /**
+             * Filter by webhook configuration ID
+             */
+            webhook_config_id?: string;
+            /**
+             * Filter events from this date (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * Filter events until this date (inclusive)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Maximum number of results to return
+             * example:
+             * 50
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last event in the previous page
+                 */
+                created_at?: string; // date-time
                 /**
                  * Event ID from the last event in the previous page
                  */
@@ -2084,16 +2235,32 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace QueryMonitoringEvents {
+    namespace QueryInboundMonitoringEvents {
         namespace Parameters {
             export type IntegrationId = string; // uuid
         }
         export interface PathParameters {
             integrationId: Parameters.IntegrationId /* uuid */;
         }
-        export type RequestBody = Components.Schemas.QueryMonitoringEventsRequest;
+        export type RequestBody = Components.Schemas.QueryInboundMonitoringEventsRequest;
         namespace Responses {
-            export type $200 = Components.Responses.QueryMonitoringEventsResponse;
+            export type $200 = Components.Responses.QueryInboundMonitoringEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace QueryOutboundMonitoringEvents {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.QueryOutboundMonitoringEventsRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.QueryOutboundMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
@@ -2521,24 +2688,24 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
   /**
-   * queryMonitoringEvents - queryMonitoringEvents
+   * queryInboundMonitoringEvents - queryInboundMonitoringEvents
    * 
-   * Query ERP sync monitoring events for a specific integration.
-   * Returns detailed information about inbound/outbound sync events,
+   * Query inbound monitoring events for a specific integration.
+   * Returns detailed information about inbound sync events from ERP systems,
    * including success rates, error breakdowns, and processing metrics.
    * 
    */
-  'queryMonitoringEvents'(
-    parameters?: Parameters<Paths.QueryMonitoringEvents.PathParameters> | null,
-    data?: Paths.QueryMonitoringEvents.RequestBody,
+  'queryInboundMonitoringEvents'(
+    parameters?: Parameters<Paths.QueryInboundMonitoringEvents.PathParameters> | null,
+    data?: Paths.QueryInboundMonitoringEvents.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.QueryMonitoringEvents.Responses.$200>
+  ): OperationResponse<Paths.QueryInboundMonitoringEvents.Responses.$200>
   /**
    * getMonitoringStats - getMonitoringStats
    * 
-   * Get aggregated statistics for ERP sync monitoring events for a specific integration.
-   * Returns summary metrics like total events, success/error counts,
-   * and breakdowns by use case, direction, and sync type.
+   * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+   * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
+   * including success/error counts and optional breakdowns.
    * 
    */
   'getMonitoringStats'(
@@ -2571,6 +2738,19 @@ export interface OperationMethods {
     data?: Paths.QueryAccessLogs.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryAccessLogs.Responses.$200>
+  /**
+   * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
+   * 
+   * Query outbound monitoring events for a specific integration.
+   * Returns detailed information about outbound event deliveries,
+   * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+   * 
+   */
+  'queryOutboundMonitoringEvents'(
+    parameters?: Parameters<Paths.QueryOutboundMonitoringEvents.PathParameters> | null,
+    data?: Paths.QueryOutboundMonitoringEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -2893,28 +3073,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegrationAppMapping.Responses.$200>
   }
-  ['/v1/integrations/{integrationId}/monitoring/events']: {
+  ['/v1/integrations/{integrationId}/monitoring/inbound-events']: {
     /**
-     * queryMonitoringEvents - queryMonitoringEvents
+     * queryInboundMonitoringEvents - queryInboundMonitoringEvents
      * 
-     * Query ERP sync monitoring events for a specific integration.
-     * Returns detailed information about inbound/outbound sync events,
+     * Query inbound monitoring events for a specific integration.
+     * Returns detailed information about inbound sync events from ERP systems,
      * including success rates, error breakdowns, and processing metrics.
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.QueryMonitoringEvents.PathParameters> | null,
-      data?: Paths.QueryMonitoringEvents.RequestBody,
+      parameters?: Parameters<Paths.QueryInboundMonitoringEvents.PathParameters> | null,
+      data?: Paths.QueryInboundMonitoringEvents.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.QueryMonitoringEvents.Responses.$200>
+    ): OperationResponse<Paths.QueryInboundMonitoringEvents.Responses.$200>
   }
   ['/v1/integrations/{integrationId}/monitoring/stats']: {
     /**
      * getMonitoringStats - getMonitoringStats
      * 
-     * Get aggregated statistics for ERP sync monitoring events for a specific integration.
-     * Returns summary metrics like total events, success/error counts,
-     * and breakdowns by use case, direction, and sync type.
+     * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+     * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
+     * including success/error counts and optional breakdowns.
      * 
      */
     'post'(
@@ -2952,6 +3132,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.QueryAccessLogs.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/monitoring/outbound-events']: {
+    /**
+     * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
+     * 
+     * Query outbound monitoring events for a specific integration.
+     * Returns detailed information about outbound event deliveries,
+     * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryOutboundMonitoringEvents.PathParameters> | null,
+      data?: Paths.QueryOutboundMonitoringEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -2975,6 +3170,7 @@ export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Req
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
+export type InboundMonitoringEvent = Components.Schemas.InboundMonitoringEvent;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
 export type Integration = Components.Schemas.Integration;
@@ -2992,18 +3188,19 @@ export type MappingSimulationResponse = Components.Schemas.MappingSimulationResp
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
-export type MonitoringEvent = Components.Schemas.MonitoringEvent;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
+export type OutboundMonitoringEvent = Components.Schemas.OutboundMonitoringEvent;
 export type OutboundStatusResponse = Components.Schemas.OutboundStatusResponse;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type OutboundUseCaseStatus = Components.Schemas.OutboundUseCaseStatus;
 export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
-export type QueryMonitoringEventsRequest = Components.Schemas.QueryMonitoringEventsRequest;
+export type QueryInboundMonitoringEventsRequest = Components.Schemas.QueryInboundMonitoringEventsRequest;
+export type QueryOutboundMonitoringEventsRequest = Components.Schemas.QueryOutboundMonitoringEventsRequest;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationRefItemConfig = Components.Schemas.RelationRefItemConfig;
