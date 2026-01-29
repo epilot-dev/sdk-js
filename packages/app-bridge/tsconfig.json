@@ -24,5 +24,6 @@
     "noUncheckedSideEffectImports": true,
     "types": ["vitest/globals"]
   },
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["examples/**", "node_modules/**"]
 }
