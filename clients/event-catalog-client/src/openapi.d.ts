@@ -38,6 +38,10 @@ declare namespace Components {
          *   "_event_source": {
          *     "type": "string",
          *     "description": "Source that triggered the event"
+         *   },
+         *   "_ack_id": {
+         *     "type": "string",
+         *     "description": "Unique acknowledgment tracking ID for the event"
          *   }
          * }
          */
@@ -123,6 +127,8 @@ declare namespace Components {
          *   "_event_name": "MeterReading",
          *   "_event_version": "1.0.0",
          *   "_event_source": "api",
+         *   "_trigger_source_type": "api",
+         *   "_trigger_source": "user_123456",
          *   "reading_value": 123.45,
          *   "reading_date": "2024-01-01T11:59:00Z",
          *   "read_by": "John Doe",
@@ -166,6 +172,29 @@ declare namespace Components {
              * Source that triggered the event
              */
             _event_source: string;
+            /**
+             * The type of system that triggered the event.
+             * Common values: api, automation, operation, portal_user
+             *
+             * example:
+             * api
+             */
+            _trigger_source_type?: string;
+            /**
+             * Identifier of the specific trigger source.
+             * - For api: User ID or API key identifier
+             * - For automation: Automation execution ID
+             * - For operation: Activity ID from the entity operation
+             * - For portal_user: Portal user email
+             *
+             */
+            _trigger_source?: string;
+            /**
+             * Unique acknowledgment tracking ID for the event.
+             * Used to track event delivery and processing status.
+             *
+             */
+            _ack_id?: string;
         }
         /**
          * Event configuration with required fields
@@ -294,6 +323,16 @@ declare namespace Components {
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether this event can be explicitly triggered by automations.
+             * When true, the event will appear in the automation builder as a
+             * "Trigger Event" action option.
+             * Defaults to false if not specified.
+             *
+             * example:
+             * true
+             */
+            automation_trigger?: boolean;
         }
         /**
          * Base properties shared between EventConfig and UpdateEventPayload
@@ -422,6 +461,16 @@ declare namespace Components {
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether this event can be explicitly triggered by automations.
+             * When true, the event will appear in the automation builder as a
+             * "Trigger Event" action option.
+             * Defaults to false if not specified.
+             *
+             * example:
+             * true
+             */
+            automation_trigger?: boolean;
         }
         /**
          * JSON Schema declaring the event payload structure
@@ -675,6 +724,22 @@ declare namespace Components {
              * Whether this field is required in the event payload
              */
             required?: boolean;
+            /**
+             * Optional JSONata expression to extract the field value from the hydrated entity graph.
+             *
+             * The expression has access to all hydrated graph nodes by their node ID.
+             * If not specified, the field value must be provided as input when triggering the event.
+             *
+             * Examples:
+             *   - "ticket.meter_reading_value" (simple path)
+             *   - "contact.email[0].email" (nested/array access)
+             *   - "ticket.reading_timestamp ?? $now()" (with fallback)
+             *   - "$number(meter_counter.reading_value)" (type coercion)
+             *
+             * example:
+             * ticket.meter_reading_value
+             */
+            graph_source?: string;
         }
         export type SchemaField = /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
         export interface SearchOptions {
@@ -722,6 +787,74 @@ declare namespace Components {
              * evt_1234567890abcdef
              */
             event_id?: string;
+        }
+        /**
+         * Payload for explicitly triggering an event via API
+         */
+        export interface TriggerEventPayload {
+            /**
+             * Entity seed for graph hydration. Required for events that have an entity_graph defined.
+             * Specifies which entity to start graph traversal from.
+             *
+             */
+            seed?: {
+                /**
+                 * Entity ID to seed the graph hydration
+                 */
+                entity_id: string; // uuid
+                /**
+                 * Node ID from the event's entity_graph definition that matches
+                 * the seed entity. Must be a valid node in the event's graph.
+                 *
+                 */
+                node_id: string;
+            };
+            /**
+             * Input field values for the event. Keys must match the event's
+             * schema_fields definitions. Values are validated against each
+             * field's JSON Schema.
+             *
+             */
+            fields?: {
+                [name: string]: any;
+            };
+            /**
+             * Optional list of node IDs to skip during entity graph hydration.
+             * These nodes will be null/undefined in the event payload.
+             *
+             */
+            skip_hydration?: string[];
+            /**
+             * The type of system that triggered the event.
+             * Examples: api, automation, operation, portal_user
+             * Defaults to "api" if not specified.
+             *
+             */
+            _trigger_source_type?: string;
+            /**
+             * Identifier of the specific trigger source.
+             * Examples: user ID, automation execution ID, activity ID, portal user email
+             * Defaults to the calling user ID if not specified.
+             *
+             */
+            _trigger_source?: string;
+        }
+        /**
+         * Response from triggering an event
+         */
+        export interface TriggerEventResponse {
+            /**
+             * Whether the event was triggered successfully
+             */
+            success: boolean;
+            /**
+             * The unique event ID (ULID) assigned to this event
+             */
+            event_id: string;
+            /**
+             * EventBridge event ID from publishing
+             */
+            event_bridge_event_id?: string;
         }
         /**
          * Payload for updating an event configuration.
@@ -853,6 +986,16 @@ declare namespace Components {
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether this event can be explicitly triggered by automations.
+             * When true, the event will appear in the automation builder as a
+             * "Trigger Event" action option.
+             * Defaults to false if not specified.
+             *
+             * example:
+             * true
+             */
+            automation_trigger?: boolean;
         }
     }
 }
@@ -1080,6 +1223,8 @@ declare namespace Paths {
                  *   "_event_name": "MeterReading",
                  *   "_event_version": "1.0.0",
                  *   "_event_source": "api",
+                 *   "_trigger_source_type": "api",
+                 *   "_trigger_source": "user_123456",
                  *   "reading_value": 123.45,
                  *   "reading_date": "2024-01-01T11:59:00Z",
                  *   "read_by": "John Doe",
@@ -1113,6 +1258,24 @@ declare namespace Paths {
                      */
                     event_id?: string;
                 } | null;
+            }
+        }
+    }
+    namespace TriggerEvent {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /* Payload for explicitly triggering an event via API */ Components.Schemas.TriggerEventPayload;
+        namespace Responses {
+            export type $200 = /* Response from triggering an event */ Components.Schemas.TriggerEventResponse;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -1180,6 +1343,23 @@ export interface OperationMethods {
     data?: Paths.SearchEventHistory.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchEventHistory.Responses.$200>
+  /**
+   * triggerEvent - triggerEvent
+   * 
+   * Explicitly trigger an event by providing input field values and an optional entity seed
+   * for graph hydration. The event must be enabled for the organization.
+   * 
+   * - For events with an entity_graph, a seed (entity_id + node_id) is required
+   * - For events without an entity_graph, only fields are needed
+   * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
+   *   are not included when triggering via API
+   * 
+   */
+  'triggerEvent'(
+    parameters?: Parameters<Paths.TriggerEvent.PathParameters> | null,
+    data?: Paths.TriggerEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerEvent.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1253,6 +1433,25 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchEventHistory.Responses.$200>
   }
+  ['/v1/events/{event_name}:trigger']: {
+    /**
+     * triggerEvent - triggerEvent
+     * 
+     * Explicitly trigger an event by providing input field values and an optional entity seed
+     * for graph hydration. The event must be enabled for the organization.
+     * 
+     * - For events with an entity_graph, a seed (entity_id + node_id) is required
+     * - For events without an entity_graph, only fields are needed
+     * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
+     *   are not included when triggering via API
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerEvent.PathParameters> | null,
+      data?: Paths.TriggerEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerEvent.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -1272,4 +1471,6 @@ export type GraphNode = Components.Schemas.GraphNode;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
+export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
+export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;

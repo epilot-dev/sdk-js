@@ -84,6 +84,25 @@
         },
         "responses": {}
       }
+    },
+    "/v1/events/{event_name}:trigger": {
+      "post": {
+        "operationId": "triggerEvent",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {},

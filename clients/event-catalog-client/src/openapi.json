@@ -3,7 +3,7 @@
   "info": {
     "title": "Event Catalog API",
     "description": "Manages the catalog of business events available in epilot",
-    "version": "0.0.1"
+    "version": "0.1.0"
   },
   "tags": [
     {
@@ -260,6 +260,58 @@
           }
         }
       }
+    },
+    "/v1/events/{event_name}:trigger": {
+      "post": {
+        "operationId": "triggerEvent",
+        "summary": "triggerEvent",
+        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event triggered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (validation error, missing seed, or missing required fields)"
+          },
+          "403": {
+            "description": "Event is disabled for this organization"
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -357,6 +409,12 @@
             "description": "Whether this event is enabled for the organization.\nWhen disabled, the event will not be triggered.\nDefaults to true if not specified.\n",
             "default": true,
             "example": true
+          },
+          "automation_trigger": {
+            "type": "boolean",
+            "description": "Whether this event can be explicitly triggered by automations.\nWhen true, the event will appear in the automation builder as a\n\"Trigger Event\" action option.\nDefaults to false if not specified.\n",
+            "default": false,
+            "example": true
           }
         }
       },
@@ -403,6 +461,11 @@
           "required": {
             "type": "boolean",
             "description": "Whether this field is required in the event payload"
+          },
+          "graph_source": {
+            "type": "string",
+            "description": "Optional JSONata expression to extract the field value from the hydrated entity graph.\n\nThe expression has access to all hydrated graph nodes by their node ID.\nIf not specified, the field value must be provided as input when triggering the event.\n\nExamples:\n  - \"ticket.meter_reading_value\" (simple path)\n  - \"contact.email[0].email\" (nested/array access)\n  - \"ticket.reading_timestamp ?? $now()\" (with fallback)\n  - \"$number(meter_counter.reading_value)\" (type coercion)\n",
+            "example": "ticket.meter_reading_value"
           }
         },
         "required": [
@@ -464,6 +527,10 @@
           "_event_source": {
             "type": "string",
             "description": "Source that triggered the event"
+          },
+          "_ack_id": {
+            "type": "string",
+            "description": "Unique acknowledgment tracking ID for the event"
           }
         },
         "required": [
@@ -643,6 +710,19 @@
           "_event_source": {
             "type": "string",
             "description": "Source that triggered the event"
+          },
+          "_trigger_source_type": {
+            "type": "string",
+            "description": "The type of system that triggered the event.\nCommon values: api, automation, operation, portal_user\n",
+            "example": "api"
+          },
+          "_trigger_source": {
+            "type": "string",
+            "description": "Identifier of the specific trigger source.\n- For api: User ID or API key identifier\n- For automation: Automation execution ID\n- For operation: Activity ID from the entity operation\n- For portal_user: Portal user email\n"
+          },
+          "_ack_id": {
+            "type": "string",
+            "description": "Unique acknowledgment tracking ID for the event.\nUsed to track event delivery and processing status.\n"
           }
         },
         "required": [
@@ -661,6 +741,8 @@
           "_event_name": "MeterReading",
           "_event_version": "1.0.0",
           "_event_source": "api",
+          "_trigger_source_type": "api",
+          "_trigger_source": "user_123456",
           "reading_value": 123.45,
           "reading_date": "2024-01-01T11:59:00Z",
           "read_by": "John Doe",
@@ -884,6 +966,73 @@
           "account",
           "!account.*._files",
           "**._product"
+        ]
+      },
+      "TriggerEventPayload": {
+        "type": "object",
+        "description": "Payload for explicitly triggering an event via API",
+        "properties": {
+          "seed": {
+            "type": "object",
+            "description": "Entity seed for graph hydration. Required for events that have an entity_graph defined.\nSpecifies which entity to start graph traversal from.\n",
+            "properties": {
+              "entity_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Entity ID to seed the graph hydration"
+              },
+              "node_id": {
+                "type": "string",
+                "description": "Node ID from the event's entity_graph definition that matches\nthe seed entity. Must be a valid node in the event's graph.\n"
+              }
+            },
+            "required": [
+              "entity_id",
+              "node_id"
+            ]
+          },
+          "fields": {
+            "type": "object",
+            "description": "Input field values for the event. Keys must match the event's\nschema_fields definitions. Values are validated against each\nfield's JSON Schema.\n",
+            "additionalProperties": true
+          },
+          "skip_hydration": {
+            "type": "array",
+            "description": "Optional list of node IDs to skip during entity graph hydration.\nThese nodes will be null/undefined in the event payload.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_trigger_source_type": {
+            "type": "string",
+            "description": "The type of system that triggered the event.\nExamples: api, automation, operation, portal_user\nDefaults to \"api\" if not specified.\n"
+          },
+          "_trigger_source": {
+            "type": "string",
+            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\n"
+          }
+        }
+      },
+      "TriggerEventResponse": {
+        "type": "object",
+        "description": "Response from triggering an event",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the event was triggered successfully"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "The unique event ID (ULID) assigned to this event"
+          },
+          "event_bridge_event_id": {
+            "type": "string",
+            "description": "EventBridge event ID from publishing"
+          }
+        },
+        "required": [
+          "success",
+          "event_id"
         ]
       }
     }
