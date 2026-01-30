@@ -12,6 +12,12 @@
           {
             "in": "query",
             "name": "unpublished"
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "style": "form",
+            "explode": false
           }
         ],
         "responses": {}

@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.7.0",
+    "version": "2.8.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -70,6 +70,19 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "description": "List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
           }
         ],
         "tags": [
@@ -7056,6 +7069,14 @@
           ]
         }
       },
+      "NullableEntity": {
+        "nullable": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ]
+      },
       "EntityOwner": {
         "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
         "type": "object",
@@ -8097,11 +8118,11 @@
           },
           "entityNodes": {
             "type": "object",
-            "description": "Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).\nThe seed node always returns a single Entity object.\nOther nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.\n",
+            "description": "Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).\nThe seed node and nodes with cardinality=\"one\" return a single Entity object, or null if no entity was found.\nNodes with cardinality=\"many\" return an array of Entity objects.\n",
             "additionalProperties": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/Entity"
+                  "$ref": "#/components/schemas/NullableEntity"
                 },
                 {
                   "type": "array",

@@ -4946,8 +4946,8 @@ declare namespace Components {
             };
             /**
              * Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).
-             * The seed node always returns a single Entity object.
-             * Other nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.
+             * The seed node and nodes with cardinality="one" return a single Entity object, or null if no entity was found.
+             * Nodes with cardinality="many" return an array of Entity objects.
              *
              * example:
              * {
@@ -5007,7 +5007,7 @@ declare namespace Components {
                  *   ]
                  * }
                  */
-                Entity | /**
+                NullableEntity | /**
                  * example:
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -6308,6 +6308,88 @@ declare namespace Components {
              */
             allow_any?: boolean;
         }
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
+         * }
+         */
+        export type NullableEntity = {
+            [name: string]: any;
+            _id?: string; // uuid
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org?: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
+            _schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+            /**
+             * Title of entity
+             */
+            _title?: string | null;
+            _tags?: string[] | null;
+            _created_at?: string | null; // date-time
+            _updated_at?: string | null; // date-time
+            _deleted_at?: string | null; // date-time
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
+            _purpose?: string[] | null;
+            /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
+        } | null;
         /**
          * Numeric input
          */
@@ -12274,10 +12356,12 @@ declare namespace Paths {
     }
     namespace ListSchemas {
         namespace Parameters {
+            export type Exclude = string[];
             export type Unpublished = boolean;
         }
         export interface QueryParameters {
             unpublished?: Parameters.Unpublished;
+            exclude?: Parameters.Exclude;
         }
         namespace Responses {
             export interface $200 {
@@ -15890,6 +15974,7 @@ export type LinkAttribute = Components.Schemas.LinkAttribute;
 export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
 export type MessageEmailAddressAttribute = Components.Schemas.MessageEmailAddressAttribute;
 export type MultiSelectAttribute = Components.Schemas.MultiSelectAttribute;
+export type NullableEntity = Components.Schemas.NullableEntity;
 export type NumberAttribute = Components.Schemas.NumberAttribute;
 export type OrderedListAttribute = Components.Schemas.OrderedListAttribute;
 export type PartnerOrganisationAttribute = Components.Schemas.PartnerOrganisationAttribute;
