@@ -331,6 +331,8 @@ declare namespace Paths {
             }
             export interface $403 {
             }
+            export interface $409 {
+            }
             export interface $500 {
             }
         }
@@ -656,6 +658,49 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace TestWebhookGet {
+        namespace Parameters {
+            export type ValidationToken = string;
+        }
+        export interface QueryParameters {
+            validationToken?: Parameters.ValidationToken;
+        }
+        namespace Responses {
+            export type $200 = string;
+            export interface $202 {
+                message?: string;
+                timestamp?: string; // date-time
+            }
+        }
+    }
+    namespace TestWebhookPost {
+        namespace Parameters {
+            export type DebugMessages = boolean;
+            export type ValidationToken = string;
+        }
+        export interface QueryParameters {
+            validationToken?: Parameters.ValidationToken;
+            debugMessages?: Parameters.DebugMessages;
+        }
+        /**
+         * Graph API notification payload
+         */
+        export interface RequestBody {
+            value?: {
+                subscriptionId?: string;
+                changeType?: string;
+                resource?: string;
+                clientState?: string;
+            }[];
+        }
+        namespace Responses {
+            export type $200 = string;
+            export interface $202 {
+                message?: string;
+                timestamp?: string; // date-time
+            }
+        }
+    }
     namespace UpdateEmailAddress {
         namespace Parameters {
             export type Id = string;
@@ -935,6 +980,32 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSharedMailboxMappingById.Responses.$200>
+  /**
+   * testWebhookGet - Test Webhook (GET)
+   * 
+   * Test endpoint for debugging Graph API webhook notifications via ngrok.
+   * Handles Microsoft Graph subscription validation requests by returning the validationToken.
+   * This is a PUBLIC endpoint with no authentication.
+   * 
+   */
+  'testWebhookGet'(
+    parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
+  /**
+   * testWebhookPost - Test Webhook (POST)
+   * 
+   * Test endpoint for debugging Graph API webhook notifications via ngrok.
+   * Logs all incoming webhook payloads for debugging purposes.
+   * This is a PUBLIC endpoint with no authentication.
+   * 
+   */
+  'testWebhookPost'(
+    parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
+    data?: Paths.TestWebhookPost.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
   /**
    * outlookOAuthCallback - Outlook OAuth callback
    * 
@@ -1258,6 +1329,34 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSharedMailboxMappingById.Responses.$200>
+  }
+  ['/v2/outlook/test-webhook']: {
+    /**
+     * testWebhookGet - Test Webhook (GET)
+     * 
+     * Test endpoint for debugging Graph API webhook notifications via ngrok.
+     * Handles Microsoft Graph subscription validation requests by returning the validationToken.
+     * This is a PUBLIC endpoint with no authentication.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
+    /**
+     * testWebhookPost - Test Webhook (POST)
+     * 
+     * Test endpoint for debugging Graph API webhook notifications via ngrok.
+     * Logs all incoming webhook payloads for debugging purposes.
+     * This is a PUBLIC endpoint with no authentication.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
+      data?: Paths.TestWebhookPost.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
   }
   ['/v2/outlook/oauth/callback']: {
     /**

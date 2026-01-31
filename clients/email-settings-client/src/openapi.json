@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Email settings API",
-    "version": "1.4.0"
+    "title": "Messaging Settings API",
+    "version": "1.4.1"
   },
   "tags": [
     {
@@ -756,6 +756,9 @@
           "403": {
             "description": "Access denied - user does not have access to the shared mailbox"
           },
+          "409": {
+            "description": "A shared inbox already exists for the email"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -844,6 +847,157 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/test-webhook": {
+      "get": {
+        "operationId": "testWebhookGet",
+        "summary": "Test Webhook (GET)",
+        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nHandles Microsoft Graph subscription validation requests by returning the validationToken.\nThis is a PUBLIC endpoint with no authentication.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Validation token from Microsoft Graph for subscription verification"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation token returned (for Graph API subscription validation)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Webhook received and logged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "testWebhookPost",
+        "summary": "Test Webhook (POST)",
+        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nLogs all incoming webhook payloads for debugging purposes.\nThis is a PUBLIC endpoint with no authentication.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Validation token from Microsoft Graph for subscription verification"
+          },
+          {
+            "name": "debugMessages",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Whether to include message details in the response"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Graph API notification payload",
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "subscriptionId": {
+                          "type": "string"
+                        },
+                        "changeType": {
+                          "type": "string"
+                        },
+                        "resource": {
+                          "type": "string"
+                        },
+                        "clientState": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "plain/text": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation token returned (for Graph API subscription validation)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Webhook received and logged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

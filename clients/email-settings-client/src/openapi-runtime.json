@@ -191,6 +191,42 @@
         "responses": {}
       }
     },
+    "/v2/outlook/test-webhook": {
+      "get": {
+        "operationId": "testWebhookGet",
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "testWebhookPost",
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "debugMessages",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {},
+            "plain/text": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/outlook/oauth/callback": {
       "get": {
         "operationId": "outlookOAuthCallback",
