@@ -247,7 +247,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -451,7 +451,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG";
         /**
          * Configuration of the published app
          */
@@ -992,7 +992,7 @@ declare namespace Components {
              * JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.
              */
             body?: {
-                [name: string]: string;
+                [name: string]: any;
             };
         }
         export interface ExternalProductCatalogComponent {
@@ -1047,7 +1047,7 @@ declare namespace Components {
                  * JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).
                  */
                 body?: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
             };
         }
@@ -1088,7 +1088,7 @@ declare namespace Components {
                  * JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).
                  */
                 body?: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
             };
         }
@@ -1307,6 +1307,33 @@ declare namespace Components {
              */
             override_url?: string;
         }
+        export interface PortalBlockComponent {
+            component_type: "CUSTOM_PORTAL_BLOCK";
+            configuration: PortalBlockConfig;
+            surfaces?: {
+                portal_block?: PortalBlockSurfaceConfig;
+            };
+        }
+        export interface PortalBlockConfig {
+        }
+        export interface PortalBlockSurfaceConfig {
+            /**
+             * URL of the uploaded App Bridge App. This is the entrypoint for the app
+             */
+            app_url?: string;
+            /**
+             * URL of the uploaded zip file containing the app
+             */
+            zip_url?: string;
+            /**
+             * URL of the app in dev mode
+             */
+            override_url?: string;
+            /**
+             * Define which section of the portal this block can be placed in
+             */
+            section?: "main" | "footer";
+        }
         export interface PortalExtensionAuthBlock {
             /**
              * HTTP method to use for authentication
@@ -1332,7 +1359,7 @@ declare namespace Components {
              * JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.
              */
             body?: {
-                [name: string]: string;
+                [name: string]: any;
             };
             cache?: {
                 /**
@@ -1470,7 +1497,7 @@ declare namespace Components {
                  * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
                  */
                 body?: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
             };
             resolved?: {
@@ -1534,7 +1561,7 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
             };
@@ -1607,7 +1634,7 @@ declare namespace Components {
                  * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
                  */
                 body?: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
             };
             resolved?: {
@@ -1637,6 +1664,13 @@ declare namespace Components {
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "meterReadingPlausibilityCheck";
+            /**
+             * Mode for plausibility check:
+             * - "check": Validates meter reading and returns valid: boolean (used during submission)
+             * - "range": Returns min/max allowed values for each counter for validation before submission
+             *
+             */
+            plausibility_mode?: "check" | "range";
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1647,7 +1681,7 @@ declare namespace Components {
                  * JSON body to use for the call. Supports variable interpolation.
                  */
                 body: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
                 /**
                  * Headers to use. Supports variable interpolation.
@@ -1661,7 +1695,30 @@ declare namespace Components {
              */
             resolved: {
                 /**
-                 * Indicate whether the meter reading is plausible
+                 * Optional path to an array in the response. If specified and the path points to an array,
+                 * the hook will map over each item using 'Item' variable for interpolation.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 * example:
+                 * data.results
+                 */
+                dataPath?: string;
+                /**
+                 * Counter identifier(s) used to match against the meter's counters.
+                 * Can be a string (counter ID) or an object with counter properties.
+                 * The backend resolves this to meter_counter_id in the final response.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 * example:
+                 * {
+                 *   "obis_code": "{{Item.obis}}"
+                 * }
+                 */
+                counter_identifiers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is "check".
                  * example:
                  * {{CallResponse.data.valid}}
                  */
@@ -1726,7 +1783,7 @@ declare namespace Components {
                  * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
                  */
                 body?: {
-                    [name: string]: string;
+                    [name: string]: any;
                 };
             };
             resolved?: {
@@ -1782,7 +1839,7 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
             };
@@ -3214,6 +3271,9 @@ export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
 export type OverrideDevMode = Components.Schemas.OverrideDevMode;
+export type PortalBlockComponent = Components.Schemas.PortalBlockComponent;
+export type PortalBlockConfig = Components.Schemas.PortalBlockConfig;
+export type PortalBlockSurfaceConfig = Components.Schemas.PortalBlockSurfaceConfig;
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;

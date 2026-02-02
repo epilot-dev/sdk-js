@@ -1762,6 +1762,7 @@
         "type": "string",
         "enum": [
           "CUSTOM_JOURNEY_BLOCK",
+          "CUSTOM_PORTAL_BLOCK",
           "PORTAL_EXTENSION",
           "CUSTOM_FLOW_ACTION",
           "ERP_INFORM_TOOLKIT",
@@ -1872,6 +1873,7 @@
               "propertyName": "component_type",
               "mapping": {
                 "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
+                "CUSTOM_PORTAL_BLOCK": "#/components/schemas/PortalBlockComponent",
                 "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent",
                 "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent",
                 "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent",
@@ -1882,6 +1884,9 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/JourneyBlockComponent"
+              },
+              {
+                "$ref": "#/components/schemas/PortalBlockComponent"
               },
               {
                 "$ref": "#/components/schemas/PortalExtensionComponent"
@@ -1962,6 +1967,32 @@
           },
           "configuration": {
             "$ref": "#/components/schemas/JourneyBlockConfig"
+          }
+        }
+      },
+      "PortalBlockComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_PORTAL_BLOCK"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/PortalBlockConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "portal_block": {
+                "$ref": "#/components/schemas/PortalBlockSurfaceConfig"
+              }
+            }
           }
         }
       },
@@ -2218,10 +2249,7 @@
               "body": {
                 "type": "object",
                 "description": "JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               }
             },
             "required": [
@@ -2289,10 +2317,7 @@
               "body": {
                 "type": "object",
                 "description": "JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               }
             },
             "required": [
@@ -2434,7 +2459,7 @@
               },
               "result": {
                 "type": "string",
-                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation."
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
             "required": [
@@ -2512,7 +2537,7 @@
               },
               "result": {
                 "type": "string",
-                "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation."
+                "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
             "required": [
@@ -2585,6 +2610,15 @@
               "meterReadingPlausibilityCheck"
             ]
           },
+          "plausibility_mode": {
+            "type": "string",
+            "enum": [
+              "check",
+              "range"
+            ],
+            "default": "check",
+            "description": "Mode for plausibility check:\n- \"check\": Validates meter reading and returns valid: boolean (used during submission)\n- \"range\": Returns min/max allowed values for each counter for validation before submission\n"
+          },
           "auth": {
             "$ref": "#/components/schemas/PortalExtensionAuthBlock"
           },
@@ -2598,10 +2632,7 @@
               "body": {
                 "type": "object",
                 "description": "JSON body to use for the call. Supports variable interpolation.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               },
               "headers": {
                 "type": "object",
@@ -2623,9 +2654,24 @@
             "type": "object",
             "description": "Response to the call",
             "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to an array in the response. If specified and the path points to an array,\nthe hook will map over each item using 'Item' variable for interpolation.\nRelevant only if plausibility_mode is \"range\".\n",
+                "example": "data.results"
+              },
+              "counter_identifiers": {
+                "description": "Counter identifier(s) used to match against the meter's counters.\nCan be a string (counter ID) or an object with counter properties.\nThe backend resolves this to meter_counter_id in the final response.\nRelevant only if plausibility_mode is \"range\".\n",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "obis_code": "{{Item.obis}}"
+                }
+              },
               "valid": {
                 "type": "string",
-                "description": "Indicate whether the meter reading is plausible",
+                "description": "Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is \"check\".",
                 "example": "{{CallResponse.data.valid}}"
               },
               "upper_limit": {
@@ -2720,10 +2766,7 @@
               "body": {
                 "type": "object",
                 "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               }
             },
             "required": [
@@ -2819,10 +2862,7 @@
               "body": {
                 "type": "object",
                 "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               }
             },
             "required": [
@@ -2918,10 +2958,7 @@
               "body": {
                 "type": "object",
                 "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "default": {}
+                "additionalProperties": true
               }
             },
             "required": [
@@ -3038,10 +3075,7 @@
           "body": {
             "type": "object",
             "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "default": {}
+            "additionalProperties": true
           },
           "cache": {
             "type": "object",
@@ -3100,10 +3134,7 @@
           "body": {
             "type": "object",
             "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "default": {}
+            "additionalProperties": true
           }
         },
         "required": [
@@ -3171,6 +3202,9 @@
           }
         }
       },
+      "PortalBlockConfig": {
+        "type": "object"
+      },
       "AppBridgeSurfaceConfig": {
         "type": "object",
         "properties": {
@@ -3187,6 +3221,26 @@
             "description": "URL of the app in dev mode"
           }
         }
+      },
+      "PortalBlockSurfaceConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "section": {
+                "description": "Define which section of the portal this block can be placed in",
+                "type": "string",
+                "enum": [
+                  "main",
+                  "footer"
+                ]
+              }
+            }
+          }
+        ]
       },
       "JourneyBlockComponentArgs": {
         "allOf": [
