@@ -23,7 +23,7 @@ declare namespace Components {
             oauthConfig?: /* To be sent only if authType is OAUTH_CLIENT_CREDENTIALS */ OAuthConfig;
             apiKeyConfig?: /* To be sent only if authType is API_KEY */ ApiKeyConfig;
         }
-        export type AuthType = "BASIC" | "OAUTH_CLIENT_CREDENTIALS" | "API_KEY";
+        export type AuthType = "BASIC" | "OAUTH_CLIENT_CREDENTIALS" | "API_KEY" | "NONE";
         /**
          * To be sent only if authType is BASIC
          */
@@ -316,6 +316,29 @@ declare namespace Components {
             include_activity?: boolean;
             include_changed_attributes?: boolean;
             custom_headers?: /* Object representing custom headers as key-value pairs. */ CustomHeader;
+        }
+        export interface PublicKeyResponse {
+            /**
+             * PEM-encoded Ed25519 public key for verifying webhook signatures
+             * example:
+             * -----BEGIN PUBLIC KEY-----
+             * MCowBQYDK2VwAyEA...
+             * -----END PUBLIC KEY-----
+             *
+             */
+            public_key: string;
+            /**
+             * The signing algorithm used
+             * example:
+             * ed25519
+             */
+            algorithm: string;
+            /**
+             * The issuer of the signing key
+             * example:
+             * epilot
+             */
+            issuer?: string;
         }
         export interface SearchOptions {
             /**
@@ -653,6 +676,12 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace GetPublicKey {
+        namespace Responses {
+            export type $200 = Components.Schemas.PublicKeyResponse;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetWebhookEventsV2 {
         namespace Parameters {
             export type ConfigId = string;
@@ -805,6 +834,18 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
+   * getPublicKey - getPublicKey
+   * 
+   * Returns the public key used to verify webhook signatures.
+   * This endpoint is public and does not require authentication.
+   * 
+   */
+  'getPublicKey'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  /**
    * getConfiguredEvents - getConfiguredEvents
    * 
    * Retrieve events that can trigger webhooks
@@ -937,6 +978,20 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v1/webhooks/.well-known/public-key']: {
+    /**
+     * getPublicKey - getPublicKey
+     * 
+     * Returns the public key used to verify webhook signatures.
+     * This endpoint is public and does not require authentication.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  }
   ['/v1/webhooks/configured-events']: {
     /**
      * getConfiguredEvents - getConfiguredEvents
@@ -1111,6 +1166,7 @@ export type HttpMethod = Components.Schemas.HttpMethod;
 export type Metadata = Components.Schemas.Metadata;
 export type OAuthConfig = Components.Schemas.OAuthConfig;
 export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
+export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type WebhookConfig = Components.Schemas.WebhookConfig;

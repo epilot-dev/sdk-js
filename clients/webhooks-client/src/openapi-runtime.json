@@ -5,6 +5,12 @@
     "version": ""
   },
   "paths": {
+    "/v1/webhooks/.well-known/public-key": {
+      "get": {
+        "operationId": "getPublicKey",
+        "responses": {}
+      }
+    },
     "/v1/webhooks/configured-events": {
       "get": {
         "operationId": "getConfiguredEvents",

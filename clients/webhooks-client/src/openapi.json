@@ -16,6 +16,39 @@
     }
   ],
   "paths": {
+    "/v1/webhooks/.well-known/public-key": {
+      "get": {
+        "operationId": "getPublicKey",
+        "summary": "getPublicKey",
+        "description": "Returns the public key used to verify webhook signatures.\nThis endpoint is public and does not require authentication.\n",
+        "tags": [
+          "webhooks"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success - public key returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicKeyResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/configured-events": {
       "get": {
         "operationId": "getConfiguredEvents",
@@ -804,6 +837,30 @@
   },
   "components": {
     "schemas": {
+      "PublicKeyResponse": {
+        "type": "object",
+        "properties": {
+          "public_key": {
+            "type": "string",
+            "description": "PEM-encoded Ed25519 public key for verifying webhook signatures",
+            "example": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA...\n-----END PUBLIC KEY-----\n"
+          },
+          "algorithm": {
+            "type": "string",
+            "description": "The signing algorithm used",
+            "example": "ed25519"
+          },
+          "issuer": {
+            "type": "string",
+            "description": "The issuer of the signing key",
+            "example": "epilot"
+          }
+        },
+        "required": [
+          "public_key",
+          "algorithm"
+        ]
+      },
       "SearchOptions": {
         "type": "object",
         "properties": {
@@ -916,7 +973,8 @@
         "enum": [
           "BASIC",
           "OAUTH_CLIENT_CREDENTIALS",
-          "API_KEY"
+          "API_KEY",
+          "NONE"
         ]
       },
       "Filter": {
@@ -1431,9 +1489,6 @@
     }
   ],
   "servers": [
-    {
-      "url": "https://webhooks.sls.epilot.io"
-    },
     {
       "url": "https://webhooks.sls.epilot.io"
     }
