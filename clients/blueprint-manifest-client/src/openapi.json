@@ -2203,6 +2203,10 @@
               "destination_org_id": {
                 "type": "string"
               },
+              "slug": {
+                "type": "string",
+                "description": "Blueprint slug for marketplace blueprints"
+              },
               "status": {
                 "type": "string",
                 "enum": [

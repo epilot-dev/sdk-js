@@ -149,6 +149,10 @@ declare namespace Components {
              */
             BlueprintID;
             destination_org_id?: string;
+            /**
+             * Blueprint slug for marketplace blueprints
+             */
+            slug?: string;
             status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED";
         }
         export interface BlueprintInstallationJobOptions {
@@ -2256,6 +2260,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getJob - getJob
@@ -2959,6 +2964,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type AppBlueprint = Components.Schemas.AppBlueprint;
 export type Blueprint = Components.Schemas.Blueprint;
