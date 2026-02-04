@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.26.0",
+    "version": "0.27.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2378,6 +2378,13 @@
             "type": "string",
             "description": "Optional description of the integration"
           },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2406,6 +2413,13 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2422,6 +2436,13 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3769,6 +3790,13 @@
             "type": "string",
             "description": "Optional description of the integration"
           },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
           "use_cases": {
             "type": "array",
             "description": "All use cases belonging to this integration",
@@ -3805,6 +3833,13 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
           },
           "use_cases": {
             "type": "array",
@@ -4077,13 +4112,10 @@
       },
       "QueryAccessLogsRequest": {
         "type": "object",
-        "required": [
-          "token_id"
-        ],
         "properties": {
           "token_id": {
             "type": "string",
-            "description": "Filter by access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk')",
+            "description": "Filter by a specific access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk').\nMust be one of the access_token_ids linked to the integration.\nIf omitted, returns logs for all access tokens linked to the integration.\n",
             "example": "api_5ZugdRXasLfWBypHi93Fk"
           },
           "service": {

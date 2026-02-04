@@ -193,6 +193,10 @@ declare namespace Components {
              * Optional description of the integration
              */
             description?: string;
+            /**
+             * List of access token IDs to associate with this integration
+             */
+            access_token_ids?: string[];
         }
         export interface CreateOutboundUseCaseRequest {
             /**
@@ -601,6 +605,10 @@ declare namespace Components {
              */
             description?: string;
             /**
+             * List of access token IDs associated with this integration
+             */
+            access_token_ids?: string[];
+            /**
              * ISO-8601 timestamp when the integration was created
              */
             created_at: string; // date-time
@@ -779,6 +787,10 @@ declare namespace Components {
              * Optional description of the integration
              */
             description?: string;
+            /**
+             * List of access token IDs associated with this integration
+             */
+            access_token_ids?: string[];
             /**
              * All use cases belonging to this integration
              */
@@ -1193,11 +1205,14 @@ declare namespace Components {
         }
         export interface QueryAccessLogsRequest {
             /**
-             * Filter by access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk')
+             * Filter by a specific access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk').
+             * Must be one of the access_token_ids linked to the integration.
+             * If omitted, returns logs for all access tokens linked to the integration.
+             *
              * example:
              * api_5ZugdRXasLfWBypHi93Fk
              */
-            token_id: string;
+            token_id?: string;
             /**
              * Filter by service name (e.g., 'entity', 'metering', 'submission-api')
              * example:
@@ -1741,6 +1756,10 @@ declare namespace Components {
              * Optional description of the integration
              */
             description?: string;
+            /**
+             * List of access token IDs to associate with this integration
+             */
+            access_token_ids?: string[];
         }
         export interface UpdateOutboundUseCaseRequest {
             /**
@@ -1790,6 +1809,10 @@ declare namespace Components {
              * Optional description of the integration
              */
             description?: string;
+            /**
+             * List of access token IDs to associate with this integration
+             */
+            access_token_ids?: string[];
             /**
              * Full list of use cases (declarative). This replaces ALL existing use cases.
              * - Use cases with an `id` field matching an existing use case will be updated
