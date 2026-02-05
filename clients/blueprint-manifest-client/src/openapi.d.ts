@@ -259,7 +259,11 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintResourceID[];
-            impact_on_install?: ("create" | "update" | "internal-update" | "no-op" | "delete")[];
+            /**
+             * Terraform addresses this resource references (for dependency-aware ignore)
+             */
+            depends_on_addresses?: string[];
+            impact_on_install?: ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
             /**
              * Fields causing the updates / internal updates on a resource install
              */
@@ -1358,7 +1362,7 @@ declare namespace Components {
              */
             installation_link?: string;
         }
-        export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete")[];
+        export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
         /**
          * List of feature settings that must be enabled before installing the blueprint
          * example:

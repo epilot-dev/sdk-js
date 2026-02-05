@@ -1789,6 +1789,13 @@
               "$ref": "#/components/schemas/BlueprintResourceID"
             }
           },
+          "depends_on_addresses": {
+            "type": "array",
+            "description": "Terraform addresses this resource references (for dependency-aware ignore)",
+            "items": {
+              "type": "string"
+            }
+          },
           "impact_on_install": {
             "type": "array",
             "items": {
@@ -1798,7 +1805,8 @@
                 "update",
                 "internal-update",
                 "no-op",
-                "delete"
+                "delete",
+                "ignored"
               ]
             }
           },
@@ -2437,7 +2445,8 @@
             "update",
             "internal-update",
             "no-op",
-            "delete"
+            "delete",
+            "ignored"
           ]
         }
       },
