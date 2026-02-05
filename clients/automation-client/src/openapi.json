@@ -3,7 +3,7 @@
   "info": {
     "title": "Automation API",
     "description": "API Backend for epilot Automation Workflows feature",
-    "version": "1.0.0"
+    "version": "1.2.0"
   },
   "tags": [
     {
@@ -1215,6 +1215,9 @@
             "$ref": "#/components/schemas/ReceivedEmailTrigger"
           },
           {
+            "$ref": "#/components/schemas/NewEmailThreadTrigger"
+          },
+          {
             "$ref": "#/components/schemas/FlowsTrigger"
           }
         ]
@@ -1235,6 +1238,9 @@
           },
           {
             "$ref": "#/components/schemas/InformERPAction"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerEventAction"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentAction"
@@ -1272,6 +1278,9 @@
           },
           {
             "$ref": "#/components/schemas/InformERPActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerEventActionConfig"
           },
           {
             "$ref": "#/components/schemas/CreateDocumentActionConfig"
@@ -2699,6 +2708,75 @@
           }
         }
       },
+      "TriggerEventActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-event"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerEventConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "2520gja-2sgmsaga-0asg-822jgal",
+          "name": "Trigger Event",
+          "type": "trigger-event",
+          "config": {
+            "event_name": "my_custom_event",
+            "event_inputs": {
+              "key": "value"
+            }
+          }
+        }
+      },
+      "TriggerEventAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "trigger-event"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/TriggerEventConfig"
+              }
+            }
+          }
+        ]
+      },
+      "TriggerEventConfig": {
+        "type": "object",
+        "description": "Configuration for triggering an event catalog event",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "The event catalog event name to trigger"
+          },
+          "event_inputs": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Inputs to be passed to trigger the event"
+          }
+        },
+        "required": [
+          "event_name"
+        ]
+      },
       "FlowExecutionCancelActionConfig": {
         "allOf": [
           {
@@ -3097,6 +3175,9 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventFlowAutomationTask"
+              },
+              {
+                "$ref": "#/components/schemas/TriggerEventMessaging"
               }
             ]
           },
@@ -3240,6 +3321,36 @@
           "org_id",
           "activity_id",
           "activity_type"
+        ]
+      },
+      "TriggerEventMessaging": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "new_email_thread"
+            ]
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          }
+        },
+        "required": [
+          "org_id",
+          "thread_id",
+          "message_id",
+          "entity_id"
         ]
       },
       "TriggerEventEntityOperation": {
@@ -3832,6 +3943,41 @@
                 "properties": {
                   "source_id": {
                     "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ]
+      },
+      "NewEmailThreadTrigger": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "new_email_thread"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "INBOUND",
+                      "OUTBOUND",
+                      "BOTH"
+                    ]
                   }
                 }
               }
@@ -4646,9 +4792,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://automation.sls.epilot.io"
-    },
     {
       "url": "https://automation.sls.epilot.io"
     }
