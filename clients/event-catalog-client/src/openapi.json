@@ -406,7 +406,13 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Whether this event is enabled for the organization.\nWhen disabled, the event will not be triggered.\nDefaults to true if not specified.\n",
+            "description": "Whether this event is enabled for the organization.\nWhen disabled, the event will not be triggered by any means\n(automatic, API, or automation).\nDefaults to true if not specified.\n",
+            "default": true,
+            "example": true
+          },
+          "auto_trigger": {
+            "type": "boolean",
+            "description": "Whether the event should be triggered automatically by built-in logic\n(e.g., portal submissions, entity mutations, EventBridge rules).\nWhen false, the event can still be triggered manually via API or automations.\nOnly meaningful for builtin events that have automatic trigger sources.\nDefaults to true if not specified.\n",
             "default": true,
             "example": true
           },
@@ -435,7 +441,7 @@
         ]
       },
       "UpdateEventPayload": {
-        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently only the `enabled` field is processed, other fields are ignored.\n",
+        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/EventConfigBase"
