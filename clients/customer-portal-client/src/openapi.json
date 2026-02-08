@@ -6557,6 +6557,75 @@
         }
       }
     },
+    "/v2/portal/entity/{slug}/{id}/workflows": {
+      "get": {
+        "operationId": "getEntityWorkflows",
+        "summary": "Get workflows for an entity",
+        "description": "Get all workflows associated with an entity (requires access to the entity)",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Schema slug of the entity",
+              "example": "contact"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the entity",
+              "example": "abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workflows for the entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "workflow_executions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/metering/reading/photo": {
       "post": {
         "operationId": "uploadMeterReadingPhoto",
@@ -7858,6 +7927,94 @@
                       "type": "integer",
                       "description": "Total number of entities processed",
                       "example": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/notifications/entity:status": {
+      "put": {
+        "operationId": "updateNotificationsStatus",
+        "summary": "updateNotificationsStatus",
+        "description": "Updates the statuses of multiple notifications at once.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "notifications"
+                ],
+                "properties": {
+                  "notifications": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "ID of the notification"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "read",
+                            "important"
+                          ],
+                          "description": "The status to set for the notification"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notifications status updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Message indicating the status of the notifications",
+                      "example": "Notifications status updated successfully."
                     }
                   }
                 }

@@ -1614,6 +1614,24 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity/{slug}/{id}/workflows": {
+      "get": {
+        "operationId": "getEntityWorkflows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/metering/reading/photo": {
       "post": {
         "operationId": "uploadMeterReadingPhoto",
@@ -1951,6 +1969,18 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/entity:status": {
+      "put": {
+        "operationId": "updateNotificationsStatus",
         "requestBody": {
           "required": true,
           "content": {

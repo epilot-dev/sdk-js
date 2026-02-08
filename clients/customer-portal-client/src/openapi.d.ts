@@ -8523,6 +8523,93 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntityWorkflows {
+        namespace Parameters {
+            /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            export type Id = string;
+            /**
+             * Schema slug of the entity
+             * example:
+             * contact
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * Schema slug of the entity
+             * example:
+             * contact
+             */
+            Parameters.Slug;
+            id: /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                workflow_executions?: /**
+                 * example:
+                 * {
+                 *   "id": "8gja72h6kas6h",
+                 *   "name": "Lead Qualification",
+                 *   "trigger": "MANUAL",
+                 *   "status": "STARTED",
+                 *   "creationTime": "2021-04-27T12:01:13.000Z",
+                 *   "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+                 *   "dueDate": "2021-04-27T12:01:13.000Z",
+                 *   "assignedTo": [
+                 *     "252",
+                 *     "29052"
+                 *   ],
+                 *   "flow": [
+                 *     {
+                 *       "id": "sectionId1",
+                 *       "name": "Initial Information Gathering",
+                 *       "steps": [
+                 *         {
+                 *           "id": "sada5641f3a21",
+                 *           "name": "Call client and confirm address and product",
+                 *           "status": "ASSIGNED",
+                 *           "assignedTo": [
+                 *             "11"
+                 *           ]
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a22",
+                 *           "name": "Check product availability",
+                 *           "status": "UNASSIGNED"
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a23",
+                 *           "name": "Send email confirming contact with the client",
+                 *           "status": "SKIPPED"
+                 *         }
+                 *       ]
+                 *     },
+                 *     {
+                 *       "id": "firstLevelStepId1",
+                 *       "name": "Print and send catalog",
+                 *       "status": "SKIPPED",
+                 *       "dueDate": "2023-01-15T20:00:00"
+                 *     }
+                 *   ]
+                 * }
+                 */
+                Components.Schemas.WorkflowExecution[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetExternalLinks {
         namespace Parameters {
             export type ContactId = /**
@@ -11427,6 +11514,35 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdateNotificationsStatus {
+        export interface RequestBody {
+            notifications: {
+                /**
+                 * ID of the notification
+                 */
+                id: string;
+                /**
+                 * The status to set for the notification
+                 */
+                status: "read" | "important";
+            }[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Message indicating the status of the notifications
+                 * example:
+                 * Notifications status updated successfully.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpdateOpportunity {
         namespace Parameters {
             export type Id = /**
@@ -12934,6 +13050,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   /**
+   * getEntityWorkflows - Get workflows for an entity
+   * 
+   * Get all workflows associated with an entity (requires access to the entity)
+   */
+  'getEntityWorkflows'(
+    parameters?: Parameters<Paths.GetEntityWorkflows.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
+  /**
    * uploadMeterReadingPhoto - Upload Meter Reading Photo
    * 
    * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
@@ -13158,6 +13284,16 @@ export interface OperationMethods {
     data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
+  /**
+   * updateNotificationsStatus - updateNotificationsStatus
+   * 
+   * Updates the statuses of multiple notifications at once.
+   */
+  'updateNotificationsStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdateNotificationsStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateNotificationsStatus.Responses.$200>
   /**
    * deRegisterMLoginUser - deRegisterMLoginUser
    * 
@@ -14453,6 +14589,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
+  ['/v2/portal/entity/{slug}/{id}/workflows']: {
+    /**
+     * getEntityWorkflows - Get workflows for an entity
+     * 
+     * Get all workflows associated with an entity (requires access to the entity)
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityWorkflows.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
+  }
   ['/v2/portal/metering/reading/photo']: {
     /**
      * uploadMeterReadingPhoto - Upload Meter Reading Photo
@@ -14707,6 +14855,18 @@ export interface PathsDictionary {
       data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
+  }
+  ['/v2/portal/notifications/entity:status']: {
+    /**
+     * updateNotificationsStatus - updateNotificationsStatus
+     * 
+     * Updates the statuses of multiple notifications at once.
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdateNotificationsStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateNotificationsStatus.Responses.$200>
   }
   ['/v2/portal/public/m-login/deregister/{client_id}/{user_id}']: {
     /**
