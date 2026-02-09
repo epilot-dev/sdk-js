@@ -1,0 +1,55 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/environments": {
+      "get": {
+        "operationId": "listEnvironmentVariables",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createEnvironmentVariable",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/environments/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "Environment variable key"
+        }
+      ],
+      "get": {
+        "operationId": "getEnvironmentVariable",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateEnvironmentVariable",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteEnvironmentVariable",
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": []
+}
