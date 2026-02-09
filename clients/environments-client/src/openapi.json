@@ -1,0 +1,331 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Environments API",
+    "description": "API for managing organization environment variables and secrets",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "environments",
+      "description": "Environment variables and secrets management"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/environments": {
+      "get": {
+        "operationId": "listEnvironmentVariables",
+        "summary": "List environment variables",
+        "description": "List all environment variables for the organization. Returns metadata only, no secret values.",
+        "tags": [
+          "environments"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of environment variables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentVariableList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEnvironmentVariable",
+        "summary": "Create environment variable",
+        "description": "Create a new environment variable or secret for the organization.",
+        "tags": [
+          "environments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentVariableCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created environment variable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentVariable"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "409": {
+            "description": "Environment variable with this key already exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/environments/{key}": {
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "description": "Environment variable key",
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getEnvironmentVariable",
+        "summary": "Get environment variable",
+        "description": "Get an environment variable by key. Returns value only for String type, omitted for SecretString.",
+        "tags": [
+          "environments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Environment variable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentVariable"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Environment variable not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateEnvironmentVariable",
+        "summary": "Update environment variable",
+        "description": "Update an existing environment variable value.",
+        "tags": [
+          "environments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentVariableUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated environment variable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentVariable"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Environment variable not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEnvironmentVariable",
+        "summary": "Delete environment variable",
+        "description": "Delete an environment variable by key.",
+        "tags": [
+          "environments"
+        ],
+        "responses": {
+          "204": {
+            "description": "Environment variable deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Environment variable not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "EnvironmentValueType": {
+        "type": "string",
+        "enum": [
+          "String",
+          "SecretString"
+        ]
+      },
+      "EnvironmentVariable": {
+        "type": "object",
+        "required": [
+          "key",
+          "type",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EnvironmentValueType"
+          },
+          "description": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value is returned for String type, omitted for SecretString"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EnvironmentVariableListItem": {
+        "type": "object",
+        "required": [
+          "key",
+          "type",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EnvironmentValueType"
+          },
+          "description": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EnvironmentVariableList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentVariableListItem"
+            }
+          }
+        }
+      },
+      "EnvironmentVariableCreateRequest": {
+        "type": "object",
+        "required": [
+          "key",
+          "type",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EnvironmentValueType"
+          },
+          "description": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "EnvironmentVariableUpdateRequest": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "servers": [{
+    "url": "https://environments.dev.sls.epilot.io"
+  }]
+}
