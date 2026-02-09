@@ -262,6 +262,10 @@
           "description": {
             "type": "string"
           },
+          "value": {
+            "type": "string",
+            "description": "Value is returned for String type, omitted for SecretString"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -325,7 +329,9 @@
       }
     }
   },
-  "servers": [{
-    "url": "https://environments.dev.sls.epilot.io"
-  }]
+  "servers": [
+    {
+      "url": "https://environments.dev.sls.epilot.io"
+    }
+  ]
 }

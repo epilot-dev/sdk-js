@@ -35,6 +35,10 @@ declare namespace Components {
             key: string;
             type: EnvironmentValueType;
             description?: string;
+            /**
+             * Value is returned for String type, omitted for SecretString
+             */
+            value?: string;
             created_at: string; // date-time
             updated_at: string; // date-time
         }
