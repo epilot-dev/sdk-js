@@ -577,6 +577,45 @@
         }
       }
     },
+    "/v2/outlook/connection:resolve": {
+      "get": {
+        "operationId": "resolveOutlookConnection",
+        "summary": "Resolve Outlook Connection",
+        "description": "Resolves the Outlook connection for the provided filter parameters.",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveOutlookConnectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -643,11 +682,11 @@
         }
       }
     },
-    "/v2/outlook/shared-mailboxes/connect": {
+    "/v2/outlook/mailbox/connect": {
       "post": {
-        "operationId": "connectSharedMailbox",
-        "summary": "Connect Outlook Shared Mailbox",
-        "description": "Connects an Outlook shared mailbox as a shared inbox.\n1. Validates the user has access to the shared mailbox via Microsoft Graph API\n2. Creates a shared inbox entry in email-settings with the Outlook provider info\n",
+        "operationId": "connectOutlookMailbox",
+        "summary": "Connect Outlook Mailbox",
+        "description": "Connects an Outlook mailbox:\n  1. Validates the user has access to the mailbox via Microsoft Graph API\n  2. Creates a mapping between the email address of the mailbox and the outlook connection\n  3. Enables the user to send emails as the mailbox's email address\n",
         "tags": [
           "O365 Outlook Connection"
         ],
@@ -664,26 +703,7 @@
                   "email": {
                     "type": "string",
                     "format": "email",
-                    "description": "Email address of the Outlook shared mailbox to connect"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "Display name for the shared inbox (defaults to mailbox display name)"
-                  },
-                  "color": {
-                    "type": "string",
-                    "description": "Color for the shared inbox (hex code, defaults to green)"
-                  },
-                  "assignees": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "User IDs to assign to this shared inbox"
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "Description for the shared inbox"
+                    "description": "Email address of the Outlook mailbox to connect"
                   }
                 }
               }
@@ -692,40 +712,25 @@
         },
         "responses": {
           "201": {
-            "description": "Shared mailbox connected successfully",
+            "description": "Mailbox connected successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "email_address",
+                    "outlook_email",
+                    "tenant_id",
+                    "provider"
+                  ],
                   "properties": {
-                    "shared_inbox": {
-                      "type": "object",
-                      "description": "The created shared inbox from email-settings",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "color": {
-                          "type": "string"
-                        },
-                        "assignees": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "description": {
-                          "type": "string"
-                        }
-                      }
+                    "email_address": {
+                      "$ref": "#/components/schemas/EmailAddressResponse"
                     },
                     "outlook_email": {
                       "type": "string",
                       "format": "email",
-                      "description": "The Outlook shared mailbox email address"
+                      "description": "The email of the connected mailbox"
                     },
                     "tenant_id": {
                       "type": "string",
@@ -737,10 +742,6 @@
                         "outlook"
                       ],
                       "description": "The provider type"
-                    },
-                    "display_name": {
-                      "type": "string",
-                      "description": "Display name of the shared mailbox"
                     }
                   }
                 }
@@ -754,10 +755,10 @@
             "description": "Not connected to Microsoft 365"
           },
           "403": {
-            "description": "Access denied - user does not have access to the shared mailbox"
+            "description": "Access denied - user does not have access to the mailbox"
           },
           "409": {
-            "description": "A shared inbox already exists for the email"
+            "description": "A mailbox email already connected to an Outlook connection"
           },
           "500": {
             "description": "Internal server error"
@@ -765,35 +766,35 @@
         }
       }
     },
-    "/v2/outlook/shared-mailboxes/mappings": {
+    "/v2/outlook/mailbox/mappings": {
       "get": {
-        "operationId": "getSharedMailboxMappings",
-        "summary": "Get Shared Mailbox Mappings",
-        "description": "Returns all shared mailbox mappings for the organization.\nUseful to determine which shared inboxes are connected to Outlook\nand which tenant provisions each one.\n",
+        "operationId": "getConnectedOutlookEmails",
+        "summary": "Get Connected Outlook Emails",
+        "description": "Returns all Outlook email addresses connected to the organization.\n",
         "tags": [
           "O365 Outlook Connection"
         ],
         "responses": {
           "200": {
-            "description": "Mappings retrieved successfully",
+            "description": "Outlook emails retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "required": [
-                    "mappings",
+                    "outlook_emails",
                     "count"
                   ],
                   "properties": {
-                    "mappings": {
+                    "outlook_emails": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/SharedMailboxMapping"
+                        "$ref": "#/components/schemas/ConnectedOutlookEmail"
                       }
                     },
                     "count": {
                       "type": "integer",
-                      "description": "Number of mappings"
+                      "description": "Number of Outlook emails"
                     }
                   }
                 }
@@ -802,48 +803,6 @@
           },
           "400": {
             "description": "Bad request - missing organization ID"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/v2/outlook/shared-mailboxes/mappings/{shared_inbox_id}": {
-      "get": {
-        "operationId": "getSharedMailboxMappingById",
-        "summary": "Get Shared Mailbox Mapping by ID",
-        "description": "Returns the mapping for a specific shared inbox.\nUseful to check if a specific inbox is connected to Outlook.\n",
-        "tags": [
-          "O365 Outlook Connection"
-        ],
-        "parameters": [
-          {
-            "name": "shared_inbox_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The shared inbox entity ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Mapping retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SharedMailboxMapping"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - missing organization ID or shared_inbox_id"
-          },
-          "404": {
-            "description": "Mapping not found"
           },
           "500": {
             "description": "Internal server error"
@@ -1946,21 +1905,13 @@
           }
         ]
       },
-      "SharedMailboxMapping": {
+      "ConnectedOutlookEmail": {
         "type": "object",
-        "description": "Mapping between a shared inbox and its Outlook shared mailbox.\nThis tracks which provider/tenant provisions each shared mailbox.\n",
+        "description": "Mapping between an Outlook email and its Outlook Connection.\nThis tracks which provider/tenant provisions each Outlook email.\n",
         "required": [
-          "shared_inbox_id",
-          "outlook_email",
-          "tenant_id",
-          "provider",
-          "connected_at"
+          "outlook_email"
         ],
         "properties": {
-          "shared_inbox_id": {
-            "type": "string",
-            "description": "The email-settings shared inbox entity ID"
-          },
           "outlook_email": {
             "type": "string",
             "format": "email",
@@ -1977,10 +1928,6 @@
             ],
             "description": "Provider type (for future extensibility)"
           },
-          "display_name": {
-            "type": "string",
-            "description": "Display name from Outlook"
-          },
           "connected_at": {
             "type": "string",
             "format": "date-time",
@@ -1989,6 +1936,53 @@
           "connected_by_user_id": {
             "type": "string",
             "description": "User who connected this mailbox"
+          }
+        }
+      },
+      "OutlookConnectionConfig": {
+        "type": "object",
+        "description": "Outlook connection config stored in DynamoDB",
+        "properties": {
+          "connected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "connected_by_user_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "email_address": {
+            "type": "string",
+            "format": "email"
+          },
+          "outlook_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "shared_inbox_id": {
+            "type": "string"
+          },
+          "tenant_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ResolveOutlookConnectionResponse": {
+        "type": "object",
+        "required": [
+          "resolved"
+        ],
+        "properties": {
+          "resolved": {
+            "type": "boolean"
+          },
+          "connection": {
+            "$ref": "#/components/schemas/OutlookConnectionConfig"
           }
         }
       },

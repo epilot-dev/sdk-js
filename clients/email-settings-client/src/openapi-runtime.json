@@ -148,6 +148,19 @@
         "responses": {}
       }
     },
+    "/v2/outlook/connection:resolve": {
+      "get": {
+        "operationId": "resolveOutlookConnection",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -160,9 +173,9 @@
         "responses": {}
       }
     },
-    "/v2/outlook/shared-mailboxes/connect": {
+    "/v2/outlook/mailbox/connect": {
       "post": {
-        "operationId": "connectSharedMailbox",
+        "operationId": "connectOutlookMailbox",
         "requestBody": {
           "required": true,
           "content": {
@@ -172,22 +185,9 @@
         "responses": {}
       }
     },
-    "/v2/outlook/shared-mailboxes/mappings": {
+    "/v2/outlook/mailbox/mappings": {
       "get": {
-        "operationId": "getSharedMailboxMappings",
-        "responses": {}
-      }
-    },
-    "/v2/outlook/shared-mailboxes/mappings/{shared_inbox_id}": {
-      "get": {
-        "operationId": "getSharedMailboxMappingById",
-        "parameters": [
-          {
-            "name": "shared_inbox_id",
-            "in": "path",
-            "required": true
-          }
-        ],
+        "operationId": "getConnectedOutlookEmails",
         "responses": {}
       }
     },
