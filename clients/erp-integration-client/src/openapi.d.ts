@@ -672,6 +672,23 @@ declare namespace Components {
              */
             enabled?: /* Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. */ boolean | string;
             /**
+             * Operation mode for entity mapping:
+             * - 'upsert': Create or update the entity (default)
+             * - 'delete': Soft delete the entity (marks as deleted)
+             * - 'purge': Hard delete the entity (permanent removal)
+             * - 'upsert-prune-scope-purge': Upsert entities from array, then purge entities in scope that weren't upserted
+             * - 'upsert-prune-scope-delete': Upsert entities from array, then soft delete entities in scope that weren't upserted
+             *
+             */
+            mode?: "upsert" | "delete" | "purge" | "upsert-prune-scope-purge" | "upsert-prune-scope-delete";
+            scope?: /**
+             * Scope configuration for upsert-prune-scope modes.
+             * Defines how to find entities that should be pruned if not in the upsert payload.
+             * The scope is resolved against the original event payload (not individual array items).
+             *
+             */
+            PruneScopeConfig;
+            /**
              * Field mapping definitions
              */
             fields: IntegrationEntityField[];
@@ -1202,6 +1219,39 @@ declare namespace Components {
              * List of detected conflicts, if any
              */
             conflicts?: OutboundConflict[];
+        }
+        /**
+         * Scope configuration for upsert-prune-scope modes.
+         * Defines how to find entities that should be pruned if not in the upsert payload.
+         * The scope is resolved against the original event payload (not individual array items).
+         *
+         */
+        export interface PruneScopeConfig {
+            /**
+             * Scope mode for finding entities to prune:
+             * - 'relations': Find scope by looking at all entities related to a specific entity (both direct and reverse relations)
+             * - 'query': Find scope entities directly via query parameters
+             *
+             */
+            scope_mode: "relations" | "query";
+            /**
+             * For 'relations' mode: The schema of the entity to find (e.g., 'billing_account').
+             * Not used for 'query' mode.
+             *
+             */
+            schema?: string;
+            /**
+             * For 'relations' mode: How to identify the scope entity from the payload.
+             * Not used for 'query' mode.
+             *
+             */
+            unique_ids?: RelationUniqueIdField[];
+            /**
+             * For 'query' mode: Direct query parameters to find scope entities.
+             * Not used for 'relations' or 'reverse-relations' modes.
+             *
+             */
+            query?: RelationUniqueIdField[];
         }
         export interface QueryAccessLogsRequest {
             /**
@@ -3220,6 +3270,7 @@ export type OutboundStatusResponse = Components.Schemas.OutboundStatusResponse;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type OutboundUseCaseStatus = Components.Schemas.OutboundUseCaseStatus;
+export type PruneScopeConfig = Components.Schemas.PruneScopeConfig;
 export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type QueryInboundMonitoringEventsRequest = Components.Schemas.QueryInboundMonitoringEventsRequest;
