@@ -55,6 +55,17 @@
         "responses": {}
       }
     },
+    "/v3/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV3",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/erp/updates/mapping_simulation": {
       "post": {
         "operationId": "simulateMappingV2",

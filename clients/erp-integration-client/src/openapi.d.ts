@@ -381,6 +381,33 @@ declare namespace Components {
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
         }
+        export interface ErpEventV3 {
+            /**
+             * Name of the event (e.g., business_partner, contract_account). Corresponds to the "Event Name" from the integration UI. Replaces object_type from V2.
+             */
+            event_name: string;
+            /**
+             * Timestamp when the event occurred
+             */
+            timestamp: string; // date-time
+            /**
+             * Format of the payload data
+             */
+            format: "json" | "xml";
+            /**
+             * The object data payload - can be either a serialized string or a direct JSON object
+             */
+            payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
+                [name: string]: any;
+            };
+            /**
+             * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.
+             *
+             * example:
+             * evt-2025-05-01-12345-bp
+             */
+            deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+        }
         export interface ErpUpdatesEventsV2Request {
             /**
              * UUID that identifies the integration configuration to use
@@ -394,6 +421,20 @@ declare namespace Components {
              * List of ERP events to process
              */
             events: ErpEvent[];
+        }
+        export interface ErpUpdatesEventsV3Request {
+            /**
+             * UUID that identifies the integration configuration to use
+             */
+            integration_id: string; // uuid
+            /**
+             * Optional ID that identifies the specific request for debugging purposes
+             */
+            correlation_id?: string;
+            /**
+             * List of ERP events to process
+             */
+            events: ErpEventV3[];
         }
         export interface ErrorResponseBase {
             /**
@@ -426,7 +467,7 @@ declare namespace Components {
              *   "status"
              * ]
              */
-            inbound_group_by?: ("use_case_id" | "sync_type" | "status" | "error_category" | "object_type" | "date")[];
+            inbound_group_by?: ("use_case_id" | "sync_type" | "status" | "error_category" | "object_type" | "event_name" | "date")[];
             /**
              * Fields to group outbound statistics by
              * example:
@@ -472,9 +513,13 @@ declare namespace Components {
              */
             use_case_id?: string | null;
             /**
-             * Type of event
+             * Type of event (optional for V3 events)
              */
-            event_type: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
+            event_type?: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
+            /**
+             * Event name (alias for object_type, used in V3+)
+             */
+            event_name?: string;
             /**
              * Type of object being synced (e.g., 'contract', 'meter')
              */
@@ -1335,6 +1380,10 @@ declare namespace Components {
              */
             object_type?: string;
             /**
+             * Filter by event name (alias for object_type)
+             */
+            event_name?: string;
+            /**
              * Maximum number of results to return
              * example:
              * 25
@@ -1387,6 +1436,10 @@ declare namespace Components {
              * Filter by object type (e.g., 'contract', 'meter')
              */
             object_type?: string;
+            /**
+             * Filter by event name (alias for object_type)
+             */
+            event_name?: string;
             /**
              * Filter by event ID to find a specific event
              */
@@ -2276,6 +2329,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ProcessErpUpdatesEventsV3 {
+        export type RequestBody = Components.Schemas.ErpUpdatesEventsV3Request;
+        namespace Responses {
+            export type $200 = Components.Responses.ERPUpdatesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $422 = Components.Responses.ERPUpdatesResponse;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace QueryAccessLogs {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -2516,6 +2579,19 @@ export interface OperationMethods {
     data?: Paths.ProcessErpUpdatesEventsV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ProcessErpUpdatesEventsV2.Responses.$200>
+  /**
+   * processErpUpdatesEventsV3 - processErpUpdatesEventsV3
+   * 
+   * Handles updates from ERP systems using integration_id directly.
+   * This is the v3 version that removes the unused event_type field and renames object_type to event_name
+   * to align with the integration UI naming.
+   * 
+   */
+  'processErpUpdatesEventsV3'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ProcessErpUpdatesEventsV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ProcessErpUpdatesEventsV3.Responses.$200>
   /**
    * simulateMappingV2 - simulateMappingV2
    * 
@@ -2878,6 +2954,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ProcessErpUpdatesEventsV2.Responses.$200>
   }
+  ['/v3/erp/updates/events']: {
+    /**
+     * processErpUpdatesEventsV3 - processErpUpdatesEventsV3
+     * 
+     * Handles updates from ERP systems using integration_id directly.
+     * This is the v3 version that removes the unused event_type field and renames object_type to event_name
+     * to align with the integration UI naming.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ProcessErpUpdatesEventsV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ProcessErpUpdatesEventsV3.Responses.$200>
+  }
   ['/v2/erp/updates/mapping_simulation']: {
     /**
      * simulateMappingV2 - simulateMappingV2
@@ -3239,7 +3330,9 @@ export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type ErpEvent = Components.Schemas.ErpEvent;
+export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
+export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;

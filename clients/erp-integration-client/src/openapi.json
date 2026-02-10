@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.30.0",
+    "version": "0.31.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -252,6 +252,62 @@
                   {
                     "event_type": "UPDATE",
                     "object_type": "contract_account",
+                    "timestamp": "2025-05-01T08:35:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
+                    "deduplication_id": "ca-update-20250501-083500-001"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV3",
+        "summary": "processErpUpdatesEventsV3",
+        "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v3 version that removes the unused event_type field and renames object_type to event_name\nto align with the integration UI naming.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErpUpdatesEventsV3Request"
+              },
+              "example": {
+                "integration_id": "123e4567-e89b-12d3-a456-426614174000",
+                "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
+                "events": [
+                  {
+                    "event_name": "business_partner",
+                    "timestamp": "2025-05-01T08:30:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}",
+                    "deduplication_id": "bp-create-20250501-083000-001"
+                  },
+                  {
+                    "event_name": "contract_account",
                     "timestamp": "2025-05-01T08:35:00Z",
                     "format": "json",
                     "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
@@ -2260,6 +2316,82 @@
           }
         }
       },
+      "ErpEventV3": {
+        "type": "object",
+        "required": [
+          "event_name",
+          "timestamp",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Name of the event (e.g., business_partner, contract_account). Corresponds to the \"Event Name\" from the integration UI. Replaces object_type from V2."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event occurred"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          },
+          "deduplication_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
+            "example": "evt-2025-05-01-12345-bp"
+          }
+        }
+      },
+      "ErpUpdatesEventsV3Request": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "events"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID that identifies the integration configuration to use"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional ID that identifies the specific request for debugging purposes"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of ERP events to process",
+            "items": {
+              "$ref": "#/components/schemas/ErpEventV3"
+            }
+          }
+        }
+      },
       "TriggerErpActionRequest": {
         "type": "object",
         "required": [
@@ -4038,6 +4170,10 @@
             "type": "string",
             "description": "Filter by object type"
           },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
+          },
           "limit": {
             "type": "integer",
             "description": "Maximum number of results to return",
@@ -4118,6 +4254,10 @@
           "object_type": {
             "type": "string",
             "description": "Filter by object type (e.g., 'contract', 'meter')"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
           },
           "event_id": {
             "type": "string",
@@ -4316,6 +4456,7 @@
                 "status",
                 "error_category",
                 "object_type",
+                "event_name",
                 "date"
               ]
             },
@@ -4588,7 +4729,6 @@
         "required": [
           "org_id",
           "event_id",
-          "event_type",
           "object_type",
           "sync_type",
           "status",
@@ -4627,7 +4767,11 @@
               "DELETE",
               "TRIGGER"
             ],
-            "description": "Type of event"
+            "description": "Type of event (optional for V3 events)"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Event name (alias for object_type, used in V3+)"
           },
           "object_type": {
             "type": "string",
