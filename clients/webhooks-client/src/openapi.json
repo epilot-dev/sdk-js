@@ -18,9 +18,10 @@
   "paths": {
     "/v1/webhooks/.well-known/public-key": {
       "get": {
+        "deprecated": true,
         "operationId": "getPublicKey",
         "summary": "getPublicKey",
-        "description": "Returns the public key used to verify webhook signatures.\nThis endpoint is public and does not require authentication.\n",
+        "description": "Deprecated. Webhook signatures now use per-webhook symmetric secrets\nfollowing the Standard Webhooks specification. The signing secret is\nreturned once during webhook creation.\n",
         "tags": [
           "webhooks"
         ],
@@ -1134,6 +1135,12 @@
               "format": "uuid",
               "example": "123e4567-e89b-12d3-a456-426614174000"
             }
+          },
+          "signingSecret": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Per-webhook signing secret following the Standard Webhooks specification.\nOnly returned once during webhook creation. Use this secret to verify\nwebhook signatures using the `webhook-id`, `webhook-timestamp`, and\n`webhook-signature` headers.\n",
+            "example": "whsec_C2FVsBQIhrscChlQIMV+b5sSYspob7oD"
           }
         },
         "required": [

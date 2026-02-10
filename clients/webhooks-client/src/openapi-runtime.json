@@ -7,6 +7,7 @@
   "paths": {
     "/v1/webhooks/.well-known/public-key": {
       "get": {
+        "deprecated": true,
         "operationId": "getPublicKey",
         "responses": {}
       }

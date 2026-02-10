@@ -455,6 +455,16 @@ declare namespace Components {
              * Manifest ID used to create/update the webhook resource
              */
             _manifest?: string /* uuid */[];
+            /**
+             * Per-webhook signing secret following the Standard Webhooks specification.
+             * Only returned once during webhook creation. Use this secret to verify
+             * webhook signatures using the `webhook-id`, `webhook-timestamp`, and
+             * `webhook-signature` headers.
+             *
+             * example:
+             * whsec_C2FVsBQIhrscChlQIMV+b5sSYspob7oD
+             */
+            signingSecret?: string;
         }
         export interface WebhookEvent {
             event_id: string;
@@ -836,8 +846,9 @@ export interface OperationMethods {
   /**
    * getPublicKey - getPublicKey
    * 
-   * Returns the public key used to verify webhook signatures.
-   * This endpoint is public and does not require authentication.
+   * Deprecated. Webhook signatures now use per-webhook symmetric secrets
+   * following the Standard Webhooks specification. The signing secret is
+   * returned once during webhook creation.
    * 
    */
   'getPublicKey'(
@@ -982,8 +993,9 @@ export interface PathsDictionary {
     /**
      * getPublicKey - getPublicKey
      * 
-     * Returns the public key used to verify webhook signatures.
-     * This endpoint is public and does not require authentication.
+     * Deprecated. Webhook signatures now use per-webhook symmetric secrets
+     * following the Standard Webhooks specification. The signing secret is
+     * returned once during webhook creation.
      * 
      */
     'get'(
