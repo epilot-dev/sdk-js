@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.31.0",
+    "version": "0.33.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -128,6 +128,7 @@
     },
     "/v1/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEvents",
         "summary": "processErpUpdatesEvents",
         "description": "Handles updates from ERP systems and tracks them appropriately",
@@ -214,9 +215,6 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "422": {
-            "$ref": "#/components/responses/ERPUpdatesResponse"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -225,6 +223,7 @@
     },
     "/v2/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEventsV2",
         "summary": "processErpUpdatesEventsV2",
         "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v2 version that simplifies the API by accepting integration_id\ninstead of app_id and component_id.\n",
@@ -271,9 +270,6 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "422": {
-            "$ref": "#/components/responses/ERPUpdatesResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -327,9 +323,6 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "422": {
-            "$ref": "#/components/responses/ERPUpdatesResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4223,7 +4216,9 @@
             "type": "string",
             "enum": [
               "entity",
-              "meter_reading"
+              "meter_reading",
+              "webhook",
+              "api_deprecation"
             ],
             "description": "Filter by sync type"
           },
@@ -4232,7 +4227,8 @@
             "enum": [
               "success",
               "error",
-              "skipped"
+              "skipped",
+              "warning"
             ],
             "description": "Filter by processing status"
           },
@@ -4655,6 +4651,10 @@
                 "type": "integer",
                 "description": "Number of skipped events"
               },
+              "warning_count": {
+                "type": "integer",
+                "description": "Number of warning events"
+              },
               "success_rate": {
                 "type": "number",
                 "format": "float",
@@ -4769,10 +4769,6 @@
             ],
             "description": "Type of event (optional for V3 events)"
           },
-          "event_name": {
-            "type": "string",
-            "description": "Event name (alias for object_type, used in V3+)"
-          },
           "object_type": {
             "type": "string",
             "description": "Type of object being synced (e.g., 'contract', 'meter')"
@@ -4781,7 +4777,9 @@
             "type": "string",
             "enum": [
               "entity",
-              "meter_reading"
+              "meter_reading",
+              "webhook",
+              "api_deprecation"
             ],
             "description": "Type of sync operation"
           },
@@ -4790,7 +4788,8 @@
             "enum": [
               "success",
               "error",
-              "skipped"
+              "skipped",
+              "warning"
             ],
             "description": "Processing status"
           },
@@ -5044,9 +5043,10 @@
                         "enum": [
                           "success",
                           "error",
-                          "skipped"
+                          "skipped",
+                          "ignored"
                         ],
-                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id)"
+                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
                       },
                       "message": {
                         "type": "string"

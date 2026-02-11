@@ -18,9 +18,9 @@ declare namespace Components {
                  */
                 event_id: string;
                 /**
-                 * Processing status for the event (skipped indicates duplicate deduplication_id)
+                 * Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)
                  */
-                status: "success" | "error" | "skipped";
+                status: "success" | "error" | "skipped" | "ignored";
                 message?: string;
             }[];
         }
@@ -517,21 +517,17 @@ declare namespace Components {
              */
             event_type?: "CREATE" | "UPDATE" | "DELETE" | "TRIGGER";
             /**
-             * Event name (alias for object_type, used in V3+)
-             */
-            event_name?: string;
-            /**
              * Type of object being synced (e.g., 'contract', 'meter')
              */
             object_type: string;
             /**
              * Type of sync operation
              */
-            sync_type: "entity" | "meter_reading";
+            sync_type: "entity" | "meter_reading" | "webhook" | "api_deprecation";
             /**
              * Processing status
              */
-            status: "success" | "error" | "skipped";
+            status: "success" | "error" | "skipped" | "warning";
             /**
              * Error code (when status=error)
              */
@@ -966,6 +962,10 @@ declare namespace Components {
                  * Number of skipped events
                  */
                 skipped_count: number;
+                /**
+                 * Number of warning events
+                 */
+                warning_count?: number;
                 /**
                  * Success rate as percentage (0-100)
                  */
@@ -1419,11 +1419,11 @@ declare namespace Components {
             /**
              * Filter by sync type
              */
-            sync_type?: "entity" | "meter_reading";
+            sync_type?: "entity" | "meter_reading" | "webhook" | "api_deprecation";
             /**
              * Filter by processing status
              */
-            status?: "success" | "error" | "skipped";
+            status?: "success" | "error" | "skipped" | "warning";
             /**
              * Filter by error category (only applicable when status=error)
              */
@@ -2315,7 +2315,6 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
-            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -2325,7 +2324,6 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
-            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -2335,7 +2333,6 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
-            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
