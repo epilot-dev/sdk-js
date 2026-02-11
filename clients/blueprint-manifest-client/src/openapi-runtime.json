@@ -238,6 +238,19 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
+      "post": {
+        "operationId": "validateBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",

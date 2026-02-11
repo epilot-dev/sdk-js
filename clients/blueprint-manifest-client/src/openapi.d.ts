@@ -161,7 +161,7 @@ declare namespace Components {
              */
             resources_to_ignore?: string[];
         }
-        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob;
+        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob | BlueprintValidateJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
             message?: string;
@@ -275,6 +275,32 @@ declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintResourceID = string;
+        export interface BlueprintValidateJob {
+            id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            events?: BlueprintJobEvent[];
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            /**
+             * Present when status is SUCCESS or FAILED.
+             */
+            valid?: boolean;
+            /**
+             * Present when valid is false.
+             */
+            errors?: FormattedError[];
+        }
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -728,7 +754,7 @@ declare namespace Components {
                 resources?: string[];
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -2262,6 +2288,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace ValidateBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
+            }
+        }
+    }
 }
 
 
@@ -2470,6 +2521,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
+  /**
+   * validateBlueprint - validateBlueprint
+   * 
+   * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+   * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
+   * 
+   */
+  'validateBlueprint'(
+    parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
   /**
    * exportBlueprint - exportBlueprint
    * 
@@ -2826,6 +2889,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/validate']: {
+    /**
+     * validateBlueprint - validateBlueprint
+     * 
+     * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+     * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
+  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
     /**
      * exportBlueprint - exportBlueprint
@@ -2984,6 +3061,7 @@ export type BlueprintJobID = Components.Schemas.BlueprintJobID;
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
+export type BlueprintValidateJob = Components.Schemas.BlueprintValidateJob;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonBlueprintFields = Components.Schemas.CommonBlueprintFields;
 export type CommonBlueprintJobFields = Components.Schemas.CommonBlueprintJobFields;

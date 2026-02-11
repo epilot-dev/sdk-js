@@ -1064,6 +1064,54 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
+      "post": {
+        "operationId": "validateBlueprint",
+        "summary": "validateBlueprint",
+        "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Validation job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint not found"
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
@@ -2239,6 +2287,9 @@
           },
           {
             "$ref": "#/components/schemas/BlueprintDependenciesSyncJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintValidateJob"
           }
         ]
       },
@@ -2261,6 +2312,40 @@
                   "FAILED",
                   "CANCELED"
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintValidateJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "IN_PROGRESS",
+                  "SUCCESS",
+                  "FAILED"
+                ]
+              },
+              "valid": {
+                "type": "boolean",
+                "description": "Present when status is SUCCESS or FAILED."
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FormattedError"
+                },
+                "description": "Present when valid is false."
               }
             }
           }
@@ -2937,6 +3022,7 @@
           "terraform_cli_process_error",
           "terraform_import_block_process_error",
           "terraform_init_error",
+          "terraform_validate_error",
           "terraform_plan_error",
           "terraform_apply_error",
           "terraform_show_error",
