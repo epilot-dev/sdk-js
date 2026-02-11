@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "3.4.0",
+    "version": "3.4.1",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -2951,7 +2951,8 @@
           "unsupported_attribute",
           "self_referential_block",
           "circular_dependency",
-          "state_mismatch"
+          "state_mismatch",
+          "import_nonexistent_object"
         ]
       },
       "FormattedErrorData": {
