@@ -49,6 +49,10 @@ npm run openapi <path/to/local/openapi.yml>
 ## build and generate new types
 npm run typegen && npm run build
 
+## increment the version number in package.json
+## to increment the minor or major version number instead, replace "patch" with "minor" or "major" in the below command
+npm version patch --no-git-tag-version
+
 ## commit your changes
 git commit -am 'chore(entity-client): update client with new spec'
 ```
