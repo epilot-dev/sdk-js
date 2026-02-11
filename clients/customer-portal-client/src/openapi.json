@@ -9567,6 +9567,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The URL on which the portal is accessible",
+            "example": "example-portal-12345.ecp.epilot.cloud"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -10059,6 +10067,24 @@
             "items": {
               "$ref": "#/components/schemas/PortalWidget"
             }
+          }
+        }
+      },
+      "DomainSettings": {
+        "type": "object",
+        "description": "Domain settings for the portal",
+        "properties": {
+          "is_custom_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the custom domain is enabled"
+          },
+          "is_epilot_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the Epilot domain is enabled"
+          },
+          "is_redirection_enabled": {
+            "type": "boolean",
+            "description": "Whether the redirection is enabled"
           }
         }
       },
@@ -13650,7 +13676,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10"
+            "example": "2022-10-10T00:00:00.000Z"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -14392,6 +14418,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The Epilot domain on which the portal is accessible",
+            "example": "example-portal-1.ecp.epilot.io"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -14895,6 +14929,11 @@
           "is_canary": {
             "type": "boolean",
             "description": "Whether the org is in canary mode"
+          },
+          "redirect_to": {
+            "type": "string",
+            "description": "The URL to redirect to",
+            "example": "https://example.com"
           }
         }
       },

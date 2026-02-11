@@ -828,6 +828,13 @@ declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -1193,6 +1200,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             /**
              * ID of the design used to build the portal
              */
@@ -1976,6 +1990,23 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
+        }
+        /**
+         * Domain settings for the portal
+         */
+        export interface DomainSettings {
+            /**
+             * Whether the custom domain is enabled
+             */
+            is_custom_domain_enabled?: boolean;
+            /**
+             * Whether the Epilot domain is enabled
+             */
+            is_epilot_domain_enabled?: boolean;
+            /**
+             * Whether the redirection is enabled
+             */
+            is_redirection_enabled?: boolean;
         }
         /**
          * Email templates used for authentication and internal processes
@@ -3718,6 +3749,12 @@ declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
+            /**
+             * The URL to redirect to
+             * example:
+             * https://example.com
+             */
+            redirect_to?: string;
         }
         /**
          * The meter entity
@@ -3828,7 +3865,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string;
             /**
@@ -4482,6 +4519,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -4931,6 +4975,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -5978,6 +6029,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -6381,6 +6439,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -8895,6 +8960,13 @@ declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -9334,6 +9406,13 @@ declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -12066,7 +12145,6 @@ declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -15036,7 +15114,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
@@ -15076,6 +15153,7 @@ export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
+export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
