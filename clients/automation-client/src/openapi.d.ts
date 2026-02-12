@@ -2807,7 +2807,14 @@ declare namespace Components {
             id?: string; // uuid
             type: "new_email_thread";
             configuration: {
-                direction?: "INBOUND" | "OUTBOUND" | "BOTH";
+                /**
+                 * A list of shared inbox IDs that the email thread should be matched against.
+                 */
+                shared_inbox_ids?: string[];
+                /**
+                 * Whether the trigger should be matched against only inbound, outbound emails or both.
+                 */
+                direction: "INBOUND" | "OUTBOUND" | "BOTH";
             };
         }
         export interface NumericCondition {
