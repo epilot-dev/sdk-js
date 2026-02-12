@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.33.0",
+    "version": "0.35.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2056,6 +2056,56 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/monitoring/timeseries": {
+      "post": {
+        "operationId": "getMonitoringTimeSeries",
+        "summary": "getMonitoringTimeSeries",
+        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringTimeSeriesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringTimeSeriesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/outbound-status": {
       "get": {
         "operationId": "getOutboundStatus",
@@ -3203,7 +3253,7 @@
           "attributes": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Meter reading attributes (external_id, timestamp, source, value, etc.)"
+            "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
           }
         }
       },
@@ -4481,6 +4531,103 @@
           }
         }
       },
+      "GetMonitoringTimeSeriesRequest": {
+        "type": "object",
+        "required": [
+          "from_date",
+          "interval"
+        ],
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date for the time series (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End date for the time series (inclusive). Defaults to current time if not specified.",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "5m",
+              "30m",
+              "1h",
+              "1d"
+            ],
+            "description": "The time bucket interval for aggregation",
+            "example": "1h"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ],
+            "default": "both",
+            "description": "Filter by event direction. Defaults to both.",
+            "example": "both"
+          }
+        }
+      },
+      "TimeSeriesBucket": {
+        "type": "object",
+        "required": [
+          "timestamp"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start timestamp of the bucket"
+          },
+          "inbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Inbound event counts for this bucket. Null when direction is outbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "warning_count": {
+                "type": "integer"
+              },
+              "skipped_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Outbound event counts for this bucket. Null when direction is inbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "pending_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
       "QueryOutboundMonitoringEventsRequest": {
         "type": "object",
         "properties": {
@@ -4917,6 +5064,51 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/MonitoringStats"
+            }
+          }
+        }
+      },
+      "GetMonitoringTimeSeriesResponse": {
+        "description": "Time-series aggregated event counts retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "interval",
+                "from_date",
+                "to_date",
+                "buckets"
+              ],
+              "properties": {
+                "interval": {
+                  "type": "string",
+                  "enum": [
+                    "5m",
+                    "30m",
+                    "1h",
+                    "1d"
+                  ],
+                  "description": "The time bucket interval used for aggregation"
+                },
+                "from_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Start date of the time series"
+                },
+                "to_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "End date of the time series"
+                },
+                "buckets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesBucket"
+                  },
+                  "description": "List of time-series buckets with event counts"
+                }
+              }
             }
           }
         }

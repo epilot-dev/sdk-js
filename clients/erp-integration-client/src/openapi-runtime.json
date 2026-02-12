@@ -427,6 +427,25 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/monitoring/timeseries": {
+      "post": {
+        "operationId": "getMonitoringTimeSeries",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/outbound-status": {
       "get": {
         "operationId": "getOutboundStatus",
@@ -507,6 +526,11 @@
         }
       },
       "GetMonitoringStatsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringTimeSeriesResponse": {
         "content": {
           "application/json": {}
         }

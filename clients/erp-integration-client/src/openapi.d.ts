@@ -25,6 +25,24 @@ declare namespace Components {
             }[];
         }
         export type GetMonitoringStatsResponse = Schemas.MonitoringStats;
+        export interface GetMonitoringTimeSeriesResponse {
+            /**
+             * The time bucket interval used for aggregation
+             */
+            interval: "5m" | "30m" | "1h" | "1d";
+            /**
+             * Start date of the time series
+             */
+            from_date: string; // date-time
+            /**
+             * End date of the time series
+             */
+            to_date: string; // date-time
+            /**
+             * List of time-series buckets with event counts
+             */
+            buckets: Schemas.TimeSeriesBucket[];
+        }
         export type InternalServerError = Schemas.ErrorResponseBase;
         export type NotFound = Schemas.ErrorResponseBase;
         export interface QueryAccessLogsResponse {
@@ -478,6 +496,32 @@ declare namespace Components {
              */
             outbound_group_by?: ("event_name" | "status" | "webhook_config_id" | "date")[];
         }
+        export interface GetMonitoringTimeSeriesRequest {
+            /**
+             * Start date for the time series (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date: string; // date-time
+            /**
+             * End date for the time series (inclusive). Defaults to current time if not specified.
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * The time bucket interval for aggregation
+             * example:
+             * 1h
+             */
+            interval: "5m" | "30m" | "1h" | "1d";
+            /**
+             * Filter by event direction. Defaults to both.
+             * example:
+             * both
+             */
+            direction?: "inbound" | "outbound" | "both";
+        }
         /**
          * Configuration for inbound use cases (ERP to epilot)
          */
@@ -922,7 +966,7 @@ declare namespace Components {
                 };
             };
             /**
-             * Meter reading attributes (external_id, timestamp, source, value, etc.)
+             * Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null).
              */
             attributes: {
                 [name: string]: any;
@@ -1777,6 +1821,31 @@ declare namespace Components {
              */
             overwrite?: boolean;
         }
+        export interface TimeSeriesBucket {
+            /**
+             * The start timestamp of the bucket
+             */
+            timestamp: string; // date-time
+            /**
+             * Inbound event counts for this bucket. Null when direction is outbound.
+             */
+            inbound?: {
+                success_count?: number;
+                error_count?: number;
+                warning_count?: number;
+                skipped_count?: number;
+                total_count?: number;
+            } | null;
+            /**
+             * Outbound event counts for this bucket. Null when direction is inbound.
+             */
+            outbound?: {
+                success_count?: number;
+                error_count?: number;
+                pending_count?: number;
+                total_count?: number;
+            } | null;
+        }
         export interface TriggerErpActionRequest {
             /**
              * Unique identifier of the current automation execution
@@ -2186,6 +2255,22 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.GetMonitoringStatsRequest;
         namespace Responses {
             export type $200 = Components.Responses.GetMonitoringStatsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMonitoringTimeSeries {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GetMonitoringTimeSeriesRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.GetMonitoringTimeSeriesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
@@ -2860,6 +2945,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
   /**
+   * getMonitoringTimeSeries - getMonitoringTimeSeries
+   * 
+   * Get time-series aggregated event counts for monitoring charts.
+   * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+   * 
+   */
+  'getMonitoringTimeSeries'(
+    parameters?: Parameters<Paths.GetMonitoringTimeSeries.PathParameters> | null,
+    data?: Paths.GetMonitoringTimeSeries.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringTimeSeries.Responses.$200>
+  /**
    * getOutboundStatus - getOutboundStatus
    * 
    * Get the status of all outbound use cases for a specific integration.
@@ -3264,6 +3361,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMonitoringStats.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/monitoring/timeseries']: {
+    /**
+     * getMonitoringTimeSeries - getMonitoringTimeSeries
+     * 
+     * Get time-series aggregated event counts for monitoring charts.
+     * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetMonitoringTimeSeries.PathParameters> | null,
+      data?: Paths.GetMonitoringTimeSeries.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringTimeSeries.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/outbound-status']: {
     /**
      * getOutboundStatus - getOutboundStatus
@@ -3332,6 +3443,7 @@ export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Req
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
+export type GetMonitoringTimeSeriesRequest = Components.Schemas.GetMonitoringTimeSeriesRequest;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundMonitoringEvent = Components.Schemas.InboundMonitoringEvent;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
@@ -3374,6 +3486,7 @@ export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
 export type RepeatableFieldType = Components.Schemas.RepeatableFieldType;
 export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
