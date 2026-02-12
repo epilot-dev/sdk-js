@@ -2060,7 +2060,7 @@
       "post": {
         "operationId": "getMonitoringTimeSeries",
         "summary": "getMonitoringTimeSeries",
-        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\n",
+        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -4554,8 +4554,10 @@
             "type": "string",
             "enum": [
               "5m",
+              "10m",
               "30m",
               "1h",
+              "3h",
               "1d"
             ],
             "description": "The time bucket interval for aggregation",
@@ -5085,8 +5087,10 @@
                   "type": "string",
                   "enum": [
                     "5m",
+                    "10m",
                     "30m",
                     "1h",
+                    "3h",
                     "1d"
                   ],
                   "description": "The time bucket interval used for aggregation"

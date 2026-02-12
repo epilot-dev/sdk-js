@@ -29,7 +29,7 @@ declare namespace Components {
             /**
              * The time bucket interval used for aggregation
              */
-            interval: "5m" | "30m" | "1h" | "1d";
+            interval: "5m" | "10m" | "30m" | "1h" | "3h" | "1d";
             /**
              * Start date of the time series
              */
@@ -514,7 +514,7 @@ declare namespace Components {
              * example:
              * 1h
              */
-            interval: "5m" | "30m" | "1h" | "1d";
+            interval: "5m" | "10m" | "30m" | "1h" | "3h" | "1d";
             /**
              * Filter by event direction. Defaults to both.
              * example:
@@ -2949,6 +2949,7 @@ export interface OperationMethods {
    * 
    * Get time-series aggregated event counts for monitoring charts.
    * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+   * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
    * 
    */
   'getMonitoringTimeSeries'(
@@ -3367,6 +3368,7 @@ export interface PathsDictionary {
      * 
      * Get time-series aggregated event counts for monitoring charts.
      * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+     * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
      * 
      */
     'post'(
