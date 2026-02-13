@@ -1,6 +1,6 @@
 {
   "name": "@epilot/environments-client",
-  "version": "0.0.1",
+  "version": "0.2.1",
   "description": "JavaScript client library for the epilot Environments API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
     "test": "jest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js ../../../../gitlab/environments-api/openapi.yml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/environments.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

@@ -35,10 +35,18 @@ declare namespace Components {
             key: string;
             type: EnvironmentValueType;
             description?: string;
+            /**
+             * Value is returned for String type, omitted for SecretString
+             */
+            value?: string;
             created_at: string; // date-time
             updated_at: string; // date-time
         }
         export interface EnvironmentVariableUpdateRequest {
+            /**
+             * Type of variable. Used when creating a new variable. Defaults to String.
+             */
+            type?: "String" | "SecretString";
             value: string;
             description?: string;
         }
@@ -53,6 +61,8 @@ declare namespace Paths {
             }
             export interface $401 {
             }
+            export interface $403 {
+            }
             export interface $409 {
             }
             export interface $500 {
@@ -65,6 +75,8 @@ declare namespace Paths {
             }
             export interface $401 {
             }
+            export interface $403 {
+            }
             export interface $404 {
             }
             export interface $500 {
@@ -75,6 +87,8 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.EnvironmentVariable;
             export interface $401 {
+            }
+            export interface $403 {
             }
             export interface $404 {
             }
@@ -87,6 +101,8 @@ declare namespace Paths {
             export type $200 = Components.Schemas.EnvironmentVariableList;
             export interface $401 {
             }
+            export interface $403 {
+            }
             export interface $500 {
             }
         }
@@ -95,11 +111,12 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.EnvironmentVariableUpdateRequest;
         namespace Responses {
             export type $200 = Components.Schemas.EnvironmentVariable;
+            export type $201 = Components.Schemas.EnvironmentVariable;
             export interface $400 {
             }
             export interface $401 {
             }
-            export interface $404 {
+            export interface $403 {
             }
             export interface $500 {
             }
@@ -150,13 +167,13 @@ export interface OperationMethods {
   /**
    * updateEnvironmentVariable - Update environment variable
    * 
-   * Update an existing environment variable value.
+   * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.
    */
   'updateEnvironmentVariable'(
     parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
     data?: Paths.UpdateEnvironmentVariable.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200>
+  ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200 | Paths.UpdateEnvironmentVariable.Responses.$201>
   /**
    * deleteEnvironmentVariable - Delete environment variable
    * 
@@ -206,13 +223,13 @@ export interface PathsDictionary {
     /**
      * updateEnvironmentVariable - Update environment variable
      * 
-     * Update an existing environment variable value.
+     * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.
      */
     'put'(
       parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
       data?: Paths.UpdateEnvironmentVariable.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200>
+    ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200 | Paths.UpdateEnvironmentVariable.Responses.$201>
     /**
      * deleteEnvironmentVariable - Delete environment variable
      * 

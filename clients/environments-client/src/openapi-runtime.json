@@ -51,5 +51,5 @@
     }
   },
   "components": {},
-  "servers": []
+  "servers": [{"url":"https://environments.sls.epilo.io"}]
 }
