@@ -35,7 +35,6 @@
     },
     "/v1/erp/updates/events": {
       "post": {
-        "deprecated": true,
         "operationId": "processErpUpdatesEvents",
         "requestBody": {
           "content": {
@@ -47,19 +46,7 @@
     },
     "/v2/erp/updates/events": {
       "post": {
-        "deprecated": true,
         "operationId": "processErpUpdatesEventsV2",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v3/erp/updates/events": {
-      "post": {
-        "operationId": "processErpUpdatesEventsV3",
         "requestBody": {
           "content": {
             "application/json": {}
@@ -353,6 +340,36 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}/environment": {
+      "get": {
+        "operationId": "getIntegrationEnvironment",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateIntegrationEnvironment",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -389,9 +406,9 @@
         "responses": {}
       }
     },
-    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
+    "/v1/integrations/{integrationId}/monitoring/events": {
       "post": {
-        "operationId": "queryInboundMonitoringEvents",
+        "operationId": "queryMonitoringEvents",
         "parameters": [
           {
             "name": "integrationId",
@@ -411,25 +428,6 @@
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
         "operationId": "getMonitoringStats",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/monitoring/timeseries": {
-      "post": {
-        "operationId": "getMonitoringTimeSeries",
         "parameters": [
           {
             "name": "integrationId",
@@ -477,25 +475,6 @@
         },
         "responses": {}
       }
-    },
-    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
-      "post": {
-        "operationId": "queryOutboundMonitoringEvents",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
     }
   },
   "components": {
@@ -520,7 +499,7 @@
           "application/json": {}
         }
       },
-      "QueryInboundMonitoringEventsResponse": {
+      "QueryMonitoringEventsResponse": {
         "content": {
           "application/json": {}
         }
@@ -530,17 +509,7 @@
           "application/json": {}
         }
       },
-      "GetMonitoringTimeSeriesResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
       "QueryAccessLogsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "QueryOutboundMonitoringEventsResponse": {
         "content": {
           "application/json": {}
         }
