@@ -11,6 +11,7 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export type ContextType = "workflow_execution" | "workflow_task" | "workflow_configuration" | "journey_configuration" | "entity";
+        export type CreatedByType = "user" | "group";
         /**
          * Base Entity schema
          */
@@ -39,10 +40,6 @@ declare namespace Components {
              * The Entity ID of the User that created this Note
              */
             _created_by?: /* The Entity ID of the User that created this Note */ string | number;
-            /**
-             * The Entity ID of the User that created this Note
-             */
-            created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
              * Tags associated with this Note
              */
@@ -91,10 +88,6 @@ declare namespace Components {
              */
             _created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
-             * The Entity ID of the User that created this Note
-             */
-            created_by?: /* The Entity ID of the User that created this Note */ string | number;
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -139,6 +132,14 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            created_by?: {
+                type: "user" | "group";
+                user_id?: string;
+                display_name?: string;
+                org_id?: string;
+                email?: string;
+                phone?: string;
+            };
             /**
              * List of user IDs who have read this note
              */
@@ -186,10 +187,6 @@ declare namespace Components {
              */
             _created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
-             * The Entity ID of the User that created this Note
-             */
-            created_by?: /* The Entity ID of the User that created this Note */ string | number;
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -223,6 +220,18 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            edited_at?: string; // date-time
+            created_by?: {
+                type: CreatedByType;
+                user_id?: string;
+                display_name?: string;
+                org_id?: string;
+                email?: string;
+                phone?: string;
+            };
             /**
              * List of user IDs who have read this note
              */
@@ -271,10 +280,6 @@ declare namespace Components {
              */
             _created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
-             * The Entity ID of the User that created this Note
-             */
-            created_by?: /* The Entity ID of the User that created this Note */ string | number;
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -308,6 +313,18 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            edited_at?: string; // date-time
+            created_by?: {
+                type: CreatedByType;
+                user_id?: string;
+                display_name?: string;
+                org_id?: string;
+                email?: string;
+                phone?: string;
+            };
             /**
              * List of user IDs who have read this note
              */
@@ -349,6 +366,14 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            created_by?: {
+                type: "user" | "group";
+                user_id?: string;
+                display_name?: string;
+                org_id?: string;
+                email?: string;
+                phone?: string;
+            };
             /**
              * List of user IDs who have read this note
              */
@@ -430,10 +455,6 @@ declare namespace Components {
              */
             _created_by?: /* The Entity ID of the User that created this Note */ string | number;
             /**
-             * The Entity ID of the User that created this Note
-             */
-            created_by?: /* The Entity ID of the User that created this Note */ string | number;
-            /**
              * Tags associated with this Note
              */
             _tags?: string[];
@@ -477,6 +498,14 @@ declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            created_by?: {
+                type: "user" | "group";
+                user_id?: string;
+                display_name?: string;
+                org_id?: string;
+                email?: string;
+                phone?: string;
+            };
             /**
              * List of user IDs who have read this note
              */
@@ -635,8 +664,6 @@ declare namespace Paths {
         }
         export interface PathParameters {
             entity_id: /* The ID of the Contextual Entity from where to retrieve Notes */ Parameters.EntityId;
-            from?: /* The index of the first Note to return in this query */ Parameters.From;
-            size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
         export interface QueryParameters {
             contexts?: Parameters.Contexts;
@@ -1003,6 +1030,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type ContextType = Components.Schemas.ContextType;
+export type CreatedByType = Components.Schemas.CreatedByType;
 export type Entity = Components.Schemas.Entity;
 export type NonHydratedNoteEntity = Components.Schemas.NonHydratedNoteEntity;
 export type NoteContexts = Components.Schemas.NoteContexts;
