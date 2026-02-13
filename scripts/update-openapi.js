@@ -27,7 +27,7 @@ function deduplicateServers(spec, fallbackServerURL) {
   const uniqueServers = [];
 
   for (const server of servers) {
-    if (server.url && !seen.has(server.url)) {
+    if (server && server.url && !seen.has(server.url)) {
       seen.add(server.url);
       uniqueServers.push(server);
     }
