@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.25.0",
+    "version": "0.36.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -128,6 +128,7 @@
     },
     "/v1/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEvents",
         "summary": "processErpUpdatesEvents",
         "description": "Handles updates from ERP systems and tracks them appropriately",
@@ -214,9 +215,6 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "422": {
-            "$ref": "#/components/responses/ERPUpdatesResponse"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -225,6 +223,7 @@
     },
     "/v2/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEventsV2",
         "summary": "processErpUpdatesEventsV2",
         "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v2 version that simplifies the API by accepting integration_id\ninstead of app_id and component_id.\n",
@@ -272,8 +271,58 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "422": {
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV3",
+        "summary": "processErpUpdatesEventsV3",
+        "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v3 version that removes the unused event_type field and renames object_type to event_name\nto align with the integration UI naming.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErpUpdatesEventsV3Request"
+              },
+              "example": {
+                "integration_id": "123e4567-e89b-12d3-a456-426614174000",
+                "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
+                "events": [
+                  {
+                    "event_name": "business_partner",
+                    "timestamp": "2025-05-01T08:30:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}",
+                    "deduplication_id": "bp-create-20250501-083000-001"
+                  },
+                  {
+                    "event_name": "contract_account",
+                    "timestamp": "2025-05-01T08:35:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
+                    "deduplication_id": "ca-update-20250501-083500-001"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
             "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -1782,103 +1831,6 @@
         }
       }
     },
-    "/v2/integrations/{integrationId}/environment": {
-      "get": {
-        "operationId": "getIntegrationEnvironment",
-        "summary": "getIntegrationEnvironment",
-        "description": "Retrieve the environment configuration for an integration.\nSecret values are masked and replaced with \"****\" to prevent exposure.\n",
-        "tags": [
-          "integrations"
-        ],
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true,
-            "description": "The integration ID",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved environment",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IntegrationEnvironment"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "description": "Integration not found"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      },
-      "patch": {
-        "operationId": "updateIntegrationEnvironment",
-        "summary": "updateIntegrationEnvironment",
-        "description": "Update the environment configuration for an integration.\nSupports partial updates - only provided values are modified.\nSecret values can be updated by providing the actual value in the secrets field.\nTo keep existing secrets, omit them from the request.\nTo clear a value, set it to null.\n",
-        "tags": [
-          "integrations"
-        ],
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true,
-            "description": "The integration ID",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateIntegrationEnvironmentRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Environment updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IntegrationEnvironment"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "description": "Integration not found"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -2004,11 +1956,11 @@
         }
       }
     },
-    "/v1/integrations/{integrationId}/monitoring/events": {
+    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
-        "operationId": "queryMonitoringEvents",
-        "summary": "queryMonitoringEvents",
-        "description": "Query ERP sync monitoring events for a specific integration.\nReturns detailed information about inbound/outbound sync events,\nincluding success rates, error breakdowns, and processing metrics.\n",
+        "operationId": "queryInboundMonitoringEvents",
+        "summary": "queryInboundMonitoringEvents",
+        "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2030,14 +1982,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/QueryMonitoringEventsRequest"
+                "$ref": "#/components/schemas/QueryInboundMonitoringEventsRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/QueryMonitoringEventsResponse"
+            "$ref": "#/components/responses/QueryInboundMonitoringEventsResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2058,7 +2010,7 @@
       "post": {
         "operationId": "getMonitoringStats",
         "summary": "getMonitoringStats",
-        "description": "Get aggregated statistics for ERP sync monitoring events for a specific integration.\nReturns summary metrics like total events, success/error counts,\nand breakdowns by use case, direction, and sync type.\n",
+        "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2088,6 +2040,56 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/GetMonitoringStatsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/timeseries": {
+      "post": {
+        "operationId": "getMonitoringTimeSeries",
+        "summary": "getMonitoringTimeSeries",
+        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringTimeSeriesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringTimeSeriesResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2181,6 +2183,56 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/QueryAccessLogsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
+      "post": {
+        "operationId": "queryOutboundMonitoringEvents",
+        "summary": "queryOutboundMonitoringEvents",
+        "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryOutboundMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryOutboundMonitoringEventsResponse"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2307,6 +2359,82 @@
           }
         }
       },
+      "ErpEventV3": {
+        "type": "object",
+        "required": [
+          "event_name",
+          "timestamp",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Name of the event (e.g., business_partner, contract_account). Corresponds to the \"Event Name\" from the integration UI. Replaces object_type from V2."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event occurred"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          },
+          "deduplication_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
+            "example": "evt-2025-05-01-12345-bp"
+          }
+        }
+      },
+      "ErpUpdatesEventsV3Request": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "events"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID that identifies the integration configuration to use"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional ID that identifies the specific request for debugging purposes"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of ERP events to process",
+            "items": {
+              "$ref": "#/components/schemas/ErpEventV3"
+            }
+          }
+        }
+      },
       "TriggerErpActionRequest": {
         "type": "object",
         "required": [
@@ -2425,6 +2553,20 @@
             "type": "string",
             "description": "Optional description of the integration"
           },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environment_config": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFieldConfig"
+            },
+            "description": "Configuration defining environment variables needed by this integration. Values are stored in the Environments API."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2453,6 +2595,20 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environment_config": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFieldConfig"
+            },
+            "description": "Configuration defining environment variables needed by this integration"
           }
         }
       },
@@ -2469,6 +2625,64 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environment_config": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFieldConfig"
+            },
+            "description": "Configuration defining environment variables needed by this integration"
+          }
+        }
+      },
+      "EnvironmentFieldConfig": {
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Environment variable key, used to look up the value in the Environments API.",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label for the field in the UI",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "String",
+              "SecretString"
+            ],
+            "description": "Whether the value is a plain string or an encrypted secret"
+          },
+          "description": {
+            "type": "string",
+            "description": "Help text shown below the field",
+            "maxLength": 1000
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this field must be filled before the integration can be used"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Sort order for display and drag-to-reorder"
           }
         }
       },
@@ -2525,69 +2739,6 @@
             "type": "string",
             "format": "uuid",
             "description": "The integration ID this app/component is mapped to"
-          }
-        }
-      },
-      "IntegrationEnvironment": {
-        "type": "object",
-        "description": "Environment configuration for an integration with masked secrets",
-        "required": [
-          "integrationId",
-          "values"
-        ],
-        "properties": {
-          "integrationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Parent integration ID"
-          },
-          "values": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Environment values as key-value pairs.\nSecret values are masked as \"****\" in responses.\n"
-          },
-          "secret_keys": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "List of keys that contain secret values (masked in values field)"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "ISO-8601 timestamp when the environment was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "ISO-8601 timestamp when the environment was last updated"
-          }
-        }
-      },
-      "UpdateIntegrationEnvironmentRequest": {
-        "type": "object",
-        "description": "Request to update environment configuration.\nSupports partial updates - only provided values are modified.\n",
-        "properties": {
-          "values": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "description": "Plain text environment values to update.\nSet a value to null to clear it.\n"
-          },
-          "secrets": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string",
-              "nullable": true
-            },
-            "description": "Secret environment values to update.\nThese are stored securely and masked in GET responses.\nSet a value to null to clear it.\nOmit a secret to keep its existing value.\n"
           }
         }
       },
@@ -3167,7 +3318,7 @@
           "attributes": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Meter reading attributes (external_id, timestamp, source, value, etc.)"
+            "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
           }
         }
       },
@@ -3566,11 +3717,61 @@
             ],
             "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
           },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge",
+              "upsert-prune-scope-purge",
+              "upsert-prune-scope-delete"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for entity mapping:\n- 'upsert': Create or update the entity (default)\n- 'delete': Soft delete the entity (marks as deleted)\n- 'purge': Hard delete the entity (permanent removal)\n- 'upsert-prune-scope-purge': Upsert entities from array, then purge entities in scope that weren't upserted\n- 'upsert-prune-scope-delete': Upsert entities from array, then soft delete entities in scope that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PruneScopeConfig"
+          },
           "fields": {
             "type": "array",
             "description": "Field mapping definitions",
             "items": {
               "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "PruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for upsert-prune-scope modes.\nDefines how to find entities that should be pruned if not in the upsert payload.\nThe scope is resolved against the original event payload (not individual array items).\n",
+        "required": [
+          "scope_mode"
+        ],
+        "properties": {
+          "scope_mode": {
+            "type": "string",
+            "enum": [
+              "relations",
+              "query"
+            ],
+            "description": "Scope mode for finding entities to prune:\n- 'relations': Find scope by looking at all entities related to a specific entity (both direct and reverse relations)\n- 'query': Find scope entities directly via query parameters\n"
+          },
+          "schema": {
+            "type": "string",
+            "description": "For 'relations' mode: The schema of the entity to find (e.g., 'billing_account').\nNot used for 'query' mode.\n"
+          },
+          "unique_ids": {
+            "type": "array",
+            "description": "For 'relations' mode: How to identify the scope entity from the payload.\nNot used for 'query' mode.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          },
+          "query": {
+            "type": "array",
+            "description": "For 'query' mode: Direct query parameters to find scope entities.\nNot used for 'relations' or 'reverse-relations' modes.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
             }
           }
         }
@@ -3879,6 +4080,13 @@
             "type": "string",
             "description": "Optional description of the integration"
           },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
           "use_cases": {
             "type": "array",
             "description": "All use cases belonging to this integration",
@@ -3915,6 +4123,13 @@
             "type": "string",
             "maxLength": 1000,
             "description": "Optional description of the integration"
+          },
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
           },
           "use_cases": {
             "type": "array",
@@ -4063,6 +4278,10 @@
             "type": "string",
             "description": "Filter by object type"
           },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
+          },
           "limit": {
             "type": "integer",
             "description": "Maximum number of results to return",
@@ -4090,21 +4309,13 @@
           }
         }
       },
-      "QueryMonitoringEventsRequest": {
+      "QueryInboundMonitoringEventsRequest": {
         "type": "object",
         "properties": {
           "use_case_id": {
             "type": "string",
             "format": "uuid",
             "description": "Filter by use case ID"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Filter by sync direction"
           },
           "event_type": {
             "type": "string",
@@ -4121,7 +4332,8 @@
             "enum": [
               "entity",
               "meter_reading",
-              "webhook"
+              "webhook",
+              "api_deprecation"
             ],
             "description": "Filter by sync type"
           },
@@ -4130,7 +4342,8 @@
             "enum": [
               "success",
               "error",
-              "skipped"
+              "skipped",
+              "warning"
             ],
             "description": "Filter by processing status"
           },
@@ -4141,8 +4354,7 @@
               "configuration",
               "downstream_api",
               "timeout",
-              "system",
-              "webhook_delivery"
+              "system"
             ],
             "description": "Filter by error category (only applicable when status=error)"
           },
@@ -4153,6 +4365,10 @@
           "object_type": {
             "type": "string",
             "description": "Filter by object type (e.g., 'contract', 'meter')"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
           },
           "event_id": {
             "type": "string",
@@ -4197,13 +4413,10 @@
       },
       "QueryAccessLogsRequest": {
         "type": "object",
-        "required": [
-          "token_id"
-        ],
         "properties": {
           "token_id": {
             "type": "string",
-            "description": "Filter by access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk')",
+            "description": "Filter by a specific access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk').\nMust be one of the access_token_ids linked to the integration.\nIf omitted, returns logs for all access tokens linked to the integration.\n",
             "example": "api_5ZugdRXasLfWBypHi93Fk"
           },
           "service": {
@@ -4332,19 +4545,6 @@
       "GetMonitoringStatsRequest": {
         "type": "object",
         "properties": {
-          "use_case_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Filter by use case ID"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Filter by sync direction"
-          },
           "from_date": {
             "type": "string",
             "format": "date-time",
@@ -4357,35 +4557,392 @@
             "description": "End date for statistics period (inclusive)",
             "example": "2025-01-31T23:59:59Z"
           },
-          "group_by": {
+          "inbound_group_by": {
             "type": "array",
             "items": {
               "type": "string",
               "enum": [
-                "direction",
                 "use_case_id",
                 "sync_type",
                 "status",
                 "error_category",
                 "object_type",
+                "event_name",
                 "date"
               ]
             },
-            "description": "Fields to group statistics by",
+            "description": "Fields to group inbound statistics by",
             "example": [
-              "direction",
+              "use_case_id",
+              "status"
+            ]
+          },
+          "outbound_group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "event_name",
+                "status",
+                "webhook_config_id",
+                "date"
+              ]
+            },
+            "description": "Fields to group outbound statistics by",
+            "example": [
+              "event_name",
               "status"
             ]
           }
         }
       },
-      "MonitoringEvent": {
+      "GetMonitoringTimeSeriesRequest": {
+        "type": "object",
+        "required": [
+          "from_date",
+          "interval"
+        ],
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date for the time series (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End date for the time series (inclusive). Defaults to current time if not specified.",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "5m",
+              "10m",
+              "30m",
+              "1h",
+              "3h",
+              "1d"
+            ],
+            "description": "The time bucket interval for aggregation",
+            "example": "1h"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ],
+            "default": "both",
+            "description": "Filter by event direction. Defaults to both.",
+            "example": "both"
+          }
+        }
+      },
+      "TimeSeriesBucket": {
+        "type": "object",
+        "required": [
+          "timestamp"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start timestamp of the bucket"
+          },
+          "inbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Inbound event counts for this bucket. Null when direction is outbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "warning_count": {
+                "type": "integer"
+              },
+              "skipped_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Outbound event counts for this bucket. Null when direction is inbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "pending_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "QueryOutboundMonitoringEventsRequest": {
+        "type": "object",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (event_catalog_event). If not specified, returns events for all linked event names in the integration's outbound use cases.",
+            "example": "automation_flow_target"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Filter by delivery status"
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Filter by webhook configuration ID"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "OutboundMonitoringEvent": {
         "type": "object",
         "required": [
           "org_id",
           "event_id",
-          "direction",
-          "event_type",
+          "event_name",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique event identifier"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Event name (event_catalog_event)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Delivery status"
+          },
+          "url": {
+            "type": "string",
+            "description": "Target URL"
+          },
+          "http_method": {
+            "type": "string",
+            "description": "HTTP method used (e.g., POST)"
+          },
+          "http_response": {
+            "type": "object",
+            "description": "HTTP response details (status_code, message, headers)",
+            "additionalProperties": true
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Webhook configuration ID"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata (webhook_id, organization details, correlation_id, etc.)",
+            "additionalProperties": true
+          },
+          "execution_context": {
+            "type": "object",
+            "description": "Execution context (execution_arn, state_machine_arn, etc.)",
+            "additionalProperties": true
+          },
+          "payload": {
+            "type": "object",
+            "description": "Payload that was sent",
+            "additionalProperties": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was last updated"
+          }
+        }
+      },
+      "MonitoringStats": {
+        "type": "object",
+        "required": [
+          "inbound",
+          "outbound"
+        ],
+        "properties": {
+          "inbound": {
+            "type": "object",
+            "description": "Statistics for inbound (ERP sync) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count",
+              "skipped_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of inbound events in the period"
+              },
+              "total_correlations": {
+                "type": "integer",
+                "description": "Total number of unique correlation IDs"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful events"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed events"
+              },
+              "skipped_count": {
+                "type": "integer",
+                "description": "Number of skipped events"
+              },
+              "warning_count": {
+                "type": "integer",
+                "description": "Number of warning events"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested inbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "description": "Statistics for outbound (webhook delivery) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of outbound events in the period"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful deliveries"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed deliveries"
+              },
+              "pending_count": {
+                "type": "integer",
+                "description": "Number of pending deliveries"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested outbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "InboundMonitoringEvent": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "event_id",
           "object_type",
           "sync_type",
           "status",
@@ -4416,14 +4973,6 @@
             "nullable": true,
             "description": "Use case ID"
           },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Sync direction"
-          },
           "event_type": {
             "type": "string",
             "enum": [
@@ -4432,7 +4981,7 @@
               "DELETE",
               "TRIGGER"
             ],
-            "description": "Type of event"
+            "description": "Type of event (optional for V3 events)"
           },
           "object_type": {
             "type": "string",
@@ -4443,7 +4992,8 @@
             "enum": [
               "entity",
               "meter_reading",
-              "webhook"
+              "webhook",
+              "api_deprecation"
             ],
             "description": "Type of sync operation"
           },
@@ -4452,7 +5002,8 @@
             "enum": [
               "success",
               "error",
-              "skipped"
+              "skipped",
+              "warning"
             ],
             "description": "Processing status"
           },
@@ -4474,8 +5025,7 @@
               "configuration",
               "downstream_api",
               "timeout",
-              "system",
-              "webhook_delivery"
+              "system"
             ],
             "description": "Error category (when status=error)"
           },
@@ -4483,16 +5033,6 @@
             "type": "integer",
             "nullable": true,
             "description": "Processing duration in milliseconds"
-          },
-          "target_url": {
-            "type": "string",
-            "nullable": true,
-            "description": "Target URL for outbound requests"
-          },
-          "http_status_code": {
-            "type": "integer",
-            "nullable": true,
-            "description": "HTTP status code from target (outbound only)"
           },
           "received_at": {
             "type": "string",
@@ -4503,57 +5043,6 @@
             "type": "string",
             "format": "date-time",
             "description": "When processing completed"
-          }
-        }
-      },
-      "MonitoringStats": {
-        "type": "object",
-        "required": [
-          "total_events",
-          "total_correlations",
-          "success_count",
-          "error_count",
-          "skipped_count"
-        ],
-        "properties": {
-          "total_events": {
-            "type": "integer",
-            "description": "Total number of events in the period"
-          },
-          "total_correlations": {
-            "type": "integer",
-            "description": "Total number of unique correlation IDs (a correlation_id groups multiple event_ids)"
-          },
-          "success_count": {
-            "type": "integer",
-            "description": "Number of successful events"
-          },
-          "error_count": {
-            "type": "integer",
-            "description": "Number of failed events"
-          },
-          "skipped_count": {
-            "type": "integer",
-            "description": "Number of skipped events"
-          },
-          "success_rate": {
-            "type": "number",
-            "format": "float",
-            "description": "Success rate as percentage (0-100)"
-          },
-          "last_error_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "Timestamp of the most recent error"
-          },
-          "breakdown": {
-            "type": "array",
-            "description": "Statistics breakdown by requested group_by fields",
-            "items": {
-              "type": "object",
-              "additionalProperties": true
-            }
           }
         }
       }
@@ -4599,8 +5088,8 @@
           }
         }
       },
-      "QueryMonitoringEventsResponse": {
-        "description": "Monitoring events queried successfully",
+      "QueryInboundMonitoringEventsResponse": {
+        "description": "Inbound monitoring events queried successfully",
         "content": {
           "application/json": {
             "schema": {
@@ -4609,9 +5098,9 @@
                 "data": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MonitoringEvent"
+                    "$ref": "#/components/schemas/InboundMonitoringEvent"
                   },
-                  "description": "List of monitoring events"
+                  "description": "List of inbound monitoring events"
                 },
                 "next_cursor": {
                   "type": "object",
@@ -4646,6 +5135,53 @@
           }
         }
       },
+      "GetMonitoringTimeSeriesResponse": {
+        "description": "Time-series aggregated event counts retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "interval",
+                "from_date",
+                "to_date",
+                "buckets"
+              ],
+              "properties": {
+                "interval": {
+                  "type": "string",
+                  "enum": [
+                    "5m",
+                    "10m",
+                    "30m",
+                    "1h",
+                    "3h",
+                    "1d"
+                  ],
+                  "description": "The time bucket interval used for aggregation"
+                },
+                "from_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Start date of the time series"
+                },
+                "to_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "End date of the time series"
+                },
+                "buckets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesBucket"
+                  },
+                  "description": "List of time-series buckets with event counts"
+                }
+              }
+            }
+          }
+        }
+      },
       "QueryAccessLogsResponse": {
         "description": "Access logs queried successfully",
         "content": {
@@ -4670,6 +5206,43 @@
                       "format": "date-time"
                     },
                     "request_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryOutboundMonitoringEventsResponse": {
+        "description": "Outbound monitoring events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutboundMonitoringEvent"
+                  },
+                  "description": "List of outbound monitoring events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "event_id": {
                       "type": "string"
                     }
                   }
@@ -4731,9 +5304,10 @@
                         "enum": [
                           "success",
                           "error",
-                          "skipped"
+                          "skipped",
+                          "ignored"
                         ],
-                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id)"
+                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
                       },
                       "message": {
                         "type": "string"
