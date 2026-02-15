@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.36.0",
+    "version": "0.37.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -3776,6 +3776,16 @@
           }
         }
       },
+      "MeterReadingPruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for meter reading upsert-prune-scope mode.\nThe scope is all readings for the same meter + counter.\n",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Optional source filter. When set, only readings with this source\nare eligible for pruning (e.g., 'ERP' to only prune ERP-synced readings).\n"
+          }
+        }
+      },
       "IntegrationMeterReading": {
         "type": "object",
         "required": [
@@ -3795,6 +3805,19 @@
             ],
             "default": "external_id",
             "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "upsert-prune-scope"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for meter reading mapping:\n- 'upsert': Create or update meter readings (default)\n- 'delete': Delete the meter reading\n- 'upsert-prune-scope': Upsert readings from array, then delete all other readings for the same meter+counter that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/MeterReadingPruneScopeConfig"
           },
           "meter": {
             "$ref": "#/components/schemas/MeterUniqueIdsConfig"

@@ -882,6 +882,20 @@ declare namespace Components {
              *
              */
             reading_matching?: "external_id" | "strict-date";
+            /**
+             * Operation mode for meter reading mapping:
+             * - 'upsert': Create or update meter readings (default)
+             * - 'delete': Delete the meter reading
+             * - 'upsert-prune-scope': Upsert readings from array, then delete all other readings for the same meter+counter that weren't upserted
+             *
+             */
+            mode?: "upsert" | "delete" | "upsert-prune-scope";
+            scope?: /**
+             * Scope configuration for meter reading upsert-prune-scope mode.
+             * The scope is all readings for the same meter + counter.
+             *
+             */
+            MeterReadingPruneScopeConfig;
             meter: MeterUniqueIdsConfig;
             meter_counter?: MeterUniqueIdsConfig;
             /**
@@ -981,6 +995,19 @@ declare namespace Components {
             payload: /* The event data payload - can be either a serialized string or a direct JSON object */ string | {
                 [name: string]: any;
             };
+        }
+        /**
+         * Scope configuration for meter reading upsert-prune-scope mode.
+         * The scope is all readings for the same meter + counter.
+         *
+         */
+        export interface MeterReadingPruneScopeConfig {
+            /**
+             * Optional source filter. When set, only readings with this source
+             * are eligible for pruning (e.g., 'ERP' to only prune ERP-synced readings).
+             *
+             */
+            source?: string;
         }
         export interface MeterReadingUpdate {
             meter: {
@@ -3502,6 +3529,7 @@ export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
+export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneScopeConfig;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
