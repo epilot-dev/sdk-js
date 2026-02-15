@@ -17,6 +17,10 @@
     {
       "name": "Group",
       "description": "User Groups"
+    },
+    {
+      "name": "Navigation",
+      "description": "Customized Workplace Navigation Configurations"
     }
   ],
   "security": [
@@ -632,6 +636,73 @@
         }
       }
     },
+    "/v2/user/navigations": {
+      "post": {
+        "operationId": "createNavigation",
+        "summary": "createNavigation",
+        "description": "Create a new navigation configuration. Navigations are immutable and globally accessible across organizations.\nEach creation generates a new id. To update a navigation, create a new one.\n",
+        "tags": [
+          "Navigation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NavigationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Navigation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Navigation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/user/navigations/{id}": {
+      "get": {
+        "operationId": "getNavigation",
+        "summary": "getNavigation",
+        "description": "Get a navigation configuration by ID",
+        "tags": [
+          "Navigation"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/NavigationId"
+            },
+            "required": true,
+            "description": "The UUID of the navigation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The navigation configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Navigation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Navigation not found"
+          }
+        }
+      }
+    },
     "/v2/users/public/verifyEmail": {
       "post": {
         "operationId": "verifyEmailWithToken",
@@ -866,6 +937,266 @@
         }
       }
     },
+    "/v2/users/public/passkeys:authenticateBegin": {
+      "post": {
+        "operationId": "beginPasskeyAuthentication",
+        "summary": "beginPasskeyAuthentication",
+        "description": "Begin passkey authentication flow. Returns WebAuthn options and a signed challenge token.",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "WebAuthn authentication options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyAuthenticationOptions"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or no passkeys registered"
+          }
+        }
+      }
+    },
+    "/v2/users/public/passkeys:authenticateBeginDiscoverable": {
+      "post": {
+        "operationId": "beginDiscoverablePasskeyAuthentication",
+        "summary": "beginDiscoverablePasskeyAuthentication",
+        "description": "Begin discoverable passkey authentication flow (no email required). Returns WebAuthn options with empty allowCredentials for the browser credential picker.",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "WebAuthn discoverable authentication options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyAuthenticationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/public/passkeys:resolveCredential": {
+      "post": {
+        "operationId": "resolveDiscoverableCredential",
+        "summary": "resolveDiscoverableCredential",
+        "description": "Resolve user identity from a discoverable passkey assertion. Returns the user's email and login parameters.",
+        "security": [],
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challenge_token": {
+                    "type": "string",
+                    "description": "The challenge token from authenticateBeginDiscoverable"
+                  },
+                  "assertion_response": {
+                    "type": "object",
+                    "description": "WebAuthn AuthenticatorAssertionResponse JSON"
+                  }
+                },
+                "required": [
+                  "challenge_token",
+                  "assertion_response"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolved user identity and login parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "organization_id": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "login_parameters": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginParameters"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Credential not found"
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys:registerBegin": {
+      "post": {
+        "operationId": "beginPasskeyRegistration",
+        "summary": "beginPasskeyRegistration",
+        "description": "Begin passkey registration flow for the authenticated user.",
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "friendly_name": {
+                    "type": "string",
+                    "example": "My Laptop"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "WebAuthn registration options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyRegistrationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys:registerComplete": {
+      "post": {
+        "operationId": "completePasskeyRegistration",
+        "summary": "completePasskeyRegistration",
+        "description": "Complete passkey registration by verifying the attestation response.",
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRegistrationResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Passkey registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Passkey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys": {
+      "get": {
+        "operationId": "listPasskeys",
+        "summary": "listPasskeys",
+        "description": "List all passkeys registered for the authenticated user.",
+        "tags": [
+          "User V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of passkeys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "passkeys": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Passkey"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys/{credentialId}": {
+      "delete": {
+        "operationId": "deletePasskey",
+        "summary": "deletePasskey",
+        "description": "Delete a passkey by credential ID.",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Passkey deleted successfully"
+          },
+          "404": {
+            "description": "Passkey not found"
+          }
+        }
+      }
+    },
     "/v2/users/switchOrganization": {
       "post": {
         "operationId": "switchOrganization",
@@ -1094,6 +1425,135 @@
       }
     },
     "schemas": {
+      "NavigationId": {
+        "description": "Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.",
+        "type": "string",
+        "example": "5gbe4nkp6jsfq",
+        "nullable": true
+      },
+      "Navigation": {
+        "type": "object",
+        "description": "A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID.",
+        "required": [
+          "id",
+          "name",
+          "configuration"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the navigation configuration",
+            "example": "Sales Team Navigation"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/NavigationConfiguration"
+          }
+        }
+      },
+      "NavigationCreateRequest": {
+        "type": "object",
+        "description": "Request payload to create a new navigation configuration",
+        "required": [
+          "name",
+          "configuration"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the navigation configuration",
+            "example": "Sales Team Navigation"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/NavigationConfiguration"
+          }
+        }
+      },
+      "NavigationConfiguration": {
+        "type": "object",
+        "description": "Navigation configuration organized by sections. Each section contains an array of navigation items.\n",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/NavigationItem"
+          }
+        },
+        "example": {
+          "customer_relations": [
+            {
+              "key": "dashboard"
+            },
+            {
+              "key": "contact"
+            }
+          ],
+          "configurations": [
+            {
+              "name": "Product Catalog",
+              "subItems": [
+                {
+                  "key": "product"
+                },
+                {
+                  "key": "price"
+                }
+              ]
+            },
+            {
+              "key": "journey"
+            }
+          ]
+        }
+      },
+      "NavigationItem": {
+        "description": "A navigation item - either a simple key item or a group with sub-items",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NavigationKeyItem"
+          },
+          {
+            "$ref": "#/components/schemas/NavigationGroupItem"
+          }
+        ]
+      },
+      "NavigationKeyItem": {
+        "type": "object",
+        "description": "A simple navigation item with a key",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The unique key identifier for the navigation item",
+            "example": "dashboard"
+          }
+        }
+      },
+      "NavigationGroupItem": {
+        "type": "object",
+        "description": "A navigation group containing sub-items",
+        "required": [
+          "name",
+          "subItems"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name of the navigation group",
+            "example": "Product Catalog"
+          },
+          "subItems": {
+            "type": "array",
+            "description": "The list of navigation items within this group",
+            "items": {
+              "$ref": "#/components/schemas/NavigationKeyItem"
+            }
+          }
+        }
+      },
       "InviteToken": {
         "description": "Token used to invite a user to epilot",
         "type": "string"
@@ -1282,6 +1742,9 @@
             "default": "/app/dashboard",
             "nullable": true
           },
+          "custom_navigation": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
           "override_release_channel": {
             "description": "This field is used to override the release channel for the user.",
             "type": "string",
@@ -1404,6 +1867,9 @@
             "type": "string",
             "example": "<p>Thanks</p>"
           },
+          "custom_navigation": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
           "roles": {
             "type": "array",
             "items": {
@@ -1511,6 +1977,10 @@
               "code",
               "token"
             ]
+          },
+          "passkey_enabled": {
+            "type": "boolean",
+            "description": "Whether passkey login is enabled for this organization"
           }
         }
       },
@@ -1854,13 +2324,83 @@
             "example": 10
           }
         }
+      },
+      "Passkey": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "string",
+            "description": "Base64url-encoded credential ID"
+          },
+          "friendly_name": {
+            "type": "string",
+            "example": "My Laptop"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aaguid": {
+            "type": "string"
+          }
+        }
+      },
+      "PasskeyAuthenticationOptions": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "object",
+            "description": "WebAuthn PublicKeyCredentialRequestOptions"
+          },
+          "challenge_token": {
+            "type": "string",
+            "description": "Signed JWT containing the challenge"
+          }
+        }
+      },
+      "PasskeyRegistrationOptions": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "object",
+            "description": "WebAuthn PublicKeyCredentialCreationOptions"
+          },
+          "challenge_token": {
+            "type": "string",
+            "description": "Signed JWT containing the challenge"
+          }
+        }
+      },
+      "PasskeyRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "challenge_token": {
+            "type": "string",
+            "description": "The challenge token from registerBegin"
+          },
+          "registration_response": {
+            "type": "object",
+            "description": "WebAuthn AuthenticatorAttestationResponse"
+          },
+          "friendly_name": {
+            "type": "string",
+            "example": "My Laptop"
+          }
+        },
+        "required": [
+          "challenge_token",
+          "registration_response"
+        ]
       }
     }
   },
   "servers": [
-    {
-      "url": "https://user.sls.epilot.io"
-    },
     {
       "url": "https://user.sls.epilot.io"
     }
