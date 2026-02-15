@@ -1852,10 +1852,10 @@
         }
       }
     },
-    "/v1/public/integration/{integrationId}/products-recommendation": {
+    "/v1/public/integration/{integrationId}/product-recommendations": {
       "post": {
-        "description": "Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.",
-        "operationId": "$searchExternalProductsRecommendation",
+        "description": "Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.",
+        "operationId": "$searchExternalProductRecommendations",
         "security": [
           {},
           {
@@ -2858,17 +2858,17 @@
         }
       }
     },
-    "/v1/public/external-catalog/products-recommendation": {
+    "/v1/public/external-catalog/product-recommendations": {
       "post": {
         "description": "Returns the list of available external catalog products recommendations based on a given context",
-        "operationId": "$getExternalCatalogProductsRecommendation",
+        "operationId": "$getExternalCatalogProductRecommendations",
         "security": [
           {},
           {
             "EpilotPublicAuth": []
           }
         ],
-        "summary": "getExternalCatalogProductsRecommendation",
+        "summary": "getExternalCatalogProductRecommendations",
         "tags": [
           "External Catalog API"
         ],

@@ -10005,6 +10005,56 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $GetExternalCatalogProductRecommendations {
+        export type RequestBody = /**
+         * The request payload for the external catalog service.
+         * example:
+         * {
+         *   "config": {
+         *     "appId": "1234567890",
+         *     "componentId": "1234567890",
+         *     "hookId": "1234567890"
+         *   },
+         *   "origin": "journey",
+         *   "context": {
+         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
+         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
+         *     "journey_name": "Product Selection Journey",
+         *     "journey_tags": [
+         *       "electricity",
+         *       "residential"
+         *     ],
+         *     "journey_url_params": {
+         *       "utm_source": "google",
+         *       "utm_campaign": "spring2024"
+         *     },
+         *     "current_step_name": "Product Selection",
+         *     "current_block_name": "Energy Products",
+         *     "steps_data": [
+         *       {
+         *         "step_name": "Address Information",
+         *         "step_index": 0,
+         *         "blocks": {
+         *           "Adresse": {
+         *             "countryCode": "DE",
+         *             "city": "Koblenz",
+         *             "zipCode": "56068",
+         *             "streetName": "Am Alten Hospital",
+         *             "houseNumber": "123"
+         *           }
+         *         }
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        Components.Schemas.ExternalCatalogRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $GetExternalCatalogProducts {
         export type RequestBody = /**
          * The request payload for the external catalog service.
@@ -10051,56 +10101,6 @@ declare namespace Paths {
         Components.Schemas.ExternalCatalogRequest;
         namespace Responses {
             export type $200 = Components.Schemas.SearchExternalCatalogResult;
-            export type $400 = Components.Schemas.Error;
-            export type $403 = Components.Schemas.Error;
-        }
-    }
-    namespace $GetExternalCatalogProductsRecommendation {
-        export type RequestBody = /**
-         * The request payload for the external catalog service.
-         * example:
-         * {
-         *   "config": {
-         *     "appId": "1234567890",
-         *     "componentId": "1234567890",
-         *     "hookId": "1234567890"
-         *   },
-         *   "origin": "journey",
-         *   "context": {
-         *     "journey_id": "8d0a2235-97ce-42d0-88a3-e374634ca44e",
-         *     "entity_id": "9e1b3346-a8df-53e1-99b4-f485745db55f",
-         *     "journey_name": "Product Selection Journey",
-         *     "journey_tags": [
-         *       "electricity",
-         *       "residential"
-         *     ],
-         *     "journey_url_params": {
-         *       "utm_source": "google",
-         *       "utm_campaign": "spring2024"
-         *     },
-         *     "current_step_name": "Product Selection",
-         *     "current_block_name": "Energy Products",
-         *     "steps_data": [
-         *       {
-         *         "step_name": "Address Information",
-         *         "step_index": 0,
-         *         "blocks": {
-         *           "Adresse": {
-         *             "countryCode": "DE",
-         *             "city": "Koblenz",
-         *             "zipCode": "56068",
-         *             "streetName": "Am Alten Hospital",
-         *             "houseNumber": "123"
-         *           }
-         *         }
-         *       }
-         *     ]
-         *   }
-         * }
-         */
-        Components.Schemas.ExternalCatalogRequest;
-        namespace Responses {
-            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
         }
@@ -10229,6 +10229,20 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $SearchExternalProductRecommendations {
+        namespace Parameters {
+            export type IntegrationId = Components.Schemas.IntegrationId;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId;
+        }
+        export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $SearchExternalProducts {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
@@ -10239,20 +10253,6 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
         namespace Responses {
             export type $200 = Components.Schemas.SearchExternalCatalogResult;
-            export type $400 = Components.Schemas.Error;
-            export type $403 = Components.Schemas.Error;
-        }
-    }
-    namespace $SearchExternalProductsRecommendation {
-        namespace Parameters {
-            export type IntegrationId = Components.Schemas.IntegrationId;
-        }
-        export interface PathParameters {
-            integrationId: Parameters.IntegrationId;
-        }
-        export type RequestBody = Components.Schemas.SearchExternalCatalogParams;
-        namespace Responses {
-            export type $200 = Components.Schemas.SearchExternalCatalogRecommendationsResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
         }
@@ -11618,15 +11618,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
   /**
-   * $searchExternalProductsRecommendation - searchExternalProductsRecommendation
+   * $searchExternalProductRecommendations - searchExternalProductsRecommendation
    * 
-   * Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.
+   * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
    */
-  '$searchExternalProductsRecommendation'(
-    parameters?: Parameters<Paths.$SearchExternalProductsRecommendation.PathParameters> | null,
-    data?: Paths.$SearchExternalProductsRecommendation.RequestBody,
+  '$searchExternalProductRecommendations'(
+    parameters?: Parameters<Paths.$SearchExternalProductRecommendations.PathParameters> | null,
+    data?: Paths.$SearchExternalProductRecommendations.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$SearchExternalProductsRecommendation.Responses.$200>
+  ): OperationResponse<Paths.$SearchExternalProductRecommendations.Responses.$200>
   /**
    * $searchProviders - searchProviders
    * 
@@ -11698,15 +11698,15 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
   /**
-   * $getExternalCatalogProductsRecommendation - getExternalCatalogProductsRecommendation
+   * $getExternalCatalogProductRecommendations - getExternalCatalogProductRecommendations
    * 
    * Returns the list of available external catalog products recommendations based on a given context
    */
-  '$getExternalCatalogProductsRecommendation'(
+  '$getExternalCatalogProductRecommendations'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.$GetExternalCatalogProductsRecommendation.RequestBody,
+    data?: Paths.$GetExternalCatalogProductRecommendations.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.$GetExternalCatalogProductsRecommendation.Responses.$200>
+  ): OperationResponse<Paths.$GetExternalCatalogProductRecommendations.Responses.$200>
   /**
    * $productRecommendations - productRecommendations
    * 
@@ -11875,17 +11875,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
   }
-  ['/v1/public/integration/{integrationId}/products-recommendation']: {
+  ['/v1/public/integration/{integrationId}/product-recommendations']: {
     /**
-     * $searchExternalProductsRecommendation - searchExternalProductsRecommendation
+     * $searchExternalProductRecommendations - searchExternalProductsRecommendation
      * 
-     * Returns the list of available products recommendation with computed prices based on a given context and for a given org integration.
+     * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
      */
     'post'(
-      parameters?: Parameters<Paths.$SearchExternalProductsRecommendation.PathParameters> | null,
-      data?: Paths.$SearchExternalProductsRecommendation.RequestBody,
+      parameters?: Parameters<Paths.$SearchExternalProductRecommendations.PathParameters> | null,
+      data?: Paths.$SearchExternalProductRecommendations.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$SearchExternalProductsRecommendation.Responses.$200>
+    ): OperationResponse<Paths.$SearchExternalProductRecommendations.Responses.$200>
   }
   ['/v1/public/integration/{integrationId}/providers:search']: {
     /**
@@ -11971,17 +11971,17 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
   }
-  ['/v1/public/external-catalog/products-recommendation']: {
+  ['/v1/public/external-catalog/product-recommendations']: {
     /**
-     * $getExternalCatalogProductsRecommendation - getExternalCatalogProductsRecommendation
+     * $getExternalCatalogProductRecommendations - getExternalCatalogProductRecommendations
      * 
      * Returns the list of available external catalog products recommendations based on a given context
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.$GetExternalCatalogProductsRecommendation.RequestBody,
+      data?: Paths.$GetExternalCatalogProductRecommendations.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.$GetExternalCatalogProductsRecommendation.Responses.$200>
+    ): OperationResponse<Paths.$GetExternalCatalogProductRecommendations.Responses.$200>
   }
   ['/v1/public/product-recommendations']: {
     /**
