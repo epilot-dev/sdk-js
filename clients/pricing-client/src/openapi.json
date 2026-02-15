@@ -94,6 +94,7 @@
         "Spot Market API",
         "Availability API",
         "External Integrations API",
+        "External Catalog API",
         "Product Recommendations API",
         "Promo Codes API"
       ]
@@ -129,8 +130,7 @@
   "servers": [
     {
       "url": "https://pricing-api.sls.epilot.io"
-    },
-    null
+    }
   ],
   "paths": {
     "/v1/pricing:compute": {
@@ -1575,6 +1575,16 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "No prices for date range found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1659,6 +1669,16 @@
           },
           "400": {
             "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No prices for date range found",
             "content": {
               "application/json": {
                 "schema": {
@@ -4600,6 +4620,18 @@
           "prices": {
             "type": "object",
             "description": "The price entities referenced from within `line_items`",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "coupons": {
+            "type": "array",
+            "description": "The coupons referenced from within `line_items`",
             "properties": {
               "$relation": {
                 "type": "array",
@@ -7747,7 +7779,10 @@
             "type": "string",
             "description": "The name of the country."
           }
-        }
+        },
+        "required": [
+          "postal_code"
+        ]
       },
       "AvailabilityFilters": {
         "description": "Availability filters dimensions",
@@ -8777,6 +8812,9 @@
                 "$ref": "#/components/schemas/ExternalCatalogJourneyRequest"
               },
               {
+                "$ref": "#/components/schemas/ExternalCatalogPortalRequest"
+              },
+              {
                 "$ref": "#/components/schemas/ExternalCatalogCustomRequest"
               }
             ]
@@ -8786,6 +8824,7 @@
           "propertyName": "origin",
           "mapping": {
             "journey": "#/components/schemas/ExternalCatalogJourneyRequest",
+            "portal": "#/components/schemas/ExternalCatalogPortalRequest",
             "custom": "#/components/schemas/ExternalCatalogCustomRequest"
           }
         },
@@ -8879,6 +8918,27 @@
           },
           "context": {
             "$ref": "#/components/schemas/JourneyContext"
+          }
+        },
+        "required": [
+          "origin",
+          "context"
+        ]
+      },
+      "ExternalCatalogPortalRequest": {
+        "type": "object",
+        "description": "The request payload for the external catalog service with a portal context.",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "The origin of the request.",
+            "enum": [
+              "portal"
+            ],
+            "example": "portal"
+          },
+          "context": {
+            "$ref": "#/components/schemas/PortalContext"
           }
         },
         "required": [
@@ -9000,6 +9060,451 @@
           "current_step_name",
           "current_block_name",
           "steps_data"
+        ]
+      },
+      "PortalContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract": {
+            "type": "object",
+            "description": "The contract information.",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "The unique identifier of the contract."
+              },
+              "contract_name": {
+                "type": "string",
+                "description": "Contract Name"
+              },
+              "contract_number": {
+                "type": "string",
+                "description": "Contract Number"
+              },
+              "assignee": {
+                "type": "string",
+                "description": "Assignee user ID"
+              },
+              "status": {
+                "type": "string",
+                "description": "Contract status",
+                "enum": [
+                  "draft",
+                  "in_approval_process",
+                  "approved",
+                  "active",
+                  "deactivated",
+                  "revoked",
+                  "terminated",
+                  "expired"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the contract"
+              },
+              "billing_account": {
+                "type": "string",
+                "description": "Billing Account relation ID"
+              },
+              "account_number": {
+                "type": "string",
+                "description": "Account Number"
+              },
+              "branch": {
+                "type": "string",
+                "description": "Branch/commodity type",
+                "enum": [
+                  "power",
+                  "gas",
+                  "water",
+                  "waste_water",
+                  "district_heating"
+                ]
+              },
+              "move_in_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Move In Date"
+              },
+              "move_out_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Move Out Date"
+              },
+              "billing_address": {
+                "type": "object",
+                "description": "Billing Address"
+              },
+              "delivery_address": {
+                "type": "object",
+                "description": "Delivery Address"
+              },
+              "additional_addresses": {
+                "type": "array",
+                "description": "Additional Addresses",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "termination_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date of Termination"
+              },
+              "termination_reason": {
+                "type": "string",
+                "description": "Reason For Termination"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Start Date"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date",
+                "description": "End Date"
+              },
+              "customer": {
+                "type": "array",
+                "description": "Customer relation (contact or account)",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "order": {
+                "type": "string",
+                "description": "Order relation ID"
+              },
+              "type": {
+                "type": "string",
+                "description": "Contract type",
+                "enum": [
+                  "one_time",
+                  "recurring"
+                ]
+              },
+              "billing_period": {
+                "type": "string",
+                "description": "Billing Period",
+                "enum": [
+                  "weekly",
+                  "monthly",
+                  "every_quarter",
+                  "every_6_months",
+                  "yearly"
+                ]
+              },
+              "billing_duration_amount": {
+                "type": "number",
+                "description": "Billing Duration amount",
+                "minimum": 0
+              },
+              "billing_duration_unit": {
+                "type": "string",
+                "description": "Billing Duration Unit",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "notice_time_amount": {
+                "type": "number",
+                "description": "Notice Time amount",
+                "minimum": 0
+              },
+              "notice_time_unit": {
+                "type": "string",
+                "description": "Notice Time Unit",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "termination_time_amount": {
+                "type": "number",
+                "description": "Termination Time amount",
+                "minimum": 0
+              },
+              "termination_time_unit": {
+                "type": "string",
+                "description": "Termination Time Unit",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "renewal_duration_amount": {
+                "type": "number",
+                "description": "Renewal Duration amount",
+                "minimum": 0
+              },
+              "renewal_duration_unit": {
+                "type": "string",
+                "description": "Renewal Duration Unit",
+                "enum": [
+                  "weeks",
+                  "months",
+                  "years"
+                ]
+              },
+              "billing_due_day": {
+                "type": "number",
+                "description": "Billing Due Day"
+              },
+              "installment_amount": {
+                "type": "object",
+                "description": "Installment Amount",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "EUR"
+                  }
+                }
+              },
+              "balance": {
+                "type": "object",
+                "description": "Balance",
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "default": "EUR"
+                  }
+                }
+              },
+              "meters": {
+                "type": "array",
+                "description": "Meters relation",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "payment": {
+                "type": "string",
+                "description": "Payment Details relation ID"
+              },
+              "last_sync_at": {
+                "type": "string",
+                "format": "date",
+                "description": "Last Sync At"
+              },
+              "external_id": {
+                "type": "string",
+                "description": "External ID",
+                "readOnly": true
+              }
+            }
+          },
+          "contact": {
+            "type": "object",
+            "description": "The contact information.",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "The unique identifier of the contact."
+              },
+              "salutation": {
+                "type": "string",
+                "description": "Salutation",
+                "enum": [
+                  "Mr.",
+                  "Ms. / Mrs.",
+                  "Company",
+                  "Contact Person",
+                  "Company/Contact Person",
+                  "Spouse",
+                  "Family",
+                  "Ownership",
+                  "Assembly",
+                  "Other"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "description": "Title",
+                "enum": [
+                  "Dr.",
+                  "Prof.",
+                  "Prof. Dr."
+                ]
+              },
+              "first_name": {
+                "type": "string",
+                "description": "First Name"
+              },
+              "last_name": {
+                "type": "string",
+                "description": "Last Name"
+              },
+              "customer_number": {
+                "type": "string",
+                "description": "Customer Number"
+              },
+              "birthdate": {
+                "type": "string",
+                "format": "date",
+                "description": "Date of Birth"
+              },
+              "email": {
+                "type": "array",
+                "description": "Email addresses",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "_primary": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "phone": {
+                "type": "array",
+                "description": "Phone numbers",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "phone": {
+                      "type": "string"
+                    },
+                    "_primary": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "communication_preference": {
+                "type": "string",
+                "description": "Standard communication method",
+                "enum": [
+                  "postal",
+                  "portal"
+                ]
+              },
+              "address": {
+                "type": "array",
+                "description": "Addresses",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_primary": {
+                      "type": "boolean"
+                    },
+                    "postal_code": {
+                      "type": "string"
+                    },
+                    "city": {
+                      "type": "string"
+                    },
+                    "street": {
+                      "type": "string"
+                    },
+                    "street_number": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "payment": {
+                "type": "array",
+                "description": "Payment methods",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_primary": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "account": {
+                "type": "array",
+                "description": "Account relations",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "marketing_permission": {
+                "type": "boolean",
+                "description": "Marketing Permission (deprecated)",
+                "deprecated": true
+              },
+              "contact_owner": {
+                "type": "string",
+                "description": "Contact Owner user ID"
+              },
+              "consent_email_marketing": {
+                "type": "object",
+                "description": "Email Marketing consent"
+              },
+              "consent_sms_marketing": {
+                "type": "object",
+                "description": "SMS Marketing consent"
+              },
+              "consent_phone_call": {
+                "type": "object",
+                "description": "Direct Phone Marketing consent"
+              },
+              "consent_print_marketing": {
+                "type": "object",
+                "description": "Print Marketing consent"
+              },
+              "portal_users": {
+                "type": "array",
+                "description": "Portal Users relation",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "opportunities": {
+                "type": "array",
+                "description": "Opportunities relation",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "orders": {
+                "type": "array",
+                "description": "Orders relation",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "contracts": {
+                "type": "array",
+                "description": "Contracts relation",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "external_id": {
+                "type": "string",
+                "description": "External ID",
+                "readOnly": true
+              }
+            }
+          }
+        },
+        "required": [
+          "contract",
+          "contact"
         ]
       },
       "SearchExternalCatalogResult": {
