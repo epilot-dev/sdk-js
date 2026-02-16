@@ -288,6 +288,10 @@ declare namespace Paths {
              * Email address of the Outlook mailbox to connect
              */
             email: string; // email
+            /**
+             * Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.
+             */
+            shared_inbox_id?: string;
         }
         namespace Responses {
             export interface $201 {
