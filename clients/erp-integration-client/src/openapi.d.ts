@@ -216,6 +216,10 @@ declare namespace Components {
              */
             access_token_ids?: string[];
             /**
+             * List of app IDs to associate with this integration
+             */
+            app_ids?: string[];
+            /**
              * Configuration defining environment variables needed by this integration
              */
             environment_config?: EnvironmentFieldConfig[];
@@ -723,6 +727,10 @@ declare namespace Components {
              * List of access token IDs associated with this integration
              */
             access_token_ids?: string[];
+            /**
+             * List of app IDs associated with this integration
+             */
+            app_ids?: string[];
             /**
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
@@ -1993,6 +2001,10 @@ declare namespace Components {
              * List of access token IDs to associate with this integration
              */
             access_token_ids?: string[];
+            /**
+             * List of app IDs to associate with this integration
+             */
+            app_ids?: string[];
             /**
              * Configuration defining environment variables needed by this integration
              */

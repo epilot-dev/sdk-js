@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.37.0",
+    "version": "0.38.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2560,6 +2560,13 @@
               "type": "string"
             }
           },
+          "app_ids": {
+            "type": "array",
+            "description": "List of app IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
           "environment_config": {
             "type": "array",
             "items": {
@@ -2603,6 +2610,13 @@
               "type": "string"
             }
           },
+          "app_ids": {
+            "type": "array",
+            "description": "List of app IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
           "environment_config": {
             "type": "array",
             "items": {
@@ -2629,6 +2643,13 @@
           "access_token_ids": {
             "type": "array",
             "description": "List of access token IDs to associate with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
+          "app_ids": {
+            "type": "array",
+            "description": "List of app IDs to associate with this integration",
             "items": {
               "type": "string"
             }
