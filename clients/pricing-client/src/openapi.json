@@ -1874,7 +1874,7 @@
             "example": "external-catalog"
           }
         ],
-        "summary": "searchExternalProductsRecommendation",
+        "summary": "searchExternalProductRecommendations",
         "tags": [
           "External Integrations API"
         ],

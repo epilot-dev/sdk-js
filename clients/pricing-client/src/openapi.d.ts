@@ -11618,7 +11618,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
   /**
-   * $searchExternalProductRecommendations - searchExternalProductsRecommendation
+   * $searchExternalProductRecommendations - searchExternalProductRecommendations
    * 
    * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
    */
@@ -11877,7 +11877,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/product-recommendations']: {
     /**
-     * $searchExternalProductRecommendations - searchExternalProductsRecommendation
+     * $searchExternalProductRecommendations - searchExternalProductRecommendations
      * 
      * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
      */
