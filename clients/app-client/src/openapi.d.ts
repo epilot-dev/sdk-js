@@ -1008,19 +1008,19 @@ declare namespace Components {
              * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
              *
              */
-            ExternalProductCatalogHookProductsRecommendation)[];
+            ExternalProductCatalogHookProductRecommendations)[];
         }
         /**
-         * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
          *
          */
-        export interface ExternalProductCatalogHookProducts {
+        export interface ExternalProductCatalogHookProductRecommendations {
             /**
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
-            type: "products";
+            type: "product-recommendations";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
                 /**
@@ -1052,16 +1052,16 @@ declare namespace Components {
             };
         }
         /**
-         * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
          *
          */
-        export interface ExternalProductCatalogHookProductsRecommendation {
+        export interface ExternalProductCatalogHookProducts {
             /**
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
-            type: "products-recommendation";
+            type: "products";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
                 /**
@@ -2428,6 +2428,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListPublicConfigurations {
+        namespace Parameters {
+            export type Page = number;
+            export type PageSize = number;
+        }
+        export interface QueryParameters {
+            page?: Parameters.Page;
+            pageSize?: Parameters.PageSize;
+        }
+        namespace Responses {
+            export interface $200 {
+                configurations?: /* Basic metadata about your app configuration which does not get versioned */ Components.Schemas.ConfigurationMetadata[];
+                pagination?: {
+                    total?: number;
+                    page?: number;
+                    pageSize?: number;
+                };
+            }
+        }
+    }
     namespace ListVersions {
         namespace Parameters {
             export type AppId = string;
@@ -2633,6 +2653,16 @@ export interface OperationMethods {
     data?: Paths.CreateConfiguration.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateConfiguration.Responses.$201>
+  /**
+   * listPublicConfigurations - listPublicConfigurations
+   * 
+   * List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.
+   */
+  'listPublicConfigurations'(
+    parameters?: Parameters<Paths.ListPublicConfigurations.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPublicConfigurations.Responses.$200>
   /**
    * getPublicConfiguration - getPublicConfiguration
    * 
@@ -2930,6 +2960,18 @@ export interface PathsDictionary {
       data?: Paths.CreateConfiguration.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateConfiguration.Responses.$201>
+  }
+  ['/v1/app-configurations/public']: {
+    /**
+     * listPublicConfigurations - listPublicConfigurations
+     * 
+     * List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPublicConfigurations.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPublicConfigurations.Responses.$200>
   }
   ['/v1/app-configurations/public/{appId}']: {
     /**
@@ -3258,8 +3300,8 @@ export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalI
 export type ExternalProductCatalogAuthBlock = Components.Schemas.ExternalProductCatalogAuthBlock;
 export type ExternalProductCatalogComponent = Components.Schemas.ExternalProductCatalogComponent;
 export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCatalogConfig;
+export type ExternalProductCatalogHookProductRecommendations = Components.Schemas.ExternalProductCatalogHookProductRecommendations;
 export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
-export type ExternalProductCatalogHookProductsRecommendation = Components.Schemas.ExternalProductCatalogHookProductsRecommendation;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
