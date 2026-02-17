@@ -183,6 +183,70 @@
         }
       }
     },
+    "/v1/app-configurations/public": {
+      "get": {
+        "summary": "listPublicConfigurations",
+        "description": "List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.",
+        "operationId": "listPublicConfigurations",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of public app configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "configurations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationMetadata"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/app-configurations/public/{appId}": {
       "parameters": [
         {
@@ -2181,7 +2245,7 @@
                 "propertyName": "type",
                 "mapping": {
                   "products": "#/components/schemas/ExternalProductCatalogHookProducts",
-                  "products-recommendation": "#/components/schemas/ExternalProductCatalogHookProductsRecommendation"
+                  "product-recommendations": "#/components/schemas/ExternalProductCatalogHookProductRecommendations"
                 }
               },
               "oneOf": [
@@ -2189,7 +2253,7 @@
                   "$ref": "#/components/schemas/ExternalProductCatalogHookProducts"
                 },
                 {
-                  "$ref": "#/components/schemas/ExternalProductCatalogHookProductsRecommendation"
+                  "$ref": "#/components/schemas/ExternalProductCatalogHookProductRecommendations"
                 }
               ]
             }
@@ -2265,7 +2329,7 @@
         ],
         "additionalProperties": false
       },
-      "ExternalProductCatalogHookProductsRecommendation": {
+      "ExternalProductCatalogHookProductRecommendations": {
         "description": "Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.\n",
         "type": "object",
         "properties": {
@@ -2280,7 +2344,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "products-recommendation"
+              "product-recommendations"
             ]
           },
           "auth": {
