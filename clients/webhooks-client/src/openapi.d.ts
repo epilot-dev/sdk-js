@@ -392,7 +392,7 @@ declare namespace Components {
              * example:
              * succeeded
              */
-            status?: "succeeded" | "failed";
+            status?: "succeeded" | "failed" | "skipped";
         }
         export interface TriggerWebhookResp {
             status_code?: string;
@@ -405,6 +405,46 @@ declare namespace Components {
             start_date?: string;
             end_date?: string;
             event_id: string;
+        }
+        /**
+         * A condition that must be met for the webhook to fire.
+         */
+        export interface WebhookCondition {
+            /**
+             * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items")
+             */
+            field: string;
+            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            /**
+             * Values to compare against (not required for is_empty/is_not_empty)
+             */
+            values?: string[];
+            /**
+             * Type hint for the field (affects comparison logic)
+             */
+            field_type?: "string" | "number" | "boolean" | "date" | "datetime";
+            /**
+             * Whether the target field is an array (repeatable)
+             */
+            is_array_field?: boolean;
+        }
+        /**
+         * A group of conditions with a logical operator. Multiple conditions are AND-ed by default.
+         */
+        export interface WebhookConditionGroup {
+            conditions?: [
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?
+            ];
+            logical_operator?: "AND" | "OR";
         }
         /**
          * example:
@@ -451,6 +491,7 @@ declare namespace Components {
              * JSONata expression to transform the payload
              */
             jsonataExpression?: string;
+            filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**
              * Manifest ID used to create/update the webhook resource
              */
@@ -486,7 +527,7 @@ declare namespace Components {
                 code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
-            status?: "succeeded" | "failed" | "in_progress";
+            status?: "succeeded" | "failed" | "in_progress" | "skipped";
             http_method?: "GET" | "POST" | "PUT";
             /**
              * stringified payload of the webhook request
@@ -687,6 +728,12 @@ declare namespace Paths {
         }
     }
     namespace GetPublicKey {
+        namespace Parameters {
+            export type OrgId = string;
+        }
+        export interface QueryParameters {
+            orgId: Parameters.OrgId;
+        }
         namespace Responses {
             export type $200 = Components.Schemas.PublicKeyResponse;
             export type $500 = Components.Schemas.ErrorResp;
@@ -846,13 +893,12 @@ export interface OperationMethods {
   /**
    * getPublicKey - getPublicKey
    * 
-   * Deprecated. Webhook signatures now use per-webhook symmetric secrets
-   * following the Standard Webhooks specification. The signing secret is
-   * returned once during webhook creation.
+   * Returns the platform-level Ed25519 public key used to verify
+   * asymmetric (v1a) webhook signatures. This endpoint is unauthenticated since the public key is not a secret, but the orgId parameter is required to ensure clients retrieve the correct key for their organization in case of key rotation.
    * 
    */
   'getPublicKey'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetPublicKey.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicKey.Responses.$200>
@@ -993,13 +1039,12 @@ export interface PathsDictionary {
     /**
      * getPublicKey - getPublicKey
      * 
-     * Deprecated. Webhook signatures now use per-webhook symmetric secrets
-     * following the Standard Webhooks specification. The signing secret is
-     * returned once during webhook creation.
+     * Returns the platform-level Ed25519 public key used to verify
+     * asymmetric (v1a) webhook signatures. This endpoint is unauthenticated since the public key is not a secret, but the orgId parameter is required to ensure clients retrieve the correct key for their organization in case of key rotation.
      * 
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetPublicKey.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicKey.Responses.$200>
@@ -1181,5 +1226,7 @@ export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
 export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type WebhookCondition = Components.Schemas.WebhookCondition;
+export type WebhookConditionGroup = Components.Schemas.WebhookConditionGroup;
 export type WebhookConfig = Components.Schemas.WebhookConfig;
 export type WebhookEvent = Components.Schemas.WebhookEvent;

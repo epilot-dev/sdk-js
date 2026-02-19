@@ -18,10 +18,20 @@
   "paths": {
     "/v1/webhooks/.well-known/public-key": {
       "get": {
-        "deprecated": true,
         "operationId": "getPublicKey",
         "summary": "getPublicKey",
-        "description": "Deprecated. Webhook signatures now use per-webhook symmetric secrets\nfollowing the Standard Webhooks specification. The signing secret is\nreturned once during webhook creation.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "orgId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Organization ID to retrieve the public key for."
+          }
+        ],
+        "description": "Returns the platform-level Ed25519 public key used to verify\nasymmetric (v1a) webhook signatures. This endpoint is unauthenticated since the public key is not a secret, but the orgId parameter is required to ensure clients retrieve the correct key for their organization in case of key rotation.\n",
         "tags": [
           "webhooks"
         ],
@@ -918,7 +928,8 @@
             "description": "Filter by event outcome",
             "enum": [
               "succeeded",
-              "failed"
+              "failed",
+              "skipped"
             ],
             "example": "succeeded"
           }
@@ -995,6 +1006,84 @@
           "keyToFilter",
           "supportedValues"
         ]
+      },
+      "WebhookCondition": {
+        "type": "object",
+        "description": "A condition that must be met for the webhook to fire.",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dot-notation path to the field in the event payload (e.g. \"entity.status\", \"entity.line_items\")"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "any_of",
+              "none_of",
+              "contains",
+              "not_contains",
+              "starts_with",
+              "ends_with",
+              "greater_than",
+              "less_than",
+              "greater_than_or_equals",
+              "less_than_or_equals",
+              "is_empty",
+              "is_not_empty"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "description": "Values to compare against (not required for is_empty/is_not_empty)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "field_type": {
+            "type": "string",
+            "description": "Type hint for the field (affects comparison logic)",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "datetime"
+            ],
+            "default": "string"
+          },
+          "is_array_field": {
+            "type": "boolean",
+            "description": "Whether the target field is an array (repeatable)",
+            "default": false
+          }
+        },
+        "required": [
+          "field",
+          "operation"
+        ]
+      },
+      "WebhookConditionGroup": {
+        "type": "object",
+        "description": "A group of conditions with a logical operator. Multiple conditions are AND-ed by default.",
+        "properties": {
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookCondition"
+            },
+            "maxItems": 10
+          },
+          "logical_operator": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ],
+            "default": "AND"
+          }
+        }
       },
       "Auth": {
         "type": "object",
@@ -1126,6 +1215,9 @@
           "jsonataExpression": {
             "type": "string",
             "description": "JSONata expression to transform the payload"
+          },
+          "filterConditions": {
+            "$ref": "#/components/schemas/WebhookConditionGroup"
           },
           "_manifest": {
             "type": "array",
@@ -1405,7 +1497,8 @@
             "enum": [
               "succeeded",
               "failed",
-              "in_progress"
+              "in_progress",
+              "skipped"
             ]
           },
           "http_method": {

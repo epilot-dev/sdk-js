@@ -7,8 +7,14 @@
   "paths": {
     "/v1/webhooks/.well-known/public-key": {
       "get": {
-        "deprecated": true,
         "operationId": "getPublicKey",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "orgId",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
