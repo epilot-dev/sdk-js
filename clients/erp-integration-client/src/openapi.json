@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.38.0",
+    "version": "0.40.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2574,6 +2574,9 @@
             },
             "description": "Configuration defining environment variables needed by this integration. Values are stored in the Environments API."
           },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2623,6 +2626,9 @@
               "$ref": "#/components/schemas/EnvironmentFieldConfig"
             },
             "description": "Configuration defining environment variables needed by this integration"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
           }
         }
       },
@@ -2660,6 +2666,9 @@
               "$ref": "#/components/schemas/EnvironmentFieldConfig"
             },
             "description": "Configuration defining environment variables needed by this integration"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
           }
         }
       },
@@ -2704,6 +2713,36 @@
             "type": "integer",
             "minimum": 0,
             "description": "Sort order for display and drag-to-reorder"
+          }
+        }
+      },
+      "IntegrationSettings": {
+        "type": "object",
+        "description": "Settings for the integration",
+        "properties": {
+          "autoRefresh": {
+            "$ref": "#/components/schemas/AutoRefreshSettings"
+          }
+        }
+      },
+      "AutoRefreshSettings": {
+        "type": "object",
+        "description": "Auto-refresh settings for keeping integration data fresh",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether auto-refresh is enabled"
+          },
+          "freshnessThresholdMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum age (in minutes) of data before it is considered stale and eligible for refresh"
+          },
+          "minIntervalBetweenSyncsMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Minimum interval (in minutes) between consecutive sync operations to prevent excessive API calls"
           }
         }
       },
@@ -2793,7 +2832,8 @@
             "type": "string",
             "enum": [
               "inbound",
-              "outbound"
+              "outbound",
+              "file_proxy"
             ],
             "description": "Use case type"
           },
@@ -2867,6 +2907,31 @@
           }
         ]
       },
+      "FileProxyUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCase": {
         "oneOf": [
           {
@@ -2874,13 +2939,17 @@
           },
           {
             "$ref": "#/components/schemas/OutboundUseCase"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyUseCase"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/InboundUseCase",
-            "outbound": "#/components/schemas/OutboundUseCase"
+            "outbound": "#/components/schemas/OutboundUseCase",
+            "file_proxy": "#/components/schemas/FileProxyUseCase"
           }
         }
       },
@@ -2891,13 +2960,17 @@
           },
           {
             "$ref": "#/components/schemas/CreateOutboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/CreateFileProxyUseCaseRequest"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/CreateInboundUseCaseRequest",
-            "outbound": "#/components/schemas/CreateOutboundUseCaseRequest"
+            "outbound": "#/components/schemas/CreateOutboundUseCaseRequest",
+            "file_proxy": "#/components/schemas/CreateFileProxyUseCaseRequest"
           }
         }
       },
@@ -2971,6 +3044,31 @@
           }
         ]
       },
+      "CreateFileProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UpdateUseCaseRequest": {
         "oneOf": [
           {
@@ -2978,13 +3076,17 @@
           },
           {
             "$ref": "#/components/schemas/UpdateOutboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateFileProxyUseCaseRequest"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/UpdateInboundUseCaseRequest",
-            "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest"
+            "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest",
+            "file_proxy": "#/components/schemas/UpdateFileProxyUseCaseRequest"
           }
         }
       },
@@ -3052,6 +3154,28 @@
           }
         ]
       },
+      "UpdateFileProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCaseHistoryEntry": {
         "oneOf": [
           {
@@ -3059,13 +3183,17 @@
           },
           {
             "$ref": "#/components/schemas/OutboundUseCaseHistoryEntry"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyUseCaseHistoryEntry"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/InboundUseCaseHistoryEntry",
-            "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry"
+            "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry",
+            "file_proxy": "#/components/schemas/FileProxyUseCaseHistoryEntry"
           }
         }
       },
@@ -3176,6 +3304,192 @@
             }
           }
         ]
+      },
+      "FileProxyUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUseCaseConfiguration": {
+        "type": "object",
+        "required": [
+          "steps",
+          "response"
+        ],
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "properties": {
+          "requires_vpc": {
+            "type": "boolean",
+            "description": "Whether requests require VPC routing for IP allowlisting",
+            "default": false
+          },
+          "auth": {
+            "$ref": "#/components/schemas/FileProxyAuth"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileProxyParam"
+            },
+            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, useCaseId)"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/FileProxyStep"
+            },
+            "description": "Ordered list of HTTP steps to execute to retrieve the file"
+          },
+          "response": {
+            "$ref": "#/components/schemas/FileProxyResponseConfig"
+          }
+        }
+      },
+      "FileProxyAuth": {
+        "type": "object",
+        "required": [
+          "type",
+          "token_url",
+          "client_id",
+          "client_secret"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "oauth2_client_credentials"
+            ],
+            "description": "Authentication type"
+          },
+          "token_url": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 token endpoint URL"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 client ID"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 client secret"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Optional OAuth2 scope"
+          }
+        }
+      },
+      "FileProxyParam": {
+        "type": "object",
+        "required": [
+          "name",
+          "required"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Parameter name as it appears in the query string"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this parameter is required"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the parameter"
+          }
+        }
+      },
+      "FileProxyStep": {
+        "type": "object",
+        "required": [
+          "url",
+          "method",
+          "response_type"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Handlebars template for the request URL"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "description": "HTTP method"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Handlebars templates for request headers"
+          },
+          "body": {
+            "type": "string",
+            "description": "Handlebars template for the request body (POST only)"
+          },
+          "response_type": {
+            "type": "string",
+            "enum": [
+              "json",
+              "binary"
+            ],
+            "description": "Expected response type"
+          }
+        }
+      },
+      "FileProxyResponseConfig": {
+        "type": "object",
+        "required": [
+          "body",
+          "encoding"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "JSONata expression to extract file content from step results"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "base64",
+              "binary"
+            ],
+            "description": "Encoding of the extracted body"
+          },
+          "filename": {
+            "type": "string",
+            "description": "JSONata expression to extract the filename"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "JSONata expression to extract the content type"
+          }
+        }
       },
       "MappingSimulationRequest": {
         "type": "object",
@@ -4131,6 +4445,9 @@
               "type": "string"
             }
           },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
+          },
           "use_cases": {
             "type": "array",
             "description": "All use cases belonging to this integration",
@@ -4174,6 +4491,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
           },
           "use_cases": {
             "type": "array",

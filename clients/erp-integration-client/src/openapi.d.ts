@@ -187,6 +187,46 @@ declare namespace Components {
              */
             source_ip?: string;
         }
+        /**
+         * Auto-refresh settings for keeping integration data fresh
+         */
+        export interface AutoRefreshSettings {
+            /**
+             * Whether auto-refresh is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Maximum age (in minutes) of data before it is considered stale and eligible for refresh
+             */
+            freshnessThresholdMinutes?: number;
+            /**
+             * Minimum interval (in minutes) between consecutive sync operations to prevent excessive API calls
+             */
+            minIntervalBetweenSyncsMinutes?: number;
+        }
+        export interface CreateFileProxyUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Use case type
+             */
+            type: "file_proxy";
+            configuration?: /**
+             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             *
+             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+             * Additional use-case-specific parameters are declared in the `params` array.
+             *
+             */
+            FileProxyUseCaseConfiguration;
+        }
         export interface CreateInboundUseCaseRequest {
             /**
              * Use case name
@@ -223,6 +263,7 @@ declare namespace Components {
              * Configuration defining environment variables needed by this integration
              */
             environment_config?: EnvironmentFieldConfig[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
         }
         export interface CreateOutboundUseCaseRequest {
             /**
@@ -239,7 +280,7 @@ declare namespace Components {
             type: "outbound";
             configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
-        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest;
+        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest | CreateFileProxyUseCaseRequest;
         export interface CreateUseCaseRequestBase {
             /**
              * Use case name
@@ -498,6 +539,202 @@ declare namespace Components {
              */
             message?: string;
         }
+        export interface FileProxyAuth {
+            /**
+             * Authentication type
+             */
+            type: "oauth2_client_credentials";
+            /**
+             * Handlebars template for the OAuth2 token endpoint URL
+             */
+            token_url: string;
+            /**
+             * Handlebars template for the OAuth2 client ID
+             */
+            client_id: string;
+            /**
+             * Handlebars template for the OAuth2 client secret
+             */
+            client_secret: string;
+            /**
+             * Optional OAuth2 scope
+             */
+            scope?: string;
+        }
+        export interface FileProxyParam {
+            /**
+             * Parameter name as it appears in the query string
+             */
+            name: string;
+            /**
+             * Whether this parameter is required
+             */
+            required: boolean;
+            /**
+             * Human-readable description of the parameter
+             */
+            description?: string;
+        }
+        export interface FileProxyResponseConfig {
+            /**
+             * JSONata expression to extract file content from step results
+             */
+            body: string;
+            /**
+             * Encoding of the extracted body
+             */
+            encoding: "base64" | "binary";
+            /**
+             * JSONata expression to extract the filename
+             */
+            filename?: string;
+            /**
+             * JSONata expression to extract the content type
+             */
+            content_type?: string;
+        }
+        export interface FileProxyStep {
+            /**
+             * Handlebars template for the request URL
+             */
+            url: string;
+            /**
+             * HTTP method
+             */
+            method: "GET" | "POST";
+            /**
+             * Handlebars templates for request headers
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * Handlebars template for the request body (POST only)
+             */
+            body?: string;
+            /**
+             * Expected response type
+             */
+            response_type: "json" | "binary";
+        }
+        export interface FileProxyUseCase {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * Use case type
+             */
+            type: "inbound" | "outbound" | "file_proxy" | "file_proxy";
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
+            configuration?: /**
+             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             *
+             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+             * Additional use-case-specific parameters are declared in the `params` array.
+             *
+             */
+            FileProxyUseCaseConfiguration;
+        }
+        /**
+         * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+         *
+         * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+         * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+         * Additional use-case-specific parameters are declared in the `params` array.
+         *
+         */
+        export interface FileProxyUseCaseConfiguration {
+            /**
+             * Whether requests require VPC routing for IP allowlisting
+             */
+            requires_vpc?: boolean;
+            auth?: FileProxyAuth;
+            /**
+             * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, useCaseId)
+             */
+            params?: FileProxyParam[];
+            /**
+             * Ordered list of HTTP steps to execute to retrieve the file
+             */
+            steps: [
+                FileProxyStep,
+                ...FileProxyStep[]
+            ];
+            response: FileProxyResponseConfig;
+        }
+        export interface FileProxyUseCaseHistoryEntry {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+            /**
+             * Use case type
+             */
+            type: "file_proxy";
+            configuration?: /**
+             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             *
+             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+             * Additional use-case-specific parameters are declared in the `params` array.
+             *
+             */
+            FileProxyUseCaseConfiguration;
+        }
         export interface GetMonitoringStatsRequest {
             /**
              * Start date for statistics period (inclusive)
@@ -647,7 +884,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "inbound";
+            type: "inbound" | "outbound" | "file_proxy" | "inbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -735,6 +972,7 @@ declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * ISO-8601 timestamp when the integration was created
              */
@@ -926,6 +1164,12 @@ declare namespace Components {
             fields: IntegrationFieldV1[];
         }
         /**
+         * Settings for the integration
+         */
+        export interface IntegrationSettings {
+            autoRefresh?: /* Auto-refresh settings for keeping integration data fresh */ AutoRefreshSettings;
+        }
+        /**
          * Integration with embedded use cases for atomic CRUD operations
          */
         export interface IntegrationWithUseCases {
@@ -949,6 +1193,7 @@ declare namespace Components {
              * List of access token IDs associated with this integration
              */
             access_token_ids?: string[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * All use cases belonging to this integration
              */
@@ -1282,7 +1527,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "outbound";
+            type: "inbound" | "outbound" | "file_proxy" | "outbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -1969,6 +2214,33 @@ declare namespace Components {
             end_date?: string;
             event_id?: string;
         }
+        export interface UpdateFileProxyUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name?: string;
+            /**
+             * Whether the use case is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type?: "file_proxy";
+            configuration?: /**
+             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             *
+             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+             * Additional use-case-specific parameters are declared in the `params` array.
+             *
+             */
+            FileProxyUseCaseConfiguration;
+        }
         export interface UpdateInboundUseCaseRequest {
             /**
              * Use case name
@@ -2009,6 +2281,7 @@ declare namespace Components {
              * Configuration defining environment variables needed by this integration
              */
             environment_config?: EnvironmentFieldConfig[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
         }
         export interface UpdateOutboundUseCaseRequest {
             /**
@@ -2029,7 +2302,7 @@ declare namespace Components {
             type?: "outbound";
             configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
-        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest;
+        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest | UpdateFileProxyUseCaseRequest;
         export interface UpdateUseCaseRequestBase {
             /**
              * Use case name
@@ -2062,6 +2335,7 @@ declare namespace Components {
              * List of access token IDs to associate with this integration
              */
             access_token_ids?: string[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Full list of use cases (declarative). This replaces ALL existing use cases.
              * - Use cases with an `id` field matching an existing use case will be updated
@@ -2071,7 +2345,7 @@ declare namespace Components {
              */
             use_cases?: EmbeddedUseCaseRequest[];
         }
-        export type UseCase = InboundUseCase | OutboundUseCase;
+        export type UseCase = InboundUseCase | OutboundUseCase | FileProxyUseCase;
         export interface UseCaseBase {
             /**
              * Unique identifier for the use case
@@ -2088,7 +2362,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound";
+            type: "inbound" | "outbound" | "file_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2103,7 +2377,7 @@ declare namespace Components {
              */
             updated_at: string; // date-time
         }
-        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry;
+        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
             /**
              * Unique identifier for this history entry
@@ -3504,6 +3778,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AccessLogEntry = Components.Schemas.AccessLogEntry;
+export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
+export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUseCaseRequest;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
 export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseCaseRequest;
@@ -3522,6 +3798,13 @@ export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type FileProxyAuth = Components.Schemas.FileProxyAuth;
+export type FileProxyParam = Components.Schemas.FileProxyParam;
+export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
+export type FileProxyStep = Components.Schemas.FileProxyStep;
+export type FileProxyUseCase = Components.Schemas.FileProxyUseCase;
+export type FileProxyUseCaseConfiguration = Components.Schemas.FileProxyUseCaseConfiguration;
+export type FileProxyUseCaseHistoryEntry = Components.Schemas.FileProxyUseCaseHistoryEntry;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
 export type GetMonitoringTimeSeriesRequest = Components.Schemas.GetMonitoringTimeSeriesRequest;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
@@ -3537,6 +3820,7 @@ export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
+export type IntegrationSettings = Components.Schemas.IntegrationSettings;
 export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases;
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
@@ -3570,6 +3854,7 @@ export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationA
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type UpdateFileProxyUseCaseRequest = Components.Schemas.UpdateFileProxyUseCaseRequest;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;
