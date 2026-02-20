@@ -577,45 +577,6 @@
         }
       }
     },
-    "/v2/outlook/connection:resolve": {
-      "get": {
-        "operationId": "resolveOutlookConnection",
-        "summary": "Resolve Outlook Connection",
-        "description": "Resolves the Outlook connection for the provided filter parameters.",
-        "tags": [
-          "O365 Outlook Connection"
-        ],
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Connection retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResolveOutlookConnectionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -764,6 +725,60 @@
           },
           "409": {
             "description": "A mailbox email already connected to an Outlook connection"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/{email}/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlookMailbox",
+        "summary": "Disconnect Outlook Mailbox",
+        "description": "Disconnects a single Outlook mailbox by email address.\nDeletes the email address entity, Outlook email mapping, and Graph API subscriptions.\nDoes not affect the tenant-level Outlook connection.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the Outlook mailbox to disconnect"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mailbox disconnected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "email"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The email address that was disconnected"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No Outlook mapping found for this email address"
           },
           "500": {
             "description": "Internal server error"
@@ -1944,53 +1959,6 @@
           }
         }
       },
-      "OutlookConnectionConfig": {
-        "type": "object",
-        "description": "Outlook connection config stored in DynamoDB",
-        "properties": {
-          "connected_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "connected_by_user_id": {
-            "type": "string"
-          },
-          "display_name": {
-            "type": "string"
-          },
-          "email_address": {
-            "type": "string",
-            "format": "email"
-          },
-          "outlook_email": {
-            "type": "string",
-            "format": "email"
-          },
-          "provider": {
-            "type": "string"
-          },
-          "shared_inbox_id": {
-            "type": "string"
-          },
-          "tenant_id": {
-            "type": "string"
-          }
-        }
-      },
-      "ResolveOutlookConnectionResponse": {
-        "type": "object",
-        "required": [
-          "resolved"
-        ],
-        "properties": {
-          "resolved": {
-            "type": "boolean"
-          },
-          "connection": {
-            "$ref": "#/components/schemas/OutlookConnectionConfig"
-          }
-        }
-      },
       "SignatureSetting": {
         "type": "string",
         "description": "Setting that allows to add a signature.",
@@ -2095,9 +2063,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

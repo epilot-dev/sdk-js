@@ -148,19 +148,6 @@
         "responses": {}
       }
     },
-    "/v2/outlook/connection:resolve": {
-      "get": {
-        "operationId": "resolveOutlookConnection",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -182,6 +169,19 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlookMailbox",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
@@ -478,9 +478,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

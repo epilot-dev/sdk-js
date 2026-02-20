@@ -119,25 +119,8 @@ declare namespace Components {
             id: string;
             inbox_id: string;
         }
-        /**
-         * Outlook connection config stored in DynamoDB
-         */
-        export interface OutlookConnectionConfig {
-            connected_at?: string; // date-time
-            connected_by_user_id?: string;
-            display_name?: string;
-            email_address?: string; // email
-            outlook_email?: string; // email
-            provider?: string;
-            shared_inbox_id?: string;
-            tenant_id?: string;
-        }
         export interface ProvisionEpilotEmailAddressPayload {
             address: string;
-        }
-        export interface ResolveOutlookConnectionResponse {
-            resolved: boolean;
-            connection?: /* Outlook connection config stored in DynamoDB */ OutlookConnectionConfig;
         }
         /**
          * - Restrict duplicates within:
@@ -410,6 +393,27 @@ declare namespace Paths {
             }
         }
     }
+    namespace DisconnectOutlookMailbox {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                /**
+                 * The email address that was disconnected
+                 */
+                email: string; // email
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetConnectedOutlookEmails {
         namespace Responses {
             export interface $200 {
@@ -607,19 +611,6 @@ declare namespace Paths {
             export type $200 = Components.Responses.ProvisionEpilotEmailAddressSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $409 = Components.Responses.Conflict;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace ResolveOutlookConnection {
-        namespace Parameters {
-            export type Email = string; // email
-        }
-        export interface QueryParameters {
-            email: Parameters.Email /* email */;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.ResolveOutlookConnectionResponse;
-            export type $400 = Components.Responses.BadRequest;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -906,16 +897,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
   /**
-   * resolveOutlookConnection - Resolve Outlook Connection
-   * 
-   * Resolves the Outlook connection for the provided filter parameters.
-   */
-  'resolveOutlookConnection'(
-    parameters?: Parameters<Paths.ResolveOutlookConnection.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ResolveOutlookConnection.Responses.$200>
-  /**
    * disconnectOutlook - Disconnect Outlook
    * 
    * Removes the Microsoft 365 / Outlook connection for a specific tenant.
@@ -941,6 +922,19 @@ export interface OperationMethods {
     data?: Paths.ConnectOutlookMailbox.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
+  /**
+   * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+   * 
+   * Disconnects a single Outlook mailbox by email address.
+   * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+   * Does not affect the tenant-level Outlook connection.
+   * 
+   */
+  'disconnectOutlookMailbox'(
+    parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
   /**
    * getConnectedOutlookEmails - Get Connected Outlook Emails
    * 
@@ -1244,18 +1238,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
   }
-  ['/v2/outlook/connection:resolve']: {
-    /**
-     * resolveOutlookConnection - Resolve Outlook Connection
-     * 
-     * Resolves the Outlook connection for the provided filter parameters.
-     */
-    'get'(
-      parameters?: Parameters<Paths.ResolveOutlookConnection.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ResolveOutlookConnection.Responses.$200>
-  }
   ['/v2/outlook/connection/disconnect']: {
     /**
      * disconnectOutlook - Disconnect Outlook
@@ -1285,6 +1267,21 @@ export interface PathsDictionary {
       data?: Paths.ConnectOutlookMailbox.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
+  }
+  ['/v2/outlook/mailbox/{email}/disconnect']: {
+    /**
+     * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+     * 
+     * Disconnects a single Outlook mailbox by email address.
+     * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+     * Does not affect the tenant-level Outlook connection.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
   }
   ['/v2/outlook/mailbox/mappings']: {
     /**
@@ -1443,9 +1440,7 @@ export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type InboxBucketResponse = Components.Schemas.InboxBucketResponse;
-export type OutlookConnectionConfig = Components.Schemas.OutlookConnectionConfig;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
-export type ResolveOutlookConnectionResponse = Components.Schemas.ResolveOutlookConnectionResponse;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
 export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;
 export type Setting = Components.Schemas.Setting;
