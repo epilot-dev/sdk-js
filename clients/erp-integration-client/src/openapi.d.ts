@@ -252,15 +252,15 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * List of access token IDs to associate with this integration
+             * List of access token IDs associated with this integration
              */
             access_token_ids?: string[];
             /**
-             * List of app IDs to associate with this integration
+             * List of app IDs associated with this integration
              */
             app_ids?: string[];
             /**
-             * Configuration defining environment variables needed by this integration
+             * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
@@ -953,6 +953,14 @@ declare namespace Components {
              */
             orgId: string;
             /**
+             * ISO-8601 timestamp when the integration was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the integration was last updated
+             */
+            updated_at: string; // date-time
+            /**
              * Integration name
              */
             name: string;
@@ -973,14 +981,6 @@ declare namespace Components {
              */
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
-            /**
-             * ISO-8601 timestamp when the integration was created
-             */
-            created_at: string; // date-time
-            /**
-             * ISO-8601 timestamp when the integration was last updated
-             */
-            updated_at: string; // date-time
         }
         export interface IntegrationAppMapping {
             /**
@@ -1015,6 +1015,29 @@ declare namespace Components {
                     [name: string]: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
                 };
             };
+        }
+        export interface IntegrationEditableFields {
+            /**
+             * Integration name
+             */
+            name?: string;
+            /**
+             * Optional description of the integration
+             */
+            description?: string;
+            /**
+             * List of access token IDs associated with this integration
+             */
+            access_token_ids?: string[];
+            /**
+             * List of app IDs associated with this integration
+             */
+            app_ids?: string[];
+            /**
+             * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
+             */
+            environment_config?: EnvironmentFieldConfig[];
+            settings?: /* Settings for the integration */ IntegrationSettings;
         }
         export interface IntegrationEntity {
             /**
@@ -1182,6 +1205,14 @@ declare namespace Components {
              */
             orgId: string;
             /**
+             * ISO-8601 timestamp when the integration was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the integration was last updated
+             */
+            updated_at: string; // date-time
+            /**
              * Integration name
              */
             name: string;
@@ -1193,19 +1224,19 @@ declare namespace Components {
              * List of access token IDs associated with this integration
              */
             access_token_ids?: string[];
+            /**
+             * List of app IDs associated with this integration
+             */
+            app_ids?: string[];
+            /**
+             * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
+             */
+            environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * All use cases belonging to this integration
              */
             use_cases: UseCase[];
-            /**
-             * ISO-8601 timestamp when the integration was created
-             */
-            created_at: string; // date-time
-            /**
-             * ISO-8601 timestamp when the integration was last updated
-             */
-            updated_at: string; // date-time
         }
         export interface MappingSimulationRequest {
             mapping_configuration: IntegrationConfigurationV1 | IntegrationConfigurationV2;
@@ -2260,29 +2291,7 @@ declare namespace Components {
             type?: "inbound";
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
         }
-        export interface UpdateIntegrationRequest {
-            /**
-             * Integration name
-             */
-            name?: string;
-            /**
-             * Optional description of the integration
-             */
-            description?: string;
-            /**
-             * List of access token IDs to associate with this integration
-             */
-            access_token_ids?: string[];
-            /**
-             * List of app IDs to associate with this integration
-             */
-            app_ids?: string[];
-            /**
-             * Configuration defining environment variables needed by this integration
-             */
-            environment_config?: EnvironmentFieldConfig[];
-            settings?: /* Settings for the integration */ IntegrationSettings;
-        }
+        export type UpdateIntegrationRequest = IntegrationEditableFields;
         export interface UpdateOutboundUseCaseRequest {
             /**
              * Use case name
@@ -2332,9 +2341,17 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * List of access token IDs to associate with this integration
+             * List of access token IDs associated with this integration
              */
             access_token_ids?: string[];
+            /**
+             * List of app IDs associated with this integration
+             */
+            app_ids?: string[];
+            /**
+             * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
+             */
+            environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Full list of use cases (declarative). This replaces ALL existing use cases.
@@ -3815,6 +3832,7 @@ export type Integration = Components.Schemas.Integration;
 export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
+export type IntegrationEditableFields = Components.Schemas.IntegrationEditableFields;
 export type IntegrationEntity = Components.Schemas.IntegrationEntity;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;

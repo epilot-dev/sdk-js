@@ -2526,31 +2526,18 @@
           }
         }
       },
-      "Integration": {
+      "IntegrationEditableFields": {
         "type": "object",
-        "required": [
-          "id",
-          "orgId",
-          "name",
-          "created_at",
-          "updated_at"
-        ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the integration"
-          },
-          "orgId": {
-            "type": "string",
-            "description": "Organization ID"
-          },
           "name": {
             "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
             "description": "Integration name"
           },
           "description": {
             "type": "string",
+            "maxLength": 1000,
             "description": "Optional description of the integration"
           },
           "access_token_ids": {
@@ -2576,101 +2563,66 @@
           },
           "settings": {
             "$ref": "#/components/schemas/IntegrationSettings"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was last updated"
           }
         }
+      },
+      "Integration": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "orgId",
+              "name",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "readOnly": true,
+                "description": "Unique identifier for the integration"
+              },
+              "orgId": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Organization ID"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true,
+                "description": "ISO-8601 timestamp when the integration was created"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true,
+                "description": "ISO-8601 timestamp when the integration was last updated"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
+          }
+        ]
       },
       "CreateIntegrationRequest": {
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "description": "Integration name"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
           },
-          "description": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Optional description of the integration"
-          },
-          "access_token_ids": {
-            "type": "array",
-            "description": "List of access token IDs to associate with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "app_ids": {
-            "type": "array",
-            "description": "List of app IDs to associate with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "environment_config": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentFieldConfig"
-            },
-            "description": "Configuration defining environment variables needed by this integration"
-          },
-          "settings": {
-            "$ref": "#/components/schemas/IntegrationSettings"
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ]
           }
-        }
+        ]
       },
       "UpdateIntegrationRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "description": "Integration name"
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Optional description of the integration"
-          },
-          "access_token_ids": {
-            "type": "array",
-            "description": "List of access token IDs to associate with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "app_ids": {
-            "type": "array",
-            "description": "List of app IDs to associate with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "environment_config": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentFieldConfig"
-            },
-            "description": "Configuration defining environment variables needed by this integration"
-          },
-          "settings": {
-            "$ref": "#/components/schemas/IntegrationSettings"
-          }
-        }
+        "$ref": "#/components/schemas/IntegrationEditableFields"
       },
       "EnvironmentFieldConfig": {
         "type": "object",
@@ -2801,6 +2753,402 @@
             "description": "The integration ID this app/component is mapped to"
           }
         }
+      },
+      "IntegrationWithUseCases": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Integration"
+          },
+          {
+            "type": "object",
+            "description": "Integration with embedded use cases for atomic CRUD operations",
+            "required": [
+              "use_cases"
+            ],
+            "properties": {
+              "use_cases": {
+                "type": "array",
+                "description": "All use cases belonging to this integration",
+                "items": {
+                  "$ref": "#/components/schemas/UseCase"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpsertIntegrationWithUseCasesRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
+          },
+          {
+            "type": "object",
+            "description": "Request to create or update an integration with embedded use cases (upsert).\nThis is a declarative operation - the request represents the desired state.\n",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "use_cases": {
+                "type": "array",
+                "description": "Full list of use cases (declarative). This replaces ALL existing use cases.\n- Use cases with an `id` field matching an existing use case will be updated\n- Use cases without an `id` or with a non-matching `id` will be created\n- Existing use cases not in this list will be deleted\n",
+                "items": {
+                  "$ref": "#/components/schemas/EmbeddedUseCaseRequest"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "InboundIntegrationEventConfiguration": {
+        "type": "object",
+        "description": "Configuration for inbound use cases (ERP to epilot)",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Array of entity configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntity"
+            }
+          },
+          "meter_readings": {
+            "type": "array",
+            "description": "Array of meter reading configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationMeterReading"
+            }
+          }
+        }
+      },
+      "OutboundIntegrationEventConfiguration": {
+        "type": "object",
+        "required": [
+          "event_catalog_event",
+          "mappings"
+        ],
+        "description": "Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.",
+        "properties": {
+          "event_catalog_event": {
+            "type": "string",
+            "description": "The Event Catalog event name that triggers this outbound flow",
+            "example": "contract.created"
+          },
+          "mappings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/OutboundMapping"
+            },
+            "description": "List of mappings that transform and deliver the event"
+          }
+        }
+      },
+      "IntegrationEntity": {
+        "type": "object",
+        "required": [
+          "entity_schema",
+          "unique_ids",
+          "fields"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Target entity schema (e.g., 'contact', 'contract')"
+          },
+          "unique_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of attribute names that uniquely identify this entity.\nThe _type hint for repeatable fields (e.g., email, phone) should be specified\non the corresponding field definition in the fields array.\n"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "Optional JSONata expression to pre-process the event data before field mapping"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge",
+              "upsert-prune-scope-purge",
+              "upsert-prune-scope-delete"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for entity mapping:\n- 'upsert': Create or update the entity (default)\n- 'delete': Soft delete the entity (marks as deleted)\n- 'purge': Hard delete the entity (permanent removal)\n- 'upsert-prune-scope-purge': Upsert entities from array, then purge entities in scope that weren't upserted\n- 'upsert-prune-scope-delete': Upsert entities from array, then soft delete entities in scope that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PruneScopeConfig"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "IntegrationMeterReading": {
+        "type": "object",
+        "required": [
+          "meter",
+          "fields"
+        ],
+        "properties": {
+          "jsonataExpression": {
+            "type": "string",
+            "description": "Optional JSONata expression to extract meter reading items from the event data.\nIf not provided, the entire payload is used as the reading data.\nUseful when you need to extract an array of readings from a nested structure (e.g., \"$.readings\").\n"
+          },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "default": "external_id",
+            "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "upsert-prune-scope"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for meter reading mapping:\n- 'upsert': Create or update meter readings (default)\n- 'delete': Delete the meter reading\n- 'upsert-prune-scope': Upsert readings from array, then delete all other readings for the same meter+counter that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/MeterReadingPruneScopeConfig"
+          },
+          "meter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "meter_counter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions for meter reading attributes",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "PruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for upsert-prune-scope modes.\nDefines how to find entities that should be pruned if not in the upsert payload.\nThe scope is resolved against the original event payload (not individual array items).\n",
+        "required": [
+          "scope_mode"
+        ],
+        "properties": {
+          "scope_mode": {
+            "type": "string",
+            "enum": [
+              "relations",
+              "query"
+            ],
+            "description": "Scope mode for finding entities to prune:\n- 'relations': Find scope by looking at all entities related to a specific entity (both direct and reverse relations)\n- 'query': Find scope entities directly via query parameters\n"
+          },
+          "schema": {
+            "type": "string",
+            "description": "For 'relations' mode: The schema of the entity to find (e.g., 'billing_account').\nNot used for 'query' mode.\n"
+          },
+          "unique_ids": {
+            "type": "array",
+            "description": "For 'relations' mode: How to identify the scope entity from the payload.\nNot used for 'query' mode.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          },
+          "query": {
+            "type": "array",
+            "description": "For 'query' mode: Direct query parameters to find scope entities.\nNot used for 'relations' or 'reverse-relations' modes.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "MeterReadingPruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for meter reading upsert-prune-scope mode.\nThe scope is all readings for the same meter + counter.\n",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Optional source filter. When set, only readings with this source\nare eligible for pruning (e.g., 'ERP' to only prune ERP-synced readings).\n"
+          }
+        }
+      },
+      "MeterUniqueIdsConfig": {
+        "type": "object",
+        "required": [
+          "unique_ids"
+        ],
+        "properties": {
+          "unique_ids": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Array of unique identifier field mappings",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "IntegrationEntityField": {
+        "type": "object",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name or JSONPath expression (if starts with $)"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression for transformation"
+          },
+          "constant": {
+            "description": "Constant value to assign (any type)"
+          },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
+          },
+          "relations": {
+            "$ref": "#/components/schemas/RelationConfig"
+          },
+          "relation_refs": {
+            "$ref": "#/components/schemas/RelationRefsConfig"
+          }
+        }
+      },
+      "EmbeddedUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
+            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        }
+      },
+      "EmbeddedUseCaseRequestBase": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional use case ID for update matching.\n- If provided and matches an existing use case, that use case is updated\n- If provided but no match, a new use case with this ID is created\n- If omitted, a new use case with auto-generated ID is created\n"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Use case name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional description of this change (like a commit message)"
+          }
+        }
+      },
+      "EmbeddedInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "EmbeddedOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
       },
       "UseCaseBase": {
         "type": "object",
@@ -3782,49 +4130,6 @@
           }
         }
       },
-      "InboundIntegrationEventConfiguration": {
-        "type": "object",
-        "description": "Configuration for inbound use cases (ERP to epilot)",
-        "properties": {
-          "entities": {
-            "type": "array",
-            "description": "Array of entity configurations for this event",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntity"
-            }
-          },
-          "meter_readings": {
-            "type": "array",
-            "description": "Array of meter reading configurations for this event",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationMeterReading"
-            }
-          }
-        }
-      },
-      "OutboundIntegrationEventConfiguration": {
-        "type": "object",
-        "required": [
-          "event_catalog_event",
-          "mappings"
-        ],
-        "description": "Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.",
-        "properties": {
-          "event_catalog_event": {
-            "type": "string",
-            "description": "The Event Catalog event name that triggers this outbound flow",
-            "example": "contract.created"
-          },
-          "mappings": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/components/schemas/OutboundMapping"
-            },
-            "description": "List of mappings that transform and deliver the event"
-          }
-        }
-      },
       "OutboundMapping": {
         "type": "object",
         "required": [
@@ -4018,216 +4323,6 @@
           }
         }
       },
-      "IntegrationEntity": {
-        "type": "object",
-        "required": [
-          "entity_schema",
-          "unique_ids",
-          "fields"
-        ],
-        "properties": {
-          "entity_schema": {
-            "type": "string",
-            "description": "Target entity schema (e.g., 'contact', 'contract')"
-          },
-          "unique_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Array of attribute names that uniquely identify this entity.\nThe _type hint for repeatable fields (e.g., email, phone) should be specified\non the corresponding field definition in the fields array.\n"
-          },
-          "jsonataExpression": {
-            "type": "string",
-            "description": "Optional JSONata expression to pre-process the event data before field mapping"
-          },
-          "enabled": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
-          },
-          "mode": {
-            "type": "string",
-            "enum": [
-              "upsert",
-              "delete",
-              "purge",
-              "upsert-prune-scope-purge",
-              "upsert-prune-scope-delete"
-            ],
-            "default": "upsert",
-            "description": "Operation mode for entity mapping:\n- 'upsert': Create or update the entity (default)\n- 'delete': Soft delete the entity (marks as deleted)\n- 'purge': Hard delete the entity (permanent removal)\n- 'upsert-prune-scope-purge': Upsert entities from array, then purge entities in scope that weren't upserted\n- 'upsert-prune-scope-delete': Upsert entities from array, then soft delete entities in scope that weren't upserted\n"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/PruneScopeConfig"
-          },
-          "fields": {
-            "type": "array",
-            "description": "Field mapping definitions",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntityField"
-            }
-          }
-        }
-      },
-      "PruneScopeConfig": {
-        "type": "object",
-        "description": "Scope configuration for upsert-prune-scope modes.\nDefines how to find entities that should be pruned if not in the upsert payload.\nThe scope is resolved against the original event payload (not individual array items).\n",
-        "required": [
-          "scope_mode"
-        ],
-        "properties": {
-          "scope_mode": {
-            "type": "string",
-            "enum": [
-              "relations",
-              "query"
-            ],
-            "description": "Scope mode for finding entities to prune:\n- 'relations': Find scope by looking at all entities related to a specific entity (both direct and reverse relations)\n- 'query': Find scope entities directly via query parameters\n"
-          },
-          "schema": {
-            "type": "string",
-            "description": "For 'relations' mode: The schema of the entity to find (e.g., 'billing_account').\nNot used for 'query' mode.\n"
-          },
-          "unique_ids": {
-            "type": "array",
-            "description": "For 'relations' mode: How to identify the scope entity from the payload.\nNot used for 'query' mode.\n",
-            "items": {
-              "$ref": "#/components/schemas/RelationUniqueIdField"
-            }
-          },
-          "query": {
-            "type": "array",
-            "description": "For 'query' mode: Direct query parameters to find scope entities.\nNot used for 'relations' or 'reverse-relations' modes.\n",
-            "items": {
-              "$ref": "#/components/schemas/RelationUniqueIdField"
-            }
-          }
-        }
-      },
-      "MeterReadingPruneScopeConfig": {
-        "type": "object",
-        "description": "Scope configuration for meter reading upsert-prune-scope mode.\nThe scope is all readings for the same meter + counter.\n",
-        "properties": {
-          "source": {
-            "type": "string",
-            "description": "Optional source filter. When set, only readings with this source\nare eligible for pruning (e.g., 'ERP' to only prune ERP-synced readings).\n"
-          }
-        }
-      },
-      "IntegrationMeterReading": {
-        "type": "object",
-        "required": [
-          "meter",
-          "fields"
-        ],
-        "properties": {
-          "jsonataExpression": {
-            "type": "string",
-            "description": "Optional JSONata expression to extract meter reading items from the event data.\nIf not provided, the entire payload is used as the reading data.\nUseful when you need to extract an array of readings from a nested structure (e.g., \"$.readings\").\n"
-          },
-          "reading_matching": {
-            "type": "string",
-            "enum": [
-              "external_id",
-              "strict-date"
-            ],
-            "default": "external_id",
-            "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
-          },
-          "mode": {
-            "type": "string",
-            "enum": [
-              "upsert",
-              "delete",
-              "upsert-prune-scope"
-            ],
-            "default": "upsert",
-            "description": "Operation mode for meter reading mapping:\n- 'upsert': Create or update meter readings (default)\n- 'delete': Delete the meter reading\n- 'upsert-prune-scope': Upsert readings from array, then delete all other readings for the same meter+counter that weren't upserted\n"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/MeterReadingPruneScopeConfig"
-          },
-          "meter": {
-            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
-          },
-          "meter_counter": {
-            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
-          },
-          "fields": {
-            "type": "array",
-            "description": "Field mapping definitions for meter reading attributes",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntityField"
-            }
-          }
-        }
-      },
-      "MeterUniqueIdsConfig": {
-        "type": "object",
-        "required": [
-          "unique_ids"
-        ],
-        "properties": {
-          "unique_ids": {
-            "type": "array",
-            "minItems": 1,
-            "description": "Array of unique identifier field mappings",
-            "items": {
-              "$ref": "#/components/schemas/RelationUniqueIdField"
-            }
-          }
-        }
-      },
-      "IntegrationEntityField": {
-        "type": "object",
-        "required": [
-          "attribute"
-        ],
-        "properties": {
-          "attribute": {
-            "type": "string",
-            "description": "Target attribute name"
-          },
-          "field": {
-            "type": "string",
-            "description": "Source field name or JSONPath expression (if starts with $)"
-          },
-          "jsonataExpression": {
-            "type": "string",
-            "description": "JSONata expression for transformation"
-          },
-          "constant": {
-            "description": "Constant value to assign (any type)"
-          },
-          "_type": {
-            "$ref": "#/components/schemas/RepeatableFieldType"
-          },
-          "enabled": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
-          },
-          "relations": {
-            "$ref": "#/components/schemas/RelationConfig"
-          },
-          "relation_refs": {
-            "$ref": "#/components/schemas/RelationRefsConfig"
-          }
-        }
-      },
       "RelationConfig": {
         "type": "object",
         "required": [
@@ -4408,198 +4503,6 @@
           "phone"
         ],
         "description": "Type hint for repeatable fields that require special search handling.\nThese fields are stored as arrays of objects (e.g., email: [{ email: \"value\" }]).\n"
-      },
-      "IntegrationWithUseCases": {
-        "type": "object",
-        "description": "Integration with embedded use cases for atomic CRUD operations",
-        "required": [
-          "id",
-          "orgId",
-          "name",
-          "use_cases",
-          "created_at",
-          "updated_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the integration"
-          },
-          "orgId": {
-            "type": "string",
-            "description": "Organization ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Integration name"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional description of the integration"
-          },
-          "access_token_ids": {
-            "type": "array",
-            "description": "List of access token IDs associated with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "settings": {
-            "$ref": "#/components/schemas/IntegrationSettings"
-          },
-          "use_cases": {
-            "type": "array",
-            "description": "All use cases belonging to this integration",
-            "items": {
-              "$ref": "#/components/schemas/UseCase"
-            }
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was last updated"
-          }
-        }
-      },
-      "UpsertIntegrationWithUseCasesRequest": {
-        "type": "object",
-        "description": "Request to create or update an integration with embedded use cases (upsert).\nThis is a declarative operation - the request represents the desired state.\n",
-        "required": [
-          "name"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "description": "Integration name"
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Optional description of the integration"
-          },
-          "access_token_ids": {
-            "type": "array",
-            "description": "List of access token IDs to associate with this integration",
-            "items": {
-              "type": "string"
-            }
-          },
-          "settings": {
-            "$ref": "#/components/schemas/IntegrationSettings"
-          },
-          "use_cases": {
-            "type": "array",
-            "description": "Full list of use cases (declarative). This replaces ALL existing use cases.\n- Use cases with an `id` field matching an existing use case will be updated\n- Use cases without an `id` or with a non-matching `id` will be created\n- Existing use cases not in this list will be deleted\n",
-            "items": {
-              "$ref": "#/components/schemas/EmbeddedUseCaseRequest"
-            }
-          }
-        }
-      },
-      "EmbeddedUseCaseRequest": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/EmbeddedInboundUseCaseRequest"
-          },
-          {
-            "$ref": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
-            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
-          }
-        }
-      },
-      "EmbeddedUseCaseRequestBase": {
-        "type": "object",
-        "required": [
-          "name",
-          "type",
-          "enabled"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Optional use case ID for update matching.\n- If provided and matches an existing use case, that use case is updated\n- If provided but no match, a new use case with this ID is created\n- If omitted, a new use case with auto-generated ID is created\n"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "description": "Use case name"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the use case is enabled"
-          },
-          "change_description": {
-            "type": "string",
-            "maxLength": 2000,
-            "description": "Optional description of this change (like a commit message)"
-          }
-        }
-      },
-      "EmbeddedInboundUseCaseRequest": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
-          },
-          {
-            "type": "object",
-            "required": [
-              "type"
-            ],
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "inbound"
-                ],
-                "description": "Use case type"
-              },
-              "configuration": {
-                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
-              }
-            }
-          }
-        ]
-      },
-      "EmbeddedOutboundUseCaseRequest": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
-          },
-          {
-            "type": "object",
-            "required": [
-              "type"
-            ],
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "outbound"
-                ],
-                "description": "Use case type"
-              },
-              "configuration": {
-                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
-              }
-            }
-          }
-        ]
       },
       "ReplayEventsRequest": {
         "type": "object",
