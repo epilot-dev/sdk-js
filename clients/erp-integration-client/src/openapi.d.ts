@@ -199,10 +199,6 @@ declare namespace Components {
              * Maximum age (in minutes) of data before it is considered stale and eligible for refresh
              */
             freshnessThresholdMinutes?: number;
-            /**
-             * Minimum interval (in minutes) between consecutive sync operations to prevent excessive API calls
-             */
-            minIntervalBetweenSyncsMinutes?: number;
         }
         export interface CreateFileProxyUseCaseRequest {
             /**
@@ -617,6 +613,40 @@ declare namespace Components {
              */
             response_type: "json" | "binary";
         }
+        /**
+         * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context.
+         */
+        export interface FileProxyUrlConfig {
+            /**
+             * UUID of the file_proxy use case. Maps to useCaseId query parameter.
+             */
+            use_case_id: string;
+            /**
+             * Custom query parameters. Keys become URL param names, values resolved from payload.
+             */
+            params?: {
+                [name: string]: /* Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set. */ FileProxyUrlParam;
+            };
+        }
+        /**
+         * Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set.
+         */
+        export type FileProxyUrlParam = /* Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set. */ {
+            /**
+             * Source field name or JSONPath expression (if starts with $)
+             */
+            field: string;
+        } | {
+            /**
+             * Constant value (any type, stringified for URL)
+             */
+            constant: any;
+        } | {
+            /**
+             * JSONata expression for transformation
+             */
+            jsonataExpression: string;
+        };
         export interface FileProxyUseCase {
             /**
              * Unique identifier for the use case
@@ -1116,6 +1146,7 @@ declare namespace Components {
              *
              */
             RelationRefsConfig;
+            file_proxy_url?: /* Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. */ FileProxyUrlConfig;
         }
         export interface IntegrationFieldV1 {
             /**
@@ -3819,6 +3850,8 @@ export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
 export type FileProxyStep = Components.Schemas.FileProxyStep;
+export type FileProxyUrlConfig = Components.Schemas.FileProxyUrlConfig;
+export type FileProxyUrlParam = Components.Schemas.FileProxyUrlParam;
 export type FileProxyUseCase = Components.Schemas.FileProxyUseCase;
 export type FileProxyUseCaseConfiguration = Components.Schemas.FileProxyUseCaseConfiguration;
 export type FileProxyUseCaseHistoryEntry = Components.Schemas.FileProxyUseCaseHistoryEntry;

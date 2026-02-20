@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.40.0",
+    "version": "0.41.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2690,11 +2690,6 @@
             "type": "integer",
             "minimum": 1,
             "description": "Maximum age (in minutes) of data before it is considered stale and eligible for refresh"
-          },
-          "minIntervalBetweenSyncsMinutes": {
-            "type": "integer",
-            "minimum": 1,
-            "description": "Minimum interval (in minutes) between consecutive sync operations to prevent excessive API calls"
           }
         }
       },
@@ -3050,6 +3045,69 @@
           },
           "relation_refs": {
             "$ref": "#/components/schemas/RelationRefsConfig"
+          },
+          "file_proxy_url": {
+            "$ref": "#/components/schemas/FileProxyUrlConfig"
+          }
+        }
+      },
+      "FileProxyUrlParam": {
+        "description": "Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "field"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "Source field name or JSONPath expression (if starts with $)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "constant"
+            ],
+            "properties": {
+              "constant": {
+                "description": "Constant value (any type, stringified for URL)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "jsonataExpression"
+            ],
+            "properties": {
+              "jsonataExpression": {
+                "type": "string",
+                "description": "JSONata expression for transformation"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUrlConfig": {
+        "type": "object",
+        "required": [
+          "use_case_id"
+        ],
+        "description": "Auto-constructs a file proxy download URL. orgId and integrationId are injected from context.",
+        "properties": {
+          "use_case_id": {
+            "type": "string",
+            "description": "UUID of the file_proxy use case. Maps to useCaseId query parameter."
+          },
+          "params": {
+            "type": "object",
+            "description": "Custom query parameters. Keys become URL param names, values resolved from payload.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileProxyUrlParam"
+            }
           }
         }
       },
