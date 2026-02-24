@@ -32,6 +32,9 @@ importers:
       typescript:
         specifier: ^4.9.3
         version: 4.9.5
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.105.2)
 
   clients/access-token-client:
     dependencies:
@@ -46,7 +49,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -62,10 +65,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -80,7 +83,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -89,10 +92,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/address-client:
     dependencies:
@@ -101,7 +104,7 @@ importers:
         version: 1.28.1
       axios:
         specifier: ^1.0.0 || >=0.25.0 <1.0.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -110,7 +113,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -126,7 +129,7 @@ importers:
         version: 26.0.24
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -141,7 +144,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.8.2
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -150,10 +153,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/address-suggestions-client:
     dependencies:
@@ -162,7 +165,7 @@ importers:
         version: 1.28.1
       axios:
         specifier: ^1.0.0 || >=0.25.0 <1.0.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -171,7 +174,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -187,7 +190,7 @@ importers:
         version: 26.0.24
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -202,7 +205,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.8.2
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -211,10 +214,71 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
+
+  clients/ai-agents-client:
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids':
+        specifier: ^1.28.1
+        version: 1.28.1
+      axios:
+        specifier: ^1.0.0 || >=0.25.0 <1.0.0
+        version: 1.13.5(debug@4.4.1)
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.1.1
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^26.0.20
+        version: 26.0.24
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.2)
+      jest:
+        specifier: ^29.6.2
+        version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      ts-jest:
+        specifier: ^29.4.1
+        version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
+      ts-loader:
+        specifier: ^8.0.14
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
+      ts-node:
+        specifier: ^10.8.2
+        version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
+      typescript:
+        specifier: ^4.7.4
+        version: 4.9.5
+      webpack:
+        specifier: ^5.18.0
+        version: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli:
+        specifier: ^4.10.0
+        version: 4.10.0(webpack@5.105.2)
 
   clients/app-client:
     dependencies:
@@ -229,7 +293,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -245,10 +309,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -263,7 +327,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -272,10 +336,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/audit-logs-client:
     dependencies:
@@ -290,7 +354,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -306,10 +370,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -324,7 +388,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -333,10 +397,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/automation-client:
     dependencies:
@@ -367,10 +431,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -382,7 +446,7 @@ importers:
         version: 3.3.2
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       openapicmd:
         specifier: ^2.7.0
         version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -391,7 +455,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -400,10 +464,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
       whatwg-url:
         specifier: ^11.0.0
         version: 11.0.0
@@ -418,7 +482,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -434,10 +498,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -452,7 +516,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -461,10 +525,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/blueprint-manifest-client:
     dependencies:
@@ -479,7 +543,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -495,10 +559,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -513,7 +577,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -522,10 +586,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/consent-client:
     dependencies:
@@ -540,7 +604,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -556,10 +620,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -574,7 +638,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -583,10 +647,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/customer-portal-client:
     dependencies:
@@ -598,7 +662,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -614,10 +678,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -632,7 +696,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -641,12 +705,12 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
-  clients/deduplication-client:
+  clients/data-management-client:
     dependencies:
       '@dazn/lambda-powertools-correlation-ids':
         specifier: ^1.28.1
@@ -659,7 +723,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.2.0
         version: 3.2.0
@@ -675,10 +739,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -693,7 +757,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -702,10 +766,71 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.101.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.10.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
+
+  clients/deduplication-client:
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids':
+        specifier: ^1.28.1
+        version: 1.28.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.2.0
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^26.0.20
+        version: 26.0.24
+      axios:
+        specifier: ^1.11.0
+        version: 1.13.5(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.2)
+      jest:
+        specifier: ^29.6.2
+        version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      ts-jest:
+        specifier: ^29.4.1
+        version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
+      ts-loader:
+        specifier: ^8.0.14
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
+      typescript:
+        specifier: ^4.1.3
+        version: 4.9.5
+      webpack:
+        specifier: ^5.101.0
+        version: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli:
+        specifier: ^4.10.0
+        version: 4.10.0(webpack@5.105.2)
 
   clients/design-client:
     dependencies:
@@ -720,7 +845,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -736,10 +861,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -754,7 +879,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -763,10 +888,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/discussion-client:
     dependencies:
@@ -781,7 +906,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -797,10 +922,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -815,7 +940,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -824,10 +949,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/document-client:
     dependencies:
@@ -839,7 +964,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -855,10 +980,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -873,7 +998,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -882,10 +1007,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/email-settings-client:
     dependencies:
@@ -900,7 +1025,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -916,10 +1041,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -934,7 +1059,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -943,10 +1068,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/email-template-client:
     dependencies:
@@ -961,7 +1086,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -977,10 +1102,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -995,7 +1120,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1004,10 +1129,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/entity-client:
     dependencies:
@@ -1022,7 +1147,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1038,10 +1163,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1056,7 +1181,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1065,10 +1190,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/entity-mapping-client:
     dependencies:
@@ -1083,7 +1208,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1099,10 +1224,10 @@ importers:
         version: 28.1.8
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1117,7 +1242,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1126,10 +1251,71 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
+
+  clients/environments-client:
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids':
+        specifier: ^1.28.1
+        version: 1.28.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.1.1
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^26.0.20
+        version: 26.0.24
+      axios:
+        specifier: ^1.11.0
+        version: 1.13.5(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.2)
+      jest:
+        specifier: ^29.6.2
+        version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      ts-jest:
+        specifier: ^29.4.1
+        version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
+      ts-loader:
+        specifier: ^8.0.14
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
+      typescript:
+        specifier: ^4.1.3
+        version: 4.9.5
+      webpack:
+        specifier: ^5.18.0
+        version: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli:
+        specifier: ^4.4.0
+        version: 4.10.0(webpack@5.105.2)
 
   clients/erp-integration-client:
     dependencies:
@@ -1144,7 +1330,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1159,11 +1345,11 @@ importers:
         specifier: ^26.0.20
         version: 26.0.24
       axios:
-        specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        specifier: ^1.13.5
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1178,7 +1364,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1186,11 +1372,11 @@ importers:
         specifier: ^4.1.3
         version: 4.9.5
       webpack:
-        specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        specifier: ^5.104.1
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/event-catalog-client:
     dependencies:
@@ -1205,7 +1391,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1221,10 +1407,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1239,7 +1425,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1248,10 +1434,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/file-client:
     dependencies:
@@ -1263,7 +1449,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1279,10 +1465,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1297,7 +1483,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1306,10 +1492,71 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
+
+  clients/iban-client:
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids':
+        specifier: ^1.28.1
+        version: 1.28.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.1.1
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^26.0.20
+        version: 26.0.24
+      axios:
+        specifier: ^1.11.0
+        version: 1.13.5(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.2)
+      jest:
+        specifier: ^29.6.2
+        version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      ts-jest:
+        specifier: ^29.4.1
+        version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
+      ts-loader:
+        specifier: ^8.0.14
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
+      typescript:
+        specifier: ^4.1.3
+        version: 4.9.5
+      webpack:
+        specifier: ^5.18.0
+        version: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli:
+        specifier: ^4.4.0
+        version: 4.10.0(webpack@5.105.2)
 
   clients/journey-client:
     dependencies:
@@ -1324,7 +1571,7 @@ importers:
         version: 5.11.1
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1340,19 +1587,22 @@ importers:
         version: 1.6.1(vitest@1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1))
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       json-loader:
         specifier: ^0.5.7
         version: 0.5.7
       openapi-client-axios-typegen:
         specifier: ^7.5.1
         version: 7.7.0(encoding@0.1.13)(js-yaml@4.1.0)
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
       ts-loader:
         specifier: ^8.3.0
-        version: 8.4.0(typescript@5.7.3)(webpack@5.101.0)
+        version: 8.4.0(typescript@5.7.3)(webpack@5.105.2)
       typescript:
         specifier: ^5.4.5
         version: 5.7.3
@@ -1361,10 +1611,10 @@ importers:
         version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1)
       webpack:
         specifier: ^5.91.0
-        version: 5.101.0(webpack-cli@5.1.4)
+        version: 5.105.2(webpack-cli@5.1.4)
       webpack-cli:
         specifier: ^5.1.4
-        version: 5.1.4(webpack@5.101.0)
+        version: 5.1.4(webpack@5.105.2)
 
   clients/kanban-client:
     dependencies:
@@ -1379,7 +1629,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1395,10 +1645,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1413,7 +1663,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1422,10 +1672,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/message-client:
     dependencies:
@@ -1440,7 +1690,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1456,10 +1706,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1474,7 +1724,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1483,10 +1733,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/metering-client:
     dependencies:
@@ -1498,7 +1748,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1514,10 +1764,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1532,7 +1782,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1541,10 +1791,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/notes-client:
     dependencies:
@@ -1559,7 +1809,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1575,10 +1825,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1593,7 +1843,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1602,10 +1852,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/notification-client:
     dependencies:
@@ -1620,7 +1870,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1636,10 +1886,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1654,7 +1904,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1663,10 +1913,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/organization-client:
     dependencies:
@@ -1681,7 +1931,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1697,10 +1947,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1715,7 +1965,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1724,10 +1974,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/partner-directory-client:
     dependencies:
@@ -1742,7 +1992,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1758,10 +2008,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1776,7 +2026,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.3.0
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1785,10 +2035,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/permissions-client:
     dependencies:
@@ -1803,7 +2053,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1819,10 +2069,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1837,7 +2087,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1846,10 +2096,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/pricing-client:
     dependencies:
@@ -1864,7 +2114,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1880,10 +2130,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1898,7 +2148,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1907,10 +2157,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/pricing-tier-client:
     dependencies:
@@ -1925,7 +2175,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -1941,10 +2191,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -1959,7 +2209,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -1968,10 +2218,71 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
+
+  clients/purpose-client:
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids':
+        specifier: ^1.28.1
+        version: 1.28.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http:
+        specifier: ^3.2.0
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^26.0.20
+        version: 26.0.24
+      axios:
+        specifier: ^1.11.0
+        version: 1.13.5(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.2)
+      jest:
+        specifier: ^29.6.2
+        version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapicmd:
+        specifier: ^2.7.0
+        version: 2.7.0(@types/node@24.2.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
+      ts-jest:
+        specifier: ^29.4.1
+        version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
+      ts-loader:
+        specifier: ^8.0.14
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
+      typescript:
+        specifier: ^4.1.3
+        version: 4.9.5
+      webpack:
+        specifier: ^5.18.0
+        version: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli:
+        specifier: ^4.4.0
+        version: 4.10.0(webpack@5.105.2)
 
   clients/sandbox-client:
     dependencies:
@@ -1986,7 +2297,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2002,10 +2313,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2020,7 +2331,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2029,10 +2340,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/submission-client:
     dependencies:
@@ -2047,7 +2358,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2063,10 +2374,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2081,7 +2392,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2090,10 +2401,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/targeting-client:
     dependencies:
@@ -2108,7 +2419,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2124,10 +2435,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2142,7 +2453,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2151,10 +2462,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/template-variables-client:
     dependencies:
@@ -2169,7 +2480,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2185,10 +2496,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2203,7 +2514,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2212,10 +2523,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/user-client:
     dependencies:
@@ -2230,7 +2541,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2246,10 +2557,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2264,7 +2575,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2273,10 +2584,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/validation-rules-client:
     dependencies:
@@ -2291,7 +2602,7 @@ importers:
         version: 5.11.1
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2307,10 +2618,10 @@ importers:
         version: 1.6.1(vitest@1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1))
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       json-loader:
         specifier: ^0.5.7
         version: 0.5.7
@@ -2319,7 +2630,7 @@ importers:
         version: 7.7.0(encoding@0.1.13)(js-yaml@4.1.0)
       ts-loader:
         specifier: ^8.3.0
-        version: 8.4.0(typescript@5.7.3)(webpack@5.101.0)
+        version: 8.4.0(typescript@5.7.3)(webpack@5.105.2)
       typescript:
         specifier: ^5.4.5
         version: 5.7.3
@@ -2328,10 +2639,10 @@ importers:
         version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.43.1)
       webpack:
         specifier: ^5.91.0
-        version: 5.101.0(webpack-cli@5.1.4)
+        version: 5.105.2(webpack-cli@5.1.4)
       webpack-cli:
         specifier: ^5.1.4
-        version: 5.1.4(webpack@5.101.0)
+        version: 5.1.4(webpack@5.105.2)
 
   clients/webhooks-client:
     dependencies:
@@ -2346,7 +2657,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2362,10 +2673,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2380,7 +2691,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2389,10 +2700,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/workflow-client:
     dependencies:
@@ -2407,7 +2718,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2423,10 +2734,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2441,7 +2752,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2450,10 +2761,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        version: 4.10.0(webpack@5.105.2)
 
   clients/workflow-definition-client:
     dependencies:
@@ -2468,7 +2779,7 @@ importers:
         version: 1.0.0
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http:
         specifier: ^3.1.1
         version: 3.2.0
@@ -2484,10 +2795,10 @@ importers:
         version: 26.0.24
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       copy-webpack-plugin:
         specifier: ^7.0.0
-        version: 7.0.0(webpack@5.101.0)
+        version: 7.0.0(webpack@5.105.2)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2502,7 +2813,7 @@ importers:
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
       ts-loader:
         specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.101.0)
+        version: 8.4.0(typescript@4.9.5)(webpack@5.105.2)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@24.2.0)(typescript@4.9.5)
@@ -2511,10 +2822,10 @@ importers:
         version: 4.9.5
       webpack:
         specifier: ^5.18.0
-        version: 5.101.0(webpack-cli@4.10.0)
+        version: 5.105.2(webpack-cli@4.10.0)
       webpack-cli:
-        specifier: ^4.4.0
-        version: 4.10.0(webpack@5.101.0)
+        specifier: ^4.10.0
+        version: 4.10.0(webpack@5.105.2)
 
   packages/app-bridge:
     dependencies:
@@ -2579,7 +2890,7 @@ importers:
     dependencies:
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.13.5)(js-yaml@4.1.0)
       amazon-cognito-identity-js:
         specifier: ^5.2.5
         version: 5.2.14(encoding@0.1.13)
@@ -2601,7 +2912,7 @@ importers:
         version: 2.1.6
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       jest:
         specifier: ^29.6.2
         version: 29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5))
@@ -2610,7 +2921,7 @@ importers:
         version: 0.36.8(encoding@0.1.13)
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       ts-jest:
         specifier: ^29.4.1
         version: 29.4.1(@babel/core@7.28.0)(@jest/transform@30.0.5)(@jest/types@30.0.5)(babel-jest@30.0.5(@babel/core@7.28.0))(jest-util@30.0.5)(jest@29.7.0(@types/node@24.2.0)(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5)))(typescript@4.9.5)
@@ -2625,97 +2936,97 @@ importers:
     dependencies:
       '@epilot/access-token-client':
         specifier: ^1.1.0
-        version: 1.1.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.1.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/address-suggestions-client':
         specifier: ^1.3.0
-        version: 1.3.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.3.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/audit-logs-client':
         specifier: ^0.4.0
-        version: 0.4.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.4.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/auth':
         specifier: ^0.8.0
-        version: 0.8.0(axios@1.11.0)(encoding@0.1.13)(js-yaml@4.1.0)
+        version: 0.8.0(axios@1.13.5)(encoding@0.1.13)(js-yaml@4.1.0)
       '@epilot/automation-client':
         specifier: ^2.24.0
-        version: 2.24.0(axios@1.11.0)
+        version: 2.24.0(axios@1.13.5)
       '@epilot/billing-client':
         specifier: ^0.5.0
-        version: 0.5.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.5.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/blueprint-manifest-client':
         specifier: ^3.1.0
-        version: 3.1.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.6.4(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/customer-portal-client':
         specifier: ^0.23.0
-        version: 0.23.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.23.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/design-client':
         specifier: ^0.3.0
-        version: 0.3.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.3.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/discussion-client':
         specifier: ^1.10.0
-        version: 1.10.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.10.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/document-client':
         specifier: ^0.18.0
-        version: 0.18.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.18.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/email-settings-client':
         specifier: ^0.6.0
-        version: 0.6.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.6.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/email-template-client':
         specifier: ^2.2.0
-        version: 2.2.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 2.2.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/entity-client':
         specifier: ^6.6.0
-        version: 6.6.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 6.6.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/entity-mapping-client':
         specifier: ^0.10.0
-        version: 0.10.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.10.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/file-client':
         specifier: ^1.15.0
-        version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.15.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/message-client':
         specifier: ^1.18.0
-        version: 1.18.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.18.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/metering-client':
         specifier: ^0.8.0
-        version: 0.8.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.8.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/notification-client':
         specifier: ^0.7.0
-        version: 0.7.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.7.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/organization-client':
         specifier: ^0.13.0
-        version: 0.13.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.13.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/partner-directory-client':
         specifier: ^0.10.0
-        version: 0.10.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.10.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/permissions-client':
         specifier: ^0.16.0
-        version: 0.16.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.16.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/pricing-client':
         specifier: ^3.50.0
-        version: 3.50.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.50.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/sandbox-client':
         specifier: ^0.4.0
-        version: 0.4.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 0.4.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/submission-client':
         specifier: ^1.8.0
-        version: 1.8.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.8.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/template-variables-client':
         specifier: ^1.15.0
-        version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.15.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/user-client':
         specifier: ^3.12.0
-        version: 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 3.12.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/workflow-client':
         specifier: ^1.15.0
-        version: 1.15.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.15.0(axios@1.13.5)(js-yaml@4.1.0)
       '@epilot/workflow-definition-client':
         specifier: ^1.17.0
-        version: 1.17.0(axios@1.11.0)(js-yaml@4.1.0)
+        version: 1.17.0(axios@1.13.5)(js-yaml@4.1.0)
       axios:
         specifier: ^1.11.0
-        version: 1.11.0(debug@4.4.1)
+        version: 1.13.5(debug@4.4.1)
       openapi-client-axios:
         specifier: ^7.8.0
-        version: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+        version: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.4.0
@@ -3083,8 +3394,8 @@ packages:
     peerDependencies:
       axios: ^1.0.0 || >=0.25.0 <1.0.0
 
-  '@epilot/blueprint-manifest-client@3.1.0':
-    resolution: {integrity: sha512-1cR4ssjNpgkvTfEve0O6i3zpZMvHKNxfj5dLD1mid3IDO5Wu5FvYIaEwLJLsKE2yki6Vly3Se/FsdlVoeBSVOA==}
+  '@epilot/blueprint-manifest-client@3.6.4':
+    resolution: {integrity: sha512-H8U7lfdVw/FNxMEiNmCzyTfiHNWLEoWOowDjWlDaSDp6iAguEbMAg0n5gaMmVFYaexVqEfOThRjGGU9qqaGYvw==}
     peerDependencies:
       axios: ^1.0.0 || >=0.25.0 <1.0.0
 
@@ -4523,8 +4834,8 @@ packages:
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
-  axios@1.11.0:
-    resolution: {integrity: sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
@@ -4577,6 +4888,10 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
+  baseline-browser-mapping@2.9.19:
+    resolution: {integrity: sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==}
+    hasBin: true
+
   bath-es5@3.0.3:
     resolution: {integrity: sha512-PdCioDToH3t84lP40kUFCKWCOCH389Dl1kbC8FGoqOwamxsmqxxnJSXdkTOsPoNHXjem4+sJ+bbNoQm5zeCqxg==}
 
@@ -4609,6 +4924,11 @@ packages:
 
   browserslist@4.25.1:
     resolution: {integrity: sha512-KGj0KoOMXLpSNkkEI6Z6mShmQy0bc1I+T7K9N81k4WWMrfz+6fQ6es80B/YLAeRoKvjYE1YSHHOW1qe9xIVzHw==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+
+  browserslist@4.28.1:
+    resolution: {integrity: sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
@@ -4675,6 +4995,9 @@ packages:
 
   caniuse-lite@1.0.30001731:
     resolution: {integrity: sha512-lDdp2/wrOmTRWuoB5DpfNkC0rJDU8DqRa6nYL6HK6sytw70QMopt/NIc/9SM7ylItlBWfACXk0tEn37UWM/+mg==}
+
+  caniuse-lite@1.0.30001770:
+    resolution: {integrity: sha512-x/2CLQ1jHENRbHg5PSId2sXq1CIO1CISvwWAj027ltMVG2UNgW+w9oH2+HzgEIRFembL8bUlXtfbBHR1fCg2xw==}
 
   cardinal@2.1.1:
     resolution: {integrity: sha512-JSr5eOgoEymtYHBjNWyjrMqet9Am2miJhlfKNdqLp6zoeAh0KN5dRAcxlecj5mAJrmQomgiOBj35xHLrFjqBpw==}
@@ -5089,6 +5412,9 @@ packages:
   electron-to-chromium@1.5.198:
     resolution: {integrity: sha512-G5COfnp3w+ydVu80yprgWSfmfQaYRh9DOxfhAxstLyetKaLyl55QrNjx8C38Pc/C+RaDmb1M0Lk8wPEMQ+bGgQ==}
 
+  electron-to-chromium@1.5.286:
+    resolution: {integrity: sha512-9tfDXhJ4RKFNerfjdCcZfufu49vg620741MNs26a9+bhLThdB+plgMeou98CAaHu/WATj2iHOOHTp1hWtABj2A==}
+
   emittery@0.13.1:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
     engines: {node: '>=12'}
@@ -5117,8 +5443,8 @@ packages:
     resolution: {integrity: sha512-Nv9m36S/vxpsI+Hc4/ZGRs0n9mXqSWGGq49zxb/cJfPAQMbUtttJAlNPS4AQzaBdw/pKskw5bMbekT/Y7W/Wlg==}
     engines: {node: '>=6.9.0'}
 
-  enhanced-resolve@5.18.3:
-    resolution: {integrity: sha512-d4lC8xfavMeBjzGr2vECC3fsGXziXZQyJxD868h2M/mBI3PwAuODxAkLkq5HYuvrPYcUtiLzsTo8U3PgX3Ocww==}
+  enhanced-resolve@5.19.0:
+    resolution: {integrity: sha512-phv3E1Xl4tQOShqSte26C7Fl84EwUdZsyOuSSk9qtAGyyQs2s3jJzComh+Abf4g187lUUAvH+H26omrqia2aGg==}
     engines: {node: '>=10.13.0'}
 
   enquirer@2.4.1:
@@ -5155,6 +5481,9 @@ packages:
 
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
+
+  es-module-lexer@2.0.0:
+    resolution: {integrity: sha512-5POEcUuZybH7IdmGsD8wlf0AI55wMecM9rVBTI/qEAy2c1kTOm3DjFYjrBdI2K3BaJjJYfYFeRtM0t9ssnRuxw==}
 
   es-object-atoms@1.1.1:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
@@ -5471,8 +5800,8 @@ packages:
     resolution: {integrity: sha512-1lLKB2Mu3aGP1Q/2eCOx0fNbRMe7XdwktwOruhfqqd0rIJWwN4Dh+E3hrPSlDCXnSR7UtZ1N38rVXm+6+MEhJQ==}
     engines: {node: '>= 0.12'}
 
-  form-data@4.0.4:
-    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
+  form-data@4.0.5:
+    resolution: {integrity: sha512-8RipRLol37bNs2bhoV67fiTEvdTrbMUYcFTiy3+wuuOnUog2QBHCZWXDRijWQfAkhBj2Uf5UnVaiWwA5vdd82w==}
     engines: {node: '>= 6'}
 
   formdata-polyfill@4.0.10:
@@ -6397,8 +6726,8 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  loader-runner@4.3.0:
-    resolution: {integrity: sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==}
+  loader-runner@4.3.1:
+    resolution: {integrity: sha512-IWqP2SCPhyVFTBtRcgMHdzlf9ul25NwaFx4wCEH/KjAXuuHY4yNjvPXsBokp8jCB936PyWRaPKUNh8NvylLp2Q==}
     engines: {node: '>=6.11.5'}
 
   loader-utils@2.0.4:
@@ -6638,6 +6967,9 @@ packages:
 
   node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
+
+  node-releases@2.0.27:
+    resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -7260,8 +7592,8 @@ packages:
     resolution: {integrity: sha512-pN/yOAvcC+5rQ5nERGuwrjLlYvLTbCibnZ1I7B1LaiAz9BRBlE9GMgE/eqV30P7aJQUf7Ddimy/RsbYO/GrVGg==}
     engines: {node: '>= 10.13.0'}
 
-  schema-utils@4.3.2:
-    resolution: {integrity: sha512-Gn/JaSk/Mt9gYubxTtSn/QCV4em9mpAPiR1rqy/Ocu19u/G9J5WWdNoUT4SiV6mFC3y6cxyFcFwdzPM3FgxGAQ==}
+  schema-utils@4.3.3:
+    resolution: {integrity: sha512-eflK8wEtyOE6+hsaRVPxvUKYCpRgzLqDTb8krvAsRIwOGlHoSgYLgBXoubGgLd2fT41/OUYdb48v4k4WWHQurA==}
     engines: {node: '>= 10.13.0'}
 
   semver@6.3.1:
@@ -7560,16 +7892,16 @@ packages:
     resolution: {integrity: sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==}
     engines: {node: '>=6'}
 
-  tapable@2.2.2:
-    resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
+  tapable@2.3.0:
+    resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
-  terser-webpack-plugin@5.3.14:
-    resolution: {integrity: sha512-vkZjpUjb6OMS7dhV+tILUW6BhpDR7P2L/aQSAv+Uwk+m8KATX9EccViHTJR2qDtACKPIYndLGCyl3FMo+r2LMw==}
+  terser-webpack-plugin@5.3.16:
+    resolution: {integrity: sha512-h9oBFCWrq78NyWWVcSwZarJkZ01c2AyGrzs1crmHZO3QUg9D61Wu4NPjBy69n7JqylFF5y+CsUZYmYEIZ3mR+Q==}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       '@swc/core': '*'
@@ -7870,6 +8202,12 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
+  update-browserslist-db@1.2.3:
+    resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
+    hasBin: true
+    peerDependencies:
+      browserslist: '>= 4.21.0'
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -8088,8 +8426,8 @@ packages:
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
-  watchpack@2.4.4:
-    resolution: {integrity: sha512-c5EGNOiyxxV5qmTtAB7rbiXxi1ooX1pQKMLX/MIabJjRA0SJBQOjKF+KSVfHkr9U1cADPon0mRiVe/riyaiDUA==}
+  watchpack@2.5.1:
+    resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
     engines: {node: '>=10.13.0'}
 
   wcwidth@1.0.1:
@@ -8154,8 +8492,8 @@ packages:
     resolution: {integrity: sha512-yd1RBzSGanHkitROoPFd6qsrxt+oFhg/129YzheDGqeustzX0vTZJZsSsQjVQC4yzBQ56K55XU8gaNCtIzOnTg==}
     engines: {node: '>=10.13.0'}
 
-  webpack@5.101.0:
-    resolution: {integrity: sha512-B4t+nJqytPeuZlHuIKTbalhljIFXeNRqrUGAQgTGlfOl2lXXKXw+yZu6bicycP+PUlM44CxBjCFD6aciKFT3LQ==}
+  webpack@5.105.2:
+    resolution: {integrity: sha512-dRXm0a2qcHPUBEzVk8uph0xWSjV/xZxenQQbLwnwP7caQCYpqG1qddwlyEkIDkYn0K8tvmcrZ+bOrzoQ3HxCDw==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     peerDependencies:
@@ -8167,6 +8505,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -8782,50 +9121,50 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@epilot/access-token-client@1.1.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/access-token-client@1.1.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/address-suggestions-client@1.3.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/address-suggestions-client@1.3.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/audit-logs-client@0.4.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/audit-logs-client@0.4.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/auth@0.8.0(axios@1.11.0)(encoding@0.1.13)(js-yaml@4.1.0)':
+  '@epilot/auth@0.8.0(axios@1.13.5)(encoding@0.1.13)(js-yaml@4.1.0)':
     dependencies:
-      '@epilot/user-client': 3.12.0(axios@1.11.0)(js-yaml@4.1.0)
+      '@epilot/user-client': 3.12.0(axios@1.13.5)(js-yaml@4.1.0)
       amazon-cognito-identity-js: 5.2.14(encoding@0.1.13)
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       debug: 4.4.1(supports-color@8.1.1)
       yargs-interactive: 3.0.1
     transitivePeerDependencies:
@@ -8833,136 +9172,136 @@ snapshots:
       - js-yaml
       - supports-color
 
-  '@epilot/automation-client@2.24.0(axios@1.11.0)':
+  '@epilot/automation-client@2.24.0(axios@1.13.5)':
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
 
-  '@epilot/billing-client@0.5.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/billing-client@0.5.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/blueprint-manifest-client@3.1.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/blueprint-manifest-client@3.6.4(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/customer-portal-client@0.23.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/customer-portal-client@0.23.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/design-client@0.3.0(axios@1.11.0)(js-yaml@4.1.0)':
-    dependencies:
-      '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
-      buffer: 6.0.3
-      https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
-      stream-http: 3.2.0
-      url: 0.11.4
-      util: 0.12.5
-    transitivePeerDependencies:
-      - js-yaml
-
-  '@epilot/discussion-client@1.10.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/design-client@0.3.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/document-client@0.18.0(axios@1.11.0)(js-yaml@4.1.0)':
-    dependencies:
-      axios: 1.11.0(debug@4.4.1)
-      buffer: 6.0.3
-      https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
-      stream-http: 3.2.0
-      url: 0.11.4
-      util: 0.12.5
-    transitivePeerDependencies:
-      - js-yaml
-
-  '@epilot/email-settings-client@0.6.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/discussion-client@1.10.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/email-template-client@2.2.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/document-client@0.18.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
-      '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/entity-client@6.6.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/email-settings-client@0.6.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/entity-mapping-client@0.10.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/email-template-client@2.2.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http: 3.2.0
+      url: 0.11.4
+      util: 0.12.5
+    transitivePeerDependencies:
+      - js-yaml
+
+  '@epilot/entity-client@6.6.0(axios@1.13.5)(js-yaml@4.1.0)':
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids': 1.28.1
+      axios: 1.13.5(debug@4.4.1)
+      buffer: 6.0.3
+      https-browserify: 1.0.0
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http: 3.2.0
+      url: 0.11.4
+      util: 0.12.5
+    transitivePeerDependencies:
+      - js-yaml
+
+  '@epilot/entity-mapping-client@0.10.0(axios@1.13.5)(js-yaml@4.1.0)':
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids': 1.28.1
+      axios: 1.13.5(debug@4.4.1)
+      buffer: 6.0.3
+      https-browserify: 1.0.0
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
@@ -8984,180 +9323,180 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  '@epilot/file-client@1.15.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/file-client@1.15.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/message-client@1.18.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/message-client@1.18.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/metering-client@0.8.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/metering-client@0.8.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/notification-client@0.7.0(axios@1.11.0)(js-yaml@4.1.0)':
-    dependencies:
-      '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
-      buffer: 6.0.3
-      https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
-      stream-http: 3.2.0
-      url: 0.11.4
-      util: 0.12.5
-    transitivePeerDependencies:
-      - js-yaml
-
-  '@epilot/organization-client@0.13.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/notification-client@0.7.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/partner-directory-client@0.10.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/organization-client@0.13.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/permissions-client@0.16.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/partner-directory-client@0.10.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/pricing-client@3.50.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/permissions-client@0.16.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/sandbox-client@0.4.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/pricing-client@3.50.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/submission-client@1.8.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/sandbox-client@0.4.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/template-variables-client@1.15.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/submission-client@1.8.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/user-client@3.12.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/template-variables-client@1.15.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/workflow-client@1.15.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/user-client@3.12.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
     transitivePeerDependencies:
       - js-yaml
 
-  '@epilot/workflow-definition-client@1.17.0(axios@1.11.0)(js-yaml@4.1.0)':
+  '@epilot/workflow-client@1.15.0(axios@1.13.5)(js-yaml@4.1.0)':
     dependencies:
       '@dazn/lambda-powertools-correlation-ids': 1.28.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       buffer: 6.0.3
       https-browserify: 1.0.0
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
+      stream-http: 3.2.0
+      url: 0.11.4
+      util: 0.12.5
+    transitivePeerDependencies:
+      - js-yaml
+
+  '@epilot/workflow-definition-client@1.17.0(axios@1.13.5)(js-yaml@4.1.0)':
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids': 1.28.1
+      axios: 1.13.5(debug@4.4.1)
+      buffer: 6.0.3
+      https-browserify: 1.0.0
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       stream-http: 3.2.0
       url: 0.11.4
       util: 0.12.5
@@ -10494,34 +10833,34 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
-  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0)(webpack@5.101.0)':
+  '@webpack-cli/configtest@1.2.0(webpack-cli@4.10.0)(webpack@5.105.2)':
     dependencies:
-      webpack: 5.101.0(webpack-cli@4.10.0)
-      webpack-cli: 4.10.0(webpack@5.101.0)
+      webpack: 5.105.2(webpack-cli@4.10.0)
+      webpack-cli: 4.10.0(webpack@5.105.2)
 
-  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.101.0)':
+  '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.105.2)':
     dependencies:
-      webpack: 5.101.0(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack@5.101.0)
+      webpack: 5.105.2(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.105.2)
 
   '@webpack-cli/info@1.5.0(webpack-cli@4.10.0)':
     dependencies:
       envinfo: 7.14.0
-      webpack-cli: 4.10.0(webpack@5.101.0)
+      webpack-cli: 4.10.0(webpack@5.105.2)
 
-  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.101.0)':
+  '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.105.2)':
     dependencies:
-      webpack: 5.101.0(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack@5.101.0)
+      webpack: 5.105.2(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.105.2)
 
   '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0)':
     dependencies:
-      webpack-cli: 4.10.0(webpack@5.101.0)
+      webpack-cli: 4.10.0(webpack@5.105.2)
 
-  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack@5.101.0)':
+  '@webpack-cli/serve@2.0.5(webpack-cli@5.1.4)(webpack@5.105.2)':
     dependencies:
-      webpack: 5.101.0(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack@5.101.0)
+      webpack: 5.105.2(webpack-cli@5.1.4)
+      webpack-cli: 5.1.4(webpack@5.105.2)
 
   '@xmldom/xmldom@0.7.13': {}
 
@@ -10704,10 +11043,10 @@ snapshots:
 
   aws4@1.13.2: {}
 
-  axios@1.11.0(debug@4.4.1):
+  axios@1.13.5(debug@4.4.1):
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.1)
-      form-data: 4.0.4
+      form-data: 4.0.5
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -10810,6 +11149,8 @@ snapshots:
 
   base64-js@1.5.1: {}
 
+  baseline-browser-mapping@2.9.19: {}
+
   bath-es5@3.0.3: {}
 
   bcrypt-pbkdf@1.0.2:
@@ -10849,6 +11190,14 @@ snapshots:
       electron-to-chromium: 1.5.198
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.25.1)
+
+  browserslist@4.28.1:
+    dependencies:
+      baseline-browser-mapping: 2.9.19
+      caniuse-lite: 1.0.30001770
+      electron-to-chromium: 1.5.286
+      node-releases: 2.0.27
+      update-browserslist-db: 1.2.3(browserslist@4.28.1)
 
   bs-logger@0.2.6:
     dependencies:
@@ -10913,6 +11262,8 @@ snapshots:
   camelcase@6.3.0: {}
 
   caniuse-lite@1.0.30001731: {}
+
+  caniuse-lite@1.0.30001770: {}
 
   cardinal@2.1.1:
     dependencies:
@@ -11127,7 +11478,7 @@ snapshots:
 
   copy-to@2.0.1: {}
 
-  copy-webpack-plugin@7.0.0(webpack@5.101.0):
+  copy-webpack-plugin@7.0.0(webpack@5.105.2):
     dependencies:
       fast-glob: 3.3.3
       glob-parent: 5.1.2
@@ -11137,7 +11488,7 @@ snapshots:
       p-limit: 3.1.0
       schema-utils: 3.3.0
       serialize-javascript: 5.0.1
-      webpack: 5.101.0(webpack-cli@4.10.0)
+      webpack: 5.105.2(webpack-cli@4.10.0)
 
   core-util-is@1.0.2: {}
 
@@ -11319,6 +11670,8 @@ snapshots:
 
   electron-to-chromium@1.5.198: {}
 
+  electron-to-chromium@1.5.286: {}
+
   emittery@0.13.1: {}
 
   emoji-regex@7.0.3: {}
@@ -11342,10 +11695,10 @@ snapshots:
       memory-fs: 0.5.0
       tapable: 1.1.3
 
-  enhanced-resolve@5.18.3:
+  enhanced-resolve@5.19.0:
     dependencies:
       graceful-fs: 4.2.11
-      tapable: 2.2.2
+      tapable: 2.3.0
 
   enquirer@2.4.1:
     dependencies:
@@ -11426,6 +11779,8 @@ snapshots:
   es-errors@1.3.0: {}
 
   es-module-lexer@1.7.0: {}
+
+  es-module-lexer@2.0.0: {}
 
   es-object-atoms@1.1.1:
     dependencies:
@@ -11824,7 +12179,7 @@ snapshots:
       combined-stream: 1.0.8
       mime-types: 2.1.35
 
-  form-data@4.0.4:
+  form-data@4.0.5:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
@@ -13056,7 +13411,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  loader-runner@4.3.0: {}
+  loader-runner@4.3.1: {}
 
   loader-utils@2.0.4:
     dependencies:
@@ -13352,6 +13707,8 @@ snapshots:
 
   node-releases@2.0.19: {}
 
+  node-releases@2.0.27: {}
+
   normalize-path@3.0.0: {}
 
   npm-package-arg@11.0.3:
@@ -13465,10 +13822,10 @@ snapshots:
     dependencies:
       '@anttiviljami/dtsgenerator': 3.20.0(encoding@0.1.13)
       '@apidevtools/json-schema-ref-parser': 11.9.3
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       indent-string: 4.0.0
       lodash: 4.17.21
-      openapi-client-axios: 7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       openapi-types: 12.1.3
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -13477,17 +13834,17 @@ snapshots:
       - js-yaml
       - supports-color
 
-  openapi-client-axios@7.6.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0):
+  openapi-client-axios@7.6.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0):
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       bath-es5: 3.0.3
       dereference-json-schema: 0.2.1
       js-yaml: 4.1.0
       openapi-types: 12.1.3
 
-  openapi-client-axios@7.8.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0):
+  openapi-client-axios@7.8.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0):
     dependencies:
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       bath-es5: 3.0.3
       dereference-json-schema: 0.2.1
       js-yaml: 4.1.0
@@ -13515,7 +13872,7 @@ snapshots:
       '@oclif/plugin-plugins': 5.4.46
       '@types/inquirer': 7.3.3
       ajv: 8.17.1
-      axios: 1.11.0(debug@4.4.1)
+      axios: 1.13.5(debug@4.4.1)
       chalk: 4.1.2
       cli-ux: 6.0.9
       common-tags: 1.8.2
@@ -13535,7 +13892,7 @@ snapshots:
       koa-router: 12.0.1
       koa-static: 5.0.0
       openapi-backend: 5.11.1
-      openapi-client-axios: 7.6.0(axios@1.11.0(debug@4.4.1))(js-yaml@4.1.0)
+      openapi-client-axios: 7.6.0(axios@1.13.5(debug@4.4.1))(js-yaml@4.1.0)
       swagger-editor-dist: 4.14.6
       swagger-ui-dist: 5.27.1
       swagger2openapi: 7.0.8(encoding@0.1.13)
@@ -14020,7 +14377,7 @@ snapshots:
       ajv: 6.12.6
       ajv-keywords: 3.5.2(ajv@6.12.6)
 
-  schema-utils@4.3.2:
+  schema-utils@4.3.3:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.17.1
@@ -14368,18 +14725,18 @@ snapshots:
 
   tapable@1.1.3: {}
 
-  tapable@2.2.2: {}
+  tapable@2.3.0: {}
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.14(webpack@5.101.0):
+  terser-webpack-plugin@5.3.16(webpack@5.105.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.29
       jest-worker: 27.5.1
-      schema-utils: 4.3.2
+      schema-utils: 4.3.3
       serialize-javascript: 6.0.2
       terser: 5.43.1
-      webpack: 5.101.0(webpack-cli@4.10.0)
+      webpack: 5.105.2(webpack-cli@4.10.0)
 
   terser@5.43.1:
     dependencies:
@@ -14499,7 +14856,7 @@ snapshots:
       babel-jest: 30.0.5(@babel/core@7.28.0)
       jest-util: 30.0.5
 
-  ts-loader@8.4.0(typescript@4.9.5)(webpack@5.101.0):
+  ts-loader@8.4.0(typescript@4.9.5)(webpack@5.105.2):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 4.5.0
@@ -14507,9 +14864,9 @@ snapshots:
       micromatch: 4.0.8
       semver: 7.7.2
       typescript: 4.9.5
-      webpack: 5.101.0(webpack-cli@4.10.0)
+      webpack: 5.105.2(webpack-cli@4.10.0)
 
-  ts-loader@8.4.0(typescript@5.7.3)(webpack@5.101.0):
+  ts-loader@8.4.0(typescript@5.7.3)(webpack@5.105.2):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 4.5.0
@@ -14517,7 +14874,7 @@ snapshots:
       micromatch: 4.0.8
       semver: 7.7.2
       typescript: 5.7.3
-      webpack: 5.101.0(webpack-cli@5.1.4)
+      webpack: 5.105.2(webpack-cli@5.1.4)
 
   ts-node@10.9.2(@types/node@24.2.0)(typescript@4.9.5):
     dependencies:
@@ -14645,6 +15002,12 @@ snapshots:
   update-browserslist-db@1.1.3(browserslist@4.25.1):
     dependencies:
       browserslist: 4.25.1
+      escalade: 3.2.0
+      picocolors: 1.1.1
+
+  update-browserslist-db@1.2.3(browserslist@4.28.1):
+    dependencies:
+      browserslist: 4.28.1
       escalade: 3.2.0
       picocolors: 1.1.1
 
@@ -14909,7 +15272,7 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  watchpack@2.4.4:
+  watchpack@2.5.1:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
@@ -14930,10 +15293,10 @@ snapshots:
 
   webidl-conversions@7.0.0: {}
 
-  webpack-cli@4.10.0(webpack@5.101.0):
+  webpack-cli@4.10.0(webpack@5.105.2):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0)(webpack@5.101.0)
+      '@webpack-cli/configtest': 1.2.0(webpack-cli@4.10.0)(webpack@5.105.2)
       '@webpack-cli/info': 1.5.0(webpack-cli@4.10.0)
       '@webpack-cli/serve': 1.7.0(webpack-cli@4.10.0)
       colorette: 2.0.20
@@ -14943,15 +15306,15 @@ snapshots:
       import-local: 3.2.0
       interpret: 2.2.0
       rechoir: 0.7.1
-      webpack: 5.101.0(webpack-cli@4.10.0)
+      webpack: 5.105.2(webpack-cli@4.10.0)
       webpack-merge: 5.10.0
 
-  webpack-cli@5.1.4(webpack@5.101.0):
+  webpack-cli@5.1.4(webpack@5.105.2):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.101.0)
-      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.101.0)
-      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack@5.101.0)
+      '@webpack-cli/configtest': 2.1.1(webpack-cli@5.1.4)(webpack@5.105.2)
+      '@webpack-cli/info': 2.0.2(webpack-cli@5.1.4)(webpack@5.105.2)
+      '@webpack-cli/serve': 2.0.5(webpack-cli@5.1.4)(webpack@5.105.2)
       colorette: 2.0.20
       commander: 10.0.1
       cross-spawn: 7.0.6
@@ -14960,7 +15323,7 @@ snapshots:
       import-local: 3.2.0
       interpret: 3.1.1
       rechoir: 0.8.0
-      webpack: 5.101.0(webpack-cli@5.1.4)
+      webpack: 5.105.2(webpack-cli@5.1.4)
       webpack-merge: 5.10.0
 
   webpack-merge@5.10.0:
@@ -14971,7 +15334,7 @@ snapshots:
 
   webpack-sources@3.3.3: {}
 
-  webpack@5.101.0(webpack-cli@4.10.0):
+  webpack@5.105.2(webpack-cli@4.10.0):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -14981,31 +15344,31 @@ snapshots:
       '@webassemblyjs/wasm-parser': 1.14.1
       acorn: 8.15.0
       acorn-import-phases: 1.0.4(acorn@8.15.0)
-      browserslist: 4.25.1
+      browserslist: 4.28.1
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.18.3
-      es-module-lexer: 1.7.0
+      enhanced-resolve: 5.19.0
+      es-module-lexer: 2.0.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
       json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.0
+      loader-runner: 4.3.1
       mime-types: 2.1.35
       neo-async: 2.6.2
-      schema-utils: 4.3.2
-      tapable: 2.2.2
-      terser-webpack-plugin: 5.3.14(webpack@5.101.0)
-      watchpack: 2.4.4
+      schema-utils: 4.3.3
+      tapable: 2.3.0
+      terser-webpack-plugin: 5.3.16(webpack@5.105.2)
+      watchpack: 2.5.1
       webpack-sources: 3.3.3
     optionalDependencies:
-      webpack-cli: 4.10.0(webpack@5.101.0)
+      webpack-cli: 4.10.0(webpack@5.105.2)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
       - uglify-js
 
-  webpack@5.101.0(webpack-cli@5.1.4):
+  webpack@5.105.2(webpack-cli@5.1.4):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -15015,25 +15378,25 @@ snapshots:
       '@webassemblyjs/wasm-parser': 1.14.1
       acorn: 8.15.0
       acorn-import-phases: 1.0.4(acorn@8.15.0)
-      browserslist: 4.25.1
+      browserslist: 4.28.1
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.18.3
-      es-module-lexer: 1.7.0
+      enhanced-resolve: 5.19.0
+      es-module-lexer: 2.0.0
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
       json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.0
+      loader-runner: 4.3.1
       mime-types: 2.1.35
       neo-async: 2.6.2
-      schema-utils: 4.3.2
-      tapable: 2.2.2
-      terser-webpack-plugin: 5.3.14(webpack@5.101.0)
-      watchpack: 2.4.4
+      schema-utils: 4.3.3
+      tapable: 2.3.0
+      terser-webpack-plugin: 5.3.16(webpack@5.105.2)
+      watchpack: 2.5.1
       webpack-sources: 3.3.3
     optionalDependencies:
-      webpack-cli: 5.1.4(webpack@5.101.0)
+      webpack-cli: 5.1.4(webpack@5.105.2)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

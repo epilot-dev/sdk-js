@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.12.0",
+    "version": "0.41.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -17,6 +17,15 @@
     {
       "name": "integrations",
       "description": "Integration and Use Case management endpoints"
+    },
+    {
+      "name": "monitoring",
+      "description": "Monitoring and analytics endpoints"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
     }
   ],
   "security": [
@@ -119,6 +128,7 @@
     },
     "/v1/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEvents",
         "summary": "processErpUpdatesEvents",
         "description": "Handles updates from ERP systems and tracks them appropriately",
@@ -205,9 +215,6 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "422": {
-            "$ref": "#/components/responses/ERPUpdatesResponse"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -216,6 +223,7 @@
     },
     "/v2/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEventsV2",
         "summary": "processErpUpdatesEventsV2",
         "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v2 version that simplifies the API by accepting integration_id\ninstead of app_id and component_id.\n",
@@ -263,8 +271,329 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "422": {
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV3",
+        "summary": "processErpUpdatesEventsV3",
+        "description": "Handles updates from ERP systems using integration_id directly.\nThis is the v3 version that removes the unused event_type field and renames object_type to event_name\nto align with the integration UI naming.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErpUpdatesEventsV3Request"
+              },
+              "example": {
+                "integration_id": "123e4567-e89b-12d3-a456-426614174000",
+                "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
+                "events": [
+                  {
+                    "event_name": "business_partner",
+                    "timestamp": "2025-05-01T08:30:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}",
+                    "deduplication_id": "bp-create-20250501-083000-001"
+                  },
+                  {
+                    "event_name": "contract_account",
+                    "timestamp": "2025-05-01T08:35:00Z",
+                    "format": "json",
+                    "payload": "{\"id\":\"CA20001\",\"business_partner_id\":\"BP10001\",\"status\":\"active\",\"payment_method\":\"direct_debit\"}",
+                    "deduplication_id": "ca-update-20250501-083500-001"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
             "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMappingV2",
+        "summary": "simulateMappingV2",
+        "description": "Test v2.0 mapping configuration by transforming a payload using the provided mapping rules without persisting data.\n\nThis endpoint accepts the same configuration format that is stored in the integration use case resource,\nmaking it easier to test configurations before saving them to a use case.\n\nSee documentation at /docs/MAPPING_V2.md for detailed v2.0 format specification.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingSimulationV2Request"
+              },
+              "examples": {
+                "simple": {
+                  "summary": "Simple Example",
+                  "value": {
+                    "event_configuration": {
+                      "entities": [
+                        {
+                          "entity_schema": "contact",
+                          "unique_ids": [
+                            "customer_number"
+                          ],
+                          "fields": [
+                            {
+                              "attribute": "customer_number",
+                              "field": "customerId"
+                            },
+                            {
+                              "attribute": "first_name",
+                              "field": "firstName"
+                            },
+                            {
+                              "attribute": "last_name",
+                              "field": "lastName"
+                            },
+                            {
+                              "attribute": "email",
+                              "field": "email"
+                            },
+                            {
+                              "attribute": "source",
+                              "constant": "ERP"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "format": "json",
+                    "payload": "{\"customerId\":\"12345\",\"firstName\":\"Anna\",\"lastName\":\"Schmidt\",\"email\":\"anna@example.com\"}"
+                  }
+                },
+                "advanced_with_relations": {
+                  "summary": "Advanced with Relations",
+                  "value": {
+                    "event_configuration": {
+                      "entities": [
+                        {
+                          "entity_schema": "contract",
+                          "unique_ids": [
+                            "contract_number"
+                          ],
+                          "fields": [
+                            {
+                              "attribute": "contract_number",
+                              "field": "number"
+                            },
+                            {
+                              "attribute": "display_name",
+                              "field": "displayName"
+                            },
+                            {
+                              "attribute": "billing_account",
+                              "relations": {
+                                "operation": "_set",
+                                "items": [
+                                  {
+                                    "entity_schema": "billing_account",
+                                    "_tags": [
+                                      "PRIMARY"
+                                    ],
+                                    "unique_ids": [
+                                      {
+                                        "attribute": "external_id",
+                                        "field": "customerAccountId"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "entity_schema": "meter",
+                          "unique_ids": [
+                            "meter_number"
+                          ],
+                          "jsonataExpression": "meters.{\"number\": number, \"type\": meterType}",
+                          "fields": [
+                            {
+                              "attribute": "meter_number",
+                              "field": "number"
+                            },
+                            {
+                              "attribute": "meter_type",
+                              "field": "type"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "format": "json",
+                    "payload": "{\"number\":\"CTR-001\",\"displayName\":\"Premium Contract\",\"customerAccountId\":\"ACC-999\",\"meters\":[{\"number\":\"M-001\",\"meterType\":\"electricity\"},{\"number\":\"M-002\",\"meterType\":\"gas\"}]}"
+                  }
+                },
+                "with_meter_readings": {
+                  "summary": "With Meter Readings",
+                  "value": {
+                    "event_configuration": {
+                      "entities": [
+                        {
+                          "entity_schema": "contract",
+                          "unique_ids": [
+                            "contract_number"
+                          ],
+                          "fields": [
+                            {
+                              "attribute": "contract_number",
+                              "field": "number"
+                            },
+                            {
+                              "attribute": "display_name",
+                              "field": "name"
+                            }
+                          ]
+                        }
+                      ],
+                      "meter_readings": [
+                        {
+                          "jsonataExpression": "$.readings",
+                          "meter": {
+                            "unique_ids": [
+                              {
+                                "attribute": "external_id",
+                                "field": "meter_id"
+                              }
+                            ]
+                          },
+                          "fields": [
+                            {
+                              "attribute": "external_id",
+                              "field": "reading_id"
+                            },
+                            {
+                              "attribute": "timestamp",
+                              "field": "read_at"
+                            },
+                            {
+                              "attribute": "source",
+                              "constant": "ERP"
+                            },
+                            {
+                              "attribute": "value",
+                              "field": "value"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "format": "json",
+                    "payload": "{\"number\":\"CTR-001\",\"name\":\"Main Contract\",\"readings\":[{\"meter_id\":\"M-001\",\"reading_id\":\"R-001\",\"read_at\":\"2025-01-15T10:00:00Z\",\"value\":12345.6}]}"
+                  }
+                },
+                "conditional_fields": {
+                  "summary": "Conditional Field Processing",
+                  "description": "Example showing how to conditionally enable/disable individual field mappings",
+                  "value": {
+                    "event_configuration": {
+                      "entities": [
+                        {
+                          "entity_schema": "contact",
+                          "unique_ids": [
+                            "customer_number"
+                          ],
+                          "fields": [
+                            {
+                              "attribute": "customer_number",
+                              "field": "customerId"
+                            },
+                            {
+                              "attribute": "email",
+                              "field": "email",
+                              "enabled": "$exists(email) and email != ''"
+                            },
+                            {
+                              "attribute": "phone",
+                              "field": "phone",
+                              "enabled": "$exists(phone) and phone != ''"
+                            },
+                            {
+                              "attribute": "vip_status",
+                              "constant": "VIP",
+                              "enabled": "vipFlag = true"
+                            },
+                            {
+                              "attribute": "billing_account",
+                              "enabled": "$exists(billingAccountId)",
+                              "relations": {
+                                "operation": "_set",
+                                "items": [
+                                  {
+                                    "entity_schema": "billing_account",
+                                    "unique_ids": [
+                                      {
+                                        "attribute": "external_id",
+                                        "field": "billingAccountId"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "format": "json",
+                    "payload": "{\"customerId\":\"12345\",\"email\":\"user@example.com\",\"phone\":\"\",\"vipFlag\":true,\"billingAccountId\":\"ACC-999\"}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully simulated mapping",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingSimulationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "description": "Unprocessable entity - mapping configuration or payload validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -608,7 +937,7 @@
     "/v1/integrations": {
       "get": {
         "operationId": "listIntegrations",
-        "summary": "List all integrations",
+        "summary": "listIntegrations",
         "description": "Retrieve all integrations for the authenticated organization",
         "tags": [
           "integrations"
@@ -645,7 +974,7 @@
       },
       "post": {
         "operationId": "createIntegration",
-        "summary": "Create a new integration",
+        "summary": "createIntegration",
         "description": "Create a new integration configuration",
         "tags": [
           "integrations"
@@ -686,7 +1015,7 @@
     "/v1/integrations/{integrationId}": {
       "get": {
         "operationId": "getIntegration",
-        "summary": "Get an integration by ID",
+        "summary": "getIntegration",
         "description": "Retrieve a specific integration by its ID",
         "tags": [
           "integrations"
@@ -727,7 +1056,7 @@
       },
       "put": {
         "operationId": "updateIntegration",
-        "summary": "Update an integration",
+        "summary": "updateIntegration",
         "description": "Update an existing integration configuration",
         "tags": [
           "integrations"
@@ -781,7 +1110,7 @@
       },
       "delete": {
         "operationId": "deleteIntegration",
-        "summary": "Delete an integration",
+        "summary": "deleteIntegration",
         "description": "Delete an integration and all its use cases",
         "tags": [
           "integrations"
@@ -826,10 +1155,108 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/events": {
+      "post": {
+        "operationId": "queryEvents",
+        "summary": "queryEvents",
+        "description": "Query events for a specific integration",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/events/replay": {
+      "post": {
+        "operationId": "replayEvents",
+        "summary": "replayEvents",
+        "description": "Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with a new correlation ID for traceability.",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReplayEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/use-cases": {
       "get": {
         "operationId": "listUseCases",
-        "summary": "List all use cases for an integration",
+        "summary": "listUseCases",
         "description": "Retrieve all use cases for a specific integration",
         "tags": [
           "integrations"
@@ -878,7 +1305,7 @@
       },
       "post": {
         "operationId": "createUseCase",
-        "summary": "Create a new use case",
+        "summary": "createUseCase",
         "description": "Create a new use case for an integration",
         "tags": [
           "integrations"
@@ -934,7 +1361,7 @@
     "/v1/integrations/{integrationId}/use-cases/{useCaseId}": {
       "get": {
         "operationId": "getUseCase",
-        "summary": "Get a use case by ID",
+        "summary": "getUseCase",
         "description": "Retrieve a specific use case by its ID",
         "tags": [
           "integrations"
@@ -985,7 +1412,7 @@
       },
       "put": {
         "operationId": "updateUseCase",
-        "summary": "Update a use case",
+        "summary": "updateUseCase",
         "description": "Update an existing use case configuration",
         "tags": [
           "integrations"
@@ -1049,7 +1476,7 @@
       },
       "delete": {
         "operationId": "deleteUseCase",
-        "summary": "Delete a use case",
+        "summary": "deleteUseCase",
         "description": "Delete a use case from an integration",
         "tags": [
           "integrations"
@@ -1104,10 +1531,310 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}/history": {
+      "get": {
+        "operationId": "listUseCaseHistory",
+        "summary": "listUseCaseHistory",
+        "description": "Retrieve historical versions of a use case's configuration.\nHistory entries are returned in reverse chronological order (newest first).\nUse the 'cursor' parameter for pagination to fetch additional entries.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque pagination cursor. Pass the 'next_cursor' value from a previous\nresponse to fetch the next page of results.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJwayI6Ik9SRyMxMjM0NSIsInNrIjoiSU5URUdSQVRJT04jLi4uIn0="
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved use case history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "history"
+                  ],
+                  "properties": {
+                    "history": {
+                      "type": "array",
+                      "description": "History entries in reverse chronological order (newest first)",
+                      "items": {
+                        "$ref": "#/components/schemas/UseCaseHistoryEntry"
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "description": "Opaque cursor for fetching the next page. Absent if no more pages."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations": {
+      "get": {
+        "operationId": "listIntegrationsV2",
+        "summary": "listIntegrationsV2",
+        "description": "Retrieve all integrations with embedded use cases for the authenticated organization",
+        "tags": [
+          "integrations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integrations with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "integrations"
+                  ],
+                  "properties": {
+                    "integrations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/IntegrationWithUseCases"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createIntegrationV2",
+        "summary": "createIntegrationV2",
+        "description": "Create a new integration with embedded use cases.\n",
+        "tags": [
+          "integrations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertIntegrationWithUseCasesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Integration created successfully with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationWithUseCases"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegrationV2",
+        "summary": "getIntegrationV2",
+        "description": "Retrieve a specific integration with all its embedded use cases",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved integration with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationWithUseCases"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateIntegrationV2",
+        "summary": "updateIntegrationV2",
+        "description": "Update an existing integration with embedded use cases.\nThe integration must already exist.\nUse cases are updated declaratively:\n- Use cases in the request with matching IDs are updated\n- Use cases in the request without matching IDs are created\n- Existing use cases not in the request are deleted\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID (client-provided)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertIntegrationWithUseCasesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Integration updated successfully with use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationWithUseCases"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteIntegrationV2",
+        "summary": "deleteIntegrationV2",
+        "description": "Delete an integration and all its use cases",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
-        "summary": "Set integration app mapping",
+        "summary": "setIntegrationAppMapping",
         "description": "Creates or updates a mapping from an app/component to an integration.\nThis allows ERP updates sent via app_id and component_id to be associated\nwith a specific integration configuration.\n",
         "tags": [
           "integrations"
@@ -1171,7 +1898,7 @@
       },
       "delete": {
         "operationId": "deleteIntegrationAppMapping",
-        "summary": "Delete integration app mapping",
+        "summary": "deleteIntegrationAppMapping",
         "description": "Removes a mapping from an app/component to an integration.\n",
         "tags": [
           "integrations"
@@ -1228,6 +1955,299 @@
           }
         }
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
+      "post": {
+        "operationId": "queryInboundMonitoringEvents",
+        "summary": "queryInboundMonitoringEvents",
+        "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryInboundMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryInboundMonitoringEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/stats": {
+      "post": {
+        "operationId": "getMonitoringStats",
+        "summary": "getMonitoringStats",
+        "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringStatsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringStatsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/timeseries": {
+      "post": {
+        "operationId": "getMonitoringTimeSeries",
+        "summary": "getMonitoringTimeSeries",
+        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringTimeSeriesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringTimeSeriesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound-status": {
+      "get": {
+        "operationId": "getOutboundStatus",
+        "summary": "getOutboundStatus",
+        "description": "Get the status of all outbound use cases for a specific integration.\nReturns conflict information when events or webhooks are disabled but the use case is enabled.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved outbound status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/access-logs": {
+      "post": {
+        "operationId": "queryAccessLogs",
+        "summary": "queryAccessLogs",
+        "description": "Query API access logs for a specific integration's organization.\nReturns access token usage analytics filtered by user_id (access token).\nSupports infinite scroll pagination with cursor-based navigation.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID (used for tenant authorization)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryAccessLogsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryAccessLogsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
+      "post": {
+        "operationId": "queryOutboundMonitoringEvents",
+        "summary": "queryOutboundMonitoringEvents",
+        "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryOutboundMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryOutboundMonitoringEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1274,7 +2294,7 @@
           },
           "object_type": {
             "type": "string",
-            "description": "Type of the object being updated (business_partner, contract_account, etc.)"
+            "description": "Type of the object being updated (business_partner, contract_account, etc.). Corresponds to \"Event Name\" from the integration UI."
           },
           "timestamp": {
             "type": "string",
@@ -1335,6 +2355,82 @@
             "description": "List of ERP events to process",
             "items": {
               "$ref": "#/components/schemas/ErpEvent"
+            }
+          }
+        }
+      },
+      "ErpEventV3": {
+        "type": "object",
+        "required": [
+          "event_name",
+          "timestamp",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Name of the event (e.g., business_partner, contract_account). Corresponds to the \"Event Name\" from the integration UI. Replaces object_type from V2."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event occurred"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized object data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          },
+          "deduplication_id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
+            "example": "evt-2025-05-01-12345-bp"
+          }
+        }
+      },
+      "ErpUpdatesEventsV3Request": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "events"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID that identifies the integration configuration to use"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional ID that identifies the specific request for debugging purposes"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of ERP events to process",
+            "items": {
+              "$ref": "#/components/schemas/ErpEventV3"
             }
           }
         }
@@ -1430,77 +2526,170 @@
           }
         }
       },
-      "Integration": {
+      "IntegrationEditableFields": {
         "type": "object",
-        "required": [
-          "id",
-          "orgId",
-          "name",
-          "created_at",
-          "updated_at"
-        ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the integration"
-          },
-          "orgId": {
-            "type": "string",
-            "description": "Organization ID"
-          },
           "name": {
             "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
             "description": "Integration name"
           },
           "description": {
             "type": "string",
+            "maxLength": 1000,
             "description": "Optional description of the integration"
           },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was created"
+          "access_token_ids": {
+            "type": "array",
+            "description": "List of access token IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
           },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the integration was last updated"
+          "app_ids": {
+            "type": "array",
+            "description": "List of app IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
+          },
+          "environment_config": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentFieldConfig"
+            },
+            "description": "Configuration defining environment variables needed by this integration. Values are stored in the Environments API."
+          },
+          "settings": {
+            "$ref": "#/components/schemas/IntegrationSettings"
           }
         }
+      },
+      "Integration": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "orgId",
+              "name",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "readOnly": true,
+                "description": "Unique identifier for the integration"
+              },
+              "orgId": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Organization ID"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true,
+                "description": "ISO-8601 timestamp when the integration was created"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true,
+                "description": "ISO-8601 timestamp when the integration was last updated"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
+          }
+        ]
       },
       "CreateIntegrationRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name"
+            ]
+          }
+        ]
+      },
+      "UpdateIntegrationRequest": {
+        "$ref": "#/components/schemas/IntegrationEditableFields"
+      },
+      "EnvironmentFieldConfig": {
         "type": "object",
         "required": [
-          "name"
+          "key",
+          "label",
+          "type"
         ],
         "properties": {
-          "name": {
+          "key": {
             "type": "string",
+            "description": "Environment variable key, used to look up the value in the Environments API.",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label for the field in the UI",
             "minLength": 1,
-            "maxLength": 255,
-            "description": "Integration name"
+            "maxLength": 255
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "String",
+              "SecretString"
+            ],
+            "description": "Whether the value is a plain string or an encrypted secret"
           },
           "description": {
             "type": "string",
-            "maxLength": 1000,
-            "description": "Optional description of the integration"
+            "description": "Help text shown below the field",
+            "maxLength": 1000
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this field must be filled before the integration can be used"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Sort order for display and drag-to-reorder"
           }
         }
       },
-      "UpdateIntegrationRequest": {
+      "IntegrationSettings": {
         "type": "object",
+        "description": "Settings for the integration",
         "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255,
-            "description": "Integration name"
+          "autoRefresh": {
+            "$ref": "#/components/schemas/AutoRefreshSettings"
+          }
+        }
+      },
+      "AutoRefreshSettings": {
+        "type": "object",
+        "description": "Auto-refresh settings for keeping integration data fresh",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether auto-refresh is enabled"
           },
-          "description": {
-            "type": "string",
-            "maxLength": 1000,
-            "description": "Optional description of the integration"
+          "freshnessThresholdMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum age (in minutes) of data before it is considered stale and eligible for refresh"
           }
         }
       },
@@ -1560,6 +2749,595 @@
           }
         }
       },
+      "IntegrationWithUseCases": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Integration"
+          },
+          {
+            "type": "object",
+            "description": "Integration with embedded use cases for atomic CRUD operations",
+            "required": [
+              "use_cases"
+            ],
+            "properties": {
+              "use_cases": {
+                "type": "array",
+                "description": "All use cases belonging to this integration",
+                "items": {
+                  "$ref": "#/components/schemas/UseCase"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpsertIntegrationWithUseCasesRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationEditableFields"
+          },
+          {
+            "type": "object",
+            "description": "Request to create or update an integration with embedded use cases (upsert).\nThis is a declarative operation - the request represents the desired state.\n",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "use_cases": {
+                "type": "array",
+                "description": "Full list of use cases (declarative). This replaces ALL existing use cases.\n- Use cases with an `id` field matching an existing use case will be updated\n- Use cases without an `id` or with a non-matching `id` will be created\n- Existing use cases not in this list will be deleted\n",
+                "items": {
+                  "$ref": "#/components/schemas/EmbeddedUseCaseRequest"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "InboundIntegrationEventConfiguration": {
+        "type": "object",
+        "description": "Configuration for inbound use cases (ERP to epilot)",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Array of entity configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntity"
+            }
+          },
+          "meter_readings": {
+            "type": "array",
+            "description": "Array of meter reading configurations for this event",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationMeterReading"
+            }
+          }
+        }
+      },
+      "OutboundIntegrationEventConfiguration": {
+        "type": "object",
+        "required": [
+          "event_catalog_event",
+          "mappings"
+        ],
+        "description": "Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.",
+        "properties": {
+          "event_catalog_event": {
+            "type": "string",
+            "description": "The Event Catalog event name that triggers this outbound flow",
+            "example": "contract.created"
+          },
+          "mappings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/OutboundMapping"
+            },
+            "description": "List of mappings that transform and deliver the event"
+          }
+        }
+      },
+      "IntegrationEntity": {
+        "type": "object",
+        "required": [
+          "entity_schema",
+          "unique_ids",
+          "fields"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Target entity schema (e.g., 'contact', 'contract')"
+          },
+          "unique_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of attribute names that uniquely identify this entity.\nThe _type hint for repeatable fields (e.g., email, phone) should be specified\non the corresponding field definition in the fields array.\n"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "Optional JSONata expression to pre-process the event data before field mapping"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge",
+              "upsert-prune-scope-purge",
+              "upsert-prune-scope-delete"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for entity mapping:\n- 'upsert': Create or update the entity (default)\n- 'delete': Soft delete the entity (marks as deleted)\n- 'purge': Hard delete the entity (permanent removal)\n- 'upsert-prune-scope-purge': Upsert entities from array, then purge entities in scope that weren't upserted\n- 'upsert-prune-scope-delete': Upsert entities from array, then soft delete entities in scope that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PruneScopeConfig"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "IntegrationMeterReading": {
+        "type": "object",
+        "required": [
+          "meter",
+          "fields"
+        ],
+        "properties": {
+          "jsonataExpression": {
+            "type": "string",
+            "description": "Optional JSONata expression to extract meter reading items from the event data.\nIf not provided, the entire payload is used as the reading data.\nUseful when you need to extract an array of readings from a nested structure (e.g., \"$.readings\").\n"
+          },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "default": "external_id",
+            "description": "Strategy for matching incoming readings against existing readings.\n- 'external_id': Match readings by external_id attribute (default behavior)\n- 'strict-date': Match by meter_id + counter_id + direction + date (German timezone).\n  Useful when readings originate from ECP and are echoed back by the ERP with truncated timestamps.\n"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "upsert-prune-scope"
+            ],
+            "default": "upsert",
+            "description": "Operation mode for meter reading mapping:\n- 'upsert': Create or update meter readings (default)\n- 'delete': Delete the meter reading\n- 'upsert-prune-scope': Upsert readings from array, then delete all other readings for the same meter+counter that weren't upserted\n"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/MeterReadingPruneScopeConfig"
+          },
+          "meter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "meter_counter": {
+            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Field mapping definitions for meter reading attributes",
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntityField"
+            }
+          }
+        }
+      },
+      "PruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for upsert-prune-scope modes.\nDefines how to find entities that should be pruned if not in the upsert payload.\nThe scope is resolved against the original event payload (not individual array items).\n",
+        "required": [
+          "scope_mode"
+        ],
+        "properties": {
+          "scope_mode": {
+            "type": "string",
+            "enum": [
+              "relations",
+              "query"
+            ],
+            "description": "Scope mode for finding entities to prune:\n- 'relations': Find scope by looking at all entities related to a specific entity (both direct and reverse relations)\n- 'query': Find scope entities directly via query parameters\n"
+          },
+          "schema": {
+            "type": "string",
+            "description": "For 'relations' mode: The schema of the entity to find (e.g., 'billing_account').\nNot used for 'query' mode.\n"
+          },
+          "unique_ids": {
+            "type": "array",
+            "description": "For 'relations' mode: How to identify the scope entity from the payload.\nNot used for 'query' mode.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          },
+          "query": {
+            "type": "array",
+            "description": "For 'query' mode: Direct query parameters to find scope entities.\nNot used for 'relations' or 'reverse-relations' modes.\n",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "MeterReadingPruneScopeConfig": {
+        "type": "object",
+        "description": "Scope configuration for meter reading upsert-prune-scope mode.\nThe scope is all readings for the same meter + counter.\n",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Optional source filter. When set, only readings with this source\nare eligible for pruning (e.g., 'ERP' to only prune ERP-synced readings).\n"
+          }
+        }
+      },
+      "MeterUniqueIdsConfig": {
+        "type": "object",
+        "required": [
+          "unique_ids"
+        ],
+        "properties": {
+          "unique_ids": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Array of unique identifier field mappings",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          }
+        }
+      },
+      "IntegrationEntityField": {
+        "type": "object",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name or JSONPath expression (if starts with $)"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression for transformation"
+          },
+          "constant": {
+            "description": "Constant value to assign (any type)"
+          },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
+          },
+          "relations": {
+            "$ref": "#/components/schemas/RelationConfig"
+          },
+          "relation_refs": {
+            "$ref": "#/components/schemas/RelationRefsConfig"
+          },
+          "file_proxy_url": {
+            "$ref": "#/components/schemas/FileProxyUrlConfig"
+          }
+        }
+      },
+      "FileProxyUrlParam": {
+        "description": "Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "field"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "Source field name or JSONPath expression (if starts with $)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "constant"
+            ],
+            "properties": {
+              "constant": {
+                "description": "Constant value (any type, stringified for URL)"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "jsonataExpression"
+            ],
+            "properties": {
+              "jsonataExpression": {
+                "type": "string",
+                "description": "JSONata expression for transformation"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUrlConfig": {
+        "type": "object",
+        "required": [
+          "use_case_id"
+        ],
+        "description": "Auto-constructs a file proxy download URL. orgId and integrationId are injected from context.",
+        "properties": {
+          "use_case_id": {
+            "type": "string",
+            "description": "UUID of the file_proxy use case. Maps to useCaseId query parameter."
+          },
+          "params": {
+            "type": "object",
+            "description": "Custom query parameters. Keys become URL param names, values resolved from payload.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileProxyUrlParam"
+            }
+          }
+        }
+      },
+      "EmbeddedUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
+            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          }
+        }
+      },
+      "EmbeddedUseCaseRequestBase": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional use case ID for update matching.\n- If provided and matches an existing use case, that use case is updated\n- If provided but no match, a new use case with this ID is created\n- If omitted, a new use case with auto-generated ID is created\n"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Use case name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional description of this change (like a commit message)"
+          }
+        }
+      },
+      "EmbeddedInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "EmbeddedOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UseCaseBase": {
+        "type": "object",
+        "required": [
+          "id",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy"
+            ],
+            "description": "Use case type"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Description of the last change made to this use case"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was last updated"
+          }
+        }
+      },
+      "InboundUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "OutboundUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCase": {
         "oneOf": [
           {
@@ -1567,123 +3345,42 @@
           },
           {
             "$ref": "#/components/schemas/OutboundUseCase"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyUseCase"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/InboundUseCase",
-            "outbound": "#/components/schemas/OutboundUseCase"
-          }
-        }
-      },
-      "InboundUseCase": {
-        "type": "object",
-        "required": [
-          "id",
-          "integrationId",
-          "name",
-          "type",
-          "enabled",
-          "created_at",
-          "updated_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the use case"
-          },
-          "integrationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Parent integration ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Use case name"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "inbound"
-            ],
-            "description": "Use case type"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the use case is enabled"
-          },
-          "configuration": {
-            "$ref": "#/components/schemas/IntegrationEvent"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was last updated"
-          }
-        }
-      },
-      "OutboundUseCase": {
-        "type": "object",
-        "required": [
-          "id",
-          "integrationId",
-          "name",
-          "type",
-          "enabled",
-          "created_at",
-          "updated_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the use case"
-          },
-          "integrationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Parent integration ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Use case name"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "outbound"
-            ],
-            "description": "Use case type"
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the use case is enabled"
-          },
-          "configuration": {
-            "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was created"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "ISO-8601 timestamp when the use case was last updated"
+            "outbound": "#/components/schemas/OutboundUseCase",
+            "file_proxy": "#/components/schemas/FileProxyUseCase"
           }
         }
       },
       "CreateUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreateInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/CreateOutboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/CreateFileProxyUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/CreateInboundUseCaseRequest",
+            "outbound": "#/components/schemas/CreateOutboundUseCaseRequest",
+            "file_proxy": "#/components/schemas/CreateFileProxyUseCaseRequest"
+          }
+        }
+      },
+      "CreateUseCaseRequestBase": {
         "type": "object",
         "required": [
           "name",
@@ -1697,26 +3394,109 @@
             "maxLength": 255,
             "description": "Use case name"
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Use case type"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the use case is enabled"
-          },
-          "configuration": {
-            "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
           }
         }
       },
+      "CreateInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "CreateOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "CreateFileProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UpdateUseCaseRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UpdateInboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateOutboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateFileProxyUseCaseRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/UpdateInboundUseCaseRequest",
+            "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest",
+            "file_proxy": "#/components/schemas/UpdateFileProxyUseCaseRequest"
+          }
+        }
+      },
+      "UpdateUseCaseRequestBase": {
         "type": "object",
         "properties": {
           "name": {
@@ -1725,22 +3505,395 @@
             "maxLength": 255,
             "description": "Use case name"
           },
-          "type": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "description": "Use case type"
-          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the use case is enabled"
           },
-          "configuration": {
+          "change_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Optional description of this change (like a commit message)"
+          }
+        }
+      },
+      "UpdateInboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
             "type": "object",
-            "description": "Use case specific configuration",
-            "additionalProperties": true
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateOutboundUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateFileProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "UseCaseHistoryEntry": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InboundUseCaseHistoryEntry"
+          },
+          {
+            "$ref": "#/components/schemas/OutboundUseCaseHistoryEntry"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyUseCaseHistoryEntry"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "inbound": "#/components/schemas/InboundUseCaseHistoryEntry",
+            "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry",
+            "file_proxy": "#/components/schemas/FileProxyUseCaseHistoryEntry"
+          }
+        }
+      },
+      "UseCaseHistoryEntryBase": {
+        "type": "object",
+        "required": [
+          "id",
+          "useCaseId",
+          "integrationId",
+          "name",
+          "type",
+          "enabled",
+          "created_at",
+          "updated_at",
+          "history_created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this history entry"
+          },
+          "useCaseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Reference to the parent use case"
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parent integration ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Use case name at this point in history"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the use case was enabled at this point in history"
+          },
+          "change_description": {
+            "type": "string",
+            "description": "Description of the change that was made at this point in history"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when the use case was originally created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp of this historical snapshot (before the update)"
+          },
+          "history_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp when this history entry was created"
+          }
+        }
+      },
+      "InboundUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "OutboundUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "outbound"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/OutboundIntegrationEventConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "FileProxyUseCaseConfiguration": {
+        "type": "object",
+        "required": [
+          "steps",
+          "response"
+        ],
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "properties": {
+          "requires_vpc": {
+            "type": "boolean",
+            "description": "Whether requests require VPC routing for IP allowlisting",
+            "default": false
+          },
+          "auth": {
+            "$ref": "#/components/schemas/FileProxyAuth"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileProxyParam"
+            },
+            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, useCaseId)"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/FileProxyStep"
+            },
+            "description": "Ordered list of HTTP steps to execute to retrieve the file"
+          },
+          "response": {
+            "$ref": "#/components/schemas/FileProxyResponseConfig"
+          }
+        }
+      },
+      "FileProxyAuth": {
+        "type": "object",
+        "required": [
+          "type",
+          "token_url",
+          "client_id",
+          "client_secret"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "oauth2_client_credentials"
+            ],
+            "description": "Authentication type"
+          },
+          "token_url": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 token endpoint URL"
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 client ID"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 client secret"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Optional OAuth2 scope"
+          }
+        }
+      },
+      "FileProxyParam": {
+        "type": "object",
+        "required": [
+          "name",
+          "required"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Parameter name as it appears in the query string"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this parameter is required"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the parameter"
+          }
+        }
+      },
+      "FileProxyStep": {
+        "type": "object",
+        "required": [
+          "url",
+          "method",
+          "response_type"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Handlebars template for the request URL"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "description": "HTTP method"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Handlebars templates for request headers"
+          },
+          "body": {
+            "type": "string",
+            "description": "Handlebars template for the request body (POST only)"
+          },
+          "response_type": {
+            "type": "string",
+            "enum": [
+              "json",
+              "binary"
+            ],
+            "description": "Expected response type"
+          }
+        }
+      },
+      "FileProxyResponseConfig": {
+        "type": "object",
+        "required": [
+          "body",
+          "encoding"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "JSONata expression to extract file content from step results"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "base64",
+              "binary"
+            ],
+            "description": "Encoding of the extracted body"
+          },
+          "filename": {
+            "type": "string",
+            "description": "JSONata expression to extract the filename"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "JSONata expression to extract the content type"
           }
         }
       },
@@ -1789,6 +3942,43 @@
               }
             ],
             "description": "The object data payload - can be either a serialized string or a direct JSON object"
+          }
+        }
+      },
+      "MappingSimulationV2Request": {
+        "type": "object",
+        "description": "Request for v2 mapping simulation. Uses the same configuration format stored in integration use case resources,\nmaking it easier to test configurations before saving them.\n",
+        "required": [
+          "event_configuration",
+          "format",
+          "payload"
+        ],
+        "properties": {
+          "event_configuration": {
+            "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "json",
+              "xml"
+            ],
+            "default": "json",
+            "description": "Format of the payload data"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The serialized event data payload (JSON, XML, etc.) as a string"
+              },
+              {
+                "type": "object",
+                "description": "Direct JSON object (will be automatically serialized)",
+                "additionalProperties": true
+              }
+            ],
+            "description": "The event data payload - can be either a serialized string or a direct JSON object"
           }
         }
       },
@@ -1869,7 +4059,7 @@
           "attributes": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Meter reading attributes (external_id, timestamp, source, value, etc.)"
+            "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
           }
         }
       },
@@ -1991,152 +4181,203 @@
                 "type": "object",
                 "description": "[v2.0] Event type mappings",
                 "additionalProperties": {
-                  "$ref": "#/components/schemas/IntegrationEvent"
+                  "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
                 }
               }
             }
           }
         }
       },
-      "IntegrationEvent": {
+      "OutboundMapping": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "jsonata_expression",
+          "enabled",
+          "delivery"
+        ],
+        "description": "A mapping that transforms an event and delivers it to a webhook",
         "properties": {
-          "entities": {
-            "type": "array",
-            "description": "Array of entity configurations for this event",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntity"
-            }
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for this mapping"
           },
-          "meter_readings": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for this mapping",
+            "example": "ERP Contract Sync"
+          },
+          "jsonata_expression": {
+            "type": "string",
+            "description": "JSONata expression to transform the event payload",
+            "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this mapping is active",
+            "default": true
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryConfig"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the mapping was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the mapping was last updated"
+          }
+        }
+      },
+      "DeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type",
+          "webhook_id"
+        ],
+        "description": "Configuration for how the transformed event should be delivered",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "webhook"
+            ],
+            "description": "Delivery mechanism type (currently only webhook is supported)"
+          },
+          "webhook_id": {
+            "type": "string",
+            "description": "Reference to the webhook configuration in svc-webhooks"
+          },
+          "webhook_name": {
+            "type": "string",
+            "description": "Cached webhook name for display purposes"
+          },
+          "webhook_url": {
+            "type": "string",
+            "description": "Cached webhook URL for display purposes"
+          }
+        }
+      },
+      "OutboundStatusResponse": {
+        "type": "object",
+        "required": [
+          "useCases"
+        ],
+        "properties": {
+          "useCases": {
             "type": "array",
-            "description": "Array of meter reading configurations for this event",
             "items": {
-              "$ref": "#/components/schemas/IntegrationMeterReading"
+              "$ref": "#/components/schemas/OutboundUseCaseStatus"
             }
           }
         }
       },
-      "IntegrationEntity": {
+      "OutboundUseCaseStatus": {
         "type": "object",
         "required": [
-          "entity_schema",
-          "unique_ids",
-          "fields"
+          "useCaseId",
+          "name",
+          "useCaseEnabled",
+          "status"
         ],
         "properties": {
-          "entity_schema": {
+          "useCaseId": {
             "type": "string",
-            "description": "Target entity schema (e.g., 'contact', 'contract')"
+            "format": "uuid",
+            "description": "Unique identifier for the use case"
           },
-          "unique_ids": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name of the use case"
+          },
+          "useCaseEnabled": {
+            "type": "boolean",
+            "description": "Whether the use case is enabled"
+          },
+          "eventCatalogEvent": {
+            "type": "string",
+            "description": "The Event Catalog event name that triggers this outbound flow",
+            "example": "contract.created"
+          },
+          "eventEnabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the event is enabled in Event Catalog. Null if the API is unreachable."
+          },
+          "webhooks": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/WebhookStatus"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "conflict",
+              "disabled"
+            ],
+            "description": "Overall status of the use case:\n- 'ok': Use case is enabled and all dependencies are properly configured\n- 'conflict': Use case has configuration issues (disabled events/webhooks while enabled)\n- 'disabled': Use case is disabled\n"
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundConflict"
             },
-            "description": "Array of attribute names that uniquely identify this entity"
-          },
-          "jsonataExpression": {
+            "description": "List of detected conflicts, if any"
+          }
+        }
+      },
+      "WebhookStatus": {
+        "type": "object",
+        "required": [
+          "webhookId"
+        ],
+        "properties": {
+          "webhookId": {
             "type": "string",
-            "description": "Optional JSONata expression to pre-process the event data before field mapping"
+            "description": "Unique identifier for the webhook"
+          },
+          "webhookName": {
+            "type": "string",
+            "description": "Human-readable name of the webhook"
           },
           "enabled": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the webhook is enabled. Null if the API is unreachable."
+          }
+        }
+      },
+      "OutboundConflict": {
+        "type": "object",
+        "required": [
+          "type",
+          "message"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event_disabled",
+              "all_webhooks_disabled",
+              "event_enabled_while_disabled",
+              "webhook_enabled_while_disabled"
             ],
-            "description": "Controls whether this entity mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean."
+            "description": "Type of conflict:\n- 'event_disabled': Event catalog event is disabled while use case is enabled\n- 'all_webhooks_disabled': All webhooks are disabled while use case is enabled\n- 'event_enabled_while_disabled': Event is enabled while use case is disabled\n- 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled\n"
           },
-          "fields": {
-            "type": "array",
-            "description": "Field mapping definitions",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntityField"
-            }
-          }
-        }
-      },
-      "IntegrationMeterReading": {
-        "type": "object",
-        "required": [
-          "jsonataExpression",
-          "meter",
-          "fields"
-        ],
-        "properties": {
-          "jsonataExpression": {
+          "webhookId": {
             "type": "string",
-            "description": "JSONata expression to extract meter reading items from the event data"
+            "description": "Webhook ID (only present for webhook_enabled_while_disabled conflicts)"
           },
-          "meter": {
-            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
-          },
-          "meter_counter": {
-            "$ref": "#/components/schemas/MeterUniqueIdsConfig"
-          },
-          "fields": {
-            "type": "array",
-            "description": "Field mapping definitions for meter reading attributes",
-            "items": {
-              "$ref": "#/components/schemas/IntegrationEntityField"
-            }
-          }
-        }
-      },
-      "MeterUniqueIdsConfig": {
-        "type": "object",
-        "required": [
-          "unique_ids"
-        ],
-        "properties": {
-          "unique_ids": {
-            "type": "array",
-            "minItems": 1,
-            "description": "Array of unique identifier field mappings",
-            "items": {
-              "$ref": "#/components/schemas/RelationUniqueIdField"
-            }
-          }
-        }
-      },
-      "IntegrationEntityField": {
-        "type": "object",
-        "required": [
-          "attribute"
-        ],
-        "properties": {
-          "attribute": {
+          "message": {
             "type": "string",
-            "description": "Target attribute name"
-          },
-          "field": {
-            "type": "string",
-            "description": "Source field name or JSONPath expression (if starts with $)"
-          },
-          "jsonataExpression": {
-            "type": "string",
-            "description": "JSONata expression for transformation"
-          },
-          "constant": {
-            "description": "Constant value to assign (any type)"
-          },
-          "enabled": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "description": "Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted."
-          },
-          "relations": {
-            "$ref": "#/components/schemas/RelationConfig"
+            "description": "Human-readable description of the conflict"
           }
         }
       },
@@ -2150,9 +4391,10 @@
             "type": "string",
             "enum": [
               "_set",
-              "_append"
+              "_append",
+              "_append_all"
             ],
-            "description": "Relation operation:\n- '_set': Replace all existing relations with the specified items\n- '_append': Add new items to existing relations (fetches current entity first)\n"
+            "description": "Relation operation:\n- '_set': Replace all existing relations with the specified items\n- '_append': Add new unique items to existing relations (deduplicates by entity_id)\n- '_append_all': Add all items to existing relations (no deduplication, allows duplicates)\n"
           },
           "items": {
             "type": "array",
@@ -2204,6 +4446,9 @@
             "type": "string",
             "description": "Target attribute name in the related entity"
           },
+          "_type": {
+            "$ref": "#/components/schemas/RepeatableFieldType"
+          },
           "field": {
             "type": "string",
             "description": "Source field name from the event data"
@@ -2216,11 +4461,930 @@
             "description": "Constant value (any type)"
           }
         }
+      },
+      "RelationRefsConfig": {
+        "type": "object",
+        "description": "Configuration for relation references ($relation_ref).\nRelation references link to a specific item within a repeatable attribute on a related entity.\nCommon use case: referencing a specific address within a contact's address list.\n",
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "_set",
+              "_append",
+              "_append_all"
+            ],
+            "description": "Relation reference operation:\n- '_set': Replace all existing relation_refs with the specified items\n- '_append': Add new unique items to existing relation_refs (deduplicates by entity_id + _id)\n- '_append_all': Add all items to existing relation_refs (no deduplication, allows duplicates)\n"
+          },
+          "items": {
+            "type": "array",
+            "description": "Array of relation reference item configurations",
+            "items": {
+              "$ref": "#/components/schemas/RelationRefItemConfig"
+            }
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression that returns relation_ref items array (alternative to 'items')"
+          }
+        }
+      },
+      "RelationRefItemConfig": {
+        "type": "object",
+        "description": "Configuration for a single relation reference item",
+        "required": [
+          "entity_schema",
+          "unique_ids",
+          "path",
+          "value"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the related entity (e.g., \"contact\")"
+          },
+          "unique_ids": {
+            "type": "array",
+            "description": "Unique identifier mappings for the related entity",
+            "items": {
+              "$ref": "#/components/schemas/RelationUniqueIdField"
+            }
+          },
+          "path": {
+            "type": "string",
+            "description": "Attribute path on the related entity (e.g., \"address\")"
+          },
+          "value": {
+            "$ref": "#/components/schemas/RelationRefValueConfig"
+          }
+        }
+      },
+      "RelationRefValueConfig": {
+        "type": "object",
+        "description": "Configuration for the value to set on the related entity's attribute",
+        "required": [
+          "attribute"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Target attribute name on the related entity"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "_set",
+              "_append",
+              "_append_all"
+            ],
+            "description": "Operation for the attribute value:\n- '_set': Replace the attribute value\n- '_append': Add new unique items (deduplicates)\n- '_append_all': Add all items (no deduplication)\n"
+          },
+          "field": {
+            "type": "string",
+            "description": "Source field name from the event data"
+          },
+          "jsonataExpression": {
+            "type": "string",
+            "description": "JSONata expression to compute the value"
+          },
+          "constant": {
+            "description": "Constant value (any type)"
+          }
+        }
+      },
+      "RepeatableFieldType": {
+        "type": "string",
+        "enum": [
+          "email",
+          "phone"
+        ],
+        "description": "Type hint for repeatable fields that require special search handling.\nThese fields are stored as arrays of objects (e.g., email: [{ email: \"value\" }]).\n"
+      },
+      "ReplayEventsRequest": {
+        "type": "object",
+        "required": [
+          "event_ids"
+        ],
+        "properties": {
+          "event_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "List of event IDs to replay. Maximum 100 events per request."
+          }
+        }
+      },
+      "QueryEventsRequest": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "description": "Filter by event ID"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ],
+            "description": "Filter by event type"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Filter by correlation ID"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Filter by object type"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 25,
+            "default": 25,
+            "minimum": 1,
+            "maximum": 25
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination. Use the next_cursor from the previous response to get the next page.",
+            "properties": {
+              "event_time": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page",
+                "example": "2025-10-31T12:34:56Z"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page",
+                "example": "evt_1234567890abcdef"
+              }
+            }
+          }
+        }
+      },
+      "QueryInboundMonitoringEventsRequest": {
+        "type": "object",
+        "properties": {
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Filter by use case ID"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "TRIGGER"
+            ],
+            "description": "Filter by event type"
+          },
+          "sync_type": {
+            "type": "string",
+            "enum": [
+              "entity",
+              "meter_reading",
+              "webhook",
+              "api_deprecation"
+            ],
+            "description": "Filter by sync type"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "skipped",
+              "warning"
+            ],
+            "description": "Filter by processing status"
+          },
+          "error_category": {
+            "type": "string",
+            "enum": [
+              "validation",
+              "configuration",
+              "downstream_api",
+              "timeout",
+              "system"
+            ],
+            "description": "Filter by error category (only applicable when status=error)"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Filter by correlation ID"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Filter by object type (e.g., 'contract', 'meter')"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (alias for object_type)"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Filter by event ID to find a specific event"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination",
+            "properties": {
+              "completed_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "QueryAccessLogsRequest": {
+        "type": "object",
+        "properties": {
+          "token_id": {
+            "type": "string",
+            "description": "Filter by a specific access token ID (e.g., 'api_5ZugdRXasLfWBypHi93Fk').\nMust be one of the access_token_ids linked to the integration.\nIf omitted, returns logs for all access tokens linked to the integration.\n",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          },
+          "service": {
+            "type": "string",
+            "description": "Filter by service name (e.g., 'entity', 'metering', 'submission-api')",
+            "example": "entity"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "OPTIONS",
+              "HEAD"
+            ],
+            "description": "Filter by HTTP method"
+          },
+          "path": {
+            "type": "string",
+            "description": "Filter by request path (partial match)",
+            "example": "/v1/entity"
+          },
+          "status": {
+            "type": "integer",
+            "description": "Filter by HTTP status code",
+            "example": 200
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter logs from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter logs until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination (infinite scroll)",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last log entry in the previous page"
+              },
+              "request_id": {
+                "type": "string",
+                "description": "Request ID from the last log entry in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "AccessLogEntry": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request was made"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Environment (e.g., 'dev', 'prod')"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service name (e.g., 'entity', 'metering')"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Unique request identifier"
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method"
+          },
+          "path": {
+            "type": "string",
+            "description": "Request path"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "response_latency_ms": {
+            "type": "integer",
+            "description": "Response latency in milliseconds"
+          },
+          "response_length": {
+            "type": "integer",
+            "description": "Response body length in bytes"
+          },
+          "token_id": {
+            "type": "string",
+            "description": "Access token identifier"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Request origin header"
+          },
+          "source_ip": {
+            "type": "string",
+            "description": "Client IP address"
+          }
+        }
+      },
+      "GetMonitoringStatsRequest": {
+        "type": "object",
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date for statistics period (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End date for statistics period (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "inbound_group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "use_case_id",
+                "sync_type",
+                "status",
+                "error_category",
+                "object_type",
+                "event_name",
+                "date"
+              ]
+            },
+            "description": "Fields to group inbound statistics by",
+            "example": [
+              "use_case_id",
+              "status"
+            ]
+          },
+          "outbound_group_by": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "event_name",
+                "status",
+                "webhook_config_id",
+                "date"
+              ]
+            },
+            "description": "Fields to group outbound statistics by",
+            "example": [
+              "event_name",
+              "status"
+            ]
+          }
+        }
+      },
+      "GetMonitoringTimeSeriesRequest": {
+        "type": "object",
+        "required": [
+          "from_date",
+          "interval"
+        ],
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start date for the time series (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End date for the time series (inclusive). Defaults to current time if not specified.",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "5m",
+              "10m",
+              "30m",
+              "1h",
+              "3h",
+              "1d"
+            ],
+            "description": "The time bucket interval for aggregation",
+            "example": "1h"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ],
+            "default": "both",
+            "description": "Filter by event direction. Defaults to both.",
+            "example": "both"
+          }
+        }
+      },
+      "TimeSeriesBucket": {
+        "type": "object",
+        "required": [
+          "timestamp"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start timestamp of the bucket"
+          },
+          "inbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Inbound event counts for this bucket. Null when direction is outbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "warning_count": {
+                "type": "integer"
+              },
+              "skipped_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "nullable": true,
+            "description": "Outbound event counts for this bucket. Null when direction is inbound.",
+            "properties": {
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "pending_count": {
+                "type": "integer"
+              },
+              "total_count": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "QueryOutboundMonitoringEventsRequest": {
+        "type": "object",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "description": "Filter by event name (event_catalog_event). If not specified, returns events for all linked event names in the integration's outbound use cases.",
+            "example": "automation_flow_target"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Filter by delivery status"
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Filter by webhook configuration ID"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp from the last event in the previous page"
+              },
+              "event_id": {
+                "type": "string",
+                "description": "Event ID from the last event in the previous page"
+              }
+            }
+          }
+        }
+      },
+      "OutboundMonitoringEvent": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "event_id",
+          "event_name",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique event identifier"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Event name (event_catalog_event)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "pending"
+            ],
+            "description": "Delivery status"
+          },
+          "url": {
+            "type": "string",
+            "description": "Target URL"
+          },
+          "http_method": {
+            "type": "string",
+            "description": "HTTP method used (e.g., POST)"
+          },
+          "http_response": {
+            "type": "object",
+            "description": "HTTP response details (status_code, message, headers)",
+            "additionalProperties": true
+          },
+          "webhook_config_id": {
+            "type": "string",
+            "description": "Webhook configuration ID"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional metadata (webhook_id, organization details, correlation_id, etc.)",
+            "additionalProperties": true
+          },
+          "execution_context": {
+            "type": "object",
+            "description": "Execution context (execution_arn, state_machine_arn, etc.)",
+            "additionalProperties": true
+          },
+          "payload": {
+            "type": "object",
+            "description": "Payload that was sent",
+            "additionalProperties": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was last updated"
+          }
+        }
+      },
+      "MonitoringStats": {
+        "type": "object",
+        "required": [
+          "inbound",
+          "outbound"
+        ],
+        "properties": {
+          "inbound": {
+            "type": "object",
+            "description": "Statistics for inbound (ERP sync) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count",
+              "skipped_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of inbound events in the period"
+              },
+              "total_correlations": {
+                "type": "integer",
+                "description": "Total number of unique correlation IDs"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful events"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed events"
+              },
+              "skipped_count": {
+                "type": "integer",
+                "description": "Number of skipped events"
+              },
+              "warning_count": {
+                "type": "integer",
+                "description": "Number of warning events"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested inbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "outbound": {
+            "type": "object",
+            "description": "Statistics for outbound (webhook delivery) events",
+            "required": [
+              "total_events",
+              "success_count",
+              "error_count"
+            ],
+            "properties": {
+              "total_events": {
+                "type": "integer",
+                "description": "Total number of outbound events in the period"
+              },
+              "success_count": {
+                "type": "integer",
+                "description": "Number of successful deliveries"
+              },
+              "error_count": {
+                "type": "integer",
+                "description": "Number of failed deliveries"
+              },
+              "pending_count": {
+                "type": "integer",
+                "description": "Number of pending deliveries"
+              },
+              "success_rate": {
+                "type": "number",
+                "format": "float",
+                "description": "Success rate as percentage (0-100)"
+              },
+              "last_error_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Timestamp of the most recent error"
+              },
+              "breakdown": {
+                "type": "array",
+                "description": "Statistics breakdown by requested outbound_group_by fields",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "InboundMonitoringEvent": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "event_id",
+          "object_type",
+          "sync_type",
+          "status",
+          "received_at",
+          "completed_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique event identifier"
+          },
+          "correlation_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Correlation ID for tracing related events"
+          },
+          "integration_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Integration ID"
+          },
+          "use_case_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Use case ID"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "TRIGGER"
+            ],
+            "description": "Type of event (optional for V3 events)"
+          },
+          "object_type": {
+            "type": "string",
+            "description": "Type of object being synced (e.g., 'contract', 'meter')"
+          },
+          "sync_type": {
+            "type": "string",
+            "enum": [
+              "entity",
+              "meter_reading",
+              "webhook",
+              "api_deprecation"
+            ],
+            "description": "Type of sync operation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "skipped",
+              "warning"
+            ],
+            "description": "Processing status"
+          },
+          "error_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error code (when status=error)"
+          },
+          "error_message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message (when status=error)"
+          },
+          "error_category": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "validation",
+              "configuration",
+              "downstream_api",
+              "timeout",
+              "system"
+            ],
+            "description": "Error category (when status=error)"
+          },
+          "processing_duration_ms": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Processing duration in milliseconds"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event was received"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When processing completed"
+          }
+        }
       }
     },
     "responses": {
       "BadRequest": {
         "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
         "content": {
           "application/json": {
             "schema": {
@@ -2245,6 +5409,197 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "QueryInboundMonitoringEventsResponse": {
+        "description": "Inbound monitoring events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboundMonitoringEvent"
+                  },
+                  "description": "List of inbound monitoring events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "completed_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetMonitoringStatsResponse": {
+        "description": "Monitoring statistics retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitoringStats"
+            }
+          }
+        }
+      },
+      "GetMonitoringTimeSeriesResponse": {
+        "description": "Time-series aggregated event counts retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "interval",
+                "from_date",
+                "to_date",
+                "buckets"
+              ],
+              "properties": {
+                "interval": {
+                  "type": "string",
+                  "enum": [
+                    "5m",
+                    "10m",
+                    "30m",
+                    "1h",
+                    "3h",
+                    "1d"
+                  ],
+                  "description": "The time bucket interval used for aggregation"
+                },
+                "from_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Start date of the time series"
+                },
+                "to_date": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "End date of the time series"
+                },
+                "buckets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesBucket"
+                  },
+                  "description": "List of time-series buckets with event counts"
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryAccessLogsResponse": {
+        "description": "Access logs queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessLogEntry"
+                  },
+                  "description": "List of access log entries"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "request_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryOutboundMonitoringEventsResponse": {
+        "description": "Outbound monitoring events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutboundMonitoringEvent"
+                  },
+                  "description": "List of outbound monitoring events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ReplayEventsResponse": {
+        "description": "Events replay initiated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "replayed",
+                "results"
+              ],
+              "properties": {
+                "event_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of event IDs for which replay was requested"
+                }
+              }
             }
           }
         }
@@ -2274,9 +5629,10 @@
                         "enum": [
                           "success",
                           "error",
-                          "skipped"
+                          "skipped",
+                          "ignored"
                         ],
-                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id)"
+                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
                       },
                       "message": {
                         "type": "string"
@@ -2298,12 +5654,47 @@
             }
           }
         }
+      },
+      "QueryEventsResponse": {
+        "description": "Events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ErpEvent"
+                  },
+                  "description": "List of erp events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "event_time": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-10-31T12:34:56Z"
+                    },
+                    "event_id": {
+                      "type": "string",
+                      "example": "evt_1234567890abcdef"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available",
+                  "example": true
+                }
+              }
+            }
+          }
+        }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    }
-  ]
+  }
 }

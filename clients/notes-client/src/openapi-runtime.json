@@ -103,14 +103,6 @@
             "required": true
           },
           {
-            "in": "path",
-            "name": "from"
-          },
-          {
-            "in": "path",
-            "name": "size"
-          },
-          {
             "in": "query",
             "name": "contexts"
           },

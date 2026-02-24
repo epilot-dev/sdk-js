@@ -490,6 +490,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -507,6 +514,7 @@ declare namespace Components {
              *   - plot_of_land
              *   - suburb
              *   - country
+             *   - postbox
              *   - additional_info
              *   - coordinates
              *   - start_date
@@ -515,6 +523,7 @@ declare namespace Components {
              *   - title
              *   - first_name
              *   - last_name
+             *   - name_suffix
              *   - company_name
              *
              */
@@ -662,6 +671,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -679,6 +695,7 @@ declare namespace Components {
              *   - plot_of_land
              *   - suburb
              *   - country
+             *   - postbox
              *   - additional_info
              *   - coordinates
              *   - start_date
@@ -687,6 +704,7 @@ declare namespace Components {
              *   - title
              *   - first_name
              *   - last_name
+             *   - name_suffix
              *   - company_name
              *
              */
@@ -850,6 +868,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -1053,6 +1078,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1131,6 +1163,10 @@ declare namespace Components {
                 delete?: string[];
             };
             _purpose?: string[] | null;
+            /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
              */
@@ -1281,6 +1317,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -1473,6 +1516,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1630,6 +1680,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1780,6 +1837,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -1927,6 +1991,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -2086,6 +2157,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -2104,6 +2182,7 @@ declare namespace Components {
          *   - plot_of_land
          *   - suburb
          *   - country
+         *   - postbox
          *   - additional_info
          *   - coordinates
          *   - start_date
@@ -2112,6 +2191,7 @@ declare namespace Components {
          *   - title
          *   - first_name
          *   - last_name
+         *   - name_suffix
          *   - company_name
          *
          */
@@ -2268,6 +2348,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -2347,6 +2434,10 @@ declare namespace Components {
                 delete?: string[];
             };
             _purpose?: string[] | null;
+            /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
             /**
              * Manifest ID used to create/update the entity
              */
@@ -2815,6 +2906,10 @@ declare namespace Components {
             };
             _purpose?: string[] | null;
             /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
+            /**
              * Manifest ID used to create/update the entity
              */
             _manifest?: string /* uuid */[] | null;
@@ -3089,12 +3184,17 @@ declare namespace Components {
                 };
                 _purpose?: string[] | null;
                 /**
+                 * Automatically computed purpose names from _purpose attribute
+                 */
+                _purpose_name?: string[] | null;
+                /**
                  * Manifest ID used to create/update the entity
                  */
                 _manifest?: string /* uuid */[] | null;
             };
             diff?: {
-                added?: /**
+                /**
+                 * New attributes added to the entity as part of the operation
                  * example:
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3129,8 +3229,55 @@ declare namespace Components {
                  *   ]
                  * }
                  */
-                Entity;
-                updated?: /**
+                added?: {
+                    [name: string]: any;
+                    _id?: string; // uuid
+                    /**
+                     * Organization Id the entity belongs to
+                     */
+                    _org?: string;
+                    _owners?: /**
+                     * The user / organization owning this entity.
+                     *
+                     * Note: Owner implicitly has access to the entity regardless of ACLs.
+                     *
+                     */
+                    EntityOwner[];
+                    _schema?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+                    /**
+                     * Title of entity
+                     */
+                    _title?: string | null;
+                    _tags?: string[] | null;
+                    _created_at?: string | null; // date-time
+                    _updated_at?: string | null; // date-time
+                    _deleted_at?: string | null; // date-time
+                    /**
+                     * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+                     */
+                    _acl?: {
+                        [name: string]: any;
+                        view?: string[];
+                        edit?: string[];
+                        delete?: string[];
+                    };
+                    _purpose?: string[] | null;
+                    /**
+                     * Automatically computed purpose names from _purpose attribute
+                     */
+                    _purpose_name?: string[] | null;
+                    /**
+                     * Manifest ID used to create/update the entity
+                     */
+                    _manifest?: string /* uuid */[] | null;
+                };
+                /**
+                 * Attributes updated in the entity. Note: These values contain the previous values before the update!
                  * example:
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3165,8 +3312,55 @@ declare namespace Components {
                  *   ]
                  * }
                  */
-                Entity;
-                deleted?: /**
+                updated?: {
+                    [name: string]: any;
+                    _id?: string; // uuid
+                    /**
+                     * Organization Id the entity belongs to
+                     */
+                    _org?: string;
+                    _owners?: /**
+                     * The user / organization owning this entity.
+                     *
+                     * Note: Owner implicitly has access to the entity regardless of ACLs.
+                     *
+                     */
+                    EntityOwner[];
+                    _schema?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+                    /**
+                     * Title of entity
+                     */
+                    _title?: string | null;
+                    _tags?: string[] | null;
+                    _created_at?: string | null; // date-time
+                    _updated_at?: string | null; // date-time
+                    _deleted_at?: string | null; // date-time
+                    /**
+                     * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+                     */
+                    _acl?: {
+                        [name: string]: any;
+                        view?: string[];
+                        edit?: string[];
+                        delete?: string[];
+                    };
+                    _purpose?: string[] | null;
+                    /**
+                     * Automatically computed purpose names from _purpose attribute
+                     */
+                    _purpose_name?: string[] | null;
+                    /**
+                     * Manifest ID used to create/update the entity
+                     */
+                    _manifest?: string /* uuid */[] | null;
+                };
+                /**
+                 * Attributes removed from the entity as part of the operation
                  * example:
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -3201,7 +3395,53 @@ declare namespace Components {
                  *   ]
                  * }
                  */
-                Entity;
+                deleted?: {
+                    [name: string]: any;
+                    _id?: string; // uuid
+                    /**
+                     * Organization Id the entity belongs to
+                     */
+                    _org?: string;
+                    _owners?: /**
+                     * The user / organization owning this entity.
+                     *
+                     * Note: Owner implicitly has access to the entity regardless of ACLs.
+                     *
+                     */
+                    EntityOwner[];
+                    _schema?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+                    /**
+                     * Title of entity
+                     */
+                    _title?: string | null;
+                    _tags?: string[] | null;
+                    _created_at?: string | null; // date-time
+                    _updated_at?: string | null; // date-time
+                    _deleted_at?: string | null; // date-time
+                    /**
+                     * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+                     */
+                    _acl?: {
+                        [name: string]: any;
+                        view?: string[];
+                        edit?: string[];
+                        delete?: string[];
+                    };
+                    _purpose?: string[] | null;
+                    /**
+                     * Automatically computed purpose names from _purpose attribute
+                     */
+                    _purpose_name?: string[] | null;
+                    /**
+                     * Manifest ID used to create/update the entity
+                     */
+                    _manifest?: string /* uuid */[] | null;
+                };
             };
         }
         /**
@@ -4487,6 +4727,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -4699,8 +4946,8 @@ declare namespace Components {
             };
             /**
              * Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).
-             * The seed node always returns a single Entity object.
-             * Other nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.
+             * The seed node and nodes with cardinality="one" return a single Entity object, or null if no entity was found.
+             * Nodes with cardinality="many" return an array of Entity objects.
              *
              * example:
              * {
@@ -4760,7 +5007,7 @@ declare namespace Components {
                  *   ]
                  * }
                  */
-                Entity | /**
+                NullableEntity | /**
                  * example:
                  * {
                  *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -5085,6 +5332,10 @@ declare namespace Components {
             };
             _purpose?: string[] | null;
             /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
+            /**
              * Manifest ID used to create/update the entity
              */
             _manifest?: string /* uuid */[] | null;
@@ -5234,6 +5485,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5382,6 +5640,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5529,6 +5794,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -5686,6 +5958,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5842,6 +6121,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -5993,6 +6279,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6015,6 +6308,88 @@ declare namespace Components {
              */
             allow_any?: boolean;
         }
+        /**
+         * example:
+         * {
+         *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *   "_org": "123",
+         *   "_owners": [
+         *     {
+         *       "org_id": "123",
+         *       "user_id": "123"
+         *     }
+         *   ],
+         *   "_schema": "contact",
+         *   "_tags": [
+         *     "example",
+         *     "mock"
+         *   ],
+         *   "_created_at": "2021-02-09T12:41:43.662Z",
+         *   "_updated_at": "2021-02-09T12:41:43.662Z",
+         *   "_acl": {
+         *     "view": [
+         *       "org:456",
+         *       "org:789"
+         *     ],
+         *     "edit": [
+         *       "org:456"
+         *     ],
+         *     "delete": [
+         *       "org:456"
+         *     ]
+         *   },
+         *   "_manifest": [
+         *     "123e4567-e89b-12d3-a456-426614174000"
+         *   ]
+         * }
+         */
+        export type NullableEntity = {
+            [name: string]: any;
+            _id?: string; // uuid
+            /**
+             * Organization Id the entity belongs to
+             */
+            _org?: string;
+            _owners?: /**
+             * The user / organization owning this entity.
+             *
+             * Note: Owner implicitly has access to the entity regardless of ACLs.
+             *
+             */
+            EntityOwner[];
+            _schema?: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+            /**
+             * Title of entity
+             */
+            _title?: string | null;
+            _tags?: string[] | null;
+            _created_at?: string | null; // date-time
+            _updated_at?: string | null; // date-time
+            _deleted_at?: string | null; // date-time
+            /**
+             * Access control list (ACL) for an entity. Defines sharing access to external orgs or users.
+             */
+            _acl?: {
+                [name: string]: any;
+                view?: string[];
+                edit?: string[];
+                delete?: string[];
+            };
+            _purpose?: string[] | null;
+            /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
+            /**
+             * Manifest ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[] | null;
+        } | null;
         /**
          * Numeric input
          */
@@ -6157,11 +6532,22 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
             has_primary?: boolean;
             type: "number";
+            /**
+             * Optional data type override. When set to 'number', the value is stored as a number instead of a string. Defaults to 'string'.
+             */
+            data_type?: "number" | "string";
             format?: string;
             /**
              * Whether or not to show a thousands separator
@@ -6309,6 +6695,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -6458,6 +6851,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6605,6 +7005,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -6754,6 +7161,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -6901,6 +7315,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -7050,6 +7471,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -7197,6 +7625,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -7346,6 +7781,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -7493,6 +7935,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -7656,6 +8105,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * Relations are always repeatables
              */
@@ -7849,6 +8305,10 @@ declare namespace Components {
             };
             _purpose?: string[] | null;
             /**
+             * Automatically computed purpose names from _purpose attribute
+             */
+            _purpose_name?: string[] | null;
+            /**
              * Manifest ID used to create/update the entity
              */
             _manifest?: string /* uuid */[] | null;
@@ -8014,6 +8474,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -8563,6 +9030,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -8718,6 +9192,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -8883,6 +9364,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -9128,6 +9616,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -9307,6 +9802,14 @@ declare namespace Components {
              */
             starred?: boolean;
             /**
+             * List of locations where the classification is enabled to be used. If empty, it's enabled for all locations.
+             */
+            enabled_locations?: (TaxonomyLocationId | string)[];
+            /**
+             * List of purpose slugs where the classification is enabled to be used. If empty, it's enabled for all purposes.
+             */
+            enabled_purposes?: string[];
+            /**
              * Manifest ID used to create/update the taxonomy classification
              */
             _manifest?: string /* uuid */[] | null;
@@ -9470,6 +9973,13 @@ declare namespace Components {
              */
             explicit_searchable?: boolean;
             /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
              * The attribute is a repeatable
              */
             repeatable?: boolean;
@@ -9630,6 +10140,13 @@ declare namespace Components {
              *
              */
             explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
             /**
              * The attribute is a repeatable
              */
@@ -10662,9 +11179,12 @@ declare namespace Paths {
             export type StartDate = string; // date-time
             /**
              * example:
-             * SyncActivity
+             * [
+             *   "EntityUpdated",
+             *   "EntityCreated"
+             * ]
              */
-            export type Type = string;
+            export type Type = string[];
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -10684,7 +11204,10 @@ declare namespace Paths {
             size?: Parameters.Size;
             type?: /**
              * example:
-             * SyncActivity
+             * [
+             *   "EntityUpdated",
+             *   "EntityCreated"
+             * ]
              */
             Parameters.Type;
             include_relations?: Parameters.IncludeRelations;
@@ -11304,6 +11827,16 @@ declare namespace Paths {
             export type From = number;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
+            export type IncludeDeleted = /**
+             * Whether to include deleted entities in the search results
+             * - `true`: include deleted entities
+             * - `false`: exclude deleted entities
+             * - `only`: include only deleted entities
+             *
+             * By default, no deleted entities are included in the search results.
+             *
+             */
+            Components.Schemas.EntitySearchIncludeDeletedParam;
             export type IncludeReverse = boolean;
             export type IncludeSchemas = /**
              * URL-friendly identifier for the entity schema
@@ -11333,6 +11866,7 @@ declare namespace Paths {
             exclude_schemas?: Parameters.ExcludeSchemas;
             mode?: Parameters.Mode;
             fields?: Parameters.Fields;
+            include_deleted?: Parameters.IncludeDeleted;
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetRelationsRespWithPagination;
@@ -11637,7 +12171,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -11663,7 +12197,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -11822,10 +12356,12 @@ declare namespace Paths {
     }
     namespace ListSchemas {
         namespace Parameters {
+            export type Exclude = string[];
             export type Unpublished = boolean;
         }
         export interface QueryParameters {
             unpublished?: Parameters.Unpublished;
+            exclude?: Parameters.Exclude;
         }
         namespace Responses {
             export interface $200 {
@@ -15438,6 +15974,7 @@ export type LinkAttribute = Components.Schemas.LinkAttribute;
 export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
 export type MessageEmailAddressAttribute = Components.Schemas.MessageEmailAddressAttribute;
 export type MultiSelectAttribute = Components.Schemas.MultiSelectAttribute;
+export type NullableEntity = Components.Schemas.NullableEntity;
 export type NumberAttribute = Components.Schemas.NumberAttribute;
 export type OrderedListAttribute = Components.Schemas.OrderedListAttribute;
 export type PartnerOrganisationAttribute = Components.Schemas.PartnerOrganisationAttribute;

@@ -1,5 +1,11 @@
 # @epilot/customer-portal-client
 
+## 0.33.1
+
+### Patch Changes
+
+- Use runtime definition
+
 ## 0.29.1
 
 ### Patch Changes

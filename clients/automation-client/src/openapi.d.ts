@@ -126,7 +126,7 @@ declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | TriggerEventAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -314,6 +314,20 @@ declare namespace Components {
         InformERPActionConfig | /**
          * example:
          * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Trigger Event",
+         *   "type": "trigger-event",
+         *   "config": {
+         *     "event_name": "my_custom_event",
+         *     "event_inputs": {
+         *       "key": "value"
+         *     }
+         *   }
+         * }
+         */
+        TriggerEventActionConfig | /**
+         * example:
+         * {
          *   "id": "08g988-ojt2jtaga-292h-8978gsaga",
          *   "name": "Create Document",
          *   "type": "create-document",
@@ -479,7 +493,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | FlowsTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -806,7 +820,7 @@ declare namespace Components {
              * 2
              */
             version?: number;
-            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask;
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
             workflow_context?: WorkflowExecutionContext;
         }
         /**
@@ -2040,9 +2054,32 @@ declare namespace Components {
             AutomationExecutionId;
             execution_status: ExecutionStatus;
             /**
+             * Timestamp in UTC ISO format
+             * example:
+             * 2025-10-30T15:56:47.842Z
+             */
+            timestamp?: string; // date-time
+            /**
              * Error message for the failed automation execution
              */
             error?: string;
+        }
+        /**
+         * [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers.
+         */
+        export interface ExecutionChain {
+            /**
+             * ID of the parent flow execution that triggered this one
+             */
+            parent_execution_id?: string;
+            /**
+             * ID of the automation task that triggered this execution
+             */
+            parent_task_id?: string;
+            /**
+             * Current depth in the execution chain (0 = manual start)
+             */
+            depth?: number;
         }
         export type ExecutionStatus = "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
         export interface ExistsCondition {
@@ -2695,6 +2732,91 @@ declare namespace Components {
              */
             version?: number;
         }
+        export interface MoveThreadAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "move-thread";
+            config?: MoveThreadConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        export interface MoveThreadConfig {
+            /**
+             * ID of the inbox where the thread should be moved to
+             */
+            target_inbox_id?: string;
+        }
+        export interface NewEmailThreadTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "new_email_thread";
+            configuration: {
+                /**
+                 * A list of shared inbox IDs that the email thread should be matched against.
+                 */
+                shared_inbox_ids?: string[];
+                /**
+                 * Whether the trigger should be matched against only inbound, outbound emails or both.
+                 */
+                direction: "INBOUND" | "OUTBOUND" | "BOTH";
+            };
+        }
         export interface NumericCondition {
             numeric?: (string | number)[];
         }
@@ -3092,6 +3214,145 @@ declare namespace Components {
         export interface TriggerContext {
             [name: string]: string;
         }
+        export interface TriggerEventAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-event";
+            config?: /* Configuration for triggering an event catalog event */ TriggerEventConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "2520gja-2sgmsaga-0asg-822jgal",
+         *   "name": "Trigger Event",
+         *   "type": "trigger-event",
+         *   "config": {
+         *     "event_name": "my_custom_event",
+         *     "event_inputs": {
+         *       "key": "value"
+         *     }
+         *   }
+         * }
+         */
+        export interface TriggerEventActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "trigger-event";
+            config?: /* Configuration for triggering an event catalog event */ TriggerEventConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        /**
+         * Configuration for triggering an event catalog event
+         */
+        export interface TriggerEventConfig {
+            /**
+             * The event catalog event name to trigger
+             */
+            event_name: string;
+            /**
+             * Inputs to be passed to trigger the event
+             */
+            event_inputs?: {
+                [name: string]: any;
+            };
+        }
         export interface TriggerEventEntityActivity {
             type?: "entity_activity";
             /**
@@ -3167,6 +3428,21 @@ declare namespace Components {
              */
             EntityId;
             caller?: ApiCallerContext;
+        }
+        export interface TriggerEventMessaging {
+            type?: "new_email_thread";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            thread_id: string;
+            message_id: string;
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
         }
         export interface TriggerShareEntityAction {
             id?: /**
@@ -3638,6 +3914,7 @@ declare namespace Components {
             workflow_exec_id: string;
             workflow_exec_task_id?: string;
             workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
+            _execution_chain?: /* [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers. */ ExecutionChain;
         }
     }
 }
@@ -4496,6 +4773,7 @@ export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
 export type ExecItem = Components.Schemas.ExecItem;
+export type ExecutionChain = Components.Schemas.ExecutionChain;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
@@ -4517,6 +4795,9 @@ export type MappingAttribute = Components.Schemas.MappingAttribute;
 export type MappingAttributeMode = Components.Schemas.MappingAttributeMode;
 export type MappingAttributeV2 = Components.Schemas.MappingAttributeV2;
 export type MappingConfigRef = Components.Schemas.MappingConfigRef;
+export type MoveThreadAction = Components.Schemas.MoveThreadAction;
+export type MoveThreadConfig = Components.Schemas.MoveThreadConfig;
+export type NewEmailThreadTrigger = Components.Schemas.NewEmailThreadTrigger;
 export type NumericCondition = Components.Schemas.NumericCondition;
 export type OperationNode = Components.Schemas.OperationNode;
 export type OperationObjectNode = Components.Schemas.OperationObjectNode;
@@ -4543,10 +4824,14 @@ export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;
 export type TriggerCondition = Components.Schemas.TriggerCondition;
 export type TriggerContext = Components.Schemas.TriggerContext;
+export type TriggerEventAction = Components.Schemas.TriggerEventAction;
+export type TriggerEventActionConfig = Components.Schemas.TriggerEventActionConfig;
+export type TriggerEventConfig = Components.Schemas.TriggerEventConfig;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
 export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;
 export type TriggerEventManual = Components.Schemas.TriggerEventManual;
+export type TriggerEventMessaging = Components.Schemas.TriggerEventMessaging;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
 export type TriggerShareEntityConfig = Components.Schemas.TriggerShareEntityConfig;

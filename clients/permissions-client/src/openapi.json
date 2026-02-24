@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Permissions API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Flexible Role-based Access Control for epilot"
   },
   "tags": [
@@ -1142,6 +1142,11 @@
                     "$ref": "#/components/schemas/OrganizationId"
                   }
                 ]
+              },
+              "vendor_enforced_user_limit": {
+                "type": "integer",
+                "readOnly": true,
+                "description": "Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)"
               }
             }
           }

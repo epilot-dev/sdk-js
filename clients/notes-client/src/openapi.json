@@ -8,12 +8,6 @@
   "servers": [
     {
       "url": "https://notes.sls.epilot.io"
-    },
-    {
-      "url": "https://notes.sls.epilot.io"
-    },
-    {
-      "url": "https://notes.sls.epilot.io"
     }
   ],
   "tags": [
@@ -261,26 +255,6 @@
               "description": "The ID of the Contextual Entity from where to retrieve Notes"
             },
             "required": true
-          },
-          {
-            "in": "path",
-            "name": "from",
-            "description": "The index of the first Note to return in this query",
-            "schema": {
-              "type": "number",
-              "default": 0,
-              "description": "The index of the first Note to return in this query"
-            }
-          },
-          {
-            "in": "path",
-            "name": "size",
-            "description": "The number of Note entries to return in this query",
-            "schema": {
-              "type": "number",
-              "default": 10,
-              "description": "The number of Note entries to return in this query"
-            }
           },
           {
             "in": "query",
@@ -695,6 +669,37 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/CreatedByType"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
           "read_by": {
             "type": "array",
             "items": {
@@ -751,17 +756,6 @@
             ],
             "description": "The Entity ID of the User that created this Note"
           },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "description": "The Entity ID of the User that created this Note"
-          },
           "_tags": {
             "type": "array",
             "items": {
@@ -806,6 +800,13 @@
           "_id"
         ],
         "description": "Base Entity schema"
+      },
+      "CreatedByType": {
+        "type": "string",
+        "enum": [
+          "user",
+          "group"
+        ]
       },
       "NoteGetRequestResponse": {
         "allOf": [
@@ -865,6 +866,37 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/CreatedByType"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ]
           },
           "read_by": {
             "type": "array",
@@ -951,6 +983,36 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "group"
+                ]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ]
           },
           "read_by": {
             "type": "array",
@@ -1057,6 +1119,36 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "group"
+                ]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
           "read_by": {
             "type": "array",
             "items": {
@@ -1126,17 +1218,6 @@
             "format": "date-time"
           },
           "_created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "description": "The Entity ID of the User that created this Note"
-          },
-          "created_by": {
             "anyOf": [
               {
                 "type": "string"
@@ -1257,6 +1338,36 @@
             "type": "string",
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user",
+                  "group"
+                ]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ]
           },
           "read_by": {
             "type": "array",

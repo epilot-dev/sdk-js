@@ -828,6 +828,13 @@ declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -836,7 +843,13 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -1149,10 +1162,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -1186,6 +1201,13 @@ declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -1194,7 +1216,13 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -1507,10 +1535,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -1620,6 +1650,34 @@ declare namespace Components {
                 de?: string;
             };
             content?: string;
+        }
+        /**
+         * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+         * example:
+         * [
+         *   {
+         *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+         *     "entity_schema": "contract"
+         *   }
+         * ]
+         */
+        export type ContextEntities = /* An entity reference for context-aware operations */ ContextEntity[];
+        /**
+         * An entity reference for context-aware operations
+         */
+        export interface ContextEntity {
+            /**
+             * Entity schema
+             * example:
+             * contract
+             */
+            entity_schema: string;
+            /**
+             * Entity id
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            entity_id: string; // uuid
         }
         /**
          * The contract entity
@@ -1932,6 +1990,23 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
+        }
+        /**
+         * Domain settings for the portal
+         */
+        export interface DomainSettings {
+            /**
+             * Whether the custom domain is enabled
+             */
+            is_custom_domain_enabled?: boolean;
+            /**
+             * Whether the Epilot domain is enabled
+             */
+            is_epilot_domain_enabled?: boolean;
+            /**
+             * Whether the redirection is enabled
+             */
+            is_redirection_enabled?: boolean;
         }
         /**
          * Email templates used for authentication and internal processes
@@ -2288,6 +2363,36 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+        }
+        /**
+         * Configuration for matching existing entities during SSO login using token claims
+         */
+        export interface EntityMatchingConfig {
+            /**
+             * Mapping of portal_user attributes to token claim paths. All configured fields must match (AND logic).
+             * example:
+             * {
+             *   "external_id": "sub"
+             * }
+             */
+            portal_user?: {
+                [name: string]: string;
+            };
+            /**
+             * Mapping of contact attributes to token claim paths. All configured fields must match (AND logic).
+             * example:
+             * {
+             *   "customer_number": "customer_id",
+             *   "external_id": "sub"
+             * }
+             */
+            contact?: {
+                [name: string]: string;
+            };
+            /**
+             * Whether to automatically create Cognito user when matched portal_user has no authentication data. Defaults to true.
+             */
+            auto_create_cognito_user?: boolean;
         }
         /**
          * Response for entity get request
@@ -2767,12 +2872,17 @@ declare namespace Components {
              *
              */
             ExtensionHookRegistrationIdentifiersCheck | /**
-             * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-             *   - 200 if found with either:
-             *     - contract_id array
-             *     - contact_id string
-             *   - 404 if no contract is found
-             * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+             * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+             * The expected response http status code to the call is:
+             *   - 200 if found
+             *   - 404 if not found
+             *
+             * The following assignment modes are supported:
+             *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+             *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+             *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+             *
+             * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
              *
              */
             ExtensionHookContractIdentification | /**
@@ -2913,12 +3023,17 @@ declare namespace Components {
             use_static_ips?: boolean;
         }
         /**
-         * Hook that replaces the built-in contract identification for self-assignment. This hook makes a POST call whenever a user is trying to self-assign a contract to find the corresponding contract(s). The expected response to the call is:
-         *   - 200 if found with either:
-         *     - contract_id array
-         *     - contact_id string
-         *   - 404 if no contract is found
-         * If `contact_id` is provided in the response, Contracts are retrieved from this Contact. In that case, optionally, if you also specify `contact_relation_attribute`, the specified Contact attribute of the user performing the action will be modified to add the matched Contact.
+         * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
+         * The expected response http status code to the call is:
+         *   - 200 if found
+         *   - 404 if not found
+         *
+         * The following assignment modes are supported:
+         *   - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).
+         *   - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.
+         *   - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.
+         *
+         * Defaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.
          *
          */
         export interface ExtensionHookContractIdentification {
@@ -2951,9 +3066,17 @@ declare namespace Components {
                 body?: {
                     [key: string]: any;
                 };
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 */
+                result?: string;
             };
             /**
-             * Name of the Contact attribute to update with the matched Contact ID. Must be a Contact relation attribute supporting multiple entities.
+             * Mode of contract assignment. See hook description for mode details.
+             */
+            assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user";
+            /**
+             * Name of the Contact attribute to update with the matched Contact ID when using `contact_to_contracts` mode. Must be a Contact relation attribute supporting multiple entities.
              * example:
              * represents_contact
              */
@@ -2966,7 +3089,7 @@ declare namespace Components {
                 /**
                  * Explanation of the functionality shown to the end user.
                  * example:
-                 * This process will give you access to all Contracts kept
+                 * This process will give you access to the matching Contracts.
                  */
                 en: string;
             };
@@ -3033,6 +3156,13 @@ declare namespace Components {
          */
         export interface ExtensionHookMeterReadingPlausibilityCheck {
             type: "meterReadingPlausibilityCheck";
+            /**
+             * Mode for plausibility check:
+             * - "check": Validates meter reading and returns valid: boolean (used during submission)
+             * - "range": Returns min/max allowed values for each counter for validation before submission
+             *
+             */
+            plausibility_mode?: "check" | "range";
             auth?: ExtensionAuthBlock;
             call: {
                 /**
@@ -3057,7 +3187,33 @@ declare namespace Components {
              */
             resolved: {
                 /**
-                 * Indicate whether the meter reading is plausible
+                 * Optional path to an array in the response. If specified and the path points to an array,
+                 * the hook will map over each item using 'Item' variable for interpolation.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 * example:
+                 * data.results
+                 */
+                dataPath?: string;
+                /**
+                 * Counter identifier(s) used to match against the meter's counters.
+                 * Can be a string (counter ID) or an object with counter properties.
+                 * The backend resolves this to meter_counter_id in the final response.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 */
+                counter_identifiers?: /**
+                 * Counter identifier(s) used to match against the meter's counters.
+                 * Can be a string (counter ID) or an object with counter properties.
+                 * The backend resolves this to meter_counter_id in the final response.
+                 * Relevant only if plausibility_mode is "range".
+                 *
+                 */
+                string | {
+                    [name: string]: string;
+                };
+                /**
+                 * Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is "check".
                  * example:
                  * {{CallResponse.data.valid}}
                  */
@@ -3164,9 +3320,9 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. Supports variable interpolation.
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
-                result: string;
+                result?: string;
             };
             /**
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
@@ -3593,6 +3749,12 @@ declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
+            /**
+             * The URL to redirect to
+             * example:
+             * https://example.com
+             */
+            redirect_to?: string;
         }
         /**
          * The meter entity
@@ -3718,6 +3880,12 @@ declare namespace Components {
              * The external ID of the reading
              */
             external_id?: string;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
             /**
              * Additional metadata for the reading
              * example:
@@ -3887,6 +4055,22 @@ declare namespace Components {
              * https://graph.facebook.com/me
              */
             userinfo_endpoint?: string;
+            /**
+             * URL of the logout/end session endpoint
+             * example:
+             * https://login.microsoftonline.com/common/oauth2/v2.0/logout
+             */
+            logout_uri?: string;
+            /**
+             * URL to redirect to after logout completes
+             * example:
+             * https://customer-portal.com/login
+             */
+            logout_redirect_uri?: string;
+            /**
+             * When true, skip SSO logout redirect during "login as" flow. Use this for providers that cannot redirect back after logout and would break log in as.
+             */
+            skip_login_as_logout?: boolean;
             /**
              * URL of the mobile redirect URI
              * example:
@@ -4171,6 +4355,12 @@ declare namespace Components {
              */
             is_detail?: boolean;
             /**
+             * The schema of the detail page
+             * example:
+             * contact
+             */
+            detail_schema?: string;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4262,6 +4452,12 @@ declare namespace Components {
              */
             is_detail?: boolean;
             /**
+             * The schema of the detail page
+             * example:
+             * contact
+             */
+            detail_schema?: string;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4323,13 +4519,26 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -4642,10 +4851,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -4764,13 +4975,26 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -5083,10 +5307,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -5136,6 +5362,12 @@ declare namespace Components {
             identity_providers?: ProviderPublicConfig[];
             pages?: Page[];
         }
+        /**
+         * ID of the portal
+         * example:
+         * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+         */
+        export type PortalId = string;
         /**
          * The portal user entity
          */
@@ -5245,6 +5477,7 @@ declare namespace Components {
             ProviderDisplayName;
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
+            entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
             oidc_config?: OIDCProviderConfig;
             mobile_oidc_config?: MoblieOIDCConfig;
         }
@@ -5315,6 +5548,10 @@ declare namespace Components {
                 extension?: PublicExtensionDetails;
                 hook?: PublicContractIdentificationDetails;
             };
+            meterReadingPlausibilityCheck?: {
+                extension?: PublicExtensionDetails;
+                hook?: PublicMeterReadingPlausibilityCheckDetails;
+            };
         }
         export interface PublicExtensionDetails {
             /**
@@ -5328,6 +5565,15 @@ declare namespace Components {
                  */
                 en: string;
             };
+        }
+        export interface PublicMeterReadingPlausibilityCheckDetails {
+            /**
+             * Mode for plausibility check:
+             * - "check": Validates meter reading and returns valid: boolean (used during submission)
+             * - "range": Returns min/max allowed values for validation before submission
+             *
+             */
+            plausibility_mode?: "check" | "range";
         }
         /**
          * The person who recorded the reading
@@ -5783,13 +6029,26 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -6102,10 +6361,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -6178,13 +6439,26 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
-            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
             /**
              * Feature settings for the portal
              */
@@ -6497,10 +6771,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
-            /**
+            portal_id?: /**
              * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            portal_id?: string;
+            PortalId;
             /**
              * Key of the portal config
              * example:
@@ -6703,7 +6979,7 @@ declare namespace Paths {
             export type PortalId = string;
         }
         export interface QueryParameters {
-            origin: Parameters.Origin;
+            origin?: Parameters.Origin;
             portal_id: /**
              * Portal ID
              * example:
@@ -6754,12 +7030,74 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CheckContactExistsV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        export type RequestBody = Components.Schemas.ContactExistsRequest;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the contact exists with the given identifier values
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+                /**
+                 * ID of the contact if exists
+                 */
+                contactId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ConfigureDistribution {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
         }
         export interface QueryParameters {
             origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * The domain name of the configured distribution
+                 * example:
+                 * dsj8op4ha01jha23.cloudfront.net
+                 */
+                domainName?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ConfigureDistributionV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
         }
         namespace Responses {
             export interface $200 {
@@ -6931,6 +7269,27 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             origin: Parameters.Origin;
+        }
+        export type RequestBody = Components.Schemas.CreateUserRequest;
+        namespace Responses {
+            export interface $201 {
+                message: "User created successfully";
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateUserV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
         }
         export type RequestBody = Components.Schemas.CreateUserRequest;
         namespace Responses {
@@ -7667,6 +8026,62 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetAllowedMeterReadingRange {
+        namespace Parameters {
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+            export type MeterId = string;
+            export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
+            /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            export type Timestamp = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface QueryParameters {
+            origin?: Parameters.Origin;
+            timestamp?: /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            Parameters.Timestamp;
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    /**
+                     * The ID of the counter
+                     */
+                    meter_counter_id?: string;
+                    /**
+                     * Minimum allowed reading value
+                     */
+                    min_value?: number | null;
+                    /**
+                     * Maximum allowed reading value
+                     */
+                    max_value?: number | null;
+                }[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAutomationContext {
         namespace Parameters {
             export type ActivityId = /**
@@ -7795,6 +8210,17 @@ declare namespace Paths {
     namespace GetConsumption {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7806,10 +8232,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -7939,6 +8366,17 @@ declare namespace Paths {
     namespace GetCosts {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -7950,10 +8388,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -8049,6 +8488,20 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEmailTemplatesByPortalId {
+        namespace Parameters {
+            export type PortalId = string;
+        }
+        export interface PathParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export type $200 = /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetEntityActivityFeed {
         namespace Parameters {
             export type After = string; // date-time
@@ -8135,6 +8588,93 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntityWorkflows {
+        namespace Parameters {
+            /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            export type Id = string;
+            /**
+             * Schema slug of the entity
+             * example:
+             * contact
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * Schema slug of the entity
+             * example:
+             * contact
+             */
+            Parameters.Slug;
+            id: /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                workflow_executions?: /**
+                 * example:
+                 * {
+                 *   "id": "8gja72h6kas6h",
+                 *   "name": "Lead Qualification",
+                 *   "trigger": "MANUAL",
+                 *   "status": "STARTED",
+                 *   "creationTime": "2021-04-27T12:01:13.000Z",
+                 *   "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+                 *   "dueDate": "2021-04-27T12:01:13.000Z",
+                 *   "assignedTo": [
+                 *     "252",
+                 *     "29052"
+                 *   ],
+                 *   "flow": [
+                 *     {
+                 *       "id": "sectionId1",
+                 *       "name": "Initial Information Gathering",
+                 *       "steps": [
+                 *         {
+                 *           "id": "sada5641f3a21",
+                 *           "name": "Call client and confirm address and product",
+                 *           "status": "ASSIGNED",
+                 *           "assignedTo": [
+                 *             "11"
+                 *           ]
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a22",
+                 *           "name": "Check product availability",
+                 *           "status": "UNASSIGNED"
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a23",
+                 *           "name": "Send email confirming contact with the client",
+                 *           "status": "SKIPPED"
+                 *         }
+                 *       ]
+                 *     },
+                 *     {
+                 *       "id": "firstLevelStepId1",
+                 *       "name": "Print and send catalog",
+                 *       "status": "SKIPPED",
+                 *       "dueDate": "2023-01-15T20:00:00"
+                 *     }
+                 *   ]
+                 * }
+                 */
+                Components.Schemas.WorkflowExecution[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetExternalLinks {
         namespace Parameters {
             export type ContactId = /**
@@ -8147,6 +8687,32 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             origin?: Parameters.Origin;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExternalLink[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetExternalLinksV3 {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id?: Parameters.PortalId;
             contactId?: Parameters.ContactId;
         }
         namespace Responses {
@@ -8394,13 +8960,26 @@ declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
-                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "USER_ACCOUNT_SELF_MANAGEMENT" | "DENY";
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Enable or disable user account self management
+                 * example:
+                 * false
+                 */
+                user_account_self_management?: boolean;
                 /**
                  * Feature settings for the portal
                  */
@@ -8713,10 +9292,458 @@ declare namespace Paths {
                  * Whether this is a v3 portal configuration
                  */
                 is_v3_item?: boolean;
-                /**
+                portal_id?: /**
                  * ID of the portal
+                 * example:
+                 * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
                  */
-                portal_id?: string;
+                Components.Schemas.PortalId;
+                /**
+                 * Key of the portal config
+                 * example:
+                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                portal_sk_v3?: string;
+                origin?: /* Origin of the portal */ Components.Schemas.Origin;
+                pages?: {
+                    [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                id?: string;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                organization_id?: string;
+                /**
+                 * Organization settings
+                 */
+                org_settings?: {
+                    /**
+                     * Canary feature flag
+                     */
+                    canary?: {
+                        /**
+                         * Enable/Disable the canary feature
+                         */
+                        enabled?: boolean;
+                    };
+                    /**
+                     * Disable Advanced Usage Metrics
+                     */
+                    notracking?: {
+                        /**
+                         * Disable browser-side scripts that track advanced usage metrics
+                         */
+                        enabled?: boolean;
+                    };
+                };
+                /**
+                 * Feature flags for the portal
+                 */
+                feature_flags?: {
+                    [name: string]: boolean;
+                };
+                /**
+                 * Permissions granted to a portal user while accessing entities
+                 */
+                grants?: Components.Schemas.Grant[];
+                identity_providers?: Components.Schemas.ProviderPublicConfig[];
+                certificate_details?: {
+                    /**
+                     * Status of the certificate
+                     */
+                    status?: "PENDING_VALIDATION" | "ISSUED" | "INACTIVE" | "EXPIRED" | "VALIDATION_TIMED_OUT" | "REVOKED" | "FAILED" | "PENDING_AUTO_RENEWAL";
+                    /**
+                     * Reason for failed certificate
+                     * example:
+                     * CAA_ERROR
+                     */
+                    failed_reason?: string;
+                };
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetOrgPortalConfigV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Enable/Disable the portal access
+                 */
+                enabled?: boolean;
+                /**
+                 * A short name to identify your portal
+                 * example:
+                 * Installer Portal
+                 */
+                name?: string;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * abc.com
+                 */
+                domain: string;
+                /**
+                 * Mark true if the domain is an Epilot domain
+                 */
+                is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
+                design_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Enable or disable user account self management
+                 * example:
+                 * false
+                 */
+                user_account_self_management?: boolean;
+                /**
+                 * Feature settings for the portal
+                 */
+                feature_settings?: {
+                    /**
+                     * Start page feature flag
+                     */
+                    start_page?: boolean;
+                    /**
+                     * Billing feature flag
+                     */
+                    billing?: boolean;
+                    /**
+                     * Change due date feature flag
+                     */
+                    change_due_date?: boolean;
+                    /**
+                     * Enable or disable the new design for the portal
+                     */
+                    new_design?: boolean;
+                };
+                /**
+                 * Access token for the portal
+                 */
+                accessToken?: string;
+                advanced_mfa?: {
+                    /**
+                     * Advanced MFA feature flag
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Authentication settings for the portal
+                 */
+                auth_settings?: {
+                    passwordless_login?: {
+                        /**
+                         * Passwordless login feature flag
+                         */
+                        enabled?: boolean;
+                    };
+                    entry_point?: "PASSWORD" | "SSO";
+                    preferred_sso_providers?: /**
+                     * URL-friendly slug to use as organization-unique identifier for Provider
+                     * example:
+                     * office-365-login
+                     */
+                    Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                    /**
+                     * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                     */
+                    auto_redirect_to_sso?: boolean;
+                };
+                /**
+                 * AWS Cognito Pool details for the portal
+                 */
+                cognito_details?: {
+                    /**
+                     * Cognito user pool client ID
+                     * example:
+                     * 6bsd0jkgoie74k2i8mrhc1vest
+                     */
+                    cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool ARN
+                     * example:
+                     * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                     */
+                    cognito_user_pool_arn?: string;
+                    /**
+                     * Cognito user pool ID
+                     * example:
+                     * eu-central-1_CUEQRNbUb
+                     */
+                    cognito_user_pool_id?: string;
+                    /**
+                     * Password policy for the portal
+                     */
+                    password_policy?: {
+                        /**
+                         * Minimum password length
+                         * example:
+                         * 8
+                         */
+                        minimum_length?: number;
+                        /**
+                         * Maximum password length
+                         * example:
+                         * 256
+                         */
+                        maximum_length?: number;
+                        /**
+                         * Require lowercase characters
+                         * example:
+                         * true
+                         */
+                        require_lowercase?: boolean;
+                        /**
+                         * Require uppercase characters
+                         * example:
+                         * true
+                         */
+                        require_uppercase?: boolean;
+                        /**
+                         * Require numbers
+                         * example:
+                         * true
+                         */
+                        require_numbers?: boolean;
+                        /**
+                         * Require symbols
+                         * example:
+                         * true
+                         */
+                        require_symbols?: boolean;
+                    };
+                };
+                /**
+                 * Stringified object with configuration details
+                 */
+                config?: string;
+                /**
+                 * Deprecated. Use registration_identifiers instead.
+                 * example:
+                 * [
+                 *   "email",
+                 *   "last_name"
+                 * ]
+                 */
+                contact_identifiers?: string[];
+                /**
+                 * example:
+                 * {
+                 *   "contact": [
+                 *     "name",
+                 *     "address"
+                 *   ],
+                 *   "contract": [
+                 *     "installment_amount"
+                 *   ]
+                 * }
+                 */
+                approval_state_attributes?: {
+                    [name: string]: string[];
+                };
+                email_templates?: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+                /**
+                 * Teaser & Banner Image web links
+                 */
+                images?: {
+                    /**
+                     * URL of the order left teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                     */
+                    orderLeftTeaser?: string | null;
+                    /**
+                     * URL of the order right teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                     */
+                    orderRightTeaser?: string | null;
+                    /**
+                     * URL of the welcome banner image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                     */
+                    welcomeBanner?: string | null;
+                };
+                /**
+                 * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+                 */
+                entity_identifiers?: {
+                    type?: {
+                        /**
+                         * Enable/Disable the entity identifier
+                         */
+                        isEnabled?: boolean;
+                        /**
+                         * Attributes used to identify an entity
+                         */
+                        attributes?: string[];
+                    };
+                };
+                /**
+                 * Identifiers to identify a contract by a portal user.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "email",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                contract_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Configuration for contract selector in the portal
+                 */
+                contract_selector_config?: {
+                    /**
+                     * Whether to show inactive contracts in the selector
+                     */
+                    show_inactive?: boolean;
+                    /**
+                     * Path to the property to use as the contract title
+                     */
+                    title_path?: string;
+                };
+                /**
+                 * Identifiers to identify a contact of a portal user during the registration.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                registration_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Journeys automatically opened on a portal user action
+                 */
+                triggered_journeys?: {
+                    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                    journey_id?: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                }[];
+                /**
+                 * Rules for editing an entity by a portal user
+                 */
+                entity_edit_rules?: {
+                    slug?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    Components.Schemas.EntitySlug;
+                    /**
+                     * example:
+                     * first_name
+                     */
+                    attribute?: string;
+                    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                    cadence_period_type?: "days" | "weeks" | "months";
+                    /**
+                     * example:
+                     * 1
+                     */
+                    cadence_period?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    changes_allowed?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    grace_period?: number;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_increment?: string;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_decrement?: string;
+                    /**
+                     * example:
+                     * 10
+                     */
+                    number_of_days_before_restriction?: number;
+                }[];
+                allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
+                /**
+                 * Prevent indexing by search engines
+                 */
+                prevent_search_engine_indexing?: boolean;
+                /**
+                 * Grace period in days for meter readings
+                 */
+                meter_reading_grace_period?: number;
+                /**
+                 * Number of years to look back for showing inactive contracts in the portal
+                 */
+                inactive_contract_cutoff_years?: number;
+                /**
+                 * Whether this is a dummy/test portal configuration
+                 */
+                is_dummy?: boolean;
+                /**
+                 * Whether this is a v3 portal configuration
+                 */
+                is_v3_item?: boolean;
+                portal_id?: /**
+                 * ID of the portal
+                 * example:
+                 * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                Components.Schemas.PortalId;
                 /**
                  * Key of the portal config
                  * example:
@@ -8897,6 +9924,25 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalExtensionsV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Extension[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalPage {
         namespace Responses {
             export type $200 = Components.Schemas.Page;
@@ -8926,7 +9972,8 @@ declare namespace Paths {
     }
     namespace GetPortalPages {
         namespace Parameters {
-            /**
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
              * example:
              * [
              *   {
@@ -8935,20 +9982,7 @@ declare namespace Paths {
              *   }
              * ]
              */
-            export type ContextEntities = {
-                /**
-                 * Entity schema
-                 * example:
-                 * contract
-                 */
-                entity_schema: string;
-                /**
-                 * Entity id
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                entity_id: string; // uuid
-            }[];
+            Components.Schemas.ContextEntities;
             export type ContractId = /**
              * Entity ID
              * example:
@@ -8978,16 +10012,7 @@ declare namespace Paths {
              */
             Parameters.Filter;
             contract_id?: Parameters.ContractId;
-            context_entities?: /**
-             * example:
-             * [
-             *   {
-             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-             *     "entity_schema": "contract"
-             *   }
-             * ]
-             */
-            Parameters.ContextEntities;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Page[];
@@ -9039,6 +10064,17 @@ declare namespace Paths {
     namespace GetPrices {
         namespace Parameters {
             export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
@@ -9050,10 +10086,11 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
             hookId: Parameters.HookId;
-            meter_id: Parameters.MeterId;
+            meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
             interval: Parameters.Interval;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -9233,6 +10270,35 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPublicPortalConfigV3 {
+        namespace Parameters {
+            /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id: /**
+             * Organization ID
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalConfig;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPublicPortalExtensionDetails {
         namespace Parameters {
             /**
@@ -9251,6 +10317,37 @@ declare namespace Paths {
              */
             Parameters.OrgId;
             origin: Parameters.Origin;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PublicExtensionCapabilities;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPortalExtensionDetailsV3 {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         namespace Responses {
             export type $200 = Components.Schemas.PublicExtensionCapabilities;
@@ -9405,10 +10502,46 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetResolvedExternalLinkV3 {
+        namespace Parameters {
+            export type ContactId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            portal_id?: Parameters.PortalId;
+            contactId?: Parameters.ContactId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExternalLink;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetResolvedSeamlessLink {
         namespace Parameters {
             export type AppId = string;
-            /**
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
              * example:
              * [
              *   {
@@ -9417,20 +10550,7 @@ declare namespace Paths {
              *   }
              * ]
              */
-            export type ContextEntities = {
-                /**
-                 * Entity schema
-                 * example:
-                 * contract
-                 */
-                entity_schema: string;
-                /**
-                 * Entity id
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                entity_id: string; // uuid
-            }[];
+            Components.Schemas.ContextEntities;
             export type ExtensionId = string;
             export type LinkId = string;
         }
@@ -9438,16 +10558,7 @@ declare namespace Paths {
             app_id?: Parameters.AppId;
             extension_id: Parameters.ExtensionId;
             link_id: Parameters.LinkId;
-            context_entities?: /**
-             * example:
-             * [
-             *   {
-             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-             *     "entity_schema": "contract"
-             *   }
-             * ]
-             */
-            Parameters.ContextEntities;
+            context_entities?: Parameters.ContextEntities;
         }
         namespace Responses {
             export interface $200 {
@@ -9838,17 +10949,28 @@ declare namespace Paths {
     }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
-            [name: string]: {
-                /**
-                 * ID of the entity
-                 */
-                _id?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                Components.Schemas.EntityId /* uuid */;
-                is_main_entity?: boolean;
+            /**
+             * ID of the template
+             */
+            template_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            entity_context?: {
+                [name: string]: {
+                    /**
+                     * ID of the entity
+                     */
+                    _id?: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    is_main_entity?: boolean;
+                };
             };
         }
         namespace Responses {
@@ -9892,6 +11014,31 @@ declare namespace Paths {
                     /**
                      * example:
                      * https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
+                     */
+                    entityLink?: string;
+                    /**
+                     * example:
+                     * [
+                     *   "peter@doe.com",
+                     *   "jane@doe.com"
+                     * ]
+                     */
+                    userEmailsOnEntity?: string[];
+                };
+                portalUser?: {
+                    /**
+                     * example:
+                     * https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
+                     */
+                    invitationLink?: string;
+                    /**
+                     * example:
+                     * https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
+                     */
+                    newDocumentLink?: string;
+                    /**
+                     * example:
+                     * https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b
                      */
                     entityLink?: string;
                     /**
@@ -10127,6 +11274,58 @@ declare namespace Paths {
             }
         }
     }
+    namespace SsoLoginV3 {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type ContactId = string; // uuid
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+            org_id: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            contact_id?: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.ContactId /* uuid */;
+        }
+        export interface RequestBody {
+            provider_slug?: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                token?: Components.Schemas.SSOLoginToken;
+                /**
+                 * The email address of the user to log in as
+                 * example:
+                 * portal-customer@email.com
+                 */
+                email?: string;
+            }
+        }
+    }
     namespace SsoRedirect {
         namespace Parameters {
             /**
@@ -10165,14 +11364,18 @@ declare namespace Paths {
     }
     namespace SwapPortalConfig {
         export interface RequestBody {
-            /**
-             * Source portal ID
+            source_portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            source_portal_id: string;
-            /**
-             * Target portal ID
+            Components.Schemas.PortalId;
+            target_portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
-            target_portal_id: string;
+            Components.Schemas.PortalId;
             /**
              * Items to swap
              */
@@ -10243,6 +11446,46 @@ declare namespace Paths {
         export interface QueryParameters {
             entity_id?: Parameters.EntityId;
             origin: /* Origin of the portal */ Parameters.Origin;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Event ID
+                 */
+                eventId?: string;
+            }
+        }
+    }
+    namespace TriggerEntityAccessEventV3 {
+        namespace Parameters {
+            export type EntityId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            /**
+             * example:
+             * contract
+             */
+            export type Schema = string;
+        }
+        export interface PathParameters {
+            schema: /**
+             * example:
+             * contract
+             */
+            Parameters.Schema;
+        }
+        export interface QueryParameters {
+            entity_id?: Parameters.EntityId;
+            portal_id: Parameters.PortalId;
         }
         namespace Responses {
             export interface $200 {
@@ -10346,6 +11589,35 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.ForbiddenByRule;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateNotificationsStatus {
+        export interface RequestBody {
+            notifications: {
+                /**
+                 * ID of the notification
+                 */
+                id: string;
+                /**
+                 * The status to set for the notification
+                 */
+                status: "read" | "important";
+            }[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Message indicating the status of the notifications
+                 * example:
+                 * Notifications status updated successfully.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -10537,6 +11809,24 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpsertEmailTemplatesByPortalId {
+        namespace Parameters {
+            export type PortalId = string;
+        }
+        export interface PathParameters {
+            portal_id: Parameters.PortalId;
+        }
+        export type RequestBody = /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+        namespace Responses {
+            export interface $200 {
+                message: "Email Templates upserted successfully";
+                emailTemplates: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UpsertPortal {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -10602,6 +11892,54 @@ declare namespace Paths {
              */
             Parameters.OrgId;
             origin?: Parameters.Origin;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the user exists in the portal
+                 * example:
+                 * true
+                 */
+                exists: boolean;
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UserExistsV3 {
+        namespace Parameters {
+            /**
+             * Email Address of the portal user
+             * example:
+             * user@example.com
+             */
+            export type Email = string;
+            /**
+             * Organization ID
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            email: /**
+             * Email Address of the portal user
+             * example:
+             * user@example.com
+             */
+            Parameters.Email;
+            org_id: /**
+             * Organization ID
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
         }
         namespace Responses {
             export interface $200 {
@@ -10733,6 +12071,37 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ValidateCaaRecordsV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether to retry the validation to continue the domain setup
+                 */
+                retry?: boolean;
+                /**
+                 * Message of the validation
+                 */
+                message?: string;
+                /**
+                 * Whether the DNS is configured from the customer side
+                 */
+                isDNSConfigured?: boolean;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ValidateCadenceEntityEditRules {
         namespace Parameters {
             export type Attribute = string;
@@ -10798,6 +12167,16 @@ export interface OperationMethods {
     data?: Paths.CreateUser.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateUser.Responses.$201>
+  /**
+   * createUserV3 - createUserV3
+   * 
+   * Registers a portal user with portal id
+   */
+  'createUserV3'(
+    parameters?: Parameters<Paths.CreateUserV3.QueryParameters> | null,
+    data?: Paths.CreateUserV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateUserV3.Responses.$201>
   /**
    * validateToken - validateToken
    * 
@@ -10869,6 +12248,30 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
   /**
+   * getPortalExtensionsV3 - getPortalExtensionsV3
+   * 
+   * Retrieves the installed portal extensions.
+   */
+  'getPortalExtensionsV3'(
+    parameters?: Parameters<Paths.GetPortalExtensionsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalExtensionsV3.Responses.$200>
+  /**
+   * getPublicPortalExtensionDetailsV3 - getPublicPortalExtensionDetailsV3
+   * 
+   * Get public extension details shown to end customers and configuring users.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
+   */
+  'getPublicPortalExtensionDetailsV3'(
+    parameters?: Parameters<Paths.GetPublicPortalExtensionDetailsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalExtensionDetailsV3.Responses.$200>
+  /**
    * getConsumption - Get Consumption
    * 
    * Get energy consumption data between a given time period.
@@ -10919,6 +12322,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
   /**
+   * getExternalLinksV3 - getExternalLinksV3
+   * 
+   * Retrieves the portal configuration external links.
+   */
+  'getExternalLinksV3'(
+    parameters?: Parameters<Paths.GetExternalLinksV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExternalLinksV3.Responses.$200>
+  /**
+   * getResolvedExternalLinkV3 - getResolvedExternalLinkV3
+   * 
+   * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
+   */
+  'getResolvedExternalLinkV3'(
+    parameters?: Parameters<Paths.GetResolvedExternalLinkV3.QueryParameters & Paths.GetResolvedExternalLinkV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetResolvedExternalLinkV3.Responses.$200>
+  /**
    * getResolvedSeamlessLink - getResolvedSeamlessLink
    * 
    * Retrieves a resolved seamless portal link.
@@ -10949,6 +12372,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOrgPortalConfig.Responses.$200>
   /**
+   * getPublicPortalConfigV3 - getPublicPortalConfigV3
+   * 
+   * Retrieves the public portal configuration.
+   */
+  'getPublicPortalConfigV3'(
+    parameters?: Parameters<Paths.GetPublicPortalConfigV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalConfigV3.Responses.$200>
+  /**
+   * getOrgPortalConfigV3 - getOrgPortalConfigV3
+   * 
+   * Retrieves the portal configuration for the organization.
+   */
+  'getOrgPortalConfigV3'(
+    parameters?: Parameters<Paths.GetOrgPortalConfigV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrgPortalConfigV3.Responses.$200>
+  /**
    * getAllPortalConfigs - getAllPortalConfigs
    * 
    * Retrieves all portal configurations.
@@ -10978,6 +12421,26 @@ export interface OperationMethods {
     data?: Paths.UpsertEmailTemplates.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertEmailTemplates.Responses.$200>
+  /**
+   * getEmailTemplatesByPortalId - getEmailTemplatesByPortalId
+   * 
+   * Retrieves the email templates of a portal by portal ID
+   */
+  'getEmailTemplatesByPortalId'(
+    parameters?: Parameters<Paths.GetEmailTemplatesByPortalId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEmailTemplatesByPortalId.Responses.$200>
+  /**
+   * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
+   * 
+   * Upserts the email templates of a portal by portal ID
+   */
+  'upsertEmailTemplatesByPortalId'(
+    parameters?: Parameters<Paths.UpsertEmailTemplatesByPortalId.PathParameters> | null,
+    data?: Paths.UpsertEmailTemplatesByPortalId.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpsertEmailTemplatesByPortalId.Responses.$200>
   /**
    * getPublicPortalWidgets - getPublicPortalWidgets
    * 
@@ -11079,6 +12542,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
   /**
+   * validateCaaRecordsV3 - validateCaaRecordsV3
+   * 
+   * Validates the CAA records of a portal
+   */
+  'validateCaaRecordsV3'(
+    parameters?: Parameters<Paths.ValidateCaaRecordsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateCaaRecordsV3.Responses.$200>
+  /**
    * getContact - getContact
    * 
    * Retrieves the contact of the logged in user.
@@ -11118,6 +12591,16 @@ export interface OperationMethods {
     data?: Paths.CheckContactExists.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckContactExists.Responses.$200>
+  /**
+   * checkContactExistsV3 - checkContactExistsV3
+   * 
+   * True if contact with given identifiers exists.
+   */
+  'checkContactExistsV3'(
+    parameters?: Parameters<Paths.CheckContactExistsV3.QueryParameters> | null,
+    data?: Paths.CheckContactExistsV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
   /**
    * getValidSecondaryAttributes - getValidSecondaryAttributes
    * 
@@ -11219,6 +12702,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UserExists.Responses.$200>
   /**
+   * userExistsV3 - userExistsV3
+   * 
+   * Checks whether a user exists in the portal
+   */
+  'userExistsV3'(
+    parameters?: Parameters<Paths.UserExistsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UserExistsV3.Responses.$200>
+  /**
    * getRecipientsToNotifyOnAutomation - getRecipientsToNotifyOnAutomation
    * 
    * Get recipients to notify on automation
@@ -11238,6 +12731,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConfigureDistribution.Responses.$200>
+  /**
+   * configureDistributionV3 - configureDistributionV3
+   * 
+   * Configure the distribution for the portal's custom domain
+   */
+  'configureDistributionV3'(
+    parameters?: Parameters<Paths.ConfigureDistributionV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConfigureDistributionV3.Responses.$200>
   /**
    * getAllOrders - getAllOrders
    * 
@@ -11474,7 +12977,7 @@ export interface OperationMethods {
   /**
    * getAllFiles - getAllFiles
    * 
-   * Fetch all documents under the related entities of a contact
+   * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
    */
   'getAllFiles'(
     parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
@@ -11565,6 +13068,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   /**
+   * triggerEntityAccessEventV3 - triggerEntityAccessEventV3
+   * 
+   * Trigger entity access event for a portal user
+   */
+  'triggerEntityAccessEventV3'(
+    parameters?: Parameters<Paths.TriggerEntityAccessEventV3.QueryParameters & Paths.TriggerEntityAccessEventV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerEntityAccessEventV3.Responses.$200>
+  /**
    * getPortalUserEntity - getPortalUserEntity
    * 
    * Get a single entity for a portal user
@@ -11615,6 +13128,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   /**
+   * getEntityWorkflows - Get workflows for an entity
+   * 
+   * Get all workflows associated with an entity (requires access to the entity)
+   */
+  'getEntityWorkflows'(
+    parameters?: Parameters<Paths.GetEntityWorkflows.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
+  /**
    * uploadMeterReadingPhoto - Upload Meter Reading Photo
    * 
    * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
@@ -11635,6 +13158,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
+   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
+   * third-party plausibility check hook using 'range' mode. This endpoint requires 
+   * a plausibility check hook to be configured for the portal.
+   * 
+   */
+  'getAllowedMeterReadingRange'(
+    parameters?: Parameters<Paths.GetAllowedMeterReadingRange.QueryParameters & Paths.GetAllowedMeterReadingRange.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -11649,6 +13183,21 @@ export interface OperationMethods {
     data?: Paths.SsoLogin.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SsoLogin.Responses.$200>
+  /**
+   * ssoLoginV3 - ssoLoginV3
+   * 
+   * Initiate login using external SSO identity.
+   * 
+   * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+   * 
+   * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+   * 
+   */
+  'ssoLoginV3'(
+    parameters?: Parameters<Paths.SsoLoginV3.QueryParameters> | null,
+    data?: Paths.SsoLoginV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SsoLoginV3.Responses.$200>
   /**
    * ssoRedirect - ssoRedirect
    * 
@@ -11813,6 +13362,16 @@ export interface OperationMethods {
     data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
+  /**
+   * updateNotificationsStatus - updateNotificationsStatus
+   * 
+   * Updates the statuses of multiple notifications at once.
+   */
+  'updateNotificationsStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdateNotificationsStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateNotificationsStatus.Responses.$200>
   /**
    * deRegisterMLoginUser - deRegisterMLoginUser
    * 
@@ -11980,6 +13539,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateUser.Responses.$201>
   }
+  ['/v3/portal/public/user']: {
+    /**
+     * createUserV3 - createUserV3
+     * 
+     * Registers a portal user with portal id
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateUserV3.QueryParameters> | null,
+      data?: Paths.CreateUserV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateUserV3.Responses.$201>
+  }
   ['/v2/portal/token/validate']: {
     /**
      * validateToken - validateToken
@@ -12062,6 +13633,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicPortalExtensionDetails.Responses.$200>
   }
+  ['/v3/portal/extensions']: {
+    /**
+     * getPortalExtensionsV3 - getPortalExtensionsV3
+     * 
+     * Retrieves the installed portal extensions.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPortalExtensionsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalExtensionsV3.Responses.$200>
+  }
+  ['/v3/portal/public/extensions']: {
+    /**
+     * getPublicPortalExtensionDetailsV3 - getPublicPortalExtensionDetailsV3
+     * 
+     * Get public extension details shown to end customers and configuring users.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalExtensionDetailsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalExtensionDetailsV3.Responses.$200>
+  }
   ['/v2/portal/consumption']: {
     /**
      * getConsumption - Get Consumption
@@ -12122,6 +13721,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetResolvedExternalLink.Responses.$200>
   }
+  ['/v3/portal/external-links']: {
+    /**
+     * getExternalLinksV3 - getExternalLinksV3
+     * 
+     * Retrieves the portal configuration external links.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExternalLinksV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExternalLinksV3.Responses.$200>
+  }
+  ['/v3/portal/resolve:external-link/{id}']: {
+    /**
+     * getResolvedExternalLinkV3 - getResolvedExternalLinkV3
+     * 
+     * Retrieves a resolved portal external link. Use /v2/portal/resolve:seamless-link/{id} instead.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetResolvedExternalLinkV3.QueryParameters & Paths.GetResolvedExternalLinkV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetResolvedExternalLinkV3.Responses.$200>
+  }
   ['/v2/portal/resolve:seamless-link']: {
     /**
      * getResolvedSeamlessLink - getResolvedSeamlessLink
@@ -12158,6 +13781,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOrgPortalConfig.Responses.$200>
   }
+  ['/v3/portal/public/portal/config']: {
+    /**
+     * getPublicPortalConfigV3 - getPublicPortalConfigV3
+     * 
+     * Retrieves the public portal configuration.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalConfigV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalConfigV3.Responses.$200>
+  }
+  ['/v3/portal/org/portal/config']: {
+    /**
+     * getOrgPortalConfigV3 - getOrgPortalConfigV3
+     * 
+     * Retrieves the portal configuration for the organization.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetOrgPortalConfigV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrgPortalConfigV3.Responses.$200>
+  }
   ['/v2/portal/configs']: {
     /**
      * getAllPortalConfigs - getAllPortalConfigs
@@ -12191,6 +13838,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEmailTemplates.Responses.$200>
+  }
+  ['/v3/portal/email-templates/{portal_id}']: {
+    /**
+     * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
+     * 
+     * Upserts the email templates of a portal by portal ID
+     */
+    'post'(
+      parameters?: Parameters<Paths.UpsertEmailTemplatesByPortalId.PathParameters> | null,
+      data?: Paths.UpsertEmailTemplatesByPortalId.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpsertEmailTemplatesByPortalId.Responses.$200>
+    /**
+     * getEmailTemplatesByPortalId - getEmailTemplatesByPortalId
+     * 
+     * Retrieves the email templates of a portal by portal ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEmailTemplatesByPortalId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEmailTemplatesByPortalId.Responses.$200>
   }
   ['/v2/portal/public-widgets']: {
     /**
@@ -12310,6 +13979,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ValidateCaaRecords.Responses.$200>
   }
+  ['/v3/portal/validate/caa-records']: {
+    /**
+     * validateCaaRecordsV3 - validateCaaRecordsV3
+     * 
+     * Validates the CAA records of a portal
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateCaaRecordsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateCaaRecordsV3.Responses.$200>
+  }
   ['/v2/portal/contact']: {
     /**
      * getContact - getContact
@@ -12355,6 +14036,18 @@ export interface PathsDictionary {
       data?: Paths.CheckContactExists.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CheckContactExists.Responses.$200>
+  }
+  ['/v3/portal/public/contact/exists']: {
+    /**
+     * checkContactExistsV3 - checkContactExistsV3
+     * 
+     * True if contact with given identifiers exists.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckContactExistsV3.QueryParameters> | null,
+      data?: Paths.CheckContactExistsV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
   }
   ['/v2/portal/contact/valid/secondary/attributes']: {
     /**
@@ -12472,6 +14165,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UserExists.Responses.$200>
   }
+  ['/v3/portal/public/user/exists']: {
+    /**
+     * userExistsV3 - userExistsV3
+     * 
+     * Checks whether a user exists in the portal
+     */
+    'get'(
+      parameters?: Parameters<Paths.UserExistsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UserExistsV3.Responses.$200>
+  }
   ['/v2/portal/recipients-to-notify']: {
     /**
      * getRecipientsToNotifyOnAutomation - getRecipientsToNotifyOnAutomation
@@ -12495,6 +14200,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConfigureDistribution.Responses.$200>
+  }
+  ['/v3/portal/configure-distribution']: {
+    /**
+     * configureDistributionV3 - configureDistributionV3
+     * 
+     * Configure the distribution for the portal's custom domain
+     */
+    'get'(
+      parameters?: Parameters<Paths.ConfigureDistributionV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConfigureDistributionV3.Responses.$200>
   }
   ['/v2/portal/order']: {
     /**
@@ -12771,7 +14488,7 @@ export interface PathsDictionary {
     /**
      * getAllFiles - getAllFiles
      * 
-     * Fetch all documents under the related entities of a contact
+     * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
@@ -12878,6 +14595,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerEntityAccessEvent.Responses.$200>
   }
+  ['/v3/portal/entity/{schema}/access']: {
+    /**
+     * triggerEntityAccessEventV3 - triggerEntityAccessEventV3
+     * 
+     * Trigger entity access event for a portal user
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerEntityAccessEventV3.QueryParameters & Paths.TriggerEntityAccessEventV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerEntityAccessEventV3.Responses.$200>
+  }
   ['/v2/portal/entity:get']: {
     /**
      * getPortalUserEntity - getPortalUserEntity
@@ -12938,6 +14667,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   }
+  ['/v2/portal/entity/{slug}/{id}/workflows']: {
+    /**
+     * getEntityWorkflows - Get workflows for an entity
+     * 
+     * Get all workflows associated with an entity (requires access to the entity)
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityWorkflows.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
+  }
   ['/v2/portal/metering/reading/photo']: {
     /**
      * uploadMeterReadingPhoto - Upload Meter Reading Photo
@@ -12962,6 +14703,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
+  ['/v2/portal/metering/reading/allowed-range/{meter_id}']: {
+    /**
+     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
+     * third-party plausibility check hook using 'range' mode. This endpoint requires 
+     * a plausibility check hook to be configured for the portal.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllowedMeterReadingRange.QueryParameters & Paths.GetAllowedMeterReadingRange.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -12978,6 +14732,23 @@ export interface PathsDictionary {
       data?: Paths.SsoLogin.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SsoLogin.Responses.$200>
+  }
+  ['/v3/portal/public/sso/login']: {
+    /**
+     * ssoLoginV3 - ssoLoginV3
+     * 
+     * Initiate login using external SSO identity.
+     * 
+     * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
+     * 
+     * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SsoLoginV3.QueryParameters> | null,
+      data?: Paths.SsoLoginV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SsoLoginV3.Responses.$200>
   }
   ['/v2/portal/public/sso/redirect']: {
     /**
@@ -13162,6 +14933,18 @@ export interface PathsDictionary {
       data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
+  }
+  ['/v2/portal/notifications/entity:status']: {
+    /**
+     * updateNotificationsStatus - updateNotificationsStatus
+     * 
+     * Updates the statuses of multiple notifications at once.
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdateNotificationsStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateNotificationsStatus.Responses.$200>
   }
   ['/v2/portal/public/m-login/deregister/{client_id}/{user_id}']: {
     /**
@@ -13360,6 +15143,8 @@ export type Contact = Components.Schemas.Contact;
 export type ContactCountRequest = Components.Schemas.ContactCountRequest;
 export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
 export type ContentWidget = Components.Schemas.ContentWidget;
+export type ContextEntities = Components.Schemas.ContextEntities;
+export type ContextEntity = Components.Schemas.ContextEntity;
 export type Contract = Components.Schemas.Contract;
 export type ContractIdentifier = Components.Schemas.ContractIdentifier;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
@@ -13368,6 +15153,7 @@ export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
+export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
@@ -13375,6 +15161,7 @@ export type EntityFileCount = Components.Schemas.EntityFileCount;
 export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
+export type EntityMatchingConfig = Components.Schemas.EntityMatchingConfig;
 export type EntityResponse = Components.Schemas.EntityResponse;
 export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGroupedWithHits;
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
@@ -13424,6 +15211,7 @@ export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
+export type PortalId = Components.Schemas.PortalId;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
@@ -13436,6 +15224,7 @@ export type PublicContractIdentificationDetails = Components.Schemas.PublicContr
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
 export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
+export type PublicMeterReadingPlausibilityCheckDetails = Components.Schemas.PublicMeterReadingPlausibilityCheckDetails;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;

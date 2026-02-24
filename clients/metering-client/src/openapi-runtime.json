@@ -116,6 +116,25 @@
         "responses": {}
       }
     },
+    "/v1/metering/readings/{meter_id}": {
+      "post": {
+        "operationId": "createPortalMeterReadings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/metering/readings": {
       "post": {
         "operationId": "batchWriteMeterReadings",

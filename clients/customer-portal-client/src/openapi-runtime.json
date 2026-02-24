@@ -48,6 +48,25 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user": {
+      "post": {
+        "operationId": "createUserV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/token/validate": {
       "post": {
         "operationId": "validateToken",
@@ -134,6 +153,42 @@
         "responses": {}
       }
     },
+    "/v3/portal/extensions": {
+      "get": {
+        "operationId": "getPortalExtensionsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/extensions": {
+      "get": {
+        "operationId": "getPublicPortalExtensionDetailsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/consumption": {
       "get": {
         "operationId": "getConsumption",
@@ -156,7 +211,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -172,6 +228,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -199,7 +260,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -215,6 +277,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -242,7 +309,8 @@
           {
             "in": "query",
             "name": "meter_id",
-            "required": true
+            "required": false,
+            "deprecated": true
           },
           {
             "in": "query",
@@ -258,6 +326,11 @@
             "in": "query",
             "name": "interval",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
           }
         ],
         "responses": {}
@@ -294,6 +367,48 @@
           {
             "in": "query",
             "name": "origin",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/external-links": {
+      "get": {
+        "operationId": "getExternalLinksV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "contactId",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/resolve:external-link/{id}": {
+      "get": {
+        "operationId": "getResolvedExternalLinkV3",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": false
           },
           {
@@ -364,6 +479,37 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/portal/config": {
+      "get": {
+        "operationId": "getPublicPortalConfigV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/org/portal/config": {
+      "get": {
+        "operationId": "getOrgPortalConfigV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/configs": {
       "get": {
         "operationId": "getAllPortalConfigs",
@@ -394,6 +540,36 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/email-templates/{portal_id}": {
+      "post": {
+        "operationId": "upsertEmailTemplatesByPortalId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getEmailTemplatesByPortalId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -522,6 +698,19 @@
         "responses": {}
       }
     },
+    "/v3/portal/validate/caa-records": {
+      "post": {
+        "operationId": "validateCaaRecordsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/contact": {
       "get": {
         "operationId": "getContact",
@@ -557,6 +746,25 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/contact/exists": {
+      "post": {
+        "operationId": "checkContactExistsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -701,6 +909,29 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user/exists": {
+      "get": {
+        "operationId": "userExistsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/recipients-to-notify": {
       "post": {
         "operationId": "getRecipientsToNotifyOnAutomation",
@@ -719,6 +950,19 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/configure-distribution": {
+      "get": {
+        "operationId": "configureDistributionV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           }
         ],
@@ -1110,6 +1354,7 @@
     "/v2/portal/user/files": {
       "get": {
         "operationId": "getAllFiles",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1162,6 +1407,7 @@
     "/v2/portal/user/files/count-by-entity": {
       "get": {
         "operationId": "getFilesCountByEntity",
+        "deprecated": true,
         "responses": {}
       }
     },
@@ -1262,6 +1508,29 @@
         "responses": {}
       }
     },
+    "/v3/portal/entity/{schema}/access": {
+      "post": {
+        "operationId": "triggerEntityAccessEventV3",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "portal_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/entity:get": {
       "post": {
         "operationId": "getPortalUserEntity",
@@ -1291,7 +1560,7 @@
           {
             "in": "query",
             "name": "origin",
-            "required": true,
+            "required": false,
             "deprecated": true
           },
           {
@@ -1345,6 +1614,24 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity/{slug}/{id}/workflows": {
+      "get": {
+        "operationId": "getEntityWorkflows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/metering/reading/photo": {
       "post": {
         "operationId": "uploadMeterReadingPhoto",
@@ -1376,6 +1663,34 @@
         "responses": {}
       }
     },
+    "/v2/portal/metering/reading/allowed-range/{meter_id}": {
+      "get": {
+        "operationId": "getAllowedMeterReadingRange",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -1383,6 +1698,34 @@
           {
             "in": "query",
             "name": "origin",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contact_id",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/sso/login": {
+      "post": {
+        "operationId": "ssoLoginV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
             "required": true
           },
           {
@@ -1626,6 +1969,18 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/entity:status": {
+      "put": {
+        "operationId": "updateNotificationsStatus",
         "requestBody": {
           "required": true,
           "content": {

@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/v1/erp/tracking/acknowledgement": {
       "post": {
@@ -30,6 +35,7 @@
     },
     "/v1/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEvents",
         "requestBody": {
           "content": {
@@ -41,8 +47,32 @@
     },
     "/v2/erp/updates/events": {
       "post": {
+        "deprecated": true,
         "operationId": "processErpUpdatesEventsV2",
         "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/erp/updates/events": {
+      "post": {
+        "operationId": "processErpUpdatesEventsV3",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/erp/updates/mapping_simulation": {
+      "post": {
+        "operationId": "simulateMappingV2",
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -116,6 +146,44 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/events": {
+      "post": {
+        "operationId": "queryEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/events/replay": {
+      "post": {
+        "operationId": "replayEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -205,6 +273,86 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/use-cases/{useCaseId}/history": {
+      "get": {
+        "operationId": "listUseCaseHistory",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/integrations": {
+      "get": {
+        "operationId": "listIntegrationsV2",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createIntegrationV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}": {
+      "get": {
+        "operationId": "getIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteIntegrationV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -240,11 +388,124 @@
         },
         "responses": {}
       }
+    },
+    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
+      "post": {
+        "operationId": "queryInboundMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/stats": {
+      "post": {
+        "operationId": "getMonitoringStats",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/timeseries": {
+      "post": {
+        "operationId": "getMonitoringTimeSeries",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound-status": {
+      "get": {
+        "operationId": "getOutboundStatus",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/access-logs": {
+      "post": {
+        "operationId": "queryAccessLogs",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
+      "post": {
+        "operationId": "queryOutboundMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
     "responses": {
       "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
         "content": {
           "application/json": {}
         }
@@ -259,6 +520,36 @@
           "application/json": {}
         }
       },
+      "QueryInboundMonitoringEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringStatsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringTimeSeriesResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryAccessLogsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryOutboundMonitoringEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ReplayEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "ERPUpdatesResponse": {
         "content": {
           "application/json": {}
@@ -268,12 +559,12 @@
         "content": {
           "application/json": {}
         }
+      },
+      "QueryEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    }
-  ]
+  }
 }

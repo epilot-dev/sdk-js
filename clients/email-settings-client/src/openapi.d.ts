@@ -38,6 +38,33 @@ declare namespace Components {
         export type UpdateSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
     }
     namespace Schemas {
+        /**
+         * Mapping between an Outlook email and its Outlook Connection.
+         * This tracks which provider/tenant provisions each Outlook email.
+         *
+         */
+        export interface ConnectedOutlookEmail {
+            /**
+             * The Outlook shared mailbox email address
+             */
+            outlook_email: string; // email
+            /**
+             * Azure AD Tenant ID that provisions this mailbox
+             */
+            tenant_id?: string;
+            /**
+             * Provider type (for future extensibility)
+             */
+            provider?: "outlook";
+            /**
+             * When the mailbox was connected
+             */
+            connected_at?: string; // date-time
+            /**
+             * User who connected this mailbox
+             */
+            connected_by_user_id?: string;
+        }
         export interface CreateEmailAddressPayload {
             address: string;
             name?: string;
@@ -231,6 +258,52 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ConnectOutlook {
+        namespace Responses {
+            export interface $200 {
+                authorization_url?: string;
+            }
+        }
+    }
+    namespace ConnectOutlookMailbox {
+        export interface RequestBody {
+            /**
+             * Email address of the Outlook mailbox to connect
+             */
+            email: string; // email
+            /**
+             * Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.
+             */
+            shared_inbox_id?: string;
+        }
+        namespace Responses {
+            export interface $201 {
+                email_address: Components.Schemas.EmailAddressResponse;
+                /**
+                 * The email of the connected mailbox
+                 */
+                outlook_email: string; // email
+                /**
+                 * Azure AD Tenant ID that provisions this mailbox
+                 */
+                tenant_id: string;
+                /**
+                 * The provider type
+                 */
+                provider: "outlook";
+            }
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace DeleteDomain {
         export type RequestBody = Components.Schemas.Domain;
         namespace Responses {
@@ -293,6 +366,74 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DisconnectOutlook {
+        export interface RequestBody {
+            /**
+             * Azure AD Tenant ID of the connection to disconnect
+             */
+            tenant_id: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                success?: boolean;
+                /**
+                 * The tenant ID that was disconnected
+                 */
+                tenant_id?: string;
+                /**
+                 * List of shared inbox IDs that were affected by the disconnection
+                 */
+                affected_shared_inboxes?: string[];
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace DisconnectOutlookMailbox {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                /**
+                 * The email address that was disconnected
+                 */
+                email: string; // email
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace GetConnectedOutlookEmails {
+        namespace Responses {
+            export interface $200 {
+                outlook_emails: /**
+                 * Mapping between an Outlook email and its Outlook Connection.
+                 * This tracks which provider/tenant provisions each Outlook email.
+                 *
+                 */
+                Components.Schemas.ConnectedOutlookEmail[];
+                /**
+                 * Number of Outlook emails
+                 */
+                count: number;
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetEmailAddress {
         namespace Parameters {
             export type Id = string;
@@ -305,6 +446,78 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetOutlookConnectionStatus {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * List of Outlook connections (one per tenant)
+                 */
+                connections: {
+                    /**
+                     * Current connection status:
+                     * - pending_auth: Admin consent granted, waiting for user OAuth
+                     * - connected: Fully connected with valid tokens
+                     * - expired: Tokens expired, need to re-authenticate
+                     *
+                     */
+                    status: "connected" | "expired" | "pending_auth";
+                    /**
+                     * Action for UI to take (all call GET /outlook/connect):
+                     * - connect: No connection, initiate OAuth
+                     * - authorize: Admin consent done, complete OAuth
+                     * - reconnect: Re-authenticate expired session
+                     * - none: Fully connected, no action needed
+                     *
+                     */
+                    action: "connect" | "authorize" | "reconnect" | "none";
+                    /**
+                     * Display name of user who connected
+                     */
+                    connected_by_display_name?: string;
+                    /**
+                     * Email of the user who connected
+                     */
+                    connected_by_email?: string; // email
+                    /**
+                     * Azure AD Object ID of user who connected
+                     */
+                    connected_by_user_id?: string;
+                    /**
+                     * When the connection was established
+                     */
+                    connected_at?: string; // date-time
+                    /**
+                     * When the connection was last updated
+                     */
+                    updated_at?: string; // date-time
+                    /**
+                     * Microsoft Azure AD tenant ID
+                     */
+                    tenant_id: string;
+                    /**
+                     * Granted permission scopes
+                     */
+                    scopes?: string[];
+                    /**
+                     * When the current access token expires
+                     */
+                    expires_at?: string; // date-time
+                    /**
+                     * Whether the current token is still valid
+                     */
+                    is_token_valid?: boolean;
+                }[];
+                /**
+                 * Whether any connections exist
+                 */
+                has_connections: boolean;
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
         }
     }
     namespace GetSettings {
@@ -359,6 +572,39 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace OutlookOAuthCallback {
+        namespace Parameters {
+            export type AdminConsent = string;
+            export type ClientInfo = string;
+            export type Code = string;
+            export type Error = string;
+            export type ErrorDescription = string;
+            export type ErrorSubcode = string;
+            export type ErrorUri = string;
+            export type SessionState = string;
+            export type State = string;
+            export type Tenant = string;
+        }
+        export interface QueryParameters {
+            code?: Parameters.Code;
+            state: Parameters.State;
+            session_state?: Parameters.SessionState;
+            error?: Parameters.Error;
+            error_description?: Parameters.ErrorDescription;
+            error_subcode?: Parameters.ErrorSubcode;
+            client_info?: Parameters.ClientInfo;
+            error_uri?: Parameters.ErrorUri;
+            admin_consent?: Parameters.AdminConsent;
+            tenant?: Parameters.Tenant;
+        }
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+                expires_at?: string; // date-time
+                scope?: string;
+            }
+        }
+    }
     namespace ProvisionEpilotEmailAddress {
         export type RequestBody = Components.Schemas.ProvisionEpilotEmailAddressPayload;
         namespace Responses {
@@ -376,6 +622,49 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace TestWebhookGet {
+        namespace Parameters {
+            export type ValidationToken = string;
+        }
+        export interface QueryParameters {
+            validationToken?: Parameters.ValidationToken;
+        }
+        namespace Responses {
+            export type $200 = string;
+            export interface $202 {
+                message?: string;
+                timestamp?: string; // date-time
+            }
+        }
+    }
+    namespace TestWebhookPost {
+        namespace Parameters {
+            export type DebugMessages = boolean;
+            export type ValidationToken = string;
+        }
+        export interface QueryParameters {
+            validationToken?: Parameters.ValidationToken;
+            debugMessages?: Parameters.DebugMessages;
+        }
+        /**
+         * Graph API notification payload
+         */
+        export interface RequestBody {
+            value?: {
+                subscriptionId?: string;
+                changeType?: string;
+                resource?: string;
+                clientState?: string;
+            }[];
+        }
+        namespace Responses {
+            export type $200 = string;
+            export interface $202 {
+                message?: string;
+                timestamp?: string; // date-time
+            }
         }
     }
     namespace UpdateEmailAddress {
@@ -582,6 +871,117 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListInboxBuckets.Responses.$200>
+  /**
+   * connectOutlook - Connect Outlook
+   * 
+   * Returns Microsoft authorization URL for Outlook OAuth.
+   */
+  'connectOutlook'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
+  /**
+   * getOutlookConnectionStatus - Get Outlook Connection Status
+   * 
+   * Returns all Microsoft 365 / Outlook connections for the organization.
+   * Supports multiple connections (one per Azure AD tenant).
+   * 
+   * Each connection includes an `action` field that tells the UI what button to show
+   * and what endpoint to call. All actions use GET /outlook/connect.
+   * 
+   */
+  'getOutlookConnectionStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
+  /**
+   * disconnectOutlook - Disconnect Outlook
+   * 
+   * Removes the Microsoft 365 / Outlook connection for a specific tenant.
+   * This deletes the stored tokens and disconnects the integration.
+   * 
+   */
+  'disconnectOutlook'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.DisconnectOutlook.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
+  /**
+   * connectOutlookMailbox - Connect Outlook Mailbox
+   * 
+   * Connects an Outlook mailbox:
+   *   1. Validates the user has access to the mailbox via Microsoft Graph API
+   *   2. Creates a mapping between the email address of the mailbox and the outlook connection
+   *   3. Enables the user to send emails as the mailbox's email address
+   * 
+   */
+  'connectOutlookMailbox'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ConnectOutlookMailbox.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
+  /**
+   * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+   * 
+   * Disconnects a single Outlook mailbox by email address.
+   * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+   * Does not affect the tenant-level Outlook connection.
+   * 
+   */
+  'disconnectOutlookMailbox'(
+    parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
+  /**
+   * getConnectedOutlookEmails - Get Connected Outlook Emails
+   * 
+   * Returns all Outlook email addresses connected to the organization.
+   * 
+   */
+  'getConnectedOutlookEmails'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
+  /**
+   * testWebhookGet - Test Webhook (GET)
+   * 
+   * Test endpoint for debugging Graph API webhook notifications via ngrok.
+   * Handles Microsoft Graph subscription validation requests by returning the validationToken.
+   * This is a PUBLIC endpoint with no authentication.
+   * 
+   */
+  'testWebhookGet'(
+    parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
+  /**
+   * testWebhookPost - Test Webhook (POST)
+   * 
+   * Test endpoint for debugging Graph API webhook notifications via ngrok.
+   * Logs all incoming webhook payloads for debugging purposes.
+   * This is a PUBLIC endpoint with no authentication.
+   * 
+   */
+  'testWebhookPost'(
+    parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
+    data?: Paths.TestWebhookPost.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
+  /**
+   * outlookOAuthCallback - Outlook OAuth callback
+   * 
+   * Exchanges authorization code for tokens and stores them.
+   */
+  'outlookOAuthCallback'(
+    parameters?: Parameters<Paths.OutlookOAuthCallback.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.OutlookOAuthCallback.Responses.$200>
   /**
    * getSettings - getSettings
    * 
@@ -809,6 +1209,133 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListInboxBuckets.Responses.$200>
   }
+  ['/v2/outlook/connect']: {
+    /**
+     * connectOutlook - Connect Outlook
+     * 
+     * Returns Microsoft authorization URL for Outlook OAuth.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
+  }
+  ['/v2/outlook/connection/status']: {
+    /**
+     * getOutlookConnectionStatus - Get Outlook Connection Status
+     * 
+     * Returns all Microsoft 365 / Outlook connections for the organization.
+     * Supports multiple connections (one per Azure AD tenant).
+     * 
+     * Each connection includes an `action` field that tells the UI what button to show
+     * and what endpoint to call. All actions use GET /outlook/connect.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
+  }
+  ['/v2/outlook/connection/disconnect']: {
+    /**
+     * disconnectOutlook - Disconnect Outlook
+     * 
+     * Removes the Microsoft 365 / Outlook connection for a specific tenant.
+     * This deletes the stored tokens and disconnects the integration.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.DisconnectOutlook.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/connect']: {
+    /**
+     * connectOutlookMailbox - Connect Outlook Mailbox
+     * 
+     * Connects an Outlook mailbox:
+     *   1. Validates the user has access to the mailbox via Microsoft Graph API
+     *   2. Creates a mapping between the email address of the mailbox and the outlook connection
+     *   3. Enables the user to send emails as the mailbox's email address
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ConnectOutlookMailbox.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
+  }
+  ['/v2/outlook/mailbox/{email}/disconnect']: {
+    /**
+     * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+     * 
+     * Disconnects a single Outlook mailbox by email address.
+     * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+     * Does not affect the tenant-level Outlook connection.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/mappings']: {
+    /**
+     * getConnectedOutlookEmails - Get Connected Outlook Emails
+     * 
+     * Returns all Outlook email addresses connected to the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
+  }
+  ['/v2/outlook/test-webhook']: {
+    /**
+     * testWebhookGet - Test Webhook (GET)
+     * 
+     * Test endpoint for debugging Graph API webhook notifications via ngrok.
+     * Handles Microsoft Graph subscription validation requests by returning the validationToken.
+     * This is a PUBLIC endpoint with no authentication.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
+    /**
+     * testWebhookPost - Test Webhook (POST)
+     * 
+     * Test endpoint for debugging Graph API webhook notifications via ngrok.
+     * Logs all incoming webhook payloads for debugging purposes.
+     * This is a PUBLIC endpoint with no authentication.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
+      data?: Paths.TestWebhookPost.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
+  }
+  ['/v2/outlook/oauth/callback']: {
+    /**
+     * outlookOAuthCallback - Outlook OAuth callback
+     * 
+     * Exchanges authorization code for tokens and stores them.
+     */
+    'get'(
+      parameters?: Parameters<Paths.OutlookOAuthCallback.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.OutlookOAuthCallback.Responses.$200>
+  }
   ['/v1/email-settings']: {
     /**
      * getSettings - getSettings
@@ -904,6 +1431,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type ConnectedOutlookEmail = Components.Schemas.ConnectedOutlookEmail;
 export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;
 export type CreateSharedInboxPayload = Components.Schemas.CreateSharedInboxPayload;
 export type Domain = Components.Schemas.Domain;

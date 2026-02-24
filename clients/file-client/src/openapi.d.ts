@@ -234,6 +234,14 @@ declare namespace Components {
              * Whether the collection is starred / favorited
              */
             starred?: boolean;
+            /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
+             * List of purpose IDs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_purposes?: string[];
         }
         /**
          * Request body for creating a file collection
@@ -251,6 +259,14 @@ declare namespace Components {
              * Whether the collection is starred / favorited
              */
             starred?: boolean;
+            /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
+             * List of purpose IDs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_purposes?: string[];
         }
         /**
          * Generated uuid for a file collection
@@ -303,6 +319,19 @@ declare namespace Components {
              * 0
              */
             order?: number;
+            /**
+             * List of location slugs where the collection is enabled. If empty, enabled for all.
+             */
+            enabled_locations?: string[];
+            /**
+             * List of purpose slugs where the collection is enabled. If empty, enabled for all.
+             * example:
+             * [
+             *   "purpose:9eefcb98-93cf-4c5b-a040-f1d26d57c177",
+             *   "purpose:5c544c09-a691-43ed-a7fa-0a8b44b5b161"
+             * ]
+             */
+            enabled_purposes?: string[];
             /**
              * Timestamp when the collection was created
              * example:
@@ -424,101 +453,6 @@ declare namespace Components {
          * ef7d985c-2385-44f4-9c71-ae06a52264f8
          */
         string | string /* uuid */;
-        export interface FileFolderAttributes {
-            /**
-             * Name of the folder
-             */
-            name?: string;
-            /**
-             * Array of parent folder slugs, empty array if top-level folder
-             */
-            parents?: string[];
-            /**
-             * Whether the folder is starred / favorited
-             */
-            starred?: boolean;
-        }
-        /**
-         * Request body for creating a file folder
-         */
-        export interface FileFolderCreateRequest {
-            /**
-             * Name of the folder
-             */
-            name: string;
-            /**
-             * Array of parent folder slugs, empty array if top-level folder
-             */
-            parents?: string[];
-            /**
-             * Whether the folder is starred / favorited
-             */
-            starred?: boolean;
-        }
-        /**
-         * Generated uuid for a file folder
-         */
-        export type FileFolderId = string; // uuid
-        /**
-         * A file folder with identifiers and timestamps
-         */
-        export interface FileFolderItem {
-            /**
-             * Full slug for the folder. Format depends on collection type:
-             * - User collection: `_system_files_collection_{entity_uuid}_{user_id}:{collection_name}`
-             *   Example: `_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents`
-             * - Global collection: `_system_files_collection_schema_{schema_slug}:{collection_name}`
-             *   Example: `_system_files_collection_schema_opportunity:templates`
-             *
-             * example:
-             * _system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents
-             */
-            slug?: string;
-            /**
-             * Display name of the folder
-             * example:
-             * Documents
-             */
-            name: string;
-            id?: /* Generated uuid for a file folder */ FileFolderId /* uuid */;
-            /**
-             * Array of parent folder slugs, empty array if top-level folder. Format depends on collection type:
-             * - User collection: `_system_files_collection_{entity_uuid}_{user_id}`
-             *   Example: `["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"]`
-             * - Global collection: `_system_files_collection_schema_{schema_slug}`
-             *   Example: `["_system_files_collection_schema_opportunity"]`
-             *
-             * example:
-             * [
-             *   "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"
-             * ]
-             */
-            parents?: string[];
-            /**
-             * Whether the folder is starred / favorited
-             * example:
-             * false
-             */
-            starred?: boolean;
-            /**
-             * Display order for the folder
-             * example:
-             * 0
-             */
-            order?: number;
-            /**
-             * Timestamp when the folder was created
-             * example:
-             * 2024-01-01T12:00:00Z
-             */
-            created_at?: string; // date-time
-            /**
-             * Timestamp when the folder was last updated
-             * example:
-             * 2024-01-02T12:00:00Z
-             */
-            updated_at?: string; // date-time
-        }
         export interface FileItem {
             s3ref?: S3Ref;
             /**
@@ -929,54 +863,24 @@ declare namespace Paths {
             }
         }
     }
-    namespace CreateFileCollection {
+    namespace CreateUserSchemaFileCollection {
         namespace Parameters {
-            export type Id = /**
+            /**
              * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             * opportunity
              */
-            Components.Schemas.EntityId;
+            export type Slug = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
         }
         export type RequestBody = /* Request body for creating a file collection */ Components.Schemas.FileCollectionCreateRequest;
         namespace Responses {
             export type $201 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace CreateFileFolder {
-        namespace Parameters {
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export type RequestBody = /* Request body for creating a file folder */ Components.Schemas.FileFolderCreateRequest;
-        namespace Responses {
-            export type $201 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
         }
     }
     namespace DeleteFile {
@@ -1010,21 +914,31 @@ declare namespace Paths {
             export type $200 = Components.Schemas.FileEntity;
         }
     }
-    namespace DeleteFileCollection {
+    namespace DeleteSession {
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
+    namespace DeleteUserSchemaFileCollection {
         namespace Parameters {
             /**
              * example:
              * documents
              */
             export type CollectionSlug = string;
-            export type Id = /**
+            /**
              * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             * opportunity
              */
-            Components.Schemas.EntityId;
+            export type Slug = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
             collectionSlug: /**
              * example:
              * documents
@@ -1043,47 +957,6 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
-        }
-    }
-    namespace DeleteFileFolder {
-        namespace Parameters {
-            /**
-             * example:
-             * documents
-             */
-            export type FolderSlug = string;
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            folderSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.FolderSlug;
-        }
-        namespace Responses {
-            export interface $200 {
-            }
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace DeleteSession {
-        namespace Responses {
-            export interface $200 {
-            }
         }
     }
     namespace DownloadFile {
@@ -1192,62 +1065,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.FileEntity;
         }
     }
-    namespace GetFileCollections {
-        namespace Parameters {
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-            export type Parents = string[];
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            parents?: Parameters.Parents;
-        }
-        namespace Responses {
-            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace GetFileFolders {
-        namespace Parameters {
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-            export type Parents = string[];
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export interface QueryParameters {
-            parents?: Parameters.Parents;
-        }
-        namespace Responses {
-            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
     namespace GetFilesInCollection {
         namespace Parameters {
             /**
@@ -1287,45 +1104,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace GetFilesInFolder {
-        namespace Parameters {
-            /**
-             * example:
-             * documents
-             */
-            export type FolderSlug = string;
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            folderSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.FolderSlug;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.FileEntity[];
-            export interface $403 {
-                /**
-                 * example:
-                 * User must have permission to view this entity to access its files
-                 */
-                error?: string;
-            }
-            export interface $404 {
-                /**
-                 * example:
-                 * Entity not found
-                 */
-                error?: string;
-            }
-        }
-    }
     namespace GetGlobalFileCollections {
         namespace Parameters {
             /**
@@ -1345,29 +1123,29 @@ declare namespace Paths {
             export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
         }
     }
-    namespace GetGlobalFileFolders {
-        namespace Parameters {
-            /**
-             * example:
-             * order
-             */
-            export type SchemaSlug = string;
-        }
-        export interface PathParameters {
-            schemaSlug: /**
-             * example:
-             * order
-             */
-            Parameters.SchemaSlug;
-        }
-        namespace Responses {
-            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem[];
-        }
-    }
     namespace GetSession {
         namespace Responses {
             export interface $200 {
             }
+        }
+    }
+    namespace GetUserSchemaFileCollections {
+        namespace Parameters {
+            /**
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
         }
     }
     namespace ListPublicLinksForFile {
@@ -1529,21 +1307,25 @@ declare namespace Paths {
             export type $200 = Components.Schemas.FileEntity;
         }
     }
-    namespace UpdateFileCollection {
+    namespace UpdateUserSchemaFileCollection {
         namespace Parameters {
             /**
              * example:
              * documents
              */
             export type CollectionSlug = string;
-            export type Id = /**
+            /**
              * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             * opportunity
              */
-            Components.Schemas.EntityId;
+            export type Slug = string;
         }
         export interface PathParameters {
-            id: Parameters.Id;
+            slug: /**
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
             collectionSlug: /**
              * example:
              * documents
@@ -1553,41 +1335,6 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.FileCollectionAttributes;
         namespace Responses {
             export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
-            export type $404 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 404,
-             *   "error": "Not Found"
-             * }
-             */
-            Components.Responses.NotFoundError;
-        }
-    }
-    namespace UpdateFileFolder {
-        namespace Parameters {
-            /**
-             * example:
-             * documents
-             */
-            export type FolderSlug = string;
-            export type Id = /**
-             * example:
-             * ef7d985c-2385-44f4-9c71-ae06a52264f8
-             */
-            Components.Schemas.EntityId;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-            folderSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.FolderSlug;
-        }
-        export type RequestBody = Components.Schemas.FileFolderAttributes;
-        namespace Responses {
-            export type $200 = /* A file folder with identifiers and timestamps */ Components.Schemas.FileFolderItem;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -1906,109 +1653,49 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadFilePublic.Responses.$201>
   /**
-   * getFileFolders - getFileFolders
+   * getUserSchemaFileCollections - getUserSchemaFileCollections
    * 
-   * Gets a list of folders that exist for an entity. Deprecated - use getFileCollections instead.
+   * Gets a list of file collections for the current user and schema
    */
-  'getFileFolders'(
-    parameters?: Parameters<Paths.GetFileFolders.QueryParameters & Paths.GetFileFolders.PathParameters> | null,
+  'getUserSchemaFileCollections'(
+    parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFileFolders.Responses.$200>
+  ): OperationResponse<Paths.GetUserSchemaFileCollections.Responses.$200>
   /**
-   * createFileFolder - createFileFolder
+   * createUserSchemaFileCollection - createUserSchemaFileCollection
    * 
-   * Creates a new file folder for the specified entity. Deprecated - use createFileCollection instead.
+   * Creates a new file collection for the current user and schema
    */
-  'createFileFolder'(
-    parameters?: Parameters<Paths.CreateFileFolder.PathParameters> | null,
-    data?: Paths.CreateFileFolder.RequestBody,
+  'createUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
+    data?: Paths.CreateUserSchemaFileCollection.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateFileFolder.Responses.$201>
+  ): OperationResponse<Paths.CreateUserSchemaFileCollection.Responses.$201>
   /**
-   * updateFileFolder - updateFileFolder
+   * updateUserSchemaFileCollection - updateUserSchemaFileCollection
    * 
-   * Updates a specific file folder by slug. Deprecated - use updateFileCollection instead.
+   * Updates a file collection for the current user and schema
    */
-  'updateFileFolder'(
-    parameters?: Parameters<Paths.UpdateFileFolder.PathParameters> | null,
-    data?: Paths.UpdateFileFolder.RequestBody,
+  'updateUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
+    data?: Paths.UpdateUserSchemaFileCollection.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateFileFolder.Responses.$200>
+  ): OperationResponse<Paths.UpdateUserSchemaFileCollection.Responses.$200>
   /**
-   * deleteFileFolder - deleteFileFolder
+   * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
    * 
-   * Deletes a specific file folder by slug. Deprecated - use deleteFileCollection instead.
+   * Deletes a file collection for the current user and schema
    */
-  'deleteFileFolder'(
-    parameters?: Parameters<Paths.DeleteFileFolder.PathParameters> | null,
+  'deleteUserSchemaFileCollection'(
+    parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteFileFolder.Responses.$200>
-  /**
-   * getFilesInFolder - getFilesInFolder
-   * 
-   * Gets all files within a specific folder for an entity. Deprecated - use getFilesInCollection instead.
-   */
-  'getFilesInFolder'(
-    parameters?: Parameters<Paths.GetFilesInFolder.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
-  /**
-   * getGlobalFileFolders - getGlobalFileFolders
-   * 
-   * Gets all global file folders for a specific schema. Deprecated - use getGlobalFileCollections instead.
-   */
-  'getGlobalFileFolders'(
-    parameters?: Parameters<Paths.GetGlobalFileFolders.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetGlobalFileFolders.Responses.$200>
-  /**
-   * getFileCollections - getFileCollections
-   * 
-   * Gets a list of collections that exist for an entity
-   */
-  'getFileCollections'(
-    parameters?: Parameters<Paths.GetFileCollections.QueryParameters & Paths.GetFileCollections.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFileCollections.Responses.$200>
-  /**
-   * createFileCollection - createFileCollection
-   * 
-   * Creates a new file collection for the specified entity
-   */
-  'createFileCollection'(
-    parameters?: Parameters<Paths.CreateFileCollection.PathParameters> | null,
-    data?: Paths.CreateFileCollection.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateFileCollection.Responses.$201>
-  /**
-   * updateFileCollection - updateFileCollection
-   * 
-   * Updates a specific file collection by slug
-   */
-  'updateFileCollection'(
-    parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
-    data?: Paths.UpdateFileCollection.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateFileCollection.Responses.$200>
-  /**
-   * deleteFileCollection - deleteFileCollection
-   * 
-   * Deletes a specific file collection by slug
-   */
-  'deleteFileCollection'(
-    parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
+  ): OperationResponse<Paths.DeleteUserSchemaFileCollection.Responses.$200>
   /**
    * getFilesInCollection - getFilesInCollection
    * 
-   * Gets all files within a specific collection for an entity
+   * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
    */
   'getFilesInCollection'(
     parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
@@ -2293,123 +1980,55 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UploadFilePublic.Responses.$201>
   }
-  ['/v1/entity/{id}/folders']: {
+  ['/v1/{slug}/collections']: {
     /**
-     * getFileFolders - getFileFolders
+     * getUserSchemaFileCollections - getUserSchemaFileCollections
      * 
-     * Gets a list of folders that exist for an entity. Deprecated - use getFileCollections instead.
+     * Gets a list of file collections for the current user and schema
      */
     'get'(
-      parameters?: Parameters<Paths.GetFileFolders.QueryParameters & Paths.GetFileFolders.PathParameters> | null,
+      parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFileFolders.Responses.$200>
+    ): OperationResponse<Paths.GetUserSchemaFileCollections.Responses.$200>
     /**
-     * createFileFolder - createFileFolder
+     * createUserSchemaFileCollection - createUserSchemaFileCollection
      * 
-     * Creates a new file folder for the specified entity. Deprecated - use createFileCollection instead.
+     * Creates a new file collection for the current user and schema
      */
     'post'(
-      parameters?: Parameters<Paths.CreateFileFolder.PathParameters> | null,
-      data?: Paths.CreateFileFolder.RequestBody,
+      parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
+      data?: Paths.CreateUserSchemaFileCollection.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateFileFolder.Responses.$201>
+    ): OperationResponse<Paths.CreateUserSchemaFileCollection.Responses.$201>
   }
-  ['/v1/entity/{id}/folders/{folderSlug}']: {
+  ['/v1/{slug}/collections/{collectionSlug}']: {
     /**
-     * updateFileFolder - updateFileFolder
+     * updateUserSchemaFileCollection - updateUserSchemaFileCollection
      * 
-     * Updates a specific file folder by slug. Deprecated - use updateFileCollection instead.
+     * Updates a file collection for the current user and schema
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateFileFolder.PathParameters> | null,
-      data?: Paths.UpdateFileFolder.RequestBody,
+      parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
+      data?: Paths.UpdateUserSchemaFileCollection.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateFileFolder.Responses.$200>
+    ): OperationResponse<Paths.UpdateUserSchemaFileCollection.Responses.$200>
     /**
-     * deleteFileFolder - deleteFileFolder
+     * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
      * 
-     * Deletes a specific file folder by slug. Deprecated - use deleteFileCollection instead.
+     * Deletes a file collection for the current user and schema
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteFileFolder.PathParameters> | null,
+      parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteFileFolder.Responses.$200>
-  }
-  ['/v1/entity/{id}/folders/{folderSlug}/files']: {
-    /**
-     * getFilesInFolder - getFilesInFolder
-     * 
-     * Gets all files within a specific folder for an entity. Deprecated - use getFilesInCollection instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFilesInFolder.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFilesInFolder.Responses.$200>
-  }
-  ['/v1/folders/{schemaSlug}']: {
-    /**
-     * getGlobalFileFolders - getGlobalFileFolders
-     * 
-     * Gets all global file folders for a specific schema. Deprecated - use getGlobalFileCollections instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetGlobalFileFolders.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetGlobalFileFolders.Responses.$200>
-  }
-  ['/v1/entity/{id}/collections']: {
-    /**
-     * getFileCollections - getFileCollections
-     * 
-     * Gets a list of collections that exist for an entity
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFileCollections.QueryParameters & Paths.GetFileCollections.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFileCollections.Responses.$200>
-    /**
-     * createFileCollection - createFileCollection
-     * 
-     * Creates a new file collection for the specified entity
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreateFileCollection.PathParameters> | null,
-      data?: Paths.CreateFileCollection.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateFileCollection.Responses.$201>
-  }
-  ['/v1/entity/{id}/collections/{collectionSlug}']: {
-    /**
-     * updateFileCollection - updateFileCollection
-     * 
-     * Updates a specific file collection by slug
-     */
-    'put'(
-      parameters?: Parameters<Paths.UpdateFileCollection.PathParameters> | null,
-      data?: Paths.UpdateFileCollection.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateFileCollection.Responses.$200>
-    /**
-     * deleteFileCollection - deleteFileCollection
-     * 
-     * Deletes a specific file collection by slug
-     */
-    'delete'(
-      parameters?: Parameters<Paths.DeleteFileCollection.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteFileCollection.Responses.$200>
+    ): OperationResponse<Paths.DeleteUserSchemaFileCollection.Responses.$200>
   }
   ['/v1/entity/{id}/collections/{collectionSlug}/files']: {
     /**
      * getFilesInCollection - getFilesInCollection
      * 
-     * Gets all files within a specific collection for an entity
+     * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
      */
     'get'(
       parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
@@ -2450,10 +2069,6 @@ export type FileCollectionId = Components.Schemas.FileCollectionId;
 export type FileCollectionItem = Components.Schemas.FileCollectionItem;
 export type FileEntity = Components.Schemas.FileEntity;
 export type FileEntityId = Components.Schemas.FileEntityId;
-export type FileFolderAttributes = Components.Schemas.FileFolderAttributes;
-export type FileFolderCreateRequest = Components.Schemas.FileFolderCreateRequest;
-export type FileFolderId = Components.Schemas.FileFolderId;
-export type FileFolderItem = Components.Schemas.FileFolderItem;
 export type FileItem = Components.Schemas.FileItem;
 export type FileRelationItem = Components.Schemas.FileRelationItem;
 export type FileType = Components.Schemas.FileType;

@@ -156,6 +156,12 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",
@@ -164,6 +170,19 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id"
+          }
+        ],
         "responses": {}
       }
     },
@@ -209,6 +228,19 @@
       },
       "delete": {
         "operationId": "deleteBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
+      "post": {
+        "operationId": "validateBlueprint",
         "parameters": [
           {
             "in": "path",

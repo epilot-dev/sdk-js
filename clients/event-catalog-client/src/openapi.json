@@ -3,7 +3,7 @@
   "info": {
     "title": "Event Catalog API",
     "description": "Manages the catalog of business events available in epilot",
-    "version": "0.0.1"
+    "version": "0.1.0"
   },
   "tags": [
     {
@@ -79,6 +79,50 @@
                 }
               }
             }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchEvent",
+        "summary": "patchEvent",
+        "description": "Update the configuration of a specific business event for the organization",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated event configuration object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfig"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found"
           }
         }
       }
@@ -216,6 +260,58 @@
           }
         }
       }
+    },
+    "/v1/events/{event_name}:trigger": {
+      "post": {
+        "operationId": "triggerEvent",
+        "summary": "triggerEvent",
+        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event triggered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input (validation error, missing seed, or missing required fields)"
+          },
+          "403": {
+            "description": "Event is disabled for this organization"
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -234,161 +330,125 @@
       }
     },
     "schemas": {
-      "EventConfig": {
+      "EventConfigBase": {
         "type": "object",
+        "description": "Base properties shared between EventConfig and UpdateEventPayload",
         "properties": {
           "event_name": {
             "type": "string",
             "description": "Unique human readable name of the event",
-            "example": "MeterReading"
+            "example": "AddMeterReading"
+          },
+          "event_title": {
+            "type": "string",
+            "description": "Human-friendly title for the event",
+            "example": "Add Meter Reading"
+          },
+          "event_description": {
+            "type": "string",
+            "description": "Description of when the event is triggered",
+            "example": "Triggered when a new meter reading is added"
           },
           "event_version": {
-            "type": "integer",
-            "description": "Version of the event schema",
-            "example": 1
+            "type": "string",
+            "description": "Event version (semver)",
+            "example": "1.0.0"
+          },
+          "event_status": {
+            "type": "string",
+            "description": "Status of the event",
+            "enum": [
+              "active",
+              "deprecated",
+              "draft",
+              "disabled"
+            ],
+            "example": "active"
+          },
+          "event_tags": {
+            "type": "array",
+            "description": "Tags associated with the event for categorization and filtering\n\nThe \"builtin\" tag indicates events that are built into the epilot system.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "builtin",
+              "metering",
+              "erp"
+            ]
           },
           "schema_fields": {
             "type": "object",
             "description": "Fields that define the event schema",
             "additionalProperties": {
               "$ref": "#/components/schemas/SchemaField"
-            },
-            "example": {
-              "reading_value": {
-                "json_schema": {
-                  "type": "number",
-                  "description": "The meter reading value"
-                },
-                "required": true
-              },
-              "reading_date": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "ISO 8601 timestamp when reading was taken"
-                },
-                "required": true
-              },
-              "read_by": {
-                "json_schema": {
-                  "type": "string",
-                  "description": "Name or identifier of who submitted the reading"
-                },
-                "required": false
-              },
-              "reason": {
-                "json_schema": {
-                  "type": "string",
-                  "enum": [
-                    "regular",
-                    "move-in",
-                    "move-out",
-                    "supplier-change",
-                    "correction",
-                    "final"
-                  ],
-                  "description": "Reason for the meter reading"
-                },
-                "required": true
-              },
-              "direction": {
-                "json_schema": {
-                  "type": "string",
-                  "enum": [
-                    "feed-in",
-                    "feed-out"
-                  ],
-                  "description": "Direction of energy flow"
-                },
-                "required": true
-              },
-              "source": {
-                "json_schema": {
-                  "type": "string",
-                  "enum": [
-                    "portal",
-                    "360",
-                    "api",
-                    "automation"
-                  ],
-                  "description": "Source system where reading was submitted"
-                },
-                "required": true
-              },
-              "meter_id": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "uuid",
-                  "description": "Entity ID of the meter"
-                },
-                "required": true
-              },
-              "counter_id": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "uuid",
-                  "description": "Entity ID of the meter counter"
-                },
-                "required": true
-              },
-              "meter_number": {
-                "json_schema": {
-                  "type": "string",
-                  "description": "Human-readable meter number"
-                },
-                "required": false
-              },
-              "obis_number": {
-                "json_schema": {
-                  "type": "string",
-                  "description": "OBIS code of the counter"
-                },
-                "required": false
-              },
-              "unit": {
-                "json_schema": {
-                  "type": "string",
-                  "description": "Unit of measurement (e.g., kWh, m3)"
-                },
-                "required": false
-              },
-              "customer_id": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "uuid",
-                  "description": "Entity ID of the customer"
-                },
-                "required": false
-              },
-              "contract_id": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "uuid",
-                  "description": "Entity ID of the contract"
-                },
-                "required": false
-              },
-              "user_id": {
-                "json_schema": {
-                  "type": "string",
-                  "description": "ID of the user who submitted the reading"
-                },
-                "required": false
-              },
-              "user_email": {
-                "json_schema": {
-                  "type": "string",
-                  "format": "email",
-                  "description": "Email of the user who submitted the reading"
-                },
-                "required": false
-              }
             }
+          },
+          "entity_graph": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GraphDefinition"
+              },
+              {
+                "description": "Optional entity graph definition for resolving related entities"
+              }
+            ]
+          },
+          "entity_operation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityOperationTrigger"
+              },
+              {
+                "description": "Optional configuration for triggering this event based on entity operations"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this event is enabled for the organization.\nWhen disabled, the event will not be triggered by any means\n(automatic, API, or automation).\nDefaults to true if not specified.\n",
+            "default": true,
+            "example": true
+          },
+          "auto_trigger": {
+            "type": "boolean",
+            "description": "Whether the event should be triggered automatically by built-in logic\n(e.g., portal submissions, entity mutations, EventBridge rules).\nWhen false, the event can still be triggered manually via API or automations.\nOnly meaningful for builtin events that have automatic trigger sources.\nDefaults to true if not specified.\n",
+            "default": true,
+            "example": true
+          },
+          "automation_trigger": {
+            "type": "boolean",
+            "description": "Whether this event can be explicitly triggered by automations.\nWhen true, the event will appear in the automation builder as a\n\"Trigger Event\" action option.\nDefaults to false if not specified.\n",
+            "default": false,
+            "example": true
           }
-        },
-        "required": [
-          "event_name",
-          "schema_fields"
+        }
+      },
+      "EventConfig": {
+        "description": "Event configuration with required fields",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventConfigBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "event_name",
+              "event_version",
+              "schema_fields"
+            ]
+          }
+        ]
+      },
+      "UpdateEventPayload": {
+        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EventConfigBase"
+          },
+          {
+            "type": "object"
+          }
         ]
       },
       "PrimitiveField": {
@@ -407,6 +467,11 @@
           "required": {
             "type": "boolean",
             "description": "Whether this field is required in the event payload"
+          },
+          "graph_source": {
+            "type": "string",
+            "description": "Optional JSONata expression to extract the field value from the hydrated entity graph.\n\nThe expression has access to all hydrated graph nodes by their node ID.\nIf not specified, the field value must be provided as input when triggering the event.\n\nExamples:\n  - \"ticket.meter_reading_value\" (simple path)\n  - \"contact.email[0].email\" (nested/array access)\n  - \"ticket.reading_timestamp ?? $now()\" (with fallback)\n  - \"$number(meter_counter.reading_value)\" (type coercion)\n",
+            "example": "ticket.meter_reading_value"
           }
         },
         "required": [
@@ -468,6 +533,10 @@
           "_event_source": {
             "type": "string",
             "description": "Source that triggered the event"
+          },
+          "_ack_id": {
+            "type": "string",
+            "description": "Unique acknowledgment tracking ID for the event"
           }
         },
         "required": [
@@ -503,8 +572,8 @@
               "description": "Event name from catalog"
             },
             "_event_version": {
-              "type": "integer",
-              "description": "Schema version number"
+              "type": "string",
+              "description": "Event version (semver)"
             },
             "_event_source": {
               "type": "string",
@@ -640,12 +709,26 @@
             "description": "Event name from catalog"
           },
           "_event_version": {
-            "type": "integer",
-            "description": "Schema version number"
+            "type": "string",
+            "description": "Event version (semver)",
+            "example": "1.0.0"
           },
           "_event_source": {
             "type": "string",
             "description": "Source that triggered the event"
+          },
+          "_trigger_source_type": {
+            "type": "string",
+            "description": "The type of system that triggered the event.\nCommon values: api, automation, operation, portal_user\n",
+            "example": "api"
+          },
+          "_trigger_source": {
+            "type": "string",
+            "description": "Identifier of the specific trigger source.\n- For api: User ID or API key identifier\n- For automation: Automation execution ID\n- For operation: Activity ID from the entity operation\n- For portal_user: Portal user email\n"
+          },
+          "_ack_id": {
+            "type": "string",
+            "description": "Unique acknowledgment tracking ID for the event.\nUsed to track event delivery and processing status.\n"
           }
         },
         "required": [
@@ -662,8 +745,10 @@
           "_event_time": "2024-01-01T12:00:00Z",
           "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
           "_event_name": "MeterReading",
-          "_event_version": 1,
+          "_event_version": "1.0.0",
           "_event_source": "api",
+          "_trigger_source_type": "api",
+          "_trigger_source": "user_123456",
           "reading_value": 123.45,
           "reading_date": "2024-01-01T11:59:00Z",
           "read_by": "John Doe",
@@ -678,6 +763,150 @@
           "customer_id": "770e8400-e29b-41d4-a716-446655440000",
           "contract_id": "880e8400-e29b-41d4-a716-446655440000"
         }
+      },
+      "GraphDefinition": {
+        "type": "object",
+        "description": "Entity graph definition for resolving related entities",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "List of node definitions in the graph",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edge definitions connecting nodes",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            }
+          }
+        },
+        "required": [
+          "nodes",
+          "edges"
+        ]
+      },
+      "GraphNode": {
+        "type": "object",
+        "description": "A node in the entity graph",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "Cardinality for this node when hydrated:\n- \"one\": Node can only contain one entity, returns single Entity object\n- \"many\": Node can contain multiple entities, returns array of Entity objects\nIf not specified, defaults to \"many\" (returns array)\n",
+            "example": "one"
+          },
+          "fields": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FieldsParam"
+              },
+              {
+                "description": "Optional array of field names to include in the hydrated entity response for this node.\nWhen specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.\nOnly applies when hydrate=true.\n"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "schema"
+        ]
+      },
+      "GraphEdge": {
+        "type": "object",
+        "description": "An edge connecting two nodes in the graph",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID",
+            "example": "billing_account"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ]
+      },
+      "EntityOperationTrigger": {
+        "type": "object",
+        "description": "Configuration for triggering an event based on entity operations.\n\nWhen an entity operation matches the configured criteria, the event will be triggered.\n- On createEntity: the attribute must be present in the entity payload\n- On updateEntity: the attribute must be in diff.added, diff.updated, or diff.deleted\n- On deleteEntity: the event triggers when the entity is deleted (attributes not checked)\n",
+        "properties": {
+          "operation": {
+            "type": "array",
+            "description": "List of entity operations that can trigger this event",
+            "items": {
+              "type": "string",
+              "enum": [
+                "createEntity",
+                "updateEntity",
+                "deleteEntity"
+              ]
+            },
+            "example": [
+              "createEntity",
+              "updateEntity"
+            ]
+          },
+          "schema": {
+            "type": "array",
+            "description": "List of entity schema slugs that can trigger this event",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "contact",
+              "contract",
+              "order"
+            ]
+          },
+          "attribute": {
+            "type": "array",
+            "description": "Optional list of entity attributes to track for changes.\nIf specified, the event only triggers when these attributes are affected.\n- On createEntity: attribute must be defined in the entity payload\n- On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted\nIf not specified, all changes to matching entities will trigger the event.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "email",
+              "phone",
+              "status"
+            ]
+          },
+          "purpose": {
+            "type": "array",
+            "description": "Optional list of purpose names to filter by.\nThe entity must have at least one matching purpose in its _purpose array.\nPurpose names are matched against the taxonomy classification names (e.g., \"Kündigung\", \"Umzug/Auszug\").\nIf not specified, the event triggers regardless of entity purpose.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Kündigung",
+              "Umzug/Auszug"
+            ]
+          }
+        },
+        "required": [
+          "operation",
+          "schema"
+        ]
       },
       "SearchOptions": {
         "type": "object",
@@ -729,6 +958,88 @@
             "example": "evt_1234567890abcdef"
           }
         }
+      },
+      "FieldsParam": {
+        "type": "array",
+        "description": "List of entity fields to include or exclude in the response\n\nUse ! to exclude fields, e.g. `!_id` to exclude the `_id` field.\n\nGlobbing and globstart (**) is supported for nested fields.\n",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "_id",
+          "_title",
+          "first_name",
+          "account",
+          "!account.*._files",
+          "**._product"
+        ]
+      },
+      "TriggerEventPayload": {
+        "type": "object",
+        "description": "Payload for explicitly triggering an event via API",
+        "properties": {
+          "seed": {
+            "type": "object",
+            "description": "Entity seed for graph hydration. Required for events that have an entity_graph defined.\nSpecifies which entity to start graph traversal from.\n",
+            "properties": {
+              "entity_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Entity ID to seed the graph hydration"
+              },
+              "node_id": {
+                "type": "string",
+                "description": "Node ID from the event's entity_graph definition that matches\nthe seed entity. Must be a valid node in the event's graph.\n"
+              }
+            },
+            "required": [
+              "entity_id",
+              "node_id"
+            ]
+          },
+          "fields": {
+            "type": "object",
+            "description": "Input field values for the event. Keys must match the event's\nschema_fields definitions. Values are validated against each\nfield's JSON Schema.\n",
+            "additionalProperties": true
+          },
+          "skip_hydration": {
+            "type": "array",
+            "description": "Optional list of node IDs to skip during entity graph hydration.\nThese nodes will be null/undefined in the event payload.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_trigger_source_type": {
+            "type": "string",
+            "description": "The type of system that triggered the event.\nExamples: api, automation, operation, portal_user\nDefaults to \"api\" if not specified.\n"
+          },
+          "_trigger_source": {
+            "type": "string",
+            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\n"
+          }
+        }
+      },
+      "TriggerEventResponse": {
+        "type": "object",
+        "description": "Response from triggering an event",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the event was triggered successfully"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "The unique event ID (ULID) assigned to this event"
+          },
+          "event_bridge_event_id": {
+            "type": "string",
+            "description": "EventBridge event ID from publishing"
+          }
+        },
+        "required": [
+          "success",
+          "event_id"
+        ]
       }
     }
   },

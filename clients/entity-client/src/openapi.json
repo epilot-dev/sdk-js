@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.2.0",
+    "version": "2.8.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -70,6 +70,19 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "description": "List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
           }
         ],
         "tags": [
@@ -1883,10 +1896,18 @@
           {
             "in": "query",
             "name": "type",
-            "description": "Filter by activity type",
+            "description": "Filter by activity type(s)",
+            "style": "form",
+            "explode": false,
             "schema": {
-              "type": "string",
-              "example": "SyncActivity"
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "EntityUpdated",
+                "EntityCreated"
+              ]
             }
           },
           {
@@ -2283,6 +2304,15 @@
             "description": "List of entity fields to include in results",
             "schema": {
               "$ref": "#/components/schemas/FieldsParam"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "description": "Whether to include relations to/from deleted entities\n- `true`: include relations to/from deleted entities\n- `false`: exclude relations to/from deleted entities (default)\n- `only`: include only relations to/from deleted entities\n",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntitySearchIncludeDeletedParam"
             }
           }
         ],
@@ -2986,9 +3016,9 @@
             "name": "permanent",
             "description": "⚠️ NOT IMPLEMENTED - If true, the taxonomy will be permanently deleted",
             "schema": {
-              "type": "boolean"
-            },
-            "default": false
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -3438,7 +3468,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -5194,6 +5224,11 @@
             "description": "When set to true, this attribute will always be searchable regardless of\nthe ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields\nthat must always be included in search operations.\n",
             "default": false
           },
+          "exclude_from_search": {
+            "type": "boolean",
+            "description": "When set to true, this attribute will be excluded from search fields.\nUse this for fields that should not be matched during entity search operations,\nsuch as internal hashes or identifiers that might accidentally match search terms.\n",
+            "default": false
+          },
           "repeatable": {
             "description": "The attribute is a repeatable",
             "type": "boolean"
@@ -5938,7 +5973,7 @@
       "DefaultAddressFields": {
         "type": "array",
         "nullable": true,
-        "description": "Default fields visible on addresses\n\nValid values are:\n  - postal_code (default)\n  - city (default)\n  - street (default)\n  - street_number (default)\n  - plot_area\n  - plot_of_land\n  - suburb\n  - country\n  - additional_info\n  - coordinates\n  - start_date\n  - end_date\n  - salutation\n  - title\n  - first_name\n  - last_name\n  - company_name\n",
+        "description": "Default fields visible on addresses\n\nValid values are:\n  - postal_code (default)\n  - city (default)\n  - street (default)\n  - street_number (default)\n  - plot_area\n  - plot_of_land\n  - suburb\n  - country\n  - postbox\n  - additional_info\n  - coordinates\n  - start_date\n  - end_date\n  - salutation\n  - title\n  - first_name\n  - last_name\n  - name_suffix\n  - company_name\n",
         "items": {
           "type": "string"
         }
@@ -6187,6 +6222,15 @@
                 "enum": [
                   "number"
                 ]
+              },
+              "data_type": {
+                "type": "string",
+                "enum": [
+                  "number",
+                  "string"
+                ],
+                "default": "string",
+                "description": "Optional data type override. When set to 'number', the value is stored as a number instead of a string. Defaults to 'string'."
               },
               "format": {
                 "type": "string"
@@ -6973,6 +7017,14 @@
             },
             "nullable": true
           },
+          "_purpose_name": {
+            "description": "Automatically computed purpose names from _purpose attribute",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "_manifest": {
             "type": "array",
             "description": "Manifest ID used to create/update the entity",
@@ -7016,6 +7068,14 @@
             "123e4567-e89b-12d3-a456-426614174000"
           ]
         }
+      },
+      "NullableEntity": {
+        "nullable": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ]
       },
       "EntityOwner": {
         "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
@@ -8058,11 +8118,11 @@
           },
           "entityNodes": {
             "type": "object",
-            "description": "Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).\nThe seed node always returns a single Entity object.\nOther nodes return a single Entity object if they contain exactly one entity, or an array of Entity objects if they contain multiple entities.\n",
+            "description": "Map of node IDs to entity objects or arrays of entity objects (present when hydrate=true).\nThe seed node and nodes with cardinality=\"one\" return a single Entity object, or null if no entity was found.\nNodes with cardinality=\"many\" return an array of Entity objects.\n",
             "additionalProperties": {
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/Entity"
+                  "$ref": "#/components/schemas/NullableEntity"
                 },
                 {
                   "type": "array",
@@ -8377,13 +8437,34 @@
             "type": "object",
             "properties": {
               "added": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "New attributes added to the entity as part of the operation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               },
               "updated": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "Attributes updated in the entity. Note: These values contain the previous values before the update!"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               },
               "deleted": {
-                "$ref": "#/components/schemas/Entity"
+                "allOf": [
+                  {
+                    "description": "Attributes removed from the entity as part of the operation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Entity"
+                  }
+                ]
               }
             }
           }
@@ -8771,6 +8852,27 @@
             "type": "boolean",
             "description": "Starred taxonomy classifications can represent \"favorites\" or commonly used classifications",
             "default": false
+          },
+          "enabled_locations": {
+            "description": "List of locations where the classification is enabled to be used. If empty, it's enabled for all locations.",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TaxonomyLocationId"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "enabled_purposes": {
+            "description": "List of purpose slugs where the classification is enabled to be used. If empty, it's enabled for all purposes.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "_manifest": {
             "type": "array",

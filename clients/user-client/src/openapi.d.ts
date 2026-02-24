@@ -177,6 +177,12 @@ declare namespace Components {
                  * User's start page after login
                  */
                 custom_start_page?: string | null; // ^/app/*
+                custom_navigation?: /**
+                 * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+                 * example:
+                 * 5gbe4nkp6jsfq
+                 */
+                NavigationId;
                 /**
                  * This field is used to override the release channel for the user.
                  */
@@ -320,6 +326,172 @@ declare namespace Components {
              */
             cognito_oauth_scopes?: string[];
             oauth_response_type?: "code" | "token";
+            /**
+             * Whether passkey login is enabled for this organization
+             */
+            passkey_enabled?: boolean;
+        }
+        /**
+         * A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID.
+         */
+        export interface Navigation {
+            id: /**
+             * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+             * example:
+             * 5gbe4nkp6jsfq
+             */
+            NavigationId;
+            /**
+             * Human-readable name for the navigation configuration
+             * example:
+             * Sales Team Navigation
+             */
+            name: string;
+            configuration: /**
+             * Navigation configuration organized by sections. Each section contains an array of navigation items.
+             *
+             * example:
+             * {
+             *   "customer_relations": [
+             *     {
+             *       "key": "dashboard"
+             *     },
+             *     {
+             *       "key": "contact"
+             *     }
+             *   ],
+             *   "configurations": [
+             *     {
+             *       "name": "Product Catalog",
+             *       "subItems": [
+             *         {
+             *           "key": "product"
+             *         },
+             *         {
+             *           "key": "price"
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "key": "journey"
+             *     }
+             *   ]
+             * }
+             */
+            NavigationConfiguration;
+        }
+        /**
+         * Navigation configuration organized by sections. Each section contains an array of navigation items.
+         *
+         * example:
+         * {
+         *   "customer_relations": [
+         *     {
+         *       "key": "dashboard"
+         *     },
+         *     {
+         *       "key": "contact"
+         *     }
+         *   ],
+         *   "configurations": [
+         *     {
+         *       "name": "Product Catalog",
+         *       "subItems": [
+         *         {
+         *           "key": "product"
+         *         },
+         *         {
+         *           "key": "price"
+         *         }
+         *       ]
+         *     },
+         *     {
+         *       "key": "journey"
+         *     }
+         *   ]
+         * }
+         */
+        export interface NavigationConfiguration {
+            [name: string]: /* A navigation item - either a simple key item or a group with sub-items */ NavigationItem[];
+        }
+        /**
+         * Request payload to create a new navigation configuration
+         */
+        export interface NavigationCreateRequest {
+            /**
+             * Human-readable name for the navigation configuration
+             * example:
+             * Sales Team Navigation
+             */
+            name: string;
+            configuration: /**
+             * Navigation configuration organized by sections. Each section contains an array of navigation items.
+             *
+             * example:
+             * {
+             *   "customer_relations": [
+             *     {
+             *       "key": "dashboard"
+             *     },
+             *     {
+             *       "key": "contact"
+             *     }
+             *   ],
+             *   "configurations": [
+             *     {
+             *       "name": "Product Catalog",
+             *       "subItems": [
+             *         {
+             *           "key": "product"
+             *         },
+             *         {
+             *           "key": "price"
+             *         }
+             *       ]
+             *     },
+             *     {
+             *       "key": "journey"
+             *     }
+             *   ]
+             * }
+             */
+            NavigationConfiguration;
+        }
+        /**
+         * A navigation group containing sub-items
+         */
+        export interface NavigationGroupItem {
+            /**
+             * The display name of the navigation group
+             * example:
+             * Product Catalog
+             */
+            name: string;
+            /**
+             * The list of navigation items within this group
+             */
+            subItems: /* A simple navigation item with a key */ NavigationKeyItem[];
+        }
+        /**
+         * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+         * example:
+         * 5gbe4nkp6jsfq
+         */
+        export type NavigationId = string | null;
+        /**
+         * A navigation item - either a simple key item or a group with sub-items
+         */
+        export type NavigationItem = /* A navigation item - either a simple key item or a group with sub-items */ /* A simple navigation item with a key */ NavigationKeyItem | /* A navigation group containing sub-items */ NavigationGroupItem;
+        /**
+         * A simple navigation item with a key
+         */
+        export interface NavigationKeyItem {
+            /**
+             * The unique key identifier for the navigation item
+             * example:
+             * dashboard
+             */
+            key: string;
         }
         export type Offset = number;
         export interface Organization {
@@ -416,6 +588,61 @@ declare namespace Components {
          * Token used to invite a partner user to epilot
          */
         export type PartnerInvitationToken = string;
+        export interface Passkey {
+            /**
+             * Base64url-encoded credential ID
+             */
+            credential_id?: string;
+            /**
+             * example:
+             * My Laptop
+             */
+            friendly_name?: string;
+            created_at?: string; // date-time
+            transports?: string[];
+            aaguid?: string;
+        }
+        export interface PasskeyAuthenticationOptions {
+            /**
+             * WebAuthn PublicKeyCredentialRequestOptions
+             */
+            options?: {
+                [key: string]: any;
+            };
+            /**
+             * Signed JWT containing the challenge
+             */
+            challenge_token?: string;
+        }
+        export interface PasskeyRegistrationOptions {
+            /**
+             * WebAuthn PublicKeyCredentialCreationOptions
+             */
+            options?: {
+                [key: string]: any;
+            };
+            /**
+             * Signed JWT containing the challenge
+             */
+            challenge_token?: string;
+        }
+        export interface PasskeyRegistrationResponse {
+            /**
+             * The challenge token from registerBegin
+             */
+            challenge_token: string;
+            /**
+             * WebAuthn AuthenticatorAttestationResponse
+             */
+            registration_response: {
+                [key: string]: any;
+            };
+            /**
+             * example:
+             * My Laptop
+             */
+            friendly_name?: string;
+        }
         export type Query = string;
         export interface SignupUserPayload {
             organization_detail?: OrganizationDetail;
@@ -466,6 +693,12 @@ declare namespace Components {
              * <p>Thanks</p>
              */
             signature?: string;
+            custom_navigation?: /**
+             * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+             * example:
+             * 5gbe4nkp6jsfq
+             */
+            NavigationId;
             /**
              * Deprecated! Please use Permissions API instead
              */
@@ -614,6 +847,12 @@ declare namespace Components {
              * User's start page after login
              */
             custom_start_page?: string | null; // ^/app/*
+            custom_navigation?: /**
+             * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+             * example:
+             * 5gbe4nkp6jsfq
+             */
+            NavigationId;
             /**
              * This field is used to override the release channel for the user.
              */
@@ -732,6 +971,33 @@ declare namespace Paths {
             }
         }
     }
+    namespace BeginDiscoverablePasskeyAuthentication {
+        namespace Responses {
+            export type $200 = Components.Schemas.PasskeyAuthenticationOptions;
+        }
+    }
+    namespace BeginPasskeyAuthentication {
+        export interface RequestBody {
+            email: string; // email
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PasskeyAuthenticationOptions;
+            export interface $404 {
+            }
+        }
+    }
+    namespace BeginPasskeyRegistration {
+        export interface RequestBody {
+            /**
+             * example:
+             * My Laptop
+             */
+            friendly_name?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PasskeyRegistrationOptions;
+        }
+    }
     namespace CheckInviteToken {
         namespace Parameters {
             export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;
@@ -770,10 +1036,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace CompletePasskeyRegistration {
+        export type RequestBody = Components.Schemas.PasskeyRegistrationResponse;
+        namespace Responses {
+            export type $200 = Components.Schemas.Passkey;
+        }
+    }
     namespace CreateGroup {
         export type RequestBody = Components.Schemas.CreateGroupReq;
         namespace Responses {
             export type $201 = Components.Schemas.Group;
+        }
+    }
+    namespace CreateNavigation {
+        export type RequestBody = /* Request payload to create a new navigation configuration */ Components.Schemas.NavigationCreateRequest;
+        namespace Responses {
+            export type $201 = /* A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID. */ Components.Schemas.Navigation;
         }
     }
     namespace DeleteGroup {
@@ -785,6 +1063,20 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $204 {
+            }
+        }
+    }
+    namespace DeletePasskey {
+        namespace Parameters {
+            export type CredentialId = string;
+        }
+        export interface PathParameters {
+            credentialId: Parameters.CredentialId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -861,6 +1153,24 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UserV2;
         }
     }
+    namespace GetNavigation {
+        namespace Parameters {
+            export type Id = /**
+             * Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.
+             * example:
+             * 5gbe4nkp6jsfq
+             */
+            Components.Schemas.NavigationId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID. */ Components.Schemas.Navigation;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetUser {
         namespace Parameters {
             export type Id = /* User's unique identifier */ Components.Schemas.UserId;
@@ -914,6 +1224,13 @@ declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Schemas.UserV2;
             export interface $400 {
+            }
+        }
+    }
+    namespace ListPasskeys {
+        namespace Responses {
+            export interface $200 {
+                passkeys?: Components.Schemas.Passkey[];
             }
         }
     }
@@ -988,6 +1305,30 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.UserV2;
             export interface $400 {
+            }
+        }
+    }
+    namespace ResolveDiscoverableCredential {
+        export interface RequestBody {
+            /**
+             * The challenge token from authenticateBeginDiscoverable
+             */
+            challenge_token: string;
+            /**
+             * WebAuthn AuthenticatorAssertionResponse JSON
+             */
+            assertion_response: {
+                [key: string]: any;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                email?: string; // email
+                organization_id?: string;
+                user_id?: string;
+                login_parameters?: Components.Schemas.LoginParameters[];
+            }
+            export interface $404 {
             }
         }
     }
@@ -1214,6 +1555,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
   /**
+   * createNavigation - createNavigation
+   * 
+   * Create a new navigation configuration. Navigations are immutable and globally accessible across organizations.
+   * Each creation generates a new id. To update a navigation, create a new one.
+   * 
+   */
+  'createNavigation'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateNavigation.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateNavigation.Responses.$201>
+  /**
+   * getNavigation - getNavigation
+   * 
+   * Get a navigation configuration by ID
+   */
+  'getNavigation'(
+    parameters?: Parameters<Paths.GetNavigation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNavigation.Responses.$200>
+  /**
    * verifyEmailWithToken - verifyEmailWithToken
    * 
    * Update new email using an verification token
@@ -1266,6 +1629,76 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
+  /**
+   * beginPasskeyAuthentication - beginPasskeyAuthentication
+   * 
+   * Begin passkey authentication flow. Returns WebAuthn options and a signed challenge token.
+   */
+  'beginPasskeyAuthentication'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BeginPasskeyAuthentication.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BeginPasskeyAuthentication.Responses.$200>
+  /**
+   * beginDiscoverablePasskeyAuthentication - beginDiscoverablePasskeyAuthentication
+   * 
+   * Begin discoverable passkey authentication flow (no email required). Returns WebAuthn options with empty allowCredentials for the browser credential picker.
+   */
+  'beginDiscoverablePasskeyAuthentication'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BeginDiscoverablePasskeyAuthentication.Responses.$200>
+  /**
+   * resolveDiscoverableCredential - resolveDiscoverableCredential
+   * 
+   * Resolve user identity from a discoverable passkey assertion. Returns the user's email and login parameters.
+   */
+  'resolveDiscoverableCredential'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ResolveDiscoverableCredential.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResolveDiscoverableCredential.Responses.$200>
+  /**
+   * beginPasskeyRegistration - beginPasskeyRegistration
+   * 
+   * Begin passkey registration flow for the authenticated user.
+   */
+  'beginPasskeyRegistration'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BeginPasskeyRegistration.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BeginPasskeyRegistration.Responses.$200>
+  /**
+   * completePasskeyRegistration - completePasskeyRegistration
+   * 
+   * Complete passkey registration by verifying the attestation response.
+   */
+  'completePasskeyRegistration'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CompletePasskeyRegistration.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CompletePasskeyRegistration.Responses.$200>
+  /**
+   * listPasskeys - listPasskeys
+   * 
+   * List all passkeys registered for the authenticated user.
+   */
+  'listPasskeys'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPasskeys.Responses.$200>
+  /**
+   * deletePasskey - deletePasskey
+   * 
+   * Delete a passkey by credential ID.
+   */
+  'deletePasskey'(
+    parameters?: Parameters<Paths.DeletePasskey.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeletePasskey.Responses.$204>
   /**
    * switchOrganization - switchOrganization
    * 
@@ -1488,6 +1921,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AdvanceUserAssignment.Responses.$200>
   }
+  ['/v2/user/navigations']: {
+    /**
+     * createNavigation - createNavigation
+     * 
+     * Create a new navigation configuration. Navigations are immutable and globally accessible across organizations.
+     * Each creation generates a new id. To update a navigation, create a new one.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateNavigation.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateNavigation.Responses.$201>
+  }
+  ['/v2/user/navigations/{id}']: {
+    /**
+     * getNavigation - getNavigation
+     * 
+     * Get a navigation configuration by ID
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNavigation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNavigation.Responses.$200>
+  }
   ['/v2/users/public/verifyEmail']: {
     /**
      * verifyEmailWithToken - verifyEmailWithToken
@@ -1550,6 +2009,90 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserLoginParametersV2.Responses.$200>
+  }
+  ['/v2/users/public/passkeys:authenticateBegin']: {
+    /**
+     * beginPasskeyAuthentication - beginPasskeyAuthentication
+     * 
+     * Begin passkey authentication flow. Returns WebAuthn options and a signed challenge token.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BeginPasskeyAuthentication.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BeginPasskeyAuthentication.Responses.$200>
+  }
+  ['/v2/users/public/passkeys:authenticateBeginDiscoverable']: {
+    /**
+     * beginDiscoverablePasskeyAuthentication - beginDiscoverablePasskeyAuthentication
+     * 
+     * Begin discoverable passkey authentication flow (no email required). Returns WebAuthn options with empty allowCredentials for the browser credential picker.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BeginDiscoverablePasskeyAuthentication.Responses.$200>
+  }
+  ['/v2/users/public/passkeys:resolveCredential']: {
+    /**
+     * resolveDiscoverableCredential - resolveDiscoverableCredential
+     * 
+     * Resolve user identity from a discoverable passkey assertion. Returns the user's email and login parameters.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ResolveDiscoverableCredential.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResolveDiscoverableCredential.Responses.$200>
+  }
+  ['/v2/users/me/passkeys:registerBegin']: {
+    /**
+     * beginPasskeyRegistration - beginPasskeyRegistration
+     * 
+     * Begin passkey registration flow for the authenticated user.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BeginPasskeyRegistration.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BeginPasskeyRegistration.Responses.$200>
+  }
+  ['/v2/users/me/passkeys:registerComplete']: {
+    /**
+     * completePasskeyRegistration - completePasskeyRegistration
+     * 
+     * Complete passkey registration by verifying the attestation response.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CompletePasskeyRegistration.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CompletePasskeyRegistration.Responses.$200>
+  }
+  ['/v2/users/me/passkeys']: {
+    /**
+     * listPasskeys - listPasskeys
+     * 
+     * List all passkeys registered for the authenticated user.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPasskeys.Responses.$200>
+  }
+  ['/v2/users/me/passkeys/{credentialId}']: {
+    /**
+     * deletePasskey - deletePasskey
+     * 
+     * Delete a passkey by credential ID.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeletePasskey.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeletePasskey.Responses.$204>
   }
   ['/v2/users/switchOrganization']: {
     /**
@@ -1626,11 +2169,22 @@ export type Hydrate = Components.Schemas.Hydrate;
 export type InviteToken = Components.Schemas.InviteToken;
 export type Limit = Components.Schemas.Limit;
 export type LoginParameters = Components.Schemas.LoginParameters;
+export type Navigation = Components.Schemas.Navigation;
+export type NavigationConfiguration = Components.Schemas.NavigationConfiguration;
+export type NavigationCreateRequest = Components.Schemas.NavigationCreateRequest;
+export type NavigationGroupItem = Components.Schemas.NavigationGroupItem;
+export type NavigationId = Components.Schemas.NavigationId;
+export type NavigationItem = Components.Schemas.NavigationItem;
+export type NavigationKeyItem = Components.Schemas.NavigationKeyItem;
 export type Offset = Components.Schemas.Offset;
 export type Organization = Components.Schemas.Organization;
 export type OrganizationDetail = Components.Schemas.OrganizationDetail;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type PartnerInvitationToken = Components.Schemas.PartnerInvitationToken;
+export type Passkey = Components.Schemas.Passkey;
+export type PasskeyAuthenticationOptions = Components.Schemas.PasskeyAuthenticationOptions;
+export type PasskeyRegistrationOptions = Components.Schemas.PasskeyRegistrationOptions;
+export type PasskeyRegistrationResponse = Components.Schemas.PasskeyRegistrationResponse;
 export type Query = Components.Schemas.Query;
 export type SignupUserPayload = Components.Schemas.SignupUserPayload;
 export type UpdateGroupReq = Components.Schemas.UpdateGroupReq;

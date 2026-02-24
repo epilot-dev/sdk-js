@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.19.0
+
+### Minor Changes
+
+- Add support for AI agent configs and condition attribute sub-fields
+
+## 1.18.0
+
+### Minor Changes
+
+- Add new cancel schedule endpoint & deprecate old one
+
 ## 1.16.0
 
 ### Minor Changes

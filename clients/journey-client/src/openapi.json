@@ -3,7 +3,7 @@
   "info": {
     "title": "Journey API",
     "description": "API to configure journeys",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "security": [
     {
@@ -167,6 +167,22 @@
           "200": {
             "description": "Success",
             "content": {}
+          },
+          "404": {
+            "description": "Journey not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -372,6 +388,22 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Journey or associated entity not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -518,6 +550,22 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Journey or associated entity not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -554,6 +602,22 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Journey or associated entity not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "journey not found"
+                    }
+                  }
                 }
               }
             }
@@ -762,7 +826,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "journey not found"
+                      "example": "File with ID 535ef74a-dd66-4d01-94a9-725016e70d1c not found."
                     }
                   }
                 }
@@ -1024,22 +1088,127 @@
               "additionalProperties": false
             }
           },
+          "logicsV4": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Unique identifier for logic. Use uuidv7"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "description": "If true, logic can't be manipulated by the configuring user"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Indicates which action to take in case logic evaluates to true"
+                },
+                "triggeredOn": {
+                  "type": "string",
+                  "description": "Indicates when the logic should be evaluated"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "operator": {
+                          "type": "string",
+                          "description": "Operator to be applied between the fact value and the value"
+                        },
+                        "functionName": {
+                          "type": "string",
+                          "description": "If operator is a custom function, this needs to be provided"
+                        },
+                        "fact": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "description": "Unique identifier for a fact"
+                            },
+                            "referenceType": {
+                              "type": "string",
+                              "description": "Indicates reference type (block or context parameter)"
+                            },
+                            "referenceId": {
+                              "type": "string",
+                              "description": "Id of the reference"
+                            },
+                            "path": {
+                              "type": "string",
+                              "description": "Path to a property. Used if only part of the value is needed"
+                            },
+                            "meaning": {
+                              "type": "string",
+                              "description": "If path is a reference, indicates the intention of it"
+                            }
+                          }
+                        },
+                        "value": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "object"
+                            },
+                            {
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "args": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                },
+                "settings": {
+                  "type": "object",
+                  "description": "Logic specific settings. Will vary by type of logic"
+                }
+              }
+            }
+          },
           "contextSchema": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Unique identifier for the context schema item"
+                },
                 "type": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Type of the parameter. It could be either an entity slug, or a text"
                 },
                 "paramKey": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Expected key to be received in the context"
                 },
                 "isRequired": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Indicates if a value is expected to be provided"
                 },
                 "shouldLoadEntity": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
                 }
               },
               "required": [
@@ -1236,6 +1405,10 @@
           "createdBy": {
             "type": "string"
           },
+          "updatedBy": {
+            "type": "string",
+            "nullable": true
+          },
           "__lastModifiedAt": {
             "type": "string",
             "description": "If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey",
@@ -1401,22 +1574,127 @@
               "additionalProperties": false
             }
           },
+          "logicsV4": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Unique identifier for logic. Use uuidv7"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "description": "If true, logic can't be manipulated by the configuring user"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Indicates which action to take in case logic evaluates to true"
+                },
+                "triggeredOn": {
+                  "type": "string",
+                  "description": "Indicates when the logic should be evaluated"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "operator": {
+                          "type": "string",
+                          "description": "Operator to be applied between the fact value and the value"
+                        },
+                        "functionName": {
+                          "type": "string",
+                          "description": "If operator is a custom function, this needs to be provided"
+                        },
+                        "fact": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "description": "Unique identifier for a fact"
+                            },
+                            "referenceType": {
+                              "type": "string",
+                              "description": "Indicates reference type (block or context parameter)"
+                            },
+                            "referenceId": {
+                              "type": "string",
+                              "description": "Id of the reference"
+                            },
+                            "path": {
+                              "type": "string",
+                              "description": "Path to a property. Used if only part of the value is needed"
+                            },
+                            "meaning": {
+                              "type": "string",
+                              "description": "If path is a reference, indicates the intention of it"
+                            }
+                          }
+                        },
+                        "value": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "object"
+                            },
+                            {
+                              "type": "array"
+                            }
+                          ]
+                        },
+                        "args": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                },
+                "settings": {
+                  "type": "object",
+                  "description": "Logic specific settings. Will vary by type of logic"
+                }
+              }
+            }
+          },
           "contextSchema": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Unique identifier for the context schema item"
+                },
                 "type": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Type of the parameter. It could be either an entity slug, or a text"
                 },
                 "paramKey": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Expected key to be received in the context"
                 },
                 "isRequired": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "Indicates if a value is expected to be provided"
                 },
                 "shouldLoadEntity": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
                 }
               },
               "required": [
@@ -1983,6 +2261,11 @@
             "type": "boolean",
             "description": "The canary flag controls update frequency of epilot application: when true, customers receive continuous updates; when false, they only get updates with new version releases.",
             "example": true
+          },
+          "thirdPartyCookies": {
+            "type": "boolean",
+            "description": "When set to false, third-party cookies and resources should be completely disabled to comply with GDPR regulations.",
+            "example": true
           }
         }
       },
@@ -2048,6 +2331,9 @@
     }
   },
   "servers": [
+    {
+      "url": "https://journey-config.sls.epilot.io"
+    },
     {
       "url": "https://journey-config.sls.epilot.io"
     }

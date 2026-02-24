@@ -85,6 +85,23 @@
         "responses": {}
       }
     },
+    "/v1/kanban/org/default-board": {
+      "put": {
+        "operationId": "setDefaultKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "clearDefaultKanbanBoard",
+        "responses": {}
+      }
+    },
     "/v1/kanban/query/flows:autocomplete": {
       "get": {
         "operationId": "flowsAutocomplete",

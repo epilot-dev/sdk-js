@@ -23,13 +23,125 @@ declare namespace Components {
             oauthConfig?: /* To be sent only if authType is OAUTH_CLIENT_CREDENTIALS */ OAuthConfig;
             apiKeyConfig?: /* To be sent only if authType is API_KEY */ ApiKeyConfig;
         }
-        export type AuthType = "BASIC" | "OAUTH_CLIENT_CREDENTIALS" | "API_KEY";
+        export type AuthType = "BASIC" | "OAUTH_CLIENT_CREDENTIALS" | "API_KEY" | "NONE";
         /**
          * To be sent only if authType is BASIC
          */
         export interface BasicAuthConfig {
             username: string;
             password?: string;
+        }
+        export interface BatchReplayRequest {
+            /**
+             * List of event IDs to replay
+             * example:
+             * [
+             *   "2f1b7cf8-ff55-4359-966f-e56f39a52c94",
+             *   "48c984bf-466b-470b-b743-d07cea168243"
+             * ]
+             */
+            eventIds: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
         }
         /**
          * Object representing custom headers as key-value pairs.
@@ -123,147 +235,8 @@ declare namespace Components {
          * Payload for triggering a webhook
          */
         export interface ExecutionPayload {
+            [name: string]: any;
             metadata: /* Contains the metadata about the configured event */ Metadata;
-        }
-        /**
-         * Failures stored in the database.
-         */
-        export interface FailureEntry {
-            /**
-             * The ID of the given organization
-             */
-            orgId?: string;
-            /**
-             * ID of event. Unique
-             */
-            eventId?: string;
-            /**
-             * Name for identifying the event. Unique.
-             */
-            eventName?: string;
-            /**
-             * Time of event creation
-             */
-            creationTimestamp?: string;
-            /**
-             * Contains the metadata about the configured event
-             */
-            payload?: {
-                [key: string]: any;
-            };
-            /**
-             * The ID of the webhook configuration
-             */
-            webhookConfigId?: string;
-            errorCode?: string;
-            /**
-             * The error message encountered during webhook delivery
-             */
-            errorPayload?: string;
-            /**
-             * destination url of configured webhook
-             */
-            url?: string;
-        }
-        /**
-         * Key of last loaded item previously returned via paginated response
-         */
-        export interface FailureLastKey {
-            orgId?: string;
-            eventId?: string;
-            creationTimestamp?: string;
-            webhookConfigId?: string;
-        }
-        /**
-         * Response for get errors request.
-         * example:
-         * {
-         *   "failures": [
-         *     {
-         *       "eventName": "customer_request_created,",
-         *       "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
-         *       "errorCode": "502",
-         *       "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
-         *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-         *       "orgId": "728",
-         *       "errorPayload": "Failed to store data",
-         *       "url": "https://63b2de56be27.ngrok.io",
-         *       "payload": {
-         *         "metadata": {
-         *           "action": "created",
-         *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-         *           "event_name": "customer_request_created",
-         *           "object": "customer_request",
-         *           "organization_id": "728",
-         *           "version": "1.0.0"
-         *         },
-         *         "customer_request": {
-         *           "id": "TEST",
-         *           "payment_details": {
-         *             "account_owner_name": "Test",
-         *             "bank_name": "Test Bank",
-         *             "bic": "BIC",
-         *             "iban": "IBAN",
-         *             "payment_method": "sepa"
-         *           },
-         *           "request_items": [
-         *             {
-         *               "id": "TEST",
-         *               "otherProp1": "test1",
-         *               "otherProp2": "test2"
-         *             }
-         *           ]
-         *         }
-         *       }
-         *     },
-         *     {
-         *       "eventName": "customer_request_created",
-         *       "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-         *       "errorCode": "404",
-         *       "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
-         *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-         *       "orgId": "728",
-         *       "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
-         *       "url": "https://ef68038e3af9.ngrok.io",
-         *       "payload": {
-         *         "metadata": {
-         *           "action": "created",
-         *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-         *           "event_name": "customer_request_created",
-         *           "object": "customer_request",
-         *           "organization_id": "728",
-         *           "version": "1.0.0"
-         *         },
-         *         "customer_request": {
-         *           "id": "TEST",
-         *           "payment_details": {
-         *             "account_owner_name": "Test",
-         *             "bank_name": "Test Bank",
-         *             "bic": "BIC",
-         *             "iban": "IBAN",
-         *             "payment_method": "sepa"
-         *           },
-         *           "request_items": [
-         *             {
-         *               "id": "TEST",
-         *               "otherProp1": "test1",
-         *               "otherProp2": true
-         *             }
-         *           ]
-         *         }
-         *       }
-         *     }
-         *   ],
-         *   "lastLoadedKey": {
-         *     "orgId": 6122,
-         *     "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-         *     "creationTimestamp": "2022:01:01T00:00:00.000Z"
-         *   }
-         * }
-         */
-        export interface FailuresResp {
-            lastLoadedKey?: /* Key of last loaded item previously returned via paginated response */ FailureLastKey;
-            failures: /* Failures stored in the database. */ FailureEntry[];
         }
         export interface Filter {
             keyToFilter: string;
@@ -344,6 +317,29 @@ declare namespace Components {
             include_changed_attributes?: boolean;
             custom_headers?: /* Object representing custom headers as key-value pairs. */ CustomHeader;
         }
+        export interface PublicKeyResponse {
+            /**
+             * PEM-encoded Ed25519 public key for verifying webhook signatures
+             * example:
+             * -----BEGIN PUBLIC KEY-----
+             * MCowBQYDK2VwAyEA...
+             * -----END PUBLIC KEY-----
+             *
+             */
+            public_key: string;
+            /**
+             * The signing algorithm used
+             * example:
+             * ed25519
+             */
+            algorithm: string;
+            /**
+             * The issuer of the signing key
+             * example:
+             * epilot
+             */
+            issuer?: string;
+        }
         export interface SearchOptions {
             /**
              * Maximum number of results to return
@@ -396,7 +392,7 @@ declare namespace Components {
              * example:
              * succeeded
              */
-            status?: "succeeded" | "failed";
+            status?: "succeeded" | "failed" | "skipped";
         }
         export interface TriggerWebhookResp {
             status_code?: string;
@@ -409,6 +405,46 @@ declare namespace Components {
             start_date?: string;
             end_date?: string;
             event_id: string;
+        }
+        /**
+         * A condition that must be met for the webhook to fire.
+         */
+        export interface WebhookCondition {
+            /**
+             * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items")
+             */
+            field: string;
+            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            /**
+             * Values to compare against (not required for is_empty/is_not_empty)
+             */
+            values?: string[];
+            /**
+             * Type hint for the field (affects comparison logic)
+             */
+            field_type?: "string" | "number" | "boolean" | "date" | "datetime";
+            /**
+             * Whether the target field is an array (repeatable)
+             */
+            is_array_field?: boolean;
+        }
+        /**
+         * A group of conditions with a logical operator. Multiple conditions are AND-ed by default.
+         */
+        export interface WebhookConditionGroup {
+            conditions?: [
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. */ WebhookCondition?
+            ];
+            logical_operator?: "AND" | "OR";
         }
         /**
          * example:
@@ -455,10 +491,21 @@ declare namespace Components {
              * JSONata expression to transform the payload
              */
             jsonataExpression?: string;
+            filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**
              * Manifest ID used to create/update the webhook resource
              */
             _manifest?: string /* uuid */[];
+            /**
+             * Per-webhook signing secret following the Standard Webhooks specification.
+             * Only returned once during webhook creation. Use this secret to verify
+             * webhook signatures using the `webhook-id`, `webhook-timestamp`, and
+             * `webhook-signature` headers.
+             *
+             * example:
+             * whsec_C2FVsBQIhrscChlQIMV+b5sSYspob7oD
+             */
+            signingSecret?: string;
         }
         export interface WebhookEvent {
             event_id: string;
@@ -480,7 +527,7 @@ declare namespace Components {
                 code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
-            status?: "succeeded" | "failed" | "in_progress";
+            status?: "succeeded" | "failed" | "in_progress" | "skipped";
             http_method?: "GET" | "POST" | "PUT";
             /**
              * stringified payload of the webhook request
@@ -490,6 +537,26 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace BatchReplayEvents {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        export type RequestBody = Components.Schemas.BatchReplayRequest;
+        namespace Responses {
+            export interface $202 {
+                /**
+                 * List of event ids that were enqueued for replay
+                 */
+                replayed_event_ids?: string[];
+            }
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace CreateConfig {
         export type RequestBody = /**
          * example:
@@ -660,212 +727,15 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
-    namespace GetFailures {
+    namespace GetPublicKey {
         namespace Parameters {
-            export type LastLoadedEventId = string;
-            export type LastLoadedTimestamp = string;
+            export type OrgId = string;
         }
         export interface QueryParameters {
-            lastLoadedEventId?: Parameters.LastLoadedEventId;
-            lastLoadedTimestamp?: Parameters.LastLoadedTimestamp;
+            orgId: Parameters.OrgId;
         }
         namespace Responses {
-            export type $200 = /**
-             * Response for get errors request.
-             * example:
-             * {
-             *   "failures": [
-             *     {
-             *       "eventName": "customer_request_created,",
-             *       "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
-             *       "errorCode": "502",
-             *       "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
-             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-             *       "orgId": "728",
-             *       "errorPayload": "Failed to store data",
-             *       "url": "https://63b2de56be27.ngrok.io",
-             *       "payload": {
-             *         "metadata": {
-             *           "action": "created",
-             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-             *           "event_name": "customer_request_created",
-             *           "object": "customer_request",
-             *           "organization_id": "728",
-             *           "version": "1.0.0"
-             *         },
-             *         "customer_request": {
-             *           "id": "TEST",
-             *           "payment_details": {
-             *             "account_owner_name": "Test",
-             *             "bank_name": "Test Bank",
-             *             "bic": "BIC",
-             *             "iban": "IBAN",
-             *             "payment_method": "sepa"
-             *           },
-             *           "request_items": [
-             *             {
-             *               "id": "TEST",
-             *               "otherProp1": "test1",
-             *               "otherProp2": "test2"
-             *             }
-             *           ]
-             *         }
-             *       }
-             *     },
-             *     {
-             *       "eventName": "customer_request_created",
-             *       "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-             *       "errorCode": "404",
-             *       "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
-             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-             *       "orgId": "728",
-             *       "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
-             *       "url": "https://ef68038e3af9.ngrok.io",
-             *       "payload": {
-             *         "metadata": {
-             *           "action": "created",
-             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-             *           "event_name": "customer_request_created",
-             *           "object": "customer_request",
-             *           "organization_id": "728",
-             *           "version": "1.0.0"
-             *         },
-             *         "customer_request": {
-             *           "id": "TEST",
-             *           "payment_details": {
-             *             "account_owner_name": "Test",
-             *             "bank_name": "Test Bank",
-             *             "bic": "BIC",
-             *             "iban": "IBAN",
-             *             "payment_method": "sepa"
-             *           },
-             *           "request_items": [
-             *             {
-             *               "id": "TEST",
-             *               "otherProp1": "test1",
-             *               "otherProp2": true
-             *             }
-             *           ]
-             *         }
-             *       }
-             *     }
-             *   ],
-             *   "lastLoadedKey": {
-             *     "orgId": 6122,
-             *     "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-             *     "creationTimestamp": "2022:01:01T00:00:00.000Z"
-             *   }
-             * }
-             */
-            Components.Schemas.FailuresResp;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
-    namespace GetFailuresForConfig {
-        namespace Parameters {
-            export type ConfigId = string;
-            export type LastLoadedEventId = string;
-            export type LastLoadedTimestamp = string;
-        }
-        export interface PathParameters {
-            configId: Parameters.ConfigId;
-        }
-        export interface QueryParameters {
-            lastLoadedEventId?: Parameters.LastLoadedEventId;
-            lastLoadedTimestamp?: Parameters.LastLoadedTimestamp;
-        }
-        namespace Responses {
-            export type $200 = /**
-             * Response for get errors request.
-             * example:
-             * {
-             *   "failures": [
-             *     {
-             *       "eventName": "customer_request_created,",
-             *       "eventId": "12e8726b-071b-4c42-9221-8caae0d14863",
-             *       "errorCode": "502",
-             *       "webhookConfigId": "kreauMGUr55nDoVviaaBLG",
-             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-             *       "orgId": "728",
-             *       "errorPayload": "Failed to store data",
-             *       "url": "https://63b2de56be27.ngrok.io",
-             *       "payload": {
-             *         "metadata": {
-             *           "action": "created",
-             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-             *           "event_name": "customer_request_created",
-             *           "object": "customer_request",
-             *           "organization_id": "728",
-             *           "version": "1.0.0"
-             *         },
-             *         "customer_request": {
-             *           "id": "TEST",
-             *           "payment_details": {
-             *             "account_owner_name": "Test",
-             *             "bank_name": "Test Bank",
-             *             "bic": "BIC",
-             *             "iban": "IBAN",
-             *             "payment_method": "sepa"
-             *           },
-             *           "request_items": [
-             *             {
-             *               "id": "TEST",
-             *               "otherProp1": "test1",
-             *               "otherProp2": "test2"
-             *             }
-             *           ]
-             *         }
-             *       }
-             *     },
-             *     {
-             *       "eventName": "customer_request_created",
-             *       "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-             *       "errorCode": "404",
-             *       "webhookConfigId": "xrExypA8HBWEtK9AXfU2de",
-             *       "creationTimestamp": "2021-04-13T17:43:40.576Z",
-             *       "orgId": "728",
-             *       "errorPayload": "Tunnel ef68038e3af9.ngrok.io not found",
-             *       "url": "https://ef68038e3af9.ngrok.io",
-             *       "payload": {
-             *         "metadata": {
-             *           "action": "created",
-             *           "creation_timestamp": "2021-04-13T17:43:40.576Z",
-             *           "event_name": "customer_request_created",
-             *           "object": "customer_request",
-             *           "organization_id": "728",
-             *           "version": "1.0.0"
-             *         },
-             *         "customer_request": {
-             *           "id": "TEST",
-             *           "payment_details": {
-             *             "account_owner_name": "Test",
-             *             "bank_name": "Test Bank",
-             *             "bic": "BIC",
-             *             "iban": "IBAN",
-             *             "payment_method": "sepa"
-             *           },
-             *           "request_items": [
-             *             {
-             *               "id": "TEST",
-             *               "otherProp1": "test1",
-             *               "otherProp2": true
-             *             }
-             *           ]
-             *         }
-             *       }
-             *     }
-             *   ],
-             *   "lastLoadedKey": {
-             *     "orgId": 6122,
-             *     "eventId": "fc51a730-9730-4b55-8aa1-dd6d66b7e3e2",
-             *     "creationTimestamp": "2022:01:01T00:00:00.000Z"
-             *   }
-             * }
-             */
-            Components.Schemas.FailuresResp;
-            export type $404 = Components.Schemas.ErrorResp;
+            export type $200 = Components.Schemas.PublicKeyResponse;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -934,15 +804,6 @@ declare namespace Paths {
             export interface $204 {
             }
             export type $404 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
-    namespace ResendFailure {
-        export type RequestBody = /* Failures stored in the database. */ Components.Schemas.FailureEntry;
-        namespace Responses {
-            export interface $204 {
-            }
-            export type $401 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1030,6 +891,18 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
+   * getPublicKey - getPublicKey
+   * 
+   * Returns the platform-level Ed25519 public key used to verify
+   * asymmetric (v1a) webhook signatures. This endpoint is unauthenticated since the public key is not a secret, but the orgId parameter is required to ensure clients retrieve the correct key for their organization in case of key rotation.
+   * 
+   */
+  'getPublicKey'(
+    parameters?: Parameters<Paths.GetPublicKey.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  /**
    * getConfiguredEvents - getConfiguredEvents
    * 
    * Retrieve events that can trigger webhooks
@@ -1090,39 +963,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   /**
-   * getFailuresForConfig - getFailuresForConfig
-   * 
-   * **Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
-   * 
-   */
-  'getFailuresForConfig'(
-    parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
-  /**
-   * getFailures - getFailures
-   * 
-   * **Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
-   * 
-   */
-  'getFailures'(
-    parameters?: Parameters<Paths.GetFailures.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFailures.Responses.$200>
-  /**
-   * resendFailure - resendFailure
-   * 
-   * **Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.
-   * 
-   */
-  'resendFailure'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.ResendFailure.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ResendFailure.Responses.$204>
-  /**
    * triggerWebhook - triggers a webhook event either async or sync
    * 
    * Trigger a webhook
@@ -1135,13 +975,23 @@ export interface OperationMethods {
   /**
    * getWehookEvents - getWehookEvents
    * 
-   * Get sent events for a given webhook config
+   * This endpoint is deprecated and will be removed on 2025-12-31. Use /v2/webhooks/configs/{configId}/events instead.
    */
   'getWehookEvents'(
     parameters?: Parameters<Paths.GetWehookEvents.QueryParameters & Paths.GetWehookEvents.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
+  /**
+   * batchReplayEvents - batchReplayEvents
+   * 
+   * Replay a batch of webhook events
+   */
+  'batchReplayEvents'(
+    parameters?: Parameters<Paths.BatchReplayEvents.PathParameters> | null,
+    data?: Paths.BatchReplayEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchReplayEvents.Responses.$202>
   /**
    * getEventById - getEventById
    * 
@@ -1185,6 +1035,20 @@ export interface OperationMethods {
 }
 
 export interface PathsDictionary {
+  ['/v1/webhooks/.well-known/public-key']: {
+    /**
+     * getPublicKey - getPublicKey
+     * 
+     * Returns the platform-level Ed25519 public key used to verify
+     * asymmetric (v1a) webhook signatures. This endpoint is unauthenticated since the public key is not a secret, but the orgId parameter is required to ensure clients retrieve the correct key for their organization in case of key rotation.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicKey.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicKey.Responses.$200>
+  }
   ['/v1/webhooks/configured-events']: {
     /**
      * getConfiguredEvents - getConfiguredEvents
@@ -1251,45 +1115,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   }
-  ['/v1/webhooks/configs/{configId}/failures']: {
-    /**
-     * getFailuresForConfig - getFailuresForConfig
-     * 
-     * **Deprecated:** This endpoint (getFailuresForConfig)will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFailuresForConfig.QueryParameters & Paths.GetFailuresForConfig.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFailuresForConfig.Responses.$200>
-  }
-  ['/v1/webhooks/failures']: {
-    /**
-     * getFailures - getFailures
-     * 
-     * **Deprecated:** This endpoint (getFailures) will be removed on `2025-12-31`. Use the new `/v2/webhooks/configs/{configId}/events` endpoint instead.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetFailures.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFailures.Responses.$200>
-  }
-  ['/v1/webhooks/failures/resend']: {
-    /**
-     * resendFailure - resendFailure
-     * 
-     * **Deprecated:** This endpoint (resendFailure) will be removed on `2025-12-31`. Use the new `/v1/webhooks/configs/{configId}/events/{eventId}/replay` endpoint instead.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.ResendFailure.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ResendFailure.Responses.$204>
-  }
   ['/v1/webhooks/configs/{configId}/trigger']: {
     /**
      * triggerWebhook - triggers a webhook event either async or sync
@@ -1306,13 +1131,25 @@ export interface PathsDictionary {
     /**
      * getWehookEvents - getWehookEvents
      * 
-     * Get sent events for a given webhook config
+     * This endpoint is deprecated and will be removed on 2025-12-31. Use /v2/webhooks/configs/{configId}/events instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetWehookEvents.QueryParameters & Paths.GetWehookEvents.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetWehookEvents.Responses.$200>
+  }
+  ['/v1/webhooks/configs/{configId}/events/replay-batch']: {
+    /**
+     * batchReplayEvents - batchReplayEvents
+     * 
+     * Replay a batch of webhook events
+     */
+    'post'(
+      parameters?: Parameters<Paths.BatchReplayEvents.PathParameters> | null,
+      data?: Paths.BatchReplayEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchReplayEvents.Responses.$202>
   }
   ['/v1/webhooks/configs/{configId}/events/{eventId}']: {
     /**
@@ -1371,6 +1208,7 @@ export type ApiKeyConfig = Components.Schemas.ApiKeyConfig;
 export type Auth = Components.Schemas.Auth;
 export type AuthType = Components.Schemas.AuthType;
 export type BasicAuthConfig = Components.Schemas.BasicAuthConfig;
+export type BatchReplayRequest = Components.Schemas.BatchReplayRequest;
 export type CustomHeader = Components.Schemas.CustomHeader;
 export type CustomOAuthParameter = Components.Schemas.CustomOAuthParameter;
 export type ErrorResp = Components.Schemas.ErrorResp;
@@ -1380,15 +1218,15 @@ export type EventListResponse = Components.Schemas.EventListResponse;
 export type ExampleRequest = Components.Schemas.ExampleRequest;
 export type ExampleResponse = Components.Schemas.ExampleResponse;
 export type ExecutionPayload = Components.Schemas.ExecutionPayload;
-export type FailureEntry = Components.Schemas.FailureEntry;
-export type FailureLastKey = Components.Schemas.FailureLastKey;
-export type FailuresResp = Components.Schemas.FailuresResp;
 export type Filter = Components.Schemas.Filter;
 export type HttpMethod = Components.Schemas.HttpMethod;
 export type Metadata = Components.Schemas.Metadata;
 export type OAuthConfig = Components.Schemas.OAuthConfig;
 export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
+export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type WebhookCondition = Components.Schemas.WebhookCondition;
+export type WebhookConditionGroup = Components.Schemas.WebhookConditionGroup;
 export type WebhookConfig = Components.Schemas.WebhookConfig;
 export type WebhookEvent = Components.Schemas.WebhookEvent;

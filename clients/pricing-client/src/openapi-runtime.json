@@ -242,9 +242,9 @@
         "responses": {}
       }
     },
-    "/v1/public/integration/{integrationId}/products-recommendation": {
+    "/v1/public/integration/{integrationId}/product-recommendations": {
       "post": {
-        "operationId": "$searchExternalProductsRecommendation",
+        "operationId": "$searchExternalProductRecommendations",
         "parameters": [
           {
             "in": "path",
@@ -373,6 +373,30 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/public/external-catalog/products": {
+      "post": {
+        "operationId": "$getExternalCatalogProducts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/external-catalog/product-recommendations": {
+      "post": {
+        "operationId": "$getExternalCatalogProductRecommendations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/email-settings-client",
-  "version": "0.10.0",
+  "version": "1.3.0-rc1",
   "description": "API Client for epilot Email Settings API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,6 +23,7 @@
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/email-settings.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js /Users/manikandansubramanian/Workspace/email-settings/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

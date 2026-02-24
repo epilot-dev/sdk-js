@@ -533,6 +533,10 @@ declare namespace Components {
              * 123
              */
             partner_org_id?: string;
+            /**
+             * Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)
+             */
+            vendor_enforced_user_limit?: number;
         }
         /**
          * A role that is applied to end customers and installers using the Portals

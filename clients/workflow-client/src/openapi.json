@@ -8,9 +8,6 @@
   "servers": [
     {
       "url": "https://workflows-execution.sls.epilot.io"
-    },
-    {
-      "url": "https://workflows-execution.sls.epilot.io"
     }
   ],
   "tags": [
@@ -1257,11 +1254,11 @@
         }
       }
     },
-    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
-      "post": {
-        "operationId": "cancelSchedule",
-        "summary": "cancelSchedule",
-        "description": "Cancels a flow schedule, marking it as canceled.",
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "delete": {
+        "operationId": "cancelTaskSchedule",
+        "summary": "cancelTaskSchedule",
+        "description": "Cancels a scheduled task, deleting the schedule and marking the task as skipped.",
         "tags": [
           "Flows V2"
         ],
@@ -1270,11 +1267,11 @@
             "$ref": "#/components/parameters/ExecutionIdParam"
           },
           {
-            "$ref": "#/components/parameters/ScheduleIdParam"
+            "$ref": "#/components/parameters/TaskIdParam"
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Success - when schedule has been successfully canceled"
           },
           "400": {
@@ -1289,6 +1286,80 @@
           },
           "401": {
             "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "summary": "cancelSchedule",
+        "deprecated": true,
+        "description": "Cancels a flow schedule, marking it as canceled.\n\n**Deprecated**: Use DELETE /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule instead.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - when schedule has been successfully canceled"
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1592,6 +1663,10 @@
               "type": "string"
             },
             "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the workflow execution"
           }
         }
       },
@@ -1963,6 +2038,10 @@
               },
               "lastUpdated": {
                 "type": "string"
+              },
+              "statusLastUpdated": {
+                "type": "string",
+                "description": "Last updated timestamp of the status"
               },
               "startedTime": {
                 "type": "string"
@@ -2945,6 +3024,27 @@
               "$ref": "#/components/schemas/Edge"
             }
           },
+          "_execution_chain": {
+            "type": "object",
+            "description": "[Internal] Tracks the chain of automation-originated executions to prevent infinite loops. This is an internal property and should not be used by external consumers.",
+            "properties": {
+              "parent_execution_id": {
+                "type": "string",
+                "description": "ID of the parent flow execution that triggered this execution via automation"
+              },
+              "parent_task_id": {
+                "type": "string",
+                "description": "ID of the automation task in the parent execution that triggered this"
+              },
+              "depth": {
+                "type": "integer",
+                "description": "The depth in the execution chain (0 for manual triggers, 1+ for automation-triggered)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 10
+              }
+            }
+          },
           "closing_reason": {
             "$ref": "#/components/schemas/FlowClosingReason"
           },
@@ -2967,6 +3067,10 @@
           },
           "trigger": {
             "$ref": "#/components/schemas/FlowTrigger"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the flow execution"
           }
         }
       },
@@ -3040,6 +3144,9 @@
           },
           {
             "$ref": "#/components/schemas/DecisionTask"
+          },
+          {
+            "$ref": "#/components/schemas/AiAgentTask"
           }
         ]
       },
@@ -3048,7 +3155,8 @@
         "enum": [
           "MANUAL",
           "AUTOMATION",
-          "DECISION"
+          "DECISION",
+          "AI_AGENT"
         ]
       },
       "ManualTask": {
@@ -3307,6 +3415,65 @@
           }
         ]
       },
+      "AiAgentTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "agent_config": {
+                "$ref": "#/components/schemas/AgentConfig"
+              },
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopInfo"
+              },
+              "agent_execution": {
+                "$ref": "#/components/schemas/AgentExecutionInfo"
+              },
+              "agent_execution_id": {
+                "type": "string",
+                "description": "ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing."
+              }
+            }
+          }
+        ]
+      },
+      "AgentConfig": {
+        "type": "object",
+        "description": "Configuration for AI Agent to run",
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Id of the configured AI Agent to run"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameters to customize the AI Agent behavior"
+          }
+        },
+        "additionalProperties": true
+      },
+      "AgentExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the agent execution started by this task"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the agent execution, when it already ran"
+          },
+          "error_reason": {
+            "type": "string"
+          }
+        }
+      },
       "TaskBase": {
         "type": "object",
         "properties": {
@@ -3509,6 +3676,11 @@
             "type": "string",
             "format": "date-time"
           },
+          "status_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last updated timestamp of the status"
+          },
           "in_progress_by": {
             "$ref": "#/components/schemas/UserId",
             "description": "The user which moved the task/phase to IN_PROGRESS state."
@@ -3646,7 +3818,8 @@
               "radio",
               "relation_user",
               "purpose",
-              "label"
+              "label",
+              "message_email_address"
             ]
           },
           "attribute_repeatable": {
@@ -3659,6 +3832,10 @@
               "added",
               "deleted"
             ]
+          },
+          "attribute_sub_field": {
+            "type": "string",
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
           }
         }
       },

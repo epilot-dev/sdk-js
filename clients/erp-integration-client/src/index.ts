@@ -2,3 +2,6 @@ export type { OpenAPIClient, OpenAPIClientAxios, Document } from 'openapi-client
 
 export * from './client';
 export * from './openapi';
+
+// Export the full OpenAPI specification
+export { default as openApiSpec } from './openapi.json';

@@ -1,13 +1,17 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Email settings API",
-    "version": "1.4.0"
+    "title": "Messaging Settings API",
+    "version": "1.4.1"
   },
   "tags": [
     {
       "name": "Email settings",
       "description": "Email settings service"
+    },
+    {
+      "name": "O365 Outlook Connection",
+      "description": "Microsoft Office 365 – Outlook connection endpoints"
     }
   ],
   "security": [
@@ -427,6 +431,669 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/outlook/connect": {
+      "get": {
+        "operationId": "connectOutlook",
+        "summary": "Connect Outlook",
+        "description": "Returns Microsoft authorization URL for Outlook OAuth.",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorization URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorization_url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/outlook/connection/status": {
+      "get": {
+        "operationId": "getOutlookConnectionStatus",
+        "summary": "Get Outlook Connection Status",
+        "description": "Returns all Microsoft 365 / Outlook connections for the organization.\nSupports multiple connections (one per Azure AD tenant).\n\nEach connection includes an `action` field that tells the UI what button to show\nand what endpoint to call. All actions use GET /outlook/connect.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "connections",
+                    "has_connections"
+                  ],
+                  "properties": {
+                    "connections": {
+                      "type": "array",
+                      "description": "List of Outlook connections (one per tenant)",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "status",
+                          "action",
+                          "action_label",
+                          "tenant_id"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "connected",
+                              "expired",
+                              "pending_auth"
+                            ],
+                            "description": "Current connection status:\n- pending_auth: Admin consent granted, waiting for user OAuth\n- connected: Fully connected with valid tokens\n- expired: Tokens expired, need to re-authenticate\n"
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "connect",
+                              "authorize",
+                              "reconnect",
+                              "none"
+                            ],
+                            "description": "Action for UI to take (all call GET /outlook/connect):\n- connect: No connection, initiate OAuth\n- authorize: Admin consent done, complete OAuth\n- reconnect: Re-authenticate expired session\n- none: Fully connected, no action needed\n"
+                          },
+                          "connected_by_display_name": {
+                            "type": "string",
+                            "description": "Display name of user who connected"
+                          },
+                          "connected_by_email": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "Email of the user who connected"
+                          },
+                          "connected_by_user_id": {
+                            "type": "string",
+                            "description": "Azure AD Object ID of user who connected"
+                          },
+                          "connected_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the connection was established"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the connection was last updated"
+                          },
+                          "tenant_id": {
+                            "type": "string",
+                            "description": "Microsoft Azure AD tenant ID"
+                          },
+                          "scopes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Granted permission scopes"
+                          },
+                          "expires_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "When the current access token expires"
+                          },
+                          "is_token_valid": {
+                            "type": "boolean",
+                            "description": "Whether the current token is still valid"
+                          }
+                        }
+                      }
+                    },
+                    "has_connections": {
+                      "type": "boolean",
+                      "description": "Whether any connections exist"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing organization ID"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/connection/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlook",
+        "summary": "Disconnect Outlook",
+        "description": "Removes the Microsoft 365 / Outlook connection for a specific tenant.\nThis deletes the stored tokens and disconnects the integration.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tenant_id"
+                ],
+                "properties": {
+                  "tenant_id": {
+                    "type": "string",
+                    "description": "Azure AD Tenant ID of the connection to disconnect"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "tenant_id": {
+                      "type": "string",
+                      "description": "The tenant ID that was disconnected"
+                    },
+                    "affected_shared_inboxes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of shared inbox IDs that were affected by the disconnection"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing tenant_id or organization ID"
+          },
+          "404": {
+            "description": "Connection not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/connect": {
+      "post": {
+        "operationId": "connectOutlookMailbox",
+        "summary": "Connect Outlook Mailbox",
+        "description": "Connects an Outlook mailbox:\n  1. Validates the user has access to the mailbox via Microsoft Graph API\n  2. Creates a mapping between the email address of the mailbox and the outlook connection\n  3. Enables the user to send emails as the mailbox's email address\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email address of the Outlook mailbox to connect"
+                  },
+                  "shared_inbox_id": {
+                    "type": "string",
+                    "description": "Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.",
+                    "default": "default"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mailbox connected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "email_address",
+                    "outlook_email",
+                    "tenant_id",
+                    "provider"
+                  ],
+                  "properties": {
+                    "email_address": {
+                      "$ref": "#/components/schemas/EmailAddressResponse"
+                    },
+                    "outlook_email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The email of the connected mailbox"
+                    },
+                    "tenant_id": {
+                      "type": "string",
+                      "description": "Azure AD Tenant ID that provisions this mailbox"
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": [
+                        "outlook"
+                      ],
+                      "description": "The provider type"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing email parameter"
+          },
+          "401": {
+            "description": "Not connected to Microsoft 365"
+          },
+          "403": {
+            "description": "Access denied - user does not have access to the mailbox"
+          },
+          "409": {
+            "description": "A mailbox email already connected to an Outlook connection"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/{email}/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlookMailbox",
+        "summary": "Disconnect Outlook Mailbox",
+        "description": "Disconnects a single Outlook mailbox by email address.\nDeletes the email address entity, Outlook email mapping, and Graph API subscriptions.\nDoes not affect the tenant-level Outlook connection.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the Outlook mailbox to disconnect"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mailbox disconnected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "email"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The email address that was disconnected"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No Outlook mapping found for this email address"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/mappings": {
+      "get": {
+        "operationId": "getConnectedOutlookEmails",
+        "summary": "Get Connected Outlook Emails",
+        "description": "Returns all Outlook email addresses connected to the organization.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "200": {
+            "description": "Outlook emails retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "outlook_emails",
+                    "count"
+                  ],
+                  "properties": {
+                    "outlook_emails": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConnectedOutlookEmail"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of Outlook emails"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing organization ID"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/test-webhook": {
+      "get": {
+        "operationId": "testWebhookGet",
+        "summary": "Test Webhook (GET)",
+        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nHandles Microsoft Graph subscription validation requests by returning the validationToken.\nThis is a PUBLIC endpoint with no authentication.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Validation token from Microsoft Graph for subscription verification"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation token returned (for Graph API subscription validation)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Webhook received and logged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "testWebhookPost",
+        "summary": "Test Webhook (POST)",
+        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nLogs all incoming webhook payloads for debugging purposes.\nThis is a PUBLIC endpoint with no authentication.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "validationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Validation token from Microsoft Graph for subscription verification"
+          },
+          {
+            "name": "debugMessages",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Whether to include message details in the response"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Graph API notification payload",
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "subscriptionId": {
+                          "type": "string"
+                        },
+                        "changeType": {
+                          "type": "string"
+                        },
+                        "resource": {
+                          "type": "string"
+                        },
+                        "clientState": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "plain/text": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation token returned (for Graph API subscription validation)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Webhook received and logged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/outlook/oauth/callback": {
+      "get": {
+        "operationId": "outlookOAuthCallback",
+        "summary": "Outlook OAuth callback",
+        "description": "Exchanges authorization code for tokens and stores them.",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_subcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "client_info",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_uri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "admin_consent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connected": {
+                      "type": "boolean"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1258,6 +1925,40 @@
           }
         ]
       },
+      "ConnectedOutlookEmail": {
+        "type": "object",
+        "description": "Mapping between an Outlook email and its Outlook Connection.\nThis tracks which provider/tenant provisions each Outlook email.\n",
+        "required": [
+          "outlook_email"
+        ],
+        "properties": {
+          "outlook_email": {
+            "type": "string",
+            "format": "email",
+            "description": "The Outlook shared mailbox email address"
+          },
+          "tenant_id": {
+            "type": "string",
+            "description": "Azure AD Tenant ID that provisions this mailbox"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "outlook"
+            ],
+            "description": "Provider type (for future extensibility)"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the mailbox was connected"
+          },
+          "connected_by_user_id": {
+            "type": "string",
+            "description": "User who connected this mailbox"
+          }
+        }
+      },
       "SignatureSetting": {
         "type": "string",
         "description": "Setting that allows to add a signature.",
@@ -1362,12 +2063,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    },
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

@@ -12,6 +12,12 @@
           {
             "in": "query",
             "name": "unpublished"
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "style": "form",
+            "explode": false
           }
         ],
         "responses": {}
@@ -558,7 +564,9 @@
           },
           {
             "in": "query",
-            "name": "type"
+            "name": "type",
+            "style": "form",
+            "explode": false
           },
           {
             "in": "query",
@@ -723,6 +731,11 @@
           {
             "in": "query",
             "name": "fields"
+          },
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "required": false
           }
         ],
         "responses": {}
@@ -1005,8 +1018,7 @@
           },
           {
             "in": "query",
-            "name": "permanent",
-            "default": false
+            "name": "permanent"
           }
         ],
         "responses": {}

@@ -1,0 +1,224 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/data-management/v1/{entity_schema}/query": {
+      "post": {
+        "operationId": "queryEntities",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/data-management/v1/{entity_schema}/jobs": {
+      "post": {
+        "operationId": "createJob",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/data-management/v1/{entity_schema}/jobs/{job_id}": {
+      "patch": {
+        "operationId": "updateJob",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/data-management/v1/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/jobs/{job_id}/report-url": {
+      "get": {
+        "operationId": "getJobReportUrl",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/configs/{config_id}": {
+      "get": {
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/configs/{config_id}/jobs": {
+      "post": {
+        "operationId": "createJobForConfig",
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/{entity_schema}/configs": {
+      "post": {
+        "operationId": "upsertConfig",
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/data-management/v1/configs": {
+      "get": {
+        "operationId": "listConfigs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "next_run_at",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/data-management/v1/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "config_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://data-management.sls.epilot.io"
+    }
+  ]
+}

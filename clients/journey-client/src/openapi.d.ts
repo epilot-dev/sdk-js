@@ -132,6 +132,12 @@ declare namespace Components {
              * true
              */
             canary?: boolean;
+            /**
+             * When set to false, third-party cookies and resources should be completely disabled to comply with GDPR regulations.
+             * example:
+             * true
+             */
+            thirdPartyCookies?: boolean;
         }
         export interface Journey {
             [name: string]: any;
@@ -173,10 +179,90 @@ declare namespace Components {
                 conditions: string[];
                 actions: string[];
             }[];
+            logicsV4?: {
+                [name: string]: {
+                    /**
+                     * Unique identifier for logic. Use uuidv7
+                     */
+                    id?: string; // uuid
+                    /**
+                     * If true, logic can't be manipulated by the configuring user
+                     */
+                    protected?: boolean;
+                    /**
+                     * Indicates which action to take in case logic evaluates to true
+                     */
+                    action?: string;
+                    /**
+                     * Indicates when the logic should be evaluated
+                     */
+                    triggeredOn?: string;
+                    conditions?: {
+                        /**
+                         * Operator to be applied between the fact value and the value
+                         */
+                        operator?: string;
+                        /**
+                         * If operator is a custom function, this needs to be provided
+                         */
+                        functionName?: string;
+                        fact?: {
+                            /**
+                             * Unique identifier for a fact
+                             */
+                            id?: string; // uuid
+                            /**
+                             * Indicates reference type (block or context parameter)
+                             */
+                            referenceType?: string;
+                            /**
+                             * Id of the reference
+                             */
+                            referenceId?: string;
+                            /**
+                             * Path to a property. Used if only part of the value is needed
+                             */
+                            path?: string;
+                            /**
+                             * If path is a reference, indicates the intention of it
+                             */
+                            meaning?: string;
+                        };
+                        value?: string | number | boolean | {
+                            [key: string]: any;
+                        } | any[];
+                        args?: {
+                            [key: string]: any;
+                        };
+                    }[][];
+                    /**
+                     * Logic specific settings. Will vary by type of logic
+                     */
+                    settings?: {
+                        [key: string]: any;
+                    };
+                };
+            };
             contextSchema?: {
+                /**
+                 * Unique identifier for the context schema item
+                 */
+                id?: string; // uuid
+                /**
+                 * Type of the parameter. It could be either an entity slug, or a text
+                 */
                 type: string;
+                /**
+                 * Expected key to be received in the context
+                 */
                 paramKey: string;
+                /**
+                 * Indicates if a value is expected to be provided
+                 */
                 isRequired?: boolean;
+                /**
+                 * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                 */
                 shouldLoadEntity?: boolean;
             }[];
             /**
@@ -260,6 +346,7 @@ declare namespace Components {
              */
             ValidationRuleRef;
             createdBy?: string;
+            updatedBy?: string | null;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
@@ -320,10 +407,90 @@ declare namespace Components {
                 conditions: string[];
                 actions: string[];
             }[];
+            logicsV4?: {
+                [name: string]: {
+                    /**
+                     * Unique identifier for logic. Use uuidv7
+                     */
+                    id?: string; // uuid
+                    /**
+                     * If true, logic can't be manipulated by the configuring user
+                     */
+                    protected?: boolean;
+                    /**
+                     * Indicates which action to take in case logic evaluates to true
+                     */
+                    action?: string;
+                    /**
+                     * Indicates when the logic should be evaluated
+                     */
+                    triggeredOn?: string;
+                    conditions?: {
+                        /**
+                         * Operator to be applied between the fact value and the value
+                         */
+                        operator?: string;
+                        /**
+                         * If operator is a custom function, this needs to be provided
+                         */
+                        functionName?: string;
+                        fact?: {
+                            /**
+                             * Unique identifier for a fact
+                             */
+                            id?: string; // uuid
+                            /**
+                             * Indicates reference type (block or context parameter)
+                             */
+                            referenceType?: string;
+                            /**
+                             * Id of the reference
+                             */
+                            referenceId?: string;
+                            /**
+                             * Path to a property. Used if only part of the value is needed
+                             */
+                            path?: string;
+                            /**
+                             * If path is a reference, indicates the intention of it
+                             */
+                            meaning?: string;
+                        };
+                        value?: string | number | boolean | {
+                            [key: string]: any;
+                        } | any[];
+                        args?: {
+                            [key: string]: any;
+                        };
+                    }[][];
+                    /**
+                     * Logic specific settings. Will vary by type of logic
+                     */
+                    settings?: {
+                        [key: string]: any;
+                    };
+                };
+            };
             contextSchema?: {
+                /**
+                 * Unique identifier for the context schema item
+                 */
+                id?: string; // uuid
+                /**
+                 * Type of the parameter. It could be either an entity slug, or a text
+                 */
                 type: string;
+                /**
+                 * Expected key to be received in the context
+                 */
                 paramKey: string;
+                /**
+                 * Indicates if a value is expected to be provided
+                 */
                 isRequired?: boolean;
+                /**
+                 * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                 */
                 shouldLoadEntity?: boolean;
             }[];
             /**
@@ -407,6 +574,7 @@ declare namespace Components {
              */
             ValidationRuleRef;
             createdBy?: string;
+            updatedBy?: string | null;
             /**
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
@@ -450,10 +618,90 @@ declare namespace Components {
                 conditions: string[];
                 actions: string[];
             }[];
+            logicsV4?: {
+                [name: string]: {
+                    /**
+                     * Unique identifier for logic. Use uuidv7
+                     */
+                    id?: string; // uuid
+                    /**
+                     * If true, logic can't be manipulated by the configuring user
+                     */
+                    protected?: boolean;
+                    /**
+                     * Indicates which action to take in case logic evaluates to true
+                     */
+                    action?: string;
+                    /**
+                     * Indicates when the logic should be evaluated
+                     */
+                    triggeredOn?: string;
+                    conditions?: {
+                        /**
+                         * Operator to be applied between the fact value and the value
+                         */
+                        operator?: string;
+                        /**
+                         * If operator is a custom function, this needs to be provided
+                         */
+                        functionName?: string;
+                        fact?: {
+                            /**
+                             * Unique identifier for a fact
+                             */
+                            id?: string; // uuid
+                            /**
+                             * Indicates reference type (block or context parameter)
+                             */
+                            referenceType?: string;
+                            /**
+                             * Id of the reference
+                             */
+                            referenceId?: string;
+                            /**
+                             * Path to a property. Used if only part of the value is needed
+                             */
+                            path?: string;
+                            /**
+                             * If path is a reference, indicates the intention of it
+                             */
+                            meaning?: string;
+                        };
+                        value?: string | number | boolean | {
+                            [key: string]: any;
+                        } | any[];
+                        args?: {
+                            [key: string]: any;
+                        };
+                    }[][];
+                    /**
+                     * Logic specific settings. Will vary by type of logic
+                     */
+                    settings?: {
+                        [key: string]: any;
+                    };
+                };
+            };
             contextSchema?: {
+                /**
+                 * Unique identifier for the context schema item
+                 */
+                id?: string; // uuid
+                /**
+                 * Type of the parameter. It could be either an entity slug, or a text
+                 */
                 type: string;
+                /**
+                 * Expected key to be received in the context
+                 */
                 paramKey: string;
+                /**
+                 * Indicates if a value is expected to be provided
+                 */
                 isRequired?: boolean;
+                /**
+                 * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                 */
                 shouldLoadEntity?: boolean;
             }[];
             /**
@@ -896,7 +1144,7 @@ declare namespace Paths {
             export interface $404 {
                 /**
                  * example:
-                 * journey not found
+                 * File with ID 535ef74a-dd66-4d01-94a9-725016e70d1c not found.
                  */
                 message?: string;
             }
@@ -1056,6 +1304,13 @@ declare namespace Paths {
         Components.Schemas.PatchUpdateJourneyRequest;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyResponse;
+            export interface $404 {
+                /**
+                 * example:
+                 * journey not found
+                 */
+                message?: string;
+            }
         }
     }
     namespace PatchUpdateJourneyV2 {
@@ -1066,6 +1321,13 @@ declare namespace Paths {
         Components.Schemas.PatchUpdateJourneyRequest;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export interface $404 {
+                /**
+                 * example:
+                 * journey not found
+                 */
+                message?: string;
+            }
         }
     }
     namespace RemoveJourney {
@@ -1082,6 +1344,15 @@ declare namespace Paths {
              * 509cdffe-424f-457a-95c2-9708c304ce77
              */
             Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export interface $404 {
+                /**
+                 * example:
+                 * journey not found
+                 */
+                message?: string;
+            }
         }
     }
     namespace RemoveJourneyV2 {
@@ -1119,6 +1390,13 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.JourneyCreationRequestV2;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export interface $404 {
+                /**
+                 * example:
+                 * journey not found
+                 */
+                message?: string;
+            }
         }
     }
 }

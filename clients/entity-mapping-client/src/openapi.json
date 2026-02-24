@@ -1627,7 +1627,9 @@
           "payment",
           "link",
           "currency",
-          "sequence"
+          "sequence",
+          "relation",
+          "array"
         ]
       }
     }

@@ -551,12 +551,7 @@ declare namespace Components {
             hydrate?: boolean;
         }
         export interface SearchParamsV2 {
-            /**
-             * Inbox ID
-             * example:
-             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
-             */
-            inbox_id?: string;
+            inbox_id?: string | string[];
             /**
              * Lucene query syntax supported with ElasticSearch
              * example:
@@ -669,7 +664,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
         }

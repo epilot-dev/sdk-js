@@ -2,10 +2,13 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Template Variables API",
-    "description": "API to provide variables for email and document templates.",
+    "description": "This API provides dynamic template processing and variable management, seamless Handlebars template compilation, custom variable operations, and context-aware content generation across email, document templates and snippets.\n",
     "version": "1.0.0"
   },
   "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     },
@@ -16,12 +19,12 @@
   ],
   "tags": [
     {
-      "name": "variables",
-      "description": "Variables"
+      "name": "Templates",
+      "description": "Template-based Operations"
     },
     {
-      "name": "Custom variables",
-      "description": "Custom variables"
+      "name": "Custom Variables",
+      "description": "Custom Variables Operations"
     }
   ],
   "security": [
@@ -39,7 +42,7 @@
         "summary": "getCategories",
         "description": "Get all template variable categories",
         "tags": [
-          "variables"
+          "Templates"
         ],
         "parameters": [
           {
@@ -87,7 +90,7 @@
         "summary": "searchVariables",
         "description": "Search variables",
         "tags": [
-          "variables"
+          "Templates"
         ],
         "requestBody": {
           "content": {
@@ -198,7 +201,7 @@
         "summary": "getVariableContext",
         "description": "Get full variable context\n\nCalls Entity API, User API, Brand API and others to construct full context object used for template variable replace\n",
         "tags": [
-          "variables"
+          "Templates"
         ],
         "requestBody": {
           "content": {
@@ -234,7 +237,7 @@
         "summary": "replaceTemplates",
         "description": "Replace variables in handlebars templates\n\nTakes in an array of input templates and outputs the output text with replaced variables\n",
         "tags": [
-          "variables"
+          "Templates"
         ],
         "requestBody": {
           "content": {
@@ -263,18 +266,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "outputs": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "example": [
-                        "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
-                      ]
+                  "$ref": "#/components/schemas/ReplacementOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/template:replace": {
+      "post": {
+        "operationId": "replaceTemplatesV2",
+        "summary": "Replace variables in templates (V2)",
+        "description": "Replace variables in handlebars templates with raw value preservation\n\nV2 returns parsed outputs that preserve the original data types (arrays, objects, strings)\ninstead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format. \nAlongside the parsed outputs for every single variable.\n\nTakes in an array of input templates and outputs an object mapping each input and variable\nto their rendered values with type preservation.\n",
+        "tags": [
+          "Templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "example": "Hello, {{contact.first_name}}!\n"
                     }
+                  },
+                  "parameters": {
+                    "$ref": "#/components/schemas/VariableParameters"
                   }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplacementOutputV2"
                 }
               }
             }
@@ -288,7 +323,7 @@
         "summary": "Get custom variables",
         "description": "Get all custom variables of organization",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "responses": {
           "200": {
@@ -314,7 +349,7 @@
         "summary": "Create custom variable",
         "description": "Create custom variable",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "requestBody": {
           "content": {
@@ -351,7 +386,7 @@
         "summary": "searchCustomVariables",
         "description": "Search custom variables",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "requestBody": {
           "content": {
@@ -398,7 +433,7 @@
         "summary": "Update custom variable",
         "description": "Update custom variable",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "parameters": [
           {
@@ -445,7 +480,7 @@
         "summary": "Get custom variable",
         "description": "Get custom variable",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "parameters": [
           {
@@ -483,7 +518,7 @@
         "summary": "Delete custom variable",
         "description": "Immediately and permanently deletes a custom variable",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "parameters": [
           {
@@ -513,7 +548,7 @@
         "summary": "Get default table config",
         "description": "Get default table config",
         "tags": [
-          "Custom variables"
+          "Custom Variables"
         ],
         "responses": {
           "200": {
@@ -618,6 +653,58 @@
         "required": [
           "template_type"
         ]
+      },
+      "ReplacementOutput": {
+        "type": "object",
+        "properties": {
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
+            ]
+          }
+        }
+      },
+      "ReplacementOutputV2": {
+        "type": "object",
+        "properties": {
+          "outputs": {
+            "type": "object",
+            "description": "Dictionary mapping input templates and variable names to their resolved output values.\nValues preserve their original types (string, array, object) instead of being stringified.\n\nKeys include:\n- Original input templates (e.g., \"Hello {{name}}\")\n- Individual variables found in templates (e.g., \"{{name}}\", \"{{product_images[*].public_url}}\")\n",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            },
+            "example": {
+              "Hello {{first_name}}": "Hello John",
+              "{{first_name}}": "John",
+              "{{product_images[*].public_url}}": [
+                "http://myimage.server.com/img1.png",
+                "http://myimage.server.com/img2.png"
+              ]
+            }
+          }
+        }
       },
       "VariableResult": {
         "type": "object",
