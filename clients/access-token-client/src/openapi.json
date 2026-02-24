@@ -627,6 +627,12 @@
           },
           "assignments": {
             "$ref": "#/components/schemas/Assignments"
+          },
+          "last_used": {
+            "type": "string",
+            "format": "date",
+            "description": "Last date the token was used (YYYY-MM-DD format, 1 day accuracy)",
+            "example": "2026-02-24"
           }
         },
         "required": [
@@ -650,9 +656,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://access-token.sls.epilot.io"
-    },
     {
       "url": "https://access-token.sls.epilot.io"
     }
