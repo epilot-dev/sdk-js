@@ -2,16 +2,37 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Messaging Settings API",
-    "version": "1.4.1"
+    "version": "1.4.1",
+    "description": "The Messaging Settings API provides comprehensive management of email configurations for epilot organizations.\n\n## Overview\n\nThis API enables organizations to:\n- **Email Addresses**: Configure sender email addresses, set primary addresses, and manage email aliases\n- **Email Signatures**: Create and manage HTML email signatures that can be associated with email addresses\n- **Custom Domains**: Add and verify custom email domains for professional branding\n- **Shared Inboxes**: Organize incoming emails into categorized inboxes with team assignments\n- **Microsoft 365 Integration**: Connect Outlook mailboxes for seamless email synchronization\n\n## Key Concepts\n\n### Email Addresses\nEmail addresses represent the sender identities used when composing emails. Each address can have:\n- A display name (e.g., \"Sales Team\")\n- Assigned users and groups who can send from this address\n- A default signature\n- Association with a shared inbox\n\n### Shared Inboxes\nShared inboxes help teams organize and manage incoming emails. Features include:\n- Color-coded categorization\n- Team member assignments\n- Routing rules for incoming messages\n\n### Email Signatures\nHTML signatures that are automatically appended to outgoing emails. Signatures can include:\n- Rich text formatting\n- Images and logos\n- Contact information\n\n### Custom Domains\nOrganizations can configure custom email domains to send emails from their own domain (e.g., `support@yourcompany.com`). This requires:\n1. Adding the domain\n2. Configuring DNS records\n3. Verifying domain ownership\n\n## Authentication\n\nAll endpoints require authentication via Bearer token (JWT) unless otherwise specified.\nUse the `x-epilot-org-id` header to specify the target organization when using shared tenant access.\n"
   },
   "tags": [
     {
       "name": "Email settings",
-      "description": "Email settings service"
+      "description": "Legacy settings endpoints for managing various email configuration types including signatures,\ncustom domains, email addresses, and duplicate detection settings.\n"
+    },
+    {
+      "name": "Email addresses",
+      "description": "Manage email sender addresses for your organization. Email addresses define the identities\nfrom which emails can be sent. Each address can be configured with display names, user/group\nassignments, default signatures, and shared inbox associations.\n"
+    },
+    {
+      "name": "Shared inboxes",
+      "description": "Shared inboxes provide team-based email organization. They allow multiple users to collaborate\non incoming messages with features like color-coding, assignee management, and email routing.\nA default inbox is always available and does not need to be explicitly created.\n"
+    },
+    {
+      "name": "Inbox buckets",
+      "description": "Inbox buckets are internal storage containers associated with shared inboxes. Each shared inbox\nhas a corresponding bucket for message storage. The default bucket is always available.\n"
     },
     {
       "name": "O365 Outlook Connection",
-      "description": "Microsoft Office 365 – Outlook connection endpoints"
+      "description": "Microsoft Office 365 Outlook integration endpoints. These endpoints enable organizations to:\n- Initiate OAuth connections with Microsoft 365\n- Connect Outlook shared mailboxes\n- Manage connection status and tokens\n- Disconnect integrations when needed\n\nThe integration supports multiple Azure AD tenants and handles token refresh automatically.\n"
+    },
+    {
+      "name": "Settings",
+      "description": "Generic settings management for various email configuration types:\n- **signature**: HTML email signatures\n- **email_domain**: Custom email domains\n- **email_address**: Sender email addresses\n- **whitelist_email_address**: Addresses exempt from duplicate detection\n- **restrict_duplicates_within**: Time window for duplicate email detection\n"
+    },
+    {
+      "name": "Domains",
+      "description": "Custom email domain management. Add, verify, and configure custom domains to send emails\nfrom your organization's domain. Domain verification requires proper DNS configuration\nincluding MX records and SPF/DKIM settings.\n"
     }
   ],
   "security": [
@@ -30,15 +51,20 @@
       "put": {
         "operationId": "provisionEpilotEmailAddress",
         "summary": "provisionEpilotEmailAddress",
-        "description": "Provision or reactivate epilot email address, deactivating other active epilot email addresses.",
+        "description": "Provisions or reactivates an epilot-managed email address for the organization.\n\nWhen provisioning a new epilot email address, any previously active epilot email addresses\nwill be automatically deactivated. Only one epilot email address can be active at a time.\n\nEpilot email addresses use the `@epilot.cloud` domain and are fully managed by the platform.\n",
         "tags": [
           "Email addresses"
         ],
         "requestBody": {
+          "description": "The epilot email address to provision",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProvisionEpilotEmailAddressPayload"
+              },
+              "example": {
+                "address": "mycompany@epilot.cloud"
               }
             }
           }
@@ -63,15 +89,20 @@
       "post": {
         "operationId": "setEmailAddressPrimary",
         "summary": "setEmailAddressPrimary",
-        "description": "Set email address as primary",
+        "description": "Sets the specified email address as the primary address for the organization.\n\nThe primary email address is used as the default sender address when composing new emails.\nOnly one email address can be primary at a time; setting a new primary will unset the previous one.\n",
         "tags": [
           "Email addresses"
         ],
         "requestBody": {
+          "description": "The email address to set as primary",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SetEmailAddressPrimaryPayload"
+              },
+              "example": {
+                "address": "sales@yourcompany.com"
               }
             }
           }
@@ -99,7 +130,7 @@
       "get": {
         "operationId": "getEmailAddress",
         "summary": "getEmailAddress",
-        "description": "Get email address",
+        "description": "Retrieves the details of a specific email address by its ID.\n\nReturns the full configuration including display name, assigned users/groups,\ndefault signature, and shared inbox association.\n",
         "tags": [
           "Email addresses"
         ],
@@ -126,7 +157,7 @@
       "delete": {
         "operationId": "deleteEmailAddress",
         "summary": "deleteEmailAddress",
-        "description": "Delete email address",
+        "description": "Permanently deletes an email address from the organization.\n\n**Warning**: This action cannot be undone. Users will no longer be able to send\nemails from this address after deletion.\n",
         "tags": [
           "Email addresses"
         ],
@@ -153,7 +184,7 @@
       "put": {
         "operationId": "updateEmailAddress",
         "summary": "updateEmailAddress",
-        "description": "Update email address",
+        "description": "Updates the configuration of an existing email address.\n\nYou can modify:\n- Display name\n- Assigned users and groups\n- Default signature\n- Shared inbox association\n- Active status\n",
         "tags": [
           "Email addresses"
         ],
@@ -163,10 +194,20 @@
           }
         ],
         "requestBody": {
+          "description": "The fields to update on the email address",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateEmailAddressPayload"
+              },
+              "example": {
+                "name": "Sales Team",
+                "user_ids": [
+                  "user-123",
+                  "user-456"
+                ],
+                "default_signature_id": "sig-789",
+                "is_active": true
               }
             }
           }
@@ -197,7 +238,7 @@
       "get": {
         "operationId": "listEmailAddresses",
         "summary": "listEmailAddresses",
-        "description": "List email addresses",
+        "description": "Retrieves all email addresses configured for the organization.\n\nReturns an array of email address configurations including their IDs, display names,\nassigned users/groups, signatures, and status flags.\n",
         "tags": [
           "Email addresses"
         ],
@@ -216,15 +257,29 @@
       "post": {
         "operationId": "addEmailAddress",
         "summary": "addEmailAddress",
-        "description": "Add email address",
+        "description": "Adds a new email address to the organization.\n\nThe email address can be from a custom domain (if configured) or any external\nemail provider. Optionally assign users, groups, and a default signature.\n",
         "tags": [
           "Email addresses"
         ],
         "requestBody": {
+          "description": "The email address configuration to create",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateEmailAddressPayload"
+              },
+              "example": {
+                "address": "support@yourcompany.com",
+                "name": "Customer Support",
+                "user_ids": [
+                  "user-123"
+                ],
+                "group_ids": [
+                  "group-456"
+                ],
+                "default_signature_id": "sig-789",
+                "shared_inbox_id": "inbox-abc"
               }
             }
           }
@@ -252,7 +307,7 @@
       "get": {
         "operationId": "getSharedInbox",
         "summary": "getSharedInbox",
-        "description": "Get shared inbox",
+        "description": "Retrieves the details of a specific shared inbox by its ID.\n\nReturns the inbox configuration including name, color, description, assigned team members,\nand the associated bucket ID.\n",
         "tags": [
           "Shared inboxes"
         ],
@@ -279,7 +334,7 @@
       "delete": {
         "operationId": "deleteSharedInbox",
         "summary": "deleteSharedInbox",
-        "description": "Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).",
+        "description": "Deletes a shared inbox and reroutes all associated emails to a successor inbox.\n\nWhen a shared inbox is deleted:\n- All email addresses associated with this inbox will be reassigned to the successor\n- If no successor is specified, emails are routed to the default inbox\n- The inbox's message history is preserved in the successor inbox\n\n**Note**: The default inbox cannot be deleted.\n",
         "tags": [
           "Shared inboxes"
         ],
@@ -289,7 +344,7 @@
           },
           {
             "name": "successorInboxId",
-            "description": "ID of the successor inbox. If not provided, the default inbox will be used.",
+            "description": "ID of the inbox that will receive emails from the deleted inbox.\nIf not provided, the default inbox (`default`) will be used as the successor.\n",
             "in": "query",
             "required": false,
             "schema": {
@@ -319,7 +374,7 @@
       "put": {
         "operationId": "updateSharedInbox",
         "summary": "updateSharedInbox",
-        "description": "Update shared inbox",
+        "description": "Updates the configuration of an existing shared inbox.\n\nYou can modify the inbox name, color, description, and team member assignments.\nChanges take effect immediately for all associated email addresses.\n",
         "tags": [
           "Shared inboxes"
         ],
@@ -329,10 +384,20 @@
           }
         ],
         "requestBody": {
+          "description": "The fields to update on the shared inbox",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateSharedInboxPayload"
+              },
+              "example": {
+                "name": "Customer Support",
+                "color": "#4CAF50",
+                "description": "Incoming customer support requests",
+                "assignees": [
+                  "user-123",
+                  "user-456"
+                ]
               }
             }
           }
@@ -363,7 +428,7 @@
       "get": {
         "operationId": "listSharedInboxes",
         "summary": "listSharedInboxes",
-        "description": "List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.",
+        "description": "Retrieves all shared inboxes configured for the organization.\n\n**Note**: The default inbox (with ID `default`) is not included in this list but is\nalways available for all organizations. You do not need to create it explicitly.\n",
         "tags": [
           "Shared inboxes"
         ],
@@ -382,15 +447,26 @@
       "post": {
         "operationId": "addSharedInbox",
         "summary": "addSharedInbox",
-        "description": "Add shared inbox",
+        "description": "Creates a new shared inbox for the organization.\n\nShared inboxes help teams organize and categorize incoming emails.\nEach inbox requires a name and color for visual identification.\n",
         "tags": [
           "Shared inboxes"
         ],
         "requestBody": {
+          "description": "The shared inbox configuration to create",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateSharedInboxPayload"
+              },
+              "example": {
+                "name": "Sales Inquiries",
+                "color": "#2196F3",
+                "description": "Inbound sales and pricing requests",
+                "assignees": [
+                  "user-123",
+                  "user-456"
+                ]
               }
             }
           }
@@ -418,7 +494,7 @@
       "get": {
         "operationId": "listInboxBuckets",
         "summary": "listInboxBuckets",
-        "description": "List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.",
+        "description": "Retrieves all inbox buckets for the organization.\n\nInbox buckets are internal storage containers that correspond to shared inboxes.\nEach shared inbox has an associated bucket for storing messages.\n\n**Note**: The default bucket (with ID `default`) is not included in this list but\nis always available for all organizations.\n",
         "tags": [
           "Inbox buckets"
         ],
@@ -438,7 +514,7 @@
     "/v2/outlook/connect": {
       "get": {
         "operationId": "connectOutlook",
-        "summary": "Connect Outlook",
+        "summary": "connectOutlook",
         "description": "Returns Microsoft authorization URL for Outlook OAuth.",
         "tags": [
           "O365 Outlook Connection"
@@ -458,6 +534,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/OutlookErrorResponse"
           }
         }
       }
@@ -465,7 +544,7 @@
     "/v2/outlook/connection/status": {
       "get": {
         "operationId": "getOutlookConnectionStatus",
-        "summary": "Get Outlook Connection Status",
+        "summary": "getOutlookConnectionStatus",
         "description": "Returns all Microsoft 365 / Outlook connections for the organization.\nSupports multiple connections (one per Azure AD tenant).\n\nEach connection includes an `action` field that tells the UI what button to show\nand what endpoint to call. All actions use GET /outlook/connect.\n",
         "tags": [
           "O365 Outlook Connection"
@@ -486,77 +565,7 @@
                       "type": "array",
                       "description": "List of Outlook connections (one per tenant)",
                       "items": {
-                        "type": "object",
-                        "required": [
-                          "status",
-                          "action",
-                          "action_label",
-                          "tenant_id"
-                        ],
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "connected",
-                              "expired",
-                              "pending_auth"
-                            ],
-                            "description": "Current connection status:\n- pending_auth: Admin consent granted, waiting for user OAuth\n- connected: Fully connected with valid tokens\n- expired: Tokens expired, need to re-authenticate\n"
-                          },
-                          "action": {
-                            "type": "string",
-                            "enum": [
-                              "connect",
-                              "authorize",
-                              "reconnect",
-                              "none"
-                            ],
-                            "description": "Action for UI to take (all call GET /outlook/connect):\n- connect: No connection, initiate OAuth\n- authorize: Admin consent done, complete OAuth\n- reconnect: Re-authenticate expired session\n- none: Fully connected, no action needed\n"
-                          },
-                          "connected_by_display_name": {
-                            "type": "string",
-                            "description": "Display name of user who connected"
-                          },
-                          "connected_by_email": {
-                            "type": "string",
-                            "format": "email",
-                            "description": "Email of the user who connected"
-                          },
-                          "connected_by_user_id": {
-                            "type": "string",
-                            "description": "Azure AD Object ID of user who connected"
-                          },
-                          "connected_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "When the connection was established"
-                          },
-                          "updated_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "When the connection was last updated"
-                          },
-                          "tenant_id": {
-                            "type": "string",
-                            "description": "Microsoft Azure AD tenant ID"
-                          },
-                          "scopes": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "Granted permission scopes"
-                          },
-                          "expires_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "description": "When the current access token expires"
-                          },
-                          "is_token_valid": {
-                            "type": "boolean",
-                            "description": "Whether the current token is still valid"
-                          }
-                        }
+                        "$ref": "#/components/schemas/OutlookConnectionStatus"
                       }
                     },
                     "has_connections": {
@@ -580,7 +589,7 @@
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
-        "summary": "Disconnect Outlook",
+        "summary": "disconnectOutlook",
         "description": "Removes the Microsoft 365 / Outlook connection for a specific tenant.\nThis deletes the stored tokens and disconnects the integration.\n",
         "tags": [
           "O365 Outlook Connection"
@@ -646,7 +655,7 @@
     "/v2/outlook/mailbox/connect": {
       "post": {
         "operationId": "connectOutlookMailbox",
-        "summary": "Connect Outlook Mailbox",
+        "summary": "connectOutlookMailbox",
         "description": "Connects an Outlook mailbox:\n  1. Validates the user has access to the mailbox via Microsoft Graph API\n  2. Creates a mapping between the email address of the mailbox and the outlook connection\n  3. Enables the user to send emails as the mailbox's email address\n",
         "tags": [
           "O365 Outlook Connection"
@@ -789,7 +798,7 @@
     "/v2/outlook/mailbox/mappings": {
       "get": {
         "operationId": "getConnectedOutlookEmails",
-        "summary": "Get Connected Outlook Emails",
+        "summary": "getConnectedOutlookEmails",
         "description": "Returns all Outlook email addresses connected to the organization.\n",
         "tags": [
           "O365 Outlook Connection"
@@ -833,7 +842,7 @@
     "/v2/outlook/test-webhook": {
       "get": {
         "operationId": "testWebhookGet",
-        "summary": "Test Webhook (GET)",
+        "summary": "testWebhookGet",
         "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nHandles Microsoft Graph subscription validation requests by returning the validationToken.\nThis is a PUBLIC endpoint with no authentication.\n",
         "tags": [
           "O365 Outlook Connection"
@@ -884,7 +893,7 @@
       },
       "post": {
         "operationId": "testWebhookPost",
-        "summary": "Test Webhook (POST)",
+        "summary": "testWebhookPost",
         "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nLogs all incoming webhook payloads for debugging purposes.\nThis is a PUBLIC endpoint with no authentication.\n",
         "tags": [
           "O365 Outlook Connection"
@@ -984,7 +993,7 @@
     "/v2/outlook/oauth/callback": {
       "get": {
         "operationId": "outlookOAuthCallback",
-        "summary": "Outlook OAuth callback",
+        "summary": "outlookOAuthCallback",
         "description": "Exchanges authorization code for tokens and stores them.",
         "tags": [
           "O365 Outlook Connection"
@@ -1102,14 +1111,14 @@
       "get": {
         "operationId": "getSettings",
         "summary": "getSettings",
-        "description": "Get all settings by type",
+        "description": "Retrieves settings of a specific type for the organization.\n\nIf an `id` is provided, returns only that specific setting.\nOtherwise, returns all settings of the specified type.\n\n## Setting Types\n\n| Type | Description |\n|------|-------------|\n| `signature` | HTML email signatures |\n| `email_domain` | Custom email domains |\n| `email_address` | Sender email addresses |\n| `whitelist_email_address` | Addresses exempt from duplicate detection |\n| `restrict_duplicates_within` | Time window for duplicate email detection |\n",
         "tags": [
           "Settings"
         ],
         "parameters": [
           {
             "name": "type",
-            "description": "Setting types:\n* signature\n* email_domain\n* email_address\n* whitelist_email_address\n* restrict_duplicates_within\n",
+            "description": "The type of settings to retrieve. Determines which category of\nemail settings will be returned.\n",
             "in": "query",
             "required": true,
             "schema": {
@@ -1119,7 +1128,7 @@
           },
           {
             "name": "id",
-            "description": "ID of setting",
+            "description": "Optional ID to retrieve a specific setting. If omitted, all settings\nof the specified type are returned.\n",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1129,42 +1138,95 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successfully retrieved settings. Returns either a single setting object\n(when `id` is provided) or an array of settings.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SettingsResponse"
+                },
+                "examples": {
+                  "signature_list": {
+                    "summary": "List of email signatures",
+                    "value": [
+                      {
+                        "id": "sig-123",
+                        "type": "signature",
+                        "name": "Default Signature",
+                        "value": "Best regards",
+                        "html": "<p>Best regards,<br/>The Team</p>",
+                        "created_at": "2024-01-15T10:30:00Z"
+                      }
+                    ]
+                  },
+                  "single_signature": {
+                    "summary": "Single signature by ID",
+                    "value": {
+                      "id": "sig-123",
+                      "type": "signature",
+                      "name": "Default Signature",
+                      "value": "Best regards",
+                      "html": "<p>Best regards,<br/>The Team</p>",
+                      "created_at": "2024-01-15T10:30:00Z"
+                    }
+                  }
                 }
               }
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "post": {
         "operationId": "addSetting",
         "summary": "addSetting",
-        "description": "Add setting",
+        "description": "Creates a new setting of the specified type.\n\nThe setting type determines which fields are applicable:\n- **signature**: Requires `name`, `value` (plain text), and `html` (HTML content)\n- **email_domain**: Requires `value` (domain name)\n- **whitelist_email_address**: Requires `value` (email address)\n- **restrict_duplicates_within**: Requires `value` (time duration like \"5m\", \"1d\")\n",
         "tags": [
           "Settings"
         ],
         "requestBody": {
+          "description": "The setting to create",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Setting"
+              },
+              "examples": {
+                "create_signature": {
+                  "summary": "Create an email signature",
+                  "value": {
+                    "type": "signature",
+                    "name": "Sales Signature",
+                    "value": "Best regards, Sales Team",
+                    "html": "<p>Best regards,<br/><strong>Sales Team</strong></p>"
+                  }
+                },
+                "create_whitelist": {
+                  "summary": "Whitelist an email address from duplicate detection",
+                  "value": {
+                    "type": "whitelist_email_address",
+                    "value": "noreply@automated-system.com"
+                  }
+                },
+                "set_duplicate_window": {
+                  "summary": "Set duplicate detection time window",
+                  "value": {
+                    "type": "restrict_duplicates_within",
+                    "value": "5m"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Setting created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1174,21 +1236,23 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "delete": {
         "operationId": "deleteSetting",
         "summary": "deleteSetting",
-        "description": "delete setting by ID and type",
+        "description": "Deletes a setting by its ID and type.\n\nBoth the `id` and `type` are required to uniquely identify the setting to delete.\n\n**Warning**: This action cannot be undone.\n",
         "tags": [
           "Settings"
         ],
         "requestBody": {
+          "description": "The setting identifier to delete",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1203,17 +1267,21 @@
                   },
                   "id": {
                     "type": "string",
-                    "description": "ID of setting",
+                    "description": "The unique identifier of the setting to delete",
                     "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
                   }
                 }
+              },
+              "example": {
+                "type": "signature",
+                "id": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Setting deleted successfully. Returns the deleted setting.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1223,10 +1291,10 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1235,14 +1303,14 @@
       "post": {
         "operationId": "updateSetting",
         "summary": "updateSetting",
-        "description": "Update setting by ID",
+        "description": "Updates an existing setting identified by its ID.\n\nInclude the `type` field in the request body to specify which setting type\nis being updated. Only the fields provided will be updated.\n",
         "tags": [
           "Settings"
         ],
         "parameters": [
           {
             "name": "id",
-            "description": "ID of setting",
+            "description": "The unique identifier of the setting to update",
             "in": "path",
             "required": true,
             "schema": {
@@ -1252,17 +1320,24 @@
           }
         ],
         "requestBody": {
+          "description": "The setting fields to update",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Setting"
+              },
+              "example": {
+                "type": "signature",
+                "name": "Updated Signature Name",
+                "html": "<p>Updated signature content</p>"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Setting updated successfully. Returns the updated setting.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1272,10 +1347,10 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1284,22 +1359,27 @@
       "post": {
         "operationId": "addDomain",
         "summary": "addDomain",
-        "description": "Add domain",
+        "description": "Adds a custom email domain to the organization.\n\nAfter adding the domain, you must:\n1. Configure the required DNS records (provided in the response)\n2. Verify the domain using the verification endpoint\n\nUntil verification is complete, the domain cannot be used for sending emails.\n",
         "tags": [
           "Domains"
         ],
         "requestBody": {
+          "description": "The domain to add",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Domain"
+              },
+              "example": {
+                "domain": "mail.yourcompany.com"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Domain added successfully. The response includes DNS records that must be\nconfigured before verification.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1309,38 +1389,43 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       },
       "delete": {
         "operationId": "deleteDomain",
         "summary": "deleteDomain",
-        "description": "Delete domain",
+        "description": "Removes a custom email domain from the organization.\n\n**Warning**: Deleting a domain will prevent sending emails from any addresses\nusing this domain. Existing email addresses on this domain should be removed\nor reassigned before deleting the domain.\n",
         "tags": [
           "Domains"
         ],
         "requestBody": {
+          "description": "The domain to delete",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Domain"
+              },
+              "example": {
+                "domain": "mail.yourcompany.com"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "Success"
+            "description": "Domain deleted successfully"
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1349,22 +1434,27 @@
       "post": {
         "operationId": "verifyNameServers",
         "summary": "verifyNameServers",
-        "description": "Verify name servers",
+        "description": "Verifies that the domain's name server (NS) records are correctly configured.\n\nThis check ensures that DNS resolution is properly set up for the domain\nbefore proceeding with full domain verification.\n\nRun this verification after configuring NS records in your DNS provider.\n",
         "tags": [
           "Domains"
         ],
         "requestBody": {
+          "description": "The domain to verify name servers for",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Domain"
+              },
+              "example": {
+                "domain": "mail.yourcompany.com"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Name server verification result. Check the response to see if\nverification passed or if additional DNS configuration is needed.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1374,10 +1464,10 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1386,22 +1476,27 @@
       "post": {
         "operationId": "verifyDomain",
         "summary": "verifyDomain",
-        "description": "Verify domain",
+        "description": "Verifies ownership and configuration of a custom email domain.\n\nDomain verification checks:\n- DNS TXT records for domain ownership\n- MX records for email routing\n- SPF records for sender authentication\n- DKIM records for email signing\n\nOnce verified, the domain can be used to create email addresses and send emails.\n",
         "tags": [
           "Domains"
         ],
         "requestBody": {
+          "description": "The domain to verify",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Domain"
+              },
+              "example": {
+                "domain": "mail.yourcompany.com"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Domain verification result. The response indicates whether verification\npassed and which DNS records (if any) still need configuration.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1411,10 +1506,10 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "Not found"
+            "$ref": "#/components/responses/NotFound"
           }
         }
       }
@@ -1545,51 +1640,86 @@
         }
       },
       "BadRequest": {
-        "description": "Bad request",
+        "description": "The request was malformed or contains invalid data.\nCheck the error message for details on which fields are invalid.\n",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": "Invalid email address format",
+              "status": 400
             }
           }
         }
       },
       "Forbidden": {
-        "description": "Forbidden",
+        "description": "Access denied. The authenticated user does not have permission to perform\nthis operation. This may occur if:\n- The user lacks the required role or permissions\n- The resource belongs to a different organization\n",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": "Insufficient permissions to access this resource",
+              "status": 403
             }
           }
         }
       },
       "NotFound": {
-        "description": "Not found",
+        "description": "The requested resource was not found. Verify that:\n- The resource ID is correct\n- The resource exists in your organization\n- The resource has not been deleted\n",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": "Email address not found",
+              "status": 404
             }
           }
         }
       },
       "Conflict": {
-        "description": "Conflict",
+        "description": "The request conflicts with the current state of the resource.\nCommon causes include:\n- Attempting to create a resource that already exists\n- Concurrent modification conflicts\n- Business rule violations (e.g., duplicate email address)\n",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": "Email address already exists in another configuration",
+              "status": 409
             }
           }
         }
       },
       "InternalServerError": {
-        "description": "Internal server error",
+        "description": "An unexpected error occurred on the server. If this error persists,\nplease contact support with the request details and timestamp.\n",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "error": "An unexpected error occurred",
+              "status": 500
+            }
+          }
+        }
+      },
+      "OutlookErrorResponse": {
+        "description": "An error response from the Outlook OAuth flow.\nMay include an admin consent URL if admin permissions are required.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OutlookConnectionError"
+            },
+            "example": {
+              "error": "access_denied",
+              "error_description": "Access denied",
+              "admin_consent_url": "https://login.microsoftonline.com/common/adminconsent?client_id=..."
             }
           }
         }
@@ -1598,143 +1728,210 @@
     "parameters": {
       "EmailAddressId": {
         "name": "id",
+        "description": "Unique identifier of the email address. This can be either the UUID assigned\nwhen the email address was created, or the email address string itself.\n",
         "in": "path",
         "required": true,
         "schema": {
           "type": "string"
         },
-        "example": "test@example.com"
+        "examples": {
+          "uuid": {
+            "summary": "UUID identifier",
+            "value": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+          },
+          "email": {
+            "summary": "Email address string",
+            "value": "sales@yourcompany.com"
+          }
+        }
       },
       "SharedInboxId": {
         "name": "id",
+        "description": "Unique identifier (UUID) of the shared inbox.\nUse `default` to reference the organization's default inbox.\n",
         "in": "path",
         "required": true,
         "schema": {
           "type": "string"
         },
-        "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+        "examples": {
+          "uuid": {
+            "summary": "UUID identifier",
+            "value": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
+          },
+          "default": {
+            "summary": "Default inbox",
+            "value": "default"
+          }
+        }
       }
     },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Authorization header with epilot OAuth2 bearer token",
+        "description": "Primary authentication using epilot OAuth2 bearer token.\nInclude the JWT token in the Authorization header: `Authorization: Bearer <token>`\n",
         "bearerFormat": "JWT"
       },
       "AsOrganization": {
         "type": "apiKey",
         "in": "header",
         "name": "x-ivy-org-id",
-        "description": "Set organization id when using internal auth"
+        "description": "**Internal use only.** Sets the organization context when using internal service-to-service\nauthentication. Not intended for external API consumers.\n"
       },
       "EpilotOrg": {
-        "description": "Overrides the target organization to allow shared tenant access",
+        "type": "apiKey",
         "name": "x-epilot-org-id",
         "in": "header",
-        "type": "apiKey"
+        "description": "Overrides the target organization for shared tenant access.\nUse this header when you have access to multiple organizations and need to\nspecify which organization's data to access.\n"
       }
     },
     "schemas": {
       "InboxBucketResponse": {
         "type": "object",
+        "description": "Inbox bucket representing the storage container for a shared inbox.",
         "required": [
           "id",
           "inbox_id"
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier of the bucket",
+            "example": "bucket-abc"
           },
           "inbox_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the shared inbox associated with this bucket",
+            "example": "inbox-xyz"
           }
         }
       },
       "ProvisionEpilotEmailAddressPayload": {
         "type": "object",
+        "description": "Request payload for provisioning an epilot-managed email address.",
         "required": [
           "address"
         ],
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "The epilot email address to provision (must be on @epilot.cloud domain)",
+            "example": "mycompany@epilot.cloud"
           }
         }
       },
       "SetEmailAddressPrimaryPayload": {
         "type": "object",
+        "description": "Request payload for setting an email address as the organization's primary address.",
         "required": [
           "address"
         ],
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "The email address to set as primary",
+            "example": "sales@yourcompany.com"
           }
         }
       },
       "UpdateEmailAddressPayload": {
         "type": "object",
+        "description": "Request payload for updating an email address configuration.\nAll fields are optional; only provided fields will be updated.\n",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name shown as the sender name in emails",
+            "example": "Sales Team"
           },
           "user_ids": {
             "type": "array",
+            "description": "List of user IDs who can send from this address",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "user-123",
+              "user-456"
+            ]
           },
           "group_ids": {
             "type": "array",
+            "description": "List of group IDs whose members can send from this address",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "group-789"
+            ]
           },
           "default_signature_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the signature to use by default when sending from this address",
+            "example": "sig-abc"
           },
           "shared_inbox_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the shared inbox to associate with this address",
+            "example": "inbox-xyz"
           },
           "is_active": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the email address is active and can be used for sending",
+            "example": true
           }
         }
       },
       "CreateEmailAddressPayload": {
         "type": "object",
+        "description": "Request payload for creating a new email address.",
         "required": [
           "address"
         ],
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "The email address to add (e.g., from a custom domain or external provider)",
+            "example": "support@yourcompany.com"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name shown as the sender name in emails",
+            "example": "Customer Support"
           },
           "user_ids": {
             "type": "array",
+            "description": "List of user IDs who can send from this address",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "user-123"
+            ]
           },
           "group_ids": {
             "type": "array",
+            "description": "List of group IDs whose members can send from this address",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "group-456"
+            ]
           },
           "default_signature_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the signature to use by default when sending from this address",
+            "example": "sig-789"
           },
           "shared_inbox_id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the shared inbox to associate with this address",
+            "example": "inbox-abc"
           }
         }
       },
       "EmailAddressResponse": {
+        "description": "Email address configuration with all associated metadata.",
         "allOf": [
           {
             "$ref": "#/components/schemas/SettingMeta"
@@ -1746,37 +1943,60 @@
             ],
             "properties": {
               "address": {
-                "type": "string"
+                "type": "string",
+                "description": "The email address string",
+                "example": "sales@yourcompany.com"
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Display name shown as the sender name",
+                "example": "Sales Team"
               },
               "user_ids": {
                 "type": "array",
+                "description": "IDs of users who can send from this address",
                 "items": {
                   "type": "string"
-                }
+                },
+                "example": [
+                  "user-123",
+                  "user-456"
+                ]
               },
               "group_ids": {
                 "type": "array",
+                "description": "IDs of groups whose members can send from this address",
                 "items": {
                   "type": "string"
-                }
+                },
+                "example": [
+                  "group-789"
+                ]
               },
               "default_signature_id": {
-                "type": "string"
+                "type": "string",
+                "description": "ID of the default signature for this address",
+                "example": "sig-abc"
               },
               "shared_inbox_id": {
-                "type": "string"
+                "type": "string",
+                "description": "ID of the associated shared inbox",
+                "example": "inbox-xyz"
               },
               "is_active": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether the address is currently active for sending",
+                "example": true
               },
               "is_primary": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether this is the organization's primary email address",
+                "example": false
               },
               "is_epilot_email_address": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "Whether this is an epilot-managed address (@epilot.cloud)",
+                "example": false
               }
             }
           }
@@ -1784,94 +2004,137 @@
       },
       "ErrorResponse": {
         "type": "object",
+        "description": "Standard error response format for all API errors.",
         "required": [
           "error",
           "status"
         ],
         "properties": {
           "error": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message describing what went wrong",
+            "example": "Resource not found"
           },
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "description": "HTTP status code of the error",
+            "example": 404
           }
         }
       },
       "SettingMeta": {
         "type": "object",
+        "description": "Common metadata fields for all settings and resources.",
         "required": [
           "id",
           "created_at"
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier (UUID) for the resource",
+            "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
           },
           "created_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Timestamp when the resource was created",
+            "example": "2024-01-15T10:30:00Z"
           },
           "updated_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Timestamp when the resource was last updated",
+            "example": "2024-01-20T14:45:00Z"
           },
           "created_by": {
-            "type": "string"
+            "type": "string",
+            "description": "User ID of the user who created the resource",
+            "example": "user-123"
           },
           "updated_by": {
-            "type": "string"
+            "type": "string",
+            "description": "User ID of the user who last updated the resource",
+            "example": "user-456"
           }
         }
       },
       "UpdateSharedInboxPayload": {
         "type": "object",
+        "description": "Request payload for updating a shared inbox configuration.\nAll fields are optional; only provided fields will be updated.\n",
         "properties": {
           "color": {
-            "type": "string"
+            "type": "string",
+            "description": "Hex color code for visual identification in the UI",
+            "example": "#4CAF50"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the shared inbox",
+            "example": "Customer Support"
           },
           "assignees": {
             "type": "array",
+            "description": "List of user IDs assigned to this inbox",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "user-123",
+              "user-456"
+            ]
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional description of the inbox purpose",
+            "example": "Incoming customer support requests"
           }
         }
       },
       "CreateSharedInboxPayload": {
         "type": "object",
+        "description": "Request payload for creating a new shared inbox.",
         "required": [
           "name",
           "color"
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional custom ID for the inbox (auto-generated if not provided)",
+            "example": "support-inbox"
           },
           "color": {
-            "type": "string"
+            "type": "string",
+            "description": "Hex color code for visual identification in the UI (required)",
+            "example": "#2196F3"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the shared inbox (required)",
+            "example": "Sales Inquiries"
           },
           "assignees": {
             "type": "array",
+            "description": "List of user IDs to assign to this inbox",
             "default": [],
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "user-123",
+              "user-456"
+            ]
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional description of the inbox purpose",
+            "example": "Inbound sales and pricing requests"
           }
         }
       },
       "SharedInboxResponse": {
+        "description": "Shared inbox configuration with all associated metadata.",
         "allOf": [
           {
             "$ref": "#/components/schemas/SettingMeta"
@@ -1887,26 +2150,41 @@
             ],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "description": "Unique identifier of the shared inbox",
+                "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
               },
               "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Display name of the shared inbox",
+                "example": "Customer Support"
               },
               "color": {
-                "type": "string"
+                "type": "string",
+                "description": "Hex color code for visual identification",
+                "example": "#4CAF50"
               },
               "assignees": {
                 "type": "array",
+                "description": "List of user IDs assigned to this inbox",
                 "default": [],
                 "items": {
                   "type": "string"
-                }
+                },
+                "example": [
+                  "user-123",
+                  "user-456"
+                ]
               },
               "description": {
-                "type": "string"
+                "type": "string",
+                "description": "Description of the inbox purpose",
+                "example": "Incoming customer support requests"
               },
               "bucket_id": {
-                "type": "string"
+                "type": "string",
+                "description": "ID of the associated storage bucket for messages",
+                "example": "bucket-xyz"
               }
             }
           }
@@ -1956,6 +2234,101 @@
           "connected_by_user_id": {
             "type": "string",
             "description": "User who connected this mailbox"
+          }
+        }
+      },
+      "OutlookConnectionError": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error code or message from the OAuth flow."
+          },
+          "error_description": {
+            "type": "string",
+            "description": "Human-readable description of the error."
+          },
+          "admin_consent_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL for tenant admin to grant consent, if applicable."
+          }
+        }
+      },
+      "OutlookConnectionStatus": {
+        "type": "object",
+        "required": [
+          "status",
+          "action",
+          "action_label",
+          "tenant_id"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "expired",
+              "pending_auth",
+              "not_connected"
+            ],
+            "description": "Current connection status:\n- pending_auth: Admin consent granted, waiting for user OAuth\n- connected: Fully connected with valid tokens\n- expired: Tokens expired, need to re-authenticate\n- not_connected: No connection, initiate OAuth\n"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "connect",
+              "authorize",
+              "reconnect",
+              "none"
+            ],
+            "description": "Action for UI to take (all call GET /outlook/connect):\n- connect: No connection, initiate OAuth\n- authorize: Admin consent done, complete OAuth\n- reconnect: Re-authenticate expired session\n- none: Fully connected, no action needed\n"
+          },
+          "connected_by_display_name": {
+            "type": "string",
+            "description": "Display name of user who connected"
+          },
+          "connected_by_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who connected"
+          },
+          "connected_by_user_id": {
+            "type": "string",
+            "description": "Azure AD Object ID of user who connected"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the connection was established"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the connection was last updated"
+          },
+          "tenant_id": {
+            "type": "string",
+            "description": "Microsoft Azure AD tenant ID"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Granted permission scopes"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the current access token expires"
+          },
+          "is_token_valid": {
+            "type": "boolean",
+            "description": "Whether the current token is still valid"
           }
         }
       },
@@ -2015,53 +2388,78 @@
       },
       "Setting": {
         "type": "object",
+        "description": "Generic setting object used for various email configuration types.\nThe applicable fields depend on the setting type:\n- **signature**: Uses `name`, `value` (plain text), and `html` (rich text)\n- **email_domain**: Uses `value` (domain name)\n- **whitelist_email_address**: Uses `value` (email address)\n- **restrict_duplicates_within**: Uses `value` (time duration)\n",
         "required": [
           "type"
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier of the setting",
+            "example": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the setting (used for signatures)",
+            "example": "Default Signature"
           },
           "org_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Organization ID that owns this setting",
+            "example": "org-123"
           },
           "type": {
             "$ref": "#/components/schemas/SettingType"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "description": "The setting value. Interpretation depends on type:\n- signature: Plain text version of the signature\n- email_domain: Domain name (e.g., \"yourcompany.com\")\n- whitelist_email_address: Email address to whitelist\n- restrict_duplicates_within: Time duration (e.g., \"5m\", \"1d\")\n",
+            "example": "Best regards, The Team"
           },
           "html": {
-            "type": "string"
+            "type": "string",
+            "description": "HTML content (only applicable for signature type)",
+            "example": "<p>Best regards,<br/><strong>The Team</strong></p>"
           },
           "created_at": {
-            "type": "string"
+            "type": "string",
+            "description": "ISO 8601 timestamp when the setting was created",
+            "example": "2024-01-15T10:30:00Z"
           },
           "updated_at": {
-            "type": "string"
+            "type": "string",
+            "description": "ISO 8601 timestamp when the setting was last updated",
+            "example": "2024-01-20T14:45:00Z"
           },
           "created_by": {
-            "type": "string"
+            "type": "string",
+            "description": "User ID of the creator",
+            "example": "user-123"
           },
           "updated_by": {
-            "type": "string"
+            "type": "string",
+            "description": "User ID of the last editor",
+            "example": "user-456"
           }
         },
         "additionalProperties": true
       },
       "Domain": {
         "type": "object",
+        "description": "Custom email domain configuration.",
         "properties": {
           "domain": {
             "type": "string",
-            "example": "subdomain.epilot.cloud"
+            "description": "The domain name to add or verify. Can be a root domain or subdomain.\nExamples: \"yourcompany.com\", \"mail.yourcompany.com\"\n",
+            "example": "mail.yourcompany.com"
           }
         }
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://email-settings.sls.epilot.io"
+    }
+  ]
 }
