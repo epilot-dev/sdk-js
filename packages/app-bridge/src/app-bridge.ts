@@ -14,6 +14,7 @@ import type {
   UpdateConfigOptions,
   EntityContext,
   ActionConfig,
+  PageContext,
   MessageHandler,
   VisibilityHandler,
   Unsubscribe,
@@ -240,6 +241,81 @@ export function updateContentHeight(height: number): void {
 export function onVisibilityChange(handler: VisibilityHandler): Unsubscribe {
   return subscribeToParentMessages('visibility-change', (msgEvent: MessageEvent) => {
     handler(msgEvent.data?.isVisible ?? false);
+  });
+}
+
+// =============================================================================
+// Page Surface API
+// =============================================================================
+
+/**
+ * Get the page context for custom page surfaces.
+ *
+ * Returns context including the page slug, sub-path, and full path.
+ *
+ * @param options - Request options
+ * @returns Page context data
+ *
+ * @example
+ * ```typescript
+ * import { initialize, getPageContext } from '@epilot/app-bridge';
+ *
+ * await initialize();
+ *
+ * const { slug, subPath, path } = await getPageContext();
+ * console.log(`Page: ${slug}, sub-path: ${subPath}`);
+ * ```
+ */
+export async function getPageContext(options?: RequestOptions): Promise<PageContext> {
+  const response = await request<{ context: PageContext }>('init-page-context', {}, options);
+  return response.context;
+}
+
+/**
+ * Navigate to a sub-path within the current page surface.
+ * Updates the parent frame's URL via history.pushState.
+ *
+ * @param subPath - Sub-path to navigate to (e.g., "/connections/new")
+ *
+ * @example
+ * ```typescript
+ * import { navigate } from '@epilot/app-bridge';
+ *
+ * // Navigate to /app/zapier/connections/new
+ * navigate('/connections/new');
+ *
+ * // Navigate to root
+ * navigate('/');
+ * ```
+ */
+export function navigate(subPath: string): void {
+  sendMessageToParent('navigate', { subPath });
+}
+
+/**
+ * Subscribe to location changes triggered by browser navigation (back/forward).
+ *
+ * The parent app sends location-change events when the browser URL changes
+ * due to popstate (back/forward buttons).
+ *
+ * @param handler - Callback invoked with the new sub-path
+ * @returns Unsubscribe function
+ *
+ * @example
+ * ```typescript
+ * import { onLocationChange } from '@epilot/app-bridge';
+ *
+ * const unsubscribe = onLocationChange((subPath) => {
+ *   router.navigate(subPath);
+ * });
+ *
+ * // Later: cleanup
+ * unsubscribe();
+ * ```
+ */
+export function onLocationChange(handler: (subPath: string) => void): Unsubscribe {
+  return subscribeToParentMessages('location-change', (msgEvent: MessageEvent) => {
+    handler(msgEvent.data?.subPath ?? '/');
   });
 }
 
