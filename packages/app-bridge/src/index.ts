@@ -143,6 +143,9 @@ export { initialize, getSession, isInitialized } from './app-bridge';
 // Entity surface API
 export { getEntityContext, updateContentHeight, onVisibilityChange } from './app-bridge';
 
+// Page surface API
+export { getPageContext, navigate, onLocationChange } from './app-bridge';
+
 // Action config surface API
 export { getActionConfig, updateActionConfig } from './app-bridge';
 
@@ -166,6 +169,8 @@ export type {
   // Entity surface types
   EntityCapability,
   EntityContext,
+  // Page surface types
+  PageContext,
   // Action config types
   ActionConfig,
   // Event types
