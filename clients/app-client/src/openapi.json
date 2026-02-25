@@ -1831,7 +1831,8 @@
           "CUSTOM_FLOW_ACTION",
           "ERP_INFORM_TOOLKIT",
           "CUSTOM_CAPABILITY",
-          "EXTERNAL_PRODUCT_CATALOG"
+          "EXTERNAL_PRODUCT_CATALOG",
+          "CUSTOM_PAGE"
         ],
         "description": "Type of app component"
       },
@@ -1942,7 +1943,8 @@
                 "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent",
                 "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent",
                 "CUSTOM_CAPABILITY": "#/components/schemas/CustomCapabilityComponent",
-                "EXTERNAL_PRODUCT_CATALOG": "#/components/schemas/ExternalProductCatalogComponent"
+                "EXTERNAL_PRODUCT_CATALOG": "#/components/schemas/ExternalProductCatalogComponent",
+                "CUSTOM_PAGE": "#/components/schemas/CustomPageComponent"
               }
             },
             "oneOf": [
@@ -1966,6 +1968,9 @@
               },
               {
                 "$ref": "#/components/schemas/ExternalProductCatalogComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPageComponent"
               }
             ]
           }
@@ -2013,6 +2018,60 @@
                 "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
               }
             }
+          }
+        }
+      },
+      "CustomPageComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_PAGE"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/CustomPageConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
+          }
+        }
+      },
+      "CustomPageConfig": {
+        "type": "object",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "URL slug for the page route. Must be unique per organization.",
+            "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+            "example": "zapier"
+          },
+          "nav_label": {
+            "type": "string",
+            "description": "Display label in the navigation sidebar.",
+            "example": "Zapier"
+          },
+          "nav_icon": {
+            "type": "string",
+            "description": "Icon identifier for the navigation item.",
+            "example": "zap"
+          },
+          "nav_description": {
+            "type": "string",
+            "description": "Optional tooltip or description for the navigation item."
           }
         }
       },
