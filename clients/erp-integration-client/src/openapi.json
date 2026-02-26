@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.41.0",
+    "version": "0.43.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2314,10 +2314,12 @@
             "oneOf": [
               {
                 "type": "string",
+                "minLength": 2,
                 "description": "The serialized object data payload (JSON, XML, etc.) as a string"
               },
               {
                 "type": "object",
+                "minProperties": 1,
                 "description": "Direct JSON object (will be automatically serialized)",
                 "additionalProperties": true
               }
@@ -2390,10 +2392,12 @@
             "oneOf": [
               {
                 "type": "string",
+                "minLength": 2,
                 "description": "The serialized object data payload (JSON, XML, etc.) as a string"
               },
               {
                 "type": "object",
+                "minProperties": 1,
                 "description": "Direct JSON object (will be automatically serialized)",
                 "additionalProperties": true
               }
@@ -3746,7 +3750,8 @@
         "properties": {
           "requires_vpc": {
             "type": "boolean",
-            "description": "Whether requests require VPC routing for IP allowlisting",
+            "readOnly": true,
+            "description": "Whether requests require VPC routing for IP allowlisting. Read-only after creation — can only be modified directly in DynamoDB.",
             "default": false
           },
           "auth": {
@@ -3999,6 +4004,35 @@
             "items": {
               "$ref": "#/components/schemas/MeterReadingUpdate"
             }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)",
+            "items": {
+              "$ref": "#/components/schemas/MappingSimulationWarning"
+            }
+          }
+        }
+      },
+      "MappingSimulationWarning": {
+        "type": "object",
+        "required": [
+          "entity_schema",
+          "field",
+          "message"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "The entity schema slug where the issue was found"
+          },
+          "field": {
+            "type": "string",
+            "description": "The field name that caused the warning"
+          },
+          "message": {
+            "type": "string",
+            "description": "Description of the validation issue"
           }
         }
       },
