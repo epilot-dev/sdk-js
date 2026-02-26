@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.3.5",
+    "version": "4.5.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -702,6 +702,18 @@
         "tags": [
           "Blueprints"
         ],
+        "parameters": [
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter blueprints by archived status. If true, returns only archived blueprints. If false or not provided, returns only non-archived blueprints.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Blueprints",
@@ -1166,6 +1178,63 @@
                   "properties": {
                     "job_id": {
                       "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
+      "post": {
+        "operationId": "formatBlueprintDescription",
+        "summary": "formatBlueprintDescription",
+        "description": "Format a blueprint description as markdown using AI.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Plain text to format as markdown"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully formatted description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "markdown": {
+                      "type": "string",
+                      "description": "AI-formatted markdown content"
                     }
                   }
                 }
@@ -1786,6 +1855,46 @@
           "source_blueprint_id": {
             "description": "ID of the blueprint that brought this blueprint to the destination org (deployed or installed)",
             "$ref": "#/components/schemas/BlueprintID"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.",
+            "default": false
+          },
+          "docs_url": {
+            "type": "string",
+            "description": "URL to the blueprint documentation"
+          },
+          "compatible_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of compatible app IDs for the blueprint"
+          },
+          "required_features": {
+            "type": "object",
+            "description": "Feature constraints for blueprint installation",
+            "properties": {
+              "enabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Features that must be enabled in the target org"
+              },
+              "disabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Features that must be disabled in the target org"
+              }
+            }
+          },
+          "zip_file_name": {
+            "type": "string",
+            "description": "Custom name for the exported zip file"
           }
         },
         "required": [
@@ -3090,6 +3199,15 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "addresses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "originalError": {
+                "type": "string"
               }
             }
           }

@@ -75,6 +75,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "app";
             resources?: BlueprintResource[];
         }
@@ -384,6 +413,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
         }
         export interface CommonBlueprintJobFields {
             id?: /**
@@ -625,6 +683,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             resources?: BlueprintResource[];
             source_type: "custom";
         }
@@ -682,6 +769,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "deploy";
             resources?: BlueprintResource[];
         }
@@ -739,6 +855,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of compatible app IDs for the blueprint
+             */
+            compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "file";
             resources?: BlueprintResource[];
         }
@@ -752,6 +897,8 @@ declare namespace Components {
                 resource?: string;
                 resourceDependency?: string;
                 resources?: string[];
+                addresses?: string[];
+                originalError?: string;
             };
         }
         export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint";
@@ -1364,15 +1511,36 @@ declare namespace Components {
              */
             BlueprintID;
             /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
              * URL to the blueprint documentation
              */
             docs_url?: string;
-            source_type: "marketplace";
-            resources?: BlueprintResource[];
             /**
              * List of compatible app IDs for the blueprint
              */
             compatible_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
+            source_type: "marketplace";
+            resources?: BlueprintResource[];
             /**
              * Whether a newer version is available in the marketplace.
              */
@@ -2003,6 +2171,33 @@ declare namespace Paths {
             }
         }
     }
+    namespace FormatBlueprintDescription {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Plain text to format as markdown
+             */
+            text: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * AI-formatted markdown content
+                 */
+                markdown?: string;
+            }
+        }
+    }
     namespace GetBlueprint {
         namespace Parameters {
             export type BlueprintId = /**
@@ -2141,6 +2336,12 @@ declare namespace Paths {
         }
     }
     namespace ListBlueprints {
+        namespace Parameters {
+            export type Archived = boolean;
+        }
+        export interface QueryParameters {
+            archived?: Parameters.Archived;
+        }
         namespace Responses {
             export interface $200 {
                 /**
@@ -2434,7 +2635,7 @@ export interface OperationMethods {
    * List Custom and Installed Blueprints
    */
   'listBlueprints'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprints.Responses.$200>
@@ -2544,6 +2745,17 @@ export interface OperationMethods {
     data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  /**
+   * formatBlueprintDescription - formatBlueprintDescription
+   * 
+   * Format a blueprint description as markdown using AI.
+   * 
+   */
+  'formatBlueprintDescription'(
+    parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
+    data?: Paths.FormatBlueprintDescription.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   /**
    * addBlueprintResource - addBlueprintResource
    * 
@@ -2791,7 +3003,7 @@ export interface PathsDictionary {
      * List Custom and Installed Blueprints
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprints.Responses.$200>
@@ -2915,6 +3127,19 @@ export interface PathsDictionary {
       data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description']: {
+    /**
+     * formatBlueprintDescription - formatBlueprintDescription
+     * 
+     * Format a blueprint description as markdown using AI.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
+      data?: Paths.FormatBlueprintDescription.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources']: {
     /**
