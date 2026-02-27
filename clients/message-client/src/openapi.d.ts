@@ -664,7 +664,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00Z
+             * 2024-01-01T00:00:00.000Z
              */
             timestamp: string;
         }
@@ -730,6 +730,30 @@ declare namespace Paths {
              * IDs of users assigned to thread
              */
             assigned_to?: string[];
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace AssignUsersV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * User IDs of users to add to thread
+             */
+            add: string[];
+            /**
+             * User IDs of users to remove from thread
+             */
+            remove: string[];
         }
         namespace Responses {
             export interface $204 {
@@ -2839,6 +2863,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignUsers.Responses.$204>
   /**
+   * assignUsersV2 - assignUsersV2
+   * 
+   * Assign users to thread.
+   * 
+   */
+  'assignUsersV2'(
+    parameters?: Parameters<Paths.AssignUsersV2.PathParameters> | null,
+    data?: Paths.AssignUsersV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignUsersV2.Responses.$204>
+  /**
    * pinThread - Pin a single thread
    * 
    * Pin a single thread
@@ -3379,6 +3414,19 @@ export interface PathsDictionary {
       data?: Paths.AssignUsers.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignUsers.Responses.$204>
+  }
+  ['/v2/message/threads/{id}/assign:users']: {
+    /**
+     * assignUsersV2 - assignUsersV2
+     * 
+     * Assign users to thread.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignUsersV2.PathParameters> | null,
+      data?: Paths.AssignUsersV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignUsersV2.Responses.$204>
   }
   ['/v1/message/threads/{id}:pin']: {
     /**
