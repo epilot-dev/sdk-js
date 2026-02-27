@@ -598,6 +598,77 @@ declare namespace Components {
              */
             target_unique?: string[];
         }
+        export interface AssignThreadAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "assign-thread";
+            config?: AssignThreadConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        export interface AssignThreadConfig {
+            /**
+             * Assignees to remove from the thread, if they exist
+             */
+            remove?: string[];
+            /**
+             * Assignees to add to the thread
+             */
+            add?: string[];
+        }
         /**
          * example:
          * [
@@ -4733,6 +4804,8 @@ export type AnythingButCondition = Components.Schemas.AnythingButCondition;
 export type ApiCallerContext = Components.Schemas.ApiCallerContext;
 export type ApiSubmissionTrigger = Components.Schemas.ApiSubmissionTrigger;
 export type AppendValueMapper = Components.Schemas.AppendValueMapper;
+export type AssignThreadAction = Components.Schemas.AssignThreadAction;
+export type AssignThreadConfig = Components.Schemas.AssignThreadConfig;
 export type AssignUsersToStep = Components.Schemas.AssignUsersToStep;
 export type AutomationAction = Components.Schemas.AutomationAction;
 export type AutomationActionConfig = Components.Schemas.AutomationActionConfig;
