@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.20.0
+
+### Minor Changes
+
+- Updated specs for assigned_to for variable assignment
+
 ## 1.19.0
 
 ### Minor Changes
