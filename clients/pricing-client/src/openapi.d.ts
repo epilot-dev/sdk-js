@@ -118,6 +118,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
         }
         /**
          * Availability check request payload
@@ -649,6 +657,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
@@ -2837,6 +2853,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
@@ -4398,6 +4422,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
         }
         /**
          * The interval of the tariff if a spot market price is used as base.
@@ -7396,6 +7428,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
             metadata?: /* A set of key-value pairs used to store meta data information about an entity. */ MetaData;
             /**
              * The quantity of products being purchased.
@@ -9379,6 +9419,14 @@ declare namespace Components {
              */
             before_discount_amount_total_decimal?: string;
             /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
+            /**
              * The price type.
              */
             type?: string;
@@ -9468,6 +9516,14 @@ declare namespace Components {
              * Total amount before discount is applied as a string with all the decimal places.
              */
             before_discount_amount_total_decimal?: string;
+            /**
+             * Total amount before discount is applied, excluding taxes.
+             */
+            before_discount_amount_subtotal?: number;
+            /**
+             * Total amount before discount is applied, excluding taxes, as a string with all the decimal places.
+             */
+            before_discount_amount_subtotal_decimal?: string;
             /**
              * The price type.
              */
