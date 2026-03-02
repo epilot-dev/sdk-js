@@ -131,6 +131,31 @@
         "responses": {}
       }
     },
+    "/v2/flows/templates/{flowId}/export": {
+      "get": {
+        "operationId": "exportFlowTemplate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/templates/import": {
+      "post": {
+        "operationId": "importFlowTemplate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",

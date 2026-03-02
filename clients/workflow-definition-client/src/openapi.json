@@ -750,6 +750,131 @@
         }
       }
     },
+    "/v2/flows/templates/{flowId}/export": {
+      "get": {
+        "operationId": "exportFlowTemplate",
+        "summary": "exportFlowTemplate",
+        "description": "Export a Flow Template with all referenced automations resolved and bundled alongside.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exported flow template with resolved automations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplateExport"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flow template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/templates/import": {
+      "post": {
+        "operationId": "importFlowTemplate",
+        "summary": "importFlowTemplate",
+        "description": "Import a Flow Template from an export payload. Creates all automations and the flow in the caller's organization.",
+        "tags": [
+          "Flows V2"
+        ],
+        "requestBody": {
+          "description": "Export payload containing the flow template and resolved automations",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowTemplateExport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Flow template imported successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowTemplateImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",
@@ -1637,12 +1762,26 @@
           "assigned_to": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/VariableAssignment"
+                }
+              ]
             }
           },
           "available_in_ecp": {
             "type": "boolean",
             "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
+          },
+          "additional_triggers": {
+            "type": "array",
+            "description": "Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).",
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            }
           },
           "phases": {
             "type": "array",
@@ -1758,8 +1897,7 @@
       "AutomationTrigger": {
         "type": "object",
         "required": [
-          "type",
-          "automation_id"
+          "type"
         ],
         "properties": {
           "id": {
@@ -1774,6 +1912,28 @@
           "automation_id": {
             "type": "string",
             "description": "Id of the automation config that triggers this workflow"
+          },
+          "trigger_config": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The trigger type (e.g. entity_operation, activity)"
+                },
+                "configuration": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Trigger-specific configuration"
+                }
+              },
+              "additionalProperties": true
+            },
+            "description": "Transient field. Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update and stripped before storage.\n"
           }
         }
       },
@@ -1971,13 +2131,29 @@
       "AutomationConfig": {
         "type": "object",
         "description": "Configuration for automation execution to run",
-        "required": [
-          "flow_id"
-        ],
         "properties": {
           "flow_id": {
             "type": "string",
             "description": "Id of the configured automation to run"
+          },
+          "action_config": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The action type (e.g. send-email, trigger-workflow)"
+              },
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Action-specific configuration"
+              }
+            },
+            "additionalProperties": true,
+            "description": "Transient field. The full automation action configuration following the automation API action schema. Processed by the backend during create/update and stripped before storage. When present without a flow_id, a new automation flow is created. When present with a flow_id, the existing automation flow is updated.\n"
           }
         }
       },
@@ -2212,7 +2388,14 @@
           "assigned_to": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/VariableAssignment"
+                }
+              ]
             }
           },
           "ecp": {
@@ -2260,7 +2443,14 @@
           "assigned_to": {
             "type": "array",
             "items": {
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/VariableAssignment"
+                }
+              ]
             }
           },
           "taxonomies": {
@@ -2274,6 +2464,25 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "VariableAssignment": {
+        "type": "object",
+        "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "description": "The variable expression, e.g., \"{{entity.owner}}\"",
+            "example": "{{entity.owner}}"
+          },
+          "value": {
+            "type": "string",
+            "description": "The resolved value after variable evaluation (populated during execution)",
+            "example": "user_12345"
+          }
+        },
+        "required": [
+          "variable"
         ]
       },
       "TaskType": {
@@ -3006,6 +3215,7 @@
                   "TaskCompleted",
                   "TaskSkipped",
                   "TaskMarkedInProgress",
+                  "TaskMarkedOnHold",
                   "PhaseUpdated",
                   "PhaseCompleted",
                   "PhaseSkipped",
@@ -3143,6 +3353,64 @@
           "type",
           "condition"
         ]
+      },
+      "FlowTemplateExport": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FlowTemplate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "_resolved_automations": {
+                "type": "object",
+                "description": "Map of automation_id to full AutomationFlow object. Null values indicate automations that could not be resolved.",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FlowTemplateImportResult": {
+        "type": "object",
+        "properties": {
+          "flow": {
+            "$ref": "#/components/schemas/FlowTemplate"
+          },
+          "_id_mappings": {
+            "type": "object",
+            "description": "Maps old IDs to new IDs for cross-referencing by callers (e.g. blueprint service)",
+            "properties": {
+              "flow_id": {
+                "type": "object",
+                "properties": {
+                  "old": {
+                    "type": "string"
+                  },
+                  "new": {
+                    "type": "string"
+                  }
+                }
+              },
+              "task_ids": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Map of old_task_id to new_task_id"
+              },
+              "automation_ids": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Map of old_automation_id to new_automation_id"
+              }
+            }
+          }
+        }
       }
     }
   }
