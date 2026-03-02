@@ -64,7 +64,7 @@ declare namespace Components {
                  */
                 due_date?: string;
                 due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-                assigned_to?: /* The user ids */ Assignees;
+                assigned_to?: /* The user ids or variable assignments */ Assignees;
                 /**
                  * flag for controlling enabled/disabled state of the task
                  */
@@ -133,7 +133,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -189,9 +189,9 @@ declare namespace Components {
             skipped_by?: /* The user id */ UserId;
         }
         /**
-         * The user ids
+         * The user ids or variable assignments
          */
-        export type Assignees = string[];
+        export type Assignees = (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
         /**
          * Configuration for automation execution to run
          */
@@ -256,7 +256,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -396,7 +396,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -530,7 +530,7 @@ declare namespace Components {
                  * Status triggers are deduced from event + entity status combination.
                  *
                  */
-                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "TaskMarkedOnHold" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
                 /**
                  * Optional filter to target specific tasks or phases.
                  * Specify either task_template_id OR phase_template_id (mutually exclusive).
@@ -617,7 +617,7 @@ declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             status: WorkflowStatus;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: {
                 /**
                  * Timestamp when the flow execution started
@@ -775,7 +775,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -806,7 +806,7 @@ declare namespace Components {
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
         export interface PatchFlowReq {
             status?: WorkflowStatus;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             closing_reason?: FlowClosingReason;
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
@@ -820,7 +820,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
         }
         export interface PatchTaskReq {
             name?: string;
@@ -846,7 +846,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             /**
              * flag for controlling enabled/disabled state of the task
              */
@@ -883,7 +883,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics?: AnalyticsInfo;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
@@ -1376,7 +1376,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -1536,6 +1536,23 @@ declare namespace Components {
          * The user id
          */
         export type UserId = string;
+        /**
+         * Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.
+         */
+        export interface VariableAssignment {
+            /**
+             * The variable expression, e.g., "{{entity.owner}}"
+             * example:
+             * {{entity.owner}}
+             */
+            variable: string;
+            /**
+             * The resolved value after variable evaluation (populated during execution)
+             * example:
+             * user_12345
+             */
+            value?: string;
+        }
         export interface WorkflowContext {
             id: string;
             title: string;
@@ -2987,6 +3004,7 @@ export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type UpdateStepReq = Components.Schemas.UpdateStepReq;
 export type UpdateStepResp = Components.Schemas.UpdateStepResp;
 export type UserId = Components.Schemas.UserId;
+export type VariableAssignment = Components.Schemas.VariableAssignment;
 export type WorkflowContext = Components.Schemas.WorkflowContext;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
 export type WorkflowExecutionBase = Components.Schemas.WorkflowExecutionBase;

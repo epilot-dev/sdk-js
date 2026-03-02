@@ -2699,6 +2699,7 @@
                   "TaskCompleted",
                   "TaskSkipped",
                   "TaskMarkedInProgress",
+                  "TaskMarkedOnHold",
                   "PhaseUpdated",
                   "PhaseCompleted",
                   "PhaseSkipped",
@@ -3933,12 +3934,38 @@
         "type": "string",
         "description": "The user id"
       },
+      "VariableAssignment": {
+        "type": "object",
+        "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "description": "The variable expression, e.g., \"{{entity.owner}}\"",
+            "example": "{{entity.owner}}"
+          },
+          "value": {
+            "type": "string",
+            "description": "The resolved value after variable evaluation (populated during execution)",
+            "example": "user_12345"
+          }
+        },
+        "required": [
+          "variable"
+        ]
+      },
       "Assignees": {
         "type": "array",
         "items": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/components/schemas/VariableAssignment"
+            }
+          ]
         },
-        "description": "The user ids"
+        "description": "The user ids or variable assignments"
       },
       "PatchTaskReq": {
         "type": "object",
