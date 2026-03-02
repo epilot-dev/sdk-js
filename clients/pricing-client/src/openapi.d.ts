@@ -6436,7 +6436,9 @@ declare namespace Components {
             /**
              * The coupons referenced from within `line_items`
              */
-            coupons?: any[];
+            coupons?: {
+                $relation?: EntityRelation[];
+            };
             /**
              * Total of all items before (discounts or) taxes are applied.
              */

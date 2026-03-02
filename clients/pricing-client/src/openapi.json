@@ -4630,7 +4630,7 @@
             }
           },
           "coupons": {
-            "type": "array",
+            "type": "object",
             "description": "The coupons referenced from within `line_items`",
             "properties": {
               "$relation": {
