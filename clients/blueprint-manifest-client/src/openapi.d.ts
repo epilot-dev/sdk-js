@@ -84,9 +84,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
@@ -243,7 +243,7 @@ declare namespace Components {
             blueprint_file_s3_key: string;
             is_verified: boolean;
             docs_url?: string;
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             created_at: string; // date-time
             created_by: CallerIdentity;
             /**
@@ -422,9 +422,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
@@ -692,9 +692,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
@@ -778,9 +778,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
@@ -864,9 +864,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
@@ -1519,9 +1519,9 @@ declare namespace Components {
              */
             docs_url?: string;
             /**
-             * List of compatible app IDs for the blueprint
+             * List of recommended app IDs for the blueprint
              */
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             /**
              * Feature constraints for blueprint installation
              */
