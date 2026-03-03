@@ -161,7 +161,7 @@ declare namespace Components {
             /**
              * The postal code for the address.
              */
-            postal_code: string;
+            postal_code?: string;
             /**
              * The name of the city, district, village, or town.
              */
