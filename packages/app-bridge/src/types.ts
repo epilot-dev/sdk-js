@@ -85,6 +85,38 @@ export interface EntityContext {
 }
 
 // =============================================================================
+// Page Surface Types
+// =============================================================================
+
+/**
+ * Context data for custom page surfaces.
+ *
+ * @example
+ * ```typescript
+ * const context = await getPageContext();
+ * console.log(context.slug);    // 'zapier'
+ * console.log(context.subPath); // '/connections'
+ * console.log(context.path);    // '/app/zapier/connections'
+ * ```
+ */
+export interface PageContext {
+  /** The page slug from the URL */
+  slug: string;
+  /** Sub-path after the slug (e.g., "/settings/advanced") */
+  subPath: string;
+  /** Full path (e.g., "/app/my-app/settings/advanced") */
+  path: string;
+}
+
+/**
+ * Payload received from init-page-context response
+ * @internal
+ */
+export interface PageContextPayload {
+  context: PageContext;
+}
+
+// =============================================================================
 // Action Config Surface Types
 // =============================================================================
 
@@ -211,5 +243,17 @@ export interface AppBridgeEventMap {
   'update-content-height': {
     outgoing: UpdateContentHeightPayload;
     incoming: never;
+  };
+  'init-page-context': {
+    outgoing: Record<string, never>;
+    incoming: PageContextPayload;
+  };
+  'navigate': {
+    outgoing: { subPath: string };
+    incoming: never;
+  };
+  'location-change': {
+    outgoing: never;
+    incoming: { subPath: string };
   };
 }

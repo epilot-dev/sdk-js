@@ -697,7 +697,7 @@ declare namespace Components {
          */
         export interface FileProxyUseCaseConfiguration {
             /**
-             * Whether requests require VPC routing for IP allowlisting
+             * Whether requests require VPC routing for IP allowlisting. Read-only after creation — can only be modified directly in DynamoDB.
              */
             requires_vpc?: boolean;
             auth?: FileProxyAuth;
@@ -1292,6 +1292,10 @@ declare namespace Components {
         export interface MappingSimulationResponse {
             entity_updates: EntityUpdate[];
             meter_readings_updates?: MeterReadingUpdate[];
+            /**
+             * Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)
+             */
+            warnings?: MappingSimulationWarning[];
         }
         /**
          * Request for v2 mapping simulation. Uses the same configuration format stored in integration use case resources,
@@ -1310,6 +1314,20 @@ declare namespace Components {
             payload: /* The event data payload - can be either a serialized string or a direct JSON object */ string | {
                 [name: string]: any;
             };
+        }
+        export interface MappingSimulationWarning {
+            /**
+             * The entity schema slug where the issue was found
+             */
+            entity_schema: string;
+            /**
+             * The field name that caused the warning
+             */
+            field: string;
+            /**
+             * Description of the validation issue
+             */
+            message: string;
         }
         /**
          * Scope configuration for meter reading upsert-prune-scope mode.
@@ -3876,6 +3894,7 @@ export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
+export type MappingSimulationWarning = Components.Schemas.MappingSimulationWarning;
 export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneScopeConfig;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;

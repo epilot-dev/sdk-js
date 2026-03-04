@@ -43,6 +43,12 @@ declare namespace Components {
             journey_id?: /* Journey ID for access token type "journey" */ AccessTokenJourneyId;
             portal_id?: /* Portal ID for access token type "portal" */ PortalId;
             assignments?: /* List of role ids attached to an user */ Assignments;
+            /**
+             * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
+             * example:
+             * 2026-02-24
+             */
+            last_used?: string; // date
         }
         /**
          * Journey ID for access token type "journey"
@@ -169,6 +175,12 @@ declare namespace Paths {
                 journey_id?: /* Journey ID for access token type "journey" */ Components.Schemas.AccessTokenJourneyId;
                 portal_id?: /* Portal ID for access token type "portal" */ Components.Schemas.PortalId;
                 assignments?: /* List of role ids attached to an user */ Components.Schemas.Assignments;
+                /**
+                 * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
+                 * example:
+                 * 2026-02-24
+                 */
+                last_used?: string; // date
             }
             export interface $400 {
                 status?: number;

@@ -533,6 +533,25 @@
         "responses": {}
       }
     },
+    "/v2/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsersV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads/{id}:pin": {
       "post": {
         "operationId": "pinThread",

@@ -25,6 +25,7 @@ declare namespace Components {
         Schemas.EntityId;
         export type FillActivityQueryParam = boolean;
         export type StrictQueryParam = boolean;
+        export type VersionOnlyQueryParam = boolean;
     }
     export interface PathParameters {
         EntityIdPathParam?: Parameters.EntityIdPathParam;
@@ -35,17 +36,106 @@ declare namespace Components {
         FillActivityQueryParam?: Parameters.FillActivityQueryParam;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
         DeleteTempFileQueryParam?: Parameters.DeleteTempFileQueryParam;
+        VersionOnlyQueryParam?: Parameters.VersionOnlyQueryParam;
     }
     namespace Responses {
         /**
          * A generic error returned by the API
          * example:
          * {
+         *   "status": 400,
+         *   "error": "Bad Request: filename is required"
+         * }
+         */
+        export interface BadRequestError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 403,
+         *   "error": "Forbidden: You do not have permission to access this file"
+         * }
+         */
+        export interface ForbiddenError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 500,
+         *   "error": "Internal Server Error"
+         * }
+         */
+        export interface InternalServerError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
          *   "status": 404,
-         *   "error": "Not Found"
+         *   "error": "Not Found: File entity not found"
          * }
          */
         export interface NotFoundError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 401,
+         *   "error": "Unauthorized: Invalid or expired token"
+         * }
+         */
+        export interface UnauthorizedError {
             /**
              * The HTTP status code of the error
              * example:
@@ -327,8 +417,8 @@ declare namespace Components {
              * List of purpose slugs where the collection is enabled. If empty, enabled for all.
              * example:
              * [
-             *   "purpose:9eefcb98-93cf-4c5b-a040-f1d26d57c177",
-             *   "purpose:5c544c09-a691-43ed-a7fa-0a8b44b5b161"
+             *   "9eefcb98-93cf-4c5b-a040-f1d26d57c177",
+             *   "5c544c09-a691-43ed-a7fa-0a8b44b5b161"
              * ]
              */
             enabled_purposes?: string[];
@@ -824,63 +914,69 @@ declare namespace Components {
 declare namespace Paths {
     namespace AccessPublicLink {
         namespace Parameters {
-            /**
-             * Name of the file
-             * example:
-             * invoice-2023-12.pdf
-             */
             export type Filename = string;
-            /**
-             * An optional cache-busting hash for the file
-             */
             export type Hash = string;
-            /**
-             * Id of the publicly generated link
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: /**
-             * Id of the publicly generated link
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
-            Parameters.Id;
-            filename: /**
-             * Name of the file
-             * example:
-             * invoice-2023-12.pdf
-             */
-            Parameters.Filename;
+            id: Parameters.Id;
+            filename: Parameters.Filename;
         }
         export interface QueryParameters {
-            hash?: /* An optional cache-busting hash for the file */ Parameters.Hash;
+            hash?: Parameters.Hash;
         }
         namespace Responses {
             export interface $302 {
             }
+            export type $404 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace CreateUserSchemaFileCollection {
         namespace Parameters {
-            /**
-             * example:
-             * opportunity
-             */
             export type Slug = string;
         }
         export interface PathParameters {
-            slug: /**
-             * example:
-             * opportunity
-             */
-            Parameters.Slug;
+            slug: Parameters.Slug;
         }
         export type RequestBody = /* Request body for creating a file collection */ Components.Schemas.FileCollectionCreateRequest;
         namespace Responses {
             export type $201 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace DeleteFile {
@@ -912,6 +1008,42 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace DeleteSession {
@@ -922,41 +1054,43 @@ declare namespace Paths {
     }
     namespace DeleteUserSchemaFileCollection {
         namespace Parameters {
-            /**
-             * example:
-             * documents
-             */
             export type CollectionSlug = string;
-            /**
-             * example:
-             * opportunity
-             */
             export type Slug = string;
         }
         export interface PathParameters {
-            slug: /**
-             * example:
-             * opportunity
-             */
-            Parameters.Slug;
-            collectionSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.CollectionSlug;
+            slug: Parameters.Slug;
+            collectionSlug: Parameters.CollectionSlug;
         }
         namespace Responses {
             export interface $200 {
             }
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
              * {
              *   "status": 404,
-             *   "error": "Not Found"
+             *   "error": "Not Found: File entity not found"
              * }
              */
             Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace DownloadFile {
@@ -979,11 +1113,48 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 /**
+                 * Pre-signed S3 URL valid for downloading the file
                  * example:
                  * https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
                  */
                 download_url?: string; // uri
             }
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace DownloadFiles {
@@ -991,12 +1162,43 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = {
                 /**
+                 * Pre-signed S3 URL for downloading the file
                  * example:
                  * https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
                  */
                 download_url?: string; // uri
+                /**
+                 * The file entity ID (matches the requested ID)
+                 */
                 file_entity_id?: string; // uuid
             }[];
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace DownloadS3File {
@@ -1013,11 +1215,48 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 /**
+                 * Pre-signed S3 URL valid for downloading the file
                  * example:
                  * https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
                  */
                 download_url?: string; // uri
             }
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace GeneratePublicLink {
@@ -1033,10 +1272,45 @@ declare namespace Paths {
         }
         namespace Responses {
             /**
-             * example:
-             * https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c/invoice-2023-12.pdf
+             * The public URL that can be shared externally
              */
             export type $201 = string;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace GetFile {
@@ -1063,14 +1337,46 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace GetFilesInCollection {
         namespace Parameters {
-            /**
-             * example:
-             * documents
-             */
             export type CollectionSlug = string;
             export type Id = /**
              * example:
@@ -1080,95 +1386,117 @@ declare namespace Paths {
         }
         export interface PathParameters {
             id: Parameters.Id;
-            collectionSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.CollectionSlug;
+            collectionSlug: Parameters.CollectionSlug;
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity[];
-            export interface $403 {
-                /**
-                 * example:
-                 * User must have permission to view this entity to access its files
-                 */
-                error?: string;
-            }
-            export interface $404 {
-                /**
-                 * example:
-                 * Entity not found
-                 */
-                error?: string;
-            }
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $404 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace GetGlobalFileCollections {
         namespace Parameters {
-            /**
-             * example:
-             * order
-             */
             export type SchemaSlug = string;
         }
         export interface PathParameters {
-            schemaSlug: /**
-             * example:
-             * order
-             */
-            Parameters.SchemaSlug;
+            schemaSlug: Parameters.SchemaSlug;
         }
         namespace Responses {
             export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace GetSession {
         namespace Responses {
             export interface $200 {
             }
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
         }
     }
     namespace GetUserSchemaFileCollections {
         namespace Parameters {
-            /**
-             * example:
-             * opportunity
-             */
             export type Slug = string;
         }
         export interface PathParameters {
-            slug: /**
-             * example:
-             * opportunity
-             */
-            Parameters.Slug;
+            slug: Parameters.Slug;
         }
         namespace Responses {
             export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem[];
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace ListPublicLinksForFile {
         namespace Parameters {
-            /**
-             * ID of the file entity
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: /**
-             * ID of the file entity
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
-            Parameters.Id;
+            id: Parameters.Id;
         }
         namespace Responses {
             export interface $200 {
                 results?: Components.Schemas.PublicLink[];
             }
+            export type $501 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
         }
     }
     namespace PreviewFile {
@@ -1189,6 +1517,36 @@ declare namespace Paths {
             version?: Parameters.Version;
             w?: Parameters.W;
             h?: Parameters.H;
+        }
+        namespace Responses {
+            export type $200 = string; // binary
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace PreviewPublicFile {
@@ -1212,6 +1570,28 @@ declare namespace Paths {
             h?: Parameters.H;
             org_id?: Parameters.OrgId;
         }
+        namespace Responses {
+            export type $200 = string; // binary
+            export type $403 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
     }
     namespace PreviewS3File {
         namespace Parameters {
@@ -1223,6 +1603,45 @@ declare namespace Paths {
             h?: Parameters.H;
         }
         export type RequestBody = Components.Schemas.S3Ref;
+        namespace Responses {
+            export type $200 = string; // binary
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
     }
     namespace PreviewS3FileGet {
         namespace Parameters {
@@ -1237,30 +1656,57 @@ declare namespace Paths {
             w?: Parameters.W;
             h?: Parameters.H;
         }
+        namespace Responses {
+            export type $200 = string; // binary
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
     }
     namespace RevokePublicLink {
         namespace Parameters {
-            /**
-             * Id of the publicly generated link
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
             export type Id = string;
         }
         export interface PathParameters {
-            id: /**
-             * Id of the publicly generated link
-             * example:
-             * 13d22918-36bd-4227-9ad4-2cb978788c8d
-             */
-            Parameters.Id;
+            id: Parameters.Id;
         }
         namespace Responses {
-            /**
-             * example:
-             * https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c
-             */
-            export type $204 = string;
+            export interface $204 {
+            }
+            export type $501 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
         }
     }
     namespace SaveFile {
@@ -1272,14 +1718,43 @@ declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type VersionOnly = boolean;
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
             async?: Parameters.Async;
+            version_only?: Parameters.VersionOnly;
         }
         export type RequestBody = Components.Schemas.SaveFilePayload;
         namespace Responses {
             export type $201 = Components.Schemas.FileEntity;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace SaveFileV2 {
@@ -1294,6 +1769,7 @@ declare namespace Paths {
             export type DeleteTempFile = boolean;
             export type FillActivity = boolean;
             export type Strict = boolean;
+            export type VersionOnly = boolean;
         }
         export interface QueryParameters {
             activity_id?: Parameters.ActivityId;
@@ -1301,49 +1777,97 @@ declare namespace Paths {
             strict?: Parameters.Strict;
             async?: Parameters.Async;
             delete_temp_file?: Parameters.DeleteTempFile;
+            version_only?: Parameters.VersionOnly;
         }
         export type RequestBody = Components.Schemas.SaveFilePayloadV2;
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
-        }
-    }
-    namespace UpdateUserSchemaFileCollection {
-        namespace Parameters {
-            /**
+            export type $400 = /**
+             * A generic error returned by the API
              * example:
-             * documents
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
              */
-            export type CollectionSlug = string;
-            /**
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
              * example:
-             * opportunity
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
              */
-            export type Slug = string;
-        }
-        export interface PathParameters {
-            slug: /**
-             * example:
-             * opportunity
-             */
-            Parameters.Slug;
-            collectionSlug: /**
-             * example:
-             * documents
-             */
-            Parameters.CollectionSlug;
-        }
-        export type RequestBody = Components.Schemas.FileCollectionAttributes;
-        namespace Responses {
-            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
+            Components.Responses.UnauthorizedError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
              * {
              *   "status": 404,
-             *   "error": "Not Found"
+             *   "error": "Not Found: File entity not found"
              * }
              */
             Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateUserSchemaFileCollection {
+        namespace Parameters {
+            export type CollectionSlug = string;
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            collectionSlug: Parameters.CollectionSlug;
+        }
+        export type RequestBody = Components.Schemas.FileCollectionAttributes;
+        namespace Responses {
+            export type $200 = /* A file collection with identifiers and timestamps */ Components.Schemas.FileCollectionItem;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace UploadFile {
@@ -1373,6 +1897,33 @@ declare namespace Paths {
                  */
                 public_url?: string; // url
             }
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace UploadFilePublic {
@@ -1381,16 +1932,36 @@ declare namespace Paths {
             export interface $201 {
                 s3ref?: Components.Schemas.S3Reference;
                 /**
+                 * Pre-signed URL for uploading the file via PUT request
                  * example:
                  * https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123
                  */
                 upload_url?: string; // url
                 /**
+                 * Error message if the upload preparation failed
                  * example:
                  * File entity not found
                  */
                 error?: string;
             }
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace UploadFileV2 {
@@ -1407,14 +1978,71 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.UploadFilePayload;
         namespace Responses {
             export type $201 = Components.Schemas.FileUpload;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
     namespace VerifyCustomDownloadUrl {
         export type RequestBody = Components.Schemas.VerifyCustomDownloadUrlPayload;
         namespace Responses {
             export interface $200 {
+                /**
+                 * Whether the URL is valid and not expired
+                 */
                 valid?: boolean;
             }
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
         }
     }
 }
@@ -1450,6 +2078,19 @@ export interface OperationMethods {
   /**
    * uploadFile - uploadFile
    * 
+   * **DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files/upload` instead.
+   * 
+   * ## Migration Guide
+   * Replace calls to this endpoint with `uploadFileV2`:
+   * 
+   * | v1 Parameter | v2 Parameter | Notes |
+   * |--------------|--------------|-------|
+   * | `file_entity_id` | `file_entity_id` | No change |
+   * 
+   * The v2 response includes the same fields with improved structure.
+   * 
+   * ---
+   * 
    * Create pre-signed S3 URL to upload a file to keep temporarily (one week).
    * 
    * Use the saveFile operation to store file file permanently.
@@ -1463,11 +2104,26 @@ export interface OperationMethods {
   /**
    * saveFile - saveFile
    * 
-   * Create / Update a permanent File entity
+   * **DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files` instead.
    * 
-   * Makes file object permanent
+   * ## Migration Guide
+   * Replace calls to this endpoint with `saveFileV2`:
    * 
-   * Saves metadata to file entity
+   * | v1 Feature | v2 Feature | Notes |
+   * |------------|------------|-------|
+   * | `activity_id` param | `activity_id` param | No change |
+   * | `async` param | `async` param | No change |
+   * | - | `fill_activity` param | New in v2 |
+   * | - | `strict` param | New in v2 |
+   * | - | `delete_temp_file` param | New in v2, defaults to true |
+   * 
+   * The v2 endpoint supports additional parameters for better control over file saving behavior.
+   * 
+   * ---
+   * 
+   * Create / Update a permanent File entity.
+   * 
+   * Makes file object permanent and saves metadata to file entity.
    * 
    */
   'saveFile'(
@@ -1498,7 +2154,10 @@ export interface OperationMethods {
   /**
    * downloadFile - downloadFile
    * 
-   * Generate pre-signed download S3 url for a file
+   * Generate a pre-signed download URL for a file.
+   * 
+   * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
+   * 
    */
   'downloadFile'(
     parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
@@ -1508,7 +2167,10 @@ export interface OperationMethods {
   /**
    * downloadS3File - downloadS3File
    * 
-   * Generate pre-signed download S3 url for a file
+   * Generate a pre-signed download URL for a file using its S3 reference.
+   * 
+   * Use this endpoint when you have the S3 bucket and key but not the file entity ID.
+   * 
    */
   'downloadS3File'(
     parameters?: Parameters<Paths.DownloadS3File.QueryParameters> | null,
@@ -1518,7 +2180,10 @@ export interface OperationMethods {
   /**
    * downloadFiles - downloadFiles
    * 
-   * Bulk generate pre-signed download S3 urls for multiple files
+   * Bulk generate pre-signed download URLs for multiple files in a single request.
+   * 
+   * This is more efficient than calling `downloadFile` multiple times when you need to download several files.
+   * 
    */
   'downloadFiles'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1528,49 +2193,70 @@ export interface OperationMethods {
   /**
    * previewFile - previewFile
    * 
-   * Generate thumbnail preview for a file entity
+   * Generate a thumbnail preview for a file entity.
+   * 
+   * Supported file types include images (PNG, JPEG, GIF, WebP), PDFs, and common document formats.
+   * The preview is returned as an image (PNG or JPEG).
+   * 
+   * **Tip:** Use with CookieAuth to embed previews directly in `<img>` tags.
+   * 
    */
   'previewFile'(
     parameters?: Parameters<Paths.PreviewFile.QueryParameters & Paths.PreviewFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.PreviewFile.Responses.$200>
   /**
    * previewS3FileGet - previewS3FileGet
    * 
-   * Get thumbnail preview from an s3 reference for a file entity
+   * Get a thumbnail preview from an S3 reference using query parameters.
+   * 
+   * This GET variant is useful for embedding previews directly in `<img>` tags.
+   * 
    */
   'previewS3FileGet'(
     parameters?: Parameters<Paths.PreviewS3FileGet.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.PreviewS3FileGet.Responses.$200>
   /**
    * previewS3File - previewS3File
    * 
-   * Generate thumbnail preview from an s3 reference for a file entity
+   * Generate a thumbnail preview from an S3 reference.
+   * 
+   * Use this endpoint when you have the S3 bucket and key but not the file entity ID.
+   * 
    */
   'previewS3File'(
     parameters?: Parameters<Paths.PreviewS3File.QueryParameters> | null,
     data?: Paths.PreviewS3File.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.PreviewS3File.Responses.$200>
   /**
    * previewPublicFile - previewPublicFile
    * 
-   * Generate thumbnail preview for a public file entity
+   * Generate a thumbnail preview for a public file entity.
+   * 
+   * **No authentication required.** This endpoint only works for files with `access_control: public-read`.
+   * 
    */
   'previewPublicFile'(
     parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.PreviewPublicFile.Responses.$200>
   /**
    * getSession - getSession
    * 
-   * Start a browser session by setting passed Authorization token in a server side cookie.
+   * Start a browser session by converting a Bearer token into a server-side cookie.
    * 
-   * Allows using preview urls directly in img src for private files using cookie authentication.
+   * **Use case:** After calling this endpoint, you can use preview URLs directly in `<img>` tags
+   * without needing to set the Authorization header manually.
+   * 
+   * **Example flow:**
+   * 1. Call this endpoint with your Bearer token: `GET /v1/files/session` with `Authorization: Bearer <token>`
+   * 2. The server sets an HTTP-only cookie named `token`
+   * 3. Use preview URLs directly: `<img src="https://file.sls.epilot.io/v1/files/{id}/preview" />`
    * 
    */
   'getSession'(
@@ -1581,7 +2267,10 @@ export interface OperationMethods {
   /**
    * deleteSession - deleteSession
    * 
-   * End browser session by deleting token cookie
+   * End a browser session by deleting the token cookie.
+   * 
+   * Call this endpoint to log out and clear the session cookie.
+   * 
    */
   'deleteSession'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1591,7 +2280,10 @@ export interface OperationMethods {
   /**
    * listPublicLinksForFile - listPublicLinksForFile
    * 
-   * Not yet implemented; This API would fetch all the public links that are previously generated for a file
+   * **Not yet implemented.**
+   * 
+   * This endpoint will fetch all public links previously generated for a file.
+   * 
    */
   'listPublicLinksForFile'(
     parameters?: Parameters<Paths.ListPublicLinksForFile.PathParameters> | null,
@@ -1601,7 +2293,15 @@ export interface OperationMethods {
   /**
    * generatePublicLink - generatePublicLink
    * 
-   * Generates a public link to access a private file
+   * Generate a public link to share a private file externally.
+   * 
+   * The generated link:
+   * - Is permanent until explicitly revoked
+   * - Includes the filename for user-friendly URLs
+   * - Does not require authentication to access
+   * - Redirects to a signed download URL when accessed
+   * 
+   * **Use case:** Share invoices, contracts, or documents with external parties who don't have epilot accounts.
    * 
    */
   'generatePublicLink'(
@@ -1612,7 +2312,12 @@ export interface OperationMethods {
   /**
    * accessPublicLink - accessPublicLink
    * 
-   * Redirects to a accessible signed url for the respective file associated to the public link
+   * Access a file via its public link.
+   * 
+   * **No authentication required.** This endpoint redirects to a signed S3 URL for downloading the file.
+   * 
+   * The filename in the URL is for user-friendliness and SEO; the actual file is identified by the link ID.
+   * 
    */
   'accessPublicLink'(
     parameters?: Parameters<Paths.AccessPublicLink.QueryParameters & Paths.AccessPublicLink.PathParameters> | null,
@@ -1622,7 +2327,10 @@ export interface OperationMethods {
   /**
    * revokePublicLink - revokePublicLink
    * 
-   * Not yet implemented; This operation would revoke a given public link by ID
+   * **Not yet implemented.**
+   * 
+   * This endpoint will revoke a public link, making the file inaccessible via that link.
+   * 
    */
   'revokePublicLink'(
     parameters?: Parameters<Paths.RevokePublicLink.PathParameters> | null,
@@ -1632,7 +2340,11 @@ export interface OperationMethods {
   /**
    * verifyCustomDownloadUrl - verifyCustomDownloadUrl
    * 
-   * Verify a pre-signed custom download url for a file
+   * Verify that a custom download URL is valid and has not expired.
+   * 
+   * Use this endpoint to validate custom download URLs before redirecting users.
+   * Custom download URLs include a signature and expiration time for security.
+   * 
    */
   'verifyCustomDownloadUrl'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1642,9 +2354,16 @@ export interface OperationMethods {
   /**
    * uploadFilePublic - uploadFilePublic
    * 
-   * Create pre-signed S3 URL to upload a file to keep temporarily (one week).
+   * Create a pre-signed S3 URL for uploading a file without authentication.
    * 
-   * Use the saveFileV2 operation to store file file permanently.
+   * **No authentication required.** This endpoint is intended for public-facing forms and journeys
+   * where end-users need to upload files without logging in.
+   * 
+   * The uploaded file is stored temporarily (one week). Use `saveFileV2` with proper authentication
+   * to store the file permanently.
+   * 
+   * **Security note:** Files uploaded via this endpoint are temporary and require authenticated
+   * access to be saved permanently.
    * 
    */
   'uploadFilePublic'(
@@ -1655,7 +2374,11 @@ export interface OperationMethods {
   /**
    * getUserSchemaFileCollections - getUserSchemaFileCollections
    * 
-   * Gets a list of file collections for the current user and schema
+   * Get all file collections for the current user within a specific schema.
+   * 
+   * Collections help organize files into logical groups (e.g., "Contracts", "Invoices").
+   * User collections are private to the creating user.
+   * 
    */
   'getUserSchemaFileCollections'(
     parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
@@ -1665,7 +2388,10 @@ export interface OperationMethods {
   /**
    * createUserSchemaFileCollection - createUserSchemaFileCollection
    * 
-   * Creates a new file collection for the current user and schema
+   * Create a new file collection for the current user within a specific schema.
+   * 
+   * The collection will be private to the creating user and associated with the specified schema.
+   * 
    */
   'createUserSchemaFileCollection'(
     parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
@@ -1675,7 +2401,10 @@ export interface OperationMethods {
   /**
    * updateUserSchemaFileCollection - updateUserSchemaFileCollection
    * 
-   * Updates a file collection for the current user and schema
+   * Update an existing file collection.
+   * 
+   * You can update the name, parent relationships, starred status, and enabled locations/purposes.
+   * 
    */
   'updateUserSchemaFileCollection'(
     parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
@@ -1685,7 +2414,11 @@ export interface OperationMethods {
   /**
    * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
    * 
-   * Deletes a file collection for the current user and schema
+   * Delete a file collection.
+   * 
+   * **Note:** Deleting a collection does not delete the files within it.
+   * Files will remain but will no longer be associated with this collection.
+   * 
    */
   'deleteUserSchemaFileCollection'(
     parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
@@ -1695,7 +2428,11 @@ export interface OperationMethods {
   /**
    * getFilesInCollection - getFilesInCollection
    * 
-   * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
+   * Get all files within a specific collection for an entity.
+   * 
+   * The schema is automatically derived from the entity. This endpoint requires
+   * view permission on the parent entity to access its files.
+   * 
    */
   'getFilesInCollection'(
     parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
@@ -1705,7 +2442,11 @@ export interface OperationMethods {
   /**
    * getGlobalFileCollections - getGlobalFileCollections
    * 
-   * Gets all global file collections for a specific schema
+   * Get all global file collections for a specific schema.
+   * 
+   * Global collections are shared across all users in the organization for the specified schema.
+   * Unlike user collections, these are visible to everyone with access to entities of that schema.
+   * 
    */
   'getGlobalFileCollections'(
     parameters?: Parameters<Paths.GetGlobalFileCollections.PathParameters> | null,
@@ -1749,6 +2490,19 @@ export interface PathsDictionary {
     /**
      * uploadFile - uploadFile
      * 
+     * **DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files/upload` instead.
+     * 
+     * ## Migration Guide
+     * Replace calls to this endpoint with `uploadFileV2`:
+     * 
+     * | v1 Parameter | v2 Parameter | Notes |
+     * |--------------|--------------|-------|
+     * | `file_entity_id` | `file_entity_id` | No change |
+     * 
+     * The v2 response includes the same fields with improved structure.
+     * 
+     * ---
+     * 
      * Create pre-signed S3 URL to upload a file to keep temporarily (one week).
      * 
      * Use the saveFile operation to store file file permanently.
@@ -1764,11 +2518,26 @@ export interface PathsDictionary {
     /**
      * saveFile - saveFile
      * 
-     * Create / Update a permanent File entity
+     * **DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files` instead.
      * 
-     * Makes file object permanent
+     * ## Migration Guide
+     * Replace calls to this endpoint with `saveFileV2`:
      * 
-     * Saves metadata to file entity
+     * | v1 Feature | v2 Feature | Notes |
+     * |------------|------------|-------|
+     * | `activity_id` param | `activity_id` param | No change |
+     * | `async` param | `async` param | No change |
+     * | - | `fill_activity` param | New in v2 |
+     * | - | `strict` param | New in v2 |
+     * | - | `delete_temp_file` param | New in v2, defaults to true |
+     * 
+     * The v2 endpoint supports additional parameters for better control over file saving behavior.
+     * 
+     * ---
+     * 
+     * Create / Update a permanent File entity.
+     * 
+     * Makes file object permanent and saves metadata to file entity.
      * 
      */
     'post'(
@@ -1803,7 +2572,10 @@ export interface PathsDictionary {
     /**
      * downloadFile - downloadFile
      * 
-     * Generate pre-signed download S3 url for a file
+     * Generate a pre-signed download URL for a file.
+     * 
+     * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
@@ -1815,7 +2587,10 @@ export interface PathsDictionary {
     /**
      * downloadS3File - downloadS3File
      * 
-     * Generate pre-signed download S3 url for a file
+     * Generate a pre-signed download URL for a file using its S3 reference.
+     * 
+     * Use this endpoint when you have the S3 bucket and key but not the file entity ID.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.DownloadS3File.QueryParameters> | null,
@@ -1827,7 +2602,10 @@ export interface PathsDictionary {
     /**
      * downloadFiles - downloadFiles
      * 
-     * Bulk generate pre-signed download S3 urls for multiple files
+     * Bulk generate pre-signed download URLs for multiple files in a single request.
+     * 
+     * This is more efficient than calling `downloadFile` multiple times when you need to download several files.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1839,55 +2617,76 @@ export interface PathsDictionary {
     /**
      * previewFile - previewFile
      * 
-     * Generate thumbnail preview for a file entity
+     * Generate a thumbnail preview for a file entity.
+     * 
+     * Supported file types include images (PNG, JPEG, GIF, WebP), PDFs, and common document formats.
+     * The preview is returned as an image (PNG or JPEG).
+     * 
+     * **Tip:** Use with CookieAuth to embed previews directly in `<img>` tags.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.PreviewFile.QueryParameters & Paths.PreviewFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.PreviewFile.Responses.$200>
   }
   ['/v1/files:previewS3']: {
     /**
      * previewS3File - previewS3File
      * 
-     * Generate thumbnail preview from an s3 reference for a file entity
+     * Generate a thumbnail preview from an S3 reference.
+     * 
+     * Use this endpoint when you have the S3 bucket and key but not the file entity ID.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.PreviewS3File.QueryParameters> | null,
       data?: Paths.PreviewS3File.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.PreviewS3File.Responses.$200>
     /**
      * previewS3FileGet - previewS3FileGet
      * 
-     * Get thumbnail preview from an s3 reference for a file entity
+     * Get a thumbnail preview from an S3 reference using query parameters.
+     * 
+     * This GET variant is useful for embedding previews directly in `<img>` tags.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.PreviewS3FileGet.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.PreviewS3FileGet.Responses.$200>
   }
   ['/v1/files/public/{id}/preview']: {
     /**
      * previewPublicFile - previewPublicFile
      * 
-     * Generate thumbnail preview for a public file entity
+     * Generate a thumbnail preview for a public file entity.
+     * 
+     * **No authentication required.** This endpoint only works for files with `access_control: public-read`.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.PreviewPublicFile.Responses.$200>
   }
   ['/v1/files/session']: {
     /**
      * getSession - getSession
      * 
-     * Start a browser session by setting passed Authorization token in a server side cookie.
+     * Start a browser session by converting a Bearer token into a server-side cookie.
      * 
-     * Allows using preview urls directly in img src for private files using cookie authentication.
+     * **Use case:** After calling this endpoint, you can use preview URLs directly in `<img>` tags
+     * without needing to set the Authorization header manually.
+     * 
+     * **Example flow:**
+     * 1. Call this endpoint with your Bearer token: `GET /v1/files/session` with `Authorization: Bearer <token>`
+     * 2. The server sets an HTTP-only cookie named `token`
+     * 3. Use preview URLs directly: `<img src="https://file.sls.epilot.io/v1/files/{id}/preview" />`
      * 
      */
     'get'(
@@ -1898,7 +2697,10 @@ export interface PathsDictionary {
     /**
      * deleteSession - deleteSession
      * 
-     * End browser session by deleting token cookie
+     * End a browser session by deleting the token cookie.
+     * 
+     * Call this endpoint to log out and clear the session cookie.
+     * 
      */
     'delete'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1910,7 +2712,15 @@ export interface PathsDictionary {
     /**
      * generatePublicLink - generatePublicLink
      * 
-     * Generates a public link to access a private file
+     * Generate a public link to share a private file externally.
+     * 
+     * The generated link:
+     * - Is permanent until explicitly revoked
+     * - Includes the filename for user-friendly URLs
+     * - Does not require authentication to access
+     * - Redirects to a signed download URL when accessed
+     * 
+     * **Use case:** Share invoices, contracts, or documents with external parties who don't have epilot accounts.
      * 
      */
     'post'(
@@ -1921,7 +2731,10 @@ export interface PathsDictionary {
     /**
      * listPublicLinksForFile - listPublicLinksForFile
      * 
-     * Not yet implemented; This API would fetch all the public links that are previously generated for a file
+     * **Not yet implemented.**
+     * 
+     * This endpoint will fetch all public links previously generated for a file.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListPublicLinksForFile.PathParameters> | null,
@@ -1933,7 +2746,12 @@ export interface PathsDictionary {
     /**
      * accessPublicLink - accessPublicLink
      * 
-     * Redirects to a accessible signed url for the respective file associated to the public link
+     * Access a file via its public link.
+     * 
+     * **No authentication required.** This endpoint redirects to a signed S3 URL for downloading the file.
+     * 
+     * The filename in the URL is for user-friendliness and SEO; the actual file is identified by the link ID.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.AccessPublicLink.QueryParameters & Paths.AccessPublicLink.PathParameters> | null,
@@ -1945,7 +2763,10 @@ export interface PathsDictionary {
     /**
      * revokePublicLink - revokePublicLink
      * 
-     * Not yet implemented; This operation would revoke a given public link by ID
+     * **Not yet implemented.**
+     * 
+     * This endpoint will revoke a public link, making the file inaccessible via that link.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.RevokePublicLink.PathParameters> | null,
@@ -1957,7 +2778,11 @@ export interface PathsDictionary {
     /**
      * verifyCustomDownloadUrl - verifyCustomDownloadUrl
      * 
-     * Verify a pre-signed custom download url for a file
+     * Verify that a custom download URL is valid and has not expired.
+     * 
+     * Use this endpoint to validate custom download URLs before redirecting users.
+     * Custom download URLs include a signature and expiration time for security.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1969,9 +2794,16 @@ export interface PathsDictionary {
     /**
      * uploadFilePublic - uploadFilePublic
      * 
-     * Create pre-signed S3 URL to upload a file to keep temporarily (one week).
+     * Create a pre-signed S3 URL for uploading a file without authentication.
      * 
-     * Use the saveFileV2 operation to store file file permanently.
+     * **No authentication required.** This endpoint is intended for public-facing forms and journeys
+     * where end-users need to upload files without logging in.
+     * 
+     * The uploaded file is stored temporarily (one week). Use `saveFileV2` with proper authentication
+     * to store the file permanently.
+     * 
+     * **Security note:** Files uploaded via this endpoint are temporary and require authenticated
+     * access to be saved permanently.
      * 
      */
     'post'(
@@ -1984,7 +2816,11 @@ export interface PathsDictionary {
     /**
      * getUserSchemaFileCollections - getUserSchemaFileCollections
      * 
-     * Gets a list of file collections for the current user and schema
+     * Get all file collections for the current user within a specific schema.
+     * 
+     * Collections help organize files into logical groups (e.g., "Contracts", "Invoices").
+     * User collections are private to the creating user.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetUserSchemaFileCollections.PathParameters> | null,
@@ -1994,7 +2830,10 @@ export interface PathsDictionary {
     /**
      * createUserSchemaFileCollection - createUserSchemaFileCollection
      * 
-     * Creates a new file collection for the current user and schema
+     * Create a new file collection for the current user within a specific schema.
+     * 
+     * The collection will be private to the creating user and associated with the specified schema.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CreateUserSchemaFileCollection.PathParameters> | null,
@@ -2006,7 +2845,10 @@ export interface PathsDictionary {
     /**
      * updateUserSchemaFileCollection - updateUserSchemaFileCollection
      * 
-     * Updates a file collection for the current user and schema
+     * Update an existing file collection.
+     * 
+     * You can update the name, parent relationships, starred status, and enabled locations/purposes.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdateUserSchemaFileCollection.PathParameters> | null,
@@ -2016,7 +2858,11 @@ export interface PathsDictionary {
     /**
      * deleteUserSchemaFileCollection - deleteUserSchemaFileCollection
      * 
-     * Deletes a file collection for the current user and schema
+     * Delete a file collection.
+     * 
+     * **Note:** Deleting a collection does not delete the files within it.
+     * Files will remain but will no longer be associated with this collection.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteUserSchemaFileCollection.PathParameters> | null,
@@ -2028,7 +2874,11 @@ export interface PathsDictionary {
     /**
      * getFilesInCollection - getFilesInCollection
      * 
-     * Gets all files within a specific collection for an entity (uses schema-based taxonomy derived from entity)
+     * Get all files within a specific collection for an entity.
+     * 
+     * The schema is automatically derived from the entity. This endpoint requires
+     * view permission on the parent entity to access its files.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetFilesInCollection.PathParameters> | null,
@@ -2040,7 +2890,11 @@ export interface PathsDictionary {
     /**
      * getGlobalFileCollections - getGlobalFileCollections
      * 
-     * Gets all global file collections for a specific schema
+     * Get all global file collections for a specific schema.
+     * 
+     * Global collections are shared across all users in the organization for the specified schema.
+     * Unlike user collections, these are visible to everyone with access to entities of that schema.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetGlobalFileCollections.PathParameters> | null,

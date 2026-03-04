@@ -2699,6 +2699,7 @@
                   "TaskCompleted",
                   "TaskSkipped",
                   "TaskMarkedInProgress",
+                  "TaskMarkedOnHold",
                   "PhaseUpdated",
                   "PhaseCompleted",
                   "PhaseSkipped",
@@ -3344,14 +3345,15 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "The id of the entity / workflow / task, based on the origin of the schedule"
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value 'all_preceding_tasks_completed'."
               },
               "origin": {
                 "type": "string",
                 "enum": [
                   "flow_started",
                   "task_completed",
-                  "trigger_entity_attribute"
+                  "trigger_entity_attribute",
+                  "all_preceding_tasks_completed"
                 ]
               },
               "schema": {
@@ -3873,7 +3875,9 @@
             "enum": [
               "WORKFLOW_STARTED",
               "TASK_FINISHED",
-              "PHASE_FINISHED"
+              "PHASE_FINISHED",
+              "A_PRECEDING_TASK_COMPLETED",
+              "ALL_PRECEDING_TASKS_COMPLETED"
             ]
           },
           "task_id": {
@@ -3933,12 +3937,43 @@
         "type": "string",
         "description": "The user id"
       },
+      "VariableAssignment": {
+        "type": "object",
+        "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "description": "The variable expression, e.g., \"{{entity.owner}}\"",
+            "example": "{{entity.owner}}"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The resolved values after variable evaluation (populated during execution)",
+            "example": [
+              "user_12345"
+            ]
+          }
+        },
+        "required": [
+          "variable"
+        ]
+      },
       "Assignees": {
         "type": "array",
         "items": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/components/schemas/VariableAssignment"
+            }
+          ]
         },
-        "description": "The user ids"
+        "description": "The user ids or variable assignments"
       },
       "PatchTaskReq": {
         "type": "object",

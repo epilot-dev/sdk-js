@@ -16,6 +16,10 @@ declare namespace Components {
         export interface ApiKeyConfig {
             keyName: string;
             keyValue?: string;
+            /**
+             * When true, indicates the keyValue is an environment variable reference (e.g. {{ env.my_secret }})
+             */
+            keyValueIsEnvVar?: boolean;
         }
         export interface Auth {
             authType: AuthType;
@@ -30,6 +34,10 @@ declare namespace Components {
         export interface BasicAuthConfig {
             username: string;
             password?: string;
+            /**
+             * When true, indicates the password value is an environment variable reference (e.g. {{ env.my_secret }})
+             */
+            passwordIsEnvVar?: boolean;
         }
         export interface BatchReplayRequest {
             /**
@@ -301,6 +309,10 @@ declare namespace Components {
             clientId: string;
             clientSecret?: string;
             /**
+             * When true, indicates the clientSecret value is an environment variable reference (e.g. {{ env.my_secret }})
+             */
+            clientSecretIsEnvVar?: boolean;
+            /**
              * Https Endpoint for authentication
              */
             endpoint: string;
@@ -392,7 +404,7 @@ declare namespace Components {
              * example:
              * succeeded
              */
-            status?: "succeeded" | "failed" | "skipped";
+            status?: "succeeded" | "failed";
         }
         export interface TriggerWebhookResp {
             status_code?: string;
@@ -405,46 +417,6 @@ declare namespace Components {
             start_date?: string;
             end_date?: string;
             event_id: string;
-        }
-        /**
-         * A condition that must be met for the webhook to fire.
-         */
-        export interface WebhookCondition {
-            /**
-             * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items")
-             */
-            field: string;
-            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
-            /**
-             * Values to compare against (not required for is_empty/is_not_empty)
-             */
-            values?: string[];
-            /**
-             * Type hint for the field (affects comparison logic)
-             */
-            field_type?: "string" | "number" | "boolean" | "date" | "datetime";
-            /**
-             * Whether the target field is an array (repeatable)
-             */
-            is_array_field?: boolean;
-        }
-        /**
-         * A group of conditions with a logical operator. Multiple conditions are AND-ed by default.
-         */
-        export interface WebhookConditionGroup {
-            conditions?: [
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?
-            ];
-            logical_operator?: "AND" | "OR";
         }
         /**
          * example:
@@ -491,7 +463,6 @@ declare namespace Components {
              * JSONata expression to transform the payload
              */
             jsonataExpression?: string;
-            filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**
              * Manifest ID used to create/update the webhook resource
              */
@@ -527,7 +498,7 @@ declare namespace Components {
                 code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
-            status?: "succeeded" | "failed" | "in_progress" | "skipped";
+            status?: "succeeded" | "failed" | "in_progress";
             http_method?: "GET" | "POST" | "PUT";
             /**
              * stringified payload of the webhook request
@@ -1226,7 +1197,5 @@ export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
 export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
-export type WebhookCondition = Components.Schemas.WebhookCondition;
-export type WebhookConditionGroup = Components.Schemas.WebhookConditionGroup;
 export type WebhookConfig = Components.Schemas.WebhookConfig;
 export type WebhookEvent = Components.Schemas.WebhookEvent;

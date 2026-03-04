@@ -247,7 +247,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -451,7 +451,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE";
         /**
          * Configuration of the published app
          */
@@ -822,6 +822,37 @@ declare namespace Components {
             };
         }
         export type CustomFlowConfig = ExternalIntegrationCustomActionConfig | SandboxCustomActionConfig;
+        export interface CustomPageComponent {
+            component_type: "CUSTOM_PAGE";
+            configuration: CustomPageConfig;
+            surfaces?: {
+                page?: AppBridgeSurfaceConfig;
+            };
+        }
+        export interface CustomPageConfig {
+            /**
+             * URL slug for the page route. Must be unique per organization.
+             * example:
+             * zapier
+             */
+            slug: string; // ^[a-z0-9][a-z0-9-]*[a-z0-9]$
+            /**
+             * Display label in the navigation sidebar.
+             * example:
+             * Zapier
+             */
+            nav_label?: string;
+            /**
+             * Icon identifier for the navigation item.
+             * example:
+             * zap
+             */
+            nav_icon?: string;
+            /**
+             * Optional tooltip or description for the navigation item.
+             */
+            nav_description?: string;
+        }
         export interface EnumArg {
             type?: "enum";
             /**
@@ -3292,6 +3323,8 @@ export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
 export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
+export type CustomPageComponent = Components.Schemas.CustomPageComponent;
+export type CustomPageConfig = Components.Schemas.CustomPageConfig;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;

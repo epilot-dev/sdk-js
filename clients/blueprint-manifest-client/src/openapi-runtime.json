@@ -144,6 +144,13 @@
     "/v2/blueprint-manifest/blueprints": {
       "get": {
         "operationId": "listBlueprints",
+        "parameters": [
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false
+          }
+        ],
         "responses": {}
       },
       "post": {
@@ -263,6 +270,25 @@
         ],
         "requestBody": {
           "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
+      "post": {
+        "operationId": "formatBlueprintDescription",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
