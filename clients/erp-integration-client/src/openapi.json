@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.43.0",
+    "version": "0.44.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2404,6 +2404,13 @@
             ],
             "description": "The object data payload - can be either a serialized string or a direct JSON object"
           },
+          "use_case_slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.\n"
+          },
           "deduplication_id": {
             "type": "string",
             "pattern": "^[a-zA-Z0-9_-]+$",
@@ -3095,25 +3102,48 @@
           }
         ]
       },
-      "FileProxyUrlConfig": {
+      "FileProxyUrlParams": {
         "type": "object",
-        "required": [
-          "use_case_id"
-        ],
-        "description": "Auto-constructs a file proxy download URL. orgId and integrationId are injected from context.",
-        "properties": {
-          "use_case_id": {
-            "type": "string",
-            "description": "UUID of the file_proxy use case. Maps to useCaseId query parameter."
-          },
-          "params": {
+        "description": "Custom query parameters. Keys become URL param names, values resolved from payload.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/FileProxyUrlParam"
+        }
+      },
+      "FileProxyUrlConfig": {
+        "description": "Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.\n",
+        "oneOf": [
+          {
             "type": "object",
-            "description": "Custom query parameters. Keys become URL param names, values resolved from payload.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/FileProxyUrlParam"
+            "required": [
+              "use_case_slug"
+            ],
+            "properties": {
+              "use_case_slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9_-]*$",
+                "description": "Recommended. Slug of the file_proxy use case. Maps to useCaseSlug query parameter. Portable across environments.\n"
+              },
+              "params": {
+                "$ref": "#/components/schemas/FileProxyUrlParams"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "use_case_id"
+            ],
+            "properties": {
+              "use_case_id": {
+                "type": "string",
+                "description": "Legacy. UUID of the file_proxy use case. Maps to useCaseId query parameter. Prefer use_case_slug for portable configuration.\n"
+              },
+              "params": {
+                "$ref": "#/components/schemas/FileProxyUrlParams"
+              }
             }
           }
-        }
+        ]
       },
       "EmbeddedUseCaseRequest": {
         "oneOf": [
@@ -3150,6 +3180,13 @@
             "minLength": 1,
             "maxLength": 255,
             "description": "Use case name"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.\n"
           },
           "enabled": {
             "type": "boolean",
@@ -3237,6 +3274,13 @@
           "name": {
             "type": "string",
             "description": "Use case name"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.\n"
           },
           "type": {
             "type": "string",
@@ -3388,6 +3432,7 @@
         "type": "object",
         "required": [
           "name",
+          "slug",
           "type",
           "enabled"
         ],
@@ -3397,6 +3442,13 @@
             "minLength": 1,
             "maxLength": 255,
             "description": "Use case name"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.\n"
           },
           "enabled": {
             "type": "boolean",
@@ -3508,6 +3560,13 @@
             "minLength": 1,
             "maxLength": 255,
             "description": "Use case name"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.\n"
           },
           "enabled": {
             "type": "boolean",
@@ -3640,6 +3699,10 @@
             "type": "string",
             "description": "Use case name at this point in history"
           },
+          "slug": {
+            "type": "string",
+            "description": "Use case slug at this point in history"
+          },
           "enabled": {
             "type": "boolean",
             "description": "Whether the use case was enabled at this point in history"
@@ -3746,7 +3809,7 @@
           "steps",
           "response"
         ],
-        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
         "properties": {
           "requires_vpc": {
             "type": "boolean",
@@ -3762,7 +3825,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyParam"
             },
-            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, useCaseId)"
+            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)"
           },
           "steps": {
             "type": "array",

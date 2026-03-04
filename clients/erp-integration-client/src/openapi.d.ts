@@ -206,6 +206,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Whether the use case is enabled
              */
             enabled: boolean;
@@ -216,7 +221,7 @@ declare namespace Components {
             configuration?: /**
              * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
              * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
              * Additional use-case-specific parameters are declared in the `params` array.
              *
@@ -228,6 +233,11 @@ declare namespace Components {
              * Use case name
              */
             name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -267,6 +277,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Whether the use case is enabled
              */
             enabled: boolean;
@@ -282,6 +297,11 @@ declare namespace Components {
              * Use case name
              */
             name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -332,6 +352,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Whether the use case is enabled
              */
             enabled: boolean;
@@ -358,6 +383,11 @@ declare namespace Components {
              * Use case name
              */
             name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -386,6 +416,11 @@ declare namespace Components {
              * Use case name
              */
             name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -489,6 +524,11 @@ declare namespace Components {
             payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
                 [name: string]: any;
             };
+            /**
+             * Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.
+             *
+             */
+            use_case_slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.
              *
@@ -614,20 +654,28 @@ declare namespace Components {
             response_type: "json" | "binary";
         }
         /**
-         * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context.
+         * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
+         *
          */
-        export interface FileProxyUrlConfig {
+        export type FileProxyUrlConfig = /**
+         * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
+         *
+         */
+        {
             /**
-             * UUID of the file_proxy use case. Maps to useCaseId query parameter.
+             * Recommended. Slug of the file_proxy use case. Maps to useCaseSlug query parameter. Portable across environments.
+             *
+             */
+            use_case_slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            params?: /* Custom query parameters. Keys become URL param names, values resolved from payload. */ FileProxyUrlParams;
+        } | {
+            /**
+             * Legacy. UUID of the file_proxy use case. Maps to useCaseId query parameter. Prefer use_case_slug for portable configuration.
+             *
              */
             use_case_id: string;
-            /**
-             * Custom query parameters. Keys become URL param names, values resolved from payload.
-             */
-            params?: {
-                [name: string]: /* Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set. */ FileProxyUrlParam;
-            };
-        }
+            params?: /* Custom query parameters. Keys become URL param names, values resolved from payload. */ FileProxyUrlParams;
+        };
         /**
          * Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set.
          */
@@ -647,6 +695,12 @@ declare namespace Components {
              */
             jsonataExpression: string;
         };
+        /**
+         * Custom query parameters. Keys become URL param names, values resolved from payload.
+         */
+        export interface FileProxyUrlParams {
+            [name: string]: /* Parameter for file proxy URL. Exactly one of field, constant, or jsonataExpression must be set. */ FileProxyUrlParam;
+        }
         export interface FileProxyUseCase {
             /**
              * Unique identifier for the use case
@@ -660,6 +714,11 @@ declare namespace Components {
              * Use case name
              */
             name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Use case type
              */
@@ -680,7 +739,7 @@ declare namespace Components {
             configuration?: /**
              * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
              * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
              * Additional use-case-specific parameters are declared in the `params` array.
              *
@@ -690,7 +749,7 @@ declare namespace Components {
         /**
          * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
          *
-         * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+         * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
          * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
          * Additional use-case-specific parameters are declared in the `params` array.
          *
@@ -702,7 +761,7 @@ declare namespace Components {
             requires_vpc?: boolean;
             auth?: FileProxyAuth;
             /**
-             * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, useCaseId)
+             * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)
              */
             params?: FileProxyParam[];
             /**
@@ -732,6 +791,10 @@ declare namespace Components {
              */
             name: string;
             /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
+            /**
              * Whether the use case was enabled at this point in history
              */
             enabled: boolean;
@@ -758,7 +821,7 @@ declare namespace Components {
             configuration?: /**
              * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
              * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
              * Additional use-case-specific parameters are declared in the `params` array.
              *
@@ -912,6 +975,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Use case type
              */
             type: "inbound" | "outbound" | "file_proxy" | "inbound";
@@ -947,6 +1015,10 @@ declare namespace Components {
              * Use case name at this point in history
              */
             name: string;
+            /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
             /**
              * Whether the use case was enabled at this point in history
              */
@@ -1146,7 +1218,11 @@ declare namespace Components {
              *
              */
             RelationRefsConfig;
-            file_proxy_url?: /* Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. */ FileProxyUrlConfig;
+            file_proxy_url?: /**
+             * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
+             *
+             */
+            FileProxyUrlConfig;
         }
         export interface IntegrationFieldV1 {
             /**
@@ -1605,6 +1681,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Use case type
              */
             type: "inbound" | "outbound" | "file_proxy" | "outbound";
@@ -1640,6 +1721,10 @@ declare namespace Components {
              * Use case name at this point in history
              */
             name: string;
+            /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
             /**
              * Whether the use case was enabled at this point in history
              */
@@ -2300,6 +2385,11 @@ declare namespace Components {
              */
             name?: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Whether the use case is enabled
              */
             enabled?: boolean;
@@ -2314,7 +2404,7 @@ declare namespace Components {
             configuration?: /**
              * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and `useCaseId` as query parameters.
+             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
              * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
              * Additional use-case-specific parameters are declared in the `params` array.
              *
@@ -2326,6 +2416,11 @@ declare namespace Components {
              * Use case name
              */
             name?: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -2347,6 +2442,11 @@ declare namespace Components {
              */
             name?: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Whether the use case is enabled
              */
             enabled?: boolean;
@@ -2366,6 +2466,11 @@ declare namespace Components {
              * Use case name
              */
             name?: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -2426,6 +2531,11 @@ declare namespace Components {
              */
             name: string;
             /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
              * Use case type
              */
             type: "inbound" | "outbound" | "file_proxy";
@@ -2461,6 +2571,10 @@ declare namespace Components {
              * Use case name at this point in history
              */
             name: string;
+            /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
             /**
              * Whether the use case was enabled at this point in history
              */
@@ -3870,6 +3984,7 @@ export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig
 export type FileProxyStep = Components.Schemas.FileProxyStep;
 export type FileProxyUrlConfig = Components.Schemas.FileProxyUrlConfig;
 export type FileProxyUrlParam = Components.Schemas.FileProxyUrlParam;
+export type FileProxyUrlParams = Components.Schemas.FileProxyUrlParams;
 export type FileProxyUseCase = Components.Schemas.FileProxyUseCase;
 export type FileProxyUseCaseConfiguration = Components.Schemas.FileProxyUseCaseConfiguration;
 export type FileProxyUseCaseHistoryEntry = Components.Schemas.FileProxyUseCaseHistoryEntry;
