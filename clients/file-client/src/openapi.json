@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.9.0",
+    "version": "1.10.0",
     "description": "The File API enables you to upload, store, manage, and share files within the epilot platform.\n\n## Key Features\n- **Upload files** to temporary storage and save them permanently as File entities\n- **Generate previews** (thumbnails) for images and documents\n- **Create public links** to share private files externally\n- **Organize files** into collections for better management\n- **Version control** with automatic file versioning on updates\n\n## File Upload Workflow\n1. Call `uploadFileV2` to get a pre-signed S3 URL\n2. Upload your file directly to S3 using the pre-signed URL (PUT request)\n3. Call `saveFileV2` with the S3 reference to create a permanent File entity\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -162,7 +162,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SaveFilePayloadV2"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/SaveFilePayloadV2"
+                  },
+                  {
+                    "type": "array",
+                    "description": "Batch version mode: array of s3ref payloads to add multiple versions to a single file entity.\nAll payloads must target the same file entity (_id or file_entity_id).\nRequires version_only=true query parameter.\nS3 operations run in parallel, with a single entity update at the end.\n",
+                    "items": {
+                      "$ref": "#/components/schemas/BatchSaveFileVersionPayload"
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                ]
               },
               "examples": {
                 "New file from s3ref": {
@@ -220,6 +233,29 @@
                     "custom_download_url": "https://some-api-url.com/download?file_id=123",
                     "shared_with_end_customer": true
                   }
+                },
+                "Batch save multiple versions": {
+                  "description": "Save multiple file versions in a single request (parallel S3 processing)",
+                  "value": [
+                    {
+                      "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "filename": "photo1.jpg",
+                      "access_control": "private",
+                      "s3ref": {
+                        "bucket": "epilot-prod-user-content",
+                        "key": "123/temp/abc/photo1.jpg"
+                      }
+                    },
+                    {
+                      "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "filename": "photo2.jpg",
+                      "access_control": "private",
+                      "s3ref": {
+                        "bucket": "epilot-prod-user-content",
+                        "key": "123/temp/def/photo2.jpg"
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -227,7 +263,7 @@
         },
         "responses": {
           "200": {
-            "description": "Created File Entity",
+            "description": "Created or updated File Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -2211,6 +2247,50 @@
             "$ref": "#/components/schemas/SaveCustomFilePayload"
           }
         ]
+      },
+      "BatchSaveFileVersionPayload": {
+        "type": "object",
+        "description": "Payload for batch version save. Only s3ref payloads are supported.",
+        "properties": {
+          "_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileEntityId"
+              },
+              {
+                "description": "Target file entity to add version to"
+              }
+            ]
+          },
+          "file_entity_id": {
+            "type": "string",
+            "description": "Deprecated, use _id instead",
+            "deprecated": true
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "mime_type": {
+            "type": "string",
+            "example": "application/pdf"
+          },
+          "access_control": {
+            "type": "string",
+            "default": "private",
+            "enum": [
+              "private",
+              "public-read"
+            ]
+          },
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Ref"
+          }
+        },
+        "required": [
+          "s3ref"
+        ],
+        "additionalProperties": false
       },
       "UploadFilePayload": {
         "type": "object",

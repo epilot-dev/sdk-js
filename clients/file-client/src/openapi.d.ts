@@ -183,6 +183,38 @@ declare namespace Components {
              */
             user_id?: string;
         }
+        /**
+         * Payload for batch version save. Only s3ref payloads are supported.
+         */
+        export interface BatchSaveFileVersionPayload {
+            /**
+             * Target file entity to add version to
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            _id?: /**
+             * Target file entity to add version to
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            string | string /* uuid */;
+            /**
+             * Deprecated, use _id instead
+             */
+            file_entity_id?: string;
+            /**
+             * example:
+             * document.pdf
+             */
+            filename?: string;
+            /**
+             * example:
+             * application/pdf
+             */
+            mime_type?: string;
+            access_control?: "private" | "public-read";
+            s3ref: S3Ref;
+        }
         export interface CommonSaveFilePayload {
             [name: string]: any;
             /**
@@ -1779,7 +1811,28 @@ declare namespace Paths {
             delete_temp_file?: Parameters.DeleteTempFile;
             version_only?: Parameters.VersionOnly;
         }
-        export type RequestBody = Components.Schemas.SaveFilePayloadV2;
+        export type RequestBody = Components.Schemas.SaveFilePayloadV2 | [
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?,
+            /* Payload for batch version save. Only s3ref payloads are supported. */ Components.Schemas.BatchSaveFileVersionPayload?
+        ];
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
             export type $400 = /**
@@ -2910,6 +2963,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type ActivityId = Components.Schemas.ActivityId;
 export type BaseEntityAcl = Components.Schemas.BaseEntityAcl;
 export type BaseEntityOwner = Components.Schemas.BaseEntityOwner;
+export type BatchSaveFileVersionPayload = Components.Schemas.BatchSaveFileVersionPayload;
 export type CommonSaveFilePayload = Components.Schemas.CommonSaveFilePayload;
 export type CustomDownloadUrl = Components.Schemas.CustomDownloadUrl;
 export type DownloadFilesPayload = Components.Schemas.DownloadFilesPayload;
