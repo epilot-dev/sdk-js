@@ -1,401 +1,201 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.0",
   "info": {
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://erp-integration-api.sls.epilot.io"
-    }
-  ],
   "paths": {
-    "/v1/erp/tracking/acknowledgement": {
-      "post": {
-        "operationId": "acknowledgeTracking",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/erp/trigger": {
-      "post": {
-        "operationId": "triggerErp",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/erp/updates/events": {
-      "post": {
-        "deprecated": true,
-        "operationId": "processErpUpdatesEvents",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/erp/updates/events": {
-      "post": {
-        "deprecated": true,
-        "operationId": "processErpUpdatesEventsV2",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v3/erp/updates/events": {
-      "post": {
-        "operationId": "processErpUpdatesEventsV3",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/erp/updates/mapping_simulation": {
-      "post": {
-        "operationId": "simulateMappingV2",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/erp/updates/mapping_simulation": {
-      "post": {
-        "operationId": "simulateMapping",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations": {
+    "/v1/webhooks/.well-known/public-key": {
       "get": {
-        "operationId": "listIntegrations",
-        "responses": {}
-      },
-      "post": {
-        "operationId": "createIntegration",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}": {
-      "get": {
-        "operationId": "getIntegration",
+        "operationId": "getPublicKey",
         "parameters": [
           {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      },
-      "put": {
-        "operationId": "updateIntegration",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteIntegration",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/events": {
-      "post": {
-        "operationId": "queryEvents",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/events/replay": {
-      "post": {
-        "operationId": "replayEvents",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/use-cases": {
-      "get": {
-        "operationId": "listUseCases",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      },
-      "post": {
-        "operationId": "createUseCase",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/use-cases/{useCaseId}": {
-      "get": {
-        "operationId": "getUseCase",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "useCaseId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      },
-      "put": {
-        "operationId": "updateUseCase",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "useCaseId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteUseCase",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "useCaseId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/use-cases/{useCaseId}/history": {
-      "get": {
-        "operationId": "listUseCaseHistory",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "useCaseId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "cursor",
             "in": "query",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configured-events": {
+      "get": {
+        "operationId": "getConfiguredEvents",
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs": {
+      "get": {
+        "operationId": "getConfigs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "eventName",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}": {
+      "get": {
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/trigger": {
+      "post": {
+        "operationId": "triggerWebhook",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sync"
+          },
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getWehookEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "status"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
             "required": false
           }
         ],
         "responses": {}
       }
     },
-    "/v2/integrations": {
+    "/v1/webhooks/configs/{configId}/events/replay-batch": {
+      "post": {
+        "operationId": "batchReplayEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}": {
       "get": {
-        "operationId": "listIntegrationsV2",
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true
+          }
+        ],
         "responses": {}
-      },
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
       "post": {
-        "operationId": "createIntegrationV2",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/integrations/{integrationId}": {
-      "get": {
-        "operationId": "getIntegrationV2",
+        "operationId": "replayEvent",
         "parameters": [
           {
-            "name": "integrationId",
             "in": "path",
+            "name": "configId",
             "required": true
-          }
-        ],
-        "responses": {}
-      },
-      "put": {
-        "operationId": "updateIntegrationV2",
-        "parameters": [
+          },
           {
-            "name": "integrationId",
             "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteIntegrationV2",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
+            "name": "eventId",
             "required": true
           }
         ],
         "responses": {}
       }
     },
-    "/v1/integrations/{integrationId}/app-mapping": {
-      "put": {
-        "operationId": "setIntegrationAppMapping",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteIntegrationAppMapping",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/monitoring/inbound-events": {
+    "/v1/webhooks/configs/{configId}/example": {
       "post": {
-        "operationId": "queryInboundMonitoringEvents",
+        "operationId": "getWebhookExample",
         "parameters": [
           {
-            "name": "integrationId",
             "in": "path",
+            "name": "configId",
             "required": true
           }
         ],
@@ -408,88 +208,17 @@
         "responses": {}
       }
     },
-    "/v1/integrations/{integrationId}/monitoring/stats": {
+    "/v2/webhooks/configs/{configId}/events": {
       "post": {
-        "operationId": "getMonitoringStats",
+        "operationId": "getWebhookEventsV2",
         "parameters": [
           {
-            "name": "integrationId",
             "in": "path",
+            "name": "configId",
             "required": true
           }
         ],
         "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/monitoring/timeseries": {
-      "post": {
-        "operationId": "getMonitoringTimeSeries",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/outbound-status": {
-      "get": {
-        "operationId": "getOutboundStatus",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/monitoring/access-logs": {
-      "post": {
-        "operationId": "queryAccessLogs",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v1/integrations/{integrationId}/monitoring/outbound-events": {
-      "post": {
-        "operationId": "queryOutboundMonitoringEvents",
-        "parameters": [
-          {
-            "name": "integrationId",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
           "content": {
             "application/json": {}
           }
@@ -498,73 +227,10 @@
       }
     }
   },
-  "components": {
-    "responses": {
-      "BadRequest": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "NotFound": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "Unauthorized": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "InternalServerError": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "QueryInboundMonitoringEventsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "GetMonitoringStatsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "GetMonitoringTimeSeriesResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "QueryAccessLogsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "QueryOutboundMonitoringEventsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "ReplayEventsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "ERPUpdatesResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "TriggerWebhookResponse": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "QueryEventsResponse": {
-        "content": {
-          "application/json": {}
-        }
-      }
+  "components": {},
+  "servers": [
+    {
+      "url": "https://erp-integration-api.sls.epilot.io"
     }
-  }
+  ]
 }
