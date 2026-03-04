@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.21.0
+
+### Minor Changes
+
+- updated value type for variable assignee
+
 ## 1.20.0
 
 ### Minor Changes

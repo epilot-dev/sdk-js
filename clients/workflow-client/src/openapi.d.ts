@@ -442,7 +442,7 @@ declare namespace Components {
         export interface DueDateConfig {
             duration: number;
             unit: TimeUnit;
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED";
             task_id?: string;
             phase_id?: string;
         }
@@ -905,10 +905,10 @@ declare namespace Components {
             unit: TimeUnit;
             reference: {
                 /**
-                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 * The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value 'all_preceding_tasks_completed'.
                  */
                 id: string;
-                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed";
                 /**
                  * The schema of the entity
                  */
@@ -1547,11 +1547,13 @@ declare namespace Components {
              */
             variable: string;
             /**
-             * The resolved value after variable evaluation (populated during execution)
+             * The resolved values after variable evaluation (populated during execution)
              * example:
-             * user_12345
+             * [
+             *   "user_12345"
+             * ]
              */
-            value?: string;
+            value?: string[];
         }
         export interface WorkflowContext {
             id: string;

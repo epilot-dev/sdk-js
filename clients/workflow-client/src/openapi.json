@@ -3345,14 +3345,15 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "The id of the entity / workflow / task, based on the origin of the schedule"
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value 'all_preceding_tasks_completed'."
               },
               "origin": {
                 "type": "string",
                 "enum": [
                   "flow_started",
                   "task_completed",
-                  "trigger_entity_attribute"
+                  "trigger_entity_attribute",
+                  "all_preceding_tasks_completed"
                 ]
               },
               "schema": {
@@ -3874,7 +3875,9 @@
             "enum": [
               "WORKFLOW_STARTED",
               "TASK_FINISHED",
-              "PHASE_FINISHED"
+              "PHASE_FINISHED",
+              "A_PRECEDING_TASK_COMPLETED",
+              "ALL_PRECEDING_TASKS_COMPLETED"
             ]
           },
           "task_id": {
@@ -3944,9 +3947,14 @@
             "example": "{{entity.owner}}"
           },
           "value": {
-            "type": "string",
-            "description": "The resolved value after variable evaluation (populated during execution)",
-            "example": "user_12345"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The resolved values after variable evaluation (populated during execution)",
+            "example": [
+              "user_12345"
+            ]
           }
         },
         "required": [
