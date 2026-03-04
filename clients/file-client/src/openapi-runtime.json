@@ -40,6 +40,9 @@
           },
           {
             "$ref": "#/components/parameters/DeleteTempFileQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/VersionOnlyQueryParam"
           }
         ],
         "requestBody": {
@@ -78,6 +81,9 @@
           },
           {
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/VersionOnlyQueryParam"
           }
         ],
         "requestBody": {
@@ -508,10 +514,35 @@
         "name": "delete_temp_file",
         "in": "query",
         "required": false
+      },
+      "VersionOnlyQueryParam": {
+        "name": "version_only",
+        "in": "query",
+        "required": false
       }
     },
     "responses": {
+      "BadRequestError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnauthorizedError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ForbiddenError": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
         "content": {
           "application/json": {}
         }
