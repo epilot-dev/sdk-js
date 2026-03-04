@@ -505,9 +505,10 @@ declare namespace Components {
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
         }
-        export interface ErpEventV3 {
+        export type ErpEventV3 = {
             /**
-             * Name of the event (e.g., business_partner, contract_account). Corresponds to the "Event Name" from the integration UI. Replaces object_type from V2.
+             * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
+             *
              */
             event_name: string;
             /**
@@ -536,7 +537,39 @@ declare namespace Components {
              * evt-2025-05-01-12345-bp
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
-        }
+        } | {
+            /**
+             * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
+             *
+             */
+            event_name?: string;
+            /**
+             * Timestamp when the event occurred
+             */
+            timestamp: string; // date-time
+            /**
+             * Format of the payload data
+             */
+            format: "json" | "xml";
+            /**
+             * The object data payload - can be either a serialized string or a direct JSON object
+             */
+            payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
+                [name: string]: any;
+            };
+            /**
+             * Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.
+             *
+             */
+            use_case_slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.
+             *
+             * example:
+             * evt-2025-05-01-12345-bp
+             */
+            deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+        };
         export interface ErpUpdatesEventsV2Request {
             /**
              * UUID that identifies the integration configuration to use

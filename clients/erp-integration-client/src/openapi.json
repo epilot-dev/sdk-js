@@ -2364,15 +2364,26 @@
       "ErpEventV3": {
         "type": "object",
         "required": [
-          "event_name",
           "timestamp",
           "format",
           "payload"
         ],
+        "anyOf": [
+          {
+            "required": [
+              "event_name"
+            ]
+          },
+          {
+            "required": [
+              "use_case_slug"
+            ]
+          }
+        ],
         "properties": {
           "event_name": {
             "type": "string",
-            "description": "Name of the event (e.g., business_partner, contract_account). Corresponds to the \"Event Name\" from the integration UI. Replaces object_type from V2."
+            "description": "Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.\n"
           },
           "timestamp": {
             "type": "string",
