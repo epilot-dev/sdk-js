@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.44.0",
+    "version": "0.45.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -3432,7 +3432,6 @@
         "type": "object",
         "required": [
           "name",
-          "slug",
           "type",
           "enabled"
         ],
@@ -3871,6 +3870,35 @@
           "scope": {
             "type": "string",
             "description": "Optional OAuth2 scope"
+          },
+          "audience": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 audience parameter"
+          },
+          "resource": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 resource parameter"
+          },
+          "body_params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional key-value pairs to include in the token request body. Values support Handlebars templates."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional headers to include in the token request. Values support Handlebars templates."
+          },
+          "query_params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional query parameters to append to the token URL. Values support Handlebars templates."
           }
         }
       },

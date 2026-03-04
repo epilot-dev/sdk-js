@@ -209,7 +209,7 @@ declare namespace Components {
              * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -237,7 +237,7 @@ declare namespace Components {
              * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -280,7 +280,7 @@ declare namespace Components {
              * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -301,7 +301,7 @@ declare namespace Components {
              * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -596,6 +596,32 @@ declare namespace Components {
              * Optional OAuth2 scope
              */
             scope?: string;
+            /**
+             * Handlebars template for the OAuth2 audience parameter
+             */
+            audience?: string;
+            /**
+             * Handlebars template for the OAuth2 resource parameter
+             */
+            resource?: string;
+            /**
+             * Additional key-value pairs to include in the token request body. Values support Handlebars templates.
+             */
+            body_params?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional headers to include in the token request. Values support Handlebars templates.
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional query parameters to append to the token URL. Values support Handlebars templates.
+             */
+            query_params?: {
+                [name: string]: string;
+            };
         }
         export interface FileProxyParam {
             /**
