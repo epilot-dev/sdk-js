@@ -1865,12 +1865,12 @@
             "type": "string",
             "description": "URL to the blueprint documentation"
           },
-          "compatible_apps": {
+          "recommended_apps": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "List of compatible app IDs for the blueprint"
+            "description": "List of recommended app IDs for the blueprint"
           },
           "required_features": {
             "type": "object",
@@ -2026,7 +2026,7 @@
           "docs_url": {
             "type": "string"
           },
-          "compatible_apps": {
+          "recommended_apps": {
             "type": "array",
             "items": {
               "type": "string"
@@ -2135,12 +2135,12 @@
                   "$ref": "#/components/schemas/BlueprintResource"
                 }
               },
-              "compatible_apps": {
+              "recommended_apps": {
                 "type": "array",
                 "items": {
                   "type": "string"
                 },
-                "description": "List of compatible app IDs for the blueprint"
+                "description": "List of recommended app IDs for the blueprint"
               },
               "has_update_available": {
                 "type": "boolean",
