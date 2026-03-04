@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Messaging Settings API",
-    "version": "1.4.1",
+    "version": "1.5.0",
     "description": "The Messaging Settings API provides comprehensive management of email configurations for epilot organizations.\n\n## Overview\n\nThis API enables organizations to:\n- **Email Addresses**: Configure sender email addresses, set primary addresses, and manage email aliases\n- **Email Signatures**: Create and manage HTML email signatures that can be associated with email addresses\n- **Custom Domains**: Add and verify custom email domains for professional branding\n- **Shared Inboxes**: Organize incoming emails into categorized inboxes with team assignments\n- **Microsoft 365 Integration**: Connect Outlook mailboxes for seamless email synchronization\n\n## Key Concepts\n\n### Email Addresses\nEmail addresses represent the sender identities used when composing emails. Each address can have:\n- A display name (e.g., \"Sales Team\")\n- Assigned users and groups who can send from this address\n- A default signature\n- Association with a shared inbox\n\n### Shared Inboxes\nShared inboxes help teams organize and manage incoming emails. Features include:\n- Color-coded categorization\n- Team member assignments\n- Routing rules for incoming messages\n\n### Email Signatures\nHTML signatures that are automatically appended to outgoing emails. Signatures can include:\n- Rich text formatting\n- Images and logos\n- Contact information\n\n### Custom Domains\nOrganizations can configure custom email domains to send emails from their own domain (e.g., `support@yourcompany.com`). This requires:\n1. Adding the domain\n2. Configuring DNS records\n3. Verifying domain ownership\n\n## Authentication\n\nAll endpoints require authentication via Bearer token (JWT) unless otherwise specified.\nUse the `x-epilot-org-id` header to specify the target organization when using shared tenant access.\n"
   },
   "tags": [
@@ -679,6 +679,16 @@
                     "type": "string",
                     "description": "Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.",
                     "default": "default"
+                  },
+                  "mailboxSyncTimeframe": {
+                    "type": "string",
+                    "enum": [
+                      "5m",
+                      "1w",
+                      "2w",
+                      "1m"
+                    ],
+                    "description": "Optional timeframe for initial mailbox sync. When provided, triggers an automatic\nmailbox sync after connecting the mailbox, syncing emails from the specified period.\n"
                   }
                 }
               }
@@ -795,6 +805,218 @@
         }
       }
     },
+    "/v2/outlook/mailbox/{email}/sync": {
+      "post": {
+        "operationId": "startMailboxSync",
+        "summary": "Start Mailbox Sync",
+        "description": "Triggers an Outlook mailbox sync for the specified email address.\nSyncs existing emails (inbox + sent items) for the specified timeframe.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the Outlook mailbox to sync"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "timeframe"
+                ],
+                "properties": {
+                  "timeframe": {
+                    "$ref": "#/components/schemas/MailboxSyncTimeframePeriods",
+                    "description": "Sync period:\n- 5m: last 5 minutes (quick sync)\n- 1w: 1 week\n- 2w: 2 weeks\n- 1m: 1 month\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Sync started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "execution_id",
+                    "status",
+                    "timeframe"
+                  ],
+                  "properties": {
+                    "execution_id": {
+                      "type": "string",
+                      "description": "The execution ID"
+                    },
+                    "status": {
+                      "$ref": "#/components/schemas/MailboxSyncStatuses"
+                    },
+                    "timeframe": {
+                      "$ref": "#/components/schemas/MailboxSyncTimeframePeriods"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "404": {
+            "description": "Mailbox not connected for the provided email address"
+          },
+          "409": {
+            "description": "A sync in progress for the provided mailbox"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/status": {
+      "get": {
+        "operationId": "getMailboxSyncStatus",
+        "summary": "Get Mailbox Sync Status",
+        "description": "Returns the current or latest sync status for the specified mailbox.\nPoll this endpoint to track sync progress.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the Outlook mailbox"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sync status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailboxSyncStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No sync found for this mailbox"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/retry": {
+      "post": {
+        "operationId": "retryMailboxSync",
+        "summary": "Retry Failed Messages",
+        "description": "Retries failed messages from a previous sync execution.\nOnly retries messages with status FAILED (not PERMANENTLY_FAILED).\nMessages that fail 3+ retries become PERMANENTLY_FAILED.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the Outlook mailbox"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sync_id"
+                ],
+                "properties": {
+                  "sync_id": {
+                    "type": "string",
+                    "description": "Execution ID of the sync to retry"
+                  },
+                  "scope": {
+                    "type": "string",
+                    "enum": [
+                      "all_failed"
+                    ],
+                    "description": "Retry scope. Use 'all_failed' to retry all retryable failed messages."
+                  },
+                  "message_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Specific Graph message IDs to retry (alternative to scope)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Retry started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "retry_execution_id",
+                    "messages_queued"
+                  ],
+                  "properties": {
+                    "retry_execution_id": {
+                      "type": "string",
+                      "description": "Execution ID for the retry sync"
+                    },
+                    "messages_queued": {
+                      "type": "integer",
+                      "description": "Number of messages queued for retry"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No sync found or no retryable messages"
+          },
+          "409": {
+            "description": "A sync is already running for this mailbox"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v2/outlook/mailbox/mappings": {
       "get": {
         "operationId": "getConnectedOutlookEmails",
@@ -835,157 +1057,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/v2/outlook/test-webhook": {
-      "get": {
-        "operationId": "testWebhookGet",
-        "summary": "testWebhookGet",
-        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nHandles Microsoft Graph subscription validation requests by returning the validationToken.\nThis is a PUBLIC endpoint with no authentication.\n",
-        "tags": [
-          "O365 Outlook Connection"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "validationToken",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Validation token from Microsoft Graph for subscription verification"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Validation token returned (for Graph API subscription validation)",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Webhook received and logged",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "testWebhookPost",
-        "summary": "testWebhookPost",
-        "description": "Test endpoint for debugging Graph API webhook notifications via ngrok.\nLogs all incoming webhook payloads for debugging purposes.\nThis is a PUBLIC endpoint with no authentication.\n",
-        "tags": [
-          "O365 Outlook Connection"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "validationToken",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Validation token from Microsoft Graph for subscription verification"
-          },
-          {
-            "name": "debugMessages",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            },
-            "description": "Whether to include message details in the response"
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "description": "Graph API notification payload",
-                "properties": {
-                  "value": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "subscriptionId": {
-                          "type": "string"
-                        },
-                        "changeType": {
-                          "type": "string"
-                        },
-                        "resource": {
-                          "type": "string"
-                        },
-                        "clientState": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "plain/text": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Validation token returned (for Graph API subscription validation)",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Webhook received and logged",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -1786,6 +1857,97 @@
       }
     },
     "schemas": {
+      "MailboxSyncStatus": {
+        "type": "object",
+        "required": [
+          "execution_id",
+          "status",
+          "timeframe",
+          "started_at"
+        ],
+        "properties": {
+          "execution_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MailboxSyncStatuses"
+          },
+          "timeframe": {
+            "$ref": "#/components/schemas/MailboxSyncTimeframePeriods"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inbox": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/MailboxSyncFolderStatuses"
+              },
+              "total_messages": {
+                "type": "integer"
+              },
+              "processed_messages": {
+                "type": "integer"
+              },
+              "failed_messages": {
+                "type": "integer"
+              }
+            }
+          },
+          "sent_items": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/MailboxSyncFolderStatuses"
+              },
+              "total_messages": {
+                "type": "integer"
+              },
+              "processed_messages": {
+                "type": "integer"
+              },
+              "failed_messages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "MailboxSyncStatuses": {
+        "type": "string",
+        "enum": [
+          "RUNNING",
+          "COMPLETED",
+          "COMPLETED_WITH_ERRORS",
+          "FAILED",
+          "CANCELLED"
+        ]
+      },
+      "MailboxSyncFolderStatuses": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "RUNNING",
+          "COMPLETED",
+          "FAILED",
+          "SKIPPED"
+        ]
+      },
+      "MailboxSyncTimeframePeriods": {
+        "type": "string",
+        "enum": [
+          "5m",
+          "1w",
+          "2w",
+          "1m"
+        ]
+      },
       "InboxBucketResponse": {
         "type": "object",
         "description": "Inbox bucket representing the storage container for a shared inbox.",

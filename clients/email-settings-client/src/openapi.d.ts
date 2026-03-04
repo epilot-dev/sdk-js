@@ -298,6 +298,28 @@ declare namespace Components {
              */
             inbox_id: string;
         }
+        export type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "SKIPPED";
+        export interface MailboxSyncStatus {
+            execution_id: string;
+            status: MailboxSyncStatuses;
+            timeframe: MailboxSyncTimeframePeriods;
+            started_at: string; // date-time
+            completed_at?: string; // date-time
+            inbox?: {
+                status?: MailboxSyncFolderStatuses;
+                total_messages?: number;
+                processed_messages?: number;
+                failed_messages?: number;
+            };
+            sent_items?: {
+                status?: MailboxSyncFolderStatuses;
+                total_messages?: number;
+                processed_messages?: number;
+                failed_messages?: number;
+            };
+        }
+        export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
+        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m";
         export interface OutlookConnectionError {
             /**
              * Error code or message from the OAuth flow.
@@ -775,6 +797,12 @@ declare namespace Paths {
              * Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.
              */
             shared_inbox_id?: string;
+            /**
+             * Optional timeframe for initial mailbox sync. When provided, triggers an automatic
+             * mailbox sync after connecting the mailbox, syncing emails from the specified period.
+             *
+             */
+            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m";
         }
         namespace Responses {
             export interface $201 {
@@ -953,6 +981,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMailboxSyncStatus {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MailboxSyncStatus;
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetOutlookConnectionStatus {
         namespace Responses {
             export interface $200 {
@@ -1063,6 +1106,46 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RetryMailboxSync {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        export interface RequestBody {
+            /**
+             * Execution ID of the sync to retry
+             */
+            sync_id: string;
+            /**
+             * Retry scope. Use 'all_failed' to retry all retryable failed messages.
+             */
+            scope?: "all_failed";
+            /**
+             * Specific Graph message IDs to retry (alternative to scope)
+             */
+            message_ids?: string[];
+        }
+        namespace Responses {
+            export interface $202 {
+                /**
+                 * Execution ID for the retry sync
+                 */
+                retry_execution_id: string;
+                /**
+                 * Number of messages queued for retry
+                 */
+                messages_queued: number;
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace SetEmailAddressPrimary {
         export type RequestBody = /* Request payload for setting an email address as the organization's primary address. */ Components.Schemas.SetEmailAddressPrimaryPayload;
         namespace Responses {
@@ -1073,46 +1156,40 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace TestWebhookGet {
+    namespace StartMailboxSync {
         namespace Parameters {
-            export type ValidationToken = string;
+            export type Email = string; // email
         }
-        export interface QueryParameters {
-            validationToken?: Parameters.ValidationToken;
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
         }
-        namespace Responses {
-            export type $200 = string;
-            export interface $202 {
-                message?: string;
-                timestamp?: string; // date-time
-            }
-        }
-    }
-    namespace TestWebhookPost {
-        namespace Parameters {
-            export type DebugMessages = boolean;
-            export type ValidationToken = string;
-        }
-        export interface QueryParameters {
-            validationToken?: Parameters.ValidationToken;
-            debugMessages?: Parameters.DebugMessages;
-        }
-        /**
-         * Graph API notification payload
-         */
         export interface RequestBody {
-            value?: {
-                subscriptionId?: string;
-                changeType?: string;
-                resource?: string;
-                clientState?: string;
-            }[];
+            /**
+             * Sync period:
+             * - 5m: last 5 minutes (quick sync)
+             * - 1w: 1 week
+             * - 2w: 2 weeks
+             * - 1m: 1 month
+             *
+             */
+            timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
         }
         namespace Responses {
-            export type $200 = string;
             export interface $202 {
-                message?: string;
-                timestamp?: string; // date-time
+                /**
+                 * The execution ID
+                 */
+                execution_id: string;
+                status: Components.Schemas.MailboxSyncStatuses;
+                timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -1472,6 +1549,43 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
   /**
+   * startMailboxSync - Start Mailbox Sync
+   * 
+   * Triggers an Outlook mailbox sync for the specified email address.
+   * Syncs existing emails (inbox + sent items) for the specified timeframe.
+   * 
+   */
+  'startMailboxSync'(
+    parameters?: Parameters<Paths.StartMailboxSync.PathParameters> | null,
+    data?: Paths.StartMailboxSync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartMailboxSync.Responses.$202>
+  /**
+   * getMailboxSyncStatus - Get Mailbox Sync Status
+   * 
+   * Returns the current or latest sync status for the specified mailbox.
+   * Poll this endpoint to track sync progress.
+   * 
+   */
+  'getMailboxSyncStatus'(
+    parameters?: Parameters<Paths.GetMailboxSyncStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  /**
+   * retryMailboxSync - Retry Failed Messages
+   * 
+   * Retries failed messages from a previous sync execution.
+   * Only retries messages with status FAILED (not PERMANENTLY_FAILED).
+   * Messages that fail 3+ retries become PERMANENTLY_FAILED.
+   * 
+   */
+  'retryMailboxSync'(
+    parameters?: Parameters<Paths.RetryMailboxSync.PathParameters> | null,
+    data?: Paths.RetryMailboxSync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  /**
    * getConnectedOutlookEmails - getConnectedOutlookEmails
    * 
    * Returns all Outlook email addresses connected to the organization.
@@ -1482,32 +1596,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
-  /**
-   * testWebhookGet - testWebhookGet
-   * 
-   * Test endpoint for debugging Graph API webhook notifications via ngrok.
-   * Handles Microsoft Graph subscription validation requests by returning the validationToken.
-   * This is a PUBLIC endpoint with no authentication.
-   * 
-   */
-  'testWebhookGet'(
-    parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
-  /**
-   * testWebhookPost - testWebhookPost
-   * 
-   * Test endpoint for debugging Graph API webhook notifications via ngrok.
-   * Logs all incoming webhook payloads for debugging purposes.
-   * This is a PUBLIC endpoint with no authentication.
-   * 
-   */
-  'testWebhookPost'(
-    parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
-    data?: Paths.TestWebhookPost.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
   /**
    * outlookOAuthCallback - outlookOAuthCallback
    * 
@@ -1941,6 +2029,49 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
   }
+  ['/v2/outlook/mailbox/{email}/sync']: {
+    /**
+     * startMailboxSync - Start Mailbox Sync
+     * 
+     * Triggers an Outlook mailbox sync for the specified email address.
+     * Syncs existing emails (inbox + sent items) for the specified timeframe.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.StartMailboxSync.PathParameters> | null,
+      data?: Paths.StartMailboxSync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartMailboxSync.Responses.$202>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/status']: {
+    /**
+     * getMailboxSyncStatus - Get Mailbox Sync Status
+     * 
+     * Returns the current or latest sync status for the specified mailbox.
+     * Poll this endpoint to track sync progress.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMailboxSyncStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/retry']: {
+    /**
+     * retryMailboxSync - Retry Failed Messages
+     * 
+     * Retries failed messages from a previous sync execution.
+     * Only retries messages with status FAILED (not PERMANENTLY_FAILED).
+     * Messages that fail 3+ retries become PERMANENTLY_FAILED.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetryMailboxSync.PathParameters> | null,
+      data?: Paths.RetryMailboxSync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  }
   ['/v2/outlook/mailbox/mappings']: {
     /**
      * getConnectedOutlookEmails - getConnectedOutlookEmails
@@ -1953,34 +2084,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
-  }
-  ['/v2/outlook/test-webhook']: {
-    /**
-     * testWebhookGet - testWebhookGet
-     * 
-     * Test endpoint for debugging Graph API webhook notifications via ngrok.
-     * Handles Microsoft Graph subscription validation requests by returning the validationToken.
-     * This is a PUBLIC endpoint with no authentication.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
-    /**
-     * testWebhookPost - testWebhookPost
-     * 
-     * Test endpoint for debugging Graph API webhook notifications via ngrok.
-     * Logs all incoming webhook payloads for debugging purposes.
-     * This is a PUBLIC endpoint with no authentication.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
-      data?: Paths.TestWebhookPost.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
   }
   ['/v2/outlook/oauth/callback']: {
     /**
@@ -2155,6 +2258,10 @@ export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type InboxBucketResponse = Components.Schemas.InboxBucketResponse;
+export type MailboxSyncFolderStatuses = Components.Schemas.MailboxSyncFolderStatuses;
+export type MailboxSyncStatus = Components.Schemas.MailboxSyncStatus;
+export type MailboxSyncStatuses = Components.Schemas.MailboxSyncStatuses;
+export type MailboxSyncTimeframePeriods = Components.Schemas.MailboxSyncTimeframePeriods;
 export type OutlookConnectionError = Components.Schemas.OutlookConnectionError;
 export type OutlookConnectionStatus = Components.Schemas.OutlookConnectionStatus;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;

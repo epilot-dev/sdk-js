@@ -189,45 +189,60 @@
         "responses": {}
       }
     },
-    "/v2/outlook/mailbox/mappings": {
-      "get": {
-        "operationId": "getConnectedOutlookEmails",
-        "responses": {}
-      }
-    },
-    "/v2/outlook/test-webhook": {
-      "get": {
-        "operationId": "testWebhookGet",
-        "parameters": [
-          {
-            "name": "validationToken",
-            "in": "query",
-            "required": false
-          }
-        ],
-        "responses": {}
-      },
+    "/v2/outlook/mailbox/{email}/sync": {
       "post": {
-        "operationId": "testWebhookPost",
+        "operationId": "startMailboxSync",
         "parameters": [
           {
-            "name": "validationToken",
-            "in": "query",
-            "required": false
-          },
-          {
-            "name": "debugMessages",
-            "in": "query",
-            "required": false
+            "name": "email",
+            "in": "path",
+            "required": true
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
-            "application/json": {},
-            "plain/text": {}
+            "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/status": {
+      "get": {
+        "operationId": "getMailboxSyncStatus",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/retry": {
+      "post": {
+        "operationId": "retryMailboxSync",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/mappings": {
+      "get": {
+        "operationId": "getConnectedOutlookEmails",
         "responses": {}
       }
     },
