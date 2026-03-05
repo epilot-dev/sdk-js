@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.45.0",
+    "version": "0.46.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -3862,7 +3862,8 @@
           "type": {
             "type": "string",
             "enum": [
-              "oauth2_client_credentials"
+              "oauth2_client_credentials",
+              "oauth2_password"
             ],
             "description": "Authentication type"
           },
@@ -3889,6 +3890,14 @@
           "resource": {
             "type": "string",
             "description": "Handlebars template for the OAuth2 resource parameter"
+          },
+          "username": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 resource owner username. Required when type is oauth2_password."
+          },
+          "password": {
+            "type": "string",
+            "description": "Handlebars template for the OAuth2 resource owner password. Required when type is oauth2_password."
           },
           "body_params": {
             "type": "object",

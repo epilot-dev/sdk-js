@@ -612,7 +612,7 @@ declare namespace Components {
             /**
              * Authentication type
              */
-            type: "oauth2_client_credentials";
+            type: "oauth2_client_credentials" | "oauth2_password";
             /**
              * Handlebars template for the OAuth2 token endpoint URL
              */
@@ -637,6 +637,14 @@ declare namespace Components {
              * Handlebars template for the OAuth2 resource parameter
              */
             resource?: string;
+            /**
+             * Handlebars template for the OAuth2 resource owner username. Required when type is oauth2_password.
+             */
+            username?: string;
+            /**
+             * Handlebars template for the OAuth2 resource owner password. Required when type is oauth2_password.
+             */
+            password?: string;
             /**
              * Additional key-value pairs to include in the token request body. Values support Handlebars templates.
              */
