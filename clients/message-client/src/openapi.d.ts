@@ -292,6 +292,10 @@ declare namespace Components {
         export interface MessageRequestParams {
             [name: string]: any;
             /**
+             * Whether the thread is marked as Done immediately after sending the message
+             */
+            complete_thread?: boolean;
+            /**
              * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.
              *
              * example:
@@ -1090,6 +1094,30 @@ declare namespace Paths {
             export interface $302 {
             }
             export interface $403 {
+            }
+        }
+    }
+    namespace GetMessageEml {
+        namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $302 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -2498,6 +2526,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMessage.Responses.$204>
   /**
+   * getMessageEml - getMessageEml
+   * 
+   * Download a message as an EML file.
+   * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+   * 
+   */
+  'getMessageEml'(
+    parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
+  /**
    * searchMessages - searchMessages
    * 
    * Search Messages
@@ -2979,6 +3019,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMessage.Responses.$204>
+  }
+  ['/v1/message/messages/{id}/eml']: {
+    /**
+     * getMessageEml - getMessageEml
+     * 
+     * Download a message as an EML file.
+     * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
   }
   ['/v1/message/messages:search']: {
     /**

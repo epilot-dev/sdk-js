@@ -210,6 +210,47 @@
         }
       }
     },
+    "/v1/message/messages/{id}/eml": {
+      "get": {
+        "operationId": "getMessageEml",
+        "summary": "getMessageEml",
+        "description": "Download a message as an EML file.\nReturns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.\n",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message entity ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to EML file download URL",
+            "headers": {
+              "Location": {
+                "description": "Pre-signed S3 URL to download the EML file (expires in 15 minutes)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Message not found"
+          }
+        }
+      }
+    },
     "/v1/message/messages:search": {
       "post": {
         "operationId": "searchMessages",
@@ -2236,6 +2277,11 @@
         ],
         "additionalProperties": true,
         "properties": {
+          "complete_thread": {
+            "type": "boolean",
+            "description": "Whether the thread is marked as Done immediately after sending the message",
+            "default": false
+          },
           "thread": {
             "type": "object",
             "required": [

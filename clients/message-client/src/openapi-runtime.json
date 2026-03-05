@@ -50,6 +50,19 @@
         "responses": {}
       }
     },
+    "/v1/message/messages/{id}/eml": {
+      "get": {
+        "operationId": "getMessageEml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/message/messages:search": {
       "post": {
         "operationId": "searchMessages",
