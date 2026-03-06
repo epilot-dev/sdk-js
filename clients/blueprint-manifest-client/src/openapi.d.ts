@@ -2108,6 +2108,10 @@ declare namespace Paths {
         export interface RequestBody {
             destination_org_id?: string;
             destination_blueprint_id?: string;
+            /**
+             * When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors.
+             */
+            validate?: boolean;
         }
         namespace Responses {
             export interface $202 {

@@ -1154,6 +1154,10 @@
                   },
                   "destination_blueprint_id": {
                     "type": "string"
+                  },
+                  "validate": {
+                    "type": "boolean",
+                    "description": "When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors."
                   }
                 }
               }
