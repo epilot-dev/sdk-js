@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { Document } from 'openapi-client-axios';
 import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
@@ -8,11 +8,19 @@ export type ApiEntry = {
   instance: AxiosInstance | null;
 };
 
-export type Interceptor = {
-  type: 'request' | 'response';
-  fulfilled: (value: unknown) => unknown;
+export type RequestInterceptor = {
+  type: 'request';
+  fulfilled: (config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
   rejected?: (error: unknown) => unknown;
 };
+
+export type ResponseInterceptor = {
+  type: 'response';
+  fulfilled: (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>;
+  rejected?: (error: unknown) => unknown;
+};
+
+export type Interceptor = RequestInterceptor | ResponseInterceptor;
 
 export type SDKState = {
   token: string | null;

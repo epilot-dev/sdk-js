@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { registerBuiltinApis } from './apis/_registry';
 import type { TokenArg } from './authorize';
@@ -11,8 +11,14 @@ import type { RetryConfig } from './retry';
 import type { ApiHandle, HeadersConfig, SDKState } from './types';
 
 export type InterceptorUse = {
-  request: (fulfilled: (config: unknown) => unknown, rejected?: (error: unknown) => unknown) => void;
-  response: (fulfilled: (response: unknown) => unknown, rejected?: (error: unknown) => unknown) => void;
+  request: (
+    fulfilled: (config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>,
+    rejected?: (error: unknown) => unknown,
+  ) => void;
+  response: (
+    fulfilled: (response: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>,
+    rejected?: (error: unknown) => unknown,
+  ) => void;
 };
 
 export type EpilotSDK = {
@@ -94,11 +100,11 @@ export const createSDK = (): EpilotSDK => {
 
         case 'interceptors': {
           const interceptorUse: InterceptorUse = {
-            request: (fulfilled: (config: unknown) => unknown, rejected?: (error: unknown) => unknown) => {
+            request: (fulfilled, rejected) => {
               state.interceptors.push({ type: 'request', fulfilled, rejected });
               resetAllClients(registry);
             },
-            response: (fulfilled: (response: unknown) => unknown, rejected?: (error: unknown) => unknown) => {
+            response: (fulfilled, rejected) => {
               state.interceptors.push({ type: 'response', fulfilled, rejected });
               resetAllClients(registry);
             },

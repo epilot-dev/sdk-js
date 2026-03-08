@@ -1,5 +1,11 @@
 <h1 align="center"><img alt="epilot" src="https://raw.githubusercontent.com/epilot-dev/sdk-js/main/logo.png" width="200"><br>@epilot/sdk</h1>
 
+<p align="center">
+  <a href="https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI"><img src="https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/@epilot/sdk"><img src="https://img.shields.io/npm/v/@epilot/sdk.svg" alt="npm version"></a>
+  <a href="https://github.com/epilot-dev/sdk-js/blob/main/"><img src="http://img.shields.io/:license-mit-blue.svg" alt="License"></a>
+</p>
+
 <p align="center">JavaScript/TypeScript SDK for epilot APIs. Full types, tree-shakeable imports, and lazy-loaded OpenAPI specs.</p>
 
 ## Install

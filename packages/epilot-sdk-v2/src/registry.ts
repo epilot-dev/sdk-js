@@ -58,15 +58,9 @@ export const resolveClient = async (params: {
     // Apply global interceptors
     for (const interceptor of state.interceptors) {
       if (interceptor.type === 'request') {
-        entry.instance.interceptors.request.use(
-          interceptor.fulfilled as (value: unknown) => unknown,
-          interceptor.rejected,
-        );
+        entry.instance.interceptors.request.use(interceptor.fulfilled, interceptor.rejected);
       } else {
-        entry.instance.interceptors.response.use(
-          interceptor.fulfilled as (value: unknown) => unknown,
-          interceptor.rejected,
-        );
+        entry.instance.interceptors.response.use(interceptor.fulfilled, interceptor.rejected);
       }
     }
   }
