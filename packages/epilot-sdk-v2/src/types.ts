@@ -1,7 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import type { Document } from 'openapi-client-axios';
-
-import type { TokenArg } from './authorize';
+import type { RetryConfig } from './retry';
 
 export type ApiEntry = {
   loader: () => Promise<Document>;
@@ -19,6 +18,7 @@ export type SDKState = {
   tokenFn: (() => string | Promise<string>) | null;
   globalHeaders: Record<string, string>;
   interceptors: Interceptor[];
+  retry: RetryConfig;
 };
 
 export type HeadersConfig = Record<string, string>;

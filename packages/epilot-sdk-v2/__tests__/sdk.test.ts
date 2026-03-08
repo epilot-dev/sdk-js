@@ -8,6 +8,7 @@ vi.mock('openapi-client-axios', () => {
     defaults: { headers: { common: {} } },
     interceptors: {
       request: { use: vi.fn() },
+      response: { use: vi.fn() },
     },
     getEntity: vi.fn().mockResolvedValue({ data: { id: '123' } }),
     listFiles: vi.fn().mockResolvedValue({ data: [] }),

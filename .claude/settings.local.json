@@ -12,7 +12,13 @@
       "Bash(npm run:*)",
       "Bash(ls .eslintrc*:*)",
       "Bash(python3:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(xargs sed:*)",
+      "Bash(do python3:*)",
+      "Bash(npx biome:*)"
     ],
     "deny": []
   }

@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
-    "lint": "pnpm exec eslint src"
+    "lint": "biome check src"
   },
   "files": [
     "dist/"

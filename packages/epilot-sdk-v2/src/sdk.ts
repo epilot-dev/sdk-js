@@ -1,106 +1,116 @@
-import type { AxiosInstance } from 'axios'
+import type { AxiosInstance } from 'axios';
 
-import { registerBuiltinApis } from './apis/_registry'
-import type { TokenArg } from './authorize'
-import type { SDKClientMap } from './client-map'
-import { loadOverrides } from './overrides'
-import { createApiHandle } from './proxy'
-import { createRegistry, resolveClient, resetAllClients } from './registry'
-import type { ApiHandle, HeadersConfig, SDKState } from './types'
+import { registerBuiltinApis } from './apis/_registry';
+import type { TokenArg } from './authorize';
+import type { SDKClientMap } from './client-map';
+import { loadOverrides } from './overrides';
+import { createApiHandle } from './proxy';
+import { createRegistry, resetAllClients, resolveClient } from './registry';
+import type { RetryConfig } from './retry';
+import type { ApiHandle, HeadersConfig, SDKState } from './types';
 
 export type InterceptorUse = {
-  request: (fulfilled: (config: unknown) => unknown, rejected?: (error: unknown) => unknown) => void
-  response: (fulfilled: (response: unknown) => unknown, rejected?: (error: unknown) => unknown) => void
-}
+  request: (fulfilled: (config: unknown) => unknown, rejected?: (error: unknown) => unknown) => void;
+  response: (fulfilled: (response: unknown) => unknown, rejected?: (error: unknown) => unknown) => void;
+};
 
 export type EpilotSDK = {
   /** Set a Bearer token (static string or async function) for all clients */
-  authorize: (token: TokenArg) => void
+  authorize: (token: TokenArg) => void;
   /** Set global default headers applied to all clients (e.g. x-epilot-org-id) */
-  headers: (headers: HeadersConfig) => void
+  headers: (headers: HeadersConfig) => void;
   /** Register global axios interceptors applied to all clients */
-  interceptors: InterceptorUse
+  interceptors: InterceptorUse;
+  /** Configure retry behavior for 429 Too Many Requests responses */
+  retry: (config: RetryConfig) => void;
 } & {
-  [K in keyof SDKClientMap]: ApiHandle<SDKClientMap[K]>
-} & Record<string, ApiHandle<AxiosInstance>>
+  [K in keyof SDKClientMap]: ApiHandle<SDKClientMap[K]>;
+} & Record<string, ApiHandle<AxiosInstance>>;
 
 export const createSDK = (): EpilotSDK => {
-  const registry = createRegistry()
+  const registry = createRegistry();
   const state: SDKState = {
     token: null,
     tokenFn: null,
     globalHeaders: {},
     interceptors: [],
-  }
+    retry: { maxRetries: 3 },
+  };
 
-  registerBuiltinApis(registry)
-  loadOverrides(registry)
+  registerBuiltinApis(registry);
+  loadOverrides(registry);
 
   const getHandle = (name: string): ApiHandle<AxiosInstance> => {
-    const entry = registry.get(name)
+    const entry = registry.get(name);
     if (!entry) {
-      const available = [...registry.keys()].join(', ')
-      throw new Error(`Unknown API: "${name}". Available: ${available}`)
+      const available = [...registry.keys()].join(', ');
+      throw new Error(`Unknown API: "${name}". Available: ${available}`);
     }
 
     return createApiHandle({
       resolveClient: () => resolveClient({ registry, name, state }),
       loadDefinition: entry.loader,
-    })
-  }
+    });
+  };
 
   const sdk = new Proxy({} as EpilotSDK, {
     get(_, prop: string | symbol) {
-      if (typeof prop === 'symbol') return undefined
+      if (typeof prop === 'symbol') return undefined;
 
       switch (prop) {
         case 'authorize':
           return (token: TokenArg) => {
             if (typeof token === 'string') {
-              state.token = token
-              state.tokenFn = null
+              state.token = token;
+              state.tokenFn = null;
             } else {
-              state.token = null
-              state.tokenFn = token
+              state.token = null;
+              state.tokenFn = token;
             }
-            resetAllClients(registry)
-          }
+            resetAllClients(registry);
+          };
 
         case 'headers':
           return (headers: HeadersConfig) => {
-            Object.assign(state.globalHeaders, headers)
-            resetAllClients(registry)
-          }
+            Object.assign(state.globalHeaders, headers);
+            resetAllClients(registry);
+          };
+
+        case 'retry':
+          return (config: RetryConfig) => {
+            Object.assign(state.retry, config);
+            resetAllClients(registry);
+          };
 
         case 'interceptors': {
           const interceptorUse: InterceptorUse = {
             request: (fulfilled: (config: unknown) => unknown, rejected?: (error: unknown) => unknown) => {
-              state.interceptors.push({ type: 'request', fulfilled, rejected })
-              resetAllClients(registry)
+              state.interceptors.push({ type: 'request', fulfilled, rejected });
+              resetAllClients(registry);
             },
             response: (fulfilled: (response: unknown) => unknown, rejected?: (error: unknown) => unknown) => {
-              state.interceptors.push({ type: 'response', fulfilled, rejected })
-              resetAllClients(registry)
+              state.interceptors.push({ type: 'response', fulfilled, rejected });
+              resetAllClients(registry);
             },
-          }
-          return interceptorUse
+          };
+          return interceptorUse;
         }
 
         case 'then':
         case 'catch':
         case 'finally':
         case 'toJSON':
-          return undefined
+          return undefined;
 
         default:
           if (registry.has(prop)) {
-            return getHandle(prop)
+            return getHandle(prop);
           }
 
-          return undefined
+          return undefined;
       }
     },
-  })
+  });
 
-  return sdk
-}
+  return sdk;
+};

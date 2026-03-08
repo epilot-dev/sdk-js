@@ -74,7 +74,7 @@ const copyTypes = (clients: ClientInfo[]) => {
     let content = readFileSync(src, 'utf-8')
 
     // Replace openapi-client-axios import paths if needed
-    content = `/* eslint-disable */\n/* Auto-copied from ${client.dirName} */\n${content}`
+    content = `/* Auto-copied from ${client.dirName} */\n${content}`
 
     const dest = resolve(TYPES_DIR, `${client.kebabName}.d.ts`)
     writeFileSync(dest, content)
@@ -212,7 +212,6 @@ const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance'
 
   const lines = [
-    `import type { AxiosInstance } from 'axios'`,
     `import type { Document } from 'openapi-client-axios'`,
     ``,
     `import { createApiClient } from '../client-factory'`,
@@ -229,6 +228,8 @@ const generateApiFile = (client: ClientInfo): string => {
     const schemas = extractExportedSchemas(client)
     const allExports = ['Client', 'PathsDictionary', 'OperationMethods', ...schemas]
     lines.push(`export type { ${allExports.join(', ')} } from '../types/${client.kebabName}'`)
+  } else {
+    lines.push(`import type { AxiosInstance } from 'axios'`)
   }
 
   lines.push(
@@ -741,22 +742,6 @@ const generateDocs = (clients: ClientInfo[]) => {
     const content = generateClientDoc(client)
     writeFileSync(resolve(docsDir, `${client.kebabName}.md`), content)
   }
-
-  // Generate index
-  const indexLines = [
-    `# API Reference`,
-    ``,
-    `| API | Import Path | Operations |`,
-    `| --- | ----------- | ---------- |`,
-  ]
-
-  for (const client of validClients) {
-    const { operations } = extractOperations(client)
-    indexLines.push(`| [${client.apiName}](./${client.kebabName}.md) | \`@epilot/sdk/${client.kebabName}\` | ${operations.length} |`)
-  }
-  indexLines.push(``)
-
-  writeFileSync(resolve(docsDir, 'index.md'), indexLines.join('\n'))
 
   return validClients.length
 }

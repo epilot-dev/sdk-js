@@ -12,7 +12,7 @@ vi.mock('openapi-client-axios', () => {
       initSync() {
         return {
           defaults: { headers: { common: {} } },
-          interceptors: { request: { use: vi.fn() } },
+          interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
           getEntity: vi.fn().mockResolvedValue({ data: { id: '123' } }),
         }
       }

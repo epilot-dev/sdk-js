@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 
 import { createApiClient } from './client-factory';
+import { applyRetryInterceptor } from './retry';
 import type { ApiEntry, SDKState } from './types';
 
 export const createRegistry = () => new Map<string, ApiEntry>();
@@ -36,12 +37,15 @@ export const resolveClient = async (params: {
       headers: state.globalHeaders,
     });
 
+    // Apply retry interceptor for 429 Too Many Requests
+    applyRetryInterceptor({ client: entry.instance, config: state.retry });
+
     // Apply dynamic token function as interceptor
     if (state.tokenFn) {
       const tokenFn = state.tokenFn;
       entry.instance.interceptors.request.use(async (config) => {
         const resolved = await tokenFn();
-        config.headers['authorization'] = `Bearer ${resolved}`;
+        config.headers.authorization = `Bearer ${resolved}`;
 
         return config;
       });

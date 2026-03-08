@@ -239,8 +239,8 @@ describe('interceptor-based OAuth session (dynamic tokens)', () => {
 
     await sdk.entity.getClient()
 
-    expect(responseInterceptors.length).toBeGreaterThan(0)
-    const handler = responseInterceptors[0]
+    expect(responseInterceptors.length).toBeGreaterThan(1)
+    const handler = responseInterceptors[responseInterceptors.length - 1]
     expect(handler.rejected).toBeDefined()
 
     try {

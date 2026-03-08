@@ -24,12 +24,12 @@
     "test": "jest",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/ai-agents.yaml",
-    "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
+    "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
     "prepublishOnly": "npm run typegen && npm run build",
-    "lint": "pnpm exec eslint src"
+    "lint": "biome check src"
   },
   "files": [
     "*.js",

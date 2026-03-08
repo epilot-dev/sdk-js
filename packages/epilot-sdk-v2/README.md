@@ -1,6 +1,6 @@
-# @epilot/sdk
+<h1 align="center"><img alt="epilot" src="https://raw.githubusercontent.com/epilot-dev/sdk-js/main/logo.png" width="200"><br>@epilot/sdk</h1>
 
-Single-package epilot SDK with all API clients. Registry-based architecture with lazy-loaded OpenAPI specs, full types, tree-shakeable imports, and overrides.
+<p align="center">JavaScript/TypeScript SDK for epilot APIs. Full types, tree-shakeable imports, and lazy-loaded OpenAPI specs.</p>
 
 ## Install
 
@@ -130,6 +130,38 @@ epilot.interceptors.request((config) => {
 })
 ```
 
+### Auto-Retry (429 Too Many Requests)
+
+The SDK automatically retries requests that receive a `429 Too Many Requests` response. It respects the `Retry-After` header (in seconds) to determine how long to wait before retrying.
+
+Enabled by default with up to 3 retries.
+
+```ts
+import { epilot } from '@epilot/sdk'
+
+// Customize retry behavior
+epilot.retry({ maxRetries: 5, defaultDelayMs: 2000 })
+
+// Disable retries
+epilot.retry({ maxRetries: 0 })
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `maxRetries` | `3` | Maximum number of retries. Set to `0` to disable. |
+| `defaultDelayMs` | `1000` | Fallback delay in ms when `Retry-After` header is missing. |
+
+For individually imported clients (tree-shakeable imports), apply the interceptor manually:
+
+```ts
+import { getClient, authorize } from '@epilot/sdk/entity'
+import { applyRetryInterceptor } from '@epilot/sdk'
+
+const entityClient = await getClient()
+authorize(entityClient, () => '<my-token>')
+applyRetryInterceptor({ client: entityClient, config: { maxRetries: 3 } })
+```
+
 ### Backend Internal Calls (Pass Headers)
 
 ```ts
@@ -187,7 +219,7 @@ Override built-in API specs or register custom APIs via `.epilot/sdk-overrides.j
 const { data } = await epilot.entity.getEntity({ slug: 'contact', id: '123' })
 ```
 
-### CLI
+### Override Commands
 
 ```bash
 # Apply all overrides from .epilot/sdk-overrides.json
@@ -239,8 +271,6 @@ import type { Client } from '@epilot/sdk/entity'
 ## API Reference
 
 Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
-
-See [docs/index.md](./docs/index.md) for a full list of all 46 API clients with their operations.
 
 ## Available APIs
 

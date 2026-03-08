@@ -10,7 +10,7 @@ vi.mock('openapi-client-axios', () => {
       initSync() {
         return {
           defaults: { headers: { common: {} } },
-          interceptors: { request: { use: vi.fn() } },
+          interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
         }
       }
     },
@@ -29,7 +29,7 @@ describe('registry', () => {
 
   beforeEach(() => {
     registry = createRegistry()
-    state = { token: null, tokenFn: null, globalHeaders: {}, interceptors: [] }
+    state = { token: null, tokenFn: null, globalHeaders: {}, interceptors: [], retry: { maxRetries: 3 } }
   })
 
   it('should register and resolve an API', async () => {

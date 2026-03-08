@@ -26,7 +26,7 @@ export const createApiHandle = <T extends AxiosInstance>(params: {
         return async () => {
           const definition = await loadDefinition();
 
-          return createApiClient<T>({ definition })
+          return createApiClient<T>({ definition });
         };
       }
 
