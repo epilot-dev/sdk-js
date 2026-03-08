@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/partner-directory'
 export type { Client, PathsDictionary, OperationMethods, ActivatePartnerPayload, Address, AddressGeolocation, AssignRolesPayload, Assignable, AssignableEcpPlaceholder, AssignableGroup, AssignableOrganization, AssignablePartnerUser, AssignableUser, BaseAssignable, BaseRoleForCreate, CreatePartnerRolePayload, CreatePartnerUserPayload, EqualsCondition, Geolocation, Grant, GrantCondition, GrantWithDependencies, InviteToken, OrganizationId, Partner, PartnerId, PartnerInvitationPayload, PartnerRole, PartnerUser, RoleId, SearchGeolocation, UpdatePartnerRolePayload, User } from '../types/partner-directory'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/partner-directory.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/partner-directory.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

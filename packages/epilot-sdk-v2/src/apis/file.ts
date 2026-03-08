@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/file'
 export type { Client, PathsDictionary, OperationMethods, ActivityId, BaseEntityAcl, BaseEntityOwner, BatchSaveFileVersionPayload, CommonSaveFilePayload, CustomDownloadUrl, DownloadFilesPayload, EntityId, EntitySlug, ErrorObject, FileAttributes, FileCollectionAttributes, FileCollectionCreateRequest, FileCollectionId, FileCollectionItem, FileEntity, FileEntityId, FileItem, FileRelationItem, FileType, FileUpload, PublicLink, S3Ref, S3Reference, SaveCustomFilePayload, SaveFileFromSourceURLPayload, SaveFilePayload, SaveFilePayloadV2, SaveS3FilePayload, UploadFilePayload, VerifyCustomDownloadUrlPayload } from '../types/file'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/file.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/file.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

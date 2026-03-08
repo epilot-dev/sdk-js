@@ -17,7 +17,7 @@ const { data } = await epilot.customerPortal.upsertPortal(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/customer-portal'
 
-const customerPortalClient = await getClient()
+const customerPortalClient = getClient()
 authorize(customerPortalClient, () => '<token>')
 const { data } = await customerPortalClient.upsertPortal(...)
 ```

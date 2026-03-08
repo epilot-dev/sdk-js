@@ -27,63 +27,64 @@ describe('createApiHandle', () => {
     paths: {},
   } as unknown as Document;
 
-  it('should expose getClient() that returns the singleton', async () => {
+  it('should expose getClient() that returns the singleton', () => {
     const mockClient = createMockClient();
     const handle = createApiHandle({
-      resolveClient: async () => mockClient,
-      loadDefinition: async () => mockDefinition,
+      resolveClient: () => mockClient,
+      createClient: () => mockClient,
     });
 
-    const client = await handle.getClient();
+    const client = handle.getClient();
     expect(client).toBe(mockClient);
   });
 
-  it('should expose createClient() that returns a fresh instance', async () => {
+  it('should expose createClient() that returns a fresh instance', () => {
     const mockClient = createMockClient();
+    const freshClient = createMockClient();
     const handle = createApiHandle({
-      resolveClient: async () => mockClient,
-      loadDefinition: async () => mockDefinition,
+      resolveClient: () => mockClient,
+      createClient: () => freshClient,
     });
 
-    const fresh = await handle.createClient();
+    const fresh = handle.createClient();
     expect(fresh).toBeDefined();
-    // Fresh client is a different instance from the mock (created by createApiClient mock)
+    // Fresh client is a different instance from the singleton
     expect(fresh).not.toBe(mockClient);
   });
 
   it('should proxy operation calls to the lazy singleton', async () => {
     const mockClient = createMockClient();
     const handle = createApiHandle({
-      resolveClient: async () => mockClient,
-      loadDefinition: async () => mockDefinition,
+      resolveClient: () => mockClient,
+      createClient: () => mockClient,
     });
 
     const result = await handle.getEntity({ id: '123' });
     expect(result).toEqual({ data: { id: '123' } });
   });
 
-  it('should call resolveClient for each operation (caching is done by registry)', async () => {
+  it('should call resolveClient for each operation (caching is done by registry)', () => {
     let callCount = 0;
     const mockClient = createMockClient();
     const handle = createApiHandle({
-      resolveClient: async () => {
+      resolveClient: () => {
         callCount++;
         return mockClient;
       },
-      loadDefinition: async () => mockDefinition,
+      createClient: () => mockClient,
     });
 
-    await handle.getEntity({});
-    await handle.listItems({});
-    await handle.getClient();
+    handle.getEntity({});
+    handle.listItems({});
+    handle.getClient();
     // Each call invokes resolveClient — the registry is responsible for caching
     expect(callCount).toBe(3);
   });
 
   it('should NOT be thenable (no accidental await)', () => {
     const handle = createApiHandle({
-      resolveClient: async () => createMockClient(),
-      loadDefinition: async () => mockDefinition,
+      resolveClient: () => createMockClient(),
+      createClient: () => createMockClient(),
     });
 
     expect((handle as any).then).toBeUndefined();

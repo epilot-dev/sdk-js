@@ -17,7 +17,7 @@ const { data } = await epilot.kanban.createKanbanBoard(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/kanban'
 
-const kanbanClient = await getClient()
+const kanbanClient = getClient()
 authorize(kanbanClient, () => '<token>')
 const { data } = await kanbanClient.createKanbanBoard(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.app.getPublicFacingComponent(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/app'
 
-const appClient = await getClient()
+const appClient = getClient()
 authorize(appClient, () => '<token>')
 const { data } = await appClient.getPublicFacingComponent(...)
 ```

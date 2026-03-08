@@ -17,7 +17,7 @@ const { data } = await epilot.billing.getBillingEvents(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/billing'
 
-const billingClient = await getClient()
+const billingClient = getClient()
 authorize(billingClient, () => '<token>')
 const { data } = await billingClient.getBillingEvents(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.purpose.createPurpose(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/purpose'
 
-const purposeClient = await getClient()
+const purposeClient = getClient()
 authorize(purposeClient, () => '<token>')
 const { data } = await purposeClient.createPurpose(...)
 ```

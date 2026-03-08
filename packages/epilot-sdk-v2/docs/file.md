@@ -17,7 +17,7 @@ const { data } = await epilot.file.uploadFileV2(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/file'
 
-const fileClient = await getClient()
+const fileClient = getClient()
 authorize(fileClient, () => '<token>')
 const { data } = await fileClient.uploadFileV2(...)
 ```

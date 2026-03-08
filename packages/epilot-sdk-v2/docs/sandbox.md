@@ -17,7 +17,7 @@ const { data } = await epilot.sandbox.listPipelines(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/sandbox'
 
-const sandboxClient = await getClient()
+const sandboxClient = getClient()
 authorize(sandboxClient, () => '<token>')
 const { data } = await sandboxClient.listPipelines(...)
 ```

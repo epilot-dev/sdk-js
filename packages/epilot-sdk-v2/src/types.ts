@@ -4,7 +4,7 @@ import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
 
 export type ApiEntry = {
-  loader: () => Promise<Document>;
+  loader: () => Document;
   instance: AxiosInstance | null;
 };
 
@@ -29,7 +29,6 @@ export type SDKState = {
   interceptors: Interceptor[];
   retry: RetryConfig;
   largeResponse: LargeResponseConfig;
-  overridesReady: Promise<void>;
 };
 
 export type HeadersConfig = Record<string, string>;
@@ -44,9 +43,9 @@ export type OverridesConfig = Record<string, string>;
  */
 export type ApiHandle<T extends AxiosInstance = AxiosInstance> = {
   /** Get the cached singleton client instance (lazy-initialized on first call) */
-  getClient: () => Promise<T>;
+  getClient: () => T;
   /** Create a fresh client instance (not cached) */
-  createClient: () => Promise<T>;
+  createClient: () => T;
 } & {
   /** Operation methods forwarded to the lazy singleton */
   [K in keyof T]: T[K];

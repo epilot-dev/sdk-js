@@ -17,7 +17,7 @@ const { data } = await epilot.dataManagement.queryEntities(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/data-management'
 
-const dataManagementClient = await getClient()
+const dataManagementClient = getClient()
 authorize(dataManagementClient, () => '<token>')
 const { data } = await dataManagementClient.queryEntities(...)
 ```

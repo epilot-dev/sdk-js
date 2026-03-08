@@ -17,7 +17,7 @@ const { data } = await epilot.journey.getJourneysByOrgId(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/journey'
 
-const journeyClient = await getClient()
+const journeyClient = getClient()
 authorize(journeyClient, () => '<token>')
 const { data } = await journeyClient.getJourneysByOrgId(...)
 ```

@@ -1,4 +1,5 @@
 import type { AxiosInstance } from 'axios';
+import type { Document } from 'openapi-client-axios';
 
 import { createApiClient } from './client-factory';
 import { applyLargeResponseInterceptor } from './large-response';
@@ -10,19 +11,18 @@ export const createRegistry = () => new Map<string, ApiEntry>();
 export const registerApi = (params: {
   registry: Map<string, ApiEntry>;
   name: string;
-  loader: () => Promise<import('openapi-client-axios').Document>;
+  loader: () => Document;
 }) => {
   const { registry, name, loader } = params;
   registry.set(name, { loader, instance: null });
 };
 
-export const resolveClient = async (params: {
+export const resolveClient = (params: {
   registry: Map<string, ApiEntry>;
   name: string;
   state: SDKState;
-}): Promise<AxiosInstance> => {
+}): AxiosInstance => {
   const { registry, name, state } = params;
-  await state.overridesReady;
   const entry = registry.get(name);
 
   if (!entry) {
@@ -31,7 +31,7 @@ export const resolveClient = async (params: {
   }
 
   if (!entry.instance) {
-    const definition = await entry.loader();
+    const definition = entry.loader();
 
     entry.instance = createApiClient({
       definition,

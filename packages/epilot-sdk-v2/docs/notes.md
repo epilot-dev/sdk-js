@@ -17,7 +17,7 @@ const { data } = await epilot.notes.createNote(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/notes'
 
-const notesClient = await getClient()
+const notesClient = getClient()
 authorize(notesClient, () => '<token>')
 const { data } = await notesClient.createNote(...)
 ```

@@ -95,11 +95,11 @@ import { epilot } from '@epilot/sdk'
 epilot.authorize(() => '<my-token>')
 
 // Get the cached singleton client
-const entityClient = await epilot.entity.getClient()
+const entityClient = epilot.entity.getClient()
 const { data } = await entityClient.getEntity({ slug: 'contact', id: '123' })
 
 // Create a fresh (non-singleton) client instance
-const freshClient = await epilot.entity.createClient()
+const freshClient = epilot.entity.createClient()
 authorize(freshClient, () => '<my-token>')
 ```
 
@@ -110,7 +110,7 @@ Import only what you need. Other APIs never touch your bundle.
 ```ts
 import { getClient, authorize } from '@epilot/sdk/entity'
 
-const entityClient = await getClient()
+const entityClient = getClient()
 authorize(entityClient, () => '<my-token>')
 
 const { data } = await entityClient.getEntity({ slug: 'contact', id: '123' })
@@ -135,7 +135,7 @@ The `Client`, `OperationMethods`, and `PathsDictionary` types are also available
 ```ts
 import type { Client } from '@epilot/sdk/entity'
 
-const entityClient: Client = await epilot.entity.getClient()
+const entityClient: Client = epilot.entity.getClient()
 ```
 
 ## Headers
@@ -161,7 +161,7 @@ const { data } = await epilot.entity.searchEntities(...)
 Use standard axios `defaults.headers.common` on individual clients:
 
 ```ts
-const entityClient = await epilot.entity.getClient()
+const entityClient = epilot.entity.getClient()
 entityClient.defaults.headers.common['x-epilot-org-id'] = 'org-123'
 ```
 
@@ -174,7 +174,7 @@ import { authorize } from '@epilot/sdk'
 import { getClient } from '@epilot/sdk/entity'
 
 // Per-client — function predicate (recommended)
-const entityClient = await getClient()
+const entityClient = getClient()
 authorize(entityClient, () => '<my-token>')
 
 // Per-client — async function (e.g. OAuth / session)
@@ -200,7 +200,7 @@ epilot.authorize('my-static-api-token')
 ```ts
 import { createClient, authorize } from '@epilot/sdk/entity'
 
-const entityClient = await createClient()
+const entityClient = createClient()
 authorize(entityClient, () => '<my-token>')
 entityClient.defaults.headers.common['x-epilot-org-id'] = 'org-123'
 ```
@@ -270,7 +270,7 @@ For individually imported clients (tree-shakeable imports), apply the intercepto
 import { getClient, authorize } from '@epilot/sdk/entity'
 import { applyRetryInterceptor } from '@epilot/sdk'
 
-const entityClient = await getClient()
+const entityClient = getClient()
 authorize(entityClient, () => '<my-token>')
 applyRetryInterceptor({ client: entityClient, config: { maxRetries: 3 } })
 ```
@@ -294,7 +294,7 @@ For individually imported clients (tree-shakeable imports), apply the intercepto
 import { getClient, authorize } from '@epilot/sdk/entity'
 import { applyLargeResponseInterceptor } from '@epilot/sdk'
 
-const entityClient = await getClient()
+const entityClient = getClient()
 authorize(entityClient, () => '<my-token>')
 applyLargeResponseInterceptor({ client: entityClient, config: { enabled: true } })
 ```
@@ -306,7 +306,6 @@ Override built-in API specs or register custom APIs via `.epilot/sdk-overrides.j
 ```json
 {
   "entity": "./specs/entity-openapi.json",
-  "pricing": "https://my-dev-server.com/openapi.json",
   "myNewApi": "./specs/my-new-api-openapi.json"
 }
 ```
@@ -332,38 +331,15 @@ npx epilot-sdk typegen
 <details>
 <summary>Migration from <code>@epilot/*-client</code></summary>
 
-### Singleton import
+Drop-in replacement — just change the import path:
 
 ```ts
 // Before
-import { getClient } from '@epilot/entity-client'
-const entityClient = getClient()
+import { getClient, createClient, authorize } from '@epilot/entity-client'
+import type { Client, Entity } from '@epilot/entity-client'
 
 // After
-import { getClient } from '@epilot/sdk/entity'
-const entityClient = await getClient()
-```
-
-### Fresh client
-
-```ts
-// Before
-import { createClient } from '@epilot/entity-client'
-const entityClient = createClient()
-
-// After
-import { createClient } from '@epilot/sdk/entity'
-const entityClient = await createClient()
-```
-
-### Types
-
-```ts
-// Before
-import type { Client, Components } from '@epilot/entity-client'
-type MyEntity = Components.Schemas.Entity
-
-// After
+import { getClient, createClient, authorize } from '@epilot/sdk/entity'
 import type { Client, Entity } from '@epilot/sdk/entity'
 ```
 
@@ -379,7 +355,7 @@ When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `inte
 **Direct `getClient()` references can go stale** — if you hold a reference and then change config, your reference still points to the old client:
 
 ```ts
-const entityClient = await epilot.entity.getClient()
+const entityClient = epilot.entity.getClient()
 
 epilot.authorize('new-token') // invalidates all cached clients
 

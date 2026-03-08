@@ -17,7 +17,7 @@ const { data } = await epilot.pricing.$calculatePricingDetails(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/pricing'
 
-const pricingClient = await getClient()
+const pricingClient = getClient()
 authorize(pricingClient, () => '<token>')
 const { data } = await pricingClient.$calculatePricingDetails(...)
 ```

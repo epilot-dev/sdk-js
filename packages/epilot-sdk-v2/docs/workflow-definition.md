@@ -17,7 +17,7 @@ const { data } = await epilot.workflowDefinition.getMaxAllowedLimit(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/workflow-definition'
 
-const workflowDefinitionClient = await getClient()
+const workflowDefinitionClient = getClient()
 authorize(workflowDefinitionClient, () => '<token>')
 const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 ```

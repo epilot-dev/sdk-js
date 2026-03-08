@@ -17,7 +17,7 @@ const { data } = await epilot.permissions.listCurrentRoles(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/permissions'
 
-const permissionsClient = await getClient()
+const permissionsClient = getClient()
 authorize(permissionsClient, () => '<token>')
 const { data } = await permissionsClient.listCurrentRoles(...)
 ```

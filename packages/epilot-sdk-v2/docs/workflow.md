@@ -17,7 +17,7 @@ const { data } = await epilot.workflow.getExecutions(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/workflow'
 
-const workflowClient = await getClient()
+const workflowClient = getClient()
 authorize(workflowClient, () => '<token>')
 const { data } = await workflowClient.getExecutions(...)
 ```

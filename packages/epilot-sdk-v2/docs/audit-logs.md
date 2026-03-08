@@ -17,7 +17,7 @@ const { data } = await epilot.auditLogs.getLogs(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/audit-logs'
 
-const auditLogsClient = await getClient()
+const auditLogsClient = getClient()
 authorize(auditLogsClient, () => '<token>')
 const { data } = await auditLogsClient.getLogs(...)
 ```

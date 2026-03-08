@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/targeting'
 export type { Client, PathsDictionary, OperationMethods, AutomationRecipientPayload, AutomationStatus, BaseEntityAcl, BaseEntityOwner, BaseError, BaseNanoID, BaseRecipientPayload, BaseRelation, BaseSystemFields, BaseSystemFieldsRequired, BaseSystemId, BaseTags, BaseUUID, Campaign, CampaignStatus, ClientError, CreateRecipientPayload, ExecutionSummaryItem, GetTargetQueriesParams, JobStatus, MatchCampaignParams, MatchTargetParams, PortalRecipientPayload, PortalStatus, Recipient, RetriggerAutomationsRequest, RetriggerAutomationsResult, ServerError, Target, TargetQueryResult, UpdatePortalStatusRequest, UpdateRecipientPayload } from '../types/targeting'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/targeting.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/targeting.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

@@ -17,7 +17,7 @@ const { data } = await epilot.accessToken.createAccessToken(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/access-token'
 
-const accessTokenClient = await getClient()
+const accessTokenClient = getClient()
 authorize(accessTokenClient, () => '<token>')
 const { data } = await accessTokenClient.createAccessToken(...)
 ```

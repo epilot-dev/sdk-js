@@ -17,7 +17,7 @@ const { data } = await epilot.partnerDirectory.approvePartner(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/partner-directory'
 
-const partnerDirectoryClient = await getClient()
+const partnerDirectoryClient = getClient()
 authorize(partnerDirectoryClient, () => '<token>')
 const { data } = await partnerDirectoryClient.approvePartner(...)
 ```

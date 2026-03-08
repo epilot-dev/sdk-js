@@ -17,7 +17,7 @@ const { data } = await epilot.validationRules.getValidationRules(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/validation-rules'
 
-const validationRulesClient = await getClient()
+const validationRulesClient = getClient()
 authorize(validationRulesClient, () => '<token>')
 const { data } = await validationRulesClient.getValidationRules(...)
 ```

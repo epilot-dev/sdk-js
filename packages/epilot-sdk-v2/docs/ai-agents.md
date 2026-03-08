@@ -17,7 +17,7 @@ const { data } = await epilot.aiAgents.createAgent(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/ai-agents'
 
-const aiAgentsClient = await getClient()
+const aiAgentsClient = getClient()
 authorize(aiAgentsClient, () => '<token>')
 const { data } = await aiAgentsClient.createAgent(...)
 ```

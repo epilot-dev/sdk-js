@@ -17,7 +17,7 @@ const { data } = await epilot.targeting.changeCampaignStatus(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/targeting'
 
-const targetingClient = await getClient()
+const targetingClient = getClient()
 authorize(targetingClient, () => '<token>')
 const { data } = await targetingClient.changeCampaignStatus(...)
 ```

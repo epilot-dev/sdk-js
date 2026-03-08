@@ -17,7 +17,7 @@ const { data } = await epilot.deduplication.deduplicate(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/deduplication'
 
-const deduplicationClient = await getClient()
+const deduplicationClient = getClient()
 authorize(deduplicationClient, () => '<token>')
 const { data } = await deduplicationClient.deduplicate(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.entityMapping.storeConfig(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/entity-mapping'
 
-const entityMappingClient = await getClient()
+const entityMappingClient = getClient()
 authorize(entityMappingClient, () => '<token>')
 const { data } = await entityMappingClient.storeConfig(...)
 ```

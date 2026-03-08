@@ -17,7 +17,7 @@ const { data } = await epilot.document.getTemplateMeta(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/document'
 
-const documentClient = await getClient()
+const documentClient = getClient()
 authorize(documentClient, () => '<token>')
 const { data } = await documentClient.getTemplateMeta(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.metering.getCustomerMeters(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/metering'
 
-const meteringClient = await getClient()
+const meteringClient = getClient()
 authorize(meteringClient, () => '<token>')
 const { data } = await meteringClient.getCustomerMeters(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.organization.getCurrentOrganization(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/organization'
 
-const organizationClient = await getClient()
+const organizationClient = getClient()
 authorize(organizationClient, () => '<token>')
 const { data } = await organizationClient.getCurrentOrganization(...)
 ```

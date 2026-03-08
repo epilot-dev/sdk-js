@@ -17,7 +17,7 @@ const { data } = await epilot.emailTemplate.saveTemplate(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/email-template'
 
-const emailTemplateClient = await getClient()
+const emailTemplateClient = getClient()
 authorize(emailTemplateClient, () => '<token>')
 const { data } = await emailTemplateClient.saveTemplate(...)
 ```

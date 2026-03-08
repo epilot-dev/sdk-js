@@ -17,7 +17,7 @@ const { data } = await epilot.environments.listEnvironmentVariables(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/environments'
 
-const environmentsClient = await getClient()
+const environmentsClient = getClient()
 authorize(environmentsClient, () => '<token>')
 const { data } = await environmentsClient.listEnvironmentVariables(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.blueprintManifest.getJob(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/blueprint-manifest'
 
-const blueprintManifestClient = await getClient()
+const blueprintManifestClient = getClient()
 authorize(blueprintManifestClient, () => '<token>')
 const { data } = await blueprintManifestClient.getJob(...)
 ```

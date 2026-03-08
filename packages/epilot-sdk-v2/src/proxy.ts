@@ -1,7 +1,5 @@
 import type { AxiosInstance } from 'axios';
-import type { Document } from 'openapi-client-axios';
 
-import { createApiClient } from './client-factory';
 import type { ApiHandle } from './types';
 
 /**
@@ -9,10 +7,10 @@ import type { ApiHandle } from './types';
  * and forwards any other property access as an operation call on the lazy singleton.
  */
 export const createApiHandle = <T extends AxiosInstance>(params: {
-  resolveClient: () => Promise<T>;
-  loadDefinition: () => Promise<Document>;
+  resolveClient: () => T;
+  createClient: () => T;
 }): ApiHandle<T> => {
-  const { resolveClient, loadDefinition } = params;
+  const { resolveClient, createClient } = params;
 
   return new Proxy({} as ApiHandle<T>, {
     get(_, prop) {
@@ -23,11 +21,7 @@ export const createApiHandle = <T extends AxiosInstance>(params: {
 
       // Fresh (non-singleton) instance
       if (prop === 'createClient') {
-        return async () => {
-          const definition = await loadDefinition();
-
-          return createApiClient<T>({ definition });
-        };
+        return () => createClient();
       }
 
       // Prevent accidental `await epilot.entity` — it's not thenable
@@ -36,15 +30,15 @@ export const createApiHandle = <T extends AxiosInstance>(params: {
       }
 
       // Everything else: forward as operation call on the lazy singleton
-      return (...args: unknown[]) =>
-        resolveClient().then((client) => {
-          const method = (client as Record<string | symbol, unknown>)[prop];
-          if (typeof method === 'function') {
-            return (method as (...a: unknown[]) => unknown).apply(client, args);
-          }
+      return (...args: unknown[]) => {
+        const client = resolveClient();
+        const method = (client as Record<string | symbol, unknown>)[prop];
+        if (typeof method === 'function') {
+          return (method as (...a: unknown[]) => unknown).apply(client, args);
+        }
 
-          return method;
-        });
+        return method;
+      };
     },
   });
 };

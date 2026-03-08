@@ -17,7 +17,7 @@ const { data } = await epilot.erpIntegration.acknowledgeTracking(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/erp-integration'
 
-const erpIntegrationClient = await getClient()
+const erpIntegrationClient = getClient()
 authorize(erpIntegrationClient, () => '<token>')
 const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 ```

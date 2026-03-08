@@ -17,7 +17,7 @@ const { data } = await epilot.automation.searchFlows(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/automation'
 
-const automationClient = await getClient()
+const automationClient = getClient()
 authorize(automationClient, () => '<token>')
 const { data } = await automationClient.searchFlows(...)
 ```

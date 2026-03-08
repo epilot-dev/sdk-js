@@ -17,7 +17,7 @@ const { data } = await epilot.entity.listSchemas(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/entity'
 
-const entityClient = await getClient()
+const entityClient = getClient()
 authorize(entityClient, () => '<token>')
 const { data } = await entityClient.listSchemas(...)
 ```

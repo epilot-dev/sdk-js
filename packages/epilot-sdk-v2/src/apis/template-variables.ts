@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/template-variables'
 export type { Client, PathsDictionary, OperationMethods, CategoryResult, CustomVariable, CustomVariablesSearchParams, ExternalCustomVariable, Language, ReplacementOutput, ReplacementOutputV2, TemplateType, VariableContext, VariableParameters, VariableResult } from '../types/template-variables'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/template-variables.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/template-variables.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

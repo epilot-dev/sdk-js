@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/automation'
 export type { Client, PathsDictionary, OperationMethods, ActionCondition, ActionSchedule, ActionScheduleSource, ActivityId, ActivityTrigger, AnyAction, AnyActionConfig, AnyTrigger, AnythingButCondition, ApiCallerContext, ApiSubmissionTrigger, AppendValueMapper, AssignThreadAction, AssignThreadConfig, AssignUsersToStep, AutomationAction, AutomationActionConfig, AutomationActionExecutionState, AutomationActionId, AutomationExecution, AutomationExecutionId, AutomationFlow, AutomationFlowId, AutomationTrigger, BulkTriggerJob, BulkTriggerRequest, CancellationReason, CartCheckoutAction, CartCheckoutActionConfig, CartCheckoutConfig, Comparison, ConditionStatement, CopyValueMapper, CreateDocumentAction, CreateDocumentActionConfig, CreateDocumentConfig, CustomAction, DiffAdded, DiffDeleted, DiffUpdated, EntityId, EntityItemSnapshot, EntityManualTrigger, EntityOperation, EntityOperationTrigger, EntityRef, EntitySearchFilter, EntitySearchFilterValue, EqualsIgnoreCaseCondition, ErrorCode, ErrorDetail, ErrorObject, ErrorOutput, ExecItem, ExecutionChain, ExecutionStatus, ExistsCondition, FilterConditionOnEvent, FlowExecutionCancelAction, FlowExecutionCancelActionConfig, FlowExecutionCancelConfig, FlowsTrigger, FrontendSubmitTrigger, GetExecutionsResp, InformERPAction, InformERPActionConfig, InformERPConfig, JobId, JourneySubmitTrigger, MapEntityAction, MapEntityActionConfig, MapEntityConfig, MappingAttribute, MappingAttributeMode, MappingAttributeV2, MappingConfigRef, MoveThreadAction, MoveThreadConfig, NewEmailThreadTrigger, NumericCondition, OperationNode, OperationObjectNode, OrCondition, OrConditionForDiff, OrganizationId, PatchBulkJobRequest, PrefixCondition, PrimitiveJSONValue, ReceivedEmailTrigger, RelationAttribute, ResumeReq, ResumeResp, ResumeToken, RetryReq, RetryStrategy, SearchAutomationsResp, SendEmailAction, SendEmailActionConfig, SendEmailCondition, SendEmailConfig, SetValueMapper, StartExecutionRequest, SuffixCondition, TriggerCondition, TriggerContext, TriggerEventAction, TriggerEventActionConfig, TriggerEventConfig, TriggerEventEntityActivity, TriggerEventEntityOperation, TriggerEventFlowAutomationTask, TriggerEventManual, TriggerEventMessaging, TriggerShareEntityAction, TriggerShareEntityActionConfig, TriggerShareEntityConfig, TriggerWebhookAction, TriggerWebhookActionConfig, TriggerWebhookConfig, TriggerWorkflowAction, TriggerWorkflowActionConfig, TriggerWorkflowCondition, TriggerWorkflowConfig, WildcardCondition, WorkflowContext, WorkflowContextRole, WorkflowExecutionContext } from '../types/automation'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/automation.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/automation.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

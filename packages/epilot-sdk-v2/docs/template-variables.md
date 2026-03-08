@@ -17,7 +17,7 @@ const { data } = await epilot.templateVariables.getCategories(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/template-variables'
 
-const templateVariablesClient = await getClient()
+const templateVariablesClient = getClient()
 authorize(templateVariablesClient, () => '<token>')
 const { data } = await templateVariablesClient.getCategories(...)
 ```

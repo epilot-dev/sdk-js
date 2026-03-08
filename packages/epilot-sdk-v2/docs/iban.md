@@ -17,7 +17,7 @@ const { data } = await epilot.iban.validateIban(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/iban'
 
-const ibanClient = await getClient()
+const ibanClient = getClient()
 authorize(ibanClient, () => '<token>')
 const { data } = await ibanClient.validateIban(...)
 ```

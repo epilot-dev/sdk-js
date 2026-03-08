@@ -17,7 +17,7 @@ const { data } = await epilot.message.sendMessage(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/message'
 
-const messageClient = await getClient()
+const messageClient = getClient()
 authorize(messageClient, () => '<token>')
 const { data } = await messageClient.sendMessage(...)
 ```

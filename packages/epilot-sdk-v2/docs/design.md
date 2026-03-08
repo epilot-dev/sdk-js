@@ -17,7 +17,7 @@ const { data } = await epilot.design.getAllDesigns(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/design'
 
-const designClient = await getClient()
+const designClient = getClient()
 authorize(designClient, () => '<token>')
 const { data } = await designClient.getAllDesigns(...)
 ```

@@ -17,7 +17,7 @@ const { data } = await epilot.user.signUpUser(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/user'
 
-const userClient = await getClient()
+const userClient = getClient()
 authorize(userClient, () => '<token>')
 const { data } = await userClient.signUpUser(...)
 ```

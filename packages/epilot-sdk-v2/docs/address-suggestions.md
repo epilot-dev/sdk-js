@@ -17,7 +17,7 @@ const { data } = await epilot.addressSuggestions.getAddresses(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/address-suggestions'
 
-const addressSuggestionsClient = await getClient()
+const addressSuggestionsClient = getClient()
 authorize(addressSuggestionsClient, () => '<token>')
 const { data } = await addressSuggestionsClient.getAddresses(...)
 ```

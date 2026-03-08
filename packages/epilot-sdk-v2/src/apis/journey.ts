@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/journey'
 export type { Client, PathsDictionary, OperationMethods, ButtonOption, GenerateDocumentRequest, GenerateDocumentResponse, GetJourneysResponse, GetSettingsForJourney, Journey, JourneyAuditInfo, JourneyCreationRequest, JourneyCreationRequestV2, JourneyFeatureFlags, JourneyProductsResponse, JourneyResponse, PatchUpdateJourneyRequest, RuleRef, S3Reference, SearchJourneysQueryRequest, SearchJourneysResponse, TemplateSettings, ValidationRuleRef } from '../types/journey'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/journey.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/journey.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

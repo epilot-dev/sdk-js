@@ -17,7 +17,7 @@ const { data } = await epilot.emailSettings.provisionEpilotEmailAddress(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/email-settings'
 
-const emailSettingsClient = await getClient()
+const emailSettingsClient = getClient()
 authorize(emailSettingsClient, () => '<token>')
 const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 ```

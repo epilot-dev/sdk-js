@@ -17,7 +17,7 @@ const { data } = await epilot.submission.createSubmission(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/submission'
 
-const submissionClient = await getClient()
+const submissionClient = getClient()
 authorize(submissionClient, () => '<token>')
 const { data } = await submissionClient.createSubmission(...)
 ```

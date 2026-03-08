@@ -1,3 +1,6 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import type { Document } from 'openapi-client-axios';
 
 import { registerApi } from './registry';
@@ -7,38 +10,32 @@ const OVERRIDES_PATH = '.epilot/sdk-overrides.json';
 
 let _loaded = false;
 
-const createSpecLoader = (specPath: string, baseDir: string): (() => Promise<Document>) => {
-  if (specPath.startsWith('http://') || specPath.startsWith('https://')) {
-    return async () => {
-      const response = await fetch(specPath);
-      return (await response.json()) as Document;
-    };
-  }
+const createSpecLoader = (specPath: string, baseDir: string): (() => Document) => {
+  let cached: Document | null = null;
 
-  return async () => {
-    const { readFileSync } = await import('node:fs');
-    const { resolve } = await import('node:path');
-    const absolutePath = resolve(baseDir, specPath);
-    const content = readFileSync(absolutePath, 'utf-8');
-    return JSON.parse(content) as Document;
+  return () => {
+    if (cached) return cached;
+
+    const absolutePath = path.resolve(baseDir, specPath);
+    const content = fs.readFileSync(absolutePath, 'utf-8');
+    cached = JSON.parse(content) as Document;
+
+    return cached;
   };
 };
 
 /**
- * Lazily loads overrides from .epilot/sdk-overrides.json.
+ * Loads overrides from .epilot/sdk-overrides.json synchronously.
  * Only performs filesystem reads on first call - subsequent calls are no-ops.
- * Safe to call in browser environments (fs import is deferred).
+ * Safe to call in browser environments (fs access is guarded).
  */
-export const loadOverrides = async (registry: Map<string, ApiEntry>) => {
+export const loadOverrides = (registry: Map<string, ApiEntry>) => {
   if (_loaded) return;
   _loaded = true;
 
   try {
     // Guard against browser environments
     if (typeof process === 'undefined' || typeof process.cwd !== 'function') return;
-
-    const fs = await import('node:fs');
-    const path = await import('node:path');
 
     // Search up from cwd for overrides file
     let dir = process.cwd();

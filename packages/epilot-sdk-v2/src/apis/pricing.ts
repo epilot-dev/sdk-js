@@ -8,16 +8,17 @@ export type { TokenArg } from '../authorize'
 import type { Client } from '../types/pricing'
 export type { Client, PathsDictionary, OperationMethods, Address, Amounts, AvailabilityCheckParams, AvailabilityFilters, AvailabilityLocation, AvailabilityResult, AverageMarketPriceRecord, AverageMarketPriceResult, BaseCompositePrice, BaseCouponCommon, BaseMarketPriceRecord, BasePriceItem, BasePriceItemCommon, BasePriceItemDto, BasicAuthCredentials, BasicAuthIntegration, BillingPeriod, CartDto, CashbackAmount, CashbackAmounts, CashbackPeriod, CatalogSearch, CatalogSearchResult, CheckoutCart, CheckoutCartResult, CheckoutMode, CompositePrice, CompositePriceItem, CompositePriceItemDto, ComputePriceParams, ComputePriceParamsBase, ComputePriceParamsGas, ComputePriceParamsPower, ComputePriceResult, ComputedBasePrice, ComputedPriceBreakdown, ComputedPriceComponents, ConsumptionTypeGetAg, Coupon, CouponItem, CouponWithoutPromoCodes, Currency, CustomContext, Customer, DiscountAmounts, DynamicTariffInterval, DynamicTariffMode, EntityId, EntityItem, EntityRelation, Error, ExternalCatalogConfigurationRequest, ExternalCatalogCustomRequest, ExternalCatalogItem, ExternalCatalogJourneyRequest, ExternalCatalogPortalRequest, ExternalCatalogRequest, ExternalFeeMapping, ExternalFeeMappings, ExternalFeeMetadata, ExternalPriceMetadata, File, GasConcessionType, HistoricMarketPriceRecord, HistoricMarketPricesResult, HydratedCompositePrice, IntegrationAuthCredentials, IntegrationCredentialsResult, IntegrationId, JourneyContext, MarkupPricingModel, MetaData, NonHydratedCompositePrice, OAuthCredentials, OAuthIntegration, Offer, Opportunity, OpportunitySource, Order, OrderPayload, OrderRelation, OrderSource, OrderStatus, PaymentMethod, PortalContext, PowerMeterType, Price, PriceAmounts, PriceComponentRelation, PriceConditions, PriceDynamicTariff, PriceGetAg, PriceInputMapping, PriceInputMappings, PriceItem, PriceItemDto, PriceItemDtoUnion, PriceItems, PriceItemsDto, PriceTier, PriceTierDisplayMode, PricingDetails, PricingDetailsResponse, PricingModel, Product, ProductCategory, ProductRecommendation, ProductRecommendationResponse, ProductRecommendationSearch, PromoCode, PromoCodeValidationResponse, Provider, RecurrenceAmount, RecurrenceAmountDto, RecurrenceAmountWithTax, RedeemedPromo, SalesTax, SaveIntegrationCredentialsParams, SearchExternalCatalogParams, SearchExternalCatalogRecommendationsResult, SearchExternalCatalogResult, SearchProvidersParams, SearchProvidersResult, SearchStreetsParams, SearchStreetsResult, SignatureMeta, SpotMarketBiddingZone, SpotMarketDataFrequency, SpotMarketType, Street, TariffTypeGetAg, Tax, TaxAmount, TaxAmountBreakdown, TaxAmountDto, TaxBreakdownInfo, TierDetails, TotalDetails, TypeGetAg, ValidateAvailabilityFileError, ValidateAvailabilityFileResult } from '../types/pricing'
 
-const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/pricing.json')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const loadDefinition = (): Document => {
+  const mod = require('../definitions/pricing.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
 let _instance: Client | null = null
 
-const resolve = async (): Promise<Client> => {
+const resolve = (): Client => {
   if (!_instance) {
-    const definition = await loadDefinition()
+    const definition = loadDefinition()
     _instance = createApiClient<Client>({ definition })
   }
   return _instance
@@ -25,7 +26,7 @@ const resolve = async (): Promise<Client> => {
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  loadDefinition,
+  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
 })
 
 /** Get the cached singleton client (lazy-initialized on first call) */

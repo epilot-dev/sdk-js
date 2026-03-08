@@ -17,7 +17,7 @@ const { data } = await epilot.eventCatalog.listEvents(...)
 ```ts
 import { getClient, authorize } from '@epilot/sdk/event-catalog'
 
-const eventCatalogClient = await getClient()
+const eventCatalogClient = getClient()
 authorize(eventCatalogClient, () => '<token>')
 const { data } = await eventCatalogClient.listEvents(...)
 ```
