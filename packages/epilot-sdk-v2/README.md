@@ -33,6 +33,61 @@ const { data: executions } = await epilot.workflow.getExecutions()
 
 API clients are built on [openapi-client-axios](https://openapistack.co/docs/openapi-client-axios/intro/), which generates fully typed operation methods on top of regular [axios](https://axios-http.com/docs/intro) instances. All standard axios features (interceptors, defaults, config) work as expected. Each operation is forwarded to a lazy singleton — the spec is loaded and the client initialized on first use, then cached.
 
+Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
+
+## API Reference
+
+<!-- api-reference-table -->
+| API | Import | Docs |
+| --- | ------ | ---- |
+| `epilot.accessToken` | `@epilot/sdk/access-token` | [docs](./docs/access-token.md) |
+| `epilot.address` | `@epilot/sdk/address` | [docs](./docs/address.md) |
+| `epilot.addressSuggestions` | `@epilot/sdk/address-suggestions` | [docs](./docs/address-suggestions.md) |
+| `epilot.aiAgents` | `@epilot/sdk/ai-agents` | [docs](./docs/ai-agents.md) |
+| `epilot.app` | `@epilot/sdk/app` | [docs](./docs/app.md) |
+| `epilot.auditLogs` | `@epilot/sdk/audit-logs` | [docs](./docs/audit-logs.md) |
+| `epilot.automation` | `@epilot/sdk/automation` | [docs](./docs/automation.md) |
+| `epilot.billing` | `@epilot/sdk/billing` | [docs](./docs/billing.md) |
+| `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./docs/blueprint-manifest.md) |
+| `epilot.consent` | `@epilot/sdk/consent` | [docs](./docs/consent.md) |
+| `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./docs/customer-portal.md) |
+| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./docs/data-management.md) |
+| `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./docs/deduplication.md) |
+| `epilot.design` | `@epilot/sdk/design` | [docs](./docs/design.md) |
+| `epilot.discussion` | `@epilot/sdk/discussion` | [docs](./docs/discussion.md) |
+| `epilot.document` | `@epilot/sdk/document` | [docs](./docs/document.md) |
+| `epilot.emailSettings` | `@epilot/sdk/email-settings` | [docs](./docs/email-settings.md) |
+| `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./docs/email-template.md) |
+| `epilot.entity` | `@epilot/sdk/entity` | [docs](./docs/entity.md) |
+| `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./docs/entity-mapping.md) |
+| `epilot.environments` | `@epilot/sdk/environments` | [docs](./docs/environments.md) |
+| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./docs/erp-integration.md) |
+| `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./docs/event-catalog.md) |
+| `epilot.file` | `@epilot/sdk/file` | [docs](./docs/file.md) |
+| `epilot.iban` | `@epilot/sdk/iban` | [docs](./docs/iban.md) |
+| `epilot.journey` | `@epilot/sdk/journey` | [docs](./docs/journey.md) |
+| `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./docs/kanban.md) |
+| `epilot.message` | `@epilot/sdk/message` | [docs](./docs/message.md) |
+| `epilot.metering` | `@epilot/sdk/metering` | [docs](./docs/metering.md) |
+| `epilot.notes` | `@epilot/sdk/notes` | [docs](./docs/notes.md) |
+| `epilot.notification` | `@epilot/sdk/notification` | [docs](./docs/notification.md) |
+| `epilot.organization` | `@epilot/sdk/organization` | [docs](./docs/organization.md) |
+| `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./docs/partner-directory.md) |
+| `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./docs/permissions.md) |
+| `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./docs/pricing.md) |
+| `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./docs/pricing-tier.md) |
+| `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./docs/purpose.md) |
+| `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./docs/sandbox.md) |
+| `epilot.submission` | `@epilot/sdk/submission` | [docs](./docs/submission.md) |
+| `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./docs/targeting.md) |
+| `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./docs/template-variables.md) |
+| `epilot.user` | `@epilot/sdk/user` | [docs](./docs/user.md) |
+| `epilot.validationRules` | `@epilot/sdk/validation-rules` | [docs](./docs/validation-rules.md) |
+| `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./docs/webhooks.md) |
+| `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./docs/workflow.md) |
+| `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./docs/workflow-definition.md) |
+<!-- /api-reference-table -->
+
 ## Explicit Client Access
 
 ```ts
@@ -336,59 +391,3 @@ epilot.authorize('new-token') // invalidates all cached clients
 If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
 
 </details>
-
-
-## API Reference
-
-Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
-
-## Available APIs
-
-| API | Import | Docs |
-| --- | ------ | ---- |
-| `epilot.accessToken` | `@epilot/sdk/access-token` | [docs](./docs/access-token.md) |
-| `epilot.address` | `@epilot/sdk/address` | [docs](./docs/address.md) |
-| `epilot.addressSuggestions` | `@epilot/sdk/address-suggestions` | [docs](./docs/address-suggestions.md) |
-| `epilot.aiAgents` | `@epilot/sdk/ai-agents` | [docs](./docs/ai-agents.md) |
-| `epilot.app` | `@epilot/sdk/app` | [docs](./docs/app.md) |
-| `epilot.auditLogs` | `@epilot/sdk/audit-logs` | [docs](./docs/audit-logs.md) |
-| `epilot.automation` | `@epilot/sdk/automation` | [docs](./docs/automation.md) |
-| `epilot.billing` | `@epilot/sdk/billing` | [docs](./docs/billing.md) |
-| `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./docs/blueprint-manifest.md) |
-| `epilot.consent` | `@epilot/sdk/consent` | [docs](./docs/consent.md) |
-| `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./docs/customer-portal.md) |
-| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./docs/data-management.md) |
-| `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./docs/deduplication.md) |
-| `epilot.design` | `@epilot/sdk/design` | [docs](./docs/design.md) |
-| `epilot.discussion` | `@epilot/sdk/discussion` | [docs](./docs/discussion.md) |
-| `epilot.document` | `@epilot/sdk/document` | [docs](./docs/document.md) |
-| `epilot.emailSettings` | `@epilot/sdk/email-settings` | [docs](./docs/email-settings.md) |
-| `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./docs/email-template.md) |
-| `epilot.entity` | `@epilot/sdk/entity` | [docs](./docs/entity.md) |
-| `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./docs/entity-mapping.md) |
-| `epilot.environments` | `@epilot/sdk/environments` | [docs](./docs/environments.md) |
-| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./docs/erp-integration.md) |
-| `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./docs/event-catalog.md) |
-| `epilot.file` | `@epilot/sdk/file` | [docs](./docs/file.md) |
-| `epilot.iban` | `@epilot/sdk/iban` | [docs](./docs/iban.md) |
-| `epilot.journey` | `@epilot/sdk/journey` | [docs](./docs/journey.md) |
-| `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./docs/kanban.md) |
-| `epilot.message` | `@epilot/sdk/message` | [docs](./docs/message.md) |
-| `epilot.metering` | `@epilot/sdk/metering` | [docs](./docs/metering.md) |
-| `epilot.notes` | `@epilot/sdk/notes` | [docs](./docs/notes.md) |
-| `epilot.notification` | `@epilot/sdk/notification` | [docs](./docs/notification.md) |
-| `epilot.organization` | `@epilot/sdk/organization` | [docs](./docs/organization.md) |
-| `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./docs/partner-directory.md) |
-| `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./docs/permissions.md) |
-| `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./docs/pricing.md) |
-| `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./docs/pricing-tier.md) |
-| `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./docs/purpose.md) |
-| `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./docs/sandbox.md) |
-| `epilot.submission` | `@epilot/sdk/submission` | [docs](./docs/submission.md) |
-| `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./docs/targeting.md) |
-| `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./docs/template-variables.md) |
-| `epilot.user` | `@epilot/sdk/user` | [docs](./docs/user.md) |
-| `epilot.validationRules` | `@epilot/sdk/validation-rules` | [docs](./docs/validation-rules.md) |
-| `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./docs/webhooks.md) |
-| `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./docs/workflow.md) |
-| `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./docs/workflow-definition.md) |

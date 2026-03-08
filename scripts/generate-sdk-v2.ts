@@ -765,6 +765,37 @@ const generateDocs = (clients: ClientInfo[]) => {
   return validClients.length;
 };
 
+const generateApiTableRows = (clients: ClientInfo[], docsPrefix: string): string => {
+  const header = `| API | Import | Docs |\n| --- | ------ | ---- |`;
+  const rows = clients.map(
+    (c) => `| \`epilot.${c.apiName}\` | \`@epilot/sdk/${c.kebabName}\` | [docs](${docsPrefix}${c.kebabName}.md) |`,
+  );
+  return `${header}\n${rows.join('\n')}`;
+};
+
+const updateApiReferenceTables = (clients: ClientInfo[]) => {
+  const START_MARKER = '<!-- api-reference-table -->';
+  const END_MARKER = '<!-- /api-reference-table -->';
+
+  const files = [
+    { path: resolve(ROOT, 'README.md'), docsPrefix: './packages/epilot-sdk-v2/docs/' },
+    { path: resolve(V2_DIR, 'README.md'), docsPrefix: './docs/' },
+  ];
+
+  for (const { path, docsPrefix } of files) {
+    if (!existsSync(path)) continue;
+
+    const content = readFileSync(path, 'utf-8');
+    const startIdx = content.indexOf(START_MARKER);
+    const endIdx = content.indexOf(END_MARKER);
+    if (startIdx === -1 || endIdx === -1) continue;
+
+    const table = generateApiTableRows(clients, docsPrefix);
+    const updated = content.substring(0, startIdx + START_MARKER.length) + '\n' + table + '\n' + content.substring(endIdx);
+    writeFileSync(path, updated);
+  }
+};
+
 const main = () => {
   console.log('Discovering clients...');
   const clients = discoverClients();
@@ -804,6 +835,9 @@ const main = () => {
 
   console.log('Generating docs...');
   const docCount = generateDocs(clients);
+
+  console.log('Updating API reference tables in READMEs...');
+  updateApiReferenceTables(validClients);
 
   console.log(`\nGenerated:`);
   console.log(`  - ${validClients.length} definition files`);
