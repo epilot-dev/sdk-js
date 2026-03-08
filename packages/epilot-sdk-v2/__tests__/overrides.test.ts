@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { loadOverrides, _resetOverrides } from '../src/overrides';
+import { _resetOverrides } from '../src/overrides';
 import { createRegistry, registerApi, resolveClient } from '../src/registry';
 import type { ApiEntry, SDKState } from '../src/types';
 
@@ -134,10 +134,14 @@ describe('loadOverrides', () => {
     vi.doMock('node:fs', () => ({
       default: {
         existsSync: () => false,
-        readFileSync: () => { throw new Error('should not be called'); },
+        readFileSync: () => {
+          throw new Error('should not be called');
+        },
       },
       existsSync: () => false,
-      readFileSync: () => { throw new Error('should not be called'); },
+      readFileSync: () => {
+        throw new Error('should not be called');
+      },
     }));
 
     vi.doMock('node:path', async () => {
