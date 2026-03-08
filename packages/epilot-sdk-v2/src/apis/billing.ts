@@ -1,60 +1,41 @@
-import type { Document } from 'openapi-client-axios';
+import type { Document } from 'openapi-client-axios'
 
-import { createApiClient } from '../client-factory';
-import { createApiHandle } from '../proxy';
-import type { ApiHandle } from '../types';
-
-export type { TokenArg } from '../authorize';
-export { authorize } from '../authorize';
-
-import type { Client } from '../types/billing';
-
-export type {
-  Balance,
-  BaseBillingEvent,
-  BaseEntity,
-  BillingEvent,
-  Client,
-  Contract,
-  ContractItem,
-  Currency,
-  EntityId,
-  EntityRelationItem,
-  EntitySlug,
-  InstallmentEvent,
-  OperationMethods,
-  PathsDictionary,
-  ReimbursementEvent,
-} from '../types/billing';
+import { createApiClient } from '../client-factory'
+import { createApiHandle } from '../proxy'
+import type { ApiHandle } from '../types'
+export { authorize } from '../authorize'
+export type { TokenArg } from '../authorize'
+import type { Client } from '../types/billing'
+export type { Client, PathsDictionary, OperationMethods, Balance, BaseBillingEvent, BaseEntity, BillingEvent, Contract, ContractItem, Currency, EntityId, EntityRelationItem, EntitySlug, InstallmentEvent, ReimbursementEvent } from '../types/billing'
 
 const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/billing.json');
-  return (mod.default ?? mod) as unknown as Document;
-};
+  const mod = await import('../definitions/billing.json')
+  return (mod.default ?? mod) as unknown as Document
+}
 
-let _instance: Client | null = null;
+let _instance: Client | null = null
 
 const resolve = async (): Promise<Client> => {
   if (!_instance) {
-    const definition = await loadDefinition();
-    _instance = createApiClient<Client>({ definition });
+    const definition = await loadDefinition()
+    _instance = createApiClient<Client>({ definition })
   }
-  return _instance;
-};
+  return _instance
+}
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
   loadDefinition,
-});
+})
 
 /** Get the cached singleton client (lazy-initialized on first call) */
-export const getClient = _handle.getClient;
+export const getClient = _handle.getClient
 
 /** Create a fresh client instance (not cached) */
-export const createClient = _handle.createClient;
+export const createClient = _handle.createClient
 
 /**
  * API handle — also exposes operations directly:
  * `billing.someOperation(...)` calls forwarded to lazy singleton
  */
-export const billing = _handle;
+export const billing = _handle

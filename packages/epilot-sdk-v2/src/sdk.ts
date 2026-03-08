@@ -6,6 +6,7 @@ import type { SDKClientMap } from './client-map';
 import { loadOverrides } from './overrides';
 import { createApiHandle } from './proxy';
 import { createRegistry, resetAllClients, resolveClient } from './registry';
+import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
 import type { ApiHandle, HeadersConfig, SDKState } from './types';
 
@@ -23,6 +24,8 @@ export type EpilotSDK = {
   interceptors: InterceptorUse;
   /** Configure retry behavior for 429 Too Many Requests responses */
   retry: (config: RetryConfig) => void;
+  /** Configure large response handling for S3-backed payloads */
+  largeResponse: (config: LargeResponseConfig) => void;
 } & {
   [K in keyof SDKClientMap]: ApiHandle<SDKClientMap[K]>;
 } & Record<string, ApiHandle<AxiosInstance>>;
@@ -35,6 +38,7 @@ export const createSDK = (): EpilotSDK => {
     globalHeaders: {},
     interceptors: [],
     retry: { maxRetries: 3 },
+    largeResponse: { enabled: true },
   };
 
   registerBuiltinApis(registry);
@@ -79,6 +83,12 @@ export const createSDK = (): EpilotSDK => {
         case 'retry':
           return (config: RetryConfig) => {
             Object.assign(state.retry, config);
+            resetAllClients(registry);
+          };
+
+        case 'largeResponse':
+          return (config: LargeResponseConfig) => {
+            Object.assign(state.largeResponse, config);
             resetAllClients(registry);
           };
 

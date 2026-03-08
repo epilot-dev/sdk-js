@@ -31,7 +31,7 @@ const { data: file } = await epilot.file.getFile({ id: 'file-123' })
 const { data: executions } = await epilot.workflow.getExecutions()
 ```
 
-Operations are forwarded to a lazy singleton — the OpenAPI spec is loaded and the client initialized on first use, then cached.
+API clients are built on [openapi-client-axios](https://openapistack.co/docs/openapi-client-axios/intro/), which generates fully typed operation methods on top of regular [axios](https://axios-http.com/docs/intro) instances. All standard axios features (interceptors, defaults, config) work as expected. Each operation is forwarded to a lazy singleton — the spec is loaded and the client initialized on first use, then cached.
 
 ## Explicit Client Access
 
@@ -64,6 +64,24 @@ const { data } = await entityClient.getEntity({ slug: 'contact', id: '123' })
 // Or use the handle for direct operation forwarding
 import { entity } from '@epilot/sdk/entity'
 const { data } = await entity.getEntity({ slug: 'contact', id: '123' })
+```
+
+## Types
+
+Each API subpath re-exports all schema types generated from the OpenAPI spec. Import them directly:
+
+```ts
+import type { Entity, EntitySchema, RelationAttribute } from '@epilot/sdk/entity'
+import type { FileItem } from '@epilot/sdk/file'
+import type { AutomationFlow } from '@epilot/sdk/automation'
+```
+
+The `Client`, `OperationMethods`, and `PathsDictionary` types are also available for typing client instances:
+
+```ts
+import type { Client } from '@epilot/sdk/entity'
+
+const entityClient: Client = await epilot.entity.getClient()
 ```
 
 ## Headers
@@ -134,6 +152,62 @@ epilot.interceptors.request((config) => {
   config.headers['x-trace-id'] = generateTraceId()
   return config
 })
+```
+
+### Auto-Retry (429 Too Many Requests)
+
+The SDK automatically retries requests that receive a `429 Too Many Requests` response. It respects the `Retry-After` header (in seconds) to determine how long to wait before retrying.
+
+Enabled by default with up to 3 retries.
+
+```ts
+import { epilot } from '@epilot/sdk'
+
+// Customize retry behavior
+epilot.retry({ maxRetries: 5, defaultDelayMs: 2000 })
+
+// Disable retries
+epilot.retry({ maxRetries: 0 })
+```
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `maxRetries` | `3` | Maximum number of retries. Set to `0` to disable. |
+| `defaultDelayMs` | `1000` | Fallback delay in ms when `Retry-After` header is missing. |
+
+For individually imported clients (tree-shakeable imports), apply the interceptor manually:
+
+```ts
+import { getClient, authorize } from '@epilot/sdk/entity'
+import { applyRetryInterceptor } from '@epilot/sdk'
+
+const entityClient = await getClient()
+authorize(entityClient, () => '<my-token>')
+applyRetryInterceptor({ client: entityClient, config: { maxRetries: 3 } })
+```
+
+### Large Response Handling (413 Payload Too Large)
+
+epilot APIs use a [large response middleware](https://github.com/epilot-dev/aws-lambda-utility-middlewares) to work around the AWS Lambda 6MB response limit. When a response exceeds ~5.1MB, the API uploads the payload to S3 and returns a presigned URL instead.
+
+The SDK handles this transparently — it sends the opt-in `Accept` header and automatically fetches the full payload from S3 when a large response URL is returned. Enabled by default.
+
+```ts
+import { epilot } from '@epilot/sdk'
+
+// Disable large response handling
+epilot.largeResponse({ enabled: false })
+```
+
+For individually imported clients (tree-shakeable imports), apply the interceptor manually:
+
+```ts
+import { getClient, authorize } from '@epilot/sdk/entity'
+import { applyLargeResponseInterceptor } from '@epilot/sdk'
+
+const entityClient = await getClient()
+authorize(entityClient, () => '<my-token>')
+applyLargeResponseInterceptor({ client: entityClient, config: { enabled: true } })
 ```
 
 ### Backend Internal Calls (Pass Headers)
@@ -241,6 +315,25 @@ import type { Client, Components } from '@epilot/entity-client'
 // After (Client, OperationMethods, PathsDictionary are re-exported)
 import type { Client } from '@epilot/sdk/entity'
 ```
+
+## Client Lifecycle
+
+When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `interceptors`, the SDK invalidates all cached client instances. The next operation call creates a fresh client with the updated configuration.
+
+**Proxy operations are always up to date** — calls like `epilot.entity.getEntity(...)` re-resolve the client on every invocation, so they always use the latest config.
+
+**Direct `getClient()` references can go stale** — if you hold a reference and then change config, your reference still points to the old client:
+
+```ts
+const client = await epilot.entity.getClient()
+
+epilot.authorize('new-token') // invalidates all cached clients
+
+// client still has the old token
+// epilot.entity.getEntity(...) will use a new client with the new token
+```
+
+If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
 
 ## API Reference
 

@@ -1,5 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import type { Document } from 'openapi-client-axios';
+import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
 
 export type ApiEntry = {
@@ -19,6 +20,7 @@ export type SDKState = {
   globalHeaders: Record<string, string>;
   interceptors: Interceptor[];
   retry: RetryConfig;
+  largeResponse: LargeResponseConfig;
 };
 
 export type HeadersConfig = Record<string, string>;

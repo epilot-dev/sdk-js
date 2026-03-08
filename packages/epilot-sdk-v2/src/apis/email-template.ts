@@ -1,76 +1,41 @@
-import type { Document } from 'openapi-client-axios';
+import type { Document } from 'openapi-client-axios'
 
-import { createApiClient } from '../client-factory';
-import { createApiHandle } from '../proxy';
-import type { ApiHandle } from '../types';
-
-export type { TokenArg } from '../authorize';
-export { authorize } from '../authorize';
-
-import type { Client } from '../types/email-template';
-
-export type {
-  ApproveAction,
-  ApprovedAt,
-  AsyncEmailTemplateResponse,
-  Attachment,
-  AttachmentResponse,
-  BaseEntity,
-  BulkSendMessageJob,
-  BulkSendMessageRequest,
-  BulkSendMessageRequestWithQuery,
-  Client,
-  CreatedAt,
-  CreatedBy,
-  CreateSystemTemplatesReq,
-  CreateSystemTemplatesResp,
-  CustomVariables,
-  EmailTemplateEntity,
-  EmailTemplateRequest,
-  EmailTemplateResponse,
-  From,
-  OperationMethods,
-  OrgId,
-  PathsDictionary,
-  PresignedRequest,
-  PresignedResponse,
-  SkipCreatingEntities,
-  TaskToken,
-  TemplateType,
-  To,
-  UpdatedAt,
-  UserResponse,
-  VariableParameters,
-} from '../types/email-template';
+import { createApiClient } from '../client-factory'
+import { createApiHandle } from '../proxy'
+import type { ApiHandle } from '../types'
+export { authorize } from '../authorize'
+export type { TokenArg } from '../authorize'
+import type { Client } from '../types/email-template'
+export type { Client, PathsDictionary, OperationMethods, ApproveAction, ApprovedAt, AsyncEmailTemplateResponse, Attachment, AttachmentResponse, BaseEntity, BulkSendMessageJob, BulkSendMessageRequest, BulkSendMessageRequestWithQuery, CreateSystemTemplatesReq, CreateSystemTemplatesResp, CreatedAt, CreatedBy, CustomVariables, EmailTemplateEntity, EmailTemplateRequest, EmailTemplateResponse, From, OrgId, PresignedRequest, PresignedResponse, SkipCreatingEntities, TaskToken, TemplateType, To, UpdatedAt, UserResponse, VariableParameters } from '../types/email-template'
 
 const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/email-template.json');
-  return (mod.default ?? mod) as unknown as Document;
-};
+  const mod = await import('../definitions/email-template.json')
+  return (mod.default ?? mod) as unknown as Document
+}
 
-let _instance: Client | null = null;
+let _instance: Client | null = null
 
 const resolve = async (): Promise<Client> => {
   if (!_instance) {
-    const definition = await loadDefinition();
-    _instance = createApiClient<Client>({ definition });
+    const definition = await loadDefinition()
+    _instance = createApiClient<Client>({ definition })
   }
-  return _instance;
-};
+  return _instance
+}
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
   loadDefinition,
-});
+})
 
 /** Get the cached singleton client (lazy-initialized on first call) */
-export const getClient = _handle.getClient;
+export const getClient = _handle.getClient
 
 /** Create a fresh client instance (not cached) */
-export const createClient = _handle.createClient;
+export const createClient = _handle.createClient
 
 /**
  * API handle — also exposes operations directly:
  * `emailTemplate.someOperation(...)` calls forwarded to lazy singleton
  */
-export const emailTemplate = _handle;
+export const emailTemplate = _handle

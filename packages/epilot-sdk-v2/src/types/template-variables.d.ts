@@ -10,1290 +10,1298 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
-  namespace Schemas {
-    export interface CategoryResult {
-      /**
-       * example:
-       * contact
-       */
-      category?: string;
-      /**
-       * example:
-       * Contact
-       */
-      description?: string;
-    }
-    export interface CustomVariable {
-      /**
-       * ID
-       * example:
-       * rbse777b-3cf8-4bff-bb0c-253fd1123250
-       */
-      id?: string;
-      /**
-       * Custom variable type
-       */
-      type?: 'order_table' | 'custom' | 'journey_link' | 'snippet';
-      /**
-       * Custom variable name
-       * example:
-       * My Custom table
-       */
-      name?: string;
-      /**
-       * The key which is used for Handlebar variable syntax {{key}}
-       * example:
-       * my_custom_table
-       */
-      key: string;
-      /**
-       * The tags of custom variable
-       */
-      _tags?: string[];
-      /**
-       * The helper function parameter's names
-       * example:
-       * [
-       *   "param1",
-       *   "param2"
-       * ]
-       */
-      helper_params?: string[];
-      /**
-       * The helper function logic
-       * example:
-       * return param1 * param2;
-       */
-      helper_logic?: string;
-      /**
-       * Variable configuration
-       * example:
-       * {
-       *   "header": null,
-       *   "style": {
-       *     "color": "#222",
-       *     "background": "#fff",
-       *     "font-size": "16px",
-       *     "font-family": "",
-       *     "padding-bottom": "4px",
-       *     "font-weight": "bold",
-       *     "border": "none !important",
-       *     "text-align": "left"
-       *   },
-       *   "columns": [
-       *     {
-       *       "id": "item",
-       *       "index": 0,
-       *       "label": {
-       *         "en": "Item",
-       *         "de": "Produkt"
-       *       },
-       *       "enable": true,
-       *       "draggable": true,
-       *       "style": {
-       *         "padding-left": "10px",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     {
-       *       "id": "quantity",
-       *       "index": 1,
-       *       "label": {
-       *         "en": "Quanity",
-       *         "de": "Menge"
-       *       },
-       *       "enable": true,
-       *       "draggable": true,
-       *       "style": {
-       *         "min-width": "60px",
-       *         "width": "30%"
-       *       }
-       *     },
-       *     {
-       *       "id": "tax",
-       *       "index": 2,
-       *       "label": {
-       *         "en": "Tax Rate",
-       *         "de": "Steuerrate"
-       *       },
-       *       "enable": true,
-       *       "draggable": true,
-       *       "style": {
-       *         "min-width": "60px",
-       *         "width": "30%"
-       *       }
-       *     },
-       *     {
-       *       "id": "unit_amount",
-       *       "index": 3,
-       *       "label": {
-       *         "en": "Unit Net Price",
-       *         "de": "Nettopreis"
-       *       },
-       *       "enable": true,
-       *       "draggable": true,
-       *       "style": {
-       *         "min-width": "60px",
-       *         "width": "30%"
-       *       }
-       *     },
-       *     {
-       *       "id": "net_total",
-       *       "index": 4,
-       *       "label": {
-       *         "en": "Net total",
-       *         "de": "Nettosumme"
-       *       },
-       *       "enable": "true,",
-       *       "draggable": true,
-       *       "style": {
-       *         "min-width": "60px",
-       *         "width": "30%"
-       *       }
-       *     },
-       *     {
-       *       "id": "gross_total",
-       *       "index": 5,
-       *       "label": {
-       *         "en": "Total",
-       *         "de": "Gesamt"
-       *       },
-       *       "enable": true,
-       *       "draggable": true,
-       *       "style": {
-       *         "min-width": "60px",
-       *         "width": "30%"
-       *       }
-       *     }
-       *   ],
-       *   "body": {
-       *     "product_name": {
-       *       "parent_column": "item",
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "14px",
-       *         "font-family": "",
-       *         "font-weight": "bold",
-       *         "font-style": "normal",
-       *         "padding-top": "16px",
-       *         "padding-bottom": "8px",
-       *         "border": "none !important",
-       *         "vertical-align": "top",
-       *         "text-align": "left",
-       *         "max-width": "30%",
-       *         "padding-left": "10px"
-       *       }
-       *     },
-       *     "price_description": {
-       *       "parent_column": "item",
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "product_description": {
-       *       "parent_column": "item",
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "quantity": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "tax": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "unit_amount": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "net_total": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "gross_total": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     }
-       *   },
-       *   "footer": {
-       *     "payment_type": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "net_total": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "amount_tax": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     },
-       *     "gross_total": {
-       *       "enable": true,
-       *       "style": {
-       *         "color": "#222",
-       *         "background": "#fff",
-       *         "font-size": "12px",
-       *         "font-family": "",
-       *         "font-weight": "normal",
-       *         "font-style": "normal",
-       *         "text-align": "left",
-       *         "max-width": "30%"
-       *       }
-       *     }
-       *   }
-       * }
-       */
-      config?: {
-        [key: string]: any;
-      };
-      /**
-       * Handlebar template that used to generate the variable content
-       * example:
-       * <table style="table-layout: fixed;width: 100%;max-width: 1000px;border-collapse: collapse;">
-       *   <thead>
-       *     <tr style="height: 48px;border-bottom: 1px solid #D5E1ED;">
-       *       {{#each table_config.header.columns as |column|}}
-       *         {{#if column.enable}}
-       *           <th style="{{makeStyle @root.table_config.header.style}};{{makeStyle column.style}};">{{column._label}}</th>
-       *         {{/if}}
-       *       {{/each}}
-       *     </tr>
-       *   </thead>
-       *   <tbody style="vertical-align: baseline  !important;font-weight: 400;font-size: 12px;position: relative;">
-       *     <!-- Start rendering products -->
-       *     {{#each order.products as |product|}}
-       *       {{#if @last}}
-       *         <tr style="height: 48px;;font-size:14px;border-bottom: 1px solid #D5E1ED;">
-       *       {{else}}
-       *         <tr style="height: 48px;;font-size:14px;">
-       *       {{/if}}
-       *         {{#each @root.table_config.header.columns as |column|}}
-       *           {{#if column.enable}}
-       *             {{#if (eq column.id 'item')}}
-       *               <!-- Item -->
-       *               <td style="{{makeStyle @root.table_config.body.product_name.style}}">
-       *                 {{#if @root.table_config.body.product_name.enable}}
-       *                   {{product.name}}
-       *                 {{/if}}
-       *                 {{#if @root.table_config.body.price_description.enable}}
-       *                   <br>
-       *                   <span style="{{makeStyle @root.table_config.body.price_description.style}}">{{product.price.description}}</span>
-       *                 {{/if}}
-       *                 {{#if @root.table_config.body.product_description.enable}}
-       *                   <br>
-       *                   <span style="{{makeStyle @root.table_config.body.product_description.style}}">{{product.description}}</span>
-       *                 {{/if}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'quantity')}}
-       *               <!-- Quantity -->
-       *               <td style="{{makeStyle @root.table_config.body.quantity.style}}">{{product.price.quantity}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'tax')}}
-       *               <!-- Tax -->
-       *               <td style="{{makeStyle @root.table_config.body.tax.style}}">
-       *                 {{product.price.tax_rate}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'unit_amount')}}
-       *               <!-- Unit amount -->
-       *               <td style="{{makeStyle @root.table_config.body.unit_amount.style}}">
-       *                 {{product.price.unit_amount_net}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'net_total')}}
-       *               <!-- Amount Subtotal -->
-       *               <td style="{{makeStyle @root.table_config.body.net_total.style}}">
-       *                 {{product.price.amount_subtotal}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'amount_tax')}}
-       *               <!-- Tax amount-->
-       *               <td style="{{makeStyle @root.table_config.body.amount_tax.style}}">
-       *                 {{product.price.amount_tax}}
-       *               </td>
-       *             {{/if}}
-       *             {{#if (eq column.id 'gross_total')}}
-       *               <!-- Gross total -->
-       *               <td style="{{makeStyle @root.table_config.body.gross_total.style}}">
-       *                 {{product.price.amount_total}}
-       *                 {{#if @root.table_config.body.payment_type.enable}}
-       *                   {{#if (eq product.price.type 'recurring')}}
-       *                     <br>
-       *                     <span style="{{makeStyle @root.table_config.body.payment_type.style}}">{{product.price.billing_period}}</span>
-       *                   {{/if}}
-       *                 {{/if}}
-       *               </td>
-       *             {{/if}}
-       *           {{/if}}
-       *         {{/each}}
-       *         </tr>
-       *     {{/each}}
-       *     <!-- Finish rendering products -->
-       *     {{#if table_config.footer.gross_total.enable}}
-       *       {{#each order.total_details.recurrences as |item|}}
-       *         <tr style="height: 48px;font-size: 14px;">
-       *           <td style="padding-top: 16px; padding-bottom: 8px; border: none !important; vertical-align: top;" colspan="{{calculate_colspan @root.table_config}}"></td>
-       *           {{#if @root.table_config.footer.payment_type.enable}}
-       *             <td style="{{makeStyle @root.table_config.footer.payment_type.style}}" colspan="2">{{item.billing_period}}</td>
-       *           {{/if}}
-       *           {{#if (isColumnEnabled @root.table_config 'net_total')}}
-       *             {{#if @root.table_config.footer.net_total.enable}}
-       *               <td style="{{makeStyle @root.table_config.footer.net_total.style}}">{{item.amount_subtotal}}</td>
-       *             {{/if}}
-       *           {{/if}}
-       *           <td style="{{makeStyle @root.table_config.footer.gross_total.style}}">{{item.amount_total}}
-       *             {{#if @root.table_config.footer.amount_tax.enable}}
-       *               <br>
-       *               <span style="{{makeStyle @root.table_config.footer.amount_tax.style}}">{{item.full_amount_tax}}</span>
-       *             {{/if}}
-       *           </td>
-       *         </tr>
-       *       {{/each}}
-       *     {{/if}}
-       *     <tr style="height:16px !important;"></tr>
-       *   </tbody>
-       * </table>
-       *
-       */
-      template: string;
-      /**
-       * Creation time
-       * example:
-       * 2022-04-19T12:41:43.662Z
-       */
-      created_at?: string;
-      /**
-       * Created by
-       * example:
-       * 100042
-       */
-      created_by?: string;
-      /**
-       * Last update time
-       * example:
-       * 2022-04-20T12:41:43.662Z
-       */
-      updated_at?: string;
-      /**
-       * Updated by
-       * example:
-       * 100042
-       */
-      updated_by?: string;
-    }
-    export interface CustomVariablesSearchParams {
-      /**
-       * Variable type
-       */
-      type?: 'order_table' | 'custom' | 'journey_link' | 'snippet';
-      /**
-       * The tags of custom variable
-       */
-      tags?: string[];
-      /**
-       * Search string
-       * example:
-       * logo
-       */
-      query?: string;
-      from?: number;
-      size?: number;
-      /**
-       * Sort by field
-       * example:
-       * created_at, name, key
-       */
-      sort_by?: string;
-      /**
-       * Fields to return
-       */
-      fields?: string[];
-    }
-    export interface ExternalCustomVariable {
-      /**
-       * example:
-       * {{craftsmen.invitation_link}}
-       */
-      variable?: string;
-      /**
-       * example:
-       * https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19
-       */
-      value?: string;
-    }
-    /**
-     * 2-letter language code (ISO 639-1)
-     */
-    export type Language = string;
-    export interface ReplacementOutput {
-      /**
-       * example:
-       * [
-       *   "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
-       * ]
-       */
-      outputs?: string[];
-    }
-    export interface ReplacementOutputV2 {
-      /**
-       * Dictionary mapping input templates and variable names to their resolved output values.
-       * Values preserve their original types (string, array, object) instead of being stringified.
-       *
-       * Keys include:
-       * - Original input templates (e.g., "Hello {{name}}")
-       * - Individual variables found in templates (e.g., "{{name}}", "{{product_images[*].public_url}}")
-       *
-       * example:
-       * {
-       *   "Hello {{first_name}}": "Hello John",
-       *   "{{first_name}}": "John",
-       *   "{{product_images[*].public_url}}": [
-       *     "http://myimage.server.com/img1.png",
-       *     "http://myimage.server.com/img2.png"
-       *   ]
-       * }
-       */
-      outputs?: {
-        [name: string]:
-          | string
-          | number
-          | boolean
-          | any[]
-          | {
-              [name: string]: any;
+    namespace Schemas {
+        export interface CategoryResult {
+            /**
+             * example:
+             * contact
+             */
+            category?: string;
+            /**
+             * example:
+             * Contact
+             */
+            description?: string;
+        }
+        export interface CustomVariable {
+            /**
+             * ID
+             * example:
+             * rbse777b-3cf8-4bff-bb0c-253fd1123250
+             */
+            id?: string;
+            /**
+             * Custom variable type
+             */
+            type?: "order_table" | "custom" | "journey_link" | "snippet";
+            /**
+             * Custom variable name
+             * example:
+             * My Custom table
+             */
+            name?: string;
+            /**
+             * The key which is used for Handlebar variable syntax {{key}}
+             * example:
+             * my_custom_table
+             */
+            key: string;
+            /**
+             * The tags of custom variable
+             */
+            _tags?: string[];
+            /**
+             * The helper function parameter's names
+             * example:
+             * [
+             *   "param1",
+             *   "param2"
+             * ]
+             */
+            helper_params?: string[];
+            /**
+             * The helper function logic
+             * example:
+             * return param1 * param2;
+             */
+            helper_logic?: string;
+            /**
+             * Variable configuration
+             * example:
+             * {
+             *   "header": null,
+             *   "style": {
+             *     "color": "#222",
+             *     "background": "#fff",
+             *     "font-size": "16px",
+             *     "font-family": "",
+             *     "padding-bottom": "4px",
+             *     "font-weight": "bold",
+             *     "border": "none !important",
+             *     "text-align": "left"
+             *   },
+             *   "columns": [
+             *     {
+             *       "id": "item",
+             *       "index": 0,
+             *       "label": {
+             *         "en": "Item",
+             *         "de": "Produkt"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "padding-left": "10px",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "quantity",
+             *       "index": 1,
+             *       "label": {
+             *         "en": "Quanity",
+             *         "de": "Menge"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "tax",
+             *       "index": 2,
+             *       "label": {
+             *         "en": "Tax Rate",
+             *         "de": "Steuerrate"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "unit_amount",
+             *       "index": 3,
+             *       "label": {
+             *         "en": "Unit Net Price",
+             *         "de": "Nettopreis"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "net_total",
+             *       "index": 4,
+             *       "label": {
+             *         "en": "Net total",
+             *         "de": "Nettosumme"
+             *       },
+             *       "enable": "true,",
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     },
+             *     {
+             *       "id": "gross_total",
+             *       "index": 5,
+             *       "label": {
+             *         "en": "Total",
+             *         "de": "Gesamt"
+             *       },
+             *       "enable": true,
+             *       "draggable": true,
+             *       "style": {
+             *         "min-width": "60px",
+             *         "width": "30%"
+             *       }
+             *     }
+             *   ],
+             *   "body": {
+             *     "product_name": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "14px",
+             *         "font-family": "",
+             *         "font-weight": "bold",
+             *         "font-style": "normal",
+             *         "padding-top": "16px",
+             *         "padding-bottom": "8px",
+             *         "border": "none !important",
+             *         "vertical-align": "top",
+             *         "text-align": "left",
+             *         "max-width": "30%",
+             *         "padding-left": "10px"
+             *       }
+             *     },
+             *     "price_description": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "product_description": {
+             *       "parent_column": "item",
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "quantity": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "tax": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "unit_amount": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "net_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "gross_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     }
+             *   },
+             *   "footer": {
+             *     "payment_type": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "net_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "amount_tax": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     },
+             *     "gross_total": {
+             *       "enable": true,
+             *       "style": {
+             *         "color": "#222",
+             *         "background": "#fff",
+             *         "font-size": "12px",
+             *         "font-family": "",
+             *         "font-weight": "normal",
+             *         "font-style": "normal",
+             *         "text-align": "left",
+             *         "max-width": "30%"
+             *       }
+             *     }
+             *   }
+             * }
+             */
+            config?: {
+                [key: string]: any;
             };
-      };
+            /**
+             * Handlebar template that used to generate the variable content
+             * example:
+             * <table style="table-layout: fixed;width: 100%;max-width: 1000px;border-collapse: collapse;">
+             *   <thead>
+             *     <tr style="height: 48px;border-bottom: 1px solid #D5E1ED;">
+             *       {{#each table_config.header.columns as |column|}}
+             *         {{#if column.enable}}
+             *           <th style="{{makeStyle @root.table_config.header.style}};{{makeStyle column.style}};">{{column._label}}</th>
+             *         {{/if}}
+             *       {{/each}}
+             *     </tr>
+             *   </thead>
+             *   <tbody style="vertical-align: baseline  !important;font-weight: 400;font-size: 12px;position: relative;">
+             *     <!-- Start rendering products -->
+             *     {{#each order.products as |product|}}
+             *       {{#if @last}}
+             *         <tr style="height: 48px;;font-size:14px;border-bottom: 1px solid #D5E1ED;">
+             *       {{else}}
+             *         <tr style="height: 48px;;font-size:14px;">
+             *       {{/if}}
+             *         {{#each @root.table_config.header.columns as |column|}}
+             *           {{#if column.enable}}
+             *             {{#if (eq column.id 'item')}}
+             *               <!-- Item -->
+             *               <td style="{{makeStyle @root.table_config.body.product_name.style}}">
+             *                 {{#if @root.table_config.body.product_name.enable}}
+             *                   {{product.name}}
+             *                 {{/if}}
+             *                 {{#if @root.table_config.body.price_description.enable}}
+             *                   <br>
+             *                   <span style="{{makeStyle @root.table_config.body.price_description.style}}">{{product.price.description}}</span>
+             *                 {{/if}}
+             *                 {{#if @root.table_config.body.product_description.enable}}
+             *                   <br>
+             *                   <span style="{{makeStyle @root.table_config.body.product_description.style}}">{{product.description}}</span>
+             *                 {{/if}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'quantity')}}
+             *               <!-- Quantity -->
+             *               <td style="{{makeStyle @root.table_config.body.quantity.style}}">{{product.price.quantity}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'tax')}}
+             *               <!-- Tax -->
+             *               <td style="{{makeStyle @root.table_config.body.tax.style}}">
+             *                 {{product.price.tax_rate}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'unit_amount')}}
+             *               <!-- Unit amount -->
+             *               <td style="{{makeStyle @root.table_config.body.unit_amount.style}}">
+             *                 {{product.price.unit_amount_net}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'net_total')}}
+             *               <!-- Amount Subtotal -->
+             *               <td style="{{makeStyle @root.table_config.body.net_total.style}}">
+             *                 {{product.price.amount_subtotal}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'amount_tax')}}
+             *               <!-- Tax amount-->
+             *               <td style="{{makeStyle @root.table_config.body.amount_tax.style}}">
+             *                 {{product.price.amount_tax}}
+             *               </td>
+             *             {{/if}}
+             *             {{#if (eq column.id 'gross_total')}}
+             *               <!-- Gross total -->
+             *               <td style="{{makeStyle @root.table_config.body.gross_total.style}}">
+             *                 {{product.price.amount_total}}
+             *                 {{#if @root.table_config.body.payment_type.enable}}
+             *                   {{#if (eq product.price.type 'recurring')}}
+             *                     <br>
+             *                     <span style="{{makeStyle @root.table_config.body.payment_type.style}}">{{product.price.billing_period}}</span>
+             *                   {{/if}}
+             *                 {{/if}}
+             *               </td>
+             *             {{/if}}
+             *           {{/if}}
+             *         {{/each}}
+             *         </tr>
+             *     {{/each}}
+             *     <!-- Finish rendering products -->
+             *     {{#if table_config.footer.gross_total.enable}}
+             *       {{#each order.total_details.recurrences as |item|}}
+             *         <tr style="height: 48px;font-size: 14px;">
+             *           <td style="padding-top: 16px; padding-bottom: 8px; border: none !important; vertical-align: top;" colspan="{{calculate_colspan @root.table_config}}"></td>
+             *           {{#if @root.table_config.footer.payment_type.enable}}
+             *             <td style="{{makeStyle @root.table_config.footer.payment_type.style}}" colspan="2">{{item.billing_period}}</td>
+             *           {{/if}}
+             *           {{#if (isColumnEnabled @root.table_config 'net_total')}}
+             *             {{#if @root.table_config.footer.net_total.enable}}
+             *               <td style="{{makeStyle @root.table_config.footer.net_total.style}}">{{item.amount_subtotal}}</td>
+             *             {{/if}}
+             *           {{/if}}
+             *           <td style="{{makeStyle @root.table_config.footer.gross_total.style}}">{{item.amount_total}}
+             *             {{#if @root.table_config.footer.amount_tax.enable}}
+             *               <br>
+             *               <span style="{{makeStyle @root.table_config.footer.amount_tax.style}}">{{item.full_amount_tax}}</span>
+             *             {{/if}}
+             *           </td>
+             *         </tr>
+             *       {{/each}}
+             *     {{/if}}
+             *     <tr style="height:16px !important;"></tr>
+             *   </tbody>
+             * </table>
+             *
+             */
+            template: string;
+            /**
+             * Creation time
+             * example:
+             * 2022-04-19T12:41:43.662Z
+             */
+            created_at?: string;
+            /**
+             * Created by
+             * example:
+             * 100042
+             */
+            created_by?: string;
+            /**
+             * Last update time
+             * example:
+             * 2022-04-20T12:41:43.662Z
+             */
+            updated_at?: string;
+            /**
+             * Updated by
+             * example:
+             * 100042
+             */
+            updated_by?: string;
+        }
+        export interface CustomVariablesSearchParams {
+            /**
+             * Variable type
+             */
+            type?: "order_table" | "custom" | "journey_link" | "snippet";
+            /**
+             * The tags of custom variable
+             */
+            tags?: string[];
+            /**
+             * Search string
+             * example:
+             * logo
+             */
+            query?: string;
+            from?: number;
+            size?: number;
+            /**
+             * Sort by field
+             * example:
+             * created_at, name, key
+             */
+            sort_by?: string;
+            /**
+             * Fields to return
+             */
+            fields?: string[];
+        }
+        export interface ExternalCustomVariable {
+            /**
+             * example:
+             * {{craftsmen.invitation_link}}
+             */
+            variable?: string;
+            /**
+             * example:
+             * https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19
+             */
+            value?: string;
+        }
+        /**
+         * 2-letter language code (ISO 639-1)
+         */
+        export type Language = string;
+        export interface ReplacementOutput {
+            /**
+             * example:
+             * [
+             *   "[Brand Name GmbH] Order confirmation\nHello Customer Name\n\n<span color=\"#ccc\">Brand Name GmbH</span>\n<img src=\"https://logobucket.s3.amazonaws.com/brandlogo.png\" alt=\"Brand Name\"/>\n<a href=\"https://company.com/imprint\">imprint</a>\n"
+             * ]
+             */
+            outputs?: string[];
+        }
+        export interface ReplacementOutputV2 {
+            /**
+             * Dictionary mapping input templates and variable names to their resolved output values.
+             * Values preserve their original types (string, array, object) instead of being stringified.
+             *
+             * Keys include:
+             * - Original input templates (e.g., "Hello {{name}}")
+             * - Individual variables found in templates (e.g., "{{name}}", "{{product_images[*].public_url}}")
+             *
+             * example:
+             * {
+             *   "Hello {{first_name}}": "Hello John",
+             *   "{{first_name}}": "John",
+             *   "{{product_images[*].public_url}}": [
+             *     "http://myimage.server.com/img1.png",
+             *     "http://myimage.server.com/img2.png"
+             *   ]
+             * }
+             */
+            outputs?: {
+                [name: string]: string | number | boolean | any[] | {
+                    [name: string]: any;
+                };
+            };
+        }
+        export type TemplateType = "email" | "document";
+        export interface VariableContext {
+            /**
+             * example:
+             * https://consent.sls.epilot.io/v1/unsubscribe?token=abc123
+             */
+            unsubscribe_url?: string;
+            /**
+             * example:
+             * {
+             *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+             *   "_title": "Example Customer",
+             *   "customer_number": 123,
+             *   "first_name": "Example",
+             *   "last_name": "Customer",
+             *   "title": "Prof.",
+             *   "salutation": "Ms. / Mrs.",
+             *   "birthdate": "2018-03-03",
+             *   "email": [
+             *     {
+             *       "email": "contact.primary@domain.com",
+             *       "_tags": [
+             *         "primary"
+             *       ]
+             *     },
+             *     {
+             *       "email": "sale@domain.com"
+             *     }
+             *   ],
+             *   "phone": [
+             *     {
+             *       "phone": "+49123456789",
+             *       "_tags": [
+             *         "primary",
+             *         "support"
+             *       ]
+             *     },
+             *     {
+             *       "phone": "+49504305025"
+             *     }
+             *   ],
+             *   "address": [
+             *     {
+             *       "_tags": [
+             *         "primary",
+             *         "delivery"
+             *       ],
+             *       "country": "Germany",
+             *       "city": "Köln",
+             *       "postal_code": "50825",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": "11th floor"
+             *     },
+             *     {
+             *       "_tags": [
+             *         "billing"
+             *       ],
+             *       "country": "Finland",
+             *       "city": "Köln",
+             *       "postal_code": "50670",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "account": [
+             *     {
+             *       "status": "Active",
+             *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+             *       "tax_id": "123abc",
+             *       "name": "name",
+             *       "email": [
+             *         {
+             *           "email": "account.primary@domain.com",
+             *           "_tags": [
+             *             "primary"
+             *           ]
+             *         },
+             *         {
+             *           "email": "account.sale@domain.com"
+             *         }
+             *       ],
+             *       "phone": [
+             *         {
+             *           "phone": "+49123456789",
+             *           "_tags": [
+             *             "primary",
+             *             "support"
+             *           ]
+             *         },
+             *         {
+             *           "phone": "+49504305025"
+             *         }
+             *       ],
+             *       "address": [
+             *         {
+             *           "_tags": [
+             *             "primary",
+             *             "delivery"
+             *           ],
+             *           "country": "Germany",
+             *           "city": "Köln",
+             *           "postal_code": "50825",
+             *           "street": "Im Mediapark",
+             *           "street_number": "8a",
+             *           "additional_info": "11th floor"
+             *         }
+             *       ]
+             *     }
+             *   ]
+             * }
+             */
+            main?: {
+                [name: string]: any;
+            };
+            /**
+             * example:
+             * {
+             *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
+             *   "_title": "Example Customer",
+             *   "customer_number": 123,
+             *   "first_name": "Example",
+             *   "last_name": "Customer",
+             *   "title": "Prof.",
+             *   "salutation": "Ms. / Mrs.",
+             *   "birthdate": "2018-03-03",
+             *   "email": [
+             *     {
+             *       "email": "contact.primary@domain.com",
+             *       "_tags": [
+             *         "primary"
+             *       ]
+             *     },
+             *     {
+             *       "email": "sale@domain.com"
+             *     }
+             *   ],
+             *   "phone": [
+             *     {
+             *       "phone": "+49123456789",
+             *       "_tags": [
+             *         "primary",
+             *         "support"
+             *       ]
+             *     },
+             *     {
+             *       "phone": "+49504305025"
+             *     }
+             *   ],
+             *   "address": [
+             *     {
+             *       "_tags": [
+             *         "primary",
+             *         "delivery"
+             *       ],
+             *       "country": "Germany",
+             *       "city": "Köln",
+             *       "postal_code": "50825",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": "11th floor"
+             *     },
+             *     {
+             *       "_tags": [
+             *         "billing"
+             *       ],
+             *       "country": "Finland",
+             *       "city": "Köln",
+             *       "postal_code": "50670",
+             *       "street": "Im Mediapark",
+             *       "street_number": "8a",
+             *       "additional_info": ""
+             *     }
+             *   ],
+             *   "account": [
+             *     {
+             *       "status": "Active",
+             *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
+             *       "tax_id": "123abc",
+             *       "name": "name",
+             *       "email": [
+             *         {
+             *           "email": "account.primary@domain.com",
+             *           "_tags": [
+             *             "primary"
+             *           ]
+             *         },
+             *         {
+             *           "email": "account.sale@domain.com"
+             *         }
+             *       ],
+             *       "phone": [
+             *         {
+             *           "phone": "+49123456789",
+             *           "_tags": [
+             *             "primary",
+             *             "support"
+             *           ]
+             *         },
+             *         {
+             *           "phone": "+49504305025"
+             *         }
+             *       ],
+             *       "address": [
+             *         {
+             *           "_tags": [
+             *             "primary",
+             *             "delivery"
+             *           ],
+             *           "country": "Germany",
+             *           "city": "KölnSS",
+             *           "postal_code": "50825",
+             *           "street": "Im Mediapark",
+             *           "street_number": "8a",
+             *           "additional_info": "11th floor"
+             *         }
+             *       ]
+             *     }
+             *   ]
+             * }
+             */
+            contact?: {
+                [name: string]: any;
+            };
+            /**
+             * example:
+             * {
+             *   "id": 123453,
+             *   "name": "Brand name",
+             *   "signature": "Signature"
+             * }
+             */
+            brand?: {
+                [name: string]: any;
+            };
+        }
+        export interface VariableParameters {
+            template_type: TemplateType;
+            language?: /* 2-letter language code (ISO 639-1) */ Language;
+            /**
+             * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
+             * example:
+             * 63753437-c9e2-4e83-82bb-b1c666514561
+             */
+            main_entity_id?: string; // uuid
+            /**
+             * Brand ID
+             * example:
+             * 123451
+             */
+            brand_id?: number | null;
+            /**
+             * User ID
+             * example:
+             * 50001
+             */
+            user_id?: string | null;
+            /**
+             * Organization ID of the user
+             * example:
+             * 729224
+             */
+            user_org_id?: string | null;
+            /**
+             * Custom variables with specified values form other services.
+             */
+            custom_variables?: ExternalCustomVariable[];
+            /**
+             * If context data is available, this data will be used for variable replace.
+             */
+            context_data?: {
+                [key: string]: any;
+            };
+            /**
+             * The name of email template
+             */
+            template_name?: string;
+            /**
+             * The tags of email template
+             */
+            template_tags?: string[];
+            /**
+             * The version of the variables syntax supported. Default is 1.0
+             * example:
+             * 2
+             */
+            variables_version?: string;
+        }
+        export interface VariableResult {
+            type?: "simple" | "partial";
+            /**
+             * Payload for the QR data
+             */
+            qrdata?: string;
+            /**
+             * Variable group
+             */
+            group?: string;
+            /**
+             * The value which is used to insert to template
+             */
+            insert?: string;
+            /**
+             * Variable description
+             */
+            description?: string;
+        }
     }
-    export type TemplateType = 'email' | 'document';
-    export interface VariableContext {
-      /**
-       * example:
-       * https://consent.sls.epilot.io/v1/unsubscribe?token=abc123
-       */
-      unsubscribe_url?: string;
-      /**
-       * example:
-       * {
-       *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
-       *   "_title": "Example Customer",
-       *   "customer_number": 123,
-       *   "first_name": "Example",
-       *   "last_name": "Customer",
-       *   "title": "Prof.",
-       *   "salutation": "Ms. / Mrs.",
-       *   "birthdate": "2018-03-03",
-       *   "email": [
-       *     {
-       *       "email": "contact.primary@domain.com",
-       *       "_tags": [
-       *         "primary"
-       *       ]
-       *     },
-       *     {
-       *       "email": "sale@domain.com"
-       *     }
-       *   ],
-       *   "phone": [
-       *     {
-       *       "phone": "+49123456789",
-       *       "_tags": [
-       *         "primary",
-       *         "support"
-       *       ]
-       *     },
-       *     {
-       *       "phone": "+49504305025"
-       *     }
-       *   ],
-       *   "address": [
-       *     {
-       *       "_tags": [
-       *         "primary",
-       *         "delivery"
-       *       ],
-       *       "country": "Germany",
-       *       "city": "Köln",
-       *       "postal_code": "50825",
-       *       "street": "Im Mediapark",
-       *       "street_number": "8a",
-       *       "additional_info": "11th floor"
-       *     },
-       *     {
-       *       "_tags": [
-       *         "billing"
-       *       ],
-       *       "country": "Finland",
-       *       "city": "Köln",
-       *       "postal_code": "50670",
-       *       "street": "Im Mediapark",
-       *       "street_number": "8a",
-       *       "additional_info": ""
-       *     }
-       *   ],
-       *   "account": [
-       *     {
-       *       "status": "Active",
-       *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
-       *       "tax_id": "123abc",
-       *       "name": "name",
-       *       "email": [
-       *         {
-       *           "email": "account.primary@domain.com",
-       *           "_tags": [
-       *             "primary"
-       *           ]
-       *         },
-       *         {
-       *           "email": "account.sale@domain.com"
-       *         }
-       *       ],
-       *       "phone": [
-       *         {
-       *           "phone": "+49123456789",
-       *           "_tags": [
-       *             "primary",
-       *             "support"
-       *           ]
-       *         },
-       *         {
-       *           "phone": "+49504305025"
-       *         }
-       *       ],
-       *       "address": [
-       *         {
-       *           "_tags": [
-       *             "primary",
-       *             "delivery"
-       *           ],
-       *           "country": "Germany",
-       *           "city": "Köln",
-       *           "postal_code": "50825",
-       *           "street": "Im Mediapark",
-       *           "street_number": "8a",
-       *           "additional_info": "11th floor"
-       *         }
-       *       ]
-       *     }
-       *   ]
-       * }
-       */
-      main?: {
-        [name: string]: any;
-      };
-      /**
-       * example:
-       * {
-       *   "_id": "03be777b-3cf8-4bff-bb0c-253fd1128479",
-       *   "_title": "Example Customer",
-       *   "customer_number": 123,
-       *   "first_name": "Example",
-       *   "last_name": "Customer",
-       *   "title": "Prof.",
-       *   "salutation": "Ms. / Mrs.",
-       *   "birthdate": "2018-03-03",
-       *   "email": [
-       *     {
-       *       "email": "contact.primary@domain.com",
-       *       "_tags": [
-       *         "primary"
-       *       ]
-       *     },
-       *     {
-       *       "email": "sale@domain.com"
-       *     }
-       *   ],
-       *   "phone": [
-       *     {
-       *       "phone": "+49123456789",
-       *       "_tags": [
-       *         "primary",
-       *         "support"
-       *       ]
-       *     },
-       *     {
-       *       "phone": "+49504305025"
-       *     }
-       *   ],
-       *   "address": [
-       *     {
-       *       "_tags": [
-       *         "primary",
-       *         "delivery"
-       *       ],
-       *       "country": "Germany",
-       *       "city": "Köln",
-       *       "postal_code": "50825",
-       *       "street": "Im Mediapark",
-       *       "street_number": "8a",
-       *       "additional_info": "11th floor"
-       *     },
-       *     {
-       *       "_tags": [
-       *         "billing"
-       *       ],
-       *       "country": "Finland",
-       *       "city": "Köln",
-       *       "postal_code": "50670",
-       *       "street": "Im Mediapark",
-       *       "street_number": "8a",
-       *       "additional_info": ""
-       *     }
-       *   ],
-       *   "account": [
-       *     {
-       *       "status": "Active",
-       *       "_id": "c8d20ff6-df7a-465a-a26e-e5d28c2a3f79",
-       *       "tax_id": "123abc",
-       *       "name": "name",
-       *       "email": [
-       *         {
-       *           "email": "account.primary@domain.com",
-       *           "_tags": [
-       *             "primary"
-       *           ]
-       *         },
-       *         {
-       *           "email": "account.sale@domain.com"
-       *         }
-       *       ],
-       *       "phone": [
-       *         {
-       *           "phone": "+49123456789",
-       *           "_tags": [
-       *             "primary",
-       *             "support"
-       *           ]
-       *         },
-       *         {
-       *           "phone": "+49504305025"
-       *         }
-       *       ],
-       *       "address": [
-       *         {
-       *           "_tags": [
-       *             "primary",
-       *             "delivery"
-       *           ],
-       *           "country": "Germany",
-       *           "city": "KölnSS",
-       *           "postal_code": "50825",
-       *           "street": "Im Mediapark",
-       *           "street_number": "8a",
-       *           "additional_info": "11th floor"
-       *         }
-       *       ]
-       *     }
-       *   ]
-       * }
-       */
-      contact?: {
-        [name: string]: any;
-      };
-      /**
-       * example:
-       * {
-       *   "id": 123453,
-       *   "name": "Brand name",
-       *   "signature": "Signature"
-       * }
-       */
-      brand?: {
-        [name: string]: any;
-      };
-    }
-    export interface VariableParameters {
-      template_type: TemplateType;
-      language?: /* 2-letter language code (ISO 639-1) */ Language;
-      /**
-       * The main entity ID. Use main entity in order to use the variable without schema slug prefix - or just pass directly to other object ID.
-       * example:
-       * 63753437-c9e2-4e83-82bb-b1c666514561
-       */
-      main_entity_id?: string; // uuid
-      /**
-       * Brand ID
-       * example:
-       * 123451
-       */
-      brand_id?: number | null;
-      /**
-       * User ID
-       * example:
-       * 50001
-       */
-      user_id?: string | null;
-      /**
-       * Organization ID of the user
-       * example:
-       * 729224
-       */
-      user_org_id?: string | null;
-      /**
-       * Custom variables with specified values form other services.
-       */
-      custom_variables?: ExternalCustomVariable[];
-      /**
-       * If context data is available, this data will be used for variable replace.
-       */
-      context_data?: {
-        [key: string]: any;
-      };
-      /**
-       * The name of email template
-       */
-      template_name?: string;
-      /**
-       * The tags of email template
-       */
-      template_tags?: string[];
-      /**
-       * The version of the variables syntax supported. Default is 1.0
-       * example:
-       * 2
-       */
-      variables_version?: string;
-    }
-    export interface VariableResult {
-      type?: 'simple' | 'partial';
-      /**
-       * Payload for the QR data
-       */
-      qrdata?: string;
-      /**
-       * Variable group
-       */
-      group?: string;
-      /**
-       * The value which is used to insert to template
-       */
-      insert?: string;
-      /**
-       * Variable description
-       */
-      description?: string;
-    }
-  }
 }
 declare namespace Paths {
-  namespace CreateCustomVariable {
-    export type RequestBody = Components.Schemas.CustomVariable;
-    namespace Responses {
-      export type $201 = Components.Schemas.CustomVariable;
-      export type $403 = {};
-      export type $409 = {};
+    namespace CreateCustomVariable {
+        export type RequestBody = Components.Schemas.CustomVariable;
+        namespace Responses {
+            export type $201 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+            export interface $409 {
+            }
+        }
     }
-  }
-  namespace DeleteCustomVariable {
-    namespace Parameters {
-      export type Id = string;
+    namespace DeleteCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
     }
-    export interface PathParameters {
-      id: Parameters.Id;
+    namespace GetBluePrintTableConfig {
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+        }
     }
-    namespace Responses {
-      export type $204 = {};
-      export type $403 = {};
+    namespace GetCategories {
+        namespace Parameters {
+            export type Lang = /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
+        }
+        export interface QueryParameters {
+            lang?: Parameters.Lang;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.CategoryResult[];
+        }
     }
-  }
-  namespace GetBluePrintTableConfig {
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable;
-      export type $403 = {};
+    namespace GetCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
     }
-  }
-  namespace GetCategories {
-    namespace Parameters {
-      export type Lang = /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
+    namespace GetCustomVariables {
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable[];
+            export interface $403 {
+            }
+        }
     }
-    export interface QueryParameters {
-      lang?: Parameters.Lang;
+    namespace GetVariableContext {
+        export interface RequestBody {
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.VariableContext;
+        }
     }
-    namespace Responses {
-      export type $200 = Components.Schemas.CategoryResult[];
+    namespace ReplaceTemplates {
+        export interface RequestBody {
+            inputs?: string[];
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ReplacementOutput;
+        }
     }
-  }
-  namespace GetCustomVariable {
-    namespace Parameters {
-      export type Id = string;
+    namespace ReplaceTemplatesV2 {
+        export interface RequestBody {
+            inputs?: string[];
+            parameters?: Components.Schemas.VariableParameters;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ReplacementOutputV2;
+        }
     }
-    export interface PathParameters {
-      id: Parameters.Id;
+    namespace SearchCustomVariables {
+        export type RequestBody = Components.Schemas.CustomVariablesSearchParams;
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.CustomVariable[];
+                /**
+                 * Total number of results
+                 * example:
+                 * 100
+                 */
+                hits?: number;
+            }
+            export interface $403 {
+            }
+        }
     }
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable;
-      export type $403 = {};
-      export type $404 = {};
+    namespace SearchVariables {
+        export interface RequestBody {
+            template_type: Components.Schemas.TemplateType;
+            /**
+             * Search string
+             * example:
+             * logo
+             */
+            query: string;
+            from?: number;
+            size?: number;
+            lang?: /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
+            entity_schemas?: string[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.VariableResult[];
+        }
     }
-  }
-  namespace GetCustomVariables {
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable[];
-      export type $403 = {};
+    namespace UpdateCustomVariable {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.CustomVariable;
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomVariable;
+            export interface $403 {
+            }
+            export interface $409 {
+            }
+        }
     }
-  }
-  namespace GetVariableContext {
-    export interface RequestBody {
-      parameters?: Components.Schemas.VariableParameters;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.VariableContext;
-    }
-  }
-  namespace ReplaceTemplates {
-    export interface RequestBody {
-      inputs?: string[];
-      parameters?: Components.Schemas.VariableParameters;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.ReplacementOutput;
-    }
-  }
-  namespace ReplaceTemplatesV2 {
-    export interface RequestBody {
-      inputs?: string[];
-      parameters?: Components.Schemas.VariableParameters;
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.ReplacementOutputV2;
-    }
-  }
-  namespace SearchCustomVariables {
-    export type RequestBody = Components.Schemas.CustomVariablesSearchParams;
-    namespace Responses {
-      export interface $200 {
-        results?: Components.Schemas.CustomVariable[];
-        /**
-         * Total number of results
-         * example:
-         * 100
-         */
-        hits?: number;
-      }
-      export type $403 = {};
-    }
-  }
-  namespace SearchVariables {
-    export interface RequestBody {
-      template_type: Components.Schemas.TemplateType;
-      /**
-       * Search string
-       * example:
-       * logo
-       */
-      query: string;
-      from?: number;
-      size?: number;
-      lang?: /* 2-letter language code (ISO 639-1) */ Components.Schemas.Language;
-      entity_schemas?: string[];
-    }
-    namespace Responses {
-      export type $200 = Components.Schemas.VariableResult[];
-    }
-  }
-  namespace UpdateCustomVariable {
-    namespace Parameters {
-      export type Id = string;
-    }
-    export interface PathParameters {
-      id: Parameters.Id;
-    }
-    export type RequestBody = Components.Schemas.CustomVariable;
-    namespace Responses {
-      export type $200 = Components.Schemas.CustomVariable;
-      export type $403 = {};
-      export type $409 = {};
-    }
-  }
 }
+
 
 export interface OperationMethods {
   /**
    * getCategories - getCategories
-   *
+   * 
    * Get all template variable categories
    */
-  getCategories(
+  'getCategories'(
     parameters?: Parameters<Paths.GetCategories.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetCategories.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCategories.Responses.$200>
   /**
    * searchVariables - searchVariables
-   *
+   * 
    * Search variables
    */
-  searchVariables(
+  'searchVariables'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.SearchVariables.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.SearchVariables.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchVariables.Responses.$200>
   /**
    * getVariableContext - getVariableContext
-   *
+   * 
    * Get full variable context
-   *
+   * 
    * Calls Entity API, User API, Brand API and others to construct full context object used for template variable replace
-   *
+   * 
    */
-  getVariableContext(
+  'getVariableContext'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.GetVariableContext.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetVariableContext.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetVariableContext.Responses.$200>
   /**
    * replaceTemplates - replaceTemplates
-   *
+   * 
    * Replace variables in handlebars templates
-   *
+   * 
    * Takes in an array of input templates and outputs the output text with replaced variables
-   *
+   * 
    */
-  replaceTemplates(
+  'replaceTemplates'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ReplaceTemplates.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>
   /**
    * replaceTemplatesV2 - Replace variables in templates (V2)
-   *
+   * 
    * Replace variables in handlebars templates with raw value preservation
-   *
+   * 
    * V2 returns parsed outputs that preserve the original data types (arrays, objects, strings)
-   * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format.
+   * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format. 
    * Alongside the parsed outputs for every single variable.
-   *
+   * 
    * Takes in an array of input templates and outputs an object mapping each input and variable
    * to their rendered values with type preservation.
-   *
+   * 
    */
-  replaceTemplatesV2(
+  'replaceTemplatesV2'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ReplaceTemplatesV2.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>
   /**
    * getCustomVariables - Get custom variables
-   *
+   * 
    * Get all custom variables of organization
    */
-  getCustomVariables(
+  'getCustomVariables'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetCustomVariables.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCustomVariables.Responses.$200>
   /**
    * createCustomVariable - Create custom variable
-   *
+   * 
    * Create custom variable
    */
-  createCustomVariable(
+  'createCustomVariable'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateCustomVariable.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
   /**
    * searchCustomVariables - searchCustomVariables
-   *
+   * 
    * Search custom variables
    */
-  searchCustomVariables(
+  'searchCustomVariables'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.SearchCustomVariables.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>
   /**
    * getCustomVariable - Get custom variable
-   *
+   * 
    * Get custom variable
    */
-  getCustomVariable(
+  'getCustomVariable'(
     parameters?: Parameters<Paths.GetCustomVariable.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetCustomVariable.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCustomVariable.Responses.$200>
   /**
    * updateCustomVariable - Update custom variable
-   *
+   * 
    * Update custom variable
    */
-  updateCustomVariable(
+  'updateCustomVariable'(
     parameters?: Parameters<Paths.UpdateCustomVariable.PathParameters> | null,
     data?: Paths.UpdateCustomVariable.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
   /**
    * deleteCustomVariable - Delete custom variable
-   *
+   * 
    * Immediately and permanently deletes a custom variable
    */
-  deleteCustomVariable(
+  'deleteCustomVariable'(
     parameters?: Parameters<Paths.DeleteCustomVariable.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>
   /**
    * getBluePrintTableConfig - Get default table config
-   *
+   * 
    * Get default table config
    */
-  getBluePrintTableConfig(
+  'getBluePrintTableConfig'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetBluePrintTableConfig.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBluePrintTableConfig.Responses.$200>
 }
 
 export interface PathsDictionary {
   ['/v1/template-variables/categories']: {
     /**
      * getCategories - getCategories
-     *
+     * 
      * Get all template variable categories
      */
-    get(
+    'get'(
       parameters?: Parameters<Paths.GetCategories.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetCategories.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCategories.Responses.$200>
+  }
   ['/v1/template-variables:search']: {
     /**
      * searchVariables - searchVariables
-     *
+     * 
      * Search variables
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.SearchVariables.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.SearchVariables.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchVariables.Responses.$200>
+  }
   ['/v1/template-variables:context']: {
     /**
      * getVariableContext - getVariableContext
-     *
+     * 
      * Get full variable context
-     *
+     * 
      * Calls Entity API, User API, Brand API and others to construct full context object used for template variable replace
-     *
+     * 
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.GetVariableContext.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetVariableContext.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetVariableContext.Responses.$200>
+  }
   ['/v1/template-variables:replace']: {
     /**
      * replaceTemplates - replaceTemplates
-     *
+     * 
      * Replace variables in handlebars templates
-     *
+     * 
      * Takes in an array of input templates and outputs the output text with replaced variables
-     *
+     * 
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ReplaceTemplates.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>
+  }
   ['/v2/template:replace']: {
     /**
      * replaceTemplatesV2 - Replace variables in templates (V2)
-     *
+     * 
      * Replace variables in handlebars templates with raw value preservation
-     *
+     * 
      * V2 returns parsed outputs that preserve the original data types (arrays, objects, strings)
-     * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format.
+     * instead of stringifying always. Variables with strings mixed with other variables will be returned in the stringified format. 
      * Alongside the parsed outputs for every single variable.
-     *
+     * 
      * Takes in an array of input templates and outputs an object mapping each input and variable
      * to their rendered values with type preservation.
-     *
+     * 
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ReplaceTemplatesV2.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>
+  }
   ['/v1/custom-variables']: {
     /**
      * getCustomVariables - Get custom variables
-     *
+     * 
      * Get all custom variables of organization
      */
-    get(
+    'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetCustomVariables.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCustomVariables.Responses.$200>
     /**
      * createCustomVariable - Create custom variable
-     *
+     * 
      * Create custom variable
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateCustomVariable.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateCustomVariable.Responses.$201>
+  }
   ['/v1/custom-variables:search']: {
     /**
      * searchCustomVariables - searchCustomVariables
-     *
+     * 
      * Search custom variables
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.SearchCustomVariables.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>
+  }
   ['/v1/custom-variables/{id}']: {
     /**
      * updateCustomVariable - Update custom variable
-     *
+     * 
      * Update custom variable
      */
-    put(
+    'put'(
       parameters?: Parameters<Paths.UpdateCustomVariable.PathParameters> | null,
       data?: Paths.UpdateCustomVariable.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
     /**
      * getCustomVariable - Get custom variable
-     *
+     * 
      * Get custom variable
      */
-    get(
+    'get'(
       parameters?: Parameters<Paths.GetCustomVariable.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetCustomVariable.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCustomVariable.Responses.$200>
     /**
      * deleteCustomVariable - Delete custom variable
-     *
+     * 
      * Immediately and permanently deletes a custom variable
      */
-    delete(
+    'delete'(
       parameters?: Parameters<Paths.DeleteCustomVariable.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>
+  }
   ['/v1/custom-variables/order-table-blueprint']: {
     /**
      * getBluePrintTableConfig - Get default table config
-     *
+     * 
      * Get default table config
      */
-    get(
+    'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetBluePrintTableConfig.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBluePrintTableConfig.Responses.$200>
+  }
 }
 
-export type Client = OpenAPIClient<OperationMethods, PathsDictionary>;
+export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type CategoryResult = Components.Schemas.CategoryResult;
 export type CustomVariable = Components.Schemas.CustomVariable;

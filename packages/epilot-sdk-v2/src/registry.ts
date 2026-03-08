@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 
 import { createApiClient } from './client-factory';
+import { applyLargeResponseInterceptor } from './large-response';
 import { applyRetryInterceptor } from './retry';
 import type { ApiEntry, SDKState } from './types';
 
@@ -36,6 +37,9 @@ export const resolveClient = async (params: {
       token: state.token,
       headers: state.globalHeaders,
     });
+
+    // Apply large response interceptor for S3-backed payloads
+    applyLargeResponseInterceptor({ client: entry.instance, config: state.largeResponse });
 
     // Apply retry interceptor for 429 Too Many Requests
     applyRetryInterceptor({ client: entry.instance, config: state.retry });

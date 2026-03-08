@@ -10,848 +10,784 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
-  namespace Schemas {
-    export interface CreateValidationRuleRequest {
-      /**
-       * Title of the validation rule.
-       */
-      title: string;
-      /**
-       * Placeholder for the validation rule.
-       */
-      placeholder?: string;
-      /**
-       * Describes where and how a validation rule is applied.
-       */
-      used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-      rule: /* Validation rule that uses a regular expression to validate input. */
-        | RegexRuleType
-        | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType
-        | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
-    }
-    export interface GetValidationRulesResponse {
-      results?: /* The Validation rule definition. */ ValidationRule[];
-    }
-    /**
-     * Condition definition for a numeric-based validation rule (2 levels deep)
-     */
-    export type NumericCondition =
-      /* Condition definition for a numeric-based validation rule (2 levels deep) */
-      | {
-          all: /* Fact-based condition for numeric validation */ (
-            | NumericFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition
-          )[];
+    namespace Schemas {
+        export interface CreateValidationRuleRequest {
+            /**
+             * Title of the validation rule.
+             */
+            title: string;
+            /**
+             * Placeholder for the validation rule.
+             */
+            placeholder?: string;
+            /**
+             * Describes where and how a validation rule is applied.
+             */
+            used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
+            rule: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
         }
-      | {
-          any: /* Fact-based condition for numeric validation */ (
-            | NumericFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition
-          )[];
+        export interface GetValidationRulesResponse {
+            results?: /* The Validation rule definition. */ ValidationRule[];
         }
-      | {
-          not: /* Fact-based condition for numeric validation */
-          NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition;
-        };
-    /**
-     * Fact-based condition for numeric validation
-     */
-    export type NumericFactCondition =
-      /* Fact-based condition for numeric validation */
-      | {
-          /**
-           * The numeric value extracted from input; The amount of digits
-           */
-          fact: 'numeric-value' | 'total-length';
-          /**
-           * Numeric comparison operator
-           */
-          operator: 'equal' | 'notEqual' | 'lessThan' | 'lessThanInclusive' | 'greaterThan' | 'greaterThanInclusive';
-          /**
-           * Numeric value to compare against
-           */
-          value: number;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-          };
-        }
-      | {
-          /**
-           * Count of integer digits (excludes leading zeros unless allowed)
-           */
-          fact: 'integer-digits-count';
-          /**
-           * Digit count comparison operator
-           */
-          operator: 'equal' | 'exactlyNDigits' | 'minIntegerDigits' | 'maxIntegerDigits';
-          /**
-           * Expected number of integer digits
-           */
-          value: number;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-            /**
-             * Whether to count leading zeroes in digit count
-             */
-            allowLeadingZeroes?: boolean;
-          };
-        }
-      | {
-          /**
-           * Count of decimal digits
-           */
-          fact: 'decimal-digits-count';
-          /**
-           * Decimal digit count comparison operator
-           */
-          operator: 'equal' | 'minDecimalDigits' | 'maxDecimalDigits';
-          /**
-           * Expected number of decimal digits
-           */
-          value: number;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-          };
-        }
-      | {
-          /**
-           * Whether the input has leading zeros
-           */
-          fact: 'has-leading-zeroes';
-          /**
-           * Leading zeros check operator
-           */
-          operator: 'equal' | 'notAllowed';
-          /**
-           * Whether leading zeros should be present or not
-           */
-          value: boolean;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-          };
-        };
-    /**
-     * Nested condition with logical operators (level 2 only)
-     */
-    export type NumericNestedCondition =
-      /* Nested condition with logical operators (level 2 only) */
-      | {
-          all: /* Fact-based condition for numeric validation */ NumericFactCondition[];
-        }
-      | {
-          any: /* Fact-based condition for numeric validation */ NumericFactCondition[];
-        }
-      | {
-          not: /* Fact-based condition for numeric validation */ NumericFactCondition;
-        };
-    /**
-     * Validation rule for numeric values, supporting range and digit count constraints.
-     */
-    export interface NumericRuleType {
-      /**
-       * Indicates this is a numeric-based validation rule.
-       */
-      type: 'numeric';
-      /**
-       * The conditions that must be met for the rule to trigger
-       */
-      conditions: /* Condition definition for a numeric-based validation rule (2 levels deep) */ NumericCondition;
-    }
-    /**
-     * Condition definition for a pattern-based validation rule (2 levels deep)
-     */
-    export type PatternCondition =
-      /* Condition definition for a pattern-based validation rule (2 levels deep) */
-      | {
-          all: /* Fact-based condition for pattern validation */ (
-            | PatternFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition
-          )[];
-        }
-      | {
-          any: /* Fact-based condition for pattern validation */ (
-            | PatternFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition
-          )[];
-        }
-      | {
-          not: /* Fact-based condition for pattern validation */
-          PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition;
-        };
-    /**
-     * Fact-based condition for pattern validation
-     */
-    export type PatternFactCondition =
-      /* Fact-based condition for pattern validation */
-      | {
-          /**
-           * The name of the value to validate.
-           */
-          fact: 'total-length';
-          /**
-           * Numeric comparison operator
-           */
-          operator: 'equal' | 'notEqual' | 'lessThan' | 'lessThanInclusive' | 'greaterThan' | 'greaterThanInclusive';
-          /**
-           * Numeric value to compare against
-           */
-          value: number;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-            /**
-             * From where to check
-             */
-            start?: number;
-            /**
-             * To where to check
-             */
-            end?: number;
-          };
-        }
-      | {
-          /**
-           * The name of the value to validate.
-           */
-          fact: 'static-check' | 'total-length';
-          /**
-           * Exact digit count operator
-           */
-          operator: 'exactlyNDigits';
-          /**
-           * Number of digits required
-           */
-          value: number;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-            /**
-             * From where to check
-             */
-            start?: number;
-            /**
-             * To where to check
-             */
-            end?: number;
-          };
-        }
-      | {
-          /**
-           * The name of the value to validate.
-           */
-          fact: 'static-check';
-          /**
-           * Array-based comparison operator
-           */
-          operator: 'in' | 'notIn' | 'contains' | 'doesNotContain';
-          /**
-           * Array of string values for array-based operators
-           */
-          value: string[];
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-            /**
-             * From where to check
-             */
-            start?: number;
-            /**
-             * To where to check
-             */
-            end?: number;
-          };
-        }
-      | {
-          /**
-           * The name of the value to validate.
-           */
-          fact: 'static-check';
-          /**
-           * String comparison operator
-           */
-          operator: 'equal' | 'notEqual';
-          /**
-           * String value to compare against
-           */
-          value: string;
-          /**
-           * Additional parameters for the condition
-           */
-          params?: {
-            /**
-             * Custom error message
-             */
-            errorMessage?: string;
-            /**
-             * From where to check
-             */
-            start?: number;
-            /**
-             * To where to check
-             */
-            end?: number;
-          };
-        };
-    /**
-     * Nested condition with logical operators (level 2 only)
-     */
-    export type PatternNestedCondition =
-      /* Nested condition with logical operators (level 2 only) */
-      | {
-          all: /* Fact-based condition for pattern validation */ PatternFactCondition[];
-        }
-      | {
-          any: /* Fact-based condition for pattern validation */ PatternFactCondition[];
-        }
-      | {
-          not: /* Fact-based condition for pattern validation */ PatternFactCondition;
-        };
-    /**
-     * Validation rule that uses a sequence of patterns to validate input.
-     */
-    export interface PatternRuleType {
-      /**
-       * Indicates this is a pattern-based validation rule.
-       */
-      type: 'pattern';
-      /**
-       * The conditions that must be met for the rule to trigger
-       */
-      conditions: /* Condition definition for a pattern-based validation rule (2 levels deep) */ PatternCondition;
-    }
-    /**
-     * Condition definition for a regex-based validation rule (2 levels deep)
-     */
-    export type RegexCondition =
-      /* Condition definition for a regex-based validation rule (2 levels deep) */
-      | {
-          all: /* Fact-based condition for regex validation */ (
-            | RegexFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition
-          )[];
-        }
-      | {
-          any: /* Fact-based condition for regex validation */ (
-            | RegexFactCondition
-            | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition
-          )[];
-        }
-      | {
-          not: /* Fact-based condition for regex validation */
-          RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition;
-        };
-    /**
-     * Fact-based condition for regex validation
-     */
-    export interface RegexFactCondition {
-      /**
-       * The name of the value to validate. Should always be 'inputValue' because this property name is passed to the engine
-       */
-      fact: 'inputValue';
-      /**
-       * The operator to use for comparison
-       */
-      operator: 'regexMatch';
-      /**
-       * The actual regex
-       */
-      value: string;
-      /**
-       * Additional parameters for the condition
-       */
-      params?: {
         /**
-         * Custom error message
+         * Condition definition for a numeric-based validation rule (2 levels deep)
          */
-        errorMessage?: string;
-      };
-    }
-    /**
-     * Nested condition with logical operators (level 2 only)
-     */
-    export type RegexNestedCondition =
-      /* Nested condition with logical operators (level 2 only) */
-      | {
-          all: /* Fact-based condition for regex validation */ RegexFactCondition[];
-        }
-      | {
-          any: /* Fact-based condition for regex validation */ RegexFactCondition[];
-        }
-      | {
-          not: /* Fact-based condition for regex validation */ RegexFactCondition;
+        export type NumericCondition = /* Condition definition for a numeric-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition)[];
+        } | {
+            any: (/* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition)[];
+        } | {
+            not: /* Fact-based condition for numeric validation */ NumericFactCondition | /* Nested condition with logical operators (level 2 only) */ NumericNestedCondition;
         };
-    /**
-     * Validation rule that uses a regular expression to validate input.
-     */
-    export interface RegexRuleType {
-      /**
-       * Indicates this is a regex-based validation rule.
-       */
-      type: 'regex';
-      /**
-       * The conditions that must be met for the rule to trigger
-       */
-      conditions: /* Condition definition for a regex-based validation rule (2 levels deep) */ RegexCondition;
+        /**
+         * Fact-based condition for numeric validation
+         */
+        export type NumericFactCondition = /* Fact-based condition for numeric validation */ {
+            /**
+             * The numeric value extracted from input; The amount of digits
+             */
+            fact: "numeric-value" | "total-length";
+            /**
+             * Numeric comparison operator
+             */
+            operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive";
+            /**
+             * Numeric value to compare against
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        } | {
+            /**
+             * Count of integer digits (excludes leading zeros unless allowed)
+             */
+            fact: "integer-digits-count";
+            /**
+             * Digit count comparison operator
+             */
+            operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits";
+            /**
+             * Expected number of integer digits
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * Whether to count leading zeroes in digit count
+                 */
+                allowLeadingZeroes?: boolean;
+            };
+        } | {
+            /**
+             * Count of decimal digits
+             */
+            fact: "decimal-digits-count";
+            /**
+             * Decimal digit count comparison operator
+             */
+            operator: "equal" | "minDecimalDigits" | "maxDecimalDigits";
+            /**
+             * Expected number of decimal digits
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        } | {
+            /**
+             * Whether the input has leading zeros
+             */
+            fact: "has-leading-zeroes";
+            /**
+             * Leading zeros check operator
+             */
+            operator: "equal" | "notAllowed";
+            /**
+             * Whether leading zeros should be present or not
+             */
+            value: boolean;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        };
+        /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type NumericNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for numeric validation */ NumericFactCondition[];
+        } | {
+            any: /* Fact-based condition for numeric validation */ NumericFactCondition[];
+        } | {
+            not: /* Fact-based condition for numeric validation */ NumericFactCondition;
+        };
+        /**
+         * Validation rule for numeric values, supporting range and digit count constraints.
+         */
+        export interface NumericRuleType {
+            /**
+             * Indicates this is a numeric-based validation rule.
+             */
+            type: "numeric";
+            /**
+             * The conditions that must be met for the rule to trigger
+             */
+            conditions: /* Condition definition for a numeric-based validation rule (2 levels deep) */ NumericCondition;
+        }
+        /**
+         * Condition definition for a pattern-based validation rule (2 levels deep)
+         */
+        export type PatternCondition = /* Condition definition for a pattern-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition)[];
+        } | {
+            any: (/* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition)[];
+        } | {
+            not: /* Fact-based condition for pattern validation */ PatternFactCondition | /* Nested condition with logical operators (level 2 only) */ PatternNestedCondition;
+        };
+        /**
+         * Fact-based condition for pattern validation
+         */
+        export type PatternFactCondition = /* Fact-based condition for pattern validation */ {
+            /**
+             * The name of the value to validate.
+             */
+            fact: "total-length";
+            /**
+             * Numeric comparison operator
+             */
+            operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive";
+            /**
+             * Numeric value to compare against
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
+            /**
+             * The name of the value to validate.
+             */
+            fact: "static-check" | "total-length";
+            /**
+             * Exact digit count operator
+             */
+            operator: "exactlyNDigits";
+            /**
+             * Number of digits required
+             */
+            value: number;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
+            /**
+             * The name of the value to validate.
+             */
+            fact: "static-check";
+            /**
+             * Array-based comparison operator
+             */
+            operator: "in" | "notIn" | "contains" | "doesNotContain";
+            /**
+             * Array of string values for array-based operators
+             */
+            value: string[];
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        } | {
+            /**
+             * The name of the value to validate.
+             */
+            fact: "static-check";
+            /**
+             * String comparison operator
+             */
+            operator: "equal" | "notEqual";
+            /**
+             * String value to compare against
+             */
+            value: string;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+                /**
+                 * From where to check
+                 */
+                start?: number;
+                /**
+                 * To where to check
+                 */
+                end?: number;
+            };
+        };
+        /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type PatternNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for pattern validation */ PatternFactCondition[];
+        } | {
+            any: /* Fact-based condition for pattern validation */ PatternFactCondition[];
+        } | {
+            not: /* Fact-based condition for pattern validation */ PatternFactCondition;
+        };
+        /**
+         * Validation rule that uses a sequence of patterns to validate input.
+         */
+        export interface PatternRuleType {
+            /**
+             * Indicates this is a pattern-based validation rule.
+             */
+            type: "pattern";
+            /**
+             * The conditions that must be met for the rule to trigger
+             */
+            conditions: /* Condition definition for a pattern-based validation rule (2 levels deep) */ PatternCondition;
+        }
+        /**
+         * Condition definition for a regex-based validation rule (2 levels deep)
+         */
+        export type RegexCondition = /* Condition definition for a regex-based validation rule (2 levels deep) */ {
+            all: (/* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition)[];
+        } | {
+            any: (/* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition)[];
+        } | {
+            not: /* Fact-based condition for regex validation */ RegexFactCondition | /* Nested condition with logical operators (level 2 only) */ RegexNestedCondition;
+        };
+        /**
+         * Fact-based condition for regex validation
+         */
+        export interface RegexFactCondition {
+            /**
+             * The name of the value to validate. Should always be 'inputValue' because this property name is passed to the engine
+             */
+            fact: "inputValue";
+            /**
+             * The operator to use for comparison
+             */
+            operator: "regexMatch";
+            /**
+             * The actual regex
+             */
+            value: string;
+            /**
+             * Additional parameters for the condition
+             */
+            params?: {
+                /**
+                 * Custom error message
+                 */
+                errorMessage?: string;
+            };
+        }
+        /**
+         * Nested condition with logical operators (level 2 only)
+         */
+        export type RegexNestedCondition = /* Nested condition with logical operators (level 2 only) */ {
+            all: /* Fact-based condition for regex validation */ RegexFactCondition[];
+        } | {
+            any: /* Fact-based condition for regex validation */ RegexFactCondition[];
+        } | {
+            not: /* Fact-based condition for regex validation */ RegexFactCondition;
+        };
+        /**
+         * Validation rule that uses a regular expression to validate input.
+         */
+        export interface RegexRuleType {
+            /**
+             * Indicates this is a regex-based validation rule.
+             */
+            type: "regex";
+            /**
+             * The conditions that must be met for the rule to trigger
+             */
+            conditions: /* Condition definition for a regex-based validation rule (2 levels deep) */ RegexCondition;
+        }
+        export interface UpdateValidationRuleRequest {
+            /**
+             * Title of the validation rule.
+             */
+            title?: string;
+            /**
+             * Placeholder for the validation rule.
+             */
+            placeholder?: string;
+            /**
+             * Describes where and how a validation rule is applied.
+             */
+            used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
+        }
+        /**
+         * Describes where and how a validation rule is applied.
+         */
+        export interface UsedBy {
+            /**
+             * The context in which the rule is used (e.g., journey or entity).
+             */
+            type: "journey" | "entity";
+            /**
+             * Slug of the schema using this rule for entities.
+             */
+            schema_slug?: string;
+            /**
+             * Source identifier for the usage context.
+             */
+            source_id?: string;
+        }
+        /**
+         * The Validation rule definition.
+         */
+        export interface ValidationRule {
+            /**
+             * Title of the validation rule.
+             */
+            title: string;
+            /**
+             * Placeholder for the validation rule.
+             */
+            placeholder?: string;
+            /**
+             * Describes where and how a validation rule is applied.
+             */
+            used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
+            /**
+             * Schema version of the validation rule.
+             */
+            _schema_version: string;
+            /**
+             * Unique identifier for the validation rule.
+             */
+            _id: string;
+            /**
+             * Organization ID that owns this rule.
+             */
+            _organization_id: string;
+            /**
+             * ISO timestamp when the rule was created.
+             */
+            created_at: string;
+            /**
+             * ISO timestamp when the rule was last updated.
+             */
+            updated_at: string;
+            /**
+             * User ID of the creator.
+             */
+            created_by: string;
+            /**
+             * User ID of the last updater.
+             */
+            updated_by: string;
+        }
+        export interface ValidationRuleBase {
+            /**
+             * Title of the validation rule.
+             */
+            title?: string;
+            /**
+             * Placeholder for the validation rule.
+             */
+            placeholder?: string;
+            /**
+             * Describes where and how a validation rule is applied.
+             */
+            used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
+            rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
+        }
     }
-    export interface UpdateValidationRuleRequest {
-      /**
-       * Title of the validation rule.
-       */
-      title?: string;
-      /**
-       * Placeholder for the validation rule.
-       */
-      placeholder?: string;
-      /**
-       * Describes where and how a validation rule is applied.
-       */
-      used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-      rule?: /* Validation rule that uses a regular expression to validate input. */
-        | RegexRuleType
-        | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType
-        | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
-    }
-    /**
-     * Describes where and how a validation rule is applied.
-     */
-    export interface UsedBy {
-      /**
-       * The context in which the rule is used (e.g., journey or entity).
-       */
-      type: 'journey' | 'entity';
-      /**
-       * Slug of the schema using this rule for entities.
-       */
-      schema_slug?: string;
-      /**
-       * Source identifier for the usage context.
-       */
-      source_id?: string;
-    }
-    /**
-     * The Validation rule definition.
-     */
-    export interface ValidationRule {
-      /**
-       * Title of the validation rule.
-       */
-      title: string;
-      /**
-       * Placeholder for the validation rule.
-       */
-      placeholder?: string;
-      /**
-       * Describes where and how a validation rule is applied.
-       */
-      used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-      rule?: /* Validation rule that uses a regular expression to validate input. */
-        | RegexRuleType
-        | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType
-        | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
-      /**
-       * Schema version of the validation rule.
-       */
-      _schema_version: string;
-      /**
-       * Unique identifier for the validation rule.
-       */
-      _id: string;
-      /**
-       * Organization ID that owns this rule.
-       */
-      _organization_id: string;
-      /**
-       * ISO timestamp when the rule was created.
-       */
-      created_at: string;
-      /**
-       * ISO timestamp when the rule was last updated.
-       */
-      updated_at: string;
-      /**
-       * User ID of the creator.
-       */
-      created_by: string;
-      /**
-       * User ID of the last updater.
-       */
-      updated_by: string;
-    }
-    export interface ValidationRuleBase {
-      /**
-       * Title of the validation rule.
-       */
-      title?: string;
-      /**
-       * Placeholder for the validation rule.
-       */
-      placeholder?: string;
-      /**
-       * Describes where and how a validation rule is applied.
-       */
-      used_by?: /* Describes where and how a validation rule is applied. */ UsedBy[];
-      rule?: /* Validation rule that uses a regular expression to validate input. */
-        | RegexRuleType
-        | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType
-        | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType;
-    }
-  }
 }
 declare namespace Paths {
-  namespace AddUsedByReference {
-    namespace Parameters {
-      export type RuleId = string;
+    namespace AddUsedByReference {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-    export interface PathParameters {
-      ruleId: Parameters.RuleId;
+    namespace CreateValidationRule {
+        export type RequestBody = Components.Schemas.CreateValidationRuleRequest;
+        namespace Responses {
+            export type $201 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+        }
     }
-    export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
-    namespace Responses {
-      export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
-      export interface $400 {
-        /**
-         * example:
-         * Invalid request body
-         */
-        message?: string;
-      }
-      export interface $404 {
-        /**
-         * example:
-         * Validation rule not found
-         */
-        message?: string;
-      }
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
+    namespace DeleteValidationRule {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-  }
-  namespace CreateValidationRule {
-    export type RequestBody = Components.Schemas.CreateValidationRuleRequest;
-    namespace Responses {
-      export type $201 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+    namespace GetValidationRuleById {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-  }
-  namespace DeleteValidationRule {
-    namespace Parameters {
-      export type RuleId = string;
+    namespace GetValidationRules {
+        namespace Responses {
+            export type $200 = Components.Schemas.GetValidationRulesResponse;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-    export interface PathParameters {
-      ruleId: Parameters.RuleId;
+    namespace RemoveUsedByReference {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $404 {
+                /**
+                 * example:
+                 * Validation rule not found
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-    namespace Responses {
-      export type $204 = {};
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
+    namespace UpdateValidationRule {
+        namespace Parameters {
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            ruleId: Parameters.RuleId;
+        }
+        export type RequestBody = Components.Schemas.UpdateValidationRuleRequest;
+        namespace Responses {
+            export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
+            export interface $400 {
+                /**
+                 * example:
+                 * Invalid request body
+                 */
+                message?: string;
+            }
+            export interface $500 {
+                /**
+                 * example:
+                 * Unknown API Error
+                 */
+                message?: string;
+            }
+        }
     }
-  }
-  namespace GetValidationRuleById {
-    namespace Parameters {
-      export type RuleId = string;
-    }
-    export interface PathParameters {
-      ruleId: Parameters.RuleId;
-    }
-    namespace Responses {
-      export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
-      export interface $404 {
-        /**
-         * example:
-         * Validation rule not found
-         */
-        message?: string;
-      }
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
-    }
-  }
-  namespace GetValidationRules {
-    namespace Responses {
-      export type $200 = Components.Schemas.GetValidationRulesResponse;
-      export interface $400 {
-        /**
-         * example:
-         * Invalid request body
-         */
-        message?: string;
-      }
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
-    }
-  }
-  namespace RemoveUsedByReference {
-    namespace Parameters {
-      export type RuleId = string;
-    }
-    export interface PathParameters {
-      ruleId: Parameters.RuleId;
-    }
-    export type RequestBody = /* Describes where and how a validation rule is applied. */ Components.Schemas.UsedBy;
-    namespace Responses {
-      export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
-      export interface $400 {
-        /**
-         * example:
-         * Invalid request body
-         */
-        message?: string;
-      }
-      export interface $404 {
-        /**
-         * example:
-         * Validation rule not found
-         */
-        message?: string;
-      }
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
-    }
-  }
-  namespace UpdateValidationRule {
-    namespace Parameters {
-      export type RuleId = string;
-    }
-    export interface PathParameters {
-      ruleId: Parameters.RuleId;
-    }
-    export type RequestBody = Components.Schemas.UpdateValidationRuleRequest;
-    namespace Responses {
-      export type $200 = /* The Validation rule definition. */ Components.Schemas.ValidationRule;
-      export interface $400 {
-        /**
-         * example:
-         * Invalid request body
-         */
-        message?: string;
-      }
-      export interface $500 {
-        /**
-         * example:
-         * Unknown API Error
-         */
-        message?: string;
-      }
-    }
-  }
 }
+
 
 export interface OperationMethods {
   /**
    * getValidationRules - Get all validation rules by organization Id
-   *
+   * 
    * Gets all validation rules by organization Id
    */
-  getValidationRules(
+  'getValidationRules'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetValidationRules.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetValidationRules.Responses.$200>
   /**
    * createValidationRule - Create Validation Rule
-   *
+   * 
    * Creates a new validation rule
    */
-  createValidationRule(
+  'createValidationRule'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateValidationRule.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.CreateValidationRule.Responses.$201>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateValidationRule.Responses.$201>
   /**
    * getValidationRuleById - Get validation rule by ID
-   *
+   * 
    * Retrieves a specific validation rule by its ID
    */
-  getValidationRuleById(
+  'getValidationRuleById'(
     parameters?: Parameters<Paths.GetValidationRuleById.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>
   /**
    * updateValidationRule - Update Validation Rule (partial update)
-   *
+   * 
    * Updates an existing validation rule partially by ID
    */
-  updateValidationRule(
+  'updateValidationRule'(
     parameters?: Parameters<Paths.UpdateValidationRule.PathParameters> | null,
     data?: Paths.UpdateValidationRule.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.UpdateValidationRule.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateValidationRule.Responses.$200>
   /**
    * deleteValidationRule - Delete Validation Rule
-   *
+   * 
    * Deletes a validation rule by ID
    */
-  deleteValidationRule(
+  'deleteValidationRule'(
     parameters?: Parameters<Paths.DeleteValidationRule.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>
   /**
    * addUsedByReference - Add a reference to the usedBy array
-   *
+   * 
    * Adds a single reference to the usedBy array of a validation rule
    */
-  addUsedByReference(
+  'addUsedByReference'(
     parameters?: Parameters<Paths.AddUsedByReference.PathParameters> | null,
     data?: Paths.AddUsedByReference.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.AddUsedByReference.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddUsedByReference.Responses.$200>
   /**
    * removeUsedByReference - Remove a reference from the usedBy array
-   *
+   * 
    * Removes a specific reference from the usedBy array of a validation rule
    */
-  removeUsedByReference(
+  'removeUsedByReference'(
     parameters?: Parameters<Paths.RemoveUsedByReference.PathParameters> | null,
     data?: Paths.RemoveUsedByReference.RequestBody,
-    config?: AxiosRequestConfig,
-  ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>;
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>
 }
 
 export interface PathsDictionary {
   ['/v1/validation-rules']: {
     /**
      * getValidationRules - Get all validation rules by organization Id
-     *
+     * 
      * Gets all validation rules by organization Id
      */
-    get(
+    'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetValidationRules.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetValidationRules.Responses.$200>
     /**
      * createValidationRule - Create Validation Rule
-     *
+     * 
      * Creates a new validation rule
      */
-    post(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateValidationRule.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.CreateValidationRule.Responses.$201>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateValidationRule.Responses.$201>
+  }
   ['/v1/validation-rules/{ruleId}']: {
     /**
      * getValidationRuleById - Get validation rule by ID
-     *
+     * 
      * Retrieves a specific validation rule by its ID
      */
-    get(
+    'get'(
       parameters?: Parameters<Paths.GetValidationRuleById.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetValidationRuleById.Responses.$200>
     /**
      * updateValidationRule - Update Validation Rule (partial update)
-     *
+     * 
      * Updates an existing validation rule partially by ID
      */
-    patch(
+    'patch'(
       parameters?: Parameters<Paths.UpdateValidationRule.PathParameters> | null,
       data?: Paths.UpdateValidationRule.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.UpdateValidationRule.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateValidationRule.Responses.$200>
     /**
      * deleteValidationRule - Delete Validation Rule
-     *
+     * 
      * Deletes a validation rule by ID
      */
-    delete(
+    'delete'(
       parameters?: Parameters<Paths.DeleteValidationRule.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteValidationRule.Responses.$204>
+  }
   ['/v1/validation-rules/{ruleId}/used-by']: {
     /**
      * addUsedByReference - Add a reference to the usedBy array
-     *
+     * 
      * Adds a single reference to the usedBy array of a validation rule
      */
-    post(
+    'post'(
       parameters?: Parameters<Paths.AddUsedByReference.PathParameters> | null,
       data?: Paths.AddUsedByReference.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.AddUsedByReference.Responses.$200>;
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddUsedByReference.Responses.$200>
     /**
      * removeUsedByReference - Remove a reference from the usedBy array
-     *
+     * 
      * Removes a specific reference from the usedBy array of a validation rule
      */
-    delete(
+    'delete'(
       parameters?: Parameters<Paths.RemoveUsedByReference.PathParameters> | null,
       data?: Paths.RemoveUsedByReference.RequestBody,
-      config?: AxiosRequestConfig,
-    ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>;
-  };
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveUsedByReference.Responses.$200>
+  }
 }
 
-export type Client = OpenAPIClient<OperationMethods, PathsDictionary>;
+export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRuleRequest;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;

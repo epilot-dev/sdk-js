@@ -1,5 +1,7 @@
 export type { TokenArg } from './authorize';
 export { authorize } from './authorize';
+export type { LargeResponseConfig } from './large-response';
+export { applyLargeResponseInterceptor } from './large-response';
 export type { RetryConfig } from './retry';
 export { applyRetryInterceptor } from './retry';
 export type { EpilotSDK, InterceptorUse } from './sdk';

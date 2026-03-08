@@ -29,7 +29,7 @@ describe('registry', () => {
 
   beforeEach(() => {
     registry = createRegistry()
-    state = { token: null, tokenFn: null, globalHeaders: {}, interceptors: [], retry: { maxRetries: 3 } }
+    state = { token: null, tokenFn: null, globalHeaders: {}, interceptors: [], retry: { maxRetries: 3 }, largeResponse: { enabled: true } }
   })
 
   it('should register and resolve an API', async () => {
