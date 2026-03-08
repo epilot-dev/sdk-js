@@ -5,12 +5,12 @@ import { createApiHandle } from '../proxy'
 import type { ApiHandle } from '../types'
 export { authorize } from '../authorize'
 export type { TokenArg } from '../authorize'
-import type { Client } from '../types/ai-agents'
-export type { Client, PathsDictionary, OperationMethods, AgentDefinition, AgentId, AgentSource, ApproveExecutionRequest, CreateAgentRequest, Error, ExecuteAgentRequest, ExecutionContext, ExecutionError, ExecutionIteration, ExecutionMetrics, ExecutionMode, ExecutionPattern, ExecutionResponse, ExecutionStatus, ExecutionTrace, InputParameterDefinition, InputParametersSchema, ListAgentsResponse, ListExecutionsResponse, ModelConfig, ParameterType, PendingAction, PreviewActionType, PreviewChange, PreviewEntity, PreviewValue, RejectExecutionRequest, SkillAvailability, SkillCategory, ToolDefinition, ToolPreview, UpdateAgentRequest } from '../types/ai-agents'
+import type { Client } from '../types/dashboard'
+export type { Client, PathsDictionary, OperationMethods, Dashboard, DashboardID, DashboardTile, DashboardTileID, DatalakeQuery, Example, ExampleID, timechartVisualisationConfig, Visualisation, VisualisationConfig, VisualisationId } from '../types/dashboard'
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {
-  const mod = require('../definitions/ai-agents.json')
+  const mod = require('../definitions/dashboard.json')
   return (mod.default ?? mod) as unknown as Document
 }
 
@@ -37,6 +37,6 @@ export const createClient = _handle.createClient
 
 /**
  * API handle — also exposes operations directly:
- * `aiAgents.someOperation(...)` calls forwarded to lazy singleton
+ * `dashboard.someOperation(...)` calls forwarded to lazy singleton
  */
-export const aiAgents = _handle
+export const dashboard = _handle

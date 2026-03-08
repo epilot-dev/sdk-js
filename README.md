@@ -59,6 +59,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./packages/epilot-sdk-v2/docs/blueprint-manifest.md) |
 | `epilot.consent` | `@epilot/sdk/consent` | [docs](./packages/epilot-sdk-v2/docs/consent.md) |
 | `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./packages/epilot-sdk-v2/docs/customer-portal.md) |
+| `epilot.dashboard` | `@epilot/sdk/dashboard` | [docs](./packages/epilot-sdk-v2/docs/dashboard.md) |
 | `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./packages/epilot-sdk-v2/docs/data-management.md) |
 | `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./packages/epilot-sdk-v2/docs/deduplication.md) |
 | `epilot.design` | `@epilot/sdk/design` | [docs](./packages/epilot-sdk-v2/docs/design.md) |
