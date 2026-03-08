@@ -35,6 +35,14 @@ const { data: executions } = await epilot.workflow.getExecutions()
 
 API clients are built on [openapi-client-axios](https://openapistack.co/docs/openapi-client-axios/intro/), which generates fully typed operation methods on top of regular [axios](https://axios-http.com/docs/intro) instances. All standard axios features (interceptors, defaults, config) work as expected. Each operation is forwarded to a lazy singleton — the spec is loaded and the client initialized on first use, then cached.
 
+## Packages
+
+| Package | Description |
+| ------- | ----------- |
+| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
+| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
+| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
+
 ## API Reference
 
 | API | Import | Docs |
@@ -85,14 +93,6 @@ API clients are built on [openapi-client-axios](https://openapistack.co/docs/ope
 | `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./packages/epilot-sdk-v2/docs/webhooks.md) |
 | `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./packages/epilot-sdk-v2/docs/workflow.md) |
 | `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./packages/epilot-sdk-v2/docs/workflow-definition.md) |
-
-## Packages
-
-| Package | Description |
-| ------- | ----------- |
-| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
-| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
-| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
 
 ## Codebase Structure
 
