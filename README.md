@@ -35,6 +35,14 @@ API clients are built on [openapi-client-axios](https://openapistack.co/docs/ope
 
 Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 
+## Packages
+
+| Package | Description |
+| ------- | ----------- |
+| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
+| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
+| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
+
 ## API Reference
 
 <!-- api-reference-table -->
@@ -87,14 +95,6 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./packages/epilot-sdk-v2/docs/workflow.md) |
 | `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./packages/epilot-sdk-v2/docs/workflow-definition.md) |
 <!-- /api-reference-table -->
-
-## Packages
-
-| Package | Description |
-| ------- | ----------- |
-| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
-| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
-| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
 
 ## Codebase Structure
 
