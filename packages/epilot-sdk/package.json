@@ -2,6 +2,7 @@
   "name": "epilot-sdk",
   "version": "1.10.0",
   "description": "Epilot SDK",
+  "deprecated": "This package is deprecated. Please use @epilot/sdk instead.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {

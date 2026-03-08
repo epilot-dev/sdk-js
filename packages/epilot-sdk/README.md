@@ -1,3 +1,9 @@
+> **⚠️ DEPRECATED**: This package is deprecated. Please upgrade to [`@epilot/sdk`](https://www.npmjs.com/package/@epilot/sdk) instead.
+>
+> ```sh
+> npm install @epilot/sdk
+> ```
+
 # epilot-sdk
 [![CI](https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg)](https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI)
 [![npm version](https://img.shields.io/npm/v/epilot-sdk.svg)](https://www.npmjs.com/package/epilot-sdk)

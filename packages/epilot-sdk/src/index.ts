@@ -32,6 +32,10 @@ import {
 import { default as userClient, getClient as getUserClient } from './user-client';
 import { default as workflowClient, getClient as getWorkflowClient } from './workflow-client';
 
+console.warn(
+  '[epilot-sdk] This package is deprecated. Please upgrade to @epilot/sdk instead. See: https://www.npmjs.com/package/@epilot/sdk',
+);
+
 export class EpilotClient {
   get entity() {
     return getEntityClient();
