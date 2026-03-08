@@ -91,15 +91,16 @@ jobs:
         id: version
         run: |
           cd packages/epilot-sdk-v2
-          NEW_VERSION=$(npm version patch --no-git-tag-version)
-          echo "version=${NEW_VERSION#v}" >> "$GITHUB_OUTPUT"
+          npm version patch --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
 
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add packages/epilot-sdk-v2/ README.md
-          git commit -m "@epilot/sdk@${NEW_VERSION#v}"
-          git tag "@epilot/sdk@${NEW_VERSION#v}"
+          git commit -m "@epilot/sdk@${NEW_VERSION}"
+          git tag "@epilot/sdk@${NEW_VERSION}"
           git push origin main --follow-tags
 
       - name: Publish @epilot/sdk
