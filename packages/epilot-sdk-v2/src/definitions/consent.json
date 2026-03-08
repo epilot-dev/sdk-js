@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/consent/publish": {
+      "post": {
+        "operationId": "publishConsentEvent",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/consent/{identifier}": {
+      "get": {
+        "operationId": "listConsentEvents",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/v1/opt-in/{token}": {
+      "get": {
+        "operationId": "handleOptInWithToken",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "lang",
+            "in": "query"
+          }
+        ]
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://consent.sls.epilot.io"
+    }
+  ]
+}

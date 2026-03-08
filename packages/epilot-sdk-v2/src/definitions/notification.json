@@ -1,0 +1,221 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/notification/notifications": {
+      "get": {
+        "operationId": "getNotificationsV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "after_id"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/notifications": {
+      "post": {
+        "operationId": "createNotification",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after_id"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "in": "query",
+            "name": "no_hydrate"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/notifications/{id}": {
+      "get": {
+        "operationId": "getNotification",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/notifications/mark": {
+      "put": {
+        "operationId": "markAllAsRead",
+        "responses": {}
+      }
+    },
+    "/v1/notification/notifications/{id}/mark": {
+      "put": {
+        "operationId": "markAsRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/unreads": {
+      "get": {
+        "operationId": "getTotalUnread",
+        "responses": {}
+      }
+    },
+    "/v1/notification/templates": {
+      "get": {
+        "operationId": "listNotificationTemplates",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createNotificationTemplate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/notification/templates/{id}": {
+      "get": {
+        "operationId": "getNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteNotificationTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TemplateIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notification/templates/send-preview": {
+      "post": {
+        "operationId": "sendPreview",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "TemplateIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://notification.sls.epilot.io"
+    }
+  ]
+}

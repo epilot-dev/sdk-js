@@ -16,10 +16,7 @@ import {
   updateContentHeight,
   __reset,
 } from './app-bridge';
-import {
-  AppBridgeNotInitializedError,
-  AppBridgeTimeoutError,
-} from './errors';
+import { AppBridgeNotInitializedError, AppBridgeTimeoutError } from './errors';
 
 describe('app-bridge', () => {
   let messageHandlers: Map<string, (event: MessageEvent) => void>;
@@ -127,10 +124,7 @@ describe('app-bridge', () => {
 
       await initPromise;
 
-      expect(postMessageMock).toHaveBeenCalledWith(
-        expect.objectContaining({ contentHeight: 1000 }),
-        '*',
-      );
+      expect(postMessageMock).toHaveBeenCalledWith(expect.objectContaining({ contentHeight: 1000 }), '*');
     });
 
     it('should timeout if no response received', async () => {

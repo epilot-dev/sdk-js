@@ -2,7 +2,28 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx vitest:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npx tsup:*)",
+      "Bash(node:*)",
+      "Bash(npm run:*)",
+      "Bash(ls .eslintrc*:*)",
+      "Bash(python3:*)",
+      "Bash(awk:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(xargs sed:*)",
+      "Bash(do python3:*)",
+      "Bash(npx biome:*)",
+      "Bash(npm view:*)",
+      "Read(//private/tmp/**)",
+      "Bash(npm pack @epilot/axios-large-response)",
+      "Bash(tar xzf epilot-axios-large-response-0.0.2.tgz)",
+      "Bash(pnpm test:*)"
     ],
     "deny": []
   }

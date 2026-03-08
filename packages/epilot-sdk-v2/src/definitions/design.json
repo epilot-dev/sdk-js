@@ -1,0 +1,203 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://design-builder-api.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/designs": {
+      "get": {
+        "operationId": "getAllDesigns",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addDesign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/{designId}": {
+      "get": {
+        "operationId": "getDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/{designId}/parse": {
+      "get": {
+        "operationId": "getThemeFromDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "orgId"
+          },
+          {
+            "in": "query",
+            "name": "theme",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/designs/files": {
+      "post": {
+        "operationId": "uploadFile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file_data": {
+                  "contentType": "image/*, application/x-font-ttf, application/x-font-opentype, application/font-woff, application/font-woff2"
+                }
+              }
+            }
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getFiles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/designs/limit": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getLimit",
+        "responses": {}
+      }
+    },
+    "/v1/brands": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getBrands",
+        "responses": {}
+      }
+    },
+    "/v1/designs/consumer/{application}/{consumerId}": {
+      "get": {
+        "operationId": "getConsumerDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/designs/addConsumer/{application}/{designId}": {
+      "put": {
+        "operationId": "addConsumer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/removeConsumer/{application}/{designId}": {
+      "put": {
+        "operationId": "removeConsumer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "application",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

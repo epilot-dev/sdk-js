@@ -1,0 +1,236 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/webhooks/.well-known/public-key": {
+      "get": {
+        "operationId": "getPublicKey",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "orgId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configured-events": {
+      "get": {
+        "operationId": "getConfiguredEvents",
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs": {
+      "get": {
+        "operationId": "getConfigs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "eventName",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}": {
+      "get": {
+        "operationId": "getConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/trigger": {
+      "post": {
+        "operationId": "triggerWebhook",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sync"
+          },
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getWehookEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "status"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/replay-batch": {
+      "post": {
+        "operationId": "batchReplayEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}": {
+      "get": {
+        "operationId": "getEventById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/events/{eventId}/replay": {
+      "post": {
+        "operationId": "replayEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/webhooks/configs/{configId}/example": {
+      "post": {
+        "operationId": "getWebhookExample",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/webhooks/configs/{configId}/events": {
+      "post": {
+        "operationId": "getWebhookEventsV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://webhooks.sls.epilot.io"
+    }
+  ]
+}

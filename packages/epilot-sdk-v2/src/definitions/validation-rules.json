@@ -1,0 +1,104 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/validation-rules": {
+      "get": {
+        "operationId": "getValidationRules",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createValidationRule",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/validation-rules/{ruleId}": {
+      "get": {
+        "operationId": "getValidationRuleById",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateValidationRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteValidationRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/validation-rules/{ruleId}/used-by": {
+      "post": {
+        "operationId": "addUsedByReference",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeUsedByReference",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://validation-rules.sls.epilot.io"
+    }
+  ]
+}

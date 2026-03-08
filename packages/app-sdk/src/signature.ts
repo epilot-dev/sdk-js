@@ -1,4 +1,4 @@
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'node:http';
 import { verify } from 'node:crypto';
 
 export type PublicKey = {
@@ -30,14 +30,14 @@ export async function verifyEpilotSignature(req: HttpRequest): Promise<boolean> 
     const signatureBuffer = Buffer.from(signatures.v1a, 'base64');
 
     return verify(null, messageBuffer, publicKeyPem, signatureBuffer);
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
 
 function isFreshTimestamp(webhookTimestamp: string) {
   const currentTime = Math.floor(Date.now() / 1000);
-  const webhookTime = Number.parseInt(webhookTimestamp);
+  const webhookTime = Number.parseInt(webhookTimestamp, 10);
   const tolerance = 300; // 5 minutes
 
   return Math.abs(currentTime - webhookTime) <= tolerance;

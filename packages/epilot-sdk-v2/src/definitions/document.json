@@ -1,0 +1,62 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/documents:meta": {
+      "post": {
+        "operationId": "getTemplateMeta",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/documents:generate": {
+      "post": {
+        "operationId": "generateDocumentV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          },
+          {
+            "in": "query",
+            "name": "mode"
+          },
+          {
+            "in": "query",
+            "name": "preview_mode"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/documents:convert": {
+      "post": {
+        "operationId": "convertDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://document.sls.epilot.io"
+    }
+  ]
+}

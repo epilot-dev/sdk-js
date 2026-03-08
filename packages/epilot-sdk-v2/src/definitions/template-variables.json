@@ -1,0 +1,143 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://template-variables-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/template-variables/categories": {
+      "get": {
+        "operationId": "getCategories",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/template-variables:search": {
+      "post": {
+        "operationId": "searchVariables",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/template-variables:context": {
+      "post": {
+        "operationId": "getVariableContext",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/template-variables:replace": {
+      "post": {
+        "operationId": "replaceTemplates",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/template:replace": {
+      "post": {
+        "operationId": "replaceTemplatesV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/custom-variables": {
+      "get": {
+        "operationId": "getCustomVariables",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createCustomVariable",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/custom-variables:search": {
+      "post": {
+        "operationId": "searchCustomVariables",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/custom-variables/{id}": {
+      "put": {
+        "operationId": "updateCustomVariable",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getCustomVariable",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteCustomVariable",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/custom-variables/order-table-blueprint": {
+      "get": {
+        "operationId": "getBluePrintTableConfig",
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

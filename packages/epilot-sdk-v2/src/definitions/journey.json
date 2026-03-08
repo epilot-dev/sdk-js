@@ -1,0 +1,254 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/journey/organization/{id}": {
+      "get": {
+        "operationId": "getJourneysByOrgId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration/{id}": {
+      "get": {
+        "operationId": "getJourney",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "orgId",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeJourney",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/products/{id}": {
+      "get": {
+        "operationId": "getJourneyProducts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "postal_code",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "street",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "street_number",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration": {
+      "post": {
+        "operationId": "createJourney",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "skipAutomation",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateJourney",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchUpdateJourney",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration/search": {
+      "post": {
+        "operationId": "searchJourneys",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v1/journey/document:generate": {
+      "post": {
+        "operationId": "generateDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/journey/configuration": {
+      "post": {
+        "operationId": "createJourneyV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "skipAutomation",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateJourneyV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchUpdateJourneyV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [],
+        "responses": {}
+      }
+    },
+    "/v2/journey/configuration/{id}": {
+      "get": {
+        "operationId": "getJourneyV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeJourneyV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/{id}/settings": {
+      "get": {
+        "operationId": "getSettingsForJourney",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/button-options": {
+      "get": {
+        "operationId": "getButtonOptions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fileId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://journey-config.sls.epilot.io"
+    }
+  ]
+}

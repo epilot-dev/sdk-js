@@ -1,0 +1,159 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/billing/events": {
+      "get": {
+        "operationId": "getBillingEvents",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "event_type",
+            "in": "query"
+          },
+          {
+            "name": "date_after",
+            "in": "query"
+          },
+          {
+            "name": "date_before",
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createBillingEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/billing/events/{id}": {
+      "get": {
+        "operationId": "getBillingEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateBillingEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBillingEvent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/billing/external/{external_id}": {
+      "get": {
+        "operationId": "getBillingEventByExternalId",
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/billing/contracts": {
+      "post": {
+        "operationId": "createContractEntity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/billing/contracts/{id}": {
+      "patch": {
+        "operationId": "updateContractEntity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteContractEntity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/billing/customers/{id}/balance": {
+      "get": {
+        "operationId": "getCustomerBalance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://billing.sls.epilot.io"
+    }
+  ]
+}

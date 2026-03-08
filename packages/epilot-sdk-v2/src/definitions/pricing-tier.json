@@ -1,0 +1,20 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/pricing-tiers/me": {
+      "get": {
+        "operationId": "getCurrentPricingTier"
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://pricing-tier.sls.epilot.io"
+    }
+  ]
+}

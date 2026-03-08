@@ -63,9 +63,7 @@ export class AppBridgeTimeoutError extends AppBridgeError {
  */
 export class AppBridgeNotInitializedError extends AppBridgeError {
   constructor() {
-    super(
-      'AppBridge is not initialized. Call appBridge.initialize() first.',
-    );
+    super('AppBridge is not initialized. Call appBridge.initialize() first.');
     this.name = 'AppBridgeNotInitializedError';
   }
 }

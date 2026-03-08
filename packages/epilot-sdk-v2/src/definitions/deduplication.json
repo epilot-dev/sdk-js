@@ -1,0 +1,26 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/deduplicate": {
+      "post": {
+        "operationId": "deduplicate",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://deduplication.sls.epilot.io"
+    }
+  ]
+}

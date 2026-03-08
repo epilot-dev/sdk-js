@@ -1,0 +1,148 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/kanban/board": {
+      "post": {
+        "operationId": "createKanbanBoard",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/kanban/boards": {
+      "get": {
+        "operationId": "getKanbanBoards",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/kanban/board/{boardId}": {
+      "get": {
+        "operationId": "getKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/kanban/org/default-board": {
+      "put": {
+        "operationId": "setDefaultKanbanBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "clearDefaultKanbanBoard",
+        "responses": {}
+      }
+    },
+    "/v1/kanban/query/flows:autocomplete": {
+      "get": {
+        "operationId": "flowsAutocomplete",
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/kanban/query/flows:execute": {
+      "post": {
+        "operationId": "executeFlowsQuery",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://kanban.sls.epilot.io"
+    }
+  ]
+}

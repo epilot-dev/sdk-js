@@ -6,7 +6,7 @@
  * removed once all dependent code has been migrated.
  */
 
-import { Address, Amounts, Customer, MetaData, OrderStatus, PriceItems, PriceTier, TotalDetails } from './openapi';
+import type { Address, Amounts, Customer, MetaData, OrderStatus, PriceItems, PriceTier, TotalDetails } from './openapi';
 
 export interface AvailabilityDate {
   /**

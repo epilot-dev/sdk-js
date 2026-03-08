@@ -1,0 +1,199 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://ai-agents.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/agents": {
+      "post": {
+        "operationId": "createAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listAgents",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query"
+          },
+          {
+            "name": "availability",
+            "in": "query"
+          },
+          {
+            "name": "entity_schema",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/agents/{agent_id}": {
+      "get": {
+        "operationId": "getAgentById",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateAgentById",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteAgentById",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/agents/{agent_id}/execute": {
+      "post": {
+        "operationId": "executeAgent",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/executions": {
+      "get": {
+        "operationId": "listExecutions",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query"
+          },
+          {
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}": {
+      "get": {
+        "operationId": "getExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "cancelExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/trace": {
+      "get": {
+        "operationId": "getExecutionTrace",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/approve": {
+      "post": {
+        "operationId": "approveExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/reject": {
+      "post": {
+        "operationId": "rejectExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}
