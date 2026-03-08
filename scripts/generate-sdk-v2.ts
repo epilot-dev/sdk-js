@@ -117,6 +117,9 @@ const MAX_EXAMPLE_LINES = 30;
 
 const MAX_DEPTH = 3;
 
+const MAX_ARRAY_ITEMS = 2;
+
+
 const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
   const pad = '  '.repeat(indent);
   const inner = '  '.repeat(indent + 1);
@@ -128,7 +131,11 @@ const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
     if (depth >= MAX_DEPTH) return '[ /* ... */ ]';
-    const items = value.map((v) => `${inner}${toJsObject(v, indent + 1, depth + 1)}`);
+    const hasComplexItems = value.some((v) => typeof v === 'object' && v !== null);
+    const limit = hasComplexItems ? MAX_ARRAY_ITEMS : value.length;
+    const shown = value.slice(0, limit);
+    const items = shown.map((v) => `${inner}${toJsObject(v, indent + 1, depth + 1)}`);
+    if (value.length > limit) items.push(`${inner}/* ... ${value.length - limit} more */`);
     return `[\n${items.join(',\n')}\n${pad}]`;
   }
 
@@ -157,7 +164,10 @@ const toJsonObject = (value: unknown, indent = 0, depth = 0): string => {
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
     if (depth >= MAX_DEPTH) return '[]';
-    const items = value.map((v) => `${inner}${toJsonObject(v, indent + 1, depth + 1)}`);
+    const hasComplexItems = value.some((v) => typeof v === 'object' && v !== null);
+    const limit = hasComplexItems ? MAX_ARRAY_ITEMS : value.length;
+    const shown = value.slice(0, limit);
+    const items = shown.map((v) => `${inner}${toJsonObject(v, indent + 1, depth + 1)}`);
     return `[\n${items.join(',\n')}\n${pad}]`;
   }
 
@@ -559,9 +569,9 @@ const generateClientDoc = (client: ClientInfo): string => {
 
   const lines = [`# ${title || client.apiName}`, ``];
 
-  if (server) lines.push(`**Base URL:** \`${server}\``);
+  if (server) lines.push(`- **Base URL:** \`${server}\``);
   lines.push(
-    `**Full API Docs:** [https://docs.epilot.io/api/${client.kebabName}](https://docs.epilot.io/api/${client.kebabName})`,
+    `- **Full API Docs:** [https://docs.epilot.io/api/${client.kebabName}](https://docs.epilot.io/api/${client.kebabName})`,
   );
   lines.push(``);
 
@@ -574,12 +584,7 @@ const generateClientDoc = (client: ClientInfo): string => {
     `import { epilot } from '@epilot/sdk'`,
     ``,
     `epilot.authorize(() => '<token>')`,
-    ``,
-    `// Call operations directly (lazy singleton under the hood)`,
     `const { data } = await epilot.${client.apiName}.${firstOp}(...)`,
-    ``,
-    `// Or get the client explicitly`,
-    `const ${client.apiName}Client = await epilot.${client.apiName}.getClient()`,
     '```',
     ``,
     `### Tree-shakeable import`,
@@ -590,16 +595,9 @@ const generateClientDoc = (client: ClientInfo): string => {
     `const ${client.apiName}Client = await getClient()`,
     `authorize(${client.apiName}Client, () => '<token>')`,
     `const { data } = await ${client.apiName}Client.${firstOp}(...)`,
-    ``,
-    `// Or create a fresh (non-singleton) client`,
-    `import { createClient } from '@epilot/sdk/${client.kebabName}'`,
-    `const fresh = await createClient()`,
-    `authorize(fresh, () => '<token>')`,
     '```',
     ``,
   );
-
-  lines.push();
 
   const activeOps = operations.filter((op) => !op.deprecated);
 
@@ -703,11 +701,14 @@ const generateClientDoc = (client: ClientInfo): string => {
 
       // Response example
       if (responseExample) {
-        lines.push(`**Response**`);
+        lines.push(`<details>`);
+        lines.push(`<summary>Response</summary>`);
         lines.push(``);
         lines.push('```json');
         lines.push(responseExample);
         lines.push('```');
+        lines.push(``);
+        lines.push(`</details>`);
         lines.push(``);
       }
 
@@ -719,7 +720,9 @@ const generateClientDoc = (client: ClientInfo): string => {
   // Schemas section
   const schemas = extractSchemaTypes(client);
   if (schemas.length > 0) {
-    lines.push(`## Schemas`, ``);
+    lines.push(`<details>`);
+    lines.push(`<summary>Schemas</summary>`);
+    lines.push(``);
 
     for (const schema of schemas) {
       lines.push(`### \`${schema.name}\``);
@@ -741,6 +744,8 @@ const generateClientDoc = (client: ClientInfo): string => {
       lines.push('```');
       lines.push(``);
     }
+
+    lines.push(`</details>`);
   }
 
   return lines.join('\n');

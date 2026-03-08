@@ -1,7 +1,7 @@
 # Data Management API
 
-**Base URL:** `https://data-management.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
+- **Base URL:** `https://data-management.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.dataManagement.queryEntities(...)
-
-// Or get the client explicitly
-const dataManagementClient = await epilot.dataManagement.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/data-management'
 const dataManagementClient = await getClient()
 authorize(dataManagementClient, () => '<token>')
 const { data } = await dataManagementClient.queryEntities(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/data-management'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -77,7 +67,8 @@ const { data } = await client.queryEntities(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -87,6 +78,8 @@ const { data } = await client.queryEntities(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -111,7 +104,8 @@ const { data } = await client.createJob(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -136,6 +130,8 @@ const { data } = await client.createJob(
   "triggered_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -165,7 +161,8 @@ const { data } = await client.updateJob(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -190,6 +187,8 @@ const { data } = await client.updateJob(
   "triggered_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -205,7 +204,8 @@ const { data } = await client.getJob({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -231,6 +231,8 @@ const { data } = await client.getJob({
 }
 ```
 
+</details>
+
 ---
 
 ### `getJobReportUrl`
@@ -245,7 +247,8 @@ const { data } = await client.getJobReportUrl({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -253,6 +256,8 @@ const { data } = await client.getJobReportUrl({
   "expires_in": 0
 }
 ```
+
+</details>
 
 ---
 
@@ -268,7 +273,8 @@ const { data } = await client.getConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -299,6 +305,8 @@ const { data } = await client.getConfig({
 }
 ```
 
+</details>
+
 ---
 
 ### `createJobForConfig`
@@ -313,7 +321,8 @@ const { data } = await client.createJobForConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -338,6 +347,8 @@ const { data } = await client.createJobForConfig({
   "triggered_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -375,7 +386,8 @@ const { data } = await client.upsertConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -406,6 +418,8 @@ const { data } = await client.upsertConfig(
 }
 ```
 
+</details>
+
 ---
 
 ### `listConfigs`
@@ -425,7 +439,8 @@ const { data } = await client.listConfigs({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -448,6 +463,8 @@ const { data } = await client.listConfigs({
 }
 ```
 
+</details>
+
 ---
 
 ### `listJobs`
@@ -467,7 +484,8 @@ const { data } = await client.listJobs({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -494,9 +512,12 @@ const { data } = await client.listJobs({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ConfigType`
 
@@ -804,3 +825,5 @@ type ListConfigsResponse = {
   cursor?: string
 }
 ```
+
+</details>

@@ -1,7 +1,7 @@
 # Address API
 
-**Base URL:** `https://address.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/address](https://docs.epilot.io/api/address)
+- **Base URL:** `https://address.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/address](https://docs.epilot.io/api/address)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.address.getAddressSuggestions(...)
-
-// Or get the client explicitly
-const addressClient = await epilot.address.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/address'
 const addressClient = await getClient()
 authorize(addressClient, () => '<token>')
 const { data } = await addressClient.getAddressSuggestions(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/address'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -56,7 +46,8 @@ const { data } = await client.getAddressSuggestions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -69,6 +60,8 @@ const { data } = await client.getAddressSuggestions({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -85,7 +78,8 @@ const { data } = await client.availabilityCheck(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -103,6 +97,8 @@ const { data } = await client.availabilityCheck(
 }
 ```
 
+</details>
+
 ---
 
 ### `validateAvailabilityFile`
@@ -117,7 +113,8 @@ const { data } = await client.validateAvailabilityFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -133,9 +130,12 @@ const { data } = await client.validateAvailabilityFile({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `AvailabilityCheckParams`
 
@@ -271,3 +271,5 @@ type ErrorResponse = {
   error: string
 }
 ```
+
+</details>

@@ -1,7 +1,7 @@
 # Template Variables API
 
-**Base URL:** `https://template-variables-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/template-variables](https://docs.epilot.io/api/template-variables)
+- **Base URL:** `https://template-variables-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/template-variables](https://docs.epilot.io/api/template-variables)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.templateVariables.getCategories(...)
-
-// Or get the client explicitly
-const templateVariablesClient = await epilot.templateVariables.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/template-variables'
 const templateVariablesClient = await getClient()
 authorize(templateVariablesClient, () => '<token>')
 const { data } = await templateVariablesClient.getCategories(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/template-variables'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -62,7 +52,8 @@ const { data } = await client.getCategories({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -72,6 +63,8 @@ const { data } = await client.getCategories({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -97,7 +90,8 @@ const { data } = await client.searchVariables(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -110,6 +104,8 @@ const { data } = await client.searchVariables(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -144,7 +140,8 @@ const { data } = await client.getVariableContext(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -207,6 +204,8 @@ const { data } = await client.getVariableContext(
 }
 ```
 
+</details>
+
 ---
 
 ### `replaceTemplates`
@@ -246,7 +245,8 @@ const { data } = await client.replaceTemplates(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -255,6 +255,8 @@ const { data } = await client.replaceTemplates(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -293,7 +295,8 @@ const { data } = await client.replaceTemplatesV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -308,6 +311,8 @@ const { data } = await client.replaceTemplatesV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `getCustomVariables`
@@ -320,7 +325,8 @@ Get custom variables
 const { data } = await client.getCustomVariables()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -352,6 +358,8 @@ const { data } = await client.getCustomVariables()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -392,10 +400,7 @@ const { data } = await client.createCustomVariable(
       columns: [
         { /* ... */ },
         { /* ... */ },
-        { /* ... */ },
-        { /* ... */ },
-        { /* ... */ },
-        { /* ... */ }
+        /* ... 4 more */
       ],
       body: {
         product_name: { /* ... */ },
@@ -529,7 +534,8 @@ const { data } = await client.createCustomVariable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -559,10 +565,6 @@ const { data } = await client.createCustomVariable(
     },
     "columns": [
       {},
-      {},
-      {},
-      {},
-      {},
       {}
     ],
     "body": {
@@ -589,6 +591,8 @@ const { data } = await client.createCustomVariable(
   "updated_by": "100042"
 }
 ```
+
+</details>
 
 ---
 
@@ -617,7 +621,8 @@ const { data } = await client.searchCustomVariables(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -641,6 +646,8 @@ const { data } = await client.searchCustomVariables(
   "hits": 100
 }
 ```
+
+</details>
 
 ---
 
@@ -683,10 +690,7 @@ const { data } = await client.updateCustomVariable(
       columns: [
         { /* ... */ },
         { /* ... */ },
-        { /* ... */ },
-        { /* ... */ },
-        { /* ... */ },
-        { /* ... */ }
+        /* ... 4 more */
       ],
       body: {
         product_name: { /* ... */ },
@@ -820,7 +824,8 @@ const { data } = await client.updateCustomVariable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -850,10 +855,6 @@ const { data } = await client.updateCustomVariable(
     },
     "columns": [
       {},
-      {},
-      {},
-      {},
-      {},
       {}
     ],
     "body": {
@@ -880,6 +881,8 @@ const { data } = await client.updateCustomVariable(
   "updated_by": "100042"
 }
 ```
+
+</details>
 
 ---
 
@@ -895,7 +898,8 @@ const { data } = await client.getCustomVariable({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -925,10 +929,6 @@ const { data } = await client.getCustomVariable({
     },
     "columns": [
       {},
-      {},
-      {},
-      {},
-      {},
       {}
     ],
     "body": {
@@ -955,6 +955,8 @@ const { data } = await client.getCustomVariable({
   "updated_by": "100042"
 }
 ```
+
+</details>
 
 ---
 
@@ -982,7 +984,8 @@ Get default table config
 const { data } = await client.getBluePrintTableConfig()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1012,10 +1015,6 @@ const { data } = await client.getBluePrintTableConfig()
     },
     "columns": [
       {},
-      {},
-      {},
-      {},
-      {},
       {}
     ],
     "body": {
@@ -1043,9 +1042,12 @@ const { data } = await client.getBluePrintTableConfig()
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `Language`
 
@@ -1172,3 +1174,5 @@ type CustomVariable = {
   updated_by?: string
 }
 ```
+
+</details>

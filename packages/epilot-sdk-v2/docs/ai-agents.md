@@ -1,7 +1,7 @@
 # AI Agents API - OpenAPI 3.0
 
-**Base URL:** `https://ai-agents.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/ai-agents](https://docs.epilot.io/api/ai-agents)
+- **Base URL:** `https://ai-agents.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/ai-agents](https://docs.epilot.io/api/ai-agents)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.aiAgents.createAgent(...)
-
-// Or get the client explicitly
-const aiAgentsClient = await epilot.aiAgents.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/ai-agents'
 const aiAgentsClient = await getClient()
 authorize(aiAgentsClient, () => '<token>')
 const { data } = await aiAgentsClient.createAgent(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/ai-agents'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -83,7 +73,7 @@ const { data } = await client.createAgent(
       parameters: [
         { /* ... */ },
         { /* ... */ },
-        { /* ... */ }
+        /* ... 1 more */
       ],
       required: [
         'target_schema'
@@ -93,7 +83,8 @@ const { data } = await client.createAgent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -128,7 +119,6 @@ const { data } = await client.createAgent(
     "type": "object",
     "parameters": [
       {},
-      {},
       {}
     ],
     "required": [
@@ -141,6 +131,8 @@ const { data } = await client.createAgent(
   "created_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -158,7 +150,8 @@ const { data } = await client.listAgents({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -191,6 +184,8 @@ const { data } = await client.listAgents({
 }
 ```
 
+</details>
+
 ---
 
 ### `getAgentById`
@@ -205,7 +200,8 @@ const { data } = await client.getAgentById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -240,7 +236,6 @@ const { data } = await client.getAgentById({
     "type": "object",
     "parameters": [
       {},
-      {},
       {}
     ],
     "required": [
@@ -253,6 +248,8 @@ const { data } = await client.getAgentById({
   "created_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -290,7 +287,7 @@ const { data } = await client.updateAgentById(
       parameters: [
         { /* ... */ },
         { /* ... */ },
-        { /* ... */ }
+        /* ... 1 more */
       ],
       required: [
         'target_schema'
@@ -300,7 +297,8 @@ const { data } = await client.updateAgentById(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -335,7 +333,6 @@ const { data } = await client.updateAgentById(
     "type": "object",
     "parameters": [
       {},
-      {},
       {}
     ],
     "required": [
@@ -348,6 +345,8 @@ const { data } = await client.updateAgentById(
   "created_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -397,7 +396,8 @@ const { data } = await client.executeAgent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -445,6 +445,8 @@ const { data } = await client.executeAgent(
 }
 ```
 
+</details>
+
 ---
 
 ### `listExecutions`
@@ -461,7 +463,8 @@ const { data } = await client.listExecutions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -488,6 +491,8 @@ const { data } = await client.listExecutions({
 }
 ```
 
+</details>
+
 ---
 
 ### `getExecution`
@@ -502,7 +507,8 @@ const { data } = await client.getExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -549,6 +555,8 @@ const { data } = await client.getExecution({
   "completed_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -564,7 +572,8 @@ const { data } = await client.cancelExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -612,6 +621,8 @@ const { data } = await client.cancelExecution({
 }
 ```
 
+</details>
+
 ---
 
 ### `getExecutionTrace`
@@ -626,7 +637,8 @@ const { data } = await client.getExecutionTrace({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -645,6 +657,8 @@ const { data } = await client.getExecutionTrace({
   "total_iterations": 0
 }
 ```
+
+</details>
 
 ---
 
@@ -665,7 +679,8 @@ const { data } = await client.approveExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -712,6 +727,8 @@ const { data } = await client.approveExecution(
   "completed_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -732,7 +749,8 @@ const { data } = await client.rejectExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -780,9 +798,12 @@ const { data } = await client.rejectExecution(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `AgentId`
 
@@ -1432,3 +1453,5 @@ type Error = {
   details?: object
 }
 ```
+
+</details>

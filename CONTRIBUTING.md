@@ -27,6 +27,18 @@ npm version patch --no-git-tag-version
 git commit -am 'chore(entity-client): update client with new spec'
 ```
 
+## Auto-release (`@epilot/sdk`)
+
+When changes to any `clients/*/openapi.json` file land on `main`, the CI automatically:
+
+1. Detects which OpenAPI specs changed
+2. Regenerates types and rebuilds `@epilot/sdk`
+3. Runs tests
+4. Bumps the patch version, commits, and creates a git tag
+5. Publishes the new version to npm
+
+This means most SDK updates require no manual publishing — just merge your client spec changes and the release happens automatically.
+
 ## Publishing packages (epilot internal)
 
 This monorepo uses [Changesets](https://github.com/changesets/changesets) for version management and publishing.

@@ -1,7 +1,7 @@
 # Design Builder API v2
 
-**Base URL:** `https://design-builder-api.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
+- **Base URL:** `https://design-builder-api.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.design.getAllDesigns(...)
-
-// Or get the client explicitly
-const designClient = await epilot.design.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/design'
 const designClient = await getClient()
 authorize(designClient, () => '<token>')
 const { data } = await designClient.getAllDesigns(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/design'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -57,7 +47,8 @@ Scan all designs linked to a organization, based in orgId attribute from JWT aut
 const { data } = await client.getAllDesigns()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -68,6 +59,8 @@ const { data } = await client.getAllDesigns()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -111,7 +104,8 @@ const { data } = await client.addDesign(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -148,6 +142,8 @@ const { data } = await client.addDesign(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -163,7 +159,8 @@ const { data } = await client.getDesign({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -200,6 +197,8 @@ const { data } = await client.getDesign({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -275,11 +274,14 @@ const { data } = await client.getThemeFromDesign({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -293,7 +295,8 @@ Upload a new file for the user organization bucket
 const { data } = await client.uploadFile()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -304,6 +307,8 @@ const { data } = await client.uploadFile()
   "url": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -319,7 +324,8 @@ const { data } = await client.getFiles({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -332,6 +338,8 @@ const { data } = await client.getFiles({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -348,7 +356,8 @@ const { data } = await client.getConsumerDesign({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -385,6 +394,8 @@ const { data } = await client.getConsumerDesign({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -432,7 +443,8 @@ const { data } = await client.removeConsumer(
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `UploadFileReq`
 
@@ -904,3 +916,5 @@ type FileData = {
   url: string
 }
 ```
+
+</details>

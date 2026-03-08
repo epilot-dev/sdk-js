@@ -1,7 +1,7 @@
 # Webhooks
 
-**Base URL:** `https://webhooks.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/webhooks](https://docs.epilot.io/api/webhooks)
+- **Base URL:** `https://webhooks.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/webhooks](https://docs.epilot.io/api/webhooks)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.webhooks.getPublicKey(...)
-
-// Or get the client explicitly
-const webhooksClient = await epilot.webhooks.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/webhooks'
 const webhooksClient = await getClient()
 authorize(webhooksClient, () => '<token>')
 const { data } = await webhooksClient.getPublicKey(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/webhooks'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -64,7 +54,8 @@ const { data } = await client.getPublicKey({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -73,6 +64,8 @@ const { data } = await client.getPublicKey({
   "issuer": "epilot"
 }
 ```
+
+</details>
 
 ---
 
@@ -86,7 +79,8 @@ Retrieve events that can trigger webhooks
 const { data } = await client.getConfiguredEvents()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -96,6 +90,8 @@ const { data } = await client.getConfiguredEvents()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -111,7 +107,8 @@ const { data } = await client.getConfigs({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -131,6 +128,8 @@ const { data } = await client.getConfigs({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -166,7 +165,8 @@ const { data } = await client.createConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -190,6 +190,8 @@ const { data } = await client.createConfig(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -205,7 +207,8 @@ const { data } = await client.getConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -229,6 +232,8 @@ const { data } = await client.getConfig({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -266,7 +271,8 @@ const { data } = await client.updateConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -290,6 +296,8 @@ const { data } = await client.updateConfig(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -337,7 +345,8 @@ const { data } = await client.triggerWebhook(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -351,6 +360,8 @@ const { data } = await client.triggerWebhook(
   "event_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -389,7 +400,8 @@ const { data } = await client.getEventById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -423,6 +435,8 @@ const { data } = await client.getEventById({
   "payload": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -458,7 +472,8 @@ const { data } = await client.getWebhookExample(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -481,6 +496,8 @@ const { data } = await client.getWebhookExample(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -511,7 +528,8 @@ const { data } = await client.getWebhookEventsV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -538,9 +556,12 @@ const { data } = await client.getWebhookEventsV2(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `PublicKeyResponse`
 
@@ -927,3 +948,5 @@ type BatchReplayRequest = {
   eventIds: string[]
 }
 ```
+
+</details>

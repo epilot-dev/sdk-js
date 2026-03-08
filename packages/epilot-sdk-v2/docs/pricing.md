@@ -1,7 +1,7 @@
 # Pricing API
 
-**Base URL:** `https://pricing-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/pricing](https://docs.epilot.io/api/pricing)
+- **Base URL:** `https://pricing-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/pricing](https://docs.epilot.io/api/pricing)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.pricing.$calculatePricingDetails(...)
-
-// Or get the client explicitly
-const pricingClient = await epilot.pricing.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/pricing'
 const pricingClient = await getClient()
 authorize(pricingClient, () => '<token>')
 const { data } = await pricingClient.$calculatePricingDetails(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/pricing'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -87,7 +77,8 @@ const { data } = await client.$calculatePricingDetails(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -145,6 +136,8 @@ const { data } = await client.$calculatePricingDetails(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -275,7 +268,8 @@ const { data } = await client.createOrder(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -321,38 +315,6 @@ const { data } = await client.createOrder(
       "unit_amount_net": 42017,
       "amount_subtotal": 168067,
       "amount_total": 200000
-    },
-    {
-      "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
-      "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
-      "pricing_model": "per_unit",
-      "is_composite_price": false,
-      "_price": {},
-      "_product": {},
-      "quantity": 1,
-      "currency": "EUR",
-      "description": "Monthly",
-      "unit_amount": 12055,
-      "unit_amount_net": 11267,
-      "amount_subtotal": 11267,
-      "amount_total": 12055,
-      "taxes": []
-    },
-    {
-      "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
-      "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
-      "pricing_model": "per_unit",
-      "is_composite_price": false,
-      "_price": {},
-      "_product": {},
-      "quantity": 1,
-      "currency": "EUR",
-      "description": "Yearly payment",
-      "unit_amount": 9900,
-      "unit_amount_net": 8319,
-      "amount_subtotal": 8319,
-      "amount_total": 9900,
-      "taxes": []
     }
   ],
   "amount_subtotal": 1532191,
@@ -405,6 +367,8 @@ const { data } = await client.createOrder(
   "_updated_at": "2022-06-03T16:29:46.303Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -537,7 +501,8 @@ const { data } = await client.putOrder(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -583,38 +548,6 @@ const { data } = await client.putOrder(
       "unit_amount_net": 42017,
       "amount_subtotal": 168067,
       "amount_total": 200000
-    },
-    {
-      "price_id": "d88a8763-3e3d-4fc7-a7a5-2bc9117148bf",
-      "product_id": "065d6618-cc59-45f4-8e3a-700edf6813c3",
-      "pricing_model": "per_unit",
-      "is_composite_price": false,
-      "_price": {},
-      "_product": {},
-      "quantity": 1,
-      "currency": "EUR",
-      "description": "Monthly",
-      "unit_amount": 12055,
-      "unit_amount_net": 11267,
-      "amount_subtotal": 11267,
-      "amount_total": 12055,
-      "taxes": []
-    },
-    {
-      "price_id": "e1ddf75a-d0d1-40b4-a07e-56e292867c88",
-      "product_id": "5b9f05b7-f0f8-49c2-8a8d-0f8f923d6382",
-      "pricing_model": "per_unit",
-      "is_composite_price": false,
-      "_price": {},
-      "_product": {},
-      "quantity": 1,
-      "currency": "EUR",
-      "description": "Yearly payment",
-      "unit_amount": 9900,
-      "unit_amount_net": 8319,
-      "amount_subtotal": 8319,
-      "amount_total": 9900,
-      "taxes": []
     }
   ],
   "amount_subtotal": 1532191,
@@ -668,6 +601,8 @@ const { data } = await client.putOrder(
 }
 ```
 
+</details>
+
 ---
 
 ### `$checkoutCart`
@@ -694,7 +629,8 @@ const { data } = await client.$checkoutCart(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -710,8 +646,6 @@ const { data } = await client.$checkoutCart(
     "_title": "OR 2022/742701",
     "expires_at": "2022-06-30T16:17:00.000Z",
     "line_items": [
-      {},
-      {},
       {},
       {}
     ],
@@ -747,6 +681,8 @@ const { data } = await client.$checkoutCart(
 }
 ```
 
+</details>
+
 ---
 
 ### `$searchCatalog`
@@ -770,7 +706,8 @@ const { data } = await client.$searchCatalog(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -787,6 +724,8 @@ const { data } = await client.$searchCatalog(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -808,7 +747,8 @@ const { data } = await client.$privateSearchCatalog(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -825,6 +765,8 @@ const { data } = await client.$privateSearchCatalog(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -843,7 +785,8 @@ const { data } = await client.$validatePromoCodes(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -867,6 +810,8 @@ const { data } = await client.$validatePromoCodes(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -899,7 +844,8 @@ const { data } = await client.$availabilityCheck(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -917,6 +863,8 @@ const { data } = await client.$availabilityCheck(
 }
 ```
 
+</details>
+
 ---
 
 ### `$validateAvailabilityFile`
@@ -932,7 +880,8 @@ const { data } = await client.$validateAvailabilityFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -941,6 +890,8 @@ const { data } = await client.$validateAvailabilityFile({
   "errors": []
 }
 ```
+
+</details>
 
 ---
 
@@ -960,7 +911,8 @@ const { data } = await client.$historicMarketPrices({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -976,6 +928,8 @@ const { data } = await client.$historicMarketPrices({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -994,7 +948,8 @@ const { data } = await client.$averageMarketPrice({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1012,6 +967,8 @@ const { data } = await client.$averageMarketPrice({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1045,7 +1002,8 @@ const { data } = await client.$searchExternalProducts(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1058,6 +1016,8 @@ const { data } = await client.$searchExternalProducts(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1091,7 +1051,8 @@ const { data } = await client.$searchExternalProductRecommendations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1121,6 +1082,8 @@ const { data } = await client.$searchExternalProductRecommendations(
 }
 ```
 
+</details>
+
 ---
 
 ### `$searchProviders`
@@ -1145,7 +1108,8 @@ const { data } = await client.$searchProviders(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1155,6 +1119,8 @@ const { data } = await client.$searchProviders(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1177,7 +1143,8 @@ const { data } = await client.$searchStreets(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1186,6 +1153,8 @@ const { data } = await client.$searchStreets(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1216,7 +1185,8 @@ const { data } = await client.$computePrice(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1247,6 +1217,8 @@ const { data } = await client.$computePrice(
 }
 ```
 
+</details>
+
 ---
 
 ### `$getCredentials`
@@ -1261,11 +1233,14 @@ const { data } = await client.$getCredentials({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -1338,7 +1313,8 @@ const { data } = await client.$getExternalCatalogProducts(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1351,6 +1327,8 @@ const { data } = await client.$getExternalCatalogProducts(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1392,7 +1370,8 @@ const { data } = await client.$getExternalCatalogProductRecommendations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1421,6 +1400,8 @@ const { data } = await client.$getExternalCatalogProductRecommendations(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1458,7 +1439,8 @@ const { data } = await client.$productRecommendations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1488,9 +1470,12 @@ const { data } = await client.$productRecommendations(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `IntegrationId`
 
@@ -4279,3 +4264,5 @@ type ProductRecommendation = {
   _updated_at: string // date-time
 }
 ```
+
+</details>

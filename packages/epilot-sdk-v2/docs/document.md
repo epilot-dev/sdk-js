@@ -1,7 +1,7 @@
 # Document API
 
-**Base URL:** `https://document.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/document](https://docs.epilot.io/api/document)
+- **Base URL:** `https://document.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/document](https://docs.epilot.io/api/document)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.document.getTemplateMeta(...)
-
-// Or get the client explicitly
-const documentClient = await epilot.document.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/document'
 const documentClient = await getClient()
 authorize(documentClient, () => '<token>')
 const { data } = await documentClient.getTemplateMeta(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/document'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -59,7 +49,8 @@ const { data } = await client.getTemplateMeta(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -87,6 +78,8 @@ const { data } = await client.getTemplateMeta(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -140,7 +133,8 @@ const { data } = await client.generateDocumentV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -199,6 +193,8 @@ const { data } = await client.generateDocumentV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `convertDocument`
@@ -224,7 +220,8 @@ const { data } = await client.convertDocument(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -238,9 +235,12 @@ const { data } = await client.convertDocument(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `S3Reference`
 
@@ -527,3 +527,5 @@ type ConvertDocumentResponse = {
   }
 }
 ```
+
+</details>

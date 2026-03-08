@@ -1,7 +1,7 @@
 # Partner API
 
-**Base URL:** `https://partner-directory-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/partner-directory](https://docs.epilot.io/api/partner-directory)
+- **Base URL:** `https://partner-directory-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/partner-directory](https://docs.epilot.io/api/partner-directory)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.partnerDirectory.approvePartner(...)
-
-// Or get the client explicitly
-const partnerDirectoryClient = await epilot.partnerDirectory.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/partner-directory'
 const partnerDirectoryClient = await getClient()
 authorize(partnerDirectoryClient, () => '<token>')
 const { data } = await partnerDirectoryClient.approvePartner(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/partner-directory'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -66,7 +56,8 @@ const { data } = await client.approvePartner({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -84,6 +75,8 @@ const { data } = await client.approvePartner({
   "status": "Pending"
 }
 ```
+
+</details>
 
 ---
 
@@ -99,7 +92,8 @@ const { data } = await client.rejectPartner({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -117,6 +111,8 @@ const { data } = await client.rejectPartner({
   "status": "Pending"
 }
 ```
+
+</details>
 
 ---
 
@@ -148,7 +144,8 @@ const { data } = await client.searchAssignable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -168,6 +165,8 @@ const { data } = await client.searchAssignable(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -190,7 +189,8 @@ const { data } = await client.batchGetAssignable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -211,6 +211,8 @@ const { data } = await client.batchGetAssignable(
 }
 ```
 
+</details>
+
 ---
 
 ### `getPartnerByToken`
@@ -225,7 +227,8 @@ const { data } = await client.getPartnerByToken({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -243,6 +246,8 @@ const { data } = await client.getPartnerByToken({
   "status": "Pending"
 }
 ```
+
+</details>
 
 ---
 
@@ -282,7 +287,8 @@ const { data } = await client.searchGeolocationForText(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -292,6 +298,8 @@ const { data } = await client.searchGeolocationForText(
   "relevance": 0
 }
 ```
+
+</details>
 
 ---
 
@@ -312,7 +320,8 @@ const { data } = await client.invitePartnerV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -331,6 +340,8 @@ const { data } = await client.invitePartnerV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `getPartnerUsers`
@@ -345,7 +356,8 @@ const { data } = await client.getPartnerUsers({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -361,6 +373,8 @@ const { data } = await client.getPartnerUsers({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -386,7 +400,8 @@ const { data } = await client.createPartnerUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -396,6 +411,8 @@ const { data } = await client.createPartnerUser(
   "status": "Active"
 }
 ```
+
+</details>
 
 ---
 
@@ -412,11 +429,14 @@ const { data } = await client.deletePartnerUser({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -432,7 +452,8 @@ const { data } = await client.getPartnerRoles({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -446,6 +467,8 @@ const { data } = await client.getPartnerRoles({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -476,7 +499,8 @@ const { data } = await client.createPartnerRole(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -486,6 +510,8 @@ const { data } = await client.createPartnerRole(
   "type": "share_role"
 }
 ```
+
+</details>
 
 ---
 
@@ -518,7 +544,8 @@ const { data } = await client.updatePartnerRole(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -528,6 +555,8 @@ const { data } = await client.updatePartnerRole(
   "type": "share_role"
 }
 ```
+
+</details>
 
 ---
 
@@ -552,7 +581,8 @@ const { data } = await client.assignPartnerUserRoles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -566,6 +596,8 @@ const { data } = await client.assignPartnerUserRoles(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -590,7 +622,8 @@ const { data } = await client.unassignPartnerUserRoles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -605,9 +638,12 @@ const { data } = await client.unassignPartnerUserRoles(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `InviteToken`
 
@@ -1043,3 +1079,5 @@ type User = {
   status?: string
 }
 ```
+
+</details>

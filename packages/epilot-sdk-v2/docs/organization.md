@@ -1,7 +1,7 @@
 # Organization API
 
-**Base URL:** `https://organization-v2.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/organization](https://docs.epilot.io/api/organization)
+- **Base URL:** `https://organization-v2.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/organization](https://docs.epilot.io/api/organization)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.organization.getCurrentOrganization(...)
-
-// Or get the client explicitly
-const organizationClient = await epilot.organization.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/organization'
 const organizationClient = await getClient()
 authorize(organizationClient, () => '<token>')
 const { data } = await organizationClient.getCurrentOrganization(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/organization'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -54,7 +44,8 @@ Get caller's current organization
 const { data } = await client.getCurrentOrganization()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -84,6 +75,8 @@ const { data } = await client.getCurrentOrganization()
   "free_user_limit": 50
 }
 ```
+
+</details>
 
 ---
 
@@ -99,7 +92,8 @@ const { data } = await client.getOrganization({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -129,6 +123,8 @@ const { data } = await client.getOrganization({
   "free_user_limit": 50
 }
 ```
+
+</details>
 
 ---
 
@@ -172,7 +168,8 @@ const { data } = await client.updateOrganization(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -203,6 +200,8 @@ const { data } = await client.updateOrganization(
 }
 ```
 
+</details>
+
 ---
 
 ### `getSettings`
@@ -217,7 +216,8 @@ const { data } = await client.getSettings({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -226,6 +226,8 @@ const { data } = await client.getSettings({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -247,13 +249,16 @@ const { data } = await client.putSettingsValue(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "enabled": true
 }
 ```
+
+</details>
 
 ---
 
@@ -272,7 +277,8 @@ const { data } = await client.deleteSettingsValue({
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `OrganizationId`
 
@@ -421,3 +427,5 @@ type OrganizationCleanupStatus = {
   }>
 }
 ```
+
+</details>

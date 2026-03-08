@@ -1,7 +1,7 @@
 # Entity Mapping API
 
-**Base URL:** `https://entity-mapping.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/entity-mapping](https://docs.epilot.io/api/entity-mapping)
+- **Base URL:** `https://entity-mapping.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/entity-mapping](https://docs.epilot.io/api/entity-mapping)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.entityMapping.storeConfig(...)
-
-// Or get the client explicitly
-const entityMappingClient = await epilot.entityMapping.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/entity-mapping'
 const entityMappingClient = await getClient()
 authorize(entityMappingClient, () => '<token>')
 const { data } = await entityMappingClient.storeConfig(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/entity-mapping'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -101,7 +91,8 @@ const { data } = await client.storeConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -144,6 +135,8 @@ const { data } = await client.storeConfig(
   "version": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -159,7 +152,8 @@ const { data } = await client.getConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -202,6 +196,8 @@ const { data } = await client.getConfig({
   "version": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -217,7 +213,8 @@ const { data } = await client.deleteConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -261,6 +258,8 @@ const { data } = await client.deleteConfig({
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllVersions`
@@ -275,7 +274,8 @@ const { data } = await client.getAllVersions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -294,6 +294,8 @@ const { data } = await client.getAllVersions({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -350,7 +352,8 @@ const { data } = await client.storeNewVersion(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -393,6 +396,8 @@ const { data } = await client.storeNewVersion(
   "version": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -409,7 +414,8 @@ const { data } = await client.getConfigVersion({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -452,6 +458,8 @@ const { data } = await client.getConfigVersion({
   "version": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -491,7 +499,8 @@ const { data } = await client.executeMapping(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -523,6 +532,8 @@ const { data } = await client.executeMapping(
 }
 ```
 
+</details>
+
 ---
 
 ### `searchConfigs`
@@ -545,7 +556,8 @@ const { data } = await client.searchConfigs(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -589,6 +601,8 @@ const { data } = await client.searchConfigs(
 }
 ```
 
+</details>
+
 ---
 
 ### `queryMappingHistory`
@@ -606,11 +620,14 @@ const { data } = await client.queryMappingHistory({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -651,7 +668,8 @@ const { data } = await client.executeRelations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -665,6 +683,8 @@ const { data } = await client.executeRelations(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -680,7 +700,8 @@ const { data } = await client.getMappingConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -723,6 +744,8 @@ const { data } = await client.getMappingConfig({
   "version": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -779,7 +802,8 @@ const { data } = await client.putMappingConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -823,9 +847,12 @@ const { data } = await client.putMappingConfig(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `SearchMappingReq`
 
@@ -1661,3 +1688,5 @@ type MappingSourceProperty = {
 ```ts
 type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect" | "payment" | "link" | "currency" | "sequence" | "relation" | "array"
 ```
+
+</details>

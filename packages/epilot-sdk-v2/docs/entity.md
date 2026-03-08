@@ -1,7 +1,7 @@
 # Entity API
 
-**Base URL:** `https://entity.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/entity](https://docs.epilot.io/api/entity)
+- **Base URL:** `https://entity.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/entity](https://docs.epilot.io/api/entity)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.entity.listSchemas(...)
-
-// Or get the client explicitly
-const entityClient = await epilot.entity.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/entity'
 const entityClient = await getClient()
 authorize(entityClient, () => '<token>')
 const { data } = await entityClient.listSchemas(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/entity'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -142,7 +132,8 @@ const { data } = await client.listSchemas({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -181,6 +172,8 @@ const { data } = await client.listSchemas({
 }
 ```
 
+</details>
+
 ---
 
 ### `getSchema`
@@ -196,7 +189,8 @@ const { data } = await client.getSchema({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -301,32 +295,6 @@ const { data } = await client.getSchema({
       "name": "first_name",
       "type": "string",
       "label": "First Name"
-    },
-    {
-      "name": "last_name",
-      "type": "string",
-      "label": "Last Name"
-    },
-    {
-      "name": "birthdate",
-      "type": "date",
-      "label": "Birthdate"
-    },
-    {
-      "name": "salutation",
-      "type": "select",
-      "label": "Salutation",
-      "options": []
-    },
-    {
-      "name": "marketing_permission",
-      "type": "boolean",
-      "label": "Marketing permission"
-    },
-    {
-      "name": "image",
-      "type": "file",
-      "label": "Image"
     }
   ],
   "_purpose": [
@@ -355,6 +323,8 @@ const { data } = await client.getSchema({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -465,32 +435,7 @@ const { data } = await client.putSchema(
         type: 'string',
         label: 'First Name'
       },
-      {
-        name: 'last_name',
-        type: 'string',
-        label: 'Last Name'
-      },
-      {
-        name: 'birthdate',
-        type: 'date',
-        label: 'Birthdate'
-      },
-      {
-        name: 'salutation',
-        type: 'select',
-        label: 'Salutation',
-        options: [ /* ... */ ]
-      },
-      {
-        name: 'marketing_permission',
-        type: 'boolean',
-        label: 'Marketing permission'
-      },
-      {
-        name: 'image',
-        type: 'file',
-        label: 'Image'
-      }
+      /* ... 5 more */
     ],
     _purpose: [
       'string'
@@ -520,7 +465,8 @@ const { data } = await client.putSchema(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -625,32 +571,6 @@ const { data } = await client.putSchema(
       "name": "first_name",
       "type": "string",
       "label": "First Name"
-    },
-    {
-      "name": "last_name",
-      "type": "string",
-      "label": "Last Name"
-    },
-    {
-      "name": "birthdate",
-      "type": "date",
-      "label": "Birthdate"
-    },
-    {
-      "name": "salutation",
-      "type": "select",
-      "label": "Salutation",
-      "options": []
-    },
-    {
-      "name": "marketing_permission",
-      "type": "boolean",
-      "label": "Marketing permission"
-    },
-    {
-      "name": "image",
-      "type": "file",
-      "label": "Image"
     }
   ],
   "_purpose": [
@@ -679,6 +599,8 @@ const { data } = await client.putSchema(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -709,7 +631,8 @@ const { data } = await client.getJsonSchema({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -831,6 +754,8 @@ const { data } = await client.getJsonSchema({
 }
 ```
 
+</details>
+
 ---
 
 ### `getSchemaExample`
@@ -845,11 +770,14 @@ const { data } = await client.getSchemaExample({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -870,7 +798,8 @@ const { data } = await client.getSchemaVersions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -943,6 +872,8 @@ const { data } = await client.getSchemaVersions({
 }
 ```
 
+</details>
+
 ---
 
 ### `listAvailableCapabilities`
@@ -957,7 +888,8 @@ const { data } = await client.listAvailableCapabilities({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -979,6 +911,8 @@ const { data } = await client.listAvailableCapabilities({
 }
 ```
 
+</details>
+
 ---
 
 ### `listSchemaBlueprints`
@@ -991,7 +925,8 @@ List canonical versions of all available schemas
 const { data } = await client.listSchemaBlueprints()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1029,6 +964,8 @@ const { data } = await client.listSchemaBlueprints()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1072,7 +1009,8 @@ const { data } = await client.searchEntities(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1104,6 +1042,8 @@ const { data } = await client.searchEntities(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1163,7 +1103,8 @@ const { data } = await client.listEntities(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1196,6 +1137,8 @@ const { data } = await client.listEntities(
 }
 ```
 
+</details>
+
 ---
 
 ### `queryEntityGraph`
@@ -1216,7 +1159,7 @@ const { data } = await client.queryEntityGraph(
       nodes: [
         { /* ... */ },
         { /* ... */ },
-        { /* ... */ }
+        /* ... 1 more */
       ],
       edges: [
         { /* ... */ },
@@ -1228,7 +1171,8 @@ const { data } = await client.queryEntityGraph(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1270,6 +1214,8 @@ const { data } = await client.queryEntityGraph(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1323,7 +1269,8 @@ const { data } = await client.createEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1359,6 +1306,8 @@ const { data } = await client.createEntity(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1408,7 +1357,8 @@ const { data } = await client.validateEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1423,6 +1373,8 @@ const { data } = await client.validateEntity(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1472,7 +1424,8 @@ const { data } = await client.validateEntityV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1492,6 +1445,8 @@ const { data } = await client.validateEntityV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1542,7 +1497,8 @@ const { data } = await client.upsertEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1578,6 +1534,8 @@ const { data } = await client.upsertEntity(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1596,7 +1554,8 @@ const { data } = await client.getEntityV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1632,6 +1591,8 @@ const { data } = await client.getEntityV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1652,7 +1613,8 @@ const { data } = await client.restoreEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1688,6 +1650,8 @@ const { data } = await client.restoreEntity(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1707,7 +1671,8 @@ const { data } = await client.reindexEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1744,6 +1709,8 @@ const { data } = await client.reindexEntity(
 }
 ```
 
+</details>
+
 ---
 
 ### `getEntity`
@@ -1760,7 +1727,8 @@ const { data } = await client.getEntity({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1801,6 +1769,8 @@ const { data } = await client.getEntity({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1855,7 +1825,8 @@ const { data } = await client.updateEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1891,6 +1862,8 @@ const { data } = await client.updateEntity(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1946,7 +1919,8 @@ const { data } = await client.patchEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1983,6 +1957,8 @@ const { data } = await client.patchEntity(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteEntity`
@@ -2017,7 +1993,8 @@ const { data } = await client.autocomplete({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2027,6 +2004,8 @@ const { data } = await client.autocomplete({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2075,7 +2054,8 @@ const { data } = await client.createActivity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2099,6 +2079,8 @@ const { data } = await client.createActivity(
 }
 ```
 
+</details>
+
 ---
 
 ### `getActivity`
@@ -2115,7 +2097,8 @@ const { data } = await client.getActivity({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2152,6 +2135,8 @@ const { data } = await client.getActivity({
 }
 ```
 
+</details>
+
 ---
 
 ### `attachActivity`
@@ -2167,7 +2152,8 @@ const { data } = await client.attachActivity({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2190,6 +2176,8 @@ const { data } = await client.attachActivity({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -2216,7 +2204,8 @@ const { data } = await client.getEntityActivityFeed({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2237,6 +2226,8 @@ const { data } = await client.getEntityActivityFeed({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2259,7 +2250,8 @@ const { data } = await client.getRelations({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -2298,6 +2290,8 @@ const { data } = await client.getRelations({
 ]
 ```
 
+</details>
+
 ---
 
 ### `addRelations`
@@ -2329,7 +2323,8 @@ const { data } = await client.addRelations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2343,6 +2338,8 @@ const { data } = await client.addRelations(
   "reverse": true
 }
 ```
+
+</details>
 
 ---
 
@@ -2396,7 +2393,8 @@ const { data } = await client.getRelationsV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2424,6 +2422,8 @@ const { data } = await client.getRelationsV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2449,7 +2449,8 @@ const { data } = await client.getRelationsV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2478,6 +2479,8 @@ const { data } = await client.getRelationsV3({
 }
 ```
 
+</details>
+
 ---
 
 ### `getRelatedEntitiesCount`
@@ -2494,13 +2497,16 @@ const { data } = await client.getRelatedEntitiesCount({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "hits": 1
 }
 ```
+
+</details>
 
 ---
 
@@ -2528,7 +2534,8 @@ const { data } = await client.updateRelation(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2542,6 +2549,8 @@ const { data } = await client.updateRelation(
   "reverse": true
 }
 ```
+
+</details>
 
 ---
 
@@ -2650,7 +2659,8 @@ const { data } = await client.listSavedViews({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2672,6 +2682,8 @@ const { data } = await client.listSavedViews({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2713,7 +2725,8 @@ const { data } = await client.createSavedView(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2746,6 +2759,8 @@ const { data } = await client.createSavedView(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2761,7 +2776,8 @@ const { data } = await client.getSavedView({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2794,6 +2810,8 @@ const { data } = await client.getSavedView({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2840,7 +2858,8 @@ const { data } = await client.updateSavedView(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2873,6 +2892,8 @@ const { data } = await client.updateSavedView(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2916,7 +2937,8 @@ const { data } = await client.patchSavedView(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2950,6 +2972,8 @@ const { data } = await client.patchSavedView(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteSavedView`
@@ -2976,7 +3000,8 @@ Get the Favorite Saved Views for user based on the schema
 const { data } = await client.listFavoriteViewsForUser()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2998,6 +3023,8 @@ const { data } = await client.listFavoriteViewsForUser()
 }
 ```
 
+</details>
+
 ---
 
 ### `listTaxonomies`
@@ -3013,7 +3040,8 @@ const { data } = await client.listTaxonomies({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3037,6 +3065,8 @@ const { data } = await client.listTaxonomies({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3071,7 +3101,8 @@ const { data } = await client.createTaxonomy(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3094,6 +3125,8 @@ const { data } = await client.createTaxonomy(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3109,7 +3142,8 @@ const { data } = await client.getTaxonomy({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3132,6 +3166,8 @@ const { data } = await client.getTaxonomy({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3168,7 +3204,8 @@ const { data } = await client.updateTaxonomy(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3191,6 +3228,8 @@ const { data } = await client.updateTaxonomy(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3261,7 +3300,8 @@ const { data } = await client.updateClassificationsForTaxonomy(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3301,6 +3341,8 @@ const { data } = await client.updateClassificationsForTaxonomy(
 }
 ```
 
+</details>
+
 ---
 
 ### `createTaxonomyClassification`
@@ -3338,7 +3380,8 @@ const { data } = await client.createTaxonomyClassification(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3365,6 +3408,8 @@ const { data } = await client.createTaxonomyClassification(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3380,7 +3425,8 @@ const { data } = await client.getTaxonomyClassification({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3407,6 +3453,8 @@ const { data } = await client.getTaxonomyClassification({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3447,7 +3495,8 @@ const { data } = await client.updateTaxonomyClassification(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3474,6 +3523,8 @@ const { data } = await client.updateTaxonomyClassification(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3489,7 +3540,8 @@ const { data } = await client.deleteTaxonomyClassification({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3516,6 +3568,8 @@ const { data } = await client.deleteTaxonomyClassification({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3533,7 +3587,8 @@ const { data } = await client.taxonomyAutocomplete({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3555,6 +3610,8 @@ const { data } = await client.taxonomyAutocomplete({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3583,7 +3640,8 @@ const { data } = await client.taxonomiesClassificationsSearch(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3607,6 +3665,8 @@ const { data } = await client.taxonomiesClassificationsSearch(
 }
 ```
 
+</details>
+
 ---
 
 ### `listTaxonomyClassificationsForSchema`
@@ -3624,7 +3684,8 @@ const { data } = await client.listTaxonomyClassificationsForSchema({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3646,6 +3707,8 @@ const { data } = await client.listTaxonomyClassificationsForSchema({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3669,7 +3732,8 @@ const { data } = await client.getTaxonomyBulkActionJobs({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -3685,6 +3749,8 @@ const { data } = await client.getTaxonomyBulkActionJobs({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getTaxonomyBulkActionJobById`
@@ -3699,7 +3765,8 @@ const { data } = await client.getTaxonomyBulkActionJobById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3712,6 +3779,8 @@ const { data } = await client.getTaxonomyBulkActionJobById({
   "org": "66"
 }
 ```
+
+</details>
 
 ---
 
@@ -3728,7 +3797,8 @@ const { data } = await client.cancelBulkAction({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3741,6 +3811,8 @@ const { data } = await client.cancelBulkAction({
   "org": "66"
 }
 ```
+
+</details>
 
 ---
 
@@ -3764,7 +3836,8 @@ const { data } = await client.bulkMoveClassifications(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3772,6 +3845,8 @@ const { data } = await client.bulkMoveClassifications(
   "status": "PENDING"
 }
 ```
+
+</details>
 
 ---
 
@@ -3795,7 +3870,8 @@ const { data } = await client.bulkMergeClassifications(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3803,6 +3879,8 @@ const { data } = await client.bulkMergeClassifications(
   "status": "PENDING"
 }
 ```
+
+</details>
 
 ---
 
@@ -3826,7 +3904,8 @@ const { data } = await client.bulkDeleteClassifications(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3834,6 +3913,8 @@ const { data } = await client.bulkDeleteClassifications(
   "status": "PENDING"
 }
 ```
+
+</details>
 
 ---
 
@@ -3902,7 +3983,8 @@ const { data } = await client.createSchemaAttribute(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3959,6 +4041,8 @@ const { data } = await client.createSchemaAttribute(
   "rows": 3
 }
 ```
+
+</details>
 
 ---
 
@@ -3974,7 +4058,8 @@ const { data } = await client.getSchemaAttribute({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4031,6 +4116,8 @@ const { data } = await client.getSchemaAttribute({
   "rows": 3
 }
 ```
+
+</details>
 
 ---
 
@@ -4101,7 +4188,8 @@ const { data } = await client.putSchemaAttribute(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4158,6 +4246,8 @@ const { data } = await client.putSchemaAttribute(
   "rows": 3
 }
 ```
+
+</details>
 
 ---
 
@@ -4173,7 +4263,8 @@ const { data } = await client.deleteSchemaAttribute({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4230,6 +4321,8 @@ const { data } = await client.deleteSchemaAttribute({
   "rows": 3
 }
 ```
+
+</details>
 
 ---
 
@@ -4318,1141 +4411,7 @@ const { data } = await client.createSchemaCapability(
         has_primary: true,
         type: 'link'
       },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'date'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'country'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'boolean',
-        display_type: 'switch'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'select',
-        options: [ /* ... */ ],
-        allow_any: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'multiselect',
-        disable_case_sensitive: true,
-        allow_extra_options: true,
-        options: [ /* ... */ ],
-        allow_any: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'status',
-        options: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'sequence',
-        prefix: 'OR-',
-        start_number: 0
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation',
-        relation_type: 'has_many',
-        reverse_attributes: { /* ... */ },
-        relation_affinity_mode: 'weak',
-        enable_relation_picker: true,
-        edit_mode: 'list-view',
-        details_view_mode_enabled: false,
-        relation_picker_filter: { /* ... */ },
-        actions: [ /* ... */ ],
-        drawer_size: 'small',
-        summary_fields: [ /* ... */ ],
-        allowedSchemas: [ /* ... */ ],
-        enable_relation_tags: true,
-        add_button_label: 'string',
-        search_placeholder: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_user',
-        multiple: false
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'address',
-        default_address_fields: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_address',
-        default_address_fields: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_payment_method'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'currency',
-        currency_selector_only: false,
-        currency: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'tags',
-        options: [ /* ... */ ],
-        suggestions: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'message_email_address',
-        address: 'string',
-        send_status: 'string',
-        email_type: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'number',
-        data_type: 'string',
-        format: 'string',
-        show_separator: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'consent',
-        topic: 'string',
-        identifiers: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'internal'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'ordered_list'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'image',
-        multiple: true,
-        allowed_extensions: [ /* ... */ ],
-        display_images_landscaped: true,
-        enable_description: true,
-        default_access_control: 'public-read'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: '{{formatCurrencyAttribute entity attribute locale}}',
-        preview_value_formatter: '{{formatCurrencyAttribute entity attribute locale}}',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'computed',
-        computed: true,
-        amount_field: 'string',
-        currency_field: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'partner_status'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'invitation_email'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'automation'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'internal_user'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'purpose'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'partner_organisation'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'portal_access'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'phone'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'email'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'payment'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'price_component'
-      }
+      /* ... 32 more */
     ],
     _purpose: [
       'taxonomy-slug:classification-slug'
@@ -5493,7 +4452,8 @@ const { data } = await client.createSchemaCapability(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5571,1141 +4531,6 @@ const { data } = await client.createSchemaCapability(
       "repeatable": true,
       "has_primary": true,
       "type": "link"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "date"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "country"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "boolean",
-      "display_type": "switch"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "select",
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "multiselect",
-      "disable_case_sensitive": true,
-      "allow_extra_options": true,
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "status",
-      "options": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "sequence",
-      "prefix": "OR-",
-      "start_number": 0
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation",
-      "relation_type": "has_many",
-      "reverse_attributes": {},
-      "relation_affinity_mode": "weak",
-      "enable_relation_picker": true,
-      "edit_mode": "list-view",
-      "details_view_mode_enabled": false,
-      "relation_picker_filter": {},
-      "actions": [],
-      "drawer_size": "small",
-      "summary_fields": [],
-      "allowedSchemas": [],
-      "enable_relation_tags": true,
-      "add_button_label": "string",
-      "search_placeholder": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_user",
-      "multiple": false
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_payment_method"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "currency",
-      "currency_selector_only": false,
-      "currency": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "tags",
-      "options": [],
-      "suggestions": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "message_email_address",
-      "address": "string",
-      "send_status": "string",
-      "email_type": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "number",
-      "data_type": "string",
-      "format": "string",
-      "show_separator": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "consent",
-      "topic": "string",
-      "identifiers": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "ordered_list"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "image",
-      "multiple": true,
-      "allowed_extensions": [],
-      "display_images_landscaped": true,
-      "enable_description": true,
-      "default_access_control": "public-read"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "preview_value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "computed",
-      "computed": true,
-      "amount_field": "string",
-      "currency_field": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_status"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "invitation_email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "automation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal_user"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "purpose"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_organisation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "portal_access"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "phone"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "payment"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "price_component"
     }
   ],
   "_purpose": [
@@ -6745,6 +4570,8 @@ const { data } = await client.createSchemaCapability(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -6760,7 +4587,8 @@ const { data } = await client.getSchemaCapability({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6838,1141 +4666,6 @@ const { data } = await client.getSchemaCapability({
       "repeatable": true,
       "has_primary": true,
       "type": "link"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "date"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "country"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "boolean",
-      "display_type": "switch"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "select",
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "multiselect",
-      "disable_case_sensitive": true,
-      "allow_extra_options": true,
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "status",
-      "options": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "sequence",
-      "prefix": "OR-",
-      "start_number": 0
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation",
-      "relation_type": "has_many",
-      "reverse_attributes": {},
-      "relation_affinity_mode": "weak",
-      "enable_relation_picker": true,
-      "edit_mode": "list-view",
-      "details_view_mode_enabled": false,
-      "relation_picker_filter": {},
-      "actions": [],
-      "drawer_size": "small",
-      "summary_fields": [],
-      "allowedSchemas": [],
-      "enable_relation_tags": true,
-      "add_button_label": "string",
-      "search_placeholder": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_user",
-      "multiple": false
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_payment_method"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "currency",
-      "currency_selector_only": false,
-      "currency": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "tags",
-      "options": [],
-      "suggestions": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "message_email_address",
-      "address": "string",
-      "send_status": "string",
-      "email_type": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "number",
-      "data_type": "string",
-      "format": "string",
-      "show_separator": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "consent",
-      "topic": "string",
-      "identifiers": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "ordered_list"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "image",
-      "multiple": true,
-      "allowed_extensions": [],
-      "display_images_landscaped": true,
-      "enable_description": true,
-      "default_access_control": "public-read"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "preview_value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "computed",
-      "computed": true,
-      "amount_field": "string",
-      "currency_field": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_status"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "invitation_email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "automation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal_user"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "purpose"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_organisation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "portal_access"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "phone"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "payment"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "price_component"
     }
   ],
   "_purpose": [
@@ -8012,6 +4705,8 @@ const { data } = await client.getSchemaCapability({
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -8102,1141 +4797,7 @@ const { data } = await client.putSchemaCapability(
         has_primary: true,
         type: 'link'
       },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'date'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'country'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'boolean',
-        display_type: 'switch'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'select',
-        options: [ /* ... */ ],
-        allow_any: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'multiselect',
-        disable_case_sensitive: true,
-        allow_extra_options: true,
-        options: [ /* ... */ ],
-        allow_any: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'status',
-        options: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'sequence',
-        prefix: 'OR-',
-        start_number: 0
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation',
-        relation_type: 'has_many',
-        reverse_attributes: { /* ... */ },
-        relation_affinity_mode: 'weak',
-        enable_relation_picker: true,
-        edit_mode: 'list-view',
-        details_view_mode_enabled: false,
-        relation_picker_filter: { /* ... */ },
-        actions: [ /* ... */ ],
-        drawer_size: 'small',
-        summary_fields: [ /* ... */ ],
-        allowedSchemas: [ /* ... */ ],
-        enable_relation_tags: true,
-        add_button_label: 'string',
-        search_placeholder: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_user',
-        multiple: false
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'address',
-        default_address_fields: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_address',
-        default_address_fields: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'relation_payment_method'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'currency',
-        currency_selector_only: false,
-        currency: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'tags',
-        options: [ /* ... */ ],
-        suggestions: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'message_email_address',
-        address: 'string',
-        send_status: 'string',
-        email_type: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'number',
-        data_type: 'string',
-        format: 'string',
-        show_separator: true
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'consent',
-        topic: 'string',
-        identifiers: [ /* ... */ ]
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'internal'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'ordered_list'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'image',
-        multiple: true,
-        allowed_extensions: [ /* ... */ ],
-        display_images_landscaped: true,
-        enable_description: true,
-        default_access_control: 'public-read'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: '{{formatCurrencyAttribute entity attribute locale}}',
-        preview_value_formatter: '{{formatCurrencyAttribute entity attribute locale}}',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'computed',
-        computed: true,
-        amount_field: 'string',
-        currency_field: 'string'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'partner_status'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'invitation_email'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'automation'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'internal_user'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'purpose'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'partner_organisation'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'portal_access'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'phone'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'email'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'payment'
-      },
-      {
-        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
-        name: 'string',
-        label: 'string',
-        placeholder: 'string',
-        hidden: false,
-        show_in_table: true,
-        sortable: true,
-        required: false,
-        readonly: false,
-        deprecated: false,
-        default_value: {},
-        group: 'string',
-        order: 0,
-        layout: 'full_width',
-        hide_label: true,
-        icon: 'string',
-        render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
-        constraints: { /* ... */ },
-        feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ],
-        value_formatter: 'string',
-        preview_value_formatter: 'string',
-        entity_builder_disable_edit: false,
-        protected: true,
-        info_helpers: { /* ... */ },
-        explicit_searchable: false,
-        exclude_from_search: false,
-        repeatable: true,
-        has_primary: true,
-        type: 'price_component'
-      }
+      /* ... 32 more */
     ],
     _purpose: [
       'taxonomy-slug:classification-slug'
@@ -9277,7 +4838,8 @@ const { data } = await client.putSchemaCapability(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -9355,1141 +4917,6 @@ const { data } = await client.putSchemaCapability(
       "repeatable": true,
       "has_primary": true,
       "type": "link"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "date"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "country"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "boolean",
-      "display_type": "switch"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "select",
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "multiselect",
-      "disable_case_sensitive": true,
-      "allow_extra_options": true,
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "status",
-      "options": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "sequence",
-      "prefix": "OR-",
-      "start_number": 0
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation",
-      "relation_type": "has_many",
-      "reverse_attributes": {},
-      "relation_affinity_mode": "weak",
-      "enable_relation_picker": true,
-      "edit_mode": "list-view",
-      "details_view_mode_enabled": false,
-      "relation_picker_filter": {},
-      "actions": [],
-      "drawer_size": "small",
-      "summary_fields": [],
-      "allowedSchemas": [],
-      "enable_relation_tags": true,
-      "add_button_label": "string",
-      "search_placeholder": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_user",
-      "multiple": false
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_payment_method"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "currency",
-      "currency_selector_only": false,
-      "currency": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "tags",
-      "options": [],
-      "suggestions": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "message_email_address",
-      "address": "string",
-      "send_status": "string",
-      "email_type": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "number",
-      "data_type": "string",
-      "format": "string",
-      "show_separator": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "consent",
-      "topic": "string",
-      "identifiers": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "ordered_list"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "image",
-      "multiple": true,
-      "allowed_extensions": [],
-      "display_images_landscaped": true,
-      "enable_description": true,
-      "default_access_control": "public-read"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "preview_value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "computed",
-      "computed": true,
-      "amount_field": "string",
-      "currency_field": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_status"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "invitation_email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "automation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal_user"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "purpose"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_organisation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "portal_access"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "phone"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "payment"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "price_component"
     }
   ],
   "_purpose": [
@@ -10529,6 +4956,8 @@ const { data } = await client.putSchemaCapability(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -10544,7 +4973,8 @@ const { data } = await client.deleteSchemaCapability({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -10622,1141 +5052,6 @@ const { data } = await client.deleteSchemaCapability({
       "repeatable": true,
       "has_primary": true,
       "type": "link"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "date"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "country"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "boolean",
-      "display_type": "switch"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "select",
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "multiselect",
-      "disable_case_sensitive": true,
-      "allow_extra_options": true,
-      "options": [],
-      "allow_any": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "status",
-      "options": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "sequence",
-      "prefix": "OR-",
-      "start_number": 0
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation",
-      "relation_type": "has_many",
-      "reverse_attributes": {},
-      "relation_affinity_mode": "weak",
-      "enable_relation_picker": true,
-      "edit_mode": "list-view",
-      "details_view_mode_enabled": false,
-      "relation_picker_filter": {},
-      "actions": [],
-      "drawer_size": "small",
-      "summary_fields": [],
-      "allowedSchemas": [],
-      "enable_relation_tags": true,
-      "add_button_label": "string",
-      "search_placeholder": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_user",
-      "multiple": false
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_address",
-      "default_address_fields": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "relation_payment_method"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "currency",
-      "currency_selector_only": false,
-      "currency": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "tags",
-      "options": [],
-      "suggestions": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "message_email_address",
-      "address": "string",
-      "send_status": "string",
-      "email_type": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "number",
-      "data_type": "string",
-      "format": "string",
-      "show_separator": true
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "consent",
-      "topic": "string",
-      "identifiers": []
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "ordered_list"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "image",
-      "multiple": true,
-      "allowed_extensions": [],
-      "display_images_landscaped": true,
-      "enable_description": true,
-      "default_access_control": "public-read"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "preview_value_formatter": "{{formatCurrencyAttribute entity attribute locale}}",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "computed",
-      "computed": true,
-      "amount_field": "string",
-      "currency_field": "string"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_status"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "invitation_email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "automation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "internal_user"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "purpose"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "partner_organisation"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "portal_access"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "phone"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "email"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "payment"
-    },
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "string",
-      "label": "string",
-      "placeholder": "string",
-      "hidden": false,
-      "show_in_table": true,
-      "sortable": true,
-      "required": false,
-      "readonly": false,
-      "deprecated": false,
-      "default_value": {},
-      "group": "string",
-      "order": 0,
-      "layout": "full_width",
-      "hide_label": true,
-      "icon": "string",
-      "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
-      "constraints": {},
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "value_formatter": "string",
-      "preview_value_formatter": "string",
-      "entity_builder_disable_edit": false,
-      "protected": true,
-      "info_helpers": {},
-      "explicit_searchable": false,
-      "exclude_from_search": false,
-      "repeatable": true,
-      "has_primary": true,
-      "type": "price_component"
     }
   ],
   "_purpose": [
@@ -11796,6 +5091,8 @@ const { data } = await client.deleteSchemaCapability({
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -11837,7 +5134,8 @@ const { data } = await client.createSchemaGroup(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -11867,6 +5165,8 @@ const { data } = await client.createSchemaGroup(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -11882,7 +5182,8 @@ const { data } = await client.getSchemaGroup({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -11912,6 +5213,8 @@ const { data } = await client.getSchemaGroup({
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -11955,7 +5258,8 @@ const { data } = await client.putSchemaGroup(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -11985,6 +5289,8 @@ const { data } = await client.putSchemaGroup(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -12000,7 +5306,8 @@ const { data } = await client.deleteSchemaGroup({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -12030,6 +5337,8 @@ const { data } = await client.deleteSchemaGroup({
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -12064,7 +5373,8 @@ const { data } = await client.createSchemaGroupHeadline(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -12087,6 +5397,8 @@ const { data } = await client.createSchemaGroupHeadline(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -12102,7 +5414,8 @@ const { data } = await client.getSchemaGroupHeadline({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -12125,6 +5438,8 @@ const { data } = await client.getSchemaGroupHeadline({
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -12161,7 +5476,8 @@ const { data } = await client.putSchemaGroupHeadline(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -12184,6 +5500,8 @@ const { data } = await client.putSchemaGroupHeadline(
   "schema": "contact"
 }
 ```
+
+</details>
 
 ---
 
@@ -12199,7 +5517,8 @@ const { data } = await client.deleteSchemaGroupHeadline({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -12223,9 +5542,12 @@ const { data } = await client.deleteSchemaGroupHeadline({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ExportJobId`
 
@@ -15261,3 +8583,5 @@ type ErrorObject = {
   error?: string
 }
 ```
+
+</details>

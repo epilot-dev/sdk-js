@@ -1,7 +1,7 @@
 # Sandbox API
 
-**Base URL:** `https://sandbox.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/sandbox](https://docs.epilot.io/api/sandbox)
+- **Base URL:** `https://sandbox.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/sandbox](https://docs.epilot.io/api/sandbox)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.sandbox.listPipelines(...)
-
-// Or get the client explicitly
-const sandboxClient = await epilot.sandbox.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/sandbox'
 const sandboxClient = await getClient()
 authorize(sandboxClient, () => '<token>')
 const { data } = await sandboxClient.listPipelines(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/sandbox'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -55,7 +45,8 @@ List pipelines the current organization is part of
 const { data } = await client.listPipelines()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -73,6 +64,8 @@ const { data } = await client.listPipelines()
   "total": 1
 }
 ```
+
+</details>
 
 ---
 
@@ -92,7 +85,8 @@ const { data } = await client.createPipeline(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -105,6 +99,8 @@ const { data } = await client.createPipeline(
   "created_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -120,7 +116,8 @@ const { data } = await client.getPipeline({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -133,6 +130,8 @@ const { data } = await client.getPipeline({
   "created_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -148,7 +147,8 @@ const { data } = await client.deletePipeline({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -161,6 +161,8 @@ const { data } = await client.deletePipeline({
   "created_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -176,13 +178,16 @@ const { data } = await client.generatePipelineToken({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "pipeline_token": "eyJhbGciOiJIUzI1NiIs..."
 }
 ```
+
+</details>
 
 ---
 
@@ -210,7 +215,8 @@ const { data } = await client.requestSandbox(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -227,6 +233,8 @@ const { data } = await client.requestSandbox(
 }
 ```
 
+</details>
+
 ---
 
 ### `listSandboxRequests`
@@ -239,7 +247,8 @@ List sandbox requests from users
 const { data } = await client.listSandboxRequests()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -261,9 +270,12 @@ const { data } = await client.listSandboxRequests()
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `OrgId`
 
@@ -364,3 +376,5 @@ type SandboxRequest = {
   sandbox_request_category?: "APP_DEVELOPER_ACCOUNT" | "BLUEPRINT_SANDBOX" | "OTHER"
 }
 ```
+
+</details>

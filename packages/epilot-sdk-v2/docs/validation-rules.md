@@ -1,7 +1,7 @@
 # Validation Rules API
 
-**Base URL:** `https://validation-rules.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
+- **Base URL:** `https://validation-rules.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.validationRules.getValidationRules(...)
-
-// Or get the client explicitly
-const validationRulesClient = await epilot.validationRules.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/validation-rules'
 const validationRulesClient = await getClient()
 authorize(validationRulesClient, () => '<token>')
 const { data } = await validationRulesClient.getValidationRules(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/validation-rules'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -53,7 +43,8 @@ Get all validation rules by organization Id
 const { data } = await client.getValidationRules()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -74,6 +65,8 @@ const { data } = await client.getValidationRules()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -106,7 +99,8 @@ const { data } = await client.createValidationRule(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -134,6 +128,8 @@ const { data } = await client.createValidationRule(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -149,7 +145,8 @@ const { data } = await client.getValidationRuleById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -177,6 +174,8 @@ const { data } = await client.getValidationRuleById({
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -211,7 +210,8 @@ const { data } = await client.updateValidationRule(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -239,6 +239,8 @@ const { data } = await client.updateValidationRule(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -275,7 +277,8 @@ const { data } = await client.addUsedByReference(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -303,6 +306,8 @@ const { data } = await client.addUsedByReference(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -325,7 +330,8 @@ const { data } = await client.removeUsedByReference(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -354,9 +360,12 @@ const { data } = await client.removeUsedByReference(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `GetValidationRulesResponse`
 
@@ -919,3 +928,5 @@ type NumericFactCondition = {
   }
 }
 ```
+
+</details>

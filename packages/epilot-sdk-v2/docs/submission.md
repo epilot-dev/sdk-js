@@ -1,7 +1,7 @@
 # Submission API
 
-**Base URL:** `https://submission.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/submission](https://docs.epilot.io/api/submission)
+- **Base URL:** `https://submission.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/submission](https://docs.epilot.io/api/submission)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.submission.createSubmission(...)
-
-// Or get the client explicitly
-const submissionClient = await epilot.submission.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/submission'
 const submissionClient = await getClient()
 authorize(submissionClient, () => '<token>')
 const { data } = await submissionClient.createSubmission(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/submission'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -91,7 +81,8 @@ const { data } = await client.getNonce({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -103,9 +94,12 @@ const { data } = await client.getNonce({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `SubmissionNonce`
 
@@ -187,3 +181,5 @@ type S3Reference = {
   key: string
 }
 ```
+
+</details>

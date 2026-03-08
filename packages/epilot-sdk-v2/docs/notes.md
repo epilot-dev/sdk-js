@@ -1,7 +1,7 @@
 # Notes API
 
-**Base URL:** `https://notes.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/notes](https://docs.epilot.io/api/notes)
+- **Base URL:** `https://notes.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/notes](https://docs.epilot.io/api/notes)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.notes.createNote(...)
-
-// Or get the client explicitly
-const notesClient = await epilot.notes.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/notes'
 const notesClient = await getClient()
 authorize(notesClient, () => '<token>')
 const { data } = await notesClient.createNote(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/notes'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -255,7 +245,8 @@ const { data } = await client.getNoteContexts({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -276,6 +267,8 @@ const { data } = await client.getNoteContexts({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -335,7 +328,8 @@ const { data } = await client.toggleNoteReactions(
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `NotePostRequestBody`
 
@@ -637,3 +631,5 @@ type ToggleReactionsRequest = {
   emojis: string[]
 }
 ```
+
+</details>

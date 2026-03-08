@@ -1,7 +1,7 @@
 # Audit Log
 
-**Base URL:** `https://audit-logs.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/audit-logs](https://docs.epilot.io/api/audit-logs)
+- **Base URL:** `https://audit-logs.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/audit-logs](https://docs.epilot.io/api/audit-logs)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.auditLogs.getLogs(...)
-
-// Or get the client explicitly
-const auditLogsClient = await epilot.auditLogs.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/audit-logs'
 const auditLogsClient = await getClient()
 authorize(auditLogsClient, () => '<token>')
 const { data } = await auditLogsClient.getLogs(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/audit-logs'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -65,7 +55,8 @@ const { data } = await client.getLogs(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -88,6 +79,8 @@ const { data } = await client.getLogs(
 }
 ```
 
+</details>
+
 ---
 
 ### `getLogById`
@@ -102,7 +95,8 @@ const { data } = await client.getLogById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -134,9 +128,12 @@ const { data } = await client.getLogById({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `SearchOptions`
 
@@ -212,3 +209,5 @@ type Event = {
   source_url?: string
 }
 ```
+
+</details>

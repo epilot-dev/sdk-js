@@ -1,6 +1,6 @@
 # Pricing Tier API
 
-**Full API Docs:** [https://docs.epilot.io/api/pricing-tier](https://docs.epilot.io/api/pricing-tier)
+- **Full API Docs:** [https://docs.epilot.io/api/pricing-tier](https://docs.epilot.io/api/pricing-tier)
 
 ## Usage
 
@@ -8,12 +8,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.pricingTier.getCurrentPricingTier(...)
-
-// Or get the client explicitly
-const pricingTierClient = await epilot.pricingTier.getClient()
 ```
 
 ### Tree-shakeable import
@@ -24,11 +19,6 @@ import { getClient, authorize } from '@epilot/sdk/pricing-tier'
 const pricingTierClient = await getClient()
 authorize(pricingTierClient, () => '<token>')
 const { data } = await pricingTierClient.getCurrentPricingTier(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/pricing-tier'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -46,7 +36,8 @@ Get current pricing tier of logged in user
 const { data } = await client.getCurrentPricingTier()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -63,9 +54,12 @@ const { data } = await client.getCurrentPricingTier()
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `PricingTier`
 
@@ -83,3 +77,5 @@ type PricingTier = {
   is_pure_360?: boolean
 }
 ```
+
+</details>

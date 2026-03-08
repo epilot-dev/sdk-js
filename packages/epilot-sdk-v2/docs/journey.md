@@ -1,7 +1,7 @@
 # Journey API
 
-**Base URL:** `https://journey-config.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/journey](https://docs.epilot.io/api/journey)
+- **Base URL:** `https://journey-config.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/journey](https://docs.epilot.io/api/journey)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.journey.getJourneysByOrgId(...)
-
-// Or get the client explicitly
-const journeyClient = await epilot.journey.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/journey'
 const journeyClient = await getClient()
 authorize(journeyClient, () => '<token>')
 const { data } = await journeyClient.getJourneysByOrgId(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/journey'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -67,11 +57,14 @@ const { data } = await client.getJourneysByOrgId({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -89,7 +82,8 @@ const { data } = await client.getJourney({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -206,6 +200,8 @@ const { data } = await client.getJourney({
 }
 ```
 
+</details>
+
 ---
 
 ### `removeJourney`
@@ -239,7 +235,8 @@ const { data } = await client.getJourneyProducts({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -260,6 +257,8 @@ const { data } = await client.getJourneyProducts({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -383,7 +382,8 @@ const { data } = await client.createJourney(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -499,6 +499,8 @@ const { data } = await client.createJourney(
   "featureFlags": {}
 }
 ```
+
+</details>
 
 ---
 
@@ -638,7 +640,8 @@ const { data } = await client.patchUpdateJourney(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -710,6 +713,8 @@ const { data } = await client.patchUpdateJourney(
 }
 ```
 
+</details>
+
 ---
 
 ### `searchJourneys`
@@ -730,7 +735,8 @@ const { data } = await client.searchJourneys(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -756,6 +762,8 @@ const { data } = await client.searchJourneys(
 }
 ```
 
+</details>
+
 ---
 
 ### `generateDocument`
@@ -777,7 +785,8 @@ const { data } = await client.generateDocument(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -817,6 +826,8 @@ const { data } = await client.generateDocument(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -929,7 +940,8 @@ const { data } = await client.createJourneyV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1028,6 +1040,8 @@ const { data } = await client.createJourneyV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1138,7 +1152,8 @@ const { data } = await client.updateJourneyV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1237,6 +1252,8 @@ const { data } = await client.updateJourneyV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1256,7 +1273,8 @@ const { data } = await client.patchUpdateJourneyV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1355,6 +1373,8 @@ const { data } = await client.patchUpdateJourneyV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1370,7 +1390,8 @@ const { data } = await client.getJourneyV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1469,6 +1490,8 @@ const { data } = await client.getJourneyV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1498,7 +1521,8 @@ const { data } = await client.getSettingsForJourney({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1507,6 +1531,8 @@ const { data } = await client.getSettingsForJourney({
   "thirdPartyCookies": true
 }
 ```
+
+</details>
 
 ---
 
@@ -1522,7 +1548,8 @@ const { data } = await client.getButtonOptions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1533,9 +1560,12 @@ const { data } = await client.getButtonOptions({
 ]
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `GetJourneysResponse`
 
@@ -1901,3 +1931,5 @@ Maps field names to rule IDs.
 ```ts
 type RuleRef = Record<string, string>
 ```
+
+</details>

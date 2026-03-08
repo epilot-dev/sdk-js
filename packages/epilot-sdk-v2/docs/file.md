@@ -1,7 +1,7 @@
 # File API
 
-**Base URL:** `https://file.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/file](https://docs.epilot.io/api/file)
+- **Base URL:** `https://file.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/file](https://docs.epilot.io/api/file)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.file.uploadFileV2(...)
-
-// Or get the client explicitly
-const fileClient = await epilot.file.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/file'
 const fileClient = await getClient()
 authorize(fileClient, () => '<token>')
 const { data } = await fileClient.uploadFileV2(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/file'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -91,7 +81,8 @@ const { data } = await client.uploadFileV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -103,6 +94,8 @@ const { data } = await client.uploadFileV2(
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
 }
 ```
+
+</details>
 
 ---
 
@@ -156,7 +149,8 @@ const { data } = await client.saveFileV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -216,6 +210,8 @@ const { data } = await client.saveFileV2(
   "__additional": {}
 }
 ```
+
+</details>
 
 ---
 
@@ -234,7 +230,8 @@ const { data } = await client.getFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -294,6 +291,8 @@ const { data } = await client.getFile({
   "__additional": {}
 }
 ```
+
+</details>
 
 ---
 
@@ -312,7 +311,8 @@ const { data } = await client.deleteFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -373,6 +373,8 @@ const { data } = await client.deleteFile({
 }
 ```
 
+</details>
+
 ---
 
 ### `downloadFile`
@@ -389,13 +391,16 @@ const { data } = await client.downloadFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
 }
 ```
+
+</details>
 
 ---
 
@@ -413,13 +418,16 @@ const { data } = await client.downloadS3File({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
 }
 ```
+
+</details>
 
 ---
 
@@ -441,7 +449,8 @@ const { data } = await client.downloadFiles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -451,6 +460,8 @@ const { data } = await client.downloadFiles(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -560,11 +571,14 @@ const { data } = await client.generatePublicLink({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 "string"
 ```
+
+</details>
 
 ---
 
@@ -580,7 +594,8 @@ const { data } = await client.listPublicLinksForFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -593,6 +608,8 @@ const { data } = await client.listPublicLinksForFile({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -641,13 +658,16 @@ const { data } = await client.verifyCustomDownloadUrl(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "valid": true
 }
 ```
+
+</details>
 
 ---
 
@@ -671,7 +691,8 @@ const { data } = await client.uploadFilePublic(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -683,6 +704,8 @@ const { data } = await client.uploadFilePublic(
   "error": "File entity not found"
 }
 ```
+
+</details>
 
 ---
 
@@ -698,7 +721,8 @@ const { data } = await client.getUserSchemaFileCollections({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -723,6 +747,8 @@ const { data } = await client.getUserSchemaFileCollections({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -753,7 +779,8 @@ const { data } = await client.createUserSchemaFileCollection(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -776,6 +803,8 @@ const { data } = await client.createUserSchemaFileCollection(
   "updated_at": "2024-01-02T12:00:00Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -807,7 +836,8 @@ const { data } = await client.updateUserSchemaFileCollection(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -830,6 +860,8 @@ const { data } = await client.updateUserSchemaFileCollection(
   "updated_at": "2024-01-02T12:00:00Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -861,7 +893,8 @@ const { data } = await client.getFilesInCollection({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -909,6 +942,8 @@ const { data } = await client.getFilesInCollection({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getGlobalFileCollections`
@@ -923,7 +958,8 @@ const { data } = await client.getGlobalFileCollections({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -949,9 +985,12 @@ const { data } = await client.getGlobalFileCollections({
 ]
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `EntityId`
 
@@ -1407,3 +1446,5 @@ type FileCollectionCreateRequest = {
   enabled_purposes?: string[]
 }
 ```
+
+</details>

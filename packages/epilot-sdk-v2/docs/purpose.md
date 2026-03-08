@@ -1,7 +1,7 @@
 # Purpose API
 
-**Base URL:** `https://purpose.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/purpose](https://docs.epilot.io/api/purpose)
+- **Base URL:** `https://purpose.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/purpose](https://docs.epilot.io/api/purpose)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.purpose.createPurpose(...)
-
-// Or get the client explicitly
-const purposeClient = await epilot.purpose.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/purpose'
 const purposeClient = await getClient()
 authorize(purposeClient, () => '<token>')
 const { data } = await purposeClient.createPurpose(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/purpose'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -57,7 +47,8 @@ const { data } = await client.createPurpose(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -67,6 +58,8 @@ const { data } = await client.createPurpose(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -83,7 +76,8 @@ const { data } = await client.searchPurposes({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -97,6 +91,8 @@ const { data } = await client.searchPurposes({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -117,7 +113,8 @@ const { data } = await client.batchGetPurposes(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -133,6 +130,8 @@ const { data } = await client.batchGetPurposes(
 }
 ```
 
+</details>
+
 ---
 
 ### `getPurpose`
@@ -147,7 +146,8 @@ const { data } = await client.getPurpose({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -157,6 +157,8 @@ const { data } = await client.getPurpose({
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -177,7 +179,8 @@ const { data } = await client.updatePurpose(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -187,6 +190,8 @@ const { data } = await client.updatePurpose(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -202,7 +207,8 @@ const { data } = await client.deletePurpose({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -213,9 +219,12 @@ const { data } = await client.deletePurpose({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `Purpose`
 
@@ -268,3 +277,5 @@ type Error = {
   error?: string
 }
 ```
+
+</details>

@@ -1,7 +1,7 @@
 # Blueprint Manifest API
 
-**Base URL:** `https://blueprint-manifest.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/blueprint-manifest](https://docs.epilot.io/api/blueprint-manifest)
+- **Base URL:** `https://blueprint-manifest.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/blueprint-manifest](https://docs.epilot.io/api/blueprint-manifest)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.blueprintManifest.getJob(...)
-
-// Or get the client explicitly
-const blueprintManifestClient = await epilot.blueprintManifest.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/blueprint-manifest'
 const blueprintManifestClient = await getClient()
 authorize(blueprintManifestClient, () => '<token>')
 const { data } = await blueprintManifestClient.getJob(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/blueprint-manifest'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -79,7 +69,8 @@ const { data } = await client.uploadManifest(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -90,6 +81,8 @@ const { data } = await client.uploadManifest(
   "upload_url": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
 }
 ```
+
+</details>
 
 ---
 
@@ -105,7 +98,8 @@ const { data } = await client.listBlueprints({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -137,6 +131,8 @@ const { data } = await client.listBlueprints({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -225,7 +221,8 @@ const { data } = await client.createBlueprint(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -301,6 +298,8 @@ const { data } = await client.createBlueprint(
 }
 ```
 
+</details>
+
 ---
 
 ### `listInstalledMarketplaceBlueprints`
@@ -314,7 +313,8 @@ When multiple blueprints have the same slug, returns only the most recently crea
 const { data } = await client.listInstalledMarketplaceBlueprints()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -336,6 +336,8 @@ const { data } = await client.listInstalledMarketplaceBlueprints()
 }
 ```
 
+</details>
+
 ---
 
 ### `preInstallBlueprint`
@@ -355,7 +357,8 @@ const { data } = await client.preInstallBlueprint(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -401,6 +404,8 @@ const { data } = await client.preInstallBlueprint(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -416,7 +421,8 @@ const { data } = await client.getBlueprintPreview({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -462,6 +468,8 @@ const { data } = await client.getBlueprintPreview({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -506,7 +514,8 @@ const { data } = await client.getBlueprint({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -581,6 +590,8 @@ const { data } = await client.getBlueprint({
   "source_type": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -671,7 +682,8 @@ const { data } = await client.updateBlueprint(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -746,6 +758,8 @@ const { data } = await client.updateBlueprint(
   "source_type": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -761,7 +775,8 @@ const { data } = await client.deleteBlueprint({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -836,6 +851,8 @@ const { data } = await client.deleteBlueprint({
   "source_type": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -892,13 +909,16 @@ const { data } = await client.formatBlueprintDescription(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "markdown": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -942,7 +962,8 @@ const { data } = await client.addBlueprintResource(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -965,6 +986,8 @@ const { data } = await client.addBlueprintResource(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1024,7 +1047,8 @@ const { data } = await client.bulkAddBlueprintResources(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1047,6 +1071,8 @@ const { data } = await client.bulkAddBlueprintResources(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1091,7 +1117,8 @@ const { data } = await client.bulkUpdateBlueprintResources(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1114,6 +1141,8 @@ const { data } = await client.bulkUpdateBlueprintResources(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1134,7 +1163,8 @@ const { data } = await client.bulkDeleteBlueprintResources(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1157,6 +1187,8 @@ const { data } = await client.bulkDeleteBlueprintResources(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1200,7 +1232,8 @@ const { data } = await client.updateBlueprintResource(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1223,6 +1256,8 @@ const { data } = await client.updateBlueprintResource(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1239,7 +1274,8 @@ const { data } = await client.deleteBlueprintResource({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1263,6 +1299,8 @@ const { data } = await client.deleteBlueprintResource({
 }
 ```
 
+</details>
+
 ---
 
 ### `listBlueprintJobs`
@@ -1275,7 +1313,8 @@ List Blueprint Jobs
 const { data } = await client.listBlueprintJobs()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1294,6 +1333,8 @@ const { data } = await client.listBlueprintJobs()
 }
 ```
 
+</details>
+
 ---
 
 ### `getBlueprintJob`
@@ -1308,7 +1349,8 @@ const { data } = await client.getBlueprintJob({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1338,6 +1380,8 @@ const { data } = await client.getBlueprintJob({
 }
 ```
 
+</details>
+
 ---
 
 ### `continueInstallationJob`
@@ -1359,7 +1403,8 @@ const { data } = await client.continueInstallationJob(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1391,6 +1436,8 @@ const { data } = await client.continueInstallationJob(
 }
 ```
 
+</details>
+
 ---
 
 ### `cancelBlueprintJob`
@@ -1405,7 +1452,8 @@ const { data } = await client.cancelBlueprintJob({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1435,9 +1483,12 @@ const { data } = await client.cancelBlueprintJob({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BlueprintID`
 
@@ -2541,3 +2592,5 @@ type PutManifestPayload = {
   }>
 }
 ```
+
+</details>

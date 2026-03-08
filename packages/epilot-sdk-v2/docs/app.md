@@ -1,7 +1,7 @@
 # App API
 
-**Base URL:** `https://app.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/app](https://docs.epilot.io/api/app)
+- **Base URL:** `https://app.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/app](https://docs.epilot.io/api/app)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.app.getPublicFacingComponent(...)
-
-// Or get the client explicitly
-const appClient = await epilot.app.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/app'
 const appClient = await getClient()
 authorize(appClient, () => '<token>')
 const { data } = await appClient.getPublicFacingComponent(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/app'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -83,7 +73,8 @@ const { data } = await client.getPublicFacingComponent({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -101,6 +92,8 @@ const { data } = await client.getPublicFacingComponent({
 }
 ```
 
+</details>
+
 ---
 
 ### `listConfigurations`
@@ -116,7 +109,8 @@ const { data } = await client.listConfigurations({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -148,6 +142,8 @@ const { data } = await client.listConfigurations({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -172,13 +168,16 @@ const { data } = await client.createConfiguration(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "app_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -195,7 +194,8 @@ const { data } = await client.listPublicConfigurations({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -228,6 +228,8 @@ const { data } = await client.listPublicConfigurations({
 }
 ```
 
+</details>
+
 ---
 
 ### `getPublicConfiguration`
@@ -243,7 +245,8 @@ const { data } = await client.getPublicConfiguration({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -310,6 +313,8 @@ const { data } = await client.getPublicConfiguration({
 }
 ```
 
+</details>
+
 ---
 
 ### `getConfiguration`
@@ -325,7 +330,8 @@ const { data } = await client.getConfiguration({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -404,6 +410,8 @@ const { data } = await client.getConfiguration({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -508,7 +516,8 @@ const { data } = await client.queryEvents(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -552,6 +561,8 @@ const { data } = await client.queryEvents(
 }
 ```
 
+</details>
+
 ---
 
 ### `createBundleUploadUrl`
@@ -572,7 +583,8 @@ const { data } = await client.createBundleUploadUrl(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -586,6 +598,8 @@ const { data } = await client.createBundleUploadUrl(
   "expires_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -608,7 +622,8 @@ const { data } = await client.createZipUploadUrl(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -622,6 +637,8 @@ const { data } = await client.createZipUploadUrl(
   "expires_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -643,7 +660,8 @@ const { data } = await client.createLogoUploadUrl(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -655,6 +673,8 @@ const { data } = await client.createLogoUploadUrl(
   "expires_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -686,7 +706,8 @@ const { data } = await client.listVersions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -716,6 +737,8 @@ const { data } = await client.listVersions({
 }
 ```
 
+</details>
+
 ---
 
 ### `getVersion`
@@ -731,7 +754,8 @@ const { data } = await client.getVersion({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -811,6 +835,8 @@ const { data } = await client.getVersion({
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteVersion`
@@ -868,7 +894,8 @@ const { data } = await client.getReview({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -883,6 +910,8 @@ const { data } = await client.getReview({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -906,7 +935,8 @@ const { data } = await client.createReview(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -921,6 +951,8 @@ const { data } = await client.createReview(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -954,7 +986,8 @@ const { data } = await client.createComponent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -971,6 +1004,8 @@ const { data } = await client.createComponent(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1037,7 +1072,8 @@ const { data } = await client.cloneVersion({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1046,6 +1082,8 @@ const { data } = await client.cloneVersion({
   "status": "pending"
 }
 ```
+
+</details>
 
 ---
 
@@ -1064,7 +1102,8 @@ const { data } = await client.listInstallations({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1092,6 +1131,8 @@ const { data } = await client.listInstallations({
 }
 ```
 
+</details>
+
 ---
 
 ### `getInstallation`
@@ -1106,7 +1147,8 @@ const { data } = await client.getInstallation({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1144,6 +1186,8 @@ const { data } = await client.getInstallation({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1173,7 +1217,8 @@ const { data } = await client.install(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1211,6 +1256,8 @@ const { data } = await client.install(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1269,7 +1316,8 @@ const { data } = await client.promoteVersion({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1308,6 +1356,8 @@ const { data } = await client.promoteVersion({
 }
 ```
 
+</details>
+
 ---
 
 ### `ingestEvent`
@@ -1340,7 +1390,8 @@ const { data } = await client.ingestEvent(
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `Role`
 
@@ -2732,3 +2783,5 @@ type AggregatedEvents = {
   }>
 }
 ```
+
+</details>

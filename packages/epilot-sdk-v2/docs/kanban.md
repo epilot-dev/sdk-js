@@ -1,7 +1,7 @@
 # Kanban API
 
-**Base URL:** `https://kanban.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/kanban](https://docs.epilot.io/api/kanban)
+- **Base URL:** `https://kanban.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/kanban](https://docs.epilot.io/api/kanban)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.kanban.createKanbanBoard(...)
-
-// Or get the client explicitly
-const kanbanClient = await epilot.kanban.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/kanban'
 const kanbanClient = await getClient()
 authorize(kanbanClient, () => '<token>')
 const { data } = await kanbanClient.createKanbanBoard(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/kanban'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -95,7 +85,8 @@ const { data } = await client.createKanbanBoard(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -135,6 +126,8 @@ const { data } = await client.createKanbanBoard(
 }
 ```
 
+</details>
+
 ---
 
 ### `getKanbanBoards`
@@ -149,7 +142,8 @@ const { data } = await client.getKanbanBoards({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -173,6 +167,8 @@ const { data } = await client.getKanbanBoards({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getKanbanBoard`
@@ -187,7 +183,8 @@ const { data } = await client.getKanbanBoard({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -226,6 +223,8 @@ const { data } = await client.getKanbanBoard({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -278,7 +277,8 @@ const { data } = await client.updateKanbanBoard(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -317,6 +317,8 @@ const { data } = await client.updateKanbanBoard(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -345,7 +347,8 @@ const { data } = await client.patchKanbanBoard(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -384,6 +387,8 @@ const { data } = await client.patchKanbanBoard(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -413,7 +418,8 @@ const { data } = await client.setDefaultKanbanBoard({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -421,6 +427,8 @@ const { data } = await client.setDefaultKanbanBoard({
   "default_board_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -434,7 +442,8 @@ Clear default board for organization
 const { data } = await client.clearDefaultKanbanBoard()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -442,6 +451,8 @@ const { data } = await client.clearDefaultKanbanBoard()
   "default_board_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -460,7 +471,8 @@ const { data } = await client.flowsAutocomplete({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -470,6 +482,8 @@ const { data } = await client.flowsAutocomplete({
   "hits": 42
 }
 ```
+
+</details>
 
 ---
 
@@ -499,7 +513,8 @@ const { data } = await client.executeFlowsQuery(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -513,9 +528,12 @@ const { data } = await client.executeFlowsQuery(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BoardSummary`
 
@@ -711,3 +729,5 @@ type FilterItem = {
   data_type?: "string" | "number" | "boolean" | "date"
 }
 ```
+
+</details>

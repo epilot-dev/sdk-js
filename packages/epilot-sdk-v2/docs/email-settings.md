@@ -1,7 +1,7 @@
 # Messaging Settings API
 
-**Base URL:** `https://email-settings.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/email-settings](https://docs.epilot.io/api/email-settings)
+- **Base URL:** `https://email-settings.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/email-settings](https://docs.epilot.io/api/email-settings)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.emailSettings.provisionEpilotEmailAddress(...)
-
-// Or get the client explicitly
-const emailSettingsClient = await epilot.emailSettings.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/email-settings'
 const emailSettingsClient = await getClient()
 authorize(emailSettingsClient, () => '<token>')
 const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/email-settings'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -92,7 +82,8 @@ const { data } = await client.provisionEpilotEmailAddress(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -117,6 +108,8 @@ const { data } = await client.provisionEpilotEmailAddress(
   "is_epilot_email_address": false
 }
 ```
+
+</details>
 
 ---
 
@@ -135,7 +128,8 @@ const { data } = await client.setEmailAddressPrimary(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -160,6 +154,8 @@ const { data } = await client.setEmailAddressPrimary(
   "is_epilot_email_address": false
 }
 ```
+
+</details>
 
 ---
 
@@ -175,7 +171,8 @@ const { data } = await client.getEmailAddress({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -200,6 +197,8 @@ const { data } = await client.getEmailAddress({
   "is_epilot_email_address": false
 }
 ```
+
+</details>
 
 ---
 
@@ -244,7 +243,8 @@ const { data } = await client.updateEmailAddress(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -270,6 +270,8 @@ const { data } = await client.updateEmailAddress(
 }
 ```
 
+</details>
+
 ---
 
 ### `listEmailAddresses`
@@ -282,7 +284,8 @@ Retrieves all email addresses configured for the organization.
 const { data } = await client.listEmailAddresses()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -310,6 +313,8 @@ const { data } = await client.listEmailAddresses()
 ]
 ```
 
+</details>
+
 ---
 
 ### `addEmailAddress`
@@ -336,7 +341,8 @@ const { data } = await client.addEmailAddress(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -362,6 +368,8 @@ const { data } = await client.addEmailAddress(
 }
 ```
 
+</details>
+
 ---
 
 ### `getSharedInbox`
@@ -376,7 +384,8 @@ const { data } = await client.getSharedInbox({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -395,6 +404,8 @@ const { data } = await client.getSharedInbox({
   "bucket_id": "bucket-xyz"
 }
 ```
+
+</details>
 
 ---
 
@@ -436,7 +447,8 @@ const { data } = await client.updateSharedInbox(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -456,6 +468,8 @@ const { data } = await client.updateSharedInbox(
 }
 ```
 
+</details>
+
 ---
 
 ### `listSharedInboxes`
@@ -468,7 +482,8 @@ Retrieves all shared inboxes configured for the organization.
 const { data } = await client.listSharedInboxes()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -489,6 +504,8 @@ const { data } = await client.listSharedInboxes()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -514,7 +531,8 @@ const { data } = await client.addSharedInbox(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -534,6 +552,8 @@ const { data } = await client.addSharedInbox(
 }
 ```
 
+</details>
+
 ---
 
 ### `listInboxBuckets`
@@ -546,7 +566,8 @@ Retrieves all inbox buckets for the organization.
 const { data } = await client.listInboxBuckets()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -556,6 +577,8 @@ const { data } = await client.listInboxBuckets()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -569,13 +592,16 @@ Returns Microsoft authorization URL for Outlook OAuth.
 const { data } = await client.connectOutlook()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "authorization_url": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -590,7 +616,8 @@ Supports multiple connections (one per Azure AD tenant).
 const { data } = await client.getOutlookConnectionStatus()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -613,6 +640,8 @@ const { data } = await client.getOutlookConnectionStatus()
 }
 ```
 
+</details>
+
 ---
 
 ### `disconnectOutlook`
@@ -631,7 +660,8 @@ const { data } = await client.disconnectOutlook(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -642,6 +672,8 @@ const { data } = await client.disconnectOutlook(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -665,7 +697,8 @@ const { data } = await client.connectOutlookMailbox(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -696,6 +729,8 @@ const { data } = await client.connectOutlookMailbox(
 }
 ```
 
+</details>
+
 ---
 
 ### `disconnectOutlookMailbox`
@@ -710,7 +745,8 @@ const { data } = await client.disconnectOutlookMailbox({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -718,6 +754,8 @@ const { data } = await client.disconnectOutlookMailbox({
   "email": "user@example.com"
 }
 ```
+
+</details>
 
 ---
 
@@ -752,7 +790,8 @@ const { data } = await client.getMailboxSyncStatus({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -775,6 +814,8 @@ const { data } = await client.getMailboxSyncStatus({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -811,7 +852,8 @@ Returns all Outlook email addresses connected to the organization.
 const { data } = await client.getConnectedOutlookEmails()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -827,6 +869,8 @@ const { data } = await client.getConnectedOutlookEmails()
   "count": 0
 }
 ```
+
+</details>
 
 ---
 
@@ -851,7 +895,8 @@ const { data } = await client.outlookOAuthCallback({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -860,6 +905,8 @@ const { data } = await client.outlookOAuthCallback({
   "scope": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -876,7 +923,8 @@ const { data } = await client.getSettings({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -894,6 +942,8 @@ const { data } = await client.getSettings({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -921,7 +971,8 @@ const { data } = await client.addSetting(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -939,6 +990,8 @@ const { data } = await client.addSetting(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -958,7 +1011,8 @@ const { data } = await client.deleteSetting(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -974,6 +1028,8 @@ const { data } = await client.deleteSetting(
   "updated_by": "user-456"
 }
 ```
+
+</details>
 
 ---
 
@@ -1003,7 +1059,8 @@ const { data } = await client.updateSetting(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1019,6 +1076,8 @@ const { data } = await client.updateSetting(
   "updated_by": "user-456"
 }
 ```
+
+</details>
 
 ---
 
@@ -1037,7 +1096,8 @@ const { data } = await client.addDomain(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1055,6 +1115,8 @@ const { data } = await client.addDomain(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1090,7 +1152,8 @@ const { data } = await client.verifyNameServers(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1108,6 +1171,8 @@ const { data } = await client.verifyNameServers(
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1126,7 +1191,8 @@ const { data } = await client.verifyDomain(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1145,9 +1211,12 @@ const { data } = await client.verifyDomain(
 ]
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `MailboxSyncStatus`
 
@@ -1511,3 +1580,5 @@ type Domain = {
   domain?: string
 }
 ```
+
+</details>

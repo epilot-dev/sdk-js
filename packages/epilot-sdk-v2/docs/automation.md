@@ -1,7 +1,7 @@
 # Automation API
 
-**Base URL:** `https://automation.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/automation](https://docs.epilot.io/api/automation)
+- **Base URL:** `https://automation.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/automation](https://docs.epilot.io/api/automation)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.automation.searchFlows(...)
-
-// Or get the client explicitly
-const automationClient = await epilot.automation.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/automation'
 const automationClient = await getClient()
 authorize(automationClient, () => '<token>')
 const { data } = await automationClient.searchFlows(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/automation'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -162,7 +152,8 @@ const { data } = await client.getExecutions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -192,6 +183,8 @@ const { data } = await client.getExecutions({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -223,7 +216,8 @@ const { data } = await client.startExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -304,196 +298,6 @@ const { data } = await client.startExecution(
       "outputs": {},
       "error_output": {},
       "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-share-entity",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-webhook",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "inform-erp",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-event",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "create-document",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "send-email",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cart-checkout",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "custom-action",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "string",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cancel-flow-execution",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -521,6 +325,8 @@ const { data } = await client.startExecution(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -562,7 +368,8 @@ const { data } = await client.getBulkJob({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -607,6 +414,8 @@ const { data } = await client.getBulkJob({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -628,7 +437,8 @@ const { data } = await client.patchBulkJob(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -674,6 +484,8 @@ const { data } = await client.patchBulkJob(
 }
 ```
 
+</details>
+
 ---
 
 ### `getExecution`
@@ -688,7 +500,8 @@ const { data } = await client.getExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -769,196 +582,6 @@ const { data } = await client.getExecution({
       "outputs": {},
       "error_output": {},
       "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-share-entity",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-webhook",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "inform-erp",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-event",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "create-document",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "send-email",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cart-checkout",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "custom-action",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "string",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cancel-flow-execution",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -986,6 +609,8 @@ const { data } = await client.getExecution({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1001,7 +626,8 @@ const { data } = await client.cancelExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1082,196 +708,6 @@ const { data } = await client.cancelExecution({
       "outputs": {},
       "error_output": {},
       "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-share-entity",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-webhook",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "inform-erp",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "trigger-event",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "create-document",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "send-email",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cart-checkout",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "custom-action",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "string",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
-    },
-    {
-      "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "flow_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
-      "name": "string",
-      "type": "cancel-flow-execution",
-      "config": {},
-      "allow_failure": true,
-      "created_automatically": true,
-      "is_bulk_action": true,
-      "reason": {},
-      "condition_id": "string",
-      "schedule_id": "string",
-      "execution_status": "pending",
-      "started_at": "string",
-      "updated_at": "string",
-      "outputs": {},
-      "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -1299,6 +735,8 @@ const { data } = await client.cancelExecution({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1338,7 +776,8 @@ const { data } = await client.resumeExecutionWithToken(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1369,16 +808,6 @@ const { data } = await client.resumeExecutionWithToken(
       {}
     ],
     "actions": [
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
       {},
       {}
     ],
@@ -1437,6 +866,8 @@ const { data } = await client.resumeExecutionWithToken(
 }
 ```
 
+</details>
+
 ---
 
 ### `cancelSchedule`
@@ -1452,7 +883,8 @@ const { data } = await client.cancelSchedule({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1470,9 +902,12 @@ const { data } = await client.cancelSchedule({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `AutomationFlowId`
 
@@ -3697,3 +3132,5 @@ type ErrorObject = {
   error?: string
 }
 ```
+
+</details>

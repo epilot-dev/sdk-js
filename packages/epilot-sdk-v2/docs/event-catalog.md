@@ -1,7 +1,7 @@
 # Event Catalog API
 
-**Base URL:** `https://event-catalog.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/event-catalog](https://docs.epilot.io/api/event-catalog)
+- **Base URL:** `https://event-catalog.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/event-catalog](https://docs.epilot.io/api/event-catalog)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.eventCatalog.listEvents(...)
-
-// Or get the client explicitly
-const eventCatalogClient = await epilot.eventCatalog.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/event-catalog'
 const eventCatalogClient = await getClient()
 authorize(eventCatalogClient, () => '<token>')
 const { data } = await eventCatalogClient.listEvents(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/event-catalog'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -53,7 +43,8 @@ Retrieve list of available business events
 const { data } = await client.listEvents()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -76,6 +67,8 @@ const { data } = await client.listEvents()
 }
 ```
 
+</details>
+
 ---
 
 ### `getEvent`
@@ -90,7 +83,8 @@ const { data } = await client.getEvent({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -138,6 +132,8 @@ const { data } = await client.getEvent({
   "automation_trigger": true
 }
 ```
+
+</details>
 
 ---
 
@@ -199,7 +195,8 @@ const { data } = await client.patchEvent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -248,6 +245,8 @@ const { data } = await client.patchEvent(
 }
 ```
 
+</details>
+
 ---
 
 ### `getEventJSONSchema`
@@ -262,7 +261,8 @@ const { data } = await client.getEventJSONSchema({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -387,6 +387,8 @@ const { data } = await client.getEventJSONSchema({
 }
 ```
 
+</details>
+
 ---
 
 ### `getEventExample`
@@ -401,11 +403,14 @@ const { data } = await client.getEventExample({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -435,7 +440,8 @@ const { data } = await client.searchEventHistory(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -471,6 +477,8 @@ const { data } = await client.searchEventHistory(
 }
 ```
 
+</details>
+
 ---
 
 ### `triggerEvent`
@@ -500,7 +508,8 @@ const { data } = await client.triggerEvent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -510,9 +519,12 @@ const { data } = await client.triggerEvent(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `EventConfigBase`
 
@@ -820,3 +832,5 @@ type TriggerEventResponse = {
   event_bridge_event_id?: string
 }
 ```
+
+</details>

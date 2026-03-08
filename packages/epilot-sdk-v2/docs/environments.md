@@ -1,7 +1,7 @@
 # Environments API
 
-**Base URL:** `https://environments.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/environments](https://docs.epilot.io/api/environments)
+- **Base URL:** `https://environments.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/environments](https://docs.epilot.io/api/environments)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.environments.listEnvironmentVariables(...)
-
-// Or get the client explicitly
-const environmentsClient = await epilot.environments.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/environments'
 const environmentsClient = await getClient()
 authorize(environmentsClient, () => '<token>')
 const { data } = await environmentsClient.listEnvironmentVariables(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/environments'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -51,7 +41,8 @@ List environment variables
 const { data } = await client.listEnvironmentVariables()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -67,6 +58,8 @@ const { data } = await client.listEnvironmentVariables()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -88,7 +81,8 @@ const { data } = await client.createEnvironmentVariable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -100,6 +94,8 @@ const { data } = await client.createEnvironmentVariable(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -115,7 +111,8 @@ const { data } = await client.getEnvironmentVariable({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -127,6 +124,8 @@ const { data } = await client.getEnvironmentVariable({
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -149,7 +148,8 @@ const { data } = await client.updateEnvironmentVariable(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -161,6 +161,8 @@ const { data } = await client.updateEnvironmentVariable(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -178,7 +180,8 @@ const { data } = await client.deleteEnvironmentVariable({
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `EnvironmentValueType`
 
@@ -247,3 +250,5 @@ type EnvironmentVariableUpdateRequest = {
   description?: string
 }
 ```
+
+</details>

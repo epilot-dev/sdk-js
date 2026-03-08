@@ -1,7 +1,7 @@
 # Consent API
 
-**Base URL:** `https://consent.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/consent](https://docs.epilot.io/api/consent)
+- **Base URL:** `https://consent.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/consent](https://docs.epilot.io/api/consent)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.consent.publishConsentEvent(...)
-
-// Or get the client explicitly
-const consentClient = await epilot.consent.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/consent'
 const consentClient = await getClient()
 authorize(consentClient, () => '<token>')
 const { data } = await consentClient.publishConsentEvent(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/consent'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -64,7 +54,8 @@ const { data } = await client.publishConsentEvent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -84,6 +75,8 @@ const { data } = await client.publishConsentEvent(
 }
 ```
 
+</details>
+
 ---
 
 ### `listConsentEvents`
@@ -101,7 +94,8 @@ const { data } = await client.listConsentEvents({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -120,6 +114,8 @@ const { data } = await client.listConsentEvents({
 }
 ```
 
+</details>
+
 ---
 
 ### `handleOptInWithToken`
@@ -137,7 +133,8 @@ const { data } = await client.handleOptInWithToken({
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ConsentIdentifier`
 
@@ -200,3 +197,5 @@ type ConsentEvent = {
 ```ts
 type OrganizationId = string
 ```
+
+</details>

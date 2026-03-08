@@ -1,7 +1,7 @@
 # Workflows Definitions
 
-**Base URL:** `https://workflows-definition.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/workflow-definition](https://docs.epilot.io/api/workflow-definition)
+- **Base URL:** `https://workflows-definition.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/workflow-definition](https://docs.epilot.io/api/workflow-definition)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.workflowDefinition.getMaxAllowedLimit(...)
-
-// Or get the client explicitly
-const workflowDefinitionClient = await epilot.workflowDefinition.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/workflow-definition'
 const workflowDefinitionClient = await getClient()
 authorize(workflowDefinitionClient, () => '<token>')
 const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/workflow-definition'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -73,7 +63,8 @@ Get limits and number of created executions for an Organization.
 const { data } = await client.getMaxAllowedLimit()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -81,6 +72,8 @@ const { data } = await client.getMaxAllowedLimit()
   "maxAllowed": 0
 }
 ```
+
+</details>
 
 ---
 
@@ -94,7 +87,8 @@ Retrieve all Workflow Definitions from an Organization
 const { data } = await client.getDefinitions()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -137,6 +131,8 @@ const { data } = await client.getDefinitions()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -221,7 +217,8 @@ const { data } = await client.createDefinition(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -295,6 +292,8 @@ const { data } = await client.createDefinition(
 }
 ```
 
+</details>
+
 ---
 
 ### `listFlowTemplates`
@@ -311,7 +310,8 @@ const { data } = await client.listFlowTemplates({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -342,6 +342,8 @@ const { data } = await client.listFlowTemplates({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -391,18 +393,7 @@ const { data } = await client.createFlowTemplate(
         automation_id: 'string',
         trigger_config: [ /* ... */ ]
       },
-      {
-        id: 'string',
-        type: 'journey_submission',
-        journey_id: 'string',
-        journey_name: 'string',
-        automation_id: 'string'
-      },
-      {
-        id: 'string',
-        type: 'journey_automation',
-        entity_schema: 'string'
-      }
+      /* ... 2 more */
     ],
     phases: [
       {
@@ -449,41 +440,7 @@ const { data } = await client.createFlowTemplate(
         schedule: { /* ... */ },
         created_automatically: false
       },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        trigger_mode: 'manual',
-        conditions: [ /* ... */ ],
-        schedule: { /* ... */ },
-        loop_config: { /* ... */ }
-      },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        agent_config: { /* ... */ }
-      }
+      /* ... 2 more */
     ],
     edges: [
       {
@@ -518,7 +475,8 @@ const { data } = await client.createFlowTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -557,18 +515,6 @@ const { data } = await client.createFlowTemplate(
       "type": "automation",
       "automation_id": "string",
       "trigger_config": []
-    },
-    {
-      "id": "string",
-      "type": "journey_submission",
-      "journey_id": "string",
-      "journey_name": "string",
-      "automation_id": "string"
-    },
-    {
-      "id": "string",
-      "type": "journey_automation",
-      "entity_schema": "string"
     }
   ],
   "phases": [
@@ -615,41 +561,6 @@ const { data } = await client.createFlowTemplate(
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "trigger_mode": "manual",
-      "conditions": [],
-      "schedule": {},
-      "loop_config": {}
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "agent_config": {}
     }
   ],
   "edges": [
@@ -684,6 +595,8 @@ const { data } = await client.createFlowTemplate(
 }
 ```
 
+</details>
+
 ---
 
 ### `searchFlowTemplates`
@@ -708,7 +621,8 @@ const { data } = await client.searchFlowTemplates(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -741,6 +655,8 @@ const { data } = await client.searchFlowTemplates(
 }
 ```
 
+</details>
+
 ---
 
 ### `getFlowTemplate`
@@ -755,7 +671,8 @@ const { data } = await client.getFlowTemplate({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -794,18 +711,6 @@ const { data } = await client.getFlowTemplate({
       "type": "automation",
       "automation_id": "string",
       "trigger_config": []
-    },
-    {
-      "id": "string",
-      "type": "journey_submission",
-      "journey_id": "string",
-      "journey_name": "string",
-      "automation_id": "string"
-    },
-    {
-      "id": "string",
-      "type": "journey_automation",
-      "entity_schema": "string"
     }
   ],
   "phases": [
@@ -852,41 +757,6 @@ const { data } = await client.getFlowTemplate({
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "trigger_mode": "manual",
-      "conditions": [],
-      "schedule": {},
-      "loop_config": {}
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "agent_config": {}
     }
   ],
   "edges": [
@@ -920,6 +790,8 @@ const { data } = await client.getFlowTemplate({
   "singleClosingReasonSelection": true
 }
 ```
+
+</details>
 
 ---
 
@@ -971,18 +843,7 @@ const { data } = await client.updateFlowTemplate(
         automation_id: 'string',
         trigger_config: [ /* ... */ ]
       },
-      {
-        id: 'string',
-        type: 'journey_submission',
-        journey_id: 'string',
-        journey_name: 'string',
-        automation_id: 'string'
-      },
-      {
-        id: 'string',
-        type: 'journey_automation',
-        entity_schema: 'string'
-      }
+      /* ... 2 more */
     ],
     phases: [
       {
@@ -1029,41 +890,7 @@ const { data } = await client.updateFlowTemplate(
         schedule: { /* ... */ },
         created_automatically: false
       },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        trigger_mode: 'manual',
-        conditions: [ /* ... */ ],
-        schedule: { /* ... */ },
-        loop_config: { /* ... */ }
-      },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        agent_config: { /* ... */ }
-      }
+      /* ... 2 more */
     ],
     edges: [
       {
@@ -1098,7 +925,8 @@ const { data } = await client.updateFlowTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1137,18 +965,6 @@ const { data } = await client.updateFlowTemplate(
       "type": "automation",
       "automation_id": "string",
       "trigger_config": []
-    },
-    {
-      "id": "string",
-      "type": "journey_submission",
-      "journey_id": "string",
-      "journey_name": "string",
-      "automation_id": "string"
-    },
-    {
-      "id": "string",
-      "type": "journey_automation",
-      "entity_schema": "string"
     }
   ],
   "phases": [
@@ -1195,41 +1011,6 @@ const { data } = await client.updateFlowTemplate(
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "trigger_mode": "manual",
-      "conditions": [],
-      "schedule": {},
-      "loop_config": {}
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "agent_config": {}
     }
   ],
   "edges": [
@@ -1263,6 +1044,8 @@ const { data } = await client.updateFlowTemplate(
   "singleClosingReasonSelection": true
 }
 ```
+
+</details>
 
 ---
 
@@ -1292,7 +1075,8 @@ const { data } = await client.duplicateFlowTemplate({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1331,18 +1115,6 @@ const { data } = await client.duplicateFlowTemplate({
       "type": "automation",
       "automation_id": "string",
       "trigger_config": []
-    },
-    {
-      "id": "string",
-      "type": "journey_submission",
-      "journey_id": "string",
-      "journey_name": "string",
-      "automation_id": "string"
-    },
-    {
-      "id": "string",
-      "type": "journey_automation",
-      "entity_schema": "string"
     }
   ],
   "phases": [
@@ -1389,41 +1161,6 @@ const { data } = await client.duplicateFlowTemplate({
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "trigger_mode": "manual",
-      "conditions": [],
-      "schedule": {},
-      "loop_config": {}
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "agent_config": {}
     }
   ],
   "edges": [
@@ -1458,6 +1195,8 @@ const { data } = await client.duplicateFlowTemplate({
 }
 ```
 
+</details>
+
 ---
 
 ### `exportFlowTemplate`
@@ -1472,7 +1211,8 @@ const { data } = await client.exportFlowTemplate({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1511,18 +1251,6 @@ const { data } = await client.exportFlowTemplate({
       "type": "automation",
       "automation_id": "string",
       "trigger_config": []
-    },
-    {
-      "id": "string",
-      "type": "journey_submission",
-      "journey_id": "string",
-      "journey_name": "string",
-      "automation_id": "string"
-    },
-    {
-      "id": "string",
-      "type": "journey_automation",
-      "entity_schema": "string"
     }
   ],
   "phases": [
@@ -1569,41 +1297,6 @@ const { data } = await client.exportFlowTemplate({
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "trigger_mode": "manual",
-      "conditions": [],
-      "schedule": {},
-      "loop_config": {}
-    },
-    {
-      "id": "string",
-      "name": "string",
-      "description": {},
-      "journey": {},
-      "due_date": "2021-04-27T12:00:00.000Z",
-      "due_date_config": {},
-      "requirements": [],
-      "assigned_to": [],
-      "ecp": {},
-      "installer": {},
-      "taxonomies": [],
-      "phase_id": "string",
-      "task_type": "MANUAL",
-      "agent_config": {}
     }
   ],
   "edges": [
@@ -1638,6 +1331,8 @@ const { data } = await client.exportFlowTemplate({
   "_resolved_automations": {}
 }
 ```
+
+</details>
 
 ---
 
@@ -1687,18 +1382,7 @@ const { data } = await client.importFlowTemplate(
         automation_id: 'string',
         trigger_config: [ /* ... */ ]
       },
-      {
-        id: 'string',
-        type: 'journey_submission',
-        journey_id: 'string',
-        journey_name: 'string',
-        automation_id: 'string'
-      },
-      {
-        id: 'string',
-        type: 'journey_automation',
-        entity_schema: 'string'
-      }
+      /* ... 2 more */
     ],
     phases: [
       {
@@ -1745,41 +1429,7 @@ const { data } = await client.importFlowTemplate(
         schedule: { /* ... */ },
         created_automatically: false
       },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        trigger_mode: 'manual',
-        conditions: [ /* ... */ ],
-        schedule: { /* ... */ },
-        loop_config: { /* ... */ }
-      },
-      {
-        id: 'string',
-        name: 'string',
-        description: { /* ... */ },
-        journey: { /* ... */ },
-        due_date: '2021-04-27T12:00:00.000Z',
-        due_date_config: { /* ... */ },
-        requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
-        ecp: { /* ... */ },
-        installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
-        phase_id: 'string',
-        task_type: 'MANUAL',
-        agent_config: { /* ... */ }
-      }
+      /* ... 2 more */
     ],
     edges: [
       {
@@ -1815,7 +1465,8 @@ const { data } = await client.importFlowTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1846,16 +1497,12 @@ const { data } = await client.importFlowTemplate(
     "available_in_ecp": true,
     "additional_triggers": [
       {},
-      {},
-      {},
       {}
     ],
     "phases": [
       {}
     ],
     "tasks": [
-      {},
-      {},
       {},
       {}
     ],
@@ -1884,6 +1531,8 @@ const { data } = await client.importFlowTemplate(
 }
 ```
 
+</details>
+
 ---
 
 ### `getDefinition`
@@ -1898,7 +1547,8 @@ const { data } = await client.getDefinition({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1971,6 +1621,8 @@ const { data } = await client.getDefinition({
   "singleClosingReasonSelection": true
 }
 ```
+
+</details>
 
 ---
 
@@ -2057,7 +1709,8 @@ const { data } = await client.updateDefinition(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2131,6 +1784,8 @@ const { data } = await client.updateDefinition(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteDefinition`
@@ -2159,7 +1814,8 @@ const { data } = await client.getAllClosingReasons({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2174,6 +1830,8 @@ const { data } = await client.getAllClosingReasons({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2196,7 +1854,8 @@ const { data } = await client.createClosingReason(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2207,6 +1866,8 @@ const { data } = await client.createClosingReason(
   "creationTime": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -2222,7 +1883,8 @@ const { data } = await client.getClosingReason({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2233,6 +1895,8 @@ const { data } = await client.getClosingReason({
   "creationTime": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -2257,7 +1921,8 @@ const { data } = await client.updateClosingReason(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2268,6 +1933,8 @@ const { data } = await client.updateClosingReason(
   "creationTime": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -2316,7 +1983,8 @@ const { data } = await client.getWorkflowClosingReasons({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2327,6 +1995,8 @@ const { data } = await client.getWorkflowClosingReasons({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2353,7 +2023,8 @@ const { data } = await client.setWorkflowClosingReasons(
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `FlowTemplateBase`
 
@@ -3448,3 +3119,5 @@ type FlowTemplateImportResult = {
   // ...
 }
 ```
+
+</details>

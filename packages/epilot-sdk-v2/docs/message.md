@@ -1,7 +1,7 @@
 # Message API
 
-**Base URL:** `https://message.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/message](https://docs.epilot.io/api/message)
+- **Base URL:** `https://message.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/message](https://docs.epilot.io/api/message)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.message.sendMessage(...)
-
-// Or get the client explicitly
-const messageClient = await epilot.message.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/message'
 const messageClient = await getClient()
 authorize(messageClient, () => '<token>')
 const { data } = await messageClient.sendMessage(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/message'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -101,11 +91,14 @@ const { data } = await client.sendMessage(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -119,7 +112,8 @@ Update message metadata
 const { data } = await client.updateMessage()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -201,6 +195,8 @@ const { data } = await client.updateMessage()
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
 ```
+
+</details>
 
 ---
 
@@ -216,7 +212,8 @@ const { data } = await client.getMessage({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -298,6 +295,8 @@ const { data } = await client.getMessage({
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
 ```
+
+</details>
 
 ---
 
@@ -360,7 +359,8 @@ const { data } = await client.searchMessages(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -396,6 +396,8 @@ const { data } = await client.searchMessages(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -490,7 +492,8 @@ const { data } = await client.getUnread({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -500,6 +503,8 @@ const { data } = await client.getUnread({
   "unassigned": 1
 }
 ```
+
+</details>
 
 ---
 
@@ -543,7 +548,8 @@ const { data } = await client.searchThreads(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -568,6 +574,8 @@ const { data } = await client.searchThreads(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -601,7 +609,8 @@ const { data } = await client.searchThreadsV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -627,6 +636,8 @@ const { data } = await client.searchThreadsV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `searchIds`
@@ -644,7 +655,8 @@ const { data } = await client.searchIds(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -654,6 +666,8 @@ const { data } = await client.searchIds(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -667,7 +681,8 @@ Modify thread metadata
 const { data } = await client.updateThread()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -791,6 +806,8 @@ const { data } = await client.updateThread()
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteThread`
@@ -866,7 +883,8 @@ const { data } = await client.getThreadTimeline({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -878,6 +896,8 @@ const { data } = await client.getThreadTimeline({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1293,7 +1313,8 @@ const { data } = await client.createDraft(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1375,6 +1396,8 @@ const { data } = await client.createDraft(
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
 ```
+
+</details>
 
 ---
 
@@ -1388,7 +1411,8 @@ Send the existing draft to the recipients
 const { data } = await client.sendDraft()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1470,6 +1494,8 @@ const { data } = await client.sendDraft()
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
 ```
+
+</details>
 
 ---
 
@@ -1490,7 +1516,8 @@ const { data } = await client.getMessageV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1575,9 +1602,12 @@ const { data } = await client.getMessageV2({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ErrorResponse`
 
@@ -1953,3 +1983,5 @@ Globbing and globstart (**) is supported for nested fields.
 ```ts
 type FieldsParam = string[]
 ```
+
+</details>

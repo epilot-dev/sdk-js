@@ -1,7 +1,7 @@
 # Portal API
 
-**Base URL:** `https://customer-portal-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/customer-portal](https://docs.epilot.io/api/customer-portal)
+- **Base URL:** `https://customer-portal-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/customer-portal](https://docs.epilot.io/api/customer-portal)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.customerPortal.upsertPortal(...)
-
-// Or get the client explicitly
-const customerPortalClient = await epilot.customerPortal.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/customer-portal'
 const customerPortalClient = await getClient()
 authorize(customerPortalClient, () => '<token>')
 const { data } = await customerPortalClient.upsertPortal(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/customer-portal'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -307,10 +297,7 @@ const { data } = await client.upsertPortal(
         name: 'last_name',
         schema: 'contact'
       },
-      {
-        name: 'contract_number',
-        schema: 'contract'
-      }
+      /* ... 1 more */
     ],
     contract_selector_config: {
       show_inactive: true,
@@ -391,7 +378,8 @@ const { data } = await client.upsertPortal(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -491,10 +479,6 @@ const { data } = await client.upsertPortal(
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -600,6 +584,8 @@ const { data } = await client.upsertPortal(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -635,13 +621,16 @@ const { data } = await client.createUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "User created successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -677,13 +666,16 @@ const { data } = await client.createUserV3(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "User created successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -714,13 +706,16 @@ const { data } = await client.revokeToken(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Token revoked successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -736,7 +731,8 @@ const { data } = await client.getPortalConfigByDomain({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -836,10 +832,6 @@ const { data } = await client.getPortalConfigByDomain({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -945,6 +937,8 @@ const { data } = await client.getPortalConfigByDomain({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -960,7 +954,8 @@ const { data } = await client.getPortalConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1060,10 +1055,6 @@ const { data } = await client.getPortalConfig({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -1169,6 +1160,8 @@ const { data } = await client.getPortalConfig({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1198,7 +1191,8 @@ const { data } = await client.getPortalExtensions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1226,6 +1220,8 @@ const { data } = await client.getPortalExtensions({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getPublicPortalExtensionDetails`
@@ -1241,7 +1237,8 @@ const { data } = await client.getPublicPortalExtensionDetails({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1284,6 +1281,8 @@ const { data } = await client.getPublicPortalExtensionDetails({
 }
 ```
 
+</details>
+
 ---
 
 ### `getPortalExtensionsV3`
@@ -1298,7 +1297,8 @@ const { data } = await client.getPortalExtensionsV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1325,6 +1325,8 @@ const { data } = await client.getPortalExtensionsV3({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1345,7 +1347,8 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1387,6 +1390,8 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1409,7 +1414,8 @@ const { data } = await client.getConsumption({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1422,6 +1428,8 @@ const { data } = await client.getConsumption({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1444,7 +1452,8 @@ const { data } = await client.getCosts({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1460,6 +1469,8 @@ const { data } = await client.getCosts({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1482,7 +1493,8 @@ const { data } = await client.getPrices({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1500,6 +1512,8 @@ const { data } = await client.getPrices({
 }
 ```
 
+</details>
+
 ---
 
 ### `getExternalLinks`
@@ -1515,7 +1529,8 @@ const { data } = await client.getExternalLinks({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1541,6 +1556,8 @@ const { data } = await client.getExternalLinks({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1557,7 +1574,8 @@ const { data } = await client.getExternalLinksV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -1583,6 +1601,8 @@ const { data } = await client.getExternalLinksV3({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -1601,13 +1621,16 @@ const { data } = await client.getResolvedSeamlessLink({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "link": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1624,7 +1647,8 @@ const { data } = await client.getPublicPortalConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1724,10 +1748,6 @@ const { data } = await client.getPublicPortalConfig({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -1834,6 +1854,8 @@ const { data } = await client.getPublicPortalConfig({
 }
 ```
 
+</details>
+
 ---
 
 ### `getOrgPortalConfig`
@@ -1848,7 +1870,8 @@ const { data } = await client.getOrgPortalConfig({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1948,10 +1971,6 @@ const { data } = await client.getOrgPortalConfig({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -2061,6 +2080,8 @@ const { data } = await client.getOrgPortalConfig({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -2077,7 +2098,8 @@ const { data } = await client.getPublicPortalConfigV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2177,10 +2199,6 @@ const { data } = await client.getPublicPortalConfigV3({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -2287,6 +2305,8 @@ const { data } = await client.getPublicPortalConfigV3({
 }
 ```
 
+</details>
+
 ---
 
 ### `getOrgPortalConfigV3`
@@ -2301,7 +2321,8 @@ const { data } = await client.getOrgPortalConfigV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2401,10 +2422,6 @@ const { data } = await client.getOrgPortalConfigV3({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -2515,6 +2532,8 @@ const { data } = await client.getOrgPortalConfigV3({
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllPortalConfigs`
@@ -2527,7 +2546,8 @@ Retrieves all portal configurations.
 const { data } = await client.getAllPortalConfigs()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2579,6 +2599,8 @@ const { data } = await client.getAllPortalConfigs()
 }
 ```
 
+</details>
+
 ---
 
 ### `upsertEmailTemplates`
@@ -2612,7 +2634,8 @@ const { data } = await client.upsertEmailTemplates(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2637,6 +2660,8 @@ const { data } = await client.upsertEmailTemplates(
 }
 ```
 
+</details>
+
 ---
 
 ### `getEmailTemplates`
@@ -2651,7 +2676,8 @@ const { data } = await client.getEmailTemplates({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2672,6 +2698,8 @@ const { data } = await client.getEmailTemplates({
   "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
+
+</details>
 
 ---
 
@@ -2706,7 +2734,8 @@ const { data } = await client.upsertEmailTemplatesByPortalId(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2731,6 +2760,8 @@ const { data } = await client.upsertEmailTemplatesByPortalId(
 }
 ```
 
+</details>
+
 ---
 
 ### `getEmailTemplatesByPortalId`
@@ -2745,7 +2776,8 @@ const { data } = await client.getEmailTemplatesByPortalId({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2767,6 +2799,8 @@ const { data } = await client.getEmailTemplatesByPortalId({
 }
 ```
 
+</details>
+
 ---
 
 ### `getPublicPortalWidgets`
@@ -2782,7 +2816,8 @@ const { data } = await client.getPublicPortalWidgets({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2802,67 +2837,12 @@ const { data } = await client.getPublicPortalWidgets({
       "headline": {},
       "subHeadline": {},
       "content": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "actions": []
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {},
-      "campaign_id": "string"
     }
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -2895,69 +2875,14 @@ const { data } = await client.upsertPortalWidget(
         subHeadline: { /* ... */ },
         content: 'string'
       },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
-        actions: [ /* ... */ ]
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
-        imageUrl: 'string',
-        button: { /* ... */ }
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ }
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ }
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
-        schema: 'string'
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
-        schema: 'string'
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
-        imageUrl: 'string',
-        button: { /* ... */ },
-        campaign_id: 'string'
-      }
+      /* ... 7 more */
     ]
   },
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -2977,67 +2902,12 @@ const { data } = await client.upsertPortalWidget(
       "headline": {},
       "subHeadline": {},
       "content": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "actions": []
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {},
-      "campaign_id": "string"
     }
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3054,7 +2924,8 @@ const { data } = await client.getPortalWidgets({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3074,67 +2945,12 @@ const { data } = await client.getPortalWidgets({
       "headline": {},
       "subHeadline": {},
       "content": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "actions": []
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {}
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
-      "imageUrl": "string",
-      "button": {},
-      "campaign_id": "string"
     }
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3154,7 +2970,8 @@ const { data } = await client.replaceECPTemplateVariables(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3188,6 +3005,8 @@ const { data } = await client.replaceECPTemplateVariables(
 }
 ```
 
+</details>
+
 ---
 
 ### `getSchemas`
@@ -3200,7 +3019,8 @@ Retrieves the schemas. Only schemas usable in the private part of the portal are
 const { data } = await client.getSchemas()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3211,6 +3031,8 @@ const { data } = await client.getSchemas()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3226,7 +3048,8 @@ const { data } = await client.getSchemasByDomain({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3237,6 +3060,8 @@ const { data } = await client.getSchemasByDomain({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3252,7 +3077,8 @@ const { data } = await client.getOrganizationSettingsByDomain({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3318,6 +3144,8 @@ const { data } = await client.getOrganizationSettingsByDomain({
 }
 ```
 
+</details>
+
 ---
 
 ### `extraPermissionAttributes`
@@ -3330,7 +3158,8 @@ Retrieves the extra permission attributes.
 const { data } = await client.extraPermissionAttributes()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3357,6 +3186,8 @@ const { data } = await client.extraPermissionAttributes()
 }
 ```
 
+</details>
+
 ---
 
 ### `validateCaaRecords`
@@ -3371,7 +3202,8 @@ const { data } = await client.validateCaaRecords({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3380,6 +3212,8 @@ const { data } = await client.validateCaaRecords({
   "isDNSConfigured": true
 }
 ```
+
+</details>
 
 ---
 
@@ -3395,7 +3229,8 @@ const { data } = await client.validateCaaRecordsV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3404,6 +3239,8 @@ const { data } = await client.validateCaaRecordsV3({
   "isDNSConfigured": true
 }
 ```
+
+</details>
 
 ---
 
@@ -3417,7 +3254,8 @@ Retrieves the contact of the logged in user.
 const { data } = await client.getContact()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3467,6 +3305,8 @@ const { data } = await client.getContact()
 }
 ```
 
+</details>
+
 ---
 
 ### `updateContact`
@@ -3482,7 +3322,8 @@ const { data } = await client.updateContact(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3500,6 +3341,8 @@ const { data } = await client.updateContact(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -3515,7 +3358,8 @@ const { data } = await client.getECPContact({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3533,6 +3377,8 @@ const { data } = await client.getECPContact({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -3561,7 +3407,8 @@ const { data } = await client.checkContactExists(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3569,6 +3416,8 @@ const { data } = await client.checkContactExists(
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
+
+</details>
 
 ---
 
@@ -3597,7 +3446,8 @@ const { data } = await client.checkContactExistsV3(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3605,6 +3455,8 @@ const { data } = await client.checkContactExistsV3(
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
+
+</details>
 
 ---
 
@@ -3618,7 +3470,8 @@ Get valid secondary attributes that are used while mapping a contact on registra
 const { data } = await client.getValidSecondaryAttributes()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3630,6 +3483,8 @@ const { data } = await client.getValidSecondaryAttributes()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -3643,7 +3498,8 @@ Get the portal user details
 const { data } = await client.getPortalUser()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3661,6 +3517,8 @@ const { data } = await client.getPortalUser()
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -3677,7 +3535,8 @@ const { data } = await client.updatePortalUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3696,6 +3555,8 @@ const { data } = await client.updatePortalUser(
 }
 ```
 
+</details>
+
 ---
 
 ### `deletePortalUser`
@@ -3708,7 +3569,8 @@ Delete the portal user
 const { data } = await client.deletePortalUser()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3716,6 +3578,8 @@ const { data } = await client.deletePortalUser()
   "data": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
+
+</details>
 
 ---
 
@@ -3735,13 +3599,16 @@ const { data } = await client.updatePortalUserEmail(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "You will receive a confirmation mail soon on your updated email address."
 }
 ```
+
+</details>
 
 ---
 
@@ -3757,13 +3624,16 @@ const { data } = await client.resendConfirmationEmail({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Confirmation email sent successfully."
 }
 ```
+
+</details>
 
 ---
 
@@ -3780,7 +3650,8 @@ const { data } = await client.fetchPortalUsersByRelatedEntity({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3798,6 +3669,8 @@ const { data } = await client.fetchPortalUsersByRelatedEntity({
 }
 ```
 
+</details>
+
 ---
 
 ### `confirmUser`
@@ -3813,7 +3686,8 @@ const { data } = await client.confirmUser({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3821,6 +3695,8 @@ const { data } = await client.confirmUser({
   "user_already_confirmed": true
 }
 ```
+
+</details>
 
 ---
 
@@ -3854,13 +3730,16 @@ const { data } = await client.userExists({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "exists": true
 }
 ```
+
+</details>
 
 ---
 
@@ -3878,13 +3757,16 @@ const { data } = await client.userExistsV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "exists": true
 }
 ```
+
+</details>
 
 ---
 
@@ -3907,7 +3789,8 @@ const { data } = await client.getRecipientsToNotifyOnAutomation(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3920,6 +3803,8 @@ const { data } = await client.getRecipientsToNotifyOnAutomation(
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -3935,13 +3820,16 @@ const { data } = await client.configureDistribution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "domainName": "dsj8op4ha01jha23.cloudfront.net"
 }
 ```
+
+</details>
 
 ---
 
@@ -3957,13 +3845,16 @@ const { data } = await client.configureDistributionV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "domainName": "dsj8op4ha01jha23.cloudfront.net"
 }
 ```
+
+</details>
 
 ---
 
@@ -3980,7 +3871,8 @@ const { data } = await client.getAllOrders({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -3998,6 +3890,8 @@ const { data } = await client.getAllOrders({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -4018,7 +3912,8 @@ const { data } = await client.postOrderAcceptance(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4037,6 +3932,8 @@ const { data } = await client.postOrderAcceptance(
 }
 ```
 
+</details>
+
 ---
 
 ### `getOrder`
@@ -4051,7 +3948,8 @@ const { data } = await client.getOrder({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4136,6 +4034,8 @@ const { data } = await client.getOrder({
 }
 ```
 
+</details>
+
 ---
 
 ### `updateOrder`
@@ -4153,7 +4053,8 @@ const { data } = await client.updateOrder(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4172,6 +4073,8 @@ const { data } = await client.updateOrder(
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllOpportunities`
@@ -4187,7 +4090,8 @@ const { data } = await client.getAllOpportunities({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4206,6 +4110,8 @@ const { data } = await client.getAllOpportunities({
 }
 ```
 
+</details>
+
 ---
 
 ### `getSearchableAttributesForOpportunities`
@@ -4221,7 +4127,8 @@ const { data } = await client.getSearchableAttributesForOpportunities({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4238,6 +4145,8 @@ const { data } = await client.getSearchableAttributesForOpportunities({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -4270,7 +4179,8 @@ const { data } = await client.getSearchResultsForOpportunities(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4288,6 +4198,8 @@ const { data } = await client.getSearchResultsForOpportunities(
 }
 ```
 
+</details>
+
 ---
 
 ### `getOpportunity`
@@ -4302,7 +4214,8 @@ const { data } = await client.getOpportunity({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4376,6 +4289,8 @@ const { data } = await client.getOpportunity({
 }
 ```
 
+</details>
+
 ---
 
 ### `updateOpportunity`
@@ -4393,7 +4308,8 @@ const { data } = await client.updateOpportunity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4412,6 +4328,8 @@ const { data } = await client.updateOpportunity(
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllRequests`
@@ -4427,7 +4345,8 @@ const { data } = await client.getAllRequests({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4446,6 +4365,8 @@ const { data } = await client.getAllRequests({
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllContracts`
@@ -4461,7 +4382,8 @@ const { data } = await client.getAllContracts({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4501,6 +4423,8 @@ const { data } = await client.getAllContracts({
 }
 ```
 
+</details>
+
 ---
 
 ### `getContract`
@@ -4515,7 +4439,8 @@ const { data } = await client.getContract({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4621,6 +4546,8 @@ const { data } = await client.getContract({
 }
 ```
 
+</details>
+
 ---
 
 ### `updateContract`
@@ -4638,7 +4565,8 @@ const { data } = await client.updateContract(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4678,6 +4606,8 @@ const { data } = await client.updateContract(
 }
 ```
 
+</details>
+
 ---
 
 ### `addContractByIdentifiers`
@@ -4700,7 +4630,8 @@ const { data } = await client.addContractByIdentifiers(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4720,6 +4651,8 @@ const { data } = await client.addContractByIdentifiers(
 }
 ```
 
+</details>
+
 ---
 
 ### `getEntityIdentifiers`
@@ -4734,7 +4667,8 @@ const { data } = await client.getEntityIdentifiers({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4746,6 +4680,8 @@ const { data } = await client.getEntityIdentifiers({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -4768,7 +4704,8 @@ const { data } = await client.getEntityActivityFeed({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4786,6 +4723,8 @@ const { data } = await client.getEntityActivityFeed({
 }
 ```
 
+</details>
+
 ---
 
 ### `validateCadenceEntityEditRules`
@@ -4802,7 +4741,8 @@ const { data } = await client.validateCadenceEntityEditRules({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4822,6 +4762,8 @@ const { data } = await client.validateCadenceEntityEditRules({
 }
 ```
 
+</details>
+
 ---
 
 ### `searchPaymentRelationsInEntities`
@@ -4836,7 +4778,8 @@ const { data } = await client.searchPaymentRelationsInEntities({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4855,6 +4798,8 @@ const { data } = await client.searchPaymentRelationsInEntities({
   "hits": 50
 }
 ```
+
+</details>
 
 ---
 
@@ -4875,7 +4820,8 @@ const { data } = await client.createCustomEntityActivity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4892,6 +4838,8 @@ const { data } = await client.createCustomEntityActivity(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -4918,7 +4866,8 @@ const { data } = await client.saveEntityFile(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -4935,6 +4884,8 @@ const { data } = await client.saveEntityFile(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -4982,7 +4933,8 @@ const { data } = await client.savePortalFiles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5000,6 +4952,8 @@ const { data } = await client.savePortalFiles(
 }
 ```
 
+</details>
+
 ---
 
 ### `getRegistrationIdentifiers`
@@ -5012,7 +4966,8 @@ Get valid attributes from entities that can be used as identifier to map contact
 const { data } = await client.getRegistrationIdentifiers()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5026,6 +4981,8 @@ const { data } = await client.getRegistrationIdentifiers()
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -5041,7 +4998,8 @@ const { data } = await client.getFileById({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5069,6 +5027,8 @@ const { data } = await client.getFileById({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -5084,7 +5044,8 @@ const { data } = await client.trackFileDownloaded({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5112,6 +5073,8 @@ const { data } = await client.trackFileDownloaded({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -5134,7 +5097,8 @@ const { data } = await client.getBillingEvents({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5160,6 +5124,8 @@ const { data } = await client.getBillingEvents({
 }
 ```
 
+</details>
+
 ---
 
 ### `getCustomerBalance`
@@ -5172,7 +5138,8 @@ Get total balance across all contracts and orders of a customer entity.
 const { data } = await client.getCustomerBalance()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5181,6 +5148,8 @@ const { data } = await client.getCustomerBalance()
   "balance_currency": "EUR"
 }
 ```
+
+</details>
 
 ---
 
@@ -5196,7 +5165,8 @@ const { data } = await client.getBillingAccount({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5236,6 +5206,8 @@ const { data } = await client.getBillingAccount({
 }
 ```
 
+</details>
+
 ---
 
 ### `loginToPortalAsUser`
@@ -5254,13 +5226,16 @@ const { data } = await client.loginToPortalAsUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "login_as_token": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -5278,13 +5253,16 @@ const { data } = await client.triggerEntityAccessEvent({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "eventId": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -5302,13 +5280,16 @@ const { data } = await client.triggerEntityAccessEventV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "eventId": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -5353,9 +5334,7 @@ const { data } = await client.getPortalUserEntity(
       {
         contact: true
       },
-      {
-        contract: '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
-      }
+      /* ... 1 more */
     ],
     targets: [
       '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
@@ -5364,7 +5343,8 @@ const { data } = await client.getPortalUserEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5388,6 +5368,8 @@ const { data } = await client.getPortalUserEntity(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -5442,9 +5424,7 @@ const { data } = await client.searchPortalUserEntities(
       {
         contact: true
       },
-      {
-        contract: '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
-      }
+      /* ... 1 more */
     ],
     targets: [
       '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
@@ -5453,7 +5433,8 @@ const { data } = await client.searchPortalUserEntities(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5478,6 +5459,8 @@ const { data } = await client.searchPortalUserEntities(
   "hits": 10
 }
 ```
+
+</details>
 
 ---
 
@@ -5505,13 +5488,16 @@ const { data } = await client.canTriggerPortalFlow(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "can_trigger": true
 }
 ```
+
+</details>
 
 ---
 
@@ -5528,11 +5514,14 @@ const { data } = await client.getAutomationContext({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {}
 ```
+
+</details>
 
 ---
 
@@ -5549,7 +5538,8 @@ const { data } = await client.updateWorkflowStepAsDone({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5577,6 +5567,8 @@ const { data } = await client.updateWorkflowStepAsDone({
 }
 ```
 
+</details>
+
 ---
 
 ### `getEntityWorkflows`
@@ -5592,7 +5584,8 @@ const { data } = await client.getEntityWorkflows({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5611,6 +5604,8 @@ const { data } = await client.getEntityWorkflows({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -5632,7 +5627,8 @@ const { data } = await client.uploadMeterReadingPhoto(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5650,6 +5646,8 @@ const { data } = await client.uploadMeterReadingPhoto(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -5684,7 +5682,8 @@ const { data } = await client.createMeterReading(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5708,6 +5707,8 @@ const { data } = await client.createMeterReading(
 }
 ```
 
+</details>
+
 ---
 
 ### `getAllowedMeterReadingRange`
@@ -5723,7 +5724,8 @@ const { data } = await client.getAllowedMeterReadingRange({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5736,6 +5738,8 @@ const { data } = await client.getAllowedMeterReadingRange({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -5758,7 +5762,8 @@ const { data } = await client.ssoLogin(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5766,6 +5771,8 @@ const { data } = await client.ssoLogin(
   "email": "portal-customer@email.com"
 }
 ```
+
+</details>
 
 ---
 
@@ -5788,7 +5795,8 @@ const { data } = await client.ssoLoginV3(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5796,6 +5804,8 @@ const { data } = await client.ssoLoginV3(
   "email": "portal-customer@email.com"
 }
 ```
+
+</details>
 
 ---
 
@@ -5838,7 +5848,8 @@ const { data } = await client.ssoCallback(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5850,6 +5861,8 @@ const { data } = await client.ssoCallback(
   "scope": "openid email"
 }
 ```
+
+</details>
 
 ---
 
@@ -5865,7 +5878,8 @@ const { data } = await client.getPortalPage({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5890,6 +5904,8 @@ const { data } = await client.getPortalPage({
   "last_modified_at": "2021-02-09T12:41:43.662Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -5926,7 +5942,8 @@ const { data } = await client.updatePortalPage(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -5951,6 +5968,8 @@ const { data } = await client.updatePortalPage(
   "last_modified_at": "2021-02-09T12:41:43.662Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -5984,7 +6003,8 @@ const { data } = await client.getPortalPages({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -6011,6 +6031,8 @@ const { data } = await client.getPortalPages({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -6047,7 +6069,8 @@ const { data } = await client.createPortalPage(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6073,6 +6096,8 @@ const { data } = await client.createPortalPage(
 }
 ```
 
+</details>
+
 ---
 
 ### `getPublicPages`
@@ -6089,7 +6114,8 @@ const { data } = await client.getPublicPages({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -6116,6 +6142,8 @@ const { data } = await client.getPublicPages({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -6129,7 +6157,8 @@ Fetch all default portal pages
 const { data } = await client.getDefaultPages()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -6156,6 +6185,8 @@ const { data } = await client.getDefaultPages()
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -6183,7 +6214,8 @@ const { data } = await client.createPortalPageBlock(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6199,6 +6231,8 @@ const { data } = await client.createPortalPageBlock(
 }
 ```
 
+</details>
+
 ---
 
 ### `getPortalPageBlocks`
@@ -6213,7 +6247,8 @@ const { data } = await client.getPortalPageBlocks({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -6231,6 +6266,8 @@ const { data } = await client.getPortalPageBlocks({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getPortalPageBlock`
@@ -6246,7 +6283,8 @@ const { data } = await client.getPortalPageBlock({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6261,6 +6299,8 @@ const { data } = await client.getPortalPageBlock({
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b"
 }
 ```
+
+</details>
 
 ---
 
@@ -6289,7 +6329,8 @@ const { data } = await client.updatePortalPageBlock(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6304,6 +6345,8 @@ const { data } = await client.updatePortalPageBlock(
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b"
 }
 ```
+
+</details>
 
 ---
 
@@ -6335,7 +6378,8 @@ const { data } = await client.getUserEntryPoint({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6347,6 +6391,8 @@ const { data } = await client.getUserEntryPoint({
   "is_soft_deleted": true
 }
 ```
+
+</details>
 
 ---
 
@@ -6373,7 +6419,8 @@ const { data } = await client.updateCampaignPortalBlockStatus(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6383,6 +6430,8 @@ const { data } = await client.updateCampaignPortalBlockStatus(
   "total": 2
 }
 ```
+
+</details>
 
 ---
 
@@ -6406,13 +6455,16 @@ const { data } = await client.updateNotificationsStatus(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Notifications status updated successfully."
 }
 ```
+
+</details>
 
 ---
 
@@ -6587,10 +6639,7 @@ const { data } = await client.createPortalConfig(
         name: 'last_name',
         schema: 'contact'
       },
-      {
-        name: 'contract_number',
-        schema: 'contract'
-      }
+      /* ... 1 more */
     ],
     contract_selector_config: {
       show_inactive: true,
@@ -6689,7 +6738,8 @@ const { data } = await client.createPortalConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -6809,10 +6859,6 @@ const { data } = await client.createPortalConfig(
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -6937,6 +6983,8 @@ const { data } = await client.createPortalConfig(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -6952,7 +7000,8 @@ const { data } = await client.getPortalConfigV3({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -7072,10 +7121,6 @@ const { data } = await client.getPortalConfigV3({
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -7200,6 +7245,8 @@ const { data } = await client.getPortalConfigV3({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -7332,10 +7379,7 @@ const { data } = await client.putPortalConfig(
         name: 'last_name',
         schema: 'contact'
       },
-      {
-        name: 'contract_number',
-        schema: 'contract'
-      }
+      /* ... 1 more */
     ],
     contract_selector_config: {
       show_inactive: true,
@@ -7461,7 +7505,8 @@ const { data } = await client.putPortalConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -7581,10 +7626,6 @@ const { data } = await client.putPortalConfig(
     {
       "name": "last_name",
       "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
     }
   ],
   "contract_selector_config": {
@@ -7710,6 +7751,8 @@ const { data } = await client.putPortalConfig(
 }
 ```
 
+</details>
+
 ---
 
 ### `deletePortalConfig`
@@ -7736,7 +7779,8 @@ Retrieves all portal configurations.
 const { data } = await client.listAllPortalConfigs()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -7791,6 +7835,8 @@ const { data } = await client.listAllPortalConfigs()
 }
 ```
 
+</details>
+
 ---
 
 ### `swapPortalConfig`
@@ -7812,13 +7858,16 @@ const { data } = await client.swapPortalConfig(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Domain and users swapped successfully."
 }
 ```
+
+</details>
 
 ---
 
@@ -7840,13 +7889,16 @@ const { data } = await client.invitePartner(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "User invited successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -7860,7 +7912,8 @@ Lists all business partners linked to the businessaccount
 const { data } = await client.listBusinessPartners()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -7879,6 +7932,8 @@ const { data } = await client.listBusinessPartners()
 }
 ```
 
+</details>
+
 ---
 
 ### `resendPartnerInvitation`
@@ -7893,13 +7948,16 @@ const { data } = await client.resendPartnerInvitation({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Partner invitation resent successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -7915,13 +7973,16 @@ const { data } = await client.revokePartner({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Partner revoked from portal successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -7937,13 +7998,16 @@ const { data } = await client.disablePartner({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Partner disabled from portal successfully"
 }
 ```
+
+</details>
 
 ---
 
@@ -7959,7 +8023,8 @@ const { data } = await client.enablePartner({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -7967,9 +8032,12 @@ const { data } = await client.enablePartner({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ContextEntity`
 
@@ -10398,3 +10466,5 @@ type BusinessPartnerItem = {
   access_status?: boolean
 }
 ```
+
+</details>

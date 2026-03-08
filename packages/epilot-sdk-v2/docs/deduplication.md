@@ -1,7 +1,7 @@
 # Deduplication API
 
-**Base URL:** `https://deduplication.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/deduplication](https://docs.epilot.io/api/deduplication)
+- **Base URL:** `https://deduplication.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/deduplication](https://docs.epilot.io/api/deduplication)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.deduplication.deduplicate(...)
-
-// Or get the client explicitly
-const deduplicationClient = await epilot.deduplication.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/deduplication'
 const deduplicationClient = await getClient()
 authorize(deduplicationClient, () => '<token>')
 const { data } = await deduplicationClient.deduplicate(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/deduplication'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -56,7 +46,8 @@ const { data } = await client.deduplicate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -80,9 +71,12 @@ const { data } = await client.deduplicate(
 ]
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `DeduplicateRequestBody`
 
@@ -136,3 +130,5 @@ type Entity = {
   type?: string
 }
 ```
+
+</details>

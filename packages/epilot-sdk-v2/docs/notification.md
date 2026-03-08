@@ -1,7 +1,7 @@
 # Notification API
 
-**Base URL:** `https://notification.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/notification](https://docs.epilot.io/api/notification)
+- **Base URL:** `https://notification.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/notification](https://docs.epilot.io/api/notification)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.notification.getNotificationsV2(...)
-
-// Or get the client explicitly
-const notificationClient = await epilot.notification.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/notification'
 const notificationClient = await getClient()
 authorize(notificationClient, () => '<token>')
 const { data } = await notificationClient.getNotificationsV2(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/notification'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -66,7 +56,8 @@ const { data } = await client.getNotificationsV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -92,6 +83,8 @@ const { data } = await client.getNotificationsV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -171,7 +164,8 @@ const { data } = await client.getNotifications({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -197,6 +191,8 @@ const { data } = await client.getNotifications({
 }
 ```
 
+</details>
+
 ---
 
 ### `getNotification`
@@ -211,7 +207,8 @@ const { data } = await client.getNotification({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -257,6 +254,8 @@ const { data } = await client.getNotification({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -315,7 +314,8 @@ const { data } = await client.listNotificationTemplates({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -347,6 +347,8 @@ const { data } = await client.listNotificationTemplates({
 }
 ```
 
+</details>
+
 ---
 
 ### `createNotificationTemplate`
@@ -377,7 +379,8 @@ const { data } = await client.createNotificationTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -422,6 +425,8 @@ const { data } = await client.createNotificationTemplate(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -437,7 +442,8 @@ const { data } = await client.getNotificationTemplate({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -482,6 +488,8 @@ const { data } = await client.getNotificationTemplate({
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -514,7 +522,8 @@ const { data } = await client.updateNotificationTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -559,6 +568,8 @@ const { data } = await client.updateNotificationTemplate(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -591,7 +602,8 @@ const { data } = await client.patchNotificationTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -636,6 +648,8 @@ const { data } = await client.patchNotificationTemplate(
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -651,7 +665,8 @@ const { data } = await client.deleteNotificationTemplate({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -696,6 +711,8 @@ const { data } = await client.deleteNotificationTemplate({
   "updated_by": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -730,7 +747,8 @@ const { data } = await client.sendPreview(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -741,9 +759,12 @@ const { data } = await client.sendPreview(
 ]
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `Error`
 
@@ -1080,3 +1101,5 @@ type SendPreviewResponse = Array<{
   data?: unknown
 }>
 ```
+
+</details>

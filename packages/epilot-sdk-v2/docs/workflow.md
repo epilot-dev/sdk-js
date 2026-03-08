@@ -1,7 +1,7 @@
 # Workflows Executions
 
-**Base URL:** `https://workflows-execution.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/workflow](https://docs.epilot.io/api/workflow)
+- **Base URL:** `https://workflows-execution.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/workflow](https://docs.epilot.io/api/workflow)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.workflow.getExecutions(...)
-
-// Or get the client explicitly
-const workflowClient = await epilot.workflow.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/workflow'
 const workflowClient = await getClient()
 authorize(workflowClient, () => '<token>')
 const { data } = await workflowClient.getExecutions(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/workflow'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -75,7 +65,8 @@ const { data } = await client.getExecutions({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -94,6 +85,8 @@ const { data } = await client.getExecutions({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -123,7 +116,8 @@ const { data } = await client.createExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -154,6 +148,8 @@ const { data } = await client.createExecution(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -169,7 +165,8 @@ const { data } = await client.getExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -200,6 +197,8 @@ const { data } = await client.getExecution({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -293,7 +292,8 @@ const { data } = await client.createStep(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -377,6 +377,8 @@ const { data } = await client.createStep(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -431,7 +433,8 @@ const { data } = await client.updateStep(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -516,6 +519,8 @@ const { data } = await client.updateStep(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteStep`
@@ -547,7 +552,8 @@ const { data } = await client.getClosingReasonExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -559,6 +565,8 @@ const { data } = await client.getClosingReasonExecution({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -596,7 +604,8 @@ const { data } = await client.startFlowExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -723,6 +732,8 @@ const { data } = await client.startFlowExecution(
   "singleClosingReasonSelection": true
 }
 ```
+
+</details>
 
 ---
 
@@ -738,7 +749,8 @@ const { data } = await client.getFlowExecution({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -865,6 +877,8 @@ const { data } = await client.getFlowExecution({
   "singleClosingReasonSelection": true
 }
 ```
+
+</details>
 
 ---
 
@@ -912,7 +926,8 @@ const { data } = await client.patchFlowExecution(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1040,6 +1055,8 @@ const { data } = await client.patchFlowExecution(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteFlowExecution`
@@ -1073,7 +1090,8 @@ const { data } = await client.searchFlowExecutions(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1106,6 +1124,8 @@ const { data } = await client.searchFlowExecutions(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1174,7 +1194,8 @@ const { data } = await client.patchTask(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1257,6 +1278,8 @@ const { data } = await client.patchTask(
 }
 ```
 
+</details>
+
 ---
 
 ### `runTaskAutomation`
@@ -1272,7 +1295,8 @@ const { data } = await client.runTaskAutomation({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1366,6 +1390,8 @@ const { data } = await client.runTaskAutomation({
 }
 ```
 
+</details>
+
 ---
 
 ### `executeTask`
@@ -1381,7 +1407,8 @@ const { data } = await client.executeTask({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1464,6 +1491,8 @@ const { data } = await client.executeTask({
 }
 ```
 
+</details>
+
 ---
 
 ### `patchPhase`
@@ -1495,7 +1524,8 @@ const { data } = await client.patchPhase(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1533,6 +1563,8 @@ const { data } = await client.patchPhase(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1579,7 +1611,8 @@ const { data } = await client.addTask(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1662,6 +1695,8 @@ const { data } = await client.addTask(
 }
 ```
 
+</details>
+
 ---
 
 ### `cancelTaskSchedule`
@@ -1679,7 +1714,8 @@ const { data } = await client.cancelTaskSchedule({
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `WorkflowExecutionCreateReq`
 
@@ -3376,3 +3412,5 @@ type AddTaskReq = {
   }
 }
 ```
+
+</details>

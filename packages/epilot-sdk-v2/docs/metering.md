@@ -1,7 +1,7 @@
 # Metering API
 
-**Base URL:** `https://metering.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
+- **Base URL:** `https://metering.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.metering.getCustomerMeters(...)
-
-// Or get the client explicitly
-const meteringClient = await epilot.metering.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/metering'
 const meteringClient = await getClient()
 authorize(meteringClient, () => '<token>')
 const { data } = await meteringClient.getCustomerMeters(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/metering'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -64,7 +54,8 @@ Get Customer Meters
 const { data } = await client.getCustomerMeters()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -97,6 +88,8 @@ const { data } = await client.getCustomerMeters()
 }
 ```
 
+</details>
+
 ---
 
 ### `getMetersByContractId`
@@ -111,7 +104,8 @@ const { data } = await client.getMetersByContractId({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -141,6 +135,8 @@ const { data } = await client.getMetersByContractId({
 }
 ```
 
+</details>
+
 ---
 
 ### `updateMeter`
@@ -158,7 +154,8 @@ const { data } = await client.updateMeter(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -195,6 +192,8 @@ const { data } = await client.updateMeter(
 }
 ```
 
+</details>
+
 ---
 
 ### `getMeter`
@@ -209,7 +208,8 @@ const { data } = await client.getMeter({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -248,6 +248,8 @@ const { data } = await client.getMeter({
 }
 ```
 
+</details>
+
 ---
 
 ### `getMeterCounters`
@@ -262,7 +264,8 @@ const { data } = await client.getMeterCounters({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -290,6 +293,8 @@ const { data } = await client.getMeterCounters({
 }
 ```
 
+</details>
+
 ---
 
 ### `getCounterDetails`
@@ -304,7 +309,8 @@ const { data } = await client.getCounterDetails({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -332,6 +338,8 @@ const { data } = await client.getCounterDetails({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -366,7 +374,8 @@ const { data } = await client.createMeterReading(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -391,6 +400,8 @@ const { data } = await client.createMeterReading(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -430,7 +441,8 @@ const { data } = await client.createMeterReadings(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -454,6 +466,8 @@ const { data } = await client.createMeterReadings(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -491,7 +505,8 @@ const { data } = await client.createPortalMeterReadings(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -515,6 +530,8 @@ const { data } = await client.createPortalMeterReadings(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -558,7 +575,8 @@ const { data } = await client.batchWriteMeterReadings(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -583,6 +601,8 @@ const { data } = await client.batchWriteMeterReadings(
 }
 ```
 
+</details>
+
 ---
 
 ### `createMeterReadingFromSubmission`
@@ -606,13 +626,16 @@ const { data } = await client.createMeterReadingFromSubmission(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "Successfully Processed"
 }
 ```
+
+</details>
 
 ---
 
@@ -629,7 +652,8 @@ const { data } = await client.getAllowedReadingForMeter({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -642,6 +666,8 @@ const { data } = await client.getAllowedReadingForMeter({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -670,7 +696,8 @@ const { data } = await client.createReadingWithMeter(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -696,6 +723,8 @@ const { data } = await client.createReadingWithMeter(
 }
 ```
 
+</details>
+
 ---
 
 ### `getReadingsByInterval`
@@ -718,7 +747,8 @@ const { data } = await client.getReadingsByInterval({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -744,6 +774,8 @@ const { data } = await client.getReadingsByInterval({
   "firstRecordCreatedAt": "2022-10-01T20:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -780,7 +812,8 @@ const { data } = await client.updateMeterReading(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -806,6 +839,8 @@ const { data } = await client.updateMeterReading(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteMeterReading`
@@ -822,7 +857,8 @@ const { data } = await client.deleteMeterReading({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -834,9 +870,12 @@ const { data } = await client.deleteMeterReading({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ErrorResp`
 
@@ -1206,3 +1245,5 @@ See https://github.com/ulid/spec
 ```ts
 type ActivityId = string // ulid
 ```
+
+</details>

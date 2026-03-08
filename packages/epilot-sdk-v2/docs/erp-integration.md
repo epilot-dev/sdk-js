@@ -1,7 +1,7 @@
 # ERP Integration API
 
-**Base URL:** `https://erp-integration-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/erp-integration](https://docs.epilot.io/api/erp-integration)
+- **Base URL:** `https://erp-integration-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/erp-integration](https://docs.epilot.io/api/erp-integration)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.erpIntegration.acknowledgeTracking(...)
-
-// Or get the client explicitly
-const erpIntegrationClient = await epilot.erpIntegration.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/erp-integration'
 const erpIntegrationClient = await getClient()
 authorize(erpIntegrationClient, () => '<token>')
 const { data } = await erpIntegrationClient.acknowledgeTracking(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/erp-integration'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -86,13 +76,16 @@ const { data } = await client.acknowledgeTracking(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -120,7 +113,8 @@ const { data } = await client.triggerErp(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -134,6 +128,8 @@ const { data } = await client.triggerErp(
   "event_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -159,7 +155,8 @@ const { data } = await client.processErpUpdatesEventsV3(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -172,6 +169,8 @@ const { data } = await client.processErpUpdatesEventsV3(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -199,7 +198,8 @@ const { data } = await client.simulateMappingV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -226,6 +226,8 @@ const { data } = await client.simulateMappingV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -252,7 +254,8 @@ const { data } = await client.simulateMapping(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -280,6 +283,8 @@ const { data } = await client.simulateMapping(
 }
 ```
 
+</details>
+
 ---
 
 ### `listIntegrations`
@@ -292,7 +297,8 @@ Retrieve all integrations for the authenticated organization
 const { data } = await client.listIntegrations()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -312,6 +318,8 @@ const { data } = await client.listIntegrations()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -353,7 +361,8 @@ const { data } = await client.createIntegration(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -387,6 +396,8 @@ const { data } = await client.createIntegration(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -402,7 +413,8 @@ const { data } = await client.getIntegration({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -436,6 +448,8 @@ const { data } = await client.getIntegration({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -454,7 +468,8 @@ const { data } = await client.updateIntegration(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -489,6 +504,8 @@ const { data } = await client.updateIntegration(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteIntegration`
@@ -503,13 +520,16 @@ const { data } = await client.deleteIntegration({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -539,7 +559,8 @@ const { data } = await client.queryEvents(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -560,6 +581,8 @@ const { data } = await client.queryEvents(
   "has_more": true
 }
 ```
+
+</details>
 
 ---
 
@@ -582,7 +605,8 @@ const { data } = await client.replayEvents(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -591,6 +615,8 @@ const { data } = await client.replayEvents(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -606,7 +632,8 @@ const { data } = await client.listUseCases({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -626,6 +653,8 @@ const { data } = await client.listUseCases({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -657,7 +686,8 @@ const { data } = await client.createUseCase(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -680,6 +710,8 @@ const { data } = await client.createUseCase(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -696,7 +728,8 @@ const { data } = await client.getUseCase({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -719,6 +752,8 @@ const { data } = await client.getUseCase({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -752,7 +787,8 @@ const { data } = await client.updateUseCase(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -776,6 +812,8 @@ const { data } = await client.updateUseCase(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteUseCase`
@@ -791,13 +829,16 @@ const { data } = await client.deleteUseCase({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -817,7 +858,8 @@ const { data } = await client.listUseCaseHistory({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -841,6 +883,8 @@ const { data } = await client.listUseCaseHistory({
 }
 ```
 
+</details>
+
 ---
 
 ### `listIntegrationsV2`
@@ -853,7 +897,8 @@ Retrieve all integrations with embedded use cases for the authenticated organiza
 const { data } = await client.listIntegrationsV2()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -874,6 +919,8 @@ const { data } = await client.listIntegrationsV2()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -926,7 +973,8 @@ const { data } = await client.createIntegrationV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -974,6 +1022,8 @@ const { data } = await client.createIntegrationV2(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -989,7 +1039,8 @@ const { data } = await client.getIntegrationV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1037,6 +1088,8 @@ const { data } = await client.getIntegrationV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1095,7 +1148,8 @@ const { data } = await client.updateIntegrationV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1144,6 +1198,8 @@ const { data } = await client.updateIntegrationV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteIntegrationV2`
@@ -1158,13 +1214,16 @@ const { data } = await client.deleteIntegrationV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1189,13 +1248,16 @@ const { data } = await client.setIntegrationAppMapping(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 }
 ```
+
+</details>
 
 ---
 
@@ -1217,13 +1279,16 @@ const { data } = await client.deleteIntegrationAppMapping(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "message": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1261,7 +1326,8 @@ const { data } = await client.queryInboundMonitoringEvents(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1291,6 +1357,8 @@ const { data } = await client.queryInboundMonitoringEvents(
   "has_more": true
 }
 ```
+
+</details>
 
 ---
 
@@ -1322,7 +1390,8 @@ const { data } = await client.getMonitoringStats(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1353,6 +1422,8 @@ const { data } = await client.getMonitoringStats(
 }
 ```
 
+</details>
+
 ---
 
 ### `getMonitoringTimeSeries`
@@ -1377,7 +1448,8 @@ const { data } = await client.getMonitoringTimeSeries(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1394,6 +1466,8 @@ const { data } = await client.getMonitoringTimeSeries(
 }
 ```
 
+</details>
+
 ---
 
 ### `getOutboundStatus`
@@ -1409,7 +1483,8 @@ const { data } = await client.getOutboundStatus({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1427,6 +1502,8 @@ const { data } = await client.getOutboundStatus({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1460,7 +1537,8 @@ const { data } = await client.queryAccessLogs(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1488,6 +1566,8 @@ const { data } = await client.queryAccessLogs(
   "has_more": true
 }
 ```
+
+</details>
 
 ---
 
@@ -1519,7 +1599,8 @@ const { data } = await client.queryOutboundMonitoringEvents(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1548,9 +1629,12 @@ const { data } = await client.queryOutboundMonitoringEvents(
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `ErrorResponseBase`
 
@@ -3570,3 +3654,5 @@ type InboundMonitoringEvent = {
   completed_at: string // date-time
 }
 ```
+
+</details>

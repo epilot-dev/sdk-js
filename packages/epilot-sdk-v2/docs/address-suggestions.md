@@ -1,7 +1,7 @@
 # Address Suggestions API
 
-**Base URL:** `https://address-suggestions-api.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/address-suggestions](https://docs.epilot.io/api/address-suggestions)
+- **Base URL:** `https://address-suggestions-api.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/address-suggestions](https://docs.epilot.io/api/address-suggestions)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.addressSuggestions.getAddresses(...)
-
-// Or get the client explicitly
-const addressSuggestionsClient = await epilot.addressSuggestions.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/address-suggestions'
 const addressSuggestionsClient = await getClient()
 authorize(addressSuggestionsClient, () => '<token>')
 const { data } = await addressSuggestionsClient.getAddresses(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/address-suggestions'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -56,7 +46,8 @@ const { data } = await client.getAddresses({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -69,6 +60,8 @@ const { data } = await client.getAddresses({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -89,13 +82,16 @@ const { data } = await client.checkAvailability({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "fileId": "4e7b7d95-ced6-4f5f-9326-0c61f30dcadb"
 }
 ```
+
+</details>
 
 ---
 
@@ -111,7 +107,8 @@ const { data } = await client.validateAddressesFile({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -127,9 +124,12 @@ const { data } = await client.validateAddressesFile({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `AvailabilityLocation`
 
@@ -244,3 +244,5 @@ type ValidateAddressFileError = {
   data?: string
 }
 ```
+
+</details>

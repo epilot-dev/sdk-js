@@ -1,7 +1,7 @@
 # Billing API
 
-**Base URL:** `https://billing.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/billing](https://docs.epilot.io/api/billing)
+- **Base URL:** `https://billing.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/billing](https://docs.epilot.io/api/billing)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.billing.getBillingEvents(...)
-
-// Or get the client explicitly
-const billingClient = await epilot.billing.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/billing'
 const billingClient = await getClient()
 authorize(billingClient, () => '<token>')
 const { data } = await billingClient.getBillingEvents(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/billing'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -67,7 +57,8 @@ const { data } = await client.getBillingEvents({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -93,6 +84,8 @@ const { data } = await client.getBillingEvents({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -131,7 +124,8 @@ const { data } = await client.createBillingEvent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -158,6 +152,8 @@ const { data } = await client.createBillingEvent(
   "paid_date": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -173,7 +169,8 @@ const { data } = await client.getBillingEvent({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -200,6 +197,8 @@ const { data } = await client.getBillingEvent({
   "paid_date": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -240,7 +239,8 @@ const { data } = await client.updateBillingEvent(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -267,6 +267,8 @@ const { data } = await client.updateBillingEvent(
   "paid_date": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -296,7 +298,8 @@ const { data } = await client.getBillingEventByExternalId({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -323,6 +326,8 @@ const { data } = await client.getBillingEventByExternalId({
   "paid_date": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -371,7 +376,8 @@ const { data } = await client.createContractEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -408,6 +414,8 @@ const { data } = await client.createContractEntity(
   "balance_currency": "EUR"
 }
 ```
+
+</details>
 
 ---
 
@@ -458,7 +466,8 @@ const { data } = await client.updateContractEntity(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -496,6 +505,8 @@ const { data } = await client.updateContractEntity(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteContractEntity`
@@ -524,7 +535,8 @@ const { data } = await client.getCustomerBalance({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -534,9 +546,12 @@ const { data } = await client.getCustomerBalance({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BaseEntity`
 
@@ -757,3 +772,5 @@ Currency code in ISO 4217 format
 ```ts
 type Currency = string
 ```
+
+</details>

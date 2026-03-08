@@ -1,7 +1,7 @@
 # Discussion API
 
-**Base URL:** `https://discussion.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/discussion](https://docs.epilot.io/api/discussion)
+- **Base URL:** `https://discussion.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/discussion](https://docs.epilot.io/api/discussion)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.discussion.createComment(...)
-
-// Or get the client explicitly
-const discussionClient = await epilot.discussion.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/discussion'
 const discussionClient = await getClient()
 authorize(discussionClient, () => '<token>')
 const { data } = await discussionClient.createComment(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/discussion'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -93,7 +83,8 @@ const { data } = await client.createComment(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -131,6 +122,8 @@ const { data } = await client.createComment(
   "_schema": "message"
 }
 ```
+
+</details>
 
 ---
 
@@ -182,7 +175,8 @@ const { data } = await client.updateComment(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -220,6 +214,8 @@ const { data } = await client.updateComment(
   "_schema": "message"
 }
 ```
+
+</details>
 
 ---
 
@@ -235,7 +231,8 @@ const { data } = await client.getComment({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -273,6 +270,8 @@ const { data } = await client.getComment({
   "_schema": "message"
 }
 ```
+
+</details>
 
 ---
 
@@ -304,7 +303,8 @@ const { data } = await client.getThreadsByContext({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -332,6 +332,8 @@ const { data } = await client.getThreadsByContext({
 }
 ```
 
+</details>
+
 ---
 
 ### `getMentionableUsers`
@@ -346,7 +348,8 @@ const { data } = await client.getMentionableUsers({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -374,6 +377,8 @@ const { data } = await client.getMentionableUsers({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getThreadComments`
@@ -390,7 +395,8 @@ const { data } = await client.getThreadComments({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -418,9 +424,12 @@ const { data } = await client.getThreadComments({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BaseEntity`
 
@@ -500,3 +509,5 @@ type Reaction = {
   user_id?: number
 }
 ```
+
+</details>

@@ -35,14 +35,6 @@ const { data: executions } = await epilot.workflow.getExecutions()
 
 API clients are built on [openapi-client-axios](https://openapistack.co/docs/openapi-client-axios/intro/), which generates fully typed operation methods on top of regular [axios](https://axios-http.com/docs/intro) instances. All standard axios features (interceptors, defaults, config) work as expected. Each operation is forwarded to a lazy singleton — the spec is loaded and the client initialized on first use, then cached.
 
-## Packages
-
-| Package | Description |
-| ------- | ----------- |
-| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
-| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
-| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
-
 ## API Reference
 
 | API | Import | Docs |
@@ -93,6 +85,14 @@ API clients are built on [openapi-client-axios](https://openapistack.co/docs/ope
 | `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./packages/epilot-sdk-v2/docs/webhooks.md) |
 | `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./packages/epilot-sdk-v2/docs/workflow.md) |
 | `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./packages/epilot-sdk-v2/docs/workflow-definition.md) |
+
+## Packages
+
+| Package | Description |
+| ------- | ----------- |
+| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
+| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
+| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
 
 ## Codebase Structure
 
@@ -214,7 +214,7 @@ epilot.authorize(async () => await getTokenFromSession())
 epilot.authorize('my-static-api-token')
 ```
 
-# Fresh Client Instance
+## Fresh Client Instance
 
 ```ts
 import { createClient, authorize } from '@epilot/sdk/entity'
@@ -318,7 +318,6 @@ authorize(entityClient, () => '<my-token>')
 applyLargeResponseInterceptor({ client: entityClient, config: { enabled: true } })
 ```
 
-#
 ## Overrides & Custom APIs
 
 Override built-in API specs or register custom APIs via `.epilot/sdk-overrides.json`. This is useful for testing new versions of an API spec or getting the latest types without waiting for an SDK release.
@@ -349,7 +348,8 @@ npx epilot-sdk override entity ./my-local-entity-spec.yaml
 npx epilot-sdk typegen
 ```
 
-## Migration from `@epilot/*-client`
+<details>
+<summary>Migration from <code>@epilot/*-client</code></summary>
 
 ### Singleton import
 
@@ -380,12 +380,16 @@ const entityClient = await createClient()
 ```ts
 // Before
 import type { Client, Components } from '@epilot/entity-client'
+type MyEntity = Components.Schemas.Entity
 
-// After (Client, OperationMethods, PathsDictionary are re-exported)
-import type { Client } from '@epilot/sdk/entity'
+// After
+import type { Client, Entity } from '@epilot/sdk/entity'
 ```
 
-## Client Lifecycle
+</details>
+
+<details>
+<summary>Client Lifecycle</summary>
 
 When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `interceptors`, the SDK invalidates all cached client instances. The next operation call creates a fresh client with the updated configuration.
 
@@ -403,6 +407,8 @@ epilot.authorize('new-token') // invalidates all cached clients
 ```
 
 If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
+
+</details>
 
 ## Contributing
 

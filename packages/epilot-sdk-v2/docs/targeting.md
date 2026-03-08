@@ -1,7 +1,7 @@
 # Targeting API
 
-**Base URL:** `https://targeting.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/targeting](https://docs.epilot.io/api/targeting)
+- **Base URL:** `https://targeting.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/targeting](https://docs.epilot.io/api/targeting)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.targeting.changeCampaignStatus(...)
-
-// Or get the client explicitly
-const targetingClient = await epilot.targeting.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/targeting'
 const targetingClient = await getClient()
 authorize(targetingClient, () => '<token>')
 const { data } = await targetingClient.changeCampaignStatus(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/targeting'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -65,7 +55,8 @@ const { data } = await client.changeCampaignStatus({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -101,6 +92,8 @@ const { data } = await client.changeCampaignStatus({
 }
 ```
 
+</details>
+
 ---
 
 ### `getCampaignJobStatus`
@@ -115,7 +108,8 @@ const { data } = await client.getCampaignJobStatus({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -128,6 +122,8 @@ const { data } = await client.getCampaignJobStatus({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -143,7 +139,8 @@ const { data } = await client.getCampaignPortals({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -159,6 +156,8 @@ const { data } = await client.getCampaignPortals({
   }
 ]
 ```
+
+</details>
 
 ---
 
@@ -181,7 +180,8 @@ const { data } = await client.retriggerCampaignAutomations(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -196,6 +196,8 @@ const { data } = await client.retriggerCampaignAutomations(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -222,7 +224,8 @@ const { data } = await client.matchCampaigns(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -234,6 +237,8 @@ const { data } = await client.matchCampaigns(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -260,7 +265,8 @@ const { data } = await client.matchTargets(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -272,6 +278,8 @@ const { data } = await client.matchTargets(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -292,7 +300,8 @@ const { data } = await client.getTargetQueries(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -305,6 +314,8 @@ const { data } = await client.getTargetQueries(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -328,7 +339,8 @@ const { data } = await client.createRecipient(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -343,6 +355,8 @@ const { data } = await client.createRecipient(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -367,7 +381,8 @@ const { data } = await client.updateRecipient(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -382,6 +397,8 @@ const { data } = await client.updateRecipient(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -403,7 +420,8 @@ const { data } = await client.updateRecipientPortalStatus(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -418,6 +436,8 @@ const { data } = await client.updateRecipientPortalStatus(
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
+
+</details>
 
 ---
 
@@ -438,7 +458,8 @@ const { data } = await client.getRecipients({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -460,9 +481,12 @@ const { data } = await client.getRecipients({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BaseError`
 
@@ -840,3 +864,5 @@ type UpdatePortalStatusRequest = {
   status: "sent" | "seen" | "dismissed" | "clicked"
 }
 ```
+
+</details>

@@ -1,7 +1,7 @@
 # Permissions API
 
-**Base URL:** `https://permissions.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/permissions](https://docs.epilot.io/api/permissions)
+- **Base URL:** `https://permissions.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/permissions](https://docs.epilot.io/api/permissions)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.permissions.listCurrentRoles(...)
-
-// Or get the client explicitly
-const permissionsClient = await epilot.permissions.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/permissions'
 const permissionsClient = await getClient()
 authorize(permissionsClient, () => '<token>')
 const { data } = await permissionsClient.listCurrentRoles(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/permissions'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -61,7 +51,8 @@ Returns roles and grants assigned to current user
 const { data } = await client.listCurrentRoles()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -79,6 +70,8 @@ const { data } = await client.listCurrentRoles()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -92,7 +85,8 @@ Returns list of all roles in organization
 const { data } = await client.listAllRoles()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -110,6 +104,8 @@ const { data } = await client.listAllRoles()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -126,7 +122,8 @@ const { data } = await client.createRole(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -147,6 +144,8 @@ const { data } = await client.createRole(
   "parent_role": "123:owner"
 }
 ```
+
+</details>
 
 ---
 
@@ -179,7 +178,8 @@ const { data } = await client.searchRoles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -199,6 +199,8 @@ const { data } = await client.searchRoles(
 }
 ```
 
+</details>
+
 ---
 
 ### `getRole`
@@ -213,7 +215,8 @@ const { data } = await client.getRole({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -234,6 +237,8 @@ const { data } = await client.getRole({
   "parent_role": "123:owner"
 }
 ```
+
+</details>
 
 ---
 
@@ -268,7 +273,8 @@ const { data } = await client.putRole(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -289,6 +295,8 @@ const { data } = await client.putRole(
   "parent_role": "123:owner"
 }
 ```
+
+</details>
 
 ---
 
@@ -304,7 +312,8 @@ const { data } = await client.deleteRole({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -325,6 +334,8 @@ const { data } = await client.deleteRole({
   "parent_role": "123:owner"
 }
 ```
+
+</details>
 
 ---
 
@@ -352,13 +363,16 @@ const { data } = await client.getAssignedRolesForUser({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
   "123:owner"
 ]
 ```
+
+</details>
 
 ---
 
@@ -379,13 +393,16 @@ const { data } = await client.assignRoles(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
   "123:owner"
 ]
 ```
+
+</details>
 
 ---
 
@@ -402,7 +419,8 @@ const { data } = await client.addAssignment({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -412,6 +430,8 @@ const { data } = await client.addAssignment({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -428,7 +448,8 @@ const { data } = await client.removeAssignment({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -438,6 +459,8 @@ const { data } = await client.removeAssignment({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -451,7 +474,8 @@ Returns list of all assignments in organization
 const { data } = await client.listAllAssignments()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -464,9 +488,12 @@ const { data } = await client.listAllAssignments()
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `Grant`
 
@@ -863,3 +890,5 @@ type Error = {
   message: string
 }
 ```
+
+</details>

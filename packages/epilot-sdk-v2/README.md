@@ -141,7 +141,7 @@ epilot.authorize(async () => await getTokenFromSession())
 epilot.authorize('my-static-api-token')
 ```
 
-# Fresh Client Instance
+## Fresh Client Instance
 
 ```ts
 import { createClient, authorize } from '@epilot/sdk/entity'
@@ -245,7 +245,6 @@ authorize(entityClient, () => '<my-token>')
 applyLargeResponseInterceptor({ client: entityClient, config: { enabled: true } })
 ```
 
-#
 ## Overrides & Custom APIs
 
 Override built-in API specs or register custom APIs via `.epilot/sdk-overrides.json`. This is useful for testing new versions of an API spec or getting the latest types without waiting for an SDK release.
@@ -276,7 +275,8 @@ npx epilot-sdk override entity ./my-local-entity-spec.yaml
 npx epilot-sdk typegen
 ```
 
-## Migration from `@epilot/*-client`
+<details>
+<summary>Migration from <code>@epilot/*-client</code></summary>
 
 ### Singleton import
 
@@ -307,12 +307,16 @@ const entityClient = await createClient()
 ```ts
 // Before
 import type { Client, Components } from '@epilot/entity-client'
+type MyEntity = Components.Schemas.Entity
 
-// After (Client, OperationMethods, PathsDictionary are re-exported)
-import type { Client } from '@epilot/sdk/entity'
+// After
+import type { Client, Entity } from '@epilot/sdk/entity'
 ```
 
-## Client Lifecycle
+</details>
+
+<details>
+<summary>Client Lifecycle</summary>
 
 When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `interceptors`, the SDK invalidates all cached client instances. The next operation call creates a fresh client with the updated configuration.
 
@@ -330,6 +334,8 @@ epilot.authorize('new-token') // invalidates all cached clients
 ```
 
 If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
+
+</details>
 
 
 ## API Reference

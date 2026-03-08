@@ -1,7 +1,7 @@
 # User API
 
-**Base URL:** `https://user.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/user](https://docs.epilot.io/api/user)
+- **Base URL:** `https://user.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/user](https://docs.epilot.io/api/user)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.user.signUpUser(...)
-
-// Or get the client explicitly
-const userClient = await epilot.user.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/user'
 const userClient = await getClient()
 authorize(userClient, () => '<token>')
 const { data } = await userClient.signUpUser(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/user'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -106,7 +96,8 @@ const { data } = await client.signUpUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -160,6 +151,8 @@ const { data } = await client.signUpUser(
 }
 ```
 
+</details>
+
 ---
 
 ### `getMeV2`
@@ -172,7 +165,8 @@ Get currently logged in user
 const { data } = await client.getMeV2()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -233,6 +227,8 @@ const { data } = await client.getMeV2()
 }
 ```
 
+</details>
+
 ---
 
 ### `listUsersV2`
@@ -249,7 +245,8 @@ const { data } = await client.listUsersV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -285,6 +282,8 @@ const { data } = await client.listUsersV2({
 }
 ```
 
+</details>
+
 ---
 
 ### `getUserV2`
@@ -299,7 +298,8 @@ const { data } = await client.getUserV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -359,6 +359,8 @@ const { data } = await client.getUserV2({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -432,7 +434,8 @@ const { data } = await client.updateUserV2(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -493,6 +496,8 @@ const { data } = await client.updateUserV2(
 }
 ```
 
+</details>
+
 ---
 
 ### `deleteUserV2`
@@ -507,7 +512,8 @@ const { data } = await client.deleteUserV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -535,6 +541,8 @@ const { data } = await client.deleteUserV2({
 }
 ```
 
+</details>
+
 ---
 
 ### `inviteUser`
@@ -556,7 +564,8 @@ const { data } = await client.inviteUser(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -616,6 +625,8 @@ const { data } = await client.inviteUser(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -635,7 +646,8 @@ const { data } = await client.resendUserInvitation(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -696,6 +708,8 @@ const { data } = await client.resendUserInvitation(
 }
 ```
 
+</details>
+
 ---
 
 ### `getGroupsForUser`
@@ -710,7 +724,8 @@ const { data } = await client.getGroupsForUser({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 [
@@ -756,6 +771,8 @@ const { data } = await client.getGroupsForUser({
 ]
 ```
 
+</details>
+
 ---
 
 ### `getGroups`
@@ -773,7 +790,8 @@ const { data } = await client.getGroups({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -792,6 +810,8 @@ const { data } = await client.getGroups({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -814,7 +834,8 @@ const { data } = await client.createGroup(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -906,6 +927,8 @@ const { data } = await client.createGroup(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -922,7 +945,8 @@ const { data } = await client.getGroup({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1014,6 +1038,8 @@ const { data } = await client.getGroup({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1038,7 +1064,8 @@ const { data } = await client.updateGroup(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1130,6 +1157,8 @@ const { data } = await client.updateGroup(
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1159,7 +1188,8 @@ const { data } = await client.advanceUserAssignment({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1252,6 +1282,8 @@ const { data } = await client.advanceUserAssignment({
 }
 ```
 
+</details>
+
 ---
 
 ### `createNavigation`
@@ -1280,7 +1312,8 @@ const { data } = await client.createNavigation(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1298,6 +1331,8 @@ const { data } = await client.createNavigation(
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1313,7 +1348,8 @@ const { data } = await client.getNavigation({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1331,6 +1367,8 @@ const { data } = await client.getNavigation({
   }
 }
 ```
+
+</details>
 
 ---
 
@@ -1365,7 +1403,8 @@ const { data } = await client.checkInviteToken({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1377,6 +1416,8 @@ const { data } = await client.checkInviteToken({
   "invitee_primary_org_id": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1412,13 +1453,16 @@ const { data } = await client.rejectInvite({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "success": true
 }
 ```
+
+</details>
 
 ---
 
@@ -1434,7 +1478,8 @@ const { data } = await client.getUserLoginParametersV2({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1456,6 +1501,8 @@ const { data } = await client.getUserLoginParametersV2({
 }
 ```
 
+</details>
+
 ---
 
 ### `beginPasskeyAuthentication`
@@ -1473,7 +1520,8 @@ const { data } = await client.beginPasskeyAuthentication(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1481,6 +1529,8 @@ const { data } = await client.beginPasskeyAuthentication(
   "challenge_token": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1494,7 +1544,8 @@ Begin discoverable passkey authentication flow (no email required). Returns WebA
 const { data } = await client.beginDiscoverablePasskeyAuthentication()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1502,6 +1553,8 @@ const { data } = await client.beginDiscoverablePasskeyAuthentication()
   "challenge_token": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1521,7 +1574,8 @@ const { data } = await client.resolveDiscoverableCredential(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1546,6 +1600,8 @@ const { data } = await client.resolveDiscoverableCredential(
 }
 ```
 
+</details>
+
 ---
 
 ### `beginPasskeyRegistration`
@@ -1563,7 +1619,8 @@ const { data } = await client.beginPasskeyRegistration(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1571,6 +1628,8 @@ const { data } = await client.beginPasskeyRegistration(
   "challenge_token": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1591,7 +1650,8 @@ const { data } = await client.completePasskeyRegistration(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1605,6 +1665,8 @@ const { data } = await client.completePasskeyRegistration(
 }
 ```
 
+</details>
+
 ---
 
 ### `listPasskeys`
@@ -1617,7 +1679,8 @@ List all passkeys registered for the authenticated user.
 const { data } = await client.listPasskeys()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1632,6 +1695,8 @@ const { data } = await client.listPasskeys()
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -1664,13 +1729,16 @@ const { data } = await client.switchOrganization(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
   "login_token": "string"
 }
 ```
+
+</details>
 
 ---
 
@@ -1684,7 +1752,8 @@ Get currently logged in user
 const { data } = await client.getMe()
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1712,6 +1781,8 @@ const { data } = await client.getMe()
 }
 ```
 
+</details>
+
 ---
 
 ### `listUsers`
@@ -1729,7 +1800,8 @@ const { data } = await client.listUsers({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1751,6 +1823,8 @@ const { data } = await client.listUsers({
 }
 ```
 
+</details>
+
 ---
 
 ### `getUser`
@@ -1765,7 +1839,8 @@ const { data } = await client.getUser({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1793,6 +1868,8 @@ const { data } = await client.getUser({
 }
 ```
 
+</details>
+
 ---
 
 ### `getUserLoginParameters`
@@ -1807,7 +1884,8 @@ const { data } = await client.getUserLoginParameters({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -1829,9 +1907,12 @@ const { data } = await client.getUserLoginParameters({
 }
 ```
 
+</details>
+
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `NavigationId`
 
@@ -2319,3 +2400,5 @@ type PasskeyRegistrationResponse = {
   friendly_name?: string
 }
 ```
+
+</details>

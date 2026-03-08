@@ -1,7 +1,7 @@
 # Email template API
 
-**Base URL:** `https://email-template.sls.epilot.io`
-**Full API Docs:** [https://docs.epilot.io/api/email-template](https://docs.epilot.io/api/email-template)
+- **Base URL:** `https://email-template.sls.epilot.io`
+- **Full API Docs:** [https://docs.epilot.io/api/email-template](https://docs.epilot.io/api/email-template)
 
 ## Usage
 
@@ -9,12 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-
-// Call operations directly (lazy singleton under the hood)
 const { data } = await epilot.emailTemplate.saveTemplate(...)
-
-// Or get the client explicitly
-const emailTemplateClient = await epilot.emailTemplate.getClient()
 ```
 
 ### Tree-shakeable import
@@ -25,11 +20,6 @@ import { getClient, authorize } from '@epilot/sdk/email-template'
 const emailTemplateClient = await getClient()
 authorize(emailTemplateClient, () => '<token>')
 const { data } = await emailTemplateClient.saveTemplate(...)
-
-// Or create a fresh (non-singleton) client
-import { createClient } from '@epilot/sdk/email-template'
-const fresh = await createClient()
-authorize(fresh, () => '<token>')
 ```
 
 ## Operations
@@ -118,7 +108,8 @@ const { data } = await client.saveTemplate(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -190,6 +181,8 @@ const { data } = await client.saveTemplate(
 }
 ```
 
+</details>
+
 ---
 
 ### `getTemplateDetail`
@@ -204,7 +197,8 @@ const { data } = await client.getTemplateDetail({
 })
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -257,6 +251,8 @@ const { data } = await client.getTemplateDetail({
   ]
 }
 ```
+
+</details>
 
 ---
 
@@ -336,7 +332,8 @@ const { data } = await client.updateTemplateDetail(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -408,6 +405,8 @@ const { data } = await client.updateTemplateDetail(
 }
 ```
 
+</details>
+
 ---
 
 ### `replaceVariablesAsync`
@@ -439,7 +438,8 @@ const { data } = await client.replaceVariablesAsync(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -482,6 +482,8 @@ const { data } = await client.replaceVariablesAsync(
 }
 ```
 
+</details>
+
 ---
 
 ### `bulkSendMessage`
@@ -508,7 +510,8 @@ const { data } = await client.bulkSendMessage(
 )
 ```
 
-**Response**
+<details>
+<summary>Response</summary>
 
 ```json
 {
@@ -560,6 +563,8 @@ const { data } = await client.bulkSendMessage(
 }
 ```
 
+</details>
+
 ---
 
 ### `revertToOriginalTemplate`
@@ -579,7 +584,8 @@ const { data } = await client.revertToOriginalTemplate(
 
 ---
 
-## Schemas
+<details>
+<summary>Schemas</summary>
 
 ### `BaseEntity`
 
@@ -1036,3 +1042,5 @@ Task token to approve or cancel the bulk message action
 ```ts
 type TaskToken = string
 ```
+
+</details>
