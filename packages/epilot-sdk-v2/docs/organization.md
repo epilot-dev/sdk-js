@@ -34,6 +34,19 @@ const { data } = await organizationClient.getCurrentOrganization(...)
 - [`putSettingsValue`](#putsettingsvalue)
 - [`deleteSettingsValue`](#deletesettingsvalue)
 
+**Schemas**
+- [`OrganizationId`](#organizationid)
+- [`Organization`](#organization)
+- [`InternalOrganization`](#internalorganization)
+- [`SettingKey`](#settingkey)
+- [`Settings`](#settings)
+- [`SettingsValue`](#settingsvalue)
+- [`CreateOrganizationRequest`](#createorganizationrequest)
+- [`DataPointsResponse`](#datapointsresponse)
+- [`DataPoint`](#datapoint)
+- [`OrganizationToCleanup`](#organizationtocleanup)
+- [`OrganizationCleanupStatus`](#organizationcleanupstatus)
+
 ### `getCurrentOrganization`
 
 Get caller's current organization
@@ -277,8 +290,7 @@ const { data } = await client.deleteSettingsValue({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `OrganizationId`
 
@@ -427,5 +439,3 @@ type OrganizationCleanupStatus = {
   }>
 }
 ```
-
-</details>

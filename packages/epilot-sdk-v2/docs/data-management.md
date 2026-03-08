@@ -36,6 +36,30 @@ const { data } = await dataManagementClient.queryEntities(...)
 - [`listConfigs`](#listconfigs)
 - [`listJobs`](#listjobs)
 
+**Schemas**
+- [`ConfigType`](#configtype)
+- [`JobStatus`](#jobstatus)
+- [`JobTrigger`](#jobtrigger)
+- [`JobReportFormat`](#jobreportformat)
+- [`JobReport`](#jobreport)
+- [`CreateJobRequest`](#createjobrequest)
+- [`JobDetails`](#jobdetails)
+- [`UpdateJobRequest`](#updatejobrequest)
+- [`Job`](#job)
+- [`ListJobsResponse`](#listjobsresponse)
+- [`JobReportUrlResponse`](#jobreporturlresponse)
+- [`QueryFilterType`](#queryfiltertype)
+- [`QueryFilter`](#queryfilter)
+- [`QueryConfig`](#queryconfig)
+- [`QueryEntitiesRequest`](#queryentitiesrequest)
+- [`QueryEntitiesResult`](#queryentitiesresult)
+- [`ConfigSchedule`](#configschedule)
+- [`IntervalConfigSchedule`](#intervalconfigschedule)
+- [`UpsertConfigRequest`](#upsertconfigrequest)
+- [`Config`](#config)
+- [`DeletionRelationEntitySchema`](#deletionrelationentityschema)
+- [`ListConfigsResponse`](#listconfigsresponse)
+
 ### `queryEntities`
 
 Query entities using a saved view with additional data filters
@@ -516,8 +540,7 @@ const { data } = await client.listJobs({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `ConfigType`
 
@@ -825,5 +848,3 @@ type ListConfigsResponse = {
   cursor?: string
 }
 ```
-
-</details>

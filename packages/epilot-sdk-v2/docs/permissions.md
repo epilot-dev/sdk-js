@@ -41,6 +41,33 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 - [`removeAssignment`](#removeassignment)
 - [`listAllAssignments`](#listallassignments)
 
+**Schemas**
+- [`Grant`](#grant)
+- [`GrantWithDependencies`](#grantwithdependencies)
+- [`GrantCondition`](#grantcondition)
+- [`EqualsCondition`](#equalscondition)
+- [`RoleId`](#roleid)
+- [`BaseRole`](#baserole)
+- [`BaseRoleForCreate`](#baseroleforcreate)
+- [`UserRole`](#userrole)
+- [`OrgRole`](#orgrole)
+- [`ShareRole`](#sharerole)
+- [`PartnerRole`](#partnerrole)
+- [`PortalRole`](#portalrole)
+- [`Role`](#role)
+- [`RolePayload`](#rolepayload)
+- [`Assignment`](#assignment)
+- [`InternalAssignment`](#internalassignment)
+- [`OrgAssignments`](#orgassignments)
+- [`OrgRoles`](#orgroles)
+- [`Assignments`](#assignments)
+- [`UserId`](#userid)
+- [`OrganizationId`](#organizationid)
+- [`Slug`](#slug)
+- [`RoleSearchInput`](#rolesearchinput)
+- [`CreateRolePayload`](#createrolepayload)
+- [`Error`](#error)
+
 ### `listCurrentRoles`
 
 Returns roles and grants assigned to current user
@@ -492,8 +519,7 @@ const { data } = await client.listAllAssignments()
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Grant`
 
@@ -890,5 +916,3 @@ type Error = {
   message: string
 }
 ```
-
-</details>

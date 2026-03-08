@@ -29,6 +29,17 @@ const { data } = await addressSuggestionsClient.getAddresses(...)
 - [`checkAvailability`](#checkavailability)
 - [`validateAddressesFile`](#validateaddressesfile)
 
+**Schemas**
+- [`AvailabilityLocation`](#availabilitylocation)
+- [`AvailabilityResult`](#availabilityresult)
+- [`Error`](#error)
+- [`AddressSuggestion`](#addresssuggestion)
+- [`AddressSuggestions`](#addresssuggestions)
+- [`ValidateAddressSuggestionsFileResult`](#validateaddresssuggestionsfileresult)
+- [`ValidateAddressFileResult`](#validateaddressfileresult)
+- [`AddressSuggestionError`](#addresssuggestionerror)
+- [`ValidateAddressFileError`](#validateaddressfileerror)
+
 ### `getAddresses`
 
 get addresses from file
@@ -128,8 +139,7 @@ const { data } = await client.validateAddressesFile({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `AvailabilityLocation`
 
@@ -244,5 +254,3 @@ type ValidateAddressFileError = {
   data?: string
 }
 ```
-
-</details>

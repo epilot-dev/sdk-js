@@ -54,6 +54,57 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`continueInstallationJob`](#continueinstallationjob)
 - [`cancelBlueprintJob`](#cancelblueprintjob)
 
+**Schemas**
+- [`BlueprintID`](#blueprintid)
+- [`BlueprintResourceID`](#blueprintresourceid)
+- [`CommonBlueprintFields`](#commonblueprintfields)
+- [`BlueprintResource`](#blueprintresource)
+- [`BlueprintPreview`](#blueprintpreview)
+- [`CustomBlueprint`](#customblueprint)
+- [`FileBlueprint`](#fileblueprint)
+- [`MarketplaceBlueprint`](#marketplaceblueprint)
+- [`InstalledMarketplaceBlueprintItem`](#installedmarketplaceblueprintitem)
+- [`DeployedBlueprint`](#deployedblueprint)
+- [`AppBlueprint`](#appblueprint)
+- [`Blueprint`](#blueprint)
+- [`BlueprintJobID`](#blueprintjobid)
+- [`CommonBlueprintJobFields`](#commonblueprintjobfields)
+- [`BlueprintExportJob`](#blueprintexportjob)
+- [`BlueprintInstallationJob`](#blueprintinstallationjob)
+- [`BlueprintJob`](#blueprintjob)
+- [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
+- [`BlueprintValidateJob`](#blueprintvalidatejob)
+- [`BlueprintJobEvent`](#blueprintjobevent)
+- [`BlueprintInstallationJobOptions`](#blueprintinstallationjoboptions)
+- [`ManifestID`](#manifestid)
+- [`JobID`](#jobid)
+- [`ManifestSource`](#manifestsource)
+- [`Manifest`](#manifest)
+- [`ManifestItem`](#manifestitem)
+- [`JobStatus`](#jobstatus)
+- [`ResourceNodeType`](#resourcenodetype)
+- [`PlanChanges`](#planchanges)
+- [`CommonResourceNode`](#commonresourcenode)
+- [`RootResourceNode`](#rootresourcenode)
+- [`VirtualResourceNodeGroup`](#virtualresourcenodegroup)
+- [`ResourceNode`](#resourcenode)
+- [`Job`](#job)
+- [`UploadFilePayload`](#uploadfilepayload)
+- [`S3Reference`](#s3reference)
+- [`CommonManifestFields`](#commonmanifestfields)
+- [`ManifestTimestampFields`](#manifesttimestampfields)
+- [`CommonImportFields`](#commonimportfields)
+- [`CommonMarkdownFields`](#commonmarkdownfields)
+- [`PreInstallRequirements`](#preinstallrequirements)
+- [`BlueprintInstallStatus`](#blueprintinstallstatus)
+- [`FormattedErrorCodes`](#formattederrorcodes)
+- [`FormattedErrorData`](#formattederrordata)
+- [`FormattedError`](#formattederror)
+- [`CallerIdentity`](#calleridentity)
+- [`SelectedResources`](#selectedresources)
+- [`ResourceReplacement`](#resourcereplacement)
+- [`PutManifestPayload`](#putmanifestpayload)
+
 ### `uploadManifest`
 
 Create pre-signed S3 URL to upload a manifest file.
@@ -1487,8 +1538,7 @@ const { data } = await client.cancelBlueprintJob({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `BlueprintID`
 
@@ -2592,5 +2642,3 @@ type PutManifestPayload = {
   }>
 }
 ```
-
-</details>

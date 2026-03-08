@@ -29,6 +29,24 @@ const { data } = await documentClient.getTemplateMeta(...)
 - [`generateDocumentV2`](#generatedocumentv2)
 - [`convertDocument`](#convertdocument)
 
+**Schemas**
+- [`S3Reference`](#s3reference)
+- [`ErrorOutput`](#erroroutput)
+- [`InvalidCustomVariableErrorDetails`](#invalidcustomvariableerrordetails)
+- [`InvalidCustomVariableErrorDetail`](#invalidcustomvariableerrordetail)
+- [`InternalErrorDetails`](#internalerrordetails)
+- [`InternalErrorDetail`](#internalerrordetail)
+- [`DocxTemplaterErrorDetails`](#docxtemplatererrordetails)
+- [`DocxTemplaterErrorDetail`](#docxtemplatererrordetail)
+- [`ErrorCode`](#errorcode)
+- [`TemplateSettings`](#templatesettings)
+- [`DocumentMetaRequest`](#documentmetarequest)
+- [`DocumentMetaResponse`](#documentmetaresponse)
+- [`DocumentGenerationV2Request`](#documentgenerationv2request)
+- [`DocumentGenerationV2Response`](#documentgenerationv2response)
+- [`ConvertDocumentRequest`](#convertdocumentrequest)
+- [`ConvertDocumentResponse`](#convertdocumentresponse)
+
 ### `getTemplateMeta`
 
 Get metadata for a document template
@@ -239,8 +257,7 @@ const { data } = await client.convertDocument(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `S3Reference`
 
@@ -527,5 +544,3 @@ type ConvertDocumentResponse = {
   }
 }
 ```
-
-</details>

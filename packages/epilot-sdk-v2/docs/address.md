@@ -31,6 +31,18 @@ const { data } = await addressClient.getAddressSuggestions(...)
 - [`availabilityCheck`](#availabilitycheck)
 - [`validateAvailabilityFile`](#validateavailabilityfile)
 
+**Schemas**
+- [`AvailabilityCheckParams`](#availabilitycheckparams)
+- [`AvailabilityFilters`](#availabilityfilters)
+- [`AvailabilityDate`](#availabilitydate)
+- [`AvailabilityLocation`](#availabilitylocation)
+- [`AvailabilityResult`](#availabilityresult)
+- [`ValidateAvailabilityFileResult`](#validateavailabilityfileresult)
+- [`ValidateAvailabilityFileError`](#validateavailabilityfileerror)
+- [`AddressSuggestion`](#addresssuggestion)
+- [`AddressSuggestions`](#addresssuggestions)
+- [`ErrorResponse`](#errorresponse)
+
 ### `getAddressSuggestions`
 
 Get address suggestions for the given Availability File
@@ -134,8 +146,7 @@ const { data } = await client.validateAvailabilityFile({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `AvailabilityCheckParams`
 
@@ -271,5 +282,3 @@ type ErrorResponse = {
   error: string
 }
 ```
-
-</details>

@@ -62,7 +62,6 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./packages/epilot-sdk-v2/docs/data-management.md) |
 | `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./packages/epilot-sdk-v2/docs/deduplication.md) |
 | `epilot.design` | `@epilot/sdk/design` | [docs](./packages/epilot-sdk-v2/docs/design.md) |
-| `epilot.discussion` | `@epilot/sdk/discussion` | [docs](./packages/epilot-sdk-v2/docs/discussion.md) |
 | `epilot.document` | `@epilot/sdk/document` | [docs](./packages/epilot-sdk-v2/docs/document.md) |
 | `epilot.emailSettings` | `@epilot/sdk/email-settings` | [docs](./packages/epilot-sdk-v2/docs/email-settings.md) |
 | `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./packages/epilot-sdk-v2/docs/email-template.md) |

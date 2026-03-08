@@ -118,14 +118,6 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
-    name: 'discussion',
-    loader: async () => {
-      const mod = await import('../definitions/discussion.json');
-      return (mod.default ?? mod) as unknown as Document;
-    },
-  });
-  registerApi({
-    registry,
     name: 'document',
     loader: async () => {
       const mod = await import('../definitions/document.json');

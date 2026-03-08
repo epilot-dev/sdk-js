@@ -27,6 +27,9 @@ const { data } = await ibanClient.validateIban(...)
 **Ibans**
 - [`validateIban`](#validateiban)
 
+**Schemas**
+- [`Error`](#error)
+
 ### `validateIban`
 
 Validate an Iban
@@ -44,8 +47,7 @@ const { data } = await client.validateIban(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Error`
 
@@ -57,5 +59,3 @@ type Error = {
   error?: string
 }
 ```
-
-</details>

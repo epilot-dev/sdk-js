@@ -38,6 +38,48 @@ const { data } = await entityMappingClient.storeConfig(...)
 - [`getMappingConfig`](#getmappingconfig)
 - [`putMappingConfig`](#putmappingconfig)
 
+**Schemas**
+- [`SearchMappingReq`](#searchmappingreq)
+- [`MappingConfigsResp`](#mappingconfigsresp)
+- [`MappingConfigs`](#mappingconfigs)
+- [`MappingConfig`](#mappingconfig)
+- [`MappingConfigV2`](#mappingconfigv2)
+- [`MappingConfigCommonFields`](#mappingconfigcommonfields)
+- [`Owner`](#owner)
+- [`ExecuteRelationsReq`](#executerelationsreq)
+- [`ExecuteRelationsResp`](#executerelationsresp)
+- [`NewRelationItem`](#newrelationitem)
+- [`RelationItem`](#relationitem)
+- [`ExecuteMappingReq`](#executemappingreq)
+- [`ExecuteMappingResp`](#executemappingresp)
+- [`MappingFailure`](#mappingfailure)
+- [`MappingWarning`](#mappingwarning)
+- [`Entity`](#entity)
+- [`EntityRef`](#entityref)
+- [`SourceConfig`](#sourceconfig)
+- [`JourneyRef`](#journeyref)
+- [`Loop_Index_String`](#loop_index_string)
+- [`TargetConfig`](#targetconfig)
+- [`MapCondition`](#mapcondition)
+- [`ConditionNode`](#conditionnode)
+- [`RelationAttribute`](#relationattribute)
+- [`MappingAttributeV2`](#mappingattributev2)
+- [`AttributeOrigin`](#attributeorigin)
+- [`OperationNode`](#operationnode)
+- [`OperationObjectNode`](#operationobjectnode)
+- [`PrimitiveJSONValue`](#primitivejsonvalue)
+- [`RandomOperation`](#randomoperation)
+- [`MappingAttribute`](#mappingattribute)
+- [`MappingAttributeMode`](#mappingattributemode)
+- [`SetValueMapper`](#setvaluemapper)
+- [`CopyValueMapper`](#copyvaluemapper)
+- [`AppendValueMapper`](#appendvaluemapper)
+- [`MappingHistoryResp`](#mappinghistoryresp)
+- [`MappingHistoryEntry`](#mappinghistoryentry)
+- [`MappingSource`](#mappingsource)
+- [`MappingSourceProperty`](#mappingsourceproperty)
+- [`MappingSourceTargetType`](#mappingsourcetargettype)
+
 ### `storeConfig`
 
 Store new MappingConfig
@@ -851,8 +893,7 @@ const { data } = await client.putMappingConfig(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `SearchMappingReq`
 
@@ -1688,5 +1729,3 @@ type MappingSourceProperty = {
 ```ts
 type MappingSourceTargetType = "string" | "date" | "datetime" | "boolean" | "number" | "image" | "file" | "address" | "email" | "phone" | "select" | "multiselect" | "payment" | "link" | "currency" | "sequence" | "relation" | "array"
 ```
-
-</details>

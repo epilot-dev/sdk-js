@@ -35,6 +35,24 @@ const { data } = await accessTokenClient.createAccessToken(...)
 - [`getPublicTokenJwks`](#getpublictokenjwks)
 - [`getPublicTokenOIDC`](#getpublictokenoidc)
 
+**Schemas**
+- [`AccessToken`](#accesstoken)
+- [`AccessTokenId`](#accesstokenid)
+- [`AccessTokenName`](#accesstokenname)
+- [`AccessTokenType`](#accesstokentype)
+- [`AccessTokenJourneyId`](#accesstokenjourneyid)
+- [`PortalId`](#portalid)
+- [`TokenParameters`](#tokenparameters)
+- [`ExpiresIn`](#expiresin)
+- [`AccessTokenParameters`](#accesstokenparameters)
+- [`JourneyTokenParameters`](#journeytokenparameters)
+- [`PortalTokenParameters`](#portaltokenparameters)
+- [`AssumeTokenParameters`](#assumetokenparameters)
+- [`AppTokenParameters`](#apptokenparameters)
+- [`AccessTokenItem`](#accesstokenitem)
+- [`RoleId`](#roleid)
+- [`Assignments`](#assignments)
+
 ### `createAccessToken`
 
 **Access Token type: `API`** (default if not specified):
@@ -260,8 +278,7 @@ const { data } = await client.getPublicTokenOIDC()
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `AccessToken`
 
@@ -429,5 +446,3 @@ List of role ids attached to an user
 ```ts
 type Assignments = string[]
 ```
-
-</details>

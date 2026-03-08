@@ -85,11 +85,6 @@
       "import": "./dist/apis/design.js",
       "require": "./dist/apis/design.cjs"
     },
-    "./discussion": {
-      "types": "./dist/apis/discussion.d.ts",
-      "import": "./dist/apis/discussion.js",
-      "require": "./dist/apis/discussion.cjs"
-    },
     "./document": {
       "types": "./dist/apis/document.d.ts",
       "import": "./dist/apis/document.js",

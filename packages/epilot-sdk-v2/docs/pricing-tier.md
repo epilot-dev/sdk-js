@@ -26,6 +26,9 @@ const { data } = await pricingTierClient.getCurrentPricingTier(...)
 **Pricing Tier**
 - [`getCurrentPricingTier`](#getcurrentpricingtier)
 
+**Schemas**
+- [`PricingTier`](#pricingtier)
+
 ### `getCurrentPricingTier`
 
 Get current pricing tier of logged in user
@@ -58,8 +61,7 @@ const { data } = await client.getCurrentPricingTier()
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `PricingTier`
 
@@ -77,5 +79,3 @@ type PricingTier = {
   is_pure_360?: boolean
 }
 ```
-
-</details>

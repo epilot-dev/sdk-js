@@ -26,6 +26,11 @@ const { data } = await deduplicationClient.deduplicate(...)
 
 - [`deduplicate`](#deduplicate)
 
+**Schemas**
+- [`DeduplicateRequestBody`](#deduplicaterequestbody)
+- [`DeduplicateRequestResponse`](#deduplicaterequestresponse)
+- [`Entity`](#entity)
+
 ### `deduplicate`
 
 Deduplicates Entities
@@ -75,8 +80,7 @@ const { data } = await client.deduplicate(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `DeduplicateRequestBody`
 
@@ -130,5 +134,3 @@ type Entity = {
   type?: string
 }
 ```
-
-</details>

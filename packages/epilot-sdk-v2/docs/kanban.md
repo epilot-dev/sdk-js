@@ -38,6 +38,20 @@ const { data } = await kanbanClient.createKanbanBoard(...)
 - [`flowsAutocomplete`](#flowsautocomplete)
 - [`executeFlowsQuery`](#executeflowsquery)
 
+**Schemas**
+- [`BoardSummary`](#boardsummary)
+- [`Board`](#board)
+- [`Swimlane`](#swimlane)
+- [`Sorting`](#sorting)
+- [`BoardFilter`](#boardfilter)
+- [`FilterGroup`](#filtergroup)
+- [`FilterOperator`](#filteroperator)
+- [`DynamicDateValue`](#dynamicdatevalue)
+- [`ValueType`](#valuetype)
+- [`FlowsQueryRequest`](#flowsqueryrequest)
+- [`FlowsQueryResult`](#flowsqueryresult)
+- [`FilterItem`](#filteritem)
+
 ### `createKanbanBoard`
 
 Create a Kanban board
@@ -532,8 +546,7 @@ const { data } = await client.executeFlowsQuery(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `BoardSummary`
 
@@ -729,5 +742,3 @@ type FilterItem = {
   data_type?: "string" | "number" | "boolean" | "date"
 }
 ```
-
-</details>

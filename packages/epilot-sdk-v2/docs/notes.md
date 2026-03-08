@@ -41,6 +41,24 @@ const { data } = await notesClient.createNote(...)
 - [`removeNoteReaction`](#removenotereaction)
 - [`toggleNoteReactions`](#togglenotereactions)
 
+**Schemas**
+- [`NotePostRequestBody`](#notepostrequestbody)
+- [`ContextType`](#contexttype)
+- [`NoteEntity`](#noteentity)
+- [`Entity`](#entity)
+- [`CreatedByType`](#createdbytype)
+- [`NoteGetRequestResponse`](#notegetrequestresponse)
+- [`NotePatchRequestBody`](#notepatchrequestbody)
+- [`NonHydratedNoteEntity`](#nonhydratednoteentity)
+- [`NoteEntityParent`](#noteentityparent)
+- [`NotePutRequestBody`](#noteputrequestbody)
+- [`NoteSearchByContextRequestBody`](#notesearchbycontextrequestbody)
+- [`NotesSearchRequestResponse`](#notessearchrequestresponse)
+- [`NoteContexts`](#notecontexts)
+- [`WorkflowExecution`](#workflowexecution)
+- [`ReactionRequest`](#reactionrequest)
+- [`ToggleReactionsRequest`](#togglereactionsrequest)
+
 ### `createNote`
 
 Creates a new Note entry
@@ -328,8 +346,7 @@ const { data } = await client.toggleNoteReactions(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `NotePostRequestBody`
 
@@ -631,5 +648,3 @@ type ToggleReactionsRequest = {
   emojis: string[]
 }
 ```
-
-</details>

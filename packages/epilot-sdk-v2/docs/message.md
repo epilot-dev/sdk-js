@@ -76,6 +76,31 @@ const { data } = await messageClient.sendMessage(...)
 - [`createDraft`](#createdraft)
 - [`sendDraft`](#senddraft)
 
+**Schemas**
+- [`ErrorResponse`](#errorresponse)
+- [`MoveThreadPayload`](#movethreadpayload)
+- [`BaseEntity`](#baseentity)
+- [`Thread`](#thread)
+- [`Message`](#message)
+- [`MessageV2`](#messagev2)
+- [`Address`](#address)
+- [`AttachmentsRelation`](#attachmentsrelation)
+- [`File`](#file)
+- [`MessageRequestParams`](#messagerequestparams)
+- [`SearchParamsV2`](#searchparamsv2)
+- [`SearchParams`](#searchparams)
+- [`SearchIDParams`](#searchidparams)
+- [`ReadMessagePayload`](#readmessagepayload)
+- [`ReadingScope`](#readingscope)
+- [`ThreadTimeline`](#threadtimeline)
+- [`ThreadDoneEvent`](#threaddoneevent)
+- [`ThreadOpenEvent`](#threadopenevent)
+- [`TimelineEventData`](#timelineeventdata)
+- [`TimelineEvent`](#timelineevent)
+- [`BulkActionsPayloadWithScopes`](#bulkactionspayloadwithscopes)
+- [`BulkActionsPayload`](#bulkactionspayload)
+- [`FieldsParam`](#fieldsparam)
+
 ### `sendMessage`
 
 Send an email message
@@ -1606,8 +1631,7 @@ const { data } = await client.getMessageV2({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `ErrorResponse`
 
@@ -1983,5 +2007,3 @@ Globbing and globstart (**) is supported for nested fields.
 ```ts
 type FieldsParam = string[]
 ```
-
-</details>

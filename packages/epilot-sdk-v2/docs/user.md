@@ -66,6 +66,46 @@ const { data } = await userClient.signUpUser(...)
 - [`getUser`](#getuser)
 - [`getUserLoginParameters`](#getuserloginparameters)
 
+**Schemas**
+- [`NavigationId`](#navigationid)
+- [`Navigation`](#navigation)
+- [`NavigationCreateRequest`](#navigationcreaterequest)
+- [`NavigationConfiguration`](#navigationconfiguration)
+- [`NavigationItem`](#navigationitem)
+- [`NavigationKeyItem`](#navigationkeyitem)
+- [`NavigationGroupItem`](#navigationgroupitem)
+- [`InviteToken`](#invitetoken)
+- [`PartnerInvitationToken`](#partnerinvitationtoken)
+- [`VerificationToken`](#verificationtoken)
+- [`GroupId`](#groupid)
+- [`UserId`](#userid)
+- [`Query`](#query)
+- [`OrganizationId`](#organizationid)
+- [`Limit`](#limit)
+- [`Offset`](#offset)
+- [`Hydrate`](#hydrate)
+- [`Username`](#username)
+- [`UserInvitationPayload`](#userinvitationpayload)
+- [`UserActivationPayload`](#useractivationpayload)
+- [`UserVerificationPayload`](#userverificationpayload)
+- [`UserV2`](#userv2)
+- [`User`](#user)
+- [`LoginParameters`](#loginparameters)
+- [`CreateGroupReq`](#creategroupreq)
+- [`UpdateGroupReq`](#updategroupreq)
+- [`Group`](#group)
+- [`SignupUserPayload`](#signupuserpayload)
+- [`OrganizationDetail`](#organizationdetail)
+- [`CognitoDetails`](#cognitodetails)
+- [`UserDetail`](#userdetail)
+- [`Organization`](#organization)
+- [`DataPointsResponse`](#datapointsresponse)
+- [`DataPoint`](#datapoint)
+- [`Passkey`](#passkey)
+- [`PasskeyAuthenticationOptions`](#passkeyauthenticationoptions)
+- [`PasskeyRegistrationOptions`](#passkeyregistrationoptions)
+- [`PasskeyRegistrationResponse`](#passkeyregistrationresponse)
+
 ### `signUpUser`
 
 `POST /v2/users/public/signup`
@@ -1911,8 +1951,7 @@ const { data } = await client.getUserLoginParameters({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `NavigationId`
 
@@ -2400,5 +2439,3 @@ type PasskeyRegistrationResponse = {
   friendly_name?: string
 }
 ```
-
-</details>

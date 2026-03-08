@@ -600,6 +600,7 @@ const generateClientDoc = (client: ClientInfo): string => {
   );
 
   const activeOps = operations.filter((op) => !op.deprecated);
+  const schemas = extractSchemaTypes(client);
 
   if (activeOps.length > 0) {
     lines.push(`## Operations`, ``);
@@ -629,6 +630,15 @@ const generateClientDoc = (client: ClientInfo): string => {
       for (const op of activeOps) {
         const anchor = op.operationId.toLowerCase();
         lines.push(`- [\`${op.operationId}\`](#${anchor})`);
+      }
+      lines.push(``);
+    }
+
+    if (schemas.length > 0) {
+      lines.push(`**Schemas**`);
+      for (const schema of schemas) {
+        const anchor = schema.name.toLowerCase();
+        lines.push(`- [\`${schema.name}\`](#${anchor})`);
       }
       lines.push(``);
     }
@@ -718,11 +728,8 @@ const generateClientDoc = (client: ClientInfo): string => {
   }
 
   // Schemas section
-  const schemas = extractSchemaTypes(client);
   if (schemas.length > 0) {
-    lines.push(`<details>`);
-    lines.push(`<summary>Schemas</summary>`);
-    lines.push(``);
+    lines.push(`## Schemas`, ``);
 
     for (const schema of schemas) {
       lines.push(`### \`${schema.name}\``);
@@ -744,8 +751,6 @@ const generateClientDoc = (client: ClientInfo): string => {
       lines.push('```');
       lines.push(``);
     }
-
-    lines.push(`</details>`);
   }
 
   return lines.join('\n');

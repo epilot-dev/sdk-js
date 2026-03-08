@@ -44,6 +44,37 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`updateMeterReading`](#updatemeterreading)
 - [`deleteMeterReading`](#deletemeterreading)
 
+**Schemas**
+- [`ErrorResp`](#errorresp)
+- [`EntityId`](#entityid)
+- [`EntitySlug`](#entityslug)
+- [`BaseEntity`](#baseentity)
+- [`Entity`](#entity)
+- [`EntityItem`](#entityitem)
+- [`Id`](#id)
+- [`EntityRelation`](#entityrelation)
+- [`Meter`](#meter)
+- [`Direction`](#direction)
+- [`TariffType`](#tarifftype)
+- [`Reason`](#reason)
+- [`ReasonString`](#reasonstring)
+- [`ReadBy`](#readby)
+- [`ReadingStatus`](#readingstatus)
+- [`Reading`](#reading)
+- [`MeterReading`](#meterreading)
+- [`PortalMeterReading`](#portalmeterreading)
+- [`UpdateMeterReading`](#updatemeterreading)
+- [`MeterCounter`](#metercounter)
+- [`CounterReadingOnSubmission`](#counterreadingonsubmission)
+- [`SubmissionMeterReading`](#submissionmeterreading)
+- [`Unit`](#unit)
+- [`Source`](#source)
+- [`ActionLabel`](#actionlabel)
+- [`Rule`](#rule)
+- [`JourneyActions`](#journeyactions)
+- [`ReadingWithMeter`](#readingwithmeter)
+- [`ActivityId`](#activityid)
+
 ### `getCustomerMeters`
 
 Get Customer Meters
@@ -874,8 +905,7 @@ const { data } = await client.deleteMeterReading({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `ErrorResp`
 
@@ -1245,5 +1275,3 @@ See https://github.com/ulid/spec
 ```ts
 type ActivityId = string // ulid
 ```
-
-</details>

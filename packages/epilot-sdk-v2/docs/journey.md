@@ -44,6 +44,27 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`getJourneyV2`](#getjourneyv2)
 - [`removeJourneyV2`](#removejourneyv2)
 
+**Schemas**
+- [`GetJourneysResponse`](#getjourneysresponse)
+- [`JourneyResponse`](#journeyresponse)
+- [`JourneyProductsResponse`](#journeyproductsresponse)
+- [`PatchUpdateJourneyRequest`](#patchupdatejourneyrequest)
+- [`JourneyCreationRequest`](#journeycreationrequest)
+- [`JourneyCreationRequestV2`](#journeycreationrequestv2)
+- [`SearchJourneysQueryRequest`](#searchjourneysqueryrequest)
+- [`SearchJourneysResponse`](#searchjourneysresponse)
+- [`Journey`](#journey)
+- [`JourneyFeatureFlags`](#journeyfeatureflags)
+- [`JourneyAuditInfo`](#journeyauditinfo)
+- [`S3Reference`](#s3reference)
+- [`TemplateSettings`](#templatesettings)
+- [`GenerateDocumentResponse`](#generatedocumentresponse)
+- [`GenerateDocumentRequest`](#generatedocumentrequest)
+- [`GetSettingsForJourney`](#getsettingsforjourney)
+- [`ButtonOption`](#buttonoption)
+- [`ValidationRuleRef`](#validationruleref)
+- [`RuleRef`](#ruleref)
+
 ### `getJourneysByOrgId`
 
 Get all journeys by organization id
@@ -1564,8 +1585,7 @@ const { data } = await client.getButtonOptions({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `GetJourneysResponse`
 
@@ -1931,5 +1951,3 @@ Maps field names to rule IDs.
 ```ts
 type RuleRef = Record<string, string>
 ```
-
-</details>

@@ -33,6 +33,26 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`addUsedByReference`](#addusedbyreference)
 - [`removeUsedByReference`](#removeusedbyreference)
 
+**Schemas**
+- [`GetValidationRulesResponse`](#getvalidationrulesresponse)
+- [`CreateValidationRuleRequest`](#createvalidationrulerequest)
+- [`UpdateValidationRuleRequest`](#updatevalidationrulerequest)
+- [`ValidationRuleBase`](#validationrulebase)
+- [`ValidationRule`](#validationrule)
+- [`UsedBy`](#usedby)
+- [`RegexRuleType`](#regexruletype)
+- [`PatternRuleType`](#patternruletype)
+- [`NumericRuleType`](#numericruletype)
+- [`RegexCondition`](#regexcondition)
+- [`RegexNestedCondition`](#regexnestedcondition)
+- [`RegexFactCondition`](#regexfactcondition)
+- [`PatternCondition`](#patterncondition)
+- [`PatternNestedCondition`](#patternnestedcondition)
+- [`PatternFactCondition`](#patternfactcondition)
+- [`NumericCondition`](#numericcondition)
+- [`NumericNestedCondition`](#numericnestedcondition)
+- [`NumericFactCondition`](#numericfactcondition)
+
 ### `getValidationRules`
 
 Get all validation rules by organization Id
@@ -364,8 +384,7 @@ const { data } = await client.removeUsedByReference(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `GetValidationRulesResponse`
 
@@ -928,5 +947,3 @@ type NumericFactCondition = {
   }
 }
 ```
-
-</details>

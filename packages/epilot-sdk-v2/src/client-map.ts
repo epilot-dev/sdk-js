@@ -12,7 +12,6 @@ import type { Client as CustomerPortalClient } from './types/customer-portal';
 import type { Client as DataManagementClient } from './types/data-management';
 import type { Client as DeduplicationClient } from './types/deduplication';
 import type { Client as DesignClient } from './types/design';
-import type { Client as DiscussionClient } from './types/discussion';
 import type { Client as DocumentClient } from './types/document';
 import type { Client as EmailSettingsClient } from './types/email-settings';
 import type { Client as EmailTemplateClient } from './types/email-template';
@@ -60,7 +59,6 @@ export type SDKClientMap = {
   dataManagement: DataManagementClient;
   deduplication: DeduplicationClient;
   design: DesignClient;
-  discussion: DiscussionClient;
   document: DocumentClient;
   emailSettings: EmailSettingsClient;
   emailTemplate: EmailTemplateClient;

@@ -31,6 +31,14 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`updateEnvironmentVariable`](#updateenvironmentvariable)
 - [`deleteEnvironmentVariable`](#deleteenvironmentvariable)
 
+**Schemas**
+- [`EnvironmentValueType`](#environmentvaluetype)
+- [`EnvironmentVariable`](#environmentvariable)
+- [`EnvironmentVariableListItem`](#environmentvariablelistitem)
+- [`EnvironmentVariableList`](#environmentvariablelist)
+- [`EnvironmentVariableCreateRequest`](#environmentvariablecreaterequest)
+- [`EnvironmentVariableUpdateRequest`](#environmentvariableupdaterequest)
+
 ### `listEnvironmentVariables`
 
 List environment variables
@@ -180,8 +188,7 @@ const { data } = await client.deleteEnvironmentVariable({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `EnvironmentValueType`
 
@@ -250,5 +257,3 @@ type EnvironmentVariableUpdateRequest = {
   description?: string
 }
 ```
-
-</details>

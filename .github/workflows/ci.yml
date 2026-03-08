@@ -81,6 +81,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm build
+          pnpm run lint:fix
           pnpm --filter @epilot/sdk generate
           pnpm --filter @epilot/sdk build
           pnpm --filter @epilot/sdk test

@@ -67,6 +67,35 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`verifyNameServers`](#verifynameservers)
 - [`verifyDomain`](#verifydomain)
 
+**Schemas**
+- [`MailboxSyncStatus`](#mailboxsyncstatus)
+- [`MailboxSyncStatuses`](#mailboxsyncstatuses)
+- [`MailboxSyncFolderStatuses`](#mailboxsyncfolderstatuses)
+- [`MailboxSyncTimeframePeriods`](#mailboxsynctimeframeperiods)
+- [`InboxBucketResponse`](#inboxbucketresponse)
+- [`ProvisionEpilotEmailAddressPayload`](#provisionepilotemailaddresspayload)
+- [`SetEmailAddressPrimaryPayload`](#setemailaddressprimarypayload)
+- [`UpdateEmailAddressPayload`](#updateemailaddresspayload)
+- [`CreateEmailAddressPayload`](#createemailaddresspayload)
+- [`EmailAddressResponse`](#emailaddressresponse)
+- [`ErrorResponse`](#errorresponse)
+- [`SettingMeta`](#settingmeta)
+- [`UpdateSharedInboxPayload`](#updatesharedinboxpayload)
+- [`CreateSharedInboxPayload`](#createsharedinboxpayload)
+- [`SharedInboxResponse`](#sharedinboxresponse)
+- [`SettingsResponse`](#settingsresponse)
+- [`ConnectedOutlookEmail`](#connectedoutlookemail)
+- [`OutlookConnectionError`](#outlookconnectionerror)
+- [`OutlookConnectionStatus`](#outlookconnectionstatus)
+- [`SignatureSetting`](#signaturesetting)
+- [`EmailDomainSetting`](#emaildomainsetting)
+- [`EmailAddressSetting`](#emailaddresssetting)
+- [`WhitelistEmailAddressSetting`](#whitelistemailaddresssetting)
+- [`RestrictDuplicatesWithinSetting`](#restrictduplicateswithinsetting)
+- [`SettingType`](#settingtype)
+- [`Setting`](#setting)
+- [`Domain`](#domain)
+
 ### `provisionEpilotEmailAddress`
 
 Provisions or reactivates an epilot-managed email address for the organization.
@@ -1215,8 +1244,7 @@ const { data } = await client.verifyDomain(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `MailboxSyncStatus`
 
@@ -1580,5 +1608,3 @@ type Domain = {
   domain?: string
 }
 ```
-
-</details>

@@ -40,6 +40,19 @@ const { data } = await templateVariablesClient.getCategories(...)
 - [`deleteCustomVariable`](#deletecustomvariable)
 - [`getBluePrintTableConfig`](#getblueprinttableconfig)
 
+**Schemas**
+- [`Language`](#language)
+- [`VariableParameters`](#variableparameters)
+- [`ReplacementOutput`](#replacementoutput)
+- [`ReplacementOutputV2`](#replacementoutputv2)
+- [`VariableResult`](#variableresult)
+- [`CustomVariablesSearchParams`](#customvariablessearchparams)
+- [`VariableContext`](#variablecontext)
+- [`TemplateType`](#templatetype)
+- [`CategoryResult`](#categoryresult)
+- [`ExternalCustomVariable`](#externalcustomvariable)
+- [`CustomVariable`](#customvariable)
+
 ### `getCategories`
 
 Get all template variable categories
@@ -1046,8 +1059,7 @@ const { data } = await client.getBluePrintTableConfig()
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Language`
 
@@ -1174,5 +1186,3 @@ type CustomVariable = {
   updated_by?: string
 }
 ```
-
-</details>

@@ -32,6 +32,13 @@ const { data } = await purposeClient.createPurpose(...)
 - [`updatePurpose`](#updatepurpose)
 - [`deletePurpose`](#deletepurpose)
 
+**Schemas**
+- [`Purpose`](#purpose)
+- [`CreatePurposeInput`](#createpurposeinput)
+- [`UpdatePurposeInput`](#updatepurposeinput)
+- [`BatchGetPurposesInput`](#batchgetpurposesinput)
+- [`Error`](#error)
+
 ### `createPurpose`
 
 Create Purpose
@@ -223,8 +230,7 @@ const { data } = await client.deletePurpose({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Purpose`
 
@@ -277,5 +283,3 @@ type Error = {
   error?: string
 }
 ```
-
-</details>

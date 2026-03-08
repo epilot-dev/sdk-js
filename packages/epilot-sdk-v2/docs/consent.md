@@ -29,6 +29,15 @@ const { data } = await consentClient.publishConsentEvent(...)
 - [`listConsentEvents`](#listconsentevents)
 - [`handleOptInWithToken`](#handleoptinwithtoken)
 
+**Schemas**
+- [`ConsentIdentifier`](#consentidentifier)
+- [`ConsentTopic`](#consenttopic)
+- [`ConsentSource`](#consentsource)
+- [`ConsentMeta`](#consentmeta)
+- [`ConsentEventRequestBody`](#consenteventrequestbody)
+- [`ConsentEvent`](#consentevent)
+- [`OrganizationId`](#organizationid)
+
 ### `publishConsentEvent`
 
 Publishes consent event on event bus, which appends to consent store
@@ -133,8 +142,7 @@ const { data } = await client.handleOptInWithToken({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `ConsentIdentifier`
 
@@ -197,5 +205,3 @@ type ConsentEvent = {
 ```ts
 type OrganizationId = string
 ```
-
-</details>

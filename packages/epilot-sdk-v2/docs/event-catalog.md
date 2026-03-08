@@ -33,6 +33,25 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`searchEventHistory`](#searcheventhistory)
 - [`triggerEvent`](#triggerevent)
 
+**Schemas**
+- [`EventConfigBase`](#eventconfigbase)
+- [`EventConfig`](#eventconfig)
+- [`UpdateEventPayload`](#updateeventpayload)
+- [`PrimitiveField`](#primitivefield)
+- [`ContextEntity`](#contextentity)
+- [`SchemaField`](#schemafield)
+- [`CommonEventMetadata`](#commoneventmetadata)
+- [`EventJsonSchema`](#eventjsonschema)
+- [`Event`](#event)
+- [`GraphDefinition`](#graphdefinition)
+- [`GraphNode`](#graphnode)
+- [`GraphEdge`](#graphedge)
+- [`EntityOperationTrigger`](#entityoperationtrigger)
+- [`SearchOptions`](#searchoptions)
+- [`FieldsParam`](#fieldsparam)
+- [`TriggerEventPayload`](#triggereventpayload)
+- [`TriggerEventResponse`](#triggereventresponse)
+
 ### `listEvents`
 
 Retrieve list of available business events
@@ -523,8 +542,7 @@ const { data } = await client.triggerEvent(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `EventConfigBase`
 
@@ -832,5 +850,3 @@ type TriggerEventResponse = {
   event_bridge_event_id?: string
 }
 ```
-
-</details>

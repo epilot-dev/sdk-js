@@ -37,6 +37,35 @@ const { data } = await designClient.getAllDesigns(...)
 - [`addConsumer`](#addconsumer)
 - [`removeConsumer`](#removeconsumer)
 
+**Schemas**
+- [`UploadFileReq`](#uploadfilereq)
+- [`UploadFileRes`](#uploadfileres)
+- [`GetFilesRes`](#getfilesres)
+- [`GetAllDesignsRes`](#getalldesignsres)
+- [`GetBrandsRes`](#getbrandsres)
+- [`AddDesignReq`](#adddesignreq)
+- [`AddDesignRes`](#adddesignres)
+- [`GetDesignRes`](#getdesignres)
+- [`UpdateDesignReq`](#updatedesignreq)
+- [`ItemMetada`](#itemmetada)
+- [`AddConsumerReq`](#addconsumerreq)
+- [`DesignItem`](#designitem)
+- [`BrandItem`](#branditem)
+- [`Custom_Style`](#custom_style)
+- [`Journey`](#journey)
+- [`ConsumerData`](#consumerdata)
+- [`WidgetData`](#widgetdata)
+- [`CustomerPortalData`](#customerportaldata)
+- [`LogoData`](#logodata)
+- [`PaletteData`](#palettedata)
+- [`TypographyData`](#typographydata)
+- [`ShapeData`](#shapedata)
+- [`FontData`](#fontdata)
+- [`FontResponseUrl`](#fontresponseurl)
+- [`WidgetPortalData`](#widgetportaldata)
+- [`ErrorResp`](#errorresp)
+- [`FileData`](#filedata)
+
 ### `getAllDesigns`
 
 Scan all designs linked to a organization, based in orgId attribute from JWT auth token
@@ -443,8 +472,7 @@ const { data } = await client.removeConsumer(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `UploadFileReq`
 
@@ -916,5 +944,3 @@ type FileData = {
   url: string
 }
 ```
-
-</details>

@@ -40,6 +40,20 @@ const { data } = await billingClient.getBillingEvents(...)
 **Balance**
 - [`getCustomerBalance`](#getcustomerbalance)
 
+**Schemas**
+- [`BaseEntity`](#baseentity)
+- [`EntityId`](#entityid)
+- [`EntitySlug`](#entityslug)
+- [`EntityRelationItem`](#entityrelationitem)
+- [`BaseBillingEvent`](#basebillingevent)
+- [`InstallmentEvent`](#installmentevent)
+- [`ReimbursementEvent`](#reimbursementevent)
+- [`BillingEvent`](#billingevent)
+- [`Contract`](#contract)
+- [`ContractItem`](#contractitem)
+- [`Balance`](#balance)
+- [`Currency`](#currency)
+
 ### `getBillingEvents`
 
 Get and filter billing events such as installments and reimbursements.
@@ -550,8 +564,7 @@ const { data } = await client.getCustomerBalance({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `BaseEntity`
 
@@ -772,5 +785,3 @@ Currency code in ISO 4217 format
 ```ts
 type Currency = string
 ```
-
-</details>

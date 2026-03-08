@@ -30,6 +30,12 @@ const { data } = await auditLogsClient.getLogs(...)
 **Audit Log**
 - [`getLogById`](#getlogbyid)
 
+**Schemas**
+- [`SearchOptions`](#searchoptions)
+- [`HttpContext`](#httpcontext)
+- [`Caller`](#caller)
+- [`Event`](#event)
+
 ### `getLogs`
 
 Retrieve Audit Log events. Optionally, you can filter them by organization.
@@ -132,8 +138,7 @@ const { data } = await client.getLogById({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `SearchOptions`
 
@@ -209,5 +214,3 @@ type Event = {
   source_url?: string
 }
 ```
-
-</details>

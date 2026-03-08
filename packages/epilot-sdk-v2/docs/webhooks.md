@@ -41,6 +41,32 @@ const { data } = await webhooksClient.getPublicKey(...)
 **Events**
 - [`getWebhookEventsV2`](#getwebhookeventsv2)
 
+**Schemas**
+- [`PublicKeyResponse`](#publickeyresponse)
+- [`SearchOptions`](#searchoptions)
+- [`EventListResponse`](#eventlistresponse)
+- [`HttpMethod`](#httpmethod)
+- [`AuthType`](#authtype)
+- [`Filter`](#filter)
+- [`Auth`](#auth)
+- [`BasicAuthConfig`](#basicauthconfig)
+- [`OAuthConfig`](#oauthconfig)
+- [`ApiKeyConfig`](#apikeyconfig)
+- [`WebhookConfig`](#webhookconfig)
+- [`EventConfigResp`](#eventconfigresp)
+- [`EventConfigEntry`](#eventconfigentry)
+- [`ErrorResp`](#errorresp)
+- [`TriggerWebhookResp`](#triggerwebhookresp)
+- [`PayloadConfiguration`](#payloadconfiguration)
+- [`CustomHeader`](#customheader)
+- [`CustomOAuthParameter`](#customoauthparameter)
+- [`Metadata`](#metadata)
+- [`ExecutionPayload`](#executionpayload)
+- [`WebhookEvent`](#webhookevent)
+- [`ExampleRequest`](#examplerequest)
+- [`ExampleResponse`](#exampleresponse)
+- [`BatchReplayRequest`](#batchreplayrequest)
+
 ### `getPublicKey`
 
 Returns the platform-level Ed25519 public key used to verify
@@ -560,8 +586,7 @@ const { data } = await client.getWebhookEventsV2(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `PublicKeyResponse`
 
@@ -948,5 +973,3 @@ type BatchReplayRequest = {
   eventIds: string[]
 }
 ```
-
-</details>

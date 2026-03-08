@@ -44,6 +44,38 @@ const { data } = await partnerDirectoryClient.approvePartner(...)
 - [`assignPartnerUserRoles`](#assignpartneruserroles)
 - [`unassignPartnerUserRoles`](#unassignpartneruserroles)
 
+**Schemas**
+- [`InviteToken`](#invitetoken)
+- [`Partner`](#partner)
+- [`PartnerId`](#partnerid)
+- [`OrganizationId`](#organizationid)
+- [`ActivatePartnerPayload`](#activatepartnerpayload)
+- [`PartnerInvitationPayload`](#partnerinvitationpayload)
+- [`Assignable`](#assignable)
+- [`BaseAssignable`](#baseassignable)
+- [`AssignableUser`](#assignableuser)
+- [`AssignablePartnerUser`](#assignablepartneruser)
+- [`AssignableGroup`](#assignablegroup)
+- [`AssignableOrganization`](#assignableorganization)
+- [`AssignableEcpPlaceholder`](#assignableecpplaceholder)
+- [`SearchGeolocation`](#searchgeolocation)
+- [`Geolocation`](#geolocation)
+- [`Address`](#address)
+- [`AddressGeolocation`](#addressgeolocation)
+- [`PartnerUser`](#partneruser)
+- [`CreatePartnerUserPayload`](#createpartneruserpayload)
+- [`CreatePartnerRolePayload`](#createpartnerrolepayload)
+- [`UpdatePartnerRolePayload`](#updatepartnerrolepayload)
+- [`Grant`](#grant)
+- [`GrantWithDependencies`](#grantwithdependencies)
+- [`GrantCondition`](#grantcondition)
+- [`EqualsCondition`](#equalscondition)
+- [`RoleId`](#roleid)
+- [`BaseRoleForCreate`](#baseroleforcreate)
+- [`PartnerRole`](#partnerrole)
+- [`AssignRolesPayload`](#assignrolespayload)
+- [`User`](#user)
+
 ### `approvePartner`
 
 Approve partner request
@@ -642,8 +674,7 @@ const { data } = await client.unassignPartnerUserRoles(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `InviteToken`
 
@@ -1079,5 +1110,3 @@ type User = {
   status?: string
 }
 ```
-
-</details>

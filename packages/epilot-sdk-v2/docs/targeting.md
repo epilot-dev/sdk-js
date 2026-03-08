@@ -43,6 +43,40 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`updateRecipientPortalStatus`](#updaterecipientportalstatus)
 - [`getRecipients`](#getrecipients)
 
+**Schemas**
+- [`BaseError`](#baseerror)
+- [`ServerError`](#servererror)
+- [`ClientError`](#clienterror)
+- [`BaseUUID`](#baseuuid)
+- [`BaseNanoID`](#basenanoid)
+- [`BaseTags`](#basetags)
+- [`BaseRelation`](#baserelation)
+- [`BaseSystemId`](#basesystemid)
+- [`BaseEntityOwner`](#baseentityowner)
+- [`BaseEntityAcl`](#baseentityacl)
+- [`BaseSystemFields`](#basesystemfields)
+- [`BaseSystemFieldsRequired`](#basesystemfieldsrequired)
+- [`CampaignStatus`](#campaignstatus)
+- [`ExecutionSummaryItem`](#executionsummaryitem)
+- [`JobStatus`](#jobstatus)
+- [`Campaign`](#campaign)
+- [`Target`](#target)
+- [`MatchCampaignParams`](#matchcampaignparams)
+- [`MatchTargetParams`](#matchtargetparams)
+- [`GetTargetQueriesParams`](#gettargetqueriesparams)
+- [`TargetQueryResult`](#targetqueryresult)
+- [`AutomationStatus`](#automationstatus)
+- [`PortalStatus`](#portalstatus)
+- [`Recipient`](#recipient)
+- [`BaseRecipientPayload`](#baserecipientpayload)
+- [`AutomationRecipientPayload`](#automationrecipientpayload)
+- [`PortalRecipientPayload`](#portalrecipientpayload)
+- [`CreateRecipientPayload`](#createrecipientpayload)
+- [`UpdateRecipientPayload`](#updaterecipientpayload)
+- [`RetriggerAutomationsRequest`](#retriggerautomationsrequest)
+- [`RetriggerAutomationsResult`](#retriggerautomationsresult)
+- [`UpdatePortalStatusRequest`](#updateportalstatusrequest)
+
 ### `changeCampaignStatus`
 
 Change the status of a campaign
@@ -485,8 +519,7 @@ const { data } = await client.getRecipients({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `BaseError`
 
@@ -864,5 +897,3 @@ type UpdatePortalStatusRequest = {
   status: "sent" | "seen" | "dismissed" | "clicked"
 }
 ```
-
-</details>

@@ -59,6 +59,39 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`getFilesInCollection`](#getfilesincollection)
 - [`getGlobalFileCollections`](#getglobalfilecollections)
 
+**Schemas**
+- [`EntityId`](#entityid)
+- [`EntitySlug`](#entityslug)
+- [`ActivityId`](#activityid)
+- [`FileEntityId`](#fileentityid)
+- [`FileAttributes`](#fileattributes)
+- [`FileType`](#filetype)
+- [`CustomDownloadUrl`](#customdownloadurl)
+- [`FileEntity`](#fileentity)
+- [`CommonSaveFilePayload`](#commonsavefilepayload)
+- [`SaveS3FilePayload`](#saves3filepayload)
+- [`SaveFileFromSourceURLPayload`](#savefilefromsourceurlpayload)
+- [`SaveCustomFilePayload`](#savecustomfilepayload)
+- [`SaveFilePayload`](#savefilepayload)
+- [`SaveFilePayloadV2`](#savefilepayloadv2)
+- [`BatchSaveFileVersionPayload`](#batchsavefileversionpayload)
+- [`UploadFilePayload`](#uploadfilepayload)
+- [`FileUpload`](#fileupload)
+- [`DownloadFilesPayload`](#downloadfilespayload)
+- [`VerifyCustomDownloadUrlPayload`](#verifycustomdownloadurlpayload)
+- [`S3Reference`](#s3reference)
+- [`S3Ref`](#s3ref)
+- [`FileItem`](#fileitem)
+- [`FileRelationItem`](#filerelationitem)
+- [`PublicLink`](#publiclink)
+- [`BaseEntityOwner`](#baseentityowner)
+- [`BaseEntityAcl`](#baseentityacl)
+- [`ErrorObject`](#errorobject)
+- [`FileCollectionId`](#filecollectionid)
+- [`FileCollectionItem`](#filecollectionitem)
+- [`FileCollectionAttributes`](#filecollectionattributes)
+- [`FileCollectionCreateRequest`](#filecollectioncreaterequest)
+
 ### `uploadFileV2`
 
 Create pre-signed S3 URL to upload a file to keep temporarily (one week).
@@ -989,8 +1022,7 @@ const { data } = await client.getGlobalFileCollections({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `EntityId`
 
@@ -1446,5 +1478,3 @@ type FileCollectionCreateRequest = {
   enabled_purposes?: string[]
 }
 ```
-
-</details>

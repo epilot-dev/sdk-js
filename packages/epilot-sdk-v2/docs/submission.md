@@ -28,6 +28,13 @@ const { data } = await submissionClient.createSubmission(...)
 - [`createSubmission`](#createsubmission)
 - [`getNonce`](#getnonce)
 
+**Schemas**
+- [`SubmissionNonce`](#submissionnonce)
+- [`SubmissionPayload`](#submissionpayload)
+- [`SubmissionEntity`](#submissionentity)
+- [`OptIn`](#optin)
+- [`S3Reference`](#s3reference)
+
 ### `createSubmission`
 
 Creates a submission from a public facing Journey
@@ -98,8 +105,7 @@ const { data } = await client.getNonce({
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `SubmissionNonce`
 
@@ -181,5 +187,3 @@ type S3Reference = {
   key: string
 }
 ```
-
-</details>

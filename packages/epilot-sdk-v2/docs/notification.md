@@ -42,6 +42,27 @@ const { data } = await notificationClient.getNotificationsV2(...)
 - [`deleteNotificationTemplate`](#deletenotificationtemplate)
 - [`sendPreview`](#sendpreview)
 
+**Schemas**
+- [`Error`](#error)
+- [`EntityOperation`](#entityoperation)
+- [`NotificationItem`](#notificationitem)
+- [`Notification`](#notification)
+- [`NotificationBase`](#notificationbase)
+- [`EntityId`](#entityid)
+- [`Entity`](#entity)
+- [`Id`](#id)
+- [`NotificationId`](#notificationid)
+- [`NotificationCallerContext`](#notificationcallercontext)
+- [`EntitySlug`](#entityslug)
+- [`EntityOwner`](#entityowner)
+- [`EntityAcl`](#entityacl)
+- [`NotificationTemplate`](#notificationtemplate)
+- [`CreateNotificationTemplateInput`](#createnotificationtemplateinput)
+- [`UpdateNotificationTemplateInput`](#updatenotificationtemplateinput)
+- [`NotificationTemplateListResponse`](#notificationtemplatelistresponse)
+- [`SendPreviewInput`](#sendpreviewinput)
+- [`SendPreviewResponse`](#sendpreviewresponse)
+
 ### `getNotificationsV2`
 
 Get notifications items. These items may eventually contain entities within their payload, which can be hydrated by the client if desired by calling the Entity API directly.
@@ -763,8 +784,7 @@ const { data } = await client.sendPreview(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Error`
 
@@ -1101,5 +1121,3 @@ type SendPreviewResponse = Array<{
   data?: unknown
 }>
 ```
-
-</details>

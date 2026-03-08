@@ -34,6 +34,36 @@ const { data } = await emailTemplateClient.saveTemplate(...)
 **Variables**
 - [`replaceVariablesAsync`](#replacevariablesasync)
 
+**Schemas**
+- [`BaseEntity`](#baseentity)
+- [`EmailTemplateRequest`](#emailtemplaterequest)
+- [`EmailTemplateEntity`](#emailtemplateentity)
+- [`Attachment`](#attachment)
+- [`From`](#from)
+- [`To`](#to)
+- [`PresignedRequest`](#presignedrequest)
+- [`PresignedResponse`](#presignedresponse)
+- [`AttachmentResponse`](#attachmentresponse)
+- [`UserResponse`](#userresponse)
+- [`VariableParameters`](#variableparameters)
+- [`TemplateType`](#templatetype)
+- [`EmailTemplateResponse`](#emailtemplateresponse)
+- [`AsyncEmailTemplateResponse`](#asyncemailtemplateresponse)
+- [`SkipCreatingEntities`](#skipcreatingentities)
+- [`BulkSendMessageRequest`](#bulksendmessagerequest)
+- [`BulkSendMessageRequestWithQuery`](#bulksendmessagerequestwithquery)
+- [`CustomVariables`](#customvariables)
+- [`BulkSendMessageJob`](#bulksendmessagejob)
+- [`CreateSystemTemplatesReq`](#createsystemtemplatesreq)
+- [`CreateSystemTemplatesResp`](#createsystemtemplatesresp)
+- [`OrgId`](#orgid)
+- [`CreatedBy`](#createdby)
+- [`CreatedAt`](#createdat)
+- [`UpdatedAt`](#updatedat)
+- [`ApprovedAt`](#approvedat)
+- [`ApproveAction`](#approveaction)
+- [`TaskToken`](#tasktoken)
+
 ### `saveTemplate`
 
 Create or update a template. If `id` is provided, it will update the template.
@@ -584,8 +614,7 @@ const { data } = await client.revertToOriginalTemplate(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `BaseEntity`
 
@@ -1042,5 +1071,3 @@ Task token to approve or cancel the bulk message action
 ```ts
 type TaskToken = string
 ```
-
-</details>

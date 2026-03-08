@@ -53,6 +53,69 @@ const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 - [`deleteClosingReason`](#deleteclosingreason)
 - [`changeReasonStatus`](#changereasonstatus)
 
+**Schemas**
+- [`FlowTemplateBase`](#flowtemplatebase)
+- [`FlowTemplate`](#flowtemplate)
+- [`Version`](#version)
+- [`Trigger`](#trigger)
+- [`ManualTrigger`](#manualtrigger)
+- [`AutomationTrigger`](#automationtrigger)
+- [`JourneyAutomationTrigger`](#journeyautomationtrigger)
+- [`JourneySubmissionTrigger`](#journeysubmissiontrigger)
+- [`CreateFlowTemplate`](#createflowtemplate)
+- [`SearchFlowTemplates`](#searchflowtemplates)
+- [`FlowTemplatesList`](#flowtemplateslist)
+- [`FlowTemplateId`](#flowtemplateid)
+- [`Task`](#task)
+- [`ManualTask`](#manualtask)
+- [`AutomationTask`](#automationtask)
+- [`AutomationConfig`](#automationconfig)
+- [`AiAgentTask`](#aiagenttask)
+- [`AgentConfig`](#agentconfig)
+- [`TriggerMode`](#triggermode)
+- [`ActionSchedule`](#actionschedule)
+- [`ImmediateSchedule`](#immediateschedule)
+- [`DelayedSchedule`](#delayedschedule)
+- [`RelativeSchedule`](#relativeschedule)
+- [`DecisionTask`](#decisiontask)
+- [`TaskBase`](#taskbase)
+- [`Phase`](#phase)
+- [`VariableAssignment`](#variableassignment)
+- [`TaskType`](#tasktype)
+- [`Edge`](#edge)
+- [`Condition`](#condition)
+- [`Statement`](#statement)
+- [`EvaluationSource`](#evaluationsource)
+- [`Operator`](#operator)
+- [`DueDateConfig`](#duedateconfig)
+- [`TimeUnit`](#timeunit)
+- [`EnableRequirement`](#enablerequirement)
+- [`WorkflowDefinition`](#workflowdefinition)
+- [`Step`](#step)
+- [`Section`](#section)
+- [`TriggerType`](#triggertype)
+- [`ItemType`](#itemtype)
+- [`StepType`](#steptype)
+- [`StepJourney`](#stepjourney)
+- [`ECPDetails`](#ecpdetails)
+- [`StepDescription`](#stepdescription)
+- [`MaxAllowedLimit`](#maxallowedlimit)
+- [`DefinitionNotFoundResp`](#definitionnotfoundresp)
+- [`ClosingReasonNotFoundResp`](#closingreasonnotfoundresp)
+- [`ChangeReasonStatusReq`](#changereasonstatusreq)
+- [`ClosingReasons`](#closingreasons)
+- [`ClosingReason`](#closingreason)
+- [`ClosingReasonsStatus`](#closingreasonsstatus)
+- [`ClosingReasonsIds`](#closingreasonsids)
+- [`ClosingReasonId`](#closingreasonid)
+- [`ErrorResp`](#errorresp)
+- [`UpdateEntityAttributes`](#updateentityattributes)
+- [`EntitySync`](#entitysync)
+- [`DynamicDueDate`](#dynamicduedate)
+- [`StepRequirement`](#steprequirement)
+- [`FlowTemplateExport`](#flowtemplateexport)
+- [`FlowTemplateImportResult`](#flowtemplateimportresult)
+
 ### `getMaxAllowedLimit`
 
 Get limits and number of created executions for an Organization.
@@ -2023,8 +2086,7 @@ const { data } = await client.setWorkflowClosingReasons(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `FlowTemplateBase`
 
@@ -3119,5 +3181,3 @@ type FlowTemplateImportResult = {
   // ...
 }
 ```
-
-</details>

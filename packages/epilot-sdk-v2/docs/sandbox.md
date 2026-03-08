@@ -35,6 +35,18 @@ const { data } = await sandboxClient.listPipelines(...)
 - [`requestSandbox`](#requestsandbox)
 - [`listSandboxRequests`](#listsandboxrequests)
 
+**Schemas**
+- [`OrgId`](#orgid)
+- [`PipelineId`](#pipelineid)
+- [`PipelineRole`](#pipelinerole)
+- [`PipelineItem`](#pipelineitem)
+- [`Pipeline`](#pipeline)
+- [`CreatePipelineRequest`](#createpipelinerequest)
+- [`AccessToken`](#accesstoken)
+- [`SandboxToken`](#sandboxtoken)
+- [`PipelineToken`](#pipelinetoken)
+- [`SandboxRequest`](#sandboxrequest)
+
 ### `listPipelines`
 
 List pipelines the current organization is part of
@@ -274,8 +286,7 @@ const { data } = await client.listSandboxRequests()
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `OrgId`
 
@@ -376,5 +387,3 @@ type SandboxRequest = {
   sandbox_request_category?: "APP_DEVELOPER_ACCOUNT" | "BLUEPRINT_SANDBOX" | "OTHER"
 }
 ```
-
-</details>

@@ -60,6 +60,74 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`queryEvents`](#queryevents)
 - [`ingestEvent`](#ingestevent)
 
+**Schemas**
+- [`Role`](#role)
+- [`Options`](#options)
+- [`Option`](#option)
+- [`OptionsRef`](#optionsref)
+- [`S3Reference`](#s3reference)
+- [`ComponentType`](#componenttype)
+- [`Author`](#author)
+- [`NotificationConfig`](#notificationconfig)
+- [`NotificationEvent`](#notificationevent)
+- [`BaseComponentCommon`](#basecomponentcommon)
+- [`BaseComponent`](#basecomponent)
+- [`CustomCapabilityComponent`](#customcapabilitycomponent)
+- [`CustomPageComponent`](#custompagecomponent)
+- [`CustomPageConfig`](#custompageconfig)
+- [`JourneyBlockComponent`](#journeyblockcomponent)
+- [`PortalBlockComponent`](#portalblockcomponent)
+- [`ErpInformToolkitComponent`](#erpinformtoolkitcomponent)
+- [`CustomFlowActionComponent`](#customflowactioncomponent)
+- [`BaseCustomActionConfig`](#basecustomactionconfig)
+- [`ExternalIntegrationCustomActionConfig`](#externalintegrationcustomactionconfig)
+- [`SandboxCustomActionConfig`](#sandboxcustomactionconfig)
+- [`CustomFlowConfig`](#customflowconfig)
+- [`ExternalProductCatalogComponent`](#externalproductcatalogcomponent)
+- [`ExternalProductCatalogConfig`](#externalproductcatalogconfig)
+- [`ExternalProductCatalogHookProducts`](#externalproductcataloghookproducts)
+- [`ExternalProductCatalogHookProductRecommendations`](#externalproductcataloghookproductrecommendations)
+- [`PortalExtensionComponent`](#portalextensioncomponent)
+- [`PortalExtensionConfig`](#portalextensionconfig)
+- [`PortalExtensionHookRegistrationIdentifiersCheck`](#portalextensionhookregistrationidentifierscheck)
+- [`PortalExtensionHookContractIdentification`](#portalextensionhookcontractidentification)
+- [`PortalExtensionHookMeterReadingPlausibilityCheck`](#portalextensionhookmeterreadingplausibilitycheck)
+- [`PortalExtensionHookPriceDataRetrieval`](#portalextensionhookpricedataretrieval)
+- [`PortalExtensionHookConsumptionDataRetrieval`](#portalextensionhookconsumptiondataretrieval)
+- [`PortalExtensionHookCostDataRetrieval`](#portalextensionhookcostdataretrieval)
+- [`PortalExtensionSeamlessLink`](#portalextensionseamlesslink)
+- [`PortalExtensionAuthBlock`](#portalextensionauthblock)
+- [`ExternalProductCatalogAuthBlock`](#externalproductcatalogauthblock)
+- [`OverrideDevMode`](#overridedevmode)
+- [`JourneyBlockConfig`](#journeyblockconfig)
+- [`PortalBlockConfig`](#portalblockconfig)
+- [`AppBridgeSurfaceConfig`](#appbridgesurfaceconfig)
+- [`PortalBlockSurfaceConfig`](#portalblocksurfaceconfig)
+- [`JourneyBlockComponentArgs`](#journeyblockcomponentargs)
+- [`TextArg`](#textarg)
+- [`BooleanArg`](#booleanarg)
+- [`EnumArg`](#enumarg)
+- [`BillingFrequency`](#billingfrequency)
+- [`Pricing`](#pricing)
+- [`Audit`](#audit)
+- [`Review`](#review)
+- [`ConfigurationMetadata`](#configurationmetadata)
+- [`ConfigurationVersion`](#configurationversion)
+- [`Grants`](#grants)
+- [`BlueprintRef`](#blueprintref)
+- [`Installation`](#installation)
+- [`PublicConfiguration`](#publicconfiguration)
+- [`Configuration`](#configuration)
+- [`TranslatedString`](#translatedstring)
+- [`CallerIdentity`](#calleridentity)
+- [`BatchEventRequest`](#batcheventrequest)
+- [`Actor`](#actor)
+- [`AppEventData`](#appeventdata)
+- [`EventsQuery`](#eventsquery)
+- [`EventsQueryResponse`](#eventsqueryresponse)
+- [`RawEvents`](#rawevents)
+- [`AggregatedEvents`](#aggregatedevents)
+
 ### `getPublicFacingComponent`
 
 Retrieve public facing components for an installed app
@@ -1390,8 +1458,7 @@ const { data } = await client.ingestEvent(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `Role`
 
@@ -2783,5 +2850,3 @@ type AggregatedEvents = {
   }>
 }
 ```
-
-</details>

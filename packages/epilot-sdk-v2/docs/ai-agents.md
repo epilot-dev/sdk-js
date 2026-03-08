@@ -40,6 +40,41 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`approveExecution`](#approveexecution)
 - [`rejectExecution`](#rejectexecution)
 
+**Schemas**
+- [`AgentId`](#agentid)
+- [`CreateAgentRequest`](#createagentrequest)
+- [`UpdateAgentRequest`](#updateagentrequest)
+- [`AgentDefinition`](#agentdefinition)
+- [`ListAgentsResponse`](#listagentsresponse)
+- [`ListExecutionsResponse`](#listexecutionsresponse)
+- [`ApproveExecutionRequest`](#approveexecutionrequest)
+- [`RejectExecutionRequest`](#rejectexecutionrequest)
+- [`ExecuteAgentRequest`](#executeagentrequest)
+- [`ExecutionResponse`](#executionresponse)
+- [`ExecutionTrace`](#executiontrace)
+- [`ExecutionIteration`](#executioniteration)
+- [`PendingAction`](#pendingaction)
+- [`ExecutionError`](#executionerror)
+- [`ExecutionMetrics`](#executionmetrics)
+- [`ToolPreview`](#toolpreview)
+- [`PreviewActionType`](#previewactiontype)
+- [`PreviewEntity`](#previewentity)
+- [`PreviewChange`](#previewchange)
+- [`PreviewValue`](#previewvalue)
+- [`ToolDefinition`](#tooldefinition)
+- [`SkillCategory`](#skillcategory)
+- [`AgentSource`](#agentsource)
+- [`SkillAvailability`](#skillavailability)
+- [`ExecutionContext`](#executioncontext)
+- [`ExecutionPattern`](#executionpattern)
+- [`ExecutionMode`](#executionmode)
+- [`ExecutionStatus`](#executionstatus)
+- [`ParameterType`](#parametertype)
+- [`InputParameterDefinition`](#inputparameterdefinition)
+- [`InputParametersSchema`](#inputparametersschema)
+- [`ModelConfig`](#modelconfig)
+- [`Error`](#error)
+
 ### `createAgent`
 
 Create Agent definition
@@ -802,8 +837,7 @@ const { data } = await client.rejectExecution(
 
 ---
 
-<details>
-<summary>Schemas</summary>
+## Schemas
 
 ### `AgentId`
 
@@ -1453,5 +1487,3 @@ type Error = {
   details?: object
 }
 ```
-
-</details>
