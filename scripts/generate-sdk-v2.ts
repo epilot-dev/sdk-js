@@ -119,7 +119,6 @@ const MAX_DEPTH = 3;
 
 const MAX_ARRAY_ITEMS = 2;
 
-
 const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
   const pad = '  '.repeat(indent);
   const inner = '  '.repeat(indent + 1);
@@ -314,7 +313,8 @@ const generateRegistry = (clients: ClientInfo[]): string => {
 const generateClientMap = (clients: ClientInfo[]): string => {
   const validClients = clients.filter((c) => c.hasDefinition);
 
-  const lines = [`import type { AxiosInstance } from 'axios'`, ``];
+  const needsAxios = validClients.some((c) => !c.hasTypes);
+  const lines = needsAxios ? [`import type { AxiosInstance } from 'axios'`, ``] : [];
 
   // Import Client types with unique aliases
   for (const client of validClients) {
@@ -791,7 +791,7 @@ const updateApiReferenceTables = (clients: ClientInfo[]) => {
     if (startIdx === -1 || endIdx === -1) continue;
 
     const table = generateApiTableRows(clients, docsPrefix);
-    const updated = content.substring(0, startIdx + START_MARKER.length) + '\n' + table + '\n' + content.substring(endIdx);
+    const updated = `${content.substring(0, startIdx + START_MARKER.length)}\n${table}\n${content.substring(endIdx)}`;
     writeFileSync(path, updated);
   }
 };
