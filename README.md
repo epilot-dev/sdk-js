@@ -141,20 +141,55 @@ epilot.authorize(async () => await getTokenFromSession())
 epilot.authorize('my-static-api-token')
 ```
 
-### Interceptors
-
-Use interceptors for custom request/response processing:
+# Fresh Client Instance
 
 ```ts
-import { epilot } from '@epilot/sdk'
+import { createClient, authorize } from '@epilot/sdk/entity'
 
+const entityClient = await createClient()
+authorize(entityClient, () => '<my-token>')
+entityClient.defaults.headers.common['x-epilot-org-id'] = 'org-123'
+```
+
+## Multiple SDK Instances
+
+```ts
+import { createSDK } from '@epilot/sdk'
+
+const sdk1 = createSDK()
+sdk1.authorize(() => '<token-for-org-1>')
+sdk1.headers({ 'x-epilot-org-id': 'org-1' })
+
+const sdk2 = createSDK()
+sdk2.authorize(() => '<token-for-org-2>')
+sdk2.headers({ 'x-epilot-org-id': 'org-2' })
+```
+
+
+## Interceptors
+
+Use axios interceptors for custom request/response processing. Since clients are axios instances, you can use `client.interceptors` directly:
+
+```ts
+entityClient.interceptors.response.use((response) => {
+  console.debug(`${response.config.method?.toUpperCase()} ${response.config.url}`, {
+    status: response.status,
+    data: response.data,
+  })
+  return response
+})
+```
+
+Or register global interceptors applied to all clients:
+
+```ts
 epilot.interceptors.request((config) => {
-  config.headers['x-trace-id'] = generateTraceId()
+  config.headers['x-correlation-id'] = generateTraceId()
   return config
 })
 ```
 
-### Auto-Retry (429 Too Many Requests)
+## Auto-Retry (429 Too Many Requests)
 
 The SDK automatically retries requests that receive a `429 Too Many Requests` response. It respects the `Retry-After` header (in seconds) to determine how long to wait before retrying.
 
@@ -186,7 +221,7 @@ authorize(entityClient, () => '<my-token>')
 applyRetryInterceptor({ client: entityClient, config: { maxRetries: 3 } })
 ```
 
-### Large Response Handling (413 Payload Too Large)
+## Large Response Handling (413 Payload Too Large)
 
 epilot APIs use a [large response middleware](https://github.com/epilot-dev/aws-lambda-utility-middlewares) to work around the AWS Lambda 6MB response limit. When a response exceeds ~5.1MB, the API uploads the payload to S3 and returns a presigned URL instead.
 
@@ -210,46 +245,7 @@ authorize(entityClient, () => '<my-token>')
 applyLargeResponseInterceptor({ client: entityClient, config: { enabled: true } })
 ```
 
-### Backend Internal Calls (Pass Headers)
-
-```ts
-import { epilot } from '@epilot/sdk'
-
-const setupInternalClient = (incomingHeaders: Record<string, string>) => {
-  epilot.authorize(() => incomingHeaders.authorization.replace('Bearer ', ''))
-
-  epilot.headers({
-    'x-ivy-org-id': incomingHeaders['x-ivy-org-id'],
-    'x-epilot-org-id': incomingHeaders['x-epilot-org-id'],
-    'x-epilot-user-id': incomingHeaders['x-epilot-user-id'],
-  })
-}
-```
-
-## Fresh Client Instance
-
-```ts
-import { createClient, authorize } from '@epilot/sdk/entity'
-
-const entityClient = await createClient()
-authorize(entityClient, () => '<my-token>')
-entityClient.defaults.headers.common['x-epilot-org-id'] = 'org-123'
-```
-
-## Multiple SDK Instances
-
-```ts
-import { createSDK } from '@epilot/sdk'
-
-const sdk1 = createSDK()
-sdk1.authorize(() => '<token-for-org-1>')
-sdk1.headers({ 'x-epilot-org-id': 'org-1' })
-
-const sdk2 = createSDK()
-sdk2.authorize(() => '<token-for-org-2>')
-sdk2.headers({ 'x-epilot-org-id': 'org-2' })
-```
-
+#
 ## Overrides & Custom APIs
 
 Override built-in API specs or register custom APIs via `.epilot/sdk-overrides.json`. This is useful for testing new versions of an API spec or getting the latest types without waiting for an SDK release.
@@ -325,15 +321,16 @@ When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `inte
 **Direct `getClient()` references can go stale** — if you hold a reference and then change config, your reference still points to the old client:
 
 ```ts
-const client = await epilot.entity.getClient()
+const entityClient = await epilot.entity.getClient()
 
 epilot.authorize('new-token') // invalidates all cached clients
 
-// client still has the old token
+// entityClient still has the old token
 // epilot.entity.getEntity(...) will use a new client with the new token
 ```
 
 If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
+
 
 ## API Reference
 

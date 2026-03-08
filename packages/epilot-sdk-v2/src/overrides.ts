@@ -29,7 +29,7 @@ const createSpecLoader = (specPath: string, baseDir: string): (() => Promise<Doc
  * Only performs filesystem reads on first call - subsequent calls are no-ops.
  * Safe to call in browser environments (fs import is deferred).
  */
-export const loadOverrides = (registry: Map<string, ApiEntry>) => {
+export const loadOverrides = async (registry: Map<string, ApiEntry>) => {
   if (_loaded) return;
   _loaded = true;
 
@@ -37,9 +37,8 @@ export const loadOverrides = (registry: Map<string, ApiEntry>) => {
     // Guard against browser environments
     if (typeof process === 'undefined' || typeof process.cwd !== 'function') return;
 
-    // Lazy require to avoid top-level fs import (tree-shaking friendly)
-    const fs = require('node:fs') as typeof import('fs');
-    const path = require('node:path') as typeof import('path');
+    const fs = await import('node:fs');
+    const path = await import('node:path');
 
     // Search up from cwd for overrides file
     let dir = process.cwd();

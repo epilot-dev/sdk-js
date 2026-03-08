@@ -22,6 +22,7 @@ export const resolveClient = async (params: {
   state: SDKState;
 }): Promise<AxiosInstance> => {
   const { registry, name, state } = params;
+  await state.overridesReady;
   const entry = registry.get(name);
 
   if (!entry) {

@@ -54,7 +54,7 @@ vi.mock('../src/apis/_registry', () => ({
 }));
 
 vi.mock('../src/overrides', () => ({
-  loadOverrides: vi.fn(),
+  loadOverrides: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('static API token authentication', () => {

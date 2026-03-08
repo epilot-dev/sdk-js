@@ -45,10 +45,11 @@ export const createSDK = (): EpilotSDK => {
     interceptors: [],
     retry: { maxRetries: 3 },
     largeResponse: { enabled: true },
+    overridesReady: Promise.resolve(),
   };
 
   registerBuiltinApis(registry);
-  loadOverrides(registry);
+  state.overridesReady = loadOverrides(registry);
 
   const getHandle = (name: string): ApiHandle<AxiosInstance> => {
     const entry = registry.get(name);

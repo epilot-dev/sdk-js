@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="2" failures="0" errors="0" time="0.214">
-    <testsuite name="src/client.test.ts" timestamp="2026-03-08T12:01:55.875Z" hostname="CQT3YHK90D-viljami" tests="2" failures="0" errors="0" skipped="0" time="0.004">
-        <testcase classname="src/client.test.ts" name="client &gt; getClient &gt; should initialise and return client" time="0.002">
-        </testcase>
-        <testcase classname="src/client.test.ts" name="client &gt; getClient &gt; should have operations" time="0.001">
-        </testcase>
-    </testsuite>
-</testsuites>

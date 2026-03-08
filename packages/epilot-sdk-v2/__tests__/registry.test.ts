@@ -35,6 +35,7 @@ describe('registry', () => {
       interceptors: [],
       retry: { maxRetries: 3 },
       largeResponse: { enabled: true },
+      overridesReady: Promise.resolve(),
     };
   });
 

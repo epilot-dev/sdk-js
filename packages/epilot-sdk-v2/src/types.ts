@@ -29,6 +29,7 @@ export type SDKState = {
   interceptors: Interceptor[];
   retry: RetryConfig;
   largeResponse: LargeResponseConfig;
+  overridesReady: Promise<void>;
 };
 
 export type HeadersConfig = Record<string, string>;
