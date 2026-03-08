@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { AxiosInstance } from 'axios';
-import type { Document } from 'openapi-client-axios';
 
 import { createApiHandle } from '../src/proxy';
 
@@ -20,12 +19,6 @@ describe('createApiHandle', () => {
       getEntity: vi.fn().mockResolvedValue({ data: { id: '123' } }),
       listItems: vi.fn().mockReturnValue({ data: [1, 2, 3] }),
     }) as unknown as AxiosInstance;
-
-  const mockDefinition = {
-    openapi: '3.0.0',
-    info: { title: 'Mock', version: '1.0.0' },
-    paths: {},
-  } as unknown as Document;
 
   it('should expose getClient() that returns the singleton', () => {
     const mockClient = createMockClient();

@@ -2489,6 +2489,9 @@ importers:
       axios:
         specifier: ^1.11.0
         version: 1.13.5(debug@4.4.1)
+      msw:
+        specifier: ^2.10.4
+        version: 2.10.4(@types/node@24.2.0)(typescript@5.7.3)
       openapi-client-axios:
         specifier: ^7.8.0
         version: 7.8.0(axios@1.13.5)(js-yaml@4.1.0)
@@ -7997,7 +8000,6 @@ snapshots:
       '@inquirer/type': 3.0.8(@types/node@24.2.0)
     optionalDependencies:
       '@types/node': 24.2.0
-    optional: true
 
   '@inquirer/core@10.1.15(@types/node@20.19.9)':
     dependencies:
@@ -8024,7 +8026,6 @@ snapshots:
       yoctocolors-cjs: 2.1.2
     optionalDependencies:
       '@types/node': 24.2.0
-    optional: true
 
   '@inquirer/figures@1.0.13': {}
 
@@ -8035,7 +8036,6 @@ snapshots:
   '@inquirer/type@3.0.8(@types/node@24.2.0)':
     optionalDependencies:
       '@types/node': 24.2.0
-    optional: true
 
   '@isaacs/balanced-match@4.0.1': {}
 
@@ -11103,7 +11103,6 @@ snapshots:
       typescript: 5.7.3
     transitivePeerDependencies:
       - '@types/node'
-    optional: true
 
   mute-stream@0.0.8: {}
 

@@ -1,93 +1,93 @@
-import type { Client as AccessTokenClient } from './types/access-token'
-import type { Client as AddressClient } from './types/address'
-import type { Client as AddressSuggestionsClient } from './types/address-suggestions'
-import type { Client as AiAgentsClient } from './types/ai-agents'
-import type { Client as AppClient } from './types/app'
-import type { Client as AuditLogsClient } from './types/audit-logs'
-import type { Client as AutomationClient } from './types/automation'
-import type { Client as BillingClient } from './types/billing'
-import type { Client as BlueprintManifestClient } from './types/blueprint-manifest'
-import type { Client as ConsentClient } from './types/consent'
-import type { Client as CustomerPortalClient } from './types/customer-portal'
-import type { Client as DataManagementClient } from './types/data-management'
-import type { Client as DeduplicationClient } from './types/deduplication'
-import type { Client as DesignClient } from './types/design'
-import type { Client as DocumentClient } from './types/document'
-import type { Client as EmailSettingsClient } from './types/email-settings'
-import type { Client as EmailTemplateClient } from './types/email-template'
-import type { Client as EntityClient } from './types/entity'
-import type { Client as EntityMappingClient } from './types/entity-mapping'
-import type { Client as EnvironmentsClient } from './types/environments'
-import type { Client as ErpIntegrationClient } from './types/erp-integration'
-import type { Client as EventCatalogClient } from './types/event-catalog'
-import type { Client as FileClient } from './types/file'
-import type { Client as IbanClient } from './types/iban'
-import type { Client as JourneyClient } from './types/journey'
-import type { Client as KanbanClient } from './types/kanban'
-import type { Client as MessageClient } from './types/message'
-import type { Client as MeteringClient } from './types/metering'
-import type { Client as NotesClient } from './types/notes'
-import type { Client as NotificationClient } from './types/notification'
-import type { Client as OrganizationClient } from './types/organization'
-import type { Client as PartnerDirectoryClient } from './types/partner-directory'
-import type { Client as PermissionsClient } from './types/permissions'
-import type { Client as PricingClient } from './types/pricing'
-import type { Client as PricingTierClient } from './types/pricing-tier'
-import type { Client as PurposeClient } from './types/purpose'
-import type { Client as SandboxClient } from './types/sandbox'
-import type { Client as SubmissionClient } from './types/submission'
-import type { Client as TargetingClient } from './types/targeting'
-import type { Client as TemplateVariablesClient } from './types/template-variables'
-import type { Client as UserClient } from './types/user'
-import type { Client as ValidationRulesClient } from './types/validation-rules'
-import type { Client as WebhooksClient } from './types/webhooks'
-import type { Client as WorkflowClient } from './types/workflow'
-import type { Client as WorkflowDefinitionClient } from './types/workflow-definition'
+import type { Client as AccessTokenClient } from './types/access-token';
+import type { Client as AddressClient } from './types/address';
+import type { Client as AddressSuggestionsClient } from './types/address-suggestions';
+import type { Client as AiAgentsClient } from './types/ai-agents';
+import type { Client as AppClient } from './types/app';
+import type { Client as AuditLogsClient } from './types/audit-logs';
+import type { Client as AutomationClient } from './types/automation';
+import type { Client as BillingClient } from './types/billing';
+import type { Client as BlueprintManifestClient } from './types/blueprint-manifest';
+import type { Client as ConsentClient } from './types/consent';
+import type { Client as CustomerPortalClient } from './types/customer-portal';
+import type { Client as DataManagementClient } from './types/data-management';
+import type { Client as DeduplicationClient } from './types/deduplication';
+import type { Client as DesignClient } from './types/design';
+import type { Client as DocumentClient } from './types/document';
+import type { Client as EmailSettingsClient } from './types/email-settings';
+import type { Client as EmailTemplateClient } from './types/email-template';
+import type { Client as EntityClient } from './types/entity';
+import type { Client as EntityMappingClient } from './types/entity-mapping';
+import type { Client as EnvironmentsClient } from './types/environments';
+import type { Client as ErpIntegrationClient } from './types/erp-integration';
+import type { Client as EventCatalogClient } from './types/event-catalog';
+import type { Client as FileClient } from './types/file';
+import type { Client as IbanClient } from './types/iban';
+import type { Client as JourneyClient } from './types/journey';
+import type { Client as KanbanClient } from './types/kanban';
+import type { Client as MessageClient } from './types/message';
+import type { Client as MeteringClient } from './types/metering';
+import type { Client as NotesClient } from './types/notes';
+import type { Client as NotificationClient } from './types/notification';
+import type { Client as OrganizationClient } from './types/organization';
+import type { Client as PartnerDirectoryClient } from './types/partner-directory';
+import type { Client as PermissionsClient } from './types/permissions';
+import type { Client as PricingClient } from './types/pricing';
+import type { Client as PricingTierClient } from './types/pricing-tier';
+import type { Client as PurposeClient } from './types/purpose';
+import type { Client as SandboxClient } from './types/sandbox';
+import type { Client as SubmissionClient } from './types/submission';
+import type { Client as TargetingClient } from './types/targeting';
+import type { Client as TemplateVariablesClient } from './types/template-variables';
+import type { Client as UserClient } from './types/user';
+import type { Client as ValidationRulesClient } from './types/validation-rules';
+import type { Client as WebhooksClient } from './types/webhooks';
+import type { Client as WorkflowClient } from './types/workflow';
+import type { Client as WorkflowDefinitionClient } from './types/workflow-definition';
 
 export type SDKClientMap = {
-  accessToken: AccessTokenClient
-  address: AddressClient
-  addressSuggestions: AddressSuggestionsClient
-  aiAgents: AiAgentsClient
-  app: AppClient
-  auditLogs: AuditLogsClient
-  automation: AutomationClient
-  billing: BillingClient
-  blueprintManifest: BlueprintManifestClient
-  consent: ConsentClient
-  customerPortal: CustomerPortalClient
-  dataManagement: DataManagementClient
-  deduplication: DeduplicationClient
-  design: DesignClient
-  document: DocumentClient
-  emailSettings: EmailSettingsClient
-  emailTemplate: EmailTemplateClient
-  entity: EntityClient
-  entityMapping: EntityMappingClient
-  environments: EnvironmentsClient
-  erpIntegration: ErpIntegrationClient
-  eventCatalog: EventCatalogClient
-  file: FileClient
-  iban: IbanClient
-  journey: JourneyClient
-  kanban: KanbanClient
-  message: MessageClient
-  metering: MeteringClient
-  notes: NotesClient
-  notification: NotificationClient
-  organization: OrganizationClient
-  partnerDirectory: PartnerDirectoryClient
-  permissions: PermissionsClient
-  pricing: PricingClient
-  pricingTier: PricingTierClient
-  purpose: PurposeClient
-  sandbox: SandboxClient
-  submission: SubmissionClient
-  targeting: TargetingClient
-  templateVariables: TemplateVariablesClient
-  user: UserClient
-  validationRules: ValidationRulesClient
-  webhooks: WebhooksClient
-  workflow: WorkflowClient
-  workflowDefinition: WorkflowDefinitionClient
-}
+  accessToken: AccessTokenClient;
+  address: AddressClient;
+  addressSuggestions: AddressSuggestionsClient;
+  aiAgents: AiAgentsClient;
+  app: AppClient;
+  auditLogs: AuditLogsClient;
+  automation: AutomationClient;
+  billing: BillingClient;
+  blueprintManifest: BlueprintManifestClient;
+  consent: ConsentClient;
+  customerPortal: CustomerPortalClient;
+  dataManagement: DataManagementClient;
+  deduplication: DeduplicationClient;
+  design: DesignClient;
+  document: DocumentClient;
+  emailSettings: EmailSettingsClient;
+  emailTemplate: EmailTemplateClient;
+  entity: EntityClient;
+  entityMapping: EntityMappingClient;
+  environments: EnvironmentsClient;
+  erpIntegration: ErpIntegrationClient;
+  eventCatalog: EventCatalogClient;
+  file: FileClient;
+  iban: IbanClient;
+  journey: JourneyClient;
+  kanban: KanbanClient;
+  message: MessageClient;
+  metering: MeteringClient;
+  notes: NotesClient;
+  notification: NotificationClient;
+  organization: OrganizationClient;
+  partnerDirectory: PartnerDirectoryClient;
+  permissions: PermissionsClient;
+  pricing: PricingClient;
+  pricingTier: PricingTierClient;
+  purpose: PurposeClient;
+  sandbox: SandboxClient;
+  submission: SubmissionClient;
+  targeting: TargetingClient;
+  templateVariables: TemplateVariablesClient;
+  user: UserClient;
+  validationRules: ValidationRulesClient;
+  webhooks: WebhooksClient;
+  workflow: WorkflowClient;
+  workflowDefinition: WorkflowDefinitionClient;
+};

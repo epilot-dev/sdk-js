@@ -478,10 +478,46 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
  * Preserves valid HTML tags (details, summary, p, etc.) and backtick-wrapped content.
  */
 const HTML_TAGS = new Set([
-  'details', 'summary', 'div', 'span', 'p', 'br', 'hr', 'table', 'thead',
-  'tbody', 'tr', 'th', 'td', 'ul', 'ol', 'li', 'a', 'img', 'em', 'strong',
-  'code', 'pre', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup',
-  'sub', 'del', 'ins', 'abbr', 'b', 'i', 'u', 's', 'small', 'mark',
+  'details',
+  'summary',
+  'div',
+  'span',
+  'p',
+  'br',
+  'hr',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
+  'ul',
+  'ol',
+  'li',
+  'a',
+  'img',
+  'em',
+  'strong',
+  'code',
+  'pre',
+  'blockquote',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'sup',
+  'sub',
+  'del',
+  'ins',
+  'abbr',
+  'b',
+  'i',
+  'u',
+  's',
+  'small',
+  'mark',
 ]);
 
 const escapeMdxAngleBrackets = (text: string): string => {
@@ -682,7 +718,10 @@ const generateClientDoc = (client: ClientInfo): string => {
     }
 
     for (const op of activeOps) {
-      const desc = op.summary && op.summary.toLowerCase() !== op.operationId.toLowerCase() ? escapeMdxAngleBrackets(op.summary) : '';
+      const desc =
+        op.summary && op.summary.toLowerCase() !== op.operationId.toLowerCase()
+          ? escapeMdxAngleBrackets(op.summary)
+          : '';
       lines.push(`### \`${op.operationId}\``);
       lines.push(``);
       if (desc) {

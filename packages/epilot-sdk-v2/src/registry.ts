@@ -8,11 +8,7 @@ import type { ApiEntry, SDKState } from './types';
 
 export const createRegistry = () => new Map<string, ApiEntry>();
 
-export const registerApi = (params: {
-  registry: Map<string, ApiEntry>;
-  name: string;
-  loader: () => Document;
-}) => {
+export const registerApi = (params: { registry: Map<string, ApiEntry>; name: string; loader: () => Document }) => {
   const { registry, name, loader } = params;
   registry.set(name, { loader, instance: null });
 };
