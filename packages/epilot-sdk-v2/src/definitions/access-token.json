@@ -1,0 +1,73 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/access-tokens": {
+      "post": {
+        "operationId": "createAccessToken",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listAccessTokens",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token_type"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/{id}": {
+      "delete": {
+        "operationId": "revokeAccessToken",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getAccessTokenJwks",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/.well-known/openid-configuration": {
+      "get": {
+        "operationId": "getAccessTokenOIDC",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/public/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getPublicTokenJwks",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/public/.well-known/openid-configuration": {
+      "get": {
+        "operationId": "getPublicTokenOIDC",
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://access-token.sls.epilot.io"
+    }
+  ]
+}

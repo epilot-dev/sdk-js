@@ -1,0 +1,423 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://pricing-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/pricing:compute": {
+      "post": {
+        "operationId": "$calculatePricingDetails",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/order": {
+      "post": {
+        "operationId": "createOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/order/{id}": {
+      "put": {
+        "operationId": "putOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/cart:checkout": {
+      "post": {
+        "operationId": "$checkoutCart",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/catalog": {
+      "post": {
+        "operationId": "$searchCatalog",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID"
+          },
+          {
+            "in": "header",
+            "name": "Authorization"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/catalog": {
+      "post": {
+        "operationId": "$privateSearchCatalog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/validate-promo-codes": {
+      "post": {
+        "operationId": "$validatePromoCodes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/availability:check": {
+      "post": {
+        "operationId": "$availabilityCheck",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/validate-availability/{id}": {
+      "get": {
+        "operationId": "$validateAvailabilityFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/historicMarketPrices": {
+      "get": {
+        "operationId": "$historicMarketPrices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "bidding_zone",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "frequency",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/averageMarketPrice": {
+      "get": {
+        "operationId": "$averageMarketPrice",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "market",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "bidding_zone",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/products": {
+      "post": {
+        "operationId": "$searchExternalProducts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/product-recommendations": {
+      "post": {
+        "operationId": "$searchExternalProductRecommendations",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/providers:search": {
+      "post": {
+        "operationId": "$searchProviders",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/streets:search": {
+      "post": {
+        "operationId": "$searchStreets",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/integration/{integrationId}/compute-price": {
+      "post": {
+        "operationId": "$computePrice",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Epilot-Org-ID",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integration/{integrationId}/credentials": {
+      "get": {
+        "operationId": "$getCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:save": {
+      "put": {
+        "operationId": "$saveCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integration/{integrationId}/credentials:delete": {
+      "delete": {
+        "operationId": "$deleteCredentials",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "integrationId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/public/external-catalog/products": {
+      "post": {
+        "operationId": "$getExternalCatalogProducts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/external-catalog/product-recommendations": {
+      "post": {
+        "operationId": "$getExternalCatalogProductRecommendations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/public/product-recommendations": {
+      "post": {
+        "operationId": "$productRecommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Ivy-Org-ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

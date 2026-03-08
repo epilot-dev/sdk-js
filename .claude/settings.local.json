@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx vitest:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npx tsup:*)",
+      "Bash(node:*)",
+      "Bash(npm run:*)",
+      "Bash(ls .eslintrc*:*)",
+      "Bash(python3:*)",
+      "Bash(awk:*)"
     ],
     "deny": []
   }

@@ -1,0 +1,259 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://targeting.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/campaign/{campaign_id}/status": {
+      "post": {
+        "operationId": "changeCampaignStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/job": {
+      "get": {
+        "operationId": "getCampaignJobStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/portals": {
+      "get": {
+        "operationId": "getCampaignPortals",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/automations:retrigger": {
+      "post": {
+        "operationId": "retriggerCampaignAutomations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign:match": {
+      "post": {
+        "operationId": "matchCampaigns",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/target:match": {
+      "post": {
+        "operationId": "matchTargets",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/target/queries": {
+      "post": {
+        "operationId": "getTargetQueries",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient": {
+      "post": {
+        "operationId": "createRecipient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}": {
+      "patch": {
+        "operationId": "updateRecipient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
+      "patch": {
+        "operationId": "updateRecipientPortalStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipients": {
+      "get": {
+        "operationId": "getRecipients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "next",
+            "in": "query"
+          },
+          {
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "name": "automation_status",
+            "in": "query"
+          },
+          {
+            "name": "portal_status",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "CampaignIdPathParam": {
+        "name": "campaign_id",
+        "in": "path",
+        "required": true
+      },
+      "RecipientIdPathParam": {
+        "name": "recipient_id",
+        "in": "path",
+        "required": true
+      }
+    },
+    "responses": {
+      "ClientErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServerErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CampaignResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "JobStatusResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RecipientResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RecipientsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MatchCampaignsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MatchTargetsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetTargetQueriesResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CampaignPortalsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "RetriggerAutomationsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

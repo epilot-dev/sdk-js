@@ -1,0 +1,203 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/note": {
+      "post": {
+        "operationId": "createNote",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}": {
+      "get": {
+        "operationId": "getNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hydrate"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/notes:search": {
+      "post": {
+        "operationId": "searchNotesByContext",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/notes/{entity_id}": {
+      "get": {
+        "operationId": "getNotesByContext",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contexts"
+          },
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/pin": {
+      "post": {
+        "operationId": "pinNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/context": {
+      "get": {
+        "operationId": "getNoteContexts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/reaction": {
+      "post": {
+        "operationId": "addNoteReaction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/reaction/{emoji_shortcode}": {
+      "delete": {
+        "operationId": "removeNoteReaction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "emoji_shortcode",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/reactions/toggle": {
+      "post": {
+        "operationId": "toggleNoteReactions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

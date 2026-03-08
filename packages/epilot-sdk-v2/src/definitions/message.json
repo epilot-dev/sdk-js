@@ -1,0 +1,657 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/message/messages": {
+      "post": {
+        "operationId": "sendMessage",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "do_not_create_entities"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateMessage",
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/eml": {
+      "get": {
+        "operationId": "getMessageEml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages:search": {
+      "post": {
+        "operationId": "searchMessages",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/trash": {
+      "post": {
+        "operationId": "trashMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/untrash": {
+      "post": {
+        "operationId": "untrashMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/read": {
+      "post": {
+        "operationId": "markReadMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/message/messages/{id}/read": {
+      "post": {
+        "operationId": "markReadMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/unread/{actor}": {
+      "get": {
+        "operationId": "getUnread",
+        "parameters": [
+          {
+            "name": "actor",
+            "in": "path",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "email_filter"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/message/messages/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads:search": {
+      "post": {
+        "operationId": "searchThreads",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/message/threads:search": {
+      "post": {
+        "operationId": "searchThreadsV2",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads:searchIds": {
+      "post": {
+        "operationId": "searchIds",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads": {
+      "put": {
+        "operationId": "updateThread",
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}": {
+      "delete": {
+        "operationId": "deleteThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:move": {
+      "post": {
+        "operationId": "moveThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:markAsDone": {
+      "post": {
+        "operationId": "markThreadAsDone",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:markAsOpen": {
+      "post": {
+        "operationId": "markThreadAsOpen",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/timeline": {
+      "get": {
+        "operationId": "getThreadTimeline",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/trash": {
+      "post": {
+        "operationId": "trashThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/untrash": {
+      "post": {
+        "operationId": "untrashThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:read": {
+      "post": {
+        "operationId": "threadBulkActionsRead",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:unread": {
+      "post": {
+        "operationId": "threadBulkActionsUnread",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:favorite": {
+      "post": {
+        "operationId": "threadBulkActionsFavorite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:unfavorite": {
+      "post": {
+        "operationId": "threadBulkActionsUnfavorite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:trash": {
+      "post": {
+        "operationId": "threadBulkActionsTrash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:untrash": {
+      "post": {
+        "operationId": "threadBulkActionsUntrash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:delete": {
+      "post": {
+        "operationId": "threadBulkActionsDelete",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:done": {
+      "post": {
+        "operationId": "threadBulkActionsDone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:open": {
+      "post": {
+        "operationId": "threadBulkActionsOpen",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/read": {
+      "post": {
+        "operationId": "markReadThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/message/threads/{id}/read": {
+      "post": {
+        "operationId": "markReadThreadV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/message/threads/{id}/unread": {
+      "post": {
+        "operationId": "markUnreadThreadV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/assign": {
+      "post": {
+        "operationId": "assignThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/unassign": {
+      "post": {
+        "operationId": "unassignThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/message/threads/{id}/assign:users": {
+      "post": {
+        "operationId": "assignUsersV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}:pin": {
+      "post": {
+        "operationId": "pinThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "unpinThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/drafts": {
+      "post": {
+        "operationId": "createDraft",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/drafts:send": {
+      "post": {
+        "operationId": "sendDraft",
+        "responses": {}
+      }
+    },
+    "/v2/message/messages/{id}": {
+      "get": {
+        "operationId": "getMessageV2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://message.sls.epilot.io"
+    }
+  ]
+}

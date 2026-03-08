@@ -1,0 +1,164 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://purpose.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/purpose": {
+      "post": {
+        "operationId": "createPurpose",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreatePurposeRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/purpose:search": {
+      "get": {
+        "operationId": "searchPurposes",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/QueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/purpose:batchGet": {
+      "post": {
+        "operationId": "batchGetPurposes",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/BatchGetPurposesRequest"
+        },
+        "responses": {}
+      }
+    },
+    "/v1/purpose/{purposeId}": {
+      "get": {
+        "operationId": "getPurpose",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updatePurpose",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpdatePurposeRequest"
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePurpose",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PurposeIdPathParam": {
+        "name": "purposeId",
+        "in": "path",
+        "required": true
+      },
+      "QueryParam": {
+        "name": "query",
+        "in": "query",
+        "required": false
+      },
+      "SizeParam": {
+        "name": "size",
+        "in": "query",
+        "required": false
+      }
+    },
+    "requestBodies": {
+      "CreatePurposeRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UpdatePurposeRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BatchGetPurposesRequest": {
+        "required": true,
+        "content": {
+          "application/json": {}
+        }
+      }
+    },
+    "responses": {
+      "PurposeResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PurposeListResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PurposeSearchResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ClientErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnauthorizedResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ForbiddenResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ConflictResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServerErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/email-template/templates": {
+      "post": {
+        "operationId": "saveTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates/{id}": {
+      "get": {
+        "operationId": "getTemplateDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTemplateDetail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates:replace": {
+      "post": {
+        "operationId": "replaceVariables",
+        "deprecated": true,
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates:replaceAsync": {
+      "post": {
+        "operationId": "replaceVariablesAsync",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates:bulkSendMessage": {
+      "post": {
+        "operationId": "bulkSendMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates:revert": {
+      "post": {
+        "operationId": "revertToOriginalTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://email-template.sls.epilot.io"
+    }
+  ]
+}

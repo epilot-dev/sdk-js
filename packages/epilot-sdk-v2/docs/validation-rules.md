@@ -1,0 +1,921 @@
+# Validation Rules API
+
+**Base URL:** `https://validation-rules.sls.epilot.io`
+**Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
+
+## Usage
+
+```ts
+import { epilot } from '@epilot/sdk'
+
+epilot.authorize(() => '<token>')
+
+// Call operations directly (lazy singleton under the hood)
+const { data } = await epilot.validationRules.getValidationRules(...)
+
+// Or get the client explicitly
+const validationRulesClient = await epilot.validationRules.getClient()
+```
+
+### Tree-shakeable import
+
+```ts
+import { getClient, authorize } from '@epilot/sdk/validation-rules'
+
+const validationRulesClient = await getClient()
+authorize(validationRulesClient, () => '<token>')
+const { data } = await validationRulesClient.getValidationRules(...)
+
+// Or create a fresh (non-singleton) client
+import { createClient } from '@epilot/sdk/validation-rules'
+const fresh = await createClient()
+authorize(fresh, () => '<token>')
+```
+
+## Operations
+
+**Validation Rules**
+- [`getValidationRules`](#getvalidationrules)
+- [`createValidationRule`](#createvalidationrule)
+- [`getValidationRuleById`](#getvalidationrulebyid)
+- [`updateValidationRule`](#updatevalidationrule)
+- [`deleteValidationRule`](#deletevalidationrule)
+- [`addUsedByReference`](#addusedbyreference)
+- [`removeUsedByReference`](#removeusedbyreference)
+
+### `getValidationRules`
+
+Get all validation rules by organization Id
+
+`GET /v1/validation-rules`
+
+```ts
+const { data } = await client.getValidationRules()
+```
+
+**Response**
+
+```json
+{
+  "results": [
+    {
+      "title": "string",
+      "placeholder": "string",
+      "used_by": [],
+      "rule": {},
+      "_schema_version": "string",
+      "_id": "string",
+      "_organization_id": "string",
+      "created_at": "string",
+      "updated_at": "string",
+      "created_by": "string",
+      "updated_by": "string"
+    }
+  ]
+}
+```
+
+---
+
+### `createValidationRule`
+
+Create Validation Rule
+
+`POST /v1/validation-rules`
+
+```ts
+const { data } = await client.createValidationRule(
+  null,
+  {
+    title: 'string',
+    placeholder: 'string',
+    used_by: [
+      {
+        type: 'journey',
+        schema_slug: 'string',
+        source_id: 'string'
+      }
+    ],
+    rule: {
+      type: 'regex',
+      conditions: {
+        all: [ /* ... */ ]
+      }
+    }
+  },
+)
+```
+
+**Response**
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "schema_slug": "string",
+      "source_id": "string"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": []
+    }
+  },
+  "_schema_version": "string",
+  "_id": "string",
+  "_organization_id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "created_by": "string",
+  "updated_by": "string"
+}
+```
+
+---
+
+### `getValidationRuleById`
+
+Get validation rule by ID
+
+`GET /v1/validation-rules/{ruleId}`
+
+```ts
+const { data } = await client.getValidationRuleById({
+  ruleId: 'example',
+})
+```
+
+**Response**
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "schema_slug": "string",
+      "source_id": "string"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": []
+    }
+  },
+  "_schema_version": "string",
+  "_id": "string",
+  "_organization_id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "created_by": "string",
+  "updated_by": "string"
+}
+```
+
+---
+
+### `updateValidationRule`
+
+Update Validation Rule (partial update)
+
+`PATCH /v1/validation-rules/{ruleId}`
+
+```ts
+const { data } = await client.updateValidationRule(
+  {
+    ruleId: 'example',
+  },
+  {
+    title: 'string',
+    placeholder: 'string',
+    used_by: [
+      {
+        type: 'journey',
+        schema_slug: 'string',
+        source_id: 'string'
+      }
+    ],
+    rule: {
+      type: 'regex',
+      conditions: {
+        all: [ /* ... */ ]
+      }
+    }
+  },
+)
+```
+
+**Response**
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "schema_slug": "string",
+      "source_id": "string"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": []
+    }
+  },
+  "_schema_version": "string",
+  "_id": "string",
+  "_organization_id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "created_by": "string",
+  "updated_by": "string"
+}
+```
+
+---
+
+### `deleteValidationRule`
+
+Delete Validation Rule
+
+`DELETE /v1/validation-rules/{ruleId}`
+
+```ts
+const { data } = await client.deleteValidationRule({
+  ruleId: 'example',
+})
+```
+
+---
+
+### `addUsedByReference`
+
+Add a reference to the usedBy array
+
+`POST /v1/validation-rules/{ruleId}/used-by`
+
+```ts
+const { data } = await client.addUsedByReference(
+  {
+    ruleId: 'example',
+  },
+  {
+    type: 'journey',
+    schema_slug: 'string',
+    source_id: 'string'
+  },
+)
+```
+
+**Response**
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "schema_slug": "string",
+      "source_id": "string"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": []
+    }
+  },
+  "_schema_version": "string",
+  "_id": "string",
+  "_organization_id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "created_by": "string",
+  "updated_by": "string"
+}
+```
+
+---
+
+### `removeUsedByReference`
+
+Remove a reference from the usedBy array
+
+`DELETE /v1/validation-rules/{ruleId}/used-by`
+
+```ts
+const { data } = await client.removeUsedByReference(
+  {
+    ruleId: 'example',
+  },
+  {
+    type: 'journey',
+    schema_slug: 'string',
+    source_id: 'string'
+  },
+)
+```
+
+**Response**
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "schema_slug": "string",
+      "source_id": "string"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": []
+    }
+  },
+  "_schema_version": "string",
+  "_id": "string",
+  "_organization_id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "created_by": "string",
+  "updated_by": "string"
+}
+```
+
+---
+
+## Schemas
+
+### `GetValidationRulesResponse`
+
+```ts
+type GetValidationRulesResponse = {
+  results?: Array<{
+    _schema_version: string
+    _id: string
+    _organization_id: string
+    created_at: string
+    updated_at: string
+    created_by: string
+    updated_by: string
+  }>
+}
+```
+
+### `CreateValidationRuleRequest`
+
+```ts
+type CreateValidationRuleRequest = object
+```
+
+### `UpdateValidationRuleRequest`
+
+```ts
+type UpdateValidationRuleRequest = {
+  title?: string
+  placeholder?: string
+  used_by?: Array<{
+    type: "journey" | "entity"
+    schema_slug?: string
+    source_id?: string
+  }>
+  rule?: {
+    type: "regex"
+    conditions: {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  } | {
+    type: "pattern"
+    conditions: {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  } | {
+    type: "numeric"
+    conditions: {
+      all: { ... }
+  // ...
+}
+```
+
+### `ValidationRuleBase`
+
+```ts
+type ValidationRuleBase = {
+  title?: string
+  placeholder?: string
+  used_by?: Array<{
+    type: "journey" | "entity"
+    schema_slug?: string
+    source_id?: string
+  }>
+  rule?: {
+    type: "regex"
+    conditions: {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  } | {
+    type: "pattern"
+    conditions: {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  } | {
+    type: "numeric"
+    conditions: {
+      all: { ... }
+  // ...
+}
+```
+
+### `ValidationRule`
+
+The Validation rule definition.
+
+```ts
+type ValidationRule = {
+  _schema_version: string
+  _id: string
+  _organization_id: string
+  created_at: string
+  updated_at: string
+  created_by: string
+  updated_by: string
+}
+```
+
+### `UsedBy`
+
+Describes where and how a validation rule is applied.
+
+```ts
+type UsedBy = {
+  type: "journey" | "entity"
+  schema_slug?: string
+  source_id?: string
+}
+```
+
+### `RegexRuleType`
+
+Validation rule that uses a regular expression to validate input.
+
+```ts
+type RegexRuleType = {
+  type: "regex"
+  conditions: {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  } | {
+    not: {
+  // ...
+}
+```
+
+### `PatternRuleType`
+
+Validation rule that uses a sequence of patterns to validate input.
+
+```ts
+type PatternRuleType = {
+  type: "pattern"
+  conditions: {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  // ...
+}
+```
+
+### `NumericRuleType`
+
+Validation rule for numeric values, supporting range and digit count constraints.
+
+```ts
+type NumericRuleType = {
+  type: "numeric"
+  conditions: {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  // ...
+}
+```
+
+### `RegexCondition`
+
+Condition definition for a regex-based validation rule (2 levels deep)
+
+```ts
+type RegexCondition = {
+  all: Array<{
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }
+  }>
+  // ...
+}
+```
+
+### `RegexNestedCondition`
+
+Nested condition with logical operators (level 2 only)
+
+```ts
+type RegexNestedCondition = {
+  all: Array<{
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  }>
+} | {
+  any: Array<{
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  }>
+} | {
+  not: {
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  }
+}
+```
+
+### `RegexFactCondition`
+
+Fact-based condition for regex validation
+
+```ts
+type RegexFactCondition = {
+  fact: "inputValue"
+  operator: "regexMatch"
+  value: string
+  params?: {
+    errorMessage?: string
+  }
+}
+```
+
+### `PatternCondition`
+
+Condition definition for a pattern-based validation rule (2 levels deep)
+
+```ts
+type PatternCondition = {
+  all: Array<{
+    fact: "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check" | "total-length"
+    operator: "exactlyNDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+    operator: "in" | "notIn" | "contains" | "doesNotContain"
+    value: string[]
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+  // ...
+}
+```
+
+### `PatternNestedCondition`
+
+Nested condition with logical operators (level 2 only)
+
+```ts
+type PatternNestedCondition = {
+  all: Array<{
+    fact: "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check" | "total-length"
+    operator: "exactlyNDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+    operator: "in" | "notIn" | "contains" | "doesNotContain"
+    value: string[]
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+  // ...
+}
+```
+
+### `PatternFactCondition`
+
+Fact-based condition for pattern validation
+
+```ts
+type PatternFactCondition = {
+  fact: "total-length"
+  operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+  value: number
+  params?: {
+    errorMessage?: string
+    start?: number
+    end?: number
+  }
+} | {
+  fact: "static-check" | "total-length"
+  operator: "exactlyNDigits"
+  value: number
+  params?: {
+    errorMessage?: string
+    start?: number
+    end?: number
+  }
+} | {
+  fact: "static-check"
+  operator: "in" | "notIn" | "contains" | "doesNotContain"
+  value: string[]
+  params?: {
+    errorMessage?: string
+    start?: number
+    end?: number
+  }
+} | {
+  fact: "static-check"
+  operator: "equal" | "notEqual"
+  // ...
+}
+```
+
+### `NumericCondition`
+
+Condition definition for a numeric-based validation rule (2 levels deep)
+
+```ts
+type NumericCondition = {
+  all: Array<{
+    fact: "numeric-value" | "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "integer-digits-count"
+    operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      allowLeadingZeroes?: { ... }
+    }
+  } | {
+    fact: "decimal-digits-count"
+    operator: "equal" | "minDecimalDigits" | "maxDecimalDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "has-leading-zeroes"
+    operator: "equal" | "notAllowed"
+    value: boolean
+    params?: {
+      errorMessage?: { ... }
+    }
+  // ...
+}
+```
+
+### `NumericNestedCondition`
+
+Nested condition with logical operators (level 2 only)
+
+```ts
+type NumericNestedCondition = {
+  all: Array<{
+    fact: "numeric-value" | "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "integer-digits-count"
+    operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      allowLeadingZeroes?: { ... }
+    }
+  } | {
+    fact: "decimal-digits-count"
+    operator: "equal" | "minDecimalDigits" | "maxDecimalDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "has-leading-zeroes"
+    operator: "equal" | "notAllowed"
+    value: boolean
+    params?: {
+      errorMessage?: { ... }
+    }
+  // ...
+}
+```
+
+### `NumericFactCondition`
+
+Fact-based condition for numeric validation
+
+```ts
+type NumericFactCondition = {
+  fact: "numeric-value" | "total-length"
+  operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+  value: number
+  params?: {
+    errorMessage?: string
+  }
+} | {
+  fact: "integer-digits-count"
+  operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits"
+  value: number
+  params?: {
+    errorMessage?: string
+    allowLeadingZeroes?: boolean
+  }
+} | {
+  fact: "decimal-digits-count"
+  operator: "equal" | "minDecimalDigits" | "maxDecimalDigits"
+  value: number
+  params?: {
+    errorMessage?: string
+  }
+} | {
+  fact: "has-leading-zeroes"
+  operator: "equal" | "notAllowed"
+  value: boolean
+  params?: {
+    errorMessage?: string
+  }
+}
+```

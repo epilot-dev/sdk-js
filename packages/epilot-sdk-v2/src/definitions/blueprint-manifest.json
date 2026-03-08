@@ -1,0 +1,488 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://blueprint-manifest.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/blueprint-manifest/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createExport": {
+      "post": {
+        "operationId": "createExport",
+        "deprecated": true,
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
+      "post": {
+        "operationId": "exportManifest",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest:uploadManifest": {
+      "post": {
+        "operationId": "uploadManifest",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createPlan": {
+      "post": {
+        "operationId": "createPlan",
+        "deprecated": true,
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
+      "post": {
+        "operationId": "applyPlan",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/manifests": {
+      "get": {
+        "operationId": "listInstalledManifests",
+        "deprecated": true,
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/manifests/{manifest_id}": {
+      "get": {
+        "operationId": "getManifest",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateManifest",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteManifest",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints": {
+      "get": {
+        "operationId": "listBlueprints",
+        "parameters": [
+          {
+            "name": "archived",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createBlueprint",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprint",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
+      "get": {
+        "operationId": "getBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
+      "post": {
+        "operationId": "validateBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
+      "post": {
+        "operationId": "formatBlueprintDescription",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources": {
+      "post": {
+        "operationId": "addBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies": {
+      "post": {
+        "operationId": "syncDependencies",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk": {
+      "post": {
+        "operationId": "bulkAddBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "put": {
+        "operationId": "bulkUpdateBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "bulkDeleteBlueprintResources",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}": {
+      "put": {
+        "operationId": "updateBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprintResource",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/jobs": {
+      "get": {
+        "operationId": "listBlueprintJobs",
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}": {
+      "get": {
+        "operationId": "getBlueprintJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}:continue": {
+      "post": {
+        "operationId": "continueInstallationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
+      "post": {
+        "operationId": "cancelBlueprintJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "JobID": {
+        "name": "job_id",
+        "in": "path",
+        "required": true
+      }
+    }
+  }
+}

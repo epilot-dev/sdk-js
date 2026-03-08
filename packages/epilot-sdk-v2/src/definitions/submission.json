@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/submission/submissions": {
+      "post": {
+        "operationId": "createSubmission",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/submission/nonce/{nonce_id}": {
+      "get": {
+        "operationId": "getNonce",
+        "parameters": [
+          {
+            "name": "nonce_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://submission.sls.epilot.io"
+    }
+  ]
+}

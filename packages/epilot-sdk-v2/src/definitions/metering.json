@@ -1,0 +1,383 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/metering/meter": {
+      "get": {
+        "operationId": "getCustomerMeters",
+        "responses": {}
+      }
+    },
+    "/v1/metering/contract/meters/{contract_id}": {
+      "get": {
+        "operationId": "getMetersByContractId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/meter/{id}": {
+      "patch": {
+        "operationId": "updateMeter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getMeter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/counter": {
+      "get": {
+        "operationId": "getMeterCounters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/counter/{counter_id}": {
+      "get": {
+        "operationId": "getCounterDetails",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading": {
+      "post": {
+        "operationId": "createMeterReading",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/readings": {
+      "post": {
+        "operationId": "createMeterReadings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/readings/{meter_id}": {
+      "post": {
+        "operationId": "createPortalMeterReadings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/metering/readings": {
+      "post": {
+        "operationId": "batchWriteMeterReadings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/submission": {
+      "post": {
+        "operationId": "createMeterReadingFromSubmission",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/allowed/reading/{meter_id}": {
+      "get": {
+        "operationId": "getAllowedReadingForMeter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/with-meter": {
+      "post": {
+        "operationId": "createReadingWithMeter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}": {
+      "get": {
+        "operationId": "getReadingsByInterval",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateMeterReading",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteMeterReading",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "InvalidRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestUpdateMeter": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReadings": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateMeterReadingFromSubmission": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestCreateReadingWithMeter": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidRequestUpdateMeterReading": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    },
+    "parameters": {
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "SkipValidationQueryParam": {
+        "name": "skip_validation",
+        "in": "query",
+        "required": false
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://metering.sls.epilot.io"
+    }
+  ]
+}

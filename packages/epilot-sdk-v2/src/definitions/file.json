@@ -1,0 +1,557 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v2/files/upload": {
+      "post": {
+        "operationId": "uploadFileV2",
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/files": {
+      "post": {
+        "operationId": "saveFileV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DeleteTempFileQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/VersionOnlyQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "file_entity_id",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files": {
+      "post": {
+        "operationId": "saveFile",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/VersionOnlyQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/files/{id}": {
+      "get": {
+        "operationId": "getFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "source_url",
+            "in": "query"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "purge",
+            "in": "query"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/StrictQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/download": {
+      "get": {
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "attachment",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files:downloadS3": {
+      "post": {
+        "operationId": "downloadS3File",
+        "parameters": [
+          {
+            "name": "s3_key",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "s3_bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "attachment",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files:downloadFiles": {
+      "post": {
+        "operationId": "downloadFiles",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/preview": {
+      "get": {
+        "operationId": "previewFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files:previewS3": {
+      "post": {
+        "operationId": "previewS3File",
+        "parameters": [
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "previewS3FileGet",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/public/{id}/preview": {
+      "get": {
+        "operationId": "previewPublicFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query"
+          },
+          {
+            "name": "w",
+            "in": "query"
+          },
+          {
+            "name": "h",
+            "in": "query"
+          },
+          {
+            "name": "org_id",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/session": {
+      "get": {
+        "operationId": "getSession",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSession",
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/public/links": {
+      "post": {
+        "operationId": "generatePublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listPublicLinksForFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/public/links/{id}/{filename}": {
+      "get": {
+        "operationId": "accessPublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "hash",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/public/links/{id}": {
+      "delete": {
+        "operationId": "revokePublicLink",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/download:verify": {
+      "post": {
+        "operationId": "verifyCustomDownloadUrl",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/public/upload": {
+      "post": {
+        "operationId": "uploadFilePublic",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/{slug}/collections": {
+      "get": {
+        "operationId": "getUserSchemaFileCollections",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/{slug}/collections/{collectionSlug}": {
+      "put": {
+        "operationId": "updateUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUserSchemaFileCollection",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{id}/collections/{collectionSlug}/files": {
+      "get": {
+        "operationId": "getFilesInCollection",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "name": "collectionSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/collections/{schemaSlug}": {
+      "get": {
+        "operationId": "getGlobalFileCollections",
+        "parameters": [
+          {
+            "name": "schemaSlug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "StrictQueryParam": {
+        "name": "strict",
+        "in": "query",
+        "required": false
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "FillActivityQueryParam": {
+        "name": "fill_activity",
+        "in": "query",
+        "required": false
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "in": "query",
+        "required": false
+      },
+      "DeleteTempFileQueryParam": {
+        "name": "delete_temp_file",
+        "in": "query",
+        "required": false
+      },
+      "VersionOnlyQueryParam": {
+        "name": "version_only",
+        "in": "query",
+        "required": false
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnauthorizedError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ForbiddenError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://file.sls.epilot.io"
+    }
+  ]
+}

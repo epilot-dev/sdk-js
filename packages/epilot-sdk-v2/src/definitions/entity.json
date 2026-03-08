@@ -1,0 +1,1584 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/entity/schemas": {
+      "get": {
+        "operationId": "listSchemas",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "unpublished"
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}": {
+      "get": {
+        "operationId": "getSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "id"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "draft"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/schema": {
+      "get": {
+        "operationId": "getJsonSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "dereference"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/json/example": {
+      "get": {
+        "operationId": "getSchemaExample",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/versions": {
+      "get": {
+        "operationId": "getSchemaVersions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "versions_from"
+          },
+          {
+            "in": "query",
+            "name": "versions_size"
+          },
+          {
+            "in": "query",
+            "name": "drafts_from"
+          },
+          {
+            "in": "query",
+            "name": "drafts_size"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false,
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/capabilities/available": {
+      "get": {
+        "operationId": "listAvailableCapabilities",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/blueprints": {
+      "get": {
+        "operationId": "listSchemaBlueprints",
+        "responses": {}
+      }
+    },
+    "/v1/entity:search": {
+      "post": {
+        "operationId": "searchEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity:list": {
+      "post": {
+        "operationId": "listEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity:graph": {
+      "post": {
+        "operationId": "queryEntityGraph",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}": {
+      "post": {
+        "operationId": "createEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}:validate": {
+      "post": {
+        "operationId": "validateEntityV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathPriceParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}:upsert": {
+      "patch": {
+        "operationId": "upsertEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DryRunQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "name": "strict",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntityV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}:restore": {
+      "patch": {
+        "operationId": "restoreEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}:reindex": {
+      "post": {
+        "operationId": "reindexEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}": {
+      "get": {
+        "operationId": "getEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FillActivityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DryRunQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          },
+          "required": true
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteEntity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "purge"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:autocomplete": {
+      "get": {
+        "operationId": "autocomplete",
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "slug",
+            "in": "query"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:wipeAllEntities": {
+      "post": {
+        "operationId": "wipeAllEntities",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity": {
+      "post": {
+        "operationId": "createActivity",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entities",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity/{id}": {
+      "get": {
+        "operationId": "getActivity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdPathParam"
+          },
+          {
+            "in": "query",
+            "name": "operations_size"
+          },
+          {
+            "in": "query",
+            "name": "operations_from"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/activity/{id}:attach": {
+      "post": {
+        "operationId": "attachActivity",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ActivityIdPathParam"
+          },
+          {
+            "in": "query",
+            "name": "entities",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/activity": {
+      "get": {
+        "operationId": "getEntityActivityFeed",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "query",
+            "name": "after"
+          },
+          {
+            "in": "query",
+            "name": "before"
+          },
+          {
+            "in": "query",
+            "name": "start_date"
+          },
+          {
+            "in": "query",
+            "name": "end_date"
+          },
+          {
+            "in": "query",
+            "name": "preset_range"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "style": "form",
+            "explode": false
+          },
+          {
+            "in": "query",
+            "name": "include_relations"
+          },
+          {
+            "in": "query",
+            "name": "exclude_activity_groups"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeRelations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "fields"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/entity/{slug}/{id}/relations": {
+      "get": {
+        "operationId": "getRelationsV3",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/FromPageQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/IncludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityRelationsModeQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "fields"
+          },
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/entity/{slug}/{id}/relations/count": {
+      "get": {
+        "operationId": "getRelatedEntitiesCount",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/ExcludeSchemasQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
+      "put": {
+        "operationId": "updateRelation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteRelation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/AsyncOperationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:export": {
+      "post": {
+        "operationId": "exportEntities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          },
+          {
+            "in": "query",
+            "name": "is_template"
+          },
+          {
+            "in": "query",
+            "name": "language"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity:import": {
+      "post": {
+        "operationId": "importEntities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/views": {
+      "get": {
+        "operationId": "listSavedViews",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "slug",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/view": {
+      "post": {
+        "operationId": "createSavedView",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/view/{id}": {
+      "get": {
+        "operationId": "getSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSavedView",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SavedViewIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/views/favorites": {
+      "get": {
+        "operationId": "listFavoriteViewsForUser",
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies": {
+      "get": {
+        "operationId": "listTaxonomies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_disabled"
+          },
+          {
+            "in": "query",
+            "name": "type"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createTaxonomy",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}": {
+      "get": {
+        "operationId": "getTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "permanent"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
+      "post": {
+        "operationId": "updateClassificationsForTaxonomy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/taxonomies/classifications": {
+      "post": {
+        "operationId": "createTaxonomyClassification",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/entity/taxonomies/classifications/{classificationSlug}": {
+      "get": {
+        "operationId": "getTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteTaxonomyClassification",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomyClassificationSlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
+      "get": {
+        "operationId": "taxonomyAutocomplete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/classifications:search": {
+      "post": {
+        "operationId": "taxonomiesClassificationsSearch",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taxonomySlug"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "archived",
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "include_archived"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
+      "get": {
+        "operationId": "listTaxonomyClassificationsForSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaxonomySlugPathParam"
+          },
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/bulk-jobs": {
+      "get": {
+        "operationId": "getTaxonomyBulkActionJobs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "created_after"
+          },
+          {
+            "in": "query",
+            "name": "sort_pending_first"
+          },
+          {
+            "in": "query",
+            "name": "scope"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getTaxonomyBulkActionJobById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/bulk-jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "cancelBulkAction",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/classifications:move": {
+      "post": {
+        "operationId": "bulkMoveClassifications",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/classifications:merge": {
+      "post": {
+        "operationId": "bulkMergeClassifications",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/taxonomies/classifications:delete": {
+      "post": {
+        "operationId": "bulkDeleteClassifications",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/attributes": {
+      "post": {
+        "operationId": "createSchemaAttribute",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/attributes/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaAttribute",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/capabilities": {
+      "post": {
+        "operationId": "createSchemaCapability",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/capabilities/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaCapability",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/group": {
+      "post": {
+        "operationId": "createSchemaGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/group/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroup",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/headline": {
+      "post": {
+        "operationId": "createSchemaGroupHeadline",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/headline/{composite_id}": {
+      "get": {
+        "operationId": "getSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSchemaGroupHeadline",
+        "parameters": [
+          {
+            "name": "composite_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "EntityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "EntitySlugPathParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
+      },
+      "EntitySlugPathPriceParam": {
+        "name": "slug",
+        "in": "path",
+        "required": true
+      },
+      "TaxonomySlugQueryParam": {
+        "name": "taxonomySlug",
+        "in": "query",
+        "required": true
+      },
+      "TaxonomySlugPathParam": {
+        "name": "taxonomySlug",
+        "in": "path",
+        "required": true
+      },
+      "TaxonomySlugQueryParamOptional": {
+        "name": "taxonomySlug",
+        "in": "query"
+      },
+      "TaxonomyClassificationSlugPathParam": {
+        "name": "classificationSlug",
+        "in": "path",
+        "required": true
+      },
+      "SavedViewIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "AsyncOperationQueryParam": {
+        "name": "async",
+        "in": "query",
+        "required": false
+      },
+      "HydrateEntitiesQueryParam": {
+        "name": "hydrate",
+        "in": "query"
+      },
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "in": "query",
+        "required": false
+      },
+      "ActivityIdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "FromPageQueryParam": {
+        "name": "from",
+        "in": "query"
+      },
+      "IncludeReverseDeprecatedQueryParam": {
+        "name": "include_reverse",
+        "in": "query",
+        "deprecated": true
+      },
+      "IncludeReverseQueryParam": {
+        "name": "include_reverse",
+        "in": "query"
+      },
+      "IncludeSchemasQueryParam": {
+        "name": "include_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "ExcludeSchemasQueryParam": {
+        "name": "exclude_schemas",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": false
+      },
+      "EntityRelationsModeQueryParam": {
+        "name": "mode",
+        "in": "query",
+        "required": false
+      },
+      "DryRunQueryParam": {
+        "name": "dry_run",
+        "in": "query",
+        "required": false
+      },
+      "FillActivityQueryParam": {
+        "name": "fill_activity",
+        "in": "query",
+        "required": false
+      },
+      "ValidateEntityQueryParam": {
+        "name": "validate",
+        "in": "query"
+      }
+    },
+    "responses": {
+      "BadRequestError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "TooManyRequestsError": {
+        "headers": {
+          "Retry-After": {}
+        },
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
+}

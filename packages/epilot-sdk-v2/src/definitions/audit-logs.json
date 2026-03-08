@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://audit-logs.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/logs": {
+      "post": {
+        "operationId": "getLogs",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/logs/{logId}": {
+      "get": {
+        "operationId": "getLogById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "logId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

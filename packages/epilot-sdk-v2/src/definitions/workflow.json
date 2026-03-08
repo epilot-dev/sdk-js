@@ -1,0 +1,386 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://workflows-execution.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/workflows/executions": {
+      "get": {
+        "operationId": "getExecutions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "context",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createExecution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/{executionId}": {
+      "get": {
+        "operationId": "getExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps": {
+      "post": {
+        "operationId": "createStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps/{stepId}": {
+      "patch": {
+        "operationId": "updateStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteStep",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/search": {
+      "post": {
+        "deprecated": true,
+        "operationId": "searchExecutions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/steps/search": {
+      "post": {
+        "deprecated": true,
+        "operationId": "searchSteps",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/executions/{executionId}/closing-reasons": {
+      "get": {
+        "operationId": "getClosingReasonExecution",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions": {
+      "post": {
+        "operationId": "startFlowExecution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}": {
+      "get": {
+        "operationId": "getFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteFlowExecution",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/SoftDeleteParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions:search": {
+      "post": {
+        "operationId": "searchFlowExecutions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}": {
+      "patch": {
+        "operationId": "patchTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/automation:run": {
+      "post": {
+        "operationId": "runTaskAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute": {
+      "post": {
+        "operationId": "executeTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/phases/{phase_id}": {
+      "patch": {
+        "operationId": "patchPhase",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/PhaseIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks": {
+      "post": {
+        "operationId": "addTask",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "delete": {
+        "operationId": "cancelTaskSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ExecutionIdParam": {
+        "in": "path",
+        "name": "execution_id",
+        "required": true
+      },
+      "TaskIdParam": {
+        "in": "path",
+        "name": "task_id",
+        "required": true
+      },
+      "PhaseIdParam": {
+        "in": "path",
+        "name": "phase_id",
+        "required": true
+      },
+      "ScheduleIdParam": {
+        "in": "path",
+        "name": "schedule_id",
+        "required": true
+      },
+      "SoftDeleteParam": {
+        "in": "query",
+        "name": "soft",
+        "required": false
+      }
+    }
+  }
+}
