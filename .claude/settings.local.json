@@ -22,7 +22,8 @@
       "Bash(npm view:*)",
       "Read(//private/tmp/**)",
       "Bash(npm pack @epilot/axios-large-response)",
-      "Bash(tar xzf epilot-axios-large-response-0.0.2.tgz)"
+      "Bash(tar xzf epilot-axios-large-response-0.0.2.tgz)",
+      "Bash(pnpm test:*)"
     ],
     "deny": []
   }
