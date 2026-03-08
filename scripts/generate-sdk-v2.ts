@@ -455,14 +455,34 @@ const formatSchemaType = (schema: Schema | undefined, indent = 0, maxDepth = 3):
   return 'unknown';
 };
 
+/**
+ * Escape <word> angle bracket patterns that MDX v1 interprets as JSX tags.
+ * Preserves valid HTML tags (details, summary, p, etc.) and backtick-wrapped content.
+ */
+const HTML_TAGS = new Set([
+  'details', 'summary', 'div', 'span', 'p', 'br', 'hr', 'table', 'thead',
+  'tbody', 'tr', 'th', 'td', 'ul', 'ol', 'li', 'a', 'img', 'em', 'strong',
+  'code', 'pre', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'sup',
+  'sub', 'del', 'ins', 'abbr', 'b', 'i', 'u', 's', 'small', 'mark',
+]);
+
+const escapeMdxAngleBrackets = (text: string): string => {
+  return text.replace(/<([a-zA-Z][a-zA-Z0-9_-]*)>/g, (match, tag) => {
+    if (HTML_TAGS.has(tag.toLowerCase())) return match;
+    return `\`<${tag}>\``;
+  });
+};
+
 const sanitizeDescription = (desc: string): string => {
   // Take only the first paragraph (up to the first blank line or heading)
   const firstParagraph = desc.split(/\n\s*\n/)[0] || '';
-  // Strip any markdown headings
-  return firstParagraph
-    .replace(/^#{1,6}\s+/gm, '')
-    .trim()
-    .substring(0, 200);
+  // Strip any markdown headings, then escape MDX-incompatible angle brackets
+  return escapeMdxAngleBrackets(
+    firstParagraph
+      .replace(/^#{1,6}\s+/gm, '')
+      .trim()
+      .substring(0, 200),
+  );
 };
 
 const extractOperations = (
@@ -644,7 +664,7 @@ const generateClientDoc = (client: ClientInfo): string => {
     }
 
     for (const op of activeOps) {
-      const desc = op.summary && op.summary.toLowerCase() !== op.operationId.toLowerCase() ? op.summary : '';
+      const desc = op.summary && op.summary.toLowerCase() !== op.operationId.toLowerCase() ? escapeMdxAngleBrackets(op.summary) : '';
       lines.push(`### \`${op.operationId}\``);
       lines.push(``);
       if (desc) {
@@ -735,7 +755,7 @@ const generateClientDoc = (client: ClientInfo): string => {
       lines.push(`### \`${schema.name}\``);
       lines.push(``);
       if (schema.description) {
-        lines.push(schema.description);
+        lines.push(escapeMdxAngleBrackets(schema.description));
         lines.push(``);
       }
       const typeDef = `type ${schema.name} = ${schema.shape}`;
