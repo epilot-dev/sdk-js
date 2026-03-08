@@ -8,6 +8,8 @@
 
 <p align="center">JavaScript/TypeScript SDK for epilot APIs. Full types, tree-shakeable imports, and lazy-loaded OpenAPI specs.</p>
 
+Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
+
 ## Install
 
 ```bash
@@ -32,6 +34,77 @@ const { data: executions } = await epilot.workflow.getExecutions()
 ```
 
 API clients are built on [openapi-client-axios](https://openapistack.co/docs/openapi-client-axios/intro/), which generates fully typed operation methods on top of regular [axios](https://axios-http.com/docs/intro) instances. All standard axios features (interceptors, defaults, config) work as expected. Each operation is forwarded to a lazy singleton — the spec is loaded and the client initialized on first use, then cached.
+
+## API Reference
+
+| API | Import | Docs |
+| --- | ------ | ---- |
+| `epilot.accessToken` | `@epilot/sdk/access-token` | [docs](./packages/epilot-sdk-v2/docs/access-token.md) |
+| `epilot.address` | `@epilot/sdk/address` | [docs](./packages/epilot-sdk-v2/docs/address.md) |
+| `epilot.addressSuggestions` | `@epilot/sdk/address-suggestions` | [docs](./packages/epilot-sdk-v2/docs/address-suggestions.md) |
+| `epilot.aiAgents` | `@epilot/sdk/ai-agents` | [docs](./packages/epilot-sdk-v2/docs/ai-agents.md) |
+| `epilot.app` | `@epilot/sdk/app` | [docs](./packages/epilot-sdk-v2/docs/app.md) |
+| `epilot.auditLogs` | `@epilot/sdk/audit-logs` | [docs](./packages/epilot-sdk-v2/docs/audit-logs.md) |
+| `epilot.automation` | `@epilot/sdk/automation` | [docs](./packages/epilot-sdk-v2/docs/automation.md) |
+| `epilot.billing` | `@epilot/sdk/billing` | [docs](./packages/epilot-sdk-v2/docs/billing.md) |
+| `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./packages/epilot-sdk-v2/docs/blueprint-manifest.md) |
+| `epilot.consent` | `@epilot/sdk/consent` | [docs](./packages/epilot-sdk-v2/docs/consent.md) |
+| `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./packages/epilot-sdk-v2/docs/customer-portal.md) |
+| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./packages/epilot-sdk-v2/docs/data-management.md) |
+| `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./packages/epilot-sdk-v2/docs/deduplication.md) |
+| `epilot.design` | `@epilot/sdk/design` | [docs](./packages/epilot-sdk-v2/docs/design.md) |
+| `epilot.discussion` | `@epilot/sdk/discussion` | [docs](./packages/epilot-sdk-v2/docs/discussion.md) |
+| `epilot.document` | `@epilot/sdk/document` | [docs](./packages/epilot-sdk-v2/docs/document.md) |
+| `epilot.emailSettings` | `@epilot/sdk/email-settings` | [docs](./packages/epilot-sdk-v2/docs/email-settings.md) |
+| `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./packages/epilot-sdk-v2/docs/email-template.md) |
+| `epilot.entity` | `@epilot/sdk/entity` | [docs](./packages/epilot-sdk-v2/docs/entity.md) |
+| `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./packages/epilot-sdk-v2/docs/entity-mapping.md) |
+| `epilot.environments` | `@epilot/sdk/environments` | [docs](./packages/epilot-sdk-v2/docs/environments.md) |
+| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./packages/epilot-sdk-v2/docs/erp-integration.md) |
+| `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
+| `epilot.file` | `@epilot/sdk/file` | [docs](./packages/epilot-sdk-v2/docs/file.md) |
+| `epilot.iban` | `@epilot/sdk/iban` | [docs](./packages/epilot-sdk-v2/docs/iban.md) |
+| `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
+| `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |
+| `epilot.message` | `@epilot/sdk/message` | [docs](./packages/epilot-sdk-v2/docs/message.md) |
+| `epilot.metering` | `@epilot/sdk/metering` | [docs](./packages/epilot-sdk-v2/docs/metering.md) |
+| `epilot.notes` | `@epilot/sdk/notes` | [docs](./packages/epilot-sdk-v2/docs/notes.md) |
+| `epilot.notification` | `@epilot/sdk/notification` | [docs](./packages/epilot-sdk-v2/docs/notification.md) |
+| `epilot.organization` | `@epilot/sdk/organization` | [docs](./packages/epilot-sdk-v2/docs/organization.md) |
+| `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./packages/epilot-sdk-v2/docs/partner-directory.md) |
+| `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./packages/epilot-sdk-v2/docs/permissions.md) |
+| `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
+| `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
+| `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
+| `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
+| `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
+| `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
+| `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |
+| `epilot.user` | `@epilot/sdk/user` | [docs](./packages/epilot-sdk-v2/docs/user.md) |
+| `epilot.validationRules` | `@epilot/sdk/validation-rules` | [docs](./packages/epilot-sdk-v2/docs/validation-rules.md) |
+| `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./packages/epilot-sdk-v2/docs/webhooks.md) |
+| `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./packages/epilot-sdk-v2/docs/workflow.md) |
+| `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./packages/epilot-sdk-v2/docs/workflow-definition.md) |
+
+## Packages
+
+| Package | Description |
+| ------- | ----------- |
+| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
+| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
+| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
+
+## Codebase Structure
+
+```
+sdk-js/
+├── clients/                    # 46 API client packages (source specs + types)
+├── packages/
+│   ├── epilot-sdk-v2/          # @epilot/sdk
+│   ├── app-sdk/                # @epilot/app-sdk
+│   └── app-bridge/             # @epilot/app-bridge
+└── scripts/                    # code generation scripts
+```
 
 ## Explicit Client Access
 
@@ -331,82 +404,7 @@ epilot.authorize('new-token') // invalidates all cached clients
 
 If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
 
-
-## API Reference
-
-Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
-
-## Available APIs
-
-| API | Import | Docs |
-| --- | ------ | ---- |
-| `epilot.accessToken` | `@epilot/sdk/access-token` | [docs](./packages/epilot-sdk-v2/docs/access-token.md) |
-| `epilot.address` | `@epilot/sdk/address` | [docs](./packages/epilot-sdk-v2/docs/address.md) |
-| `epilot.addressSuggestions` | `@epilot/sdk/address-suggestions` | [docs](./packages/epilot-sdk-v2/docs/address-suggestions.md) |
-| `epilot.aiAgents` | `@epilot/sdk/ai-agents` | [docs](./packages/epilot-sdk-v2/docs/ai-agents.md) |
-| `epilot.app` | `@epilot/sdk/app` | [docs](./packages/epilot-sdk-v2/docs/app.md) |
-| `epilot.auditLogs` | `@epilot/sdk/audit-logs` | [docs](./packages/epilot-sdk-v2/docs/audit-logs.md) |
-| `epilot.automation` | `@epilot/sdk/automation` | [docs](./packages/epilot-sdk-v2/docs/automation.md) |
-| `epilot.billing` | `@epilot/sdk/billing` | [docs](./packages/epilot-sdk-v2/docs/billing.md) |
-| `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./packages/epilot-sdk-v2/docs/blueprint-manifest.md) |
-| `epilot.consent` | `@epilot/sdk/consent` | [docs](./packages/epilot-sdk-v2/docs/consent.md) |
-| `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./packages/epilot-sdk-v2/docs/customer-portal.md) |
-| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./packages/epilot-sdk-v2/docs/data-management.md) |
-| `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./packages/epilot-sdk-v2/docs/deduplication.md) |
-| `epilot.design` | `@epilot/sdk/design` | [docs](./packages/epilot-sdk-v2/docs/design.md) |
-| `epilot.discussion` | `@epilot/sdk/discussion` | [docs](./packages/epilot-sdk-v2/docs/discussion.md) |
-| `epilot.document` | `@epilot/sdk/document` | [docs](./packages/epilot-sdk-v2/docs/document.md) |
-| `epilot.emailSettings` | `@epilot/sdk/email-settings` | [docs](./packages/epilot-sdk-v2/docs/email-settings.md) |
-| `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./packages/epilot-sdk-v2/docs/email-template.md) |
-| `epilot.entity` | `@epilot/sdk/entity` | [docs](./packages/epilot-sdk-v2/docs/entity.md) |
-| `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./packages/epilot-sdk-v2/docs/entity-mapping.md) |
-| `epilot.environments` | `@epilot/sdk/environments` | [docs](./packages/epilot-sdk-v2/docs/environments.md) |
-| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./packages/epilot-sdk-v2/docs/erp-integration.md) |
-| `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
-| `epilot.file` | `@epilot/sdk/file` | [docs](./packages/epilot-sdk-v2/docs/file.md) |
-| `epilot.iban` | `@epilot/sdk/iban` | [docs](./packages/epilot-sdk-v2/docs/iban.md) |
-| `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
-| `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |
-| `epilot.message` | `@epilot/sdk/message` | [docs](./packages/epilot-sdk-v2/docs/message.md) |
-| `epilot.metering` | `@epilot/sdk/metering` | [docs](./packages/epilot-sdk-v2/docs/metering.md) |
-| `epilot.notes` | `@epilot/sdk/notes` | [docs](./packages/epilot-sdk-v2/docs/notes.md) |
-| `epilot.notification` | `@epilot/sdk/notification` | [docs](./packages/epilot-sdk-v2/docs/notification.md) |
-| `epilot.organization` | `@epilot/sdk/organization` | [docs](./packages/epilot-sdk-v2/docs/organization.md) |
-| `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./packages/epilot-sdk-v2/docs/partner-directory.md) |
-| `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./packages/epilot-sdk-v2/docs/permissions.md) |
-| `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
-| `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
-| `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
-| `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
-| `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
-| `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
-| `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |
-| `epilot.user` | `@epilot/sdk/user` | [docs](./packages/epilot-sdk-v2/docs/user.md) |
-| `epilot.validationRules` | `@epilot/sdk/validation-rules` | [docs](./packages/epilot-sdk-v2/docs/validation-rules.md) |
-| `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./packages/epilot-sdk-v2/docs/webhooks.md) |
-| `epilot.workflow` | `@epilot/sdk/workflow` | [docs](./packages/epilot-sdk-v2/docs/workflow.md) |
-| `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./packages/epilot-sdk-v2/docs/workflow-definition.md) |
-
-## Packages
-
-| Package | Description |
-| ------- | ----------- |
-| [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
-| [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
-| [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
-
-## Codebase Structure
-
-```
-sdk-js/
-├── clients/                    # 46 API client packages (source specs + types)
-├── packages/
-│   ├── epilot-sdk-v2/          # @epilot/sdk
-│   ├── app-sdk/                # @epilot/app-sdk
-│   └── app-bridge/             # @epilot/app-bridge
-└── scripts/                    # code generation scripts
-```
-
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for internal development and publishing instructions.
+
