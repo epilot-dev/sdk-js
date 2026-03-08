@@ -116,7 +116,13 @@ const { data } = await client.listConsentEvents({
       "source": "www.frontend.epilot.cloud",
       "organization_id": "123",
       "identifier": "exampleuser@epilot.cloud",
-      "meta": {}
+      "meta": {
+        "double_opt_in": true,
+        "source_type": "journey",
+        "source_id": "0e4f2a26-14f0-4ada-9294-a7d7a0b9b214",
+        "ip_address": "1.1.1.1",
+        "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+      }
     }
   ],
   "total": 1

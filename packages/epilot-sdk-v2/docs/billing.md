@@ -83,12 +83,18 @@ const { data } = await client.getBillingEvents({
       "billing_amount_decimal": "100.50",
       "billing_currency": "EUR",
       "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
-      "contract": {},
+      "contract": {
+        "$relation": [
+          {
+            "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+          }
+        ]
+      },
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "string",
       "_org": "string",
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["string"],
       "_created_at": "string",
       "_updated_at": "string",
       "type": "installment",
@@ -119,16 +125,16 @@ const { data } = await client.createBillingEvent(
     external_id: 'd4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e',
     contract: {
       $relation: [
-        { /* ... */ }
+        {
+          entity_id: 'f589786b-3024-43cd-9cb3-5a3c953f2896'
+        }
       ]
     },
     _id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     _title: 'string',
     _org: 'string',
     _schema: 'contact',
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     _created_at: 'string',
     _updated_at: 'string',
     type: 'installment',
@@ -149,16 +155,16 @@ const { data } = await client.createBillingEvent(
   "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
   "contract": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+      }
     ]
   },
   "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "type": "installment",
@@ -194,16 +200,16 @@ const { data } = await client.getBillingEvent({
   "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
   "contract": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+      }
     ]
   },
   "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "type": "installment",
@@ -234,16 +240,16 @@ const { data } = await client.updateBillingEvent(
     external_id: 'd4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e',
     contract: {
       $relation: [
-        { /* ... */ }
+        {
+          entity_id: 'f589786b-3024-43cd-9cb3-5a3c953f2896'
+        }
       ]
     },
     _id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     _title: 'string',
     _org: 'string',
     _schema: 'contact',
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     _created_at: 'string',
     _updated_at: 'string',
     type: 'installment',
@@ -264,16 +270,16 @@ const { data } = await client.updateBillingEvent(
   "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
   "contract": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+      }
     ]
   },
   "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "type": "installment",
@@ -323,16 +329,16 @@ const { data } = await client.getBillingEventByExternalId({
   "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
   "contract": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+      }
     ]
   },
   "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "type": "installment",
@@ -359,9 +365,7 @@ const { data } = await client.createContractEntity(
     _title: 'string',
     _org: 'string',
     _schema: 'contact',
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     _created_at: 'string',
     _updated_at: 'string',
     contract_name: 'Grid Contract',
@@ -399,9 +403,7 @@ const { data } = await client.createContractEntity(
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "contract_name": "Grid Contract",
@@ -449,9 +451,7 @@ const { data } = await client.updateContractEntity(
     _title: 'string',
     _org: 'string',
     _schema: 'contact',
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     _created_at: 'string',
     _updated_at: 'string',
     contract_name: 'Grid Contract',
@@ -489,9 +489,7 @@ const { data } = await client.updateContractEntity(
   "_title": "string",
   "_org": "string",
   "_schema": "contact",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "string",
   "_updated_at": "string",
   "contract_name": "Grid Contract",
@@ -727,7 +725,6 @@ type Contract = {
   installment_amount?: number
   balance?: number
   balance_currency?: string
-  // ...
 }
 ```
 
@@ -764,7 +761,6 @@ type ContractItem = {
   installment_amount?: number
   balance?: number
   balance_currency?: string
-  // ...
 }
 ```
 

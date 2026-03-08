@@ -64,12 +64,18 @@ const { data } = await client.createSubmission(
         contact_last_name: 'Last',
         contact_email: 'example@submission.com',
         request: 'I would like to know more about electric vehicles',
-        files: [ /* ... */ ]
+        files: [
+          {
+            s3ref: {
+              bucket: 'epilot-user-content',
+              key: 'temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf'
+            },
+            filename: 'document.pdf'
+          }
+        ]
       }
     ],
-    _ivy_opportunity_ids: [
-      'string'
-    ]
+    _ivy_opportunity_ids: ['string']
   },
 )
 ```

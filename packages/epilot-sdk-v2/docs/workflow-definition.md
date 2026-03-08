@@ -170,12 +170,8 @@ const { data } = await client.getDefinitions()
       "stepId": "string",
       "phaseId": "string"
     },
-    "userIds": [
-      0
-    ],
-    "assignedTo": [
-      "string"
-    ],
+    "userIds": [0],
+    "assignedTo": ["string"],
     "enableECPWorkflow": true,
     "flow": [
       {},
@@ -187,9 +183,7 @@ const { data } = await client.getDefinitions()
     "updateEntityAttributes": [
       {}
     ],
-    "taxonomies": [
-      "string"
-    ],
+    "taxonomies": ["string"],
     "singleClosingReasonSelection": true
   }
 ]
@@ -223,12 +217,8 @@ const { data } = await client.createDefinition(
       stepId: 'string',
       phaseId: 'string'
     },
-    userIds: [
-      0
-    ],
-    assignedTo: [
-      'string'
-    ],
+    userIds: [0],
+    assignedTo: ['string'],
     enableECPWorkflow: true,
     flow: [
       {
@@ -238,9 +228,9 @@ const { data } = await client.createDefinition(
         type: 'STEP',
         dueDate: '2021-04-27T12:00:00.000Z',
         dynamicDueDate: { /* ... */ },
-        assignedTo: [ /* ... */ ],
+        assignedTo: ['string'],
         steps: [ /* ... */ ],
-        taxonomies: [ /* ... */ ]
+        taxonomies: ['string']
       },
       {
         id: 'string',
@@ -252,13 +242,13 @@ const { data } = await client.createDefinition(
         order: 0,
         dueDate: '2021-04-27T12:00:00.000Z',
         dynamicDueDate: { /* ... */ },
-        userIds: [ /* ... */ ],
+        userIds: [0],
         requirements: [ /* ... */ ],
-        assignedTo: [ /* ... */ ],
+        assignedTo: ['string'],
         type: 'STEP',
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ]
+        taxonomies: ['string']
       }
     ],
     closingReasons: [
@@ -272,9 +262,7 @@ const { data } = await client.createDefinition(
         target: { /* ... */ }
       }
     ],
-    taxonomies: [
-      'string'
-    ],
+    taxonomies: ['string'],
     singleClosingReasonSelection: true
   },
 )
@@ -299,12 +287,8 @@ const { data } = await client.createDefinition(
     "stepId": "string",
     "phaseId": "string"
   },
-  "userIds": [
-    0
-  ],
-  "assignedTo": [
-    "string"
-  ],
+  "userIds": [0],
+  "assignedTo": ["string"],
   "enableECPWorkflow": true,
   "flow": [
     {
@@ -314,9 +298,9 @@ const { data } = await client.createDefinition(
       "type": "STEP",
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "steps": [],
-      "taxonomies": []
+      "taxonomies": ["string"]
     },
     {
       "id": "string",
@@ -328,13 +312,13 @@ const { data } = await client.createDefinition(
       "order": 0,
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "userIds": [],
+      "userIds": [0],
       "requirements": [],
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "type": "STEP",
       "ecp": {},
       "installer": {},
-      "taxonomies": []
+      "taxonomies": ["string"]
     }
   ],
   "closingReasons": [
@@ -348,9 +332,7 @@ const { data } = await client.createDefinition(
       "target": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -391,7 +373,7 @@ const { data } = await client.listFlowTemplates({
       "updated_at": "2021-04-27T12:01:13.000Z",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "available_in_ecp": true,
       "additional_triggers": [],
       "phases": [],
@@ -399,7 +381,7 @@ const { data } = await client.listFlowTemplates({
       "edges": [],
       "closing_reasons": [],
       "entity_sync": [],
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "singleClosingReasonSelection": true
     }
   ]
@@ -440,9 +422,7 @@ const { data } = await client.createFlowTemplate(
       task_id: 'string',
       phase_id: 'string'
     },
-    assigned_to: [
-      'string'
-    ],
+    assigned_to: ['string'],
     available_in_ecp: true,
     additional_triggers: [
       {
@@ -464,8 +444,8 @@ const { data } = await client.createFlowTemplate(
         name: 'string',
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
-        assigned_to: [ /* ... */ ],
-        taxonomies: [ /* ... */ ]
+        assigned_to: ['string'],
+        taxonomies: ['string']
       }
     ],
     tasks: [
@@ -477,10 +457,10 @@ const { data } = await client.createFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL'
       },
@@ -492,10 +472,10 @@ const { data } = await client.createFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL',
         automation_config: { /* ... */ },
@@ -530,9 +510,7 @@ const { data } = await client.createFlowTemplate(
         value: { /* ... */ }
       }
     ],
-    taxonomies: [
-      'string'
-    ],
+    taxonomies: ['string'],
     singleClosingReasonSelection: true
   },
 )
@@ -563,9 +541,7 @@ const { data } = await client.createFlowTemplate(
     "task_id": "string",
     "phase_id": "string"
   },
-  "assigned_to": [
-    "string"
-  ],
+  "assigned_to": ["string"],
   "available_in_ecp": true,
   "additional_triggers": [
     {
@@ -586,8 +562,8 @@ const { data } = await client.createFlowTemplate(
       "name": "string",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
-      "taxonomies": []
+      "assigned_to": ["string"],
+      "taxonomies": ["string"]
     }
   ],
   "tasks": [
@@ -599,10 +575,10 @@ const { data } = await client.createFlowTemplate(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
     },
@@ -614,10 +590,10 @@ const { data } = await client.createFlowTemplate(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
@@ -651,9 +627,7 @@ const { data } = await client.createFlowTemplate(
       "value": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -703,7 +677,7 @@ const { data } = await client.searchFlowTemplates(
       "updated_at": "2021-04-27T12:01:13.000Z",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "available_in_ecp": true,
       "additional_triggers": [],
       "phases": [],
@@ -711,7 +685,7 @@ const { data } = await client.searchFlowTemplates(
       "edges": [],
       "closing_reasons": [],
       "entity_sync": [],
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "singleClosingReasonSelection": true
     }
   ]
@@ -759,9 +733,7 @@ const { data } = await client.getFlowTemplate({
     "task_id": "string",
     "phase_id": "string"
   },
-  "assigned_to": [
-    "string"
-  ],
+  "assigned_to": ["string"],
   "available_in_ecp": true,
   "additional_triggers": [
     {
@@ -782,8 +754,8 @@ const { data } = await client.getFlowTemplate({
       "name": "string",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
-      "taxonomies": []
+      "assigned_to": ["string"],
+      "taxonomies": ["string"]
     }
   ],
   "tasks": [
@@ -795,10 +767,10 @@ const { data } = await client.getFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
     },
@@ -810,10 +782,10 @@ const { data } = await client.getFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
@@ -847,9 +819,7 @@ const { data } = await client.getFlowTemplate({
       "value": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -890,9 +860,7 @@ const { data } = await client.updateFlowTemplate(
       task_id: 'string',
       phase_id: 'string'
     },
-    assigned_to: [
-      'string'
-    ],
+    assigned_to: ['string'],
     available_in_ecp: true,
     additional_triggers: [
       {
@@ -914,8 +882,8 @@ const { data } = await client.updateFlowTemplate(
         name: 'string',
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
-        assigned_to: [ /* ... */ ],
-        taxonomies: [ /* ... */ ]
+        assigned_to: ['string'],
+        taxonomies: ['string']
       }
     ],
     tasks: [
@@ -927,10 +895,10 @@ const { data } = await client.updateFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL'
       },
@@ -942,10 +910,10 @@ const { data } = await client.updateFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL',
         automation_config: { /* ... */ },
@@ -980,9 +948,7 @@ const { data } = await client.updateFlowTemplate(
         value: { /* ... */ }
       }
     ],
-    taxonomies: [
-      'string'
-    ],
+    taxonomies: ['string'],
     singleClosingReasonSelection: true
   },
 )
@@ -1013,9 +979,7 @@ const { data } = await client.updateFlowTemplate(
     "task_id": "string",
     "phase_id": "string"
   },
-  "assigned_to": [
-    "string"
-  ],
+  "assigned_to": ["string"],
   "available_in_ecp": true,
   "additional_triggers": [
     {
@@ -1036,8 +1000,8 @@ const { data } = await client.updateFlowTemplate(
       "name": "string",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
-      "taxonomies": []
+      "assigned_to": ["string"],
+      "taxonomies": ["string"]
     }
   ],
   "tasks": [
@@ -1049,10 +1013,10 @@ const { data } = await client.updateFlowTemplate(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
     },
@@ -1064,10 +1028,10 @@ const { data } = await client.updateFlowTemplate(
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
@@ -1101,9 +1065,7 @@ const { data } = await client.updateFlowTemplate(
       "value": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -1163,9 +1125,7 @@ const { data } = await client.duplicateFlowTemplate({
     "task_id": "string",
     "phase_id": "string"
   },
-  "assigned_to": [
-    "string"
-  ],
+  "assigned_to": ["string"],
   "available_in_ecp": true,
   "additional_triggers": [
     {
@@ -1186,8 +1146,8 @@ const { data } = await client.duplicateFlowTemplate({
       "name": "string",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
-      "taxonomies": []
+      "assigned_to": ["string"],
+      "taxonomies": ["string"]
     }
   ],
   "tasks": [
@@ -1199,10 +1159,10 @@ const { data } = await client.duplicateFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
     },
@@ -1214,10 +1174,10 @@ const { data } = await client.duplicateFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
@@ -1251,9 +1211,7 @@ const { data } = await client.duplicateFlowTemplate({
       "value": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -1299,9 +1257,7 @@ const { data } = await client.exportFlowTemplate({
     "task_id": "string",
     "phase_id": "string"
   },
-  "assigned_to": [
-    "string"
-  ],
+  "assigned_to": ["string"],
   "available_in_ecp": true,
   "additional_triggers": [
     {
@@ -1322,8 +1278,8 @@ const { data } = await client.exportFlowTemplate({
       "name": "string",
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
-      "assigned_to": [],
-      "taxonomies": []
+      "assigned_to": ["string"],
+      "taxonomies": ["string"]
     }
   ],
   "tasks": [
@@ -1335,10 +1291,10 @@ const { data } = await client.exportFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
     },
@@ -1350,10 +1306,10 @@ const { data } = await client.exportFlowTemplate({
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
       "requirements": [],
-      "assigned_to": [],
+      "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
-      "taxonomies": [],
+      "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
@@ -1387,9 +1343,7 @@ const { data } = await client.exportFlowTemplate({
       "value": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
   "_resolved_automations": {}
 }
@@ -1429,9 +1383,7 @@ const { data } = await client.importFlowTemplate(
       task_id: 'string',
       phase_id: 'string'
     },
-    assigned_to: [
-      'string'
-    ],
+    assigned_to: ['string'],
     available_in_ecp: true,
     additional_triggers: [
       {
@@ -1453,8 +1405,8 @@ const { data } = await client.importFlowTemplate(
         name: 'string',
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
-        assigned_to: [ /* ... */ ],
-        taxonomies: [ /* ... */ ]
+        assigned_to: ['string'],
+        taxonomies: ['string']
       }
     ],
     tasks: [
@@ -1466,10 +1418,10 @@ const { data } = await client.importFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL'
       },
@@ -1481,10 +1433,10 @@ const { data } = await client.importFlowTemplate(
         due_date: '2021-04-27T12:00:00.000Z',
         due_date_config: { /* ... */ },
         requirements: [ /* ... */ ],
-        assigned_to: [ /* ... */ ],
+        assigned_to: ['string'],
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ],
+        taxonomies: ['string'],
         phase_id: 'string',
         task_type: 'MANUAL',
         automation_config: { /* ... */ },
@@ -1519,9 +1471,7 @@ const { data } = await client.importFlowTemplate(
         value: { /* ... */ }
       }
     ],
-    taxonomies: [
-      'string'
-    ],
+    taxonomies: ['string'],
     singleClosingReasonSelection: true,
     _resolved_automations: {}
   },
@@ -1554,9 +1504,7 @@ const { data } = await client.importFlowTemplate(
       "task_id": "string",
       "phase_id": "string"
     },
-    "assigned_to": [
-      "string"
-    ],
+    "assigned_to": ["string"],
     "available_in_ecp": true,
     "additional_triggers": [
       {},
@@ -1578,9 +1526,7 @@ const { data } = await client.importFlowTemplate(
     "entity_sync": [
       {}
     ],
-    "taxonomies": [
-      "string"
-    ],
+    "taxonomies": ["string"],
     "singleClosingReasonSelection": true
   },
   "_id_mappings": {
@@ -1629,12 +1575,8 @@ const { data } = await client.getDefinition({
     "stepId": "string",
     "phaseId": "string"
   },
-  "userIds": [
-    0
-  ],
-  "assignedTo": [
-    "string"
-  ],
+  "userIds": [0],
+  "assignedTo": ["string"],
   "enableECPWorkflow": true,
   "flow": [
     {
@@ -1644,9 +1586,9 @@ const { data } = await client.getDefinition({
       "type": "STEP",
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "steps": [],
-      "taxonomies": []
+      "taxonomies": ["string"]
     },
     {
       "id": "string",
@@ -1658,13 +1600,13 @@ const { data } = await client.getDefinition({
       "order": 0,
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "userIds": [],
+      "userIds": [0],
       "requirements": [],
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "type": "STEP",
       "ecp": {},
       "installer": {},
-      "taxonomies": []
+      "taxonomies": ["string"]
     }
   ],
   "closingReasons": [
@@ -1678,9 +1620,7 @@ const { data } = await client.getDefinition({
       "target": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -1715,12 +1655,8 @@ const { data } = await client.updateDefinition(
       stepId: 'string',
       phaseId: 'string'
     },
-    userIds: [
-      0
-    ],
-    assignedTo: [
-      'string'
-    ],
+    userIds: [0],
+    assignedTo: ['string'],
     enableECPWorkflow: true,
     flow: [
       {
@@ -1730,9 +1666,9 @@ const { data } = await client.updateDefinition(
         type: 'STEP',
         dueDate: '2021-04-27T12:00:00.000Z',
         dynamicDueDate: { /* ... */ },
-        assignedTo: [ /* ... */ ],
+        assignedTo: ['string'],
         steps: [ /* ... */ ],
-        taxonomies: [ /* ... */ ]
+        taxonomies: ['string']
       },
       {
         id: 'string',
@@ -1744,13 +1680,13 @@ const { data } = await client.updateDefinition(
         order: 0,
         dueDate: '2021-04-27T12:00:00.000Z',
         dynamicDueDate: { /* ... */ },
-        userIds: [ /* ... */ ],
+        userIds: [0],
         requirements: [ /* ... */ ],
-        assignedTo: [ /* ... */ ],
+        assignedTo: ['string'],
         type: 'STEP',
         ecp: { /* ... */ },
         installer: { /* ... */ },
-        taxonomies: [ /* ... */ ]
+        taxonomies: ['string']
       }
     ],
     closingReasons: [
@@ -1764,9 +1700,7 @@ const { data } = await client.updateDefinition(
         target: { /* ... */ }
       }
     ],
-    taxonomies: [
-      'string'
-    ],
+    taxonomies: ['string'],
     singleClosingReasonSelection: true
   },
 )
@@ -1791,12 +1725,8 @@ const { data } = await client.updateDefinition(
     "stepId": "string",
     "phaseId": "string"
   },
-  "userIds": [
-    0
-  ],
-  "assignedTo": [
-    "string"
-  ],
+  "userIds": [0],
+  "assignedTo": ["string"],
   "enableECPWorkflow": true,
   "flow": [
     {
@@ -1806,9 +1736,9 @@ const { data } = await client.updateDefinition(
       "type": "STEP",
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "steps": [],
-      "taxonomies": []
+      "taxonomies": ["string"]
     },
     {
       "id": "string",
@@ -1820,13 +1750,13 @@ const { data } = await client.updateDefinition(
       "order": 0,
       "dueDate": "2021-04-27T12:00:00.000Z",
       "dynamicDueDate": {},
-      "userIds": [],
+      "userIds": [0],
       "requirements": [],
-      "assignedTo": [],
+      "assignedTo": ["string"],
       "type": "STEP",
       "ecp": {},
       "installer": {},
-      "taxonomies": []
+      "taxonomies": ["string"]
     }
   ],
   "closingReasons": [
@@ -1840,9 +1770,7 @@ const { data } = await client.updateDefinition(
       "target": {}
     }
   ],
-  "taxonomies": [
-    "string"
-  ],
+  "taxonomies": ["string"],
   "singleClosingReasonSelection": true
 }
 ```
@@ -2121,6 +2049,76 @@ type FlowTemplateBase = {
   }
   enabled?: boolean
   version?: "v1" | "v2" | "v3"
+  created_at?: string
+  updated_at?: string
+  due_date?: string
+  due_date_config?: {
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED"
+    task_id?: string
+    phase_id?: string
+  }
+  assigned_to?: Array<string | {
+    variable: string
+    value?: string
+  }>
+  available_in_ecp?: boolean
+  additional_triggers?: Array<{
+    id?: string
+    type: "manual"
+    entity_schema?: string
+  } | {
+    id?: string
+    type: "automation"
+    automation_id?: string
+    trigger_config?: Array<{
+      type: { ... }
+      configuration?: { ... }
+    }>
+  } | {
+    id?: string
+    type: "journey_submission"
+    journey_id: string
+    journey_name?: string
+    automation_id?: string
+  } | {
+    id?: string
+    type: "journey_automation"
+    entity_schema?: string
+  }>
+  phases?: Array<{
+    id: string
+    name: string
+    due_date?: string
+    due_date_config?: {
+      duration: { ... }
+      unit: { ... }
+      type: { ... }
+      task_id?: { ... }
+      phase_id?: { ... }
+    }
+    assigned_to?: Array<string | {
+      variable: { ... }
+      value?: { ... }
+    }>
+    taxonomies?: string[]
+  }>
+  tasks: Array<{
+    id: string
+    name: string
+    description?: {
+      enabled?: { ... }
+      value?: { ... }
+    }
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+    due_date?: string
+    due_date_config?: {
   // ...
 }
 ```
@@ -2158,6 +2156,76 @@ type FlowTemplate = {
   }
   enabled?: boolean
   version?: "v1" | "v2" | "v3"
+  created_at?: string
+  updated_at?: string
+  due_date?: string
+  due_date_config?: {
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED"
+    task_id?: string
+    phase_id?: string
+  }
+  assigned_to?: Array<string | {
+    variable: string
+    value?: string
+  }>
+  available_in_ecp?: boolean
+  additional_triggers?: Array<{
+    id?: string
+    type: "manual"
+    entity_schema?: string
+  } | {
+    id?: string
+    type: "automation"
+    automation_id?: string
+    trigger_config?: Array<{
+      type: { ... }
+      configuration?: { ... }
+    }>
+  } | {
+    id?: string
+    type: "journey_submission"
+    journey_id: string
+    journey_name?: string
+    automation_id?: string
+  } | {
+    id?: string
+    type: "journey_automation"
+    entity_schema?: string
+  }>
+  phases?: Array<{
+    id: string
+    name: string
+    due_date?: string
+    due_date_config?: {
+      duration: { ... }
+      unit: { ... }
+      type: { ... }
+      task_id?: { ... }
+      phase_id?: { ... }
+    }
+    assigned_to?: Array<string | {
+      variable: { ... }
+      value?: { ... }
+    }>
+    taxonomies?: string[]
+  }>
+  tasks: Array<{
+    id: string
+    name: string
+    description?: {
+      enabled?: { ... }
+      value?: { ... }
+    }
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+    due_date?: string
+    due_date_config?: {
   // ...
 }
 ```
@@ -2281,6 +2349,76 @@ type CreateFlowTemplate = {
   }
   enabled?: boolean
   version?: "v1" | "v2" | "v3"
+  created_at?: string
+  updated_at?: string
+  due_date?: string
+  due_date_config?: {
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED"
+    task_id?: string
+    phase_id?: string
+  }
+  assigned_to?: Array<string | {
+    variable: string
+    value?: string
+  }>
+  available_in_ecp?: boolean
+  additional_triggers?: Array<{
+    id?: string
+    type: "manual"
+    entity_schema?: string
+  } | {
+    id?: string
+    type: "automation"
+    automation_id?: string
+    trigger_config?: Array<{
+      type: { ... }
+      configuration?: { ... }
+    }>
+  } | {
+    id?: string
+    type: "journey_submission"
+    journey_id: string
+    journey_name?: string
+    automation_id?: string
+  } | {
+    id?: string
+    type: "journey_automation"
+    entity_schema?: string
+  }>
+  phases?: Array<{
+    id: string
+    name: string
+    due_date?: string
+    due_date_config?: {
+      duration: { ... }
+      unit: { ... }
+      type: { ... }
+      task_id?: { ... }
+      phase_id?: { ... }
+    }
+    assigned_to?: Array<string | {
+      variable: { ... }
+      value?: { ... }
+    }>
+    taxonomies?: string[]
+  }>
+  tasks: Array<{
+    id: string
+    name: string
+    description?: {
+      enabled?: { ... }
+      value?: { ... }
+    }
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+    due_date?: string
+    due_date_config?: {
   // ...
 }
 ```
@@ -2333,6 +2471,76 @@ type FlowTemplatesList = {
     version?: "v1" | "v2" | "v3"
     created_at?: string
     updated_at?: string
+    due_date?: string
+    due_date_config?: {
+      duration: { ... }
+      unit: { ... }
+      type: { ... }
+      task_id?: { ... }
+      phase_id?: { ... }
+    }
+    assigned_to?: Array<string | {
+      variable: { ... }
+      value?: { ... }
+    }>
+    available_in_ecp?: boolean
+    additional_triggers?: Array<{
+      id?: { ... }
+      type: { ... }
+      entity_schema?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      automation_id?: { ... }
+      trigger_config?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      journey_id: { ... }
+      journey_name?: { ... }
+      automation_id?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      entity_schema?: { ... }
+    }>
+    phases?: Array<{
+      id: { ... }
+      name: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      assigned_to?: { ... }
+      taxonomies?: { ... }
+    }>
+    tasks: Array<{
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      journey?: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      requirements?: { ... }
+      assigned_to?: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      taxonomies?: { ... }
+      phase_id?: { ... }
+      task_type: { ... }
+    } | {
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      journey?: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      requirements?: { ... }
+      assigned_to?: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      taxonomies?: { ... }
+      phase_id?: { ... }
+      task_type: { ... }
+      automation_config: { ... }
   // ...
 }
 ```
@@ -2378,6 +2586,76 @@ type Task = {
     variable: string
     value?: string
   }>
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
+} | {
+  id: string
+  name: string
+  description?: {
+    enabled?: boolean
+    value?: string
+  }
+  journey?: {
+    id?: string
+    journeyId?: string
+    name?: string
+    complete_task_automatically?: boolean
+  }
+  due_date?: string
+  due_date_config?: {
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED"
+    task_id?: string
+    phase_id?: string
+  }
+  requirements?: Array<{
+    task_id?: string
+    phase_id?: string
+    when: "TASK_FINISHED" | "PHASE_FINISHED"
+  }>
+  assigned_to?: Array<string | {
+    variable: string
+    value?: string
+  }>
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   // ...
 }
 ```
@@ -2415,7 +2693,31 @@ type ManualTask = {
     variable: string
     value?: string
   }>
-  // ...
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
 }
 ```
 
@@ -2452,7 +2754,58 @@ type AutomationTask = {
     variable: string
     value?: string
   }>
-  // ...
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
+  automation_config: {
+    flow_id?: string
+    action_config?: {
+      type: { ... }
+      config?: { ... }
+    }
+  }
+  trigger_mode?: "manual" | "automatic"
+  schedule?: {
+    mode?: "immediate"
+  } | {
+    mode: "delayed"
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  } | {
+    mode: "relative"
+    direction: "before" | "after"
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    reference: {
+      id: { ... }
+      origin: { ... }
+      schema?: { ... }
+      attribute?: { ... }
+    }
+  }
+  created_automatically?: boolean
 }
 ```
 
@@ -2503,7 +2856,34 @@ type AiAgentTask = {
     variable: string
     value?: string
   }>
-  // ...
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
+  agent_config?: {
+    agent_id: string
+  }
 }
 ```
 
@@ -2614,7 +2994,64 @@ type DecisionTask = {
     variable: string
     value?: string
   }>
-  // ...
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
+  trigger_mode: "manual" | "automatic"
+  conditions: Array<{
+    id: string
+    branch_name: string
+    logical_operator: "AND" | "OR"
+    statements: Array<{
+      id: { ... }
+      source: { ... }
+      operator: { ... }
+      values: { ... }
+    }>
+  }>
+  schedule?: {
+    mode: "delayed"
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  } | {
+    mode: "relative"
+    direction: "before" | "after"
+    duration: number
+    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    reference: {
+      id: { ... }
+      origin: { ... }
+      schema?: { ... }
+      attribute?: { ... }
+    }
+  }
+  loop_config?: {
+    loop_branch_id: string
+    exit_branch_id: string
+    max_iterations: number
+  }
 }
 ```
 
@@ -2651,7 +3088,31 @@ type TaskBase = {
     variable: string
     value?: string
   }>
-  // ...
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
+  phase_id?: string
+  task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
 }
 ```
 
@@ -2840,6 +3301,76 @@ type WorkflowDefinition = {
       actionTypeCondition: { ... }
       stepId?: { ... }
       phaseId?: { ... }
+    }
+    assignedTo?: string[]
+    steps: Array<{
+      id?: { ... }
+      name: { ... }
+      description?: { ... }
+      executionType?: { ... }
+      automationConfig?: { ... }
+      journey?: { ... }
+      order: { ... }
+      dueDate?: { ... }
+      dynamicDueDate?: { ... }
+      userIds?: { ... }
+      requirements?: { ... }
+      assignedTo?: { ... }
+      type: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      taxonomies?: { ... }
+    }>
+    taxonomies?: string[]
+  } | {
+    id?: string
+    name: string
+    description?: {
+      enabled?: { ... }
+      value?: { ... }
+    }
+    executionType?: "MANUAL" | "AUTOMATION"
+    automationConfig?: {
+      flowId: { ... }
+    }
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+    order: number
+    dueDate?: string
+    dynamicDueDate?: {
+      numberOfUnits: { ... }
+      timePeriod: { ... }
+      actionTypeCondition: { ... }
+      stepId?: { ... }
+      phaseId?: { ... }
+    }
+    userIds?: number[]
+    requirements?: Array<{
+      definitionId: { ... }
+      type: { ... }
+      condition: { ... }
+    }>
+    assignedTo?: string[]
+    type: "STEP" | "SECTION"
+    ecp?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    installer?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    taxonomies?: string[]
+  }>
+  closingReasons?: Array<{
   // ...
 }
 ```
@@ -2879,7 +3410,33 @@ type Step = {
   requirements?: Array<{
     definitionId: string
     type: "STEP" | "SECTION"
-  // ...
+    condition: "CLOSED"
+  }>
+  assignedTo?: string[]
+  type: "STEP" | "SECTION"
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  taxonomies?: string[]
 }
 ```
 
@@ -2918,7 +3475,39 @@ type Section = {
       journeyId?: { ... }
       name?: { ... }
       complete_task_automatically?: { ... }
-  // ...
+    }
+    order: number
+    dueDate?: string
+    dynamicDueDate?: {
+      numberOfUnits: { ... }
+      timePeriod: { ... }
+      actionTypeCondition: { ... }
+      stepId?: { ... }
+      phaseId?: { ... }
+    }
+    userIds?: number[]
+    requirements?: Array<{
+      definitionId: { ... }
+      type: { ... }
+      condition: { ... }
+    }>
+    assignedTo?: string[]
+    type: "STEP" | "SECTION"
+    ecp?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    installer?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    taxonomies?: string[]
+  }>
+  taxonomies?: string[]
 }
 ```
 
@@ -3178,6 +3767,76 @@ type FlowTemplateImportResult = {
     version?: "v1" | "v2" | "v3"
     created_at?: string
     updated_at?: string
+    due_date?: string
+    due_date_config?: {
+      duration: { ... }
+      unit: { ... }
+      type: { ... }
+      task_id?: { ... }
+      phase_id?: { ... }
+    }
+    assigned_to?: Array<string | {
+      variable: { ... }
+      value?: { ... }
+    }>
+    available_in_ecp?: boolean
+    additional_triggers?: Array<{
+      id?: { ... }
+      type: { ... }
+      entity_schema?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      automation_id?: { ... }
+      trigger_config?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      journey_id: { ... }
+      journey_name?: { ... }
+      automation_id?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      entity_schema?: { ... }
+    }>
+    phases?: Array<{
+      id: { ... }
+      name: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      assigned_to?: { ... }
+      taxonomies?: { ... }
+    }>
+    tasks: Array<{
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      journey?: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      requirements?: { ... }
+      assigned_to?: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      taxonomies?: { ... }
+      phase_id?: { ... }
+      task_type: { ... }
+    } | {
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      journey?: { ... }
+      due_date?: { ... }
+      due_date_config?: { ... }
+      requirements?: { ... }
+      assigned_to?: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      taxonomies?: { ... }
+      phase_id?: { ... }
+      task_type: { ... }
+      automation_config: { ... }
   // ...
 }
 ```

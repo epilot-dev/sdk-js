@@ -74,10 +74,30 @@ const { data } = await client.listEvents()
       "event_description": "Triggered when a new meter reading is added",
       "event_version": "1.0.0",
       "event_status": "active",
-      "event_tags": [],
+      "event_tags": ["builtin", "metering", "erp"],
       "schema_fields": {},
-      "entity_graph": {},
-      "entity_operation": {},
+      "entity_graph": {
+        "nodes": [
+          {
+            "id": "contact",
+            "schema": "contact",
+            "cardinality": "one",
+            "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+          }
+        ],
+        "edges": [
+          {
+            "from": "contact",
+            "to": "billing_account"
+          }
+        ]
+      },
+      "entity_operation": {
+        "operation": ["createEntity", "updateEntity"],
+        "schema": ["contact", "contract", "order"],
+        "attribute": ["email", "phone", "status"],
+        "purpose": ["Kündigung", "Umzug/Auszug"]
+      },
       "enabled": true,
       "auto_trigger": true,
       "automation_trigger": true
@@ -112,39 +132,29 @@ const { data } = await client.getEvent({
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0.0",
   "event_status": "active",
-  "event_tags": [
-    "builtin",
-    "metering",
-    "erp"
-  ],
+  "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
     "nodes": [
-      {}
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
     ],
     "edges": [
-      {}
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
     ]
   },
   "entity_operation": {
-    "operation": [
-      "createEntity",
-      "updateEntity"
-    ],
-    "schema": [
-      "contact",
-      "contract",
-      "order"
-    ],
-    "attribute": [
-      "email",
-      "phone",
-      "status"
-    ],
-    "purpose": [
-      "Kündigung",
-      "Umzug/Auszug"
-    ]
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"]
   },
   "enabled": true,
   "auto_trigger": true,
@@ -173,39 +183,29 @@ const { data } = await client.patchEvent(
     event_description: 'Triggered when a new meter reading is added',
     event_version: '1.0.0',
     event_status: 'active',
-    event_tags: [
-      'builtin',
-      'metering',
-      'erp'
-    ],
+    event_tags: ['builtin', 'metering', 'erp'],
     schema_fields: {},
     entity_graph: {
       nodes: [
-        { /* ... */ }
+        {
+          id: 'contact',
+          schema: 'contact',
+          cardinality: 'one',
+          fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
+        }
       ],
       edges: [
-        { /* ... */ }
+        {
+          from: 'contact',
+          to: 'billing_account'
+        }
       ]
     },
     entity_operation: {
-      operation: [
-        'createEntity',
-        'updateEntity'
-      ],
-      schema: [
-        'contact',
-        'contract',
-        'order'
-      ],
-      attribute: [
-        'email',
-        'phone',
-        'status'
-      ],
-      purpose: [
-        'Kündigung',
-        'Umzug/Auszug'
-      ]
+      operation: ['createEntity', 'updateEntity'],
+      schema: ['contact', 'contract', 'order'],
+      attribute: ['email', 'phone', 'status'],
+      purpose: ['Kündigung', 'Umzug/Auszug']
     },
     enabled: true,
     auto_trigger: true,
@@ -224,39 +224,29 @@ const { data } = await client.patchEvent(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0.0",
   "event_status": "active",
-  "event_tags": [
-    "builtin",
-    "metering",
-    "erp"
-  ],
+  "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
     "nodes": [
-      {}
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
     ],
     "edges": [
-      {}
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
     ]
   },
   "entity_operation": {
-    "operation": [
-      "createEntity",
-      "updateEntity"
-    ],
-    "schema": [
-      "contact",
-      "contract",
-      "order"
-    ],
-    "attribute": [
-      "email",
-      "phone",
-      "status"
-    ],
-    "purpose": [
-      "Kündigung",
-      "Umzug/Auszug"
-    ]
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"]
   },
   "enabled": true,
   "auto_trigger": true,
@@ -327,17 +317,17 @@ const { data } = await client.getEventJSONSchema({
     },
     "reason": {
       "type": "string",
-      "enum": [],
+      "enum": ["regular", "move-in", "move-out", "supplier-change", "correction", "final"],
       "description": "Reason for the meter reading"
     },
     "direction": {
       "type": "string",
-      "enum": [],
+      "enum": ["feed-in", "feed-out"],
       "description": "Direction of energy flow"
     },
     "source": {
       "type": "string",
-      "enum": [],
+      "enum": ["portal", "360", "api", "automation"],
       "description": "Source system where reading was submitted"
     },
     "meter_id": {
@@ -382,27 +372,7 @@ const { data } = await client.getEventJSONSchema({
       "description": "Email of the user who submitted the reading"
     }
   },
-  "required": [
-    "_org_id",
-    "_event_time",
-    "_event_id",
-    "_event_name",
-    "_event_version",
-    "_event_source",
-    "reading_value",
-    "reading_date",
-    "read_by",
-    "reason",
-    "direction",
-    "source",
-    "meter_id",
-    "counter_id",
-    "meter_number",
-    "obis_number",
-    "unit",
-    "customer_id",
-    "contract_id"
-  ]
+  "required": ["_org_id", "_event_time", "_event_id", "_event_name", "_event_version", "_event_source", "reading_value", "reading_date", "read_by", "reason", "direction", "source", "meter_id", "counter_id", "meter_number", "obis_number", "unit", "customer_id", "contract_id"]
 }
 ```
 
@@ -518,9 +488,7 @@ const { data } = await client.triggerEvent(
       node_id: 'string'
     },
     fields: {},
-    skip_hydration: [
-      'string'
-    ],
+    skip_hydration: ['string'],
     _trigger_source_type: 'string',
     _trigger_source: 'string'
   },
@@ -579,7 +547,12 @@ type EventConfigBase = {
   entity_operation?: {
     operation: "createEntity" | "updateEntity" | "deleteEntity"[]
     schema: string[]
-  // ...
+    attribute?: string[]
+    purpose?: string[]
+  }
+  enabled?: boolean
+  auto_trigger?: boolean
+  automation_trigger?: boolean
 }
 ```
 
@@ -618,7 +591,12 @@ type EventConfig = {
   entity_operation?: {
     operation: "createEntity" | "updateEntity" | "deleteEntity"[]
     schema: string[]
-  // ...
+    attribute?: string[]
+    purpose?: string[]
+  }
+  enabled?: boolean
+  auto_trigger?: boolean
+  automation_trigger?: boolean
 }
 ```
 
@@ -660,7 +638,12 @@ type UpdateEventPayload = {
   entity_operation?: {
     operation: "createEntity" | "updateEntity" | "deleteEntity"[]
     schema: string[]
-  // ...
+    attribute?: string[]
+    purpose?: string[]
+  }
+  enabled?: boolean
+  auto_trigger?: boolean
+  automation_trigger?: boolean
 }
 ```
 

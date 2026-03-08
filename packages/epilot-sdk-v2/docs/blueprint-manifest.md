@@ -160,23 +160,63 @@ const { data } = await client.listBlueprints({
       "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "title": "string",
       "slug": "string",
-      "description": {},
+      "description": {
+        "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
+        "postinstall": "This is the content of the postinstall.md file\n"
+      },
       "version": "string",
-      "deployments": [],
+      "deployments": [
+        {
+          "source_org_id": "string",
+          "source_blueprint_id": "string",
+          "destination_org_id": "string",
+          "destination_blueprint_id": "string",
+          "triggered_at": "1970-01-01T00:00:00.000Z"
+        }
+      ],
       "is_verified": true,
       "installation_status": "IN_PROGRESS",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {},
-      "updated_by": {},
-      "installation_job_ids": [],
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
+      "updated_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
+      "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "archived": false,
       "docs_url": "string",
-      "recommended_apps": [],
-      "required_features": {},
+      "recommended_apps": ["string"],
+      "required_features": {
+        "enabled": ["string"],
+        "disabled": ["string"]
+      },
       "zip_file_name": "string",
-      "resources": [],
+      "resources": [
+        {
+          "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+          "name": "string",
+          "type": "designbuilder",
+          "address": "string",
+          "is_root": true,
+          "is_ready": true,
+          "is_hidden": true,
+          "is_disabled": false,
+          "hard_dependencies": ["designbuilder"],
+          "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+          "depends_on_addresses": ["string"],
+          "impact_on_install": ["create"],
+          "impact_on_install_reason": ["string"]
+        }
+      ],
       "source_type": "string"
     }
   ]
@@ -232,22 +272,14 @@ const { data } = await client.createBlueprint(
       user_id: '11001045',
       token_id: 'api_5ZugdRXasLfWBypHi93Fk'
     },
-    installation_job_ids: [
-      'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-    ],
+    installation_job_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
     source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
     archived: false,
     docs_url: 'string',
-    recommended_apps: [
-      'string'
-    ],
+    recommended_apps: ['string'],
     required_features: {
-      enabled: [
-        'string'
-      ],
-      disabled: [
-        'string'
-      ]
+      enabled: ['string'],
+      disabled: ['string']
     },
     zip_file_name: 'string',
     resources: [
@@ -260,11 +292,11 @@ const { data } = await client.createBlueprint(
         is_ready: true,
         is_hidden: true,
         is_disabled: false,
-        hard_dependencies: [ /* ... */ ],
-        parent_resource_ids: [ /* ... */ ],
-        depends_on_addresses: [ /* ... */ ],
-        impact_on_install: [ /* ... */ ],
-        impact_on_install_reason: [ /* ... */ ]
+        hard_dependencies: ['designbuilder'],
+        parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+        depends_on_addresses: ['string'],
+        impact_on_install: ['create'],
+        impact_on_install_reason: ['string']
       }
     ],
     source_type: 'string'
@@ -310,22 +342,14 @@ const { data } = await client.createBlueprint(
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
-  "installation_job_ids": [
-    "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
-  ],
+  "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "archived": false,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "required_features": {
-    "enabled": [
-      "string"
-    ],
-    "disabled": [
-      "string"
-    ]
+    "enabled": ["string"],
+    "disabled": ["string"]
   },
   "zip_file_name": "string",
   "resources": [
@@ -338,11 +362,11 @@ const { data } = await client.createBlueprint(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ],
   "source_type": "string"
@@ -376,9 +400,19 @@ const { data } = await client.listInstalledMarketplaceBlueprints()
       "slug": "solar-b2b",
       "version": "v1.0.0",
       "created_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {},
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "updated_by": {},
+      "updated_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
       "has_update_available": true,
       "latest_marketplace_version": "v2.0.0",
       "installation_link": "string"
@@ -425,9 +459,7 @@ const { data } = await client.preInstallBlueprint(
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -446,11 +478,11 @@ const { data } = await client.preInstallBlueprint(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -489,9 +521,7 @@ const { data } = await client.getBlueprintPreview({
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -510,11 +540,11 @@ const { data } = await client.getBlueprintPreview({
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -540,9 +570,7 @@ const { data } = await client.installBlueprint(
     destination_org_id: 'string',
     destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
     options: {
-      resources_to_ignore: [
-        'string'
-      ]
+      resources_to_ignore: ['string']
     },
     mode: 'simple',
     source_blueprint_type: 'marketplace',
@@ -603,22 +631,14 @@ const { data } = await client.getBlueprint({
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
-  "installation_job_ids": [
-    "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
-  ],
+  "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "archived": false,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "required_features": {
-    "enabled": [
-      "string"
-    ],
-    "disabled": [
-      "string"
-    ]
+    "enabled": ["string"],
+    "disabled": ["string"]
   },
   "zip_file_name": "string",
   "resources": [
@@ -631,11 +651,11 @@ const { data } = await client.getBlueprint({
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ],
   "source_type": "string"
@@ -693,22 +713,14 @@ const { data } = await client.updateBlueprint(
       user_id: '11001045',
       token_id: 'api_5ZugdRXasLfWBypHi93Fk'
     },
-    installation_job_ids: [
-      'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-    ],
+    installation_job_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
     source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
     archived: false,
     docs_url: 'string',
-    recommended_apps: [
-      'string'
-    ],
+    recommended_apps: ['string'],
     required_features: {
-      enabled: [
-        'string'
-      ],
-      disabled: [
-        'string'
-      ]
+      enabled: ['string'],
+      disabled: ['string']
     },
     zip_file_name: 'string',
     resources: [
@@ -721,11 +733,11 @@ const { data } = await client.updateBlueprint(
         is_ready: true,
         is_hidden: true,
         is_disabled: false,
-        hard_dependencies: [ /* ... */ ],
-        parent_resource_ids: [ /* ... */ ],
-        depends_on_addresses: [ /* ... */ ],
-        impact_on_install: [ /* ... */ ],
-        impact_on_install_reason: [ /* ... */ ]
+        hard_dependencies: ['designbuilder'],
+        parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+        depends_on_addresses: ['string'],
+        impact_on_install: ['create'],
+        impact_on_install_reason: ['string']
       }
     ],
     source_type: 'string'
@@ -771,22 +783,14 @@ const { data } = await client.updateBlueprint(
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
-  "installation_job_ids": [
-    "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
-  ],
+  "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "archived": false,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "required_features": {
-    "enabled": [
-      "string"
-    ],
-    "disabled": [
-      "string"
-    ]
+    "enabled": ["string"],
+    "disabled": ["string"]
   },
   "zip_file_name": "string",
   "resources": [
@@ -799,11 +803,11 @@ const { data } = await client.updateBlueprint(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ],
   "source_type": "string"
@@ -864,22 +868,14 @@ const { data } = await client.deleteBlueprint({
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
-  "installation_job_ids": [
-    "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
-  ],
+  "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "archived": false,
   "docs_url": "string",
-  "recommended_apps": [
-    "string"
-  ],
+  "recommended_apps": ["string"],
   "required_features": {
-    "enabled": [
-      "string"
-    ],
-    "disabled": [
-      "string"
-    ]
+    "enabled": ["string"],
+    "disabled": ["string"]
   },
   "zip_file_name": "string",
   "resources": [
@@ -892,11 +888,11 @@ const { data } = await client.deleteBlueprint({
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ],
   "source_type": "string"
@@ -994,21 +990,11 @@ const { data } = await client.addBlueprintResource(
     is_ready: true,
     is_hidden: true,
     is_disabled: false,
-    hard_dependencies: [
-      'designbuilder'
-    ],
-    parent_resource_ids: [
-      'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-    ],
-    depends_on_addresses: [
-      'string'
-    ],
-    impact_on_install: [
-      'create'
-    ],
-    impact_on_install_reason: [
-      'string'
-    ]
+    hard_dependencies: ['designbuilder'],
+    parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+    depends_on_addresses: ['string'],
+    impact_on_install: ['create'],
+    impact_on_install_reason: ['string']
   },
 )
 ```
@@ -1028,11 +1014,11 @@ const { data } = await client.addBlueprintResource(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1078,21 +1064,11 @@ const { data } = await client.bulkAddBlueprintResources(
       is_ready: true,
       is_hidden: true,
       is_disabled: false,
-      hard_dependencies: [
-        'designbuilder'
-      ],
-      parent_resource_ids: [
-        'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-      ],
-      depends_on_addresses: [
-        'string'
-      ],
-      impact_on_install: [
-        'create'
-      ],
-      impact_on_install_reason: [
-        'string'
-      ]
+      hard_dependencies: ['designbuilder'],
+      parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+      depends_on_addresses: ['string'],
+      impact_on_install: ['create'],
+      impact_on_install_reason: ['string']
     }
   ],
 )
@@ -1113,11 +1089,11 @@ const { data } = await client.bulkAddBlueprintResources(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1148,21 +1124,11 @@ const { data } = await client.bulkUpdateBlueprintResources(
       is_ready: true,
       is_hidden: true,
       is_disabled: false,
-      hard_dependencies: [
-        'designbuilder'
-      ],
-      parent_resource_ids: [
-        'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-      ],
-      depends_on_addresses: [
-        'string'
-      ],
-      impact_on_install: [
-        'create'
-      ],
-      impact_on_install_reason: [
-        'string'
-      ]
+      hard_dependencies: ['designbuilder'],
+      parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+      depends_on_addresses: ['string'],
+      impact_on_install: ['create'],
+      impact_on_install_reason: ['string']
     }
   ],
 )
@@ -1183,11 +1149,11 @@ const { data } = await client.bulkUpdateBlueprintResources(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1208,9 +1174,7 @@ const { data } = await client.bulkDeleteBlueprintResources(
   {
     blueprint_id: 'example',
   },
-  [
-    'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-  ],
+  ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
 )
 ```
 
@@ -1229,11 +1193,11 @@ const { data } = await client.bulkDeleteBlueprintResources(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1264,21 +1228,11 @@ const { data } = await client.updateBlueprintResource(
     is_ready: true,
     is_hidden: true,
     is_disabled: false,
-    hard_dependencies: [
-      'designbuilder'
-    ],
-    parent_resource_ids: [
-      'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'
-    ],
-    depends_on_addresses: [
-      'string'
-    ],
-    impact_on_install: [
-      'create'
-    ],
-    impact_on_install_reason: [
-      'string'
-    ]
+    hard_dependencies: ['designbuilder'],
+    parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
+    depends_on_addresses: ['string'],
+    impact_on_install: ['create'],
+    impact_on_install_reason: ['string']
   },
 )
 ```
@@ -1298,11 +1252,11 @@ const { data } = await client.updateBlueprintResource(
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1340,11 +1294,11 @@ const { data } = await client.deleteBlueprintResource({
       "is_ready": true,
       "is_hidden": true,
       "is_disabled": false,
-      "hard_dependencies": [],
-      "parent_resource_ids": [],
-      "depends_on_addresses": [],
-      "impact_on_install": [],
-      "impact_on_install_reason": []
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
     }
   ]
 }
@@ -1373,12 +1327,49 @@ const { data } = await client.listBlueprintJobs()
   "results": [
     {
       "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-      "events": [],
+      "events": [
+        {
+          "timestamp": "1970-01-01T00:00:00.000Z",
+          "message": "string",
+          "errors": [
+            {
+              "error": "string",
+              "code": "dependency_extraction",
+              "data": {
+                "formattedResource": {
+                  "id": "string",
+                  "name": "string",
+                  "type": "string"
+                },
+                "resource": "string",
+                "resourceDependency": "string",
+                "resources": ["string"],
+                "addresses": ["string"],
+                "originalError": "string"
+              }
+            }
+          ],
+          "level": "info",
+          "data": {
+            "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+            "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+            "resources": 0
+          }
+        }
+      ],
       "triggered_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {},
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
       "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "status": "IN_PROGRESS",
-      "download_file": {}
+      "download_file": {
+        "bucket": "blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw",
+        "key": "templates/main.tf"
+      }
     }
   ]
 }
@@ -1410,9 +1401,30 @@ const { data } = await client.getBlueprintJob({
     {
       "timestamp": "1970-01-01T00:00:00.000Z",
       "message": "string",
-      "errors": [],
+      "errors": [
+        {
+          "error": "string",
+          "code": "dependency_extraction",
+          "data": {
+            "formattedResource": {
+              "id": "string",
+              "name": "string",
+              "type": "string"
+            },
+            "resource": "string",
+            "resourceDependency": "string",
+            "resources": ["string"],
+            "addresses": ["string"],
+            "originalError": "string"
+          }
+        }
+      ],
       "level": "info",
-      "data": {}
+      "data": {
+        "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "resources": 0
+      }
     }
   ],
   "triggered_at": "1970-01-01T00:00:00.000Z",
@@ -1447,9 +1459,7 @@ const { data } = await client.continueInstallationJob(
     job_id: 'example',
   },
   {
-    resources_to_ignore: [
-      'string'
-    ]
+    resources_to_ignore: ['string']
   },
 )
 ```
@@ -1464,9 +1474,30 @@ const { data } = await client.continueInstallationJob(
     {
       "timestamp": "1970-01-01T00:00:00.000Z",
       "message": "string",
-      "errors": [],
+      "errors": [
+        {
+          "error": "string",
+          "code": "dependency_extraction",
+          "data": {
+            "formattedResource": {
+              "id": "string",
+              "name": "string",
+              "type": "string"
+            },
+            "resource": "string",
+            "resourceDependency": "string",
+            "resources": ["string"],
+            "addresses": ["string"],
+            "originalError": "string"
+          }
+        }
+      ],
       "level": "info",
-      "data": {}
+      "data": {
+        "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "resources": 0
+      }
     }
   ],
   "triggered_at": "1970-01-01T00:00:00.000Z",
@@ -1513,9 +1544,30 @@ const { data } = await client.cancelBlueprintJob({
     {
       "timestamp": "1970-01-01T00:00:00.000Z",
       "message": "string",
-      "errors": [],
+      "errors": [
+        {
+          "error": "string",
+          "code": "dependency_extraction",
+          "data": {
+            "formattedResource": {
+              "id": "string",
+              "name": "string",
+              "type": "string"
+            },
+            "resource": "string",
+            "resourceDependency": "string",
+            "resources": ["string"],
+            "addresses": ["string"],
+            "originalError": "string"
+          }
+        }
+      ],
       "level": "info",
-      "data": {}
+      "data": {
+        "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "resources": 0
+      }
     }
   ],
   "triggered_at": "1970-01-01T00:00:00.000Z",
@@ -1589,7 +1641,18 @@ type CommonBlueprintFields = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
 }
 ```
 
@@ -1648,7 +1711,13 @@ type BlueprintPreview = {
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
-  // ...
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
 }
 ```
 
@@ -1685,7 +1754,34 @@ type CustomBlueprint = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
+  source_type?: string
 }
 ```
 
@@ -1722,7 +1818,34 @@ type FileBlueprint = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  source_type?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
 }
 ```
 
@@ -1759,7 +1882,37 @@ type MarketplaceBlueprint = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  source_type?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
+  has_update_available?: boolean
+  latest_marketplace_version?: string
+  installation_link?: string
 }
 ```
 
@@ -1825,7 +1978,34 @@ type DeployedBlueprint = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  source_type?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
 }
 ```
 
@@ -1862,7 +2042,34 @@ type AppBlueprint = {
     name?: unknown
     org_id: string
     user_id?: string
-  // ...
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  source_type?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
 }
 ```
 
@@ -1899,6 +2106,76 @@ type Blueprint = {
     name?: unknown
     org_id: string
     user_id?: string
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
+  resources?: Array<{
+    id: string
+    name?: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    address?: string
+    is_root?: boolean
+    is_ready?: boolean
+    is_hidden?: boolean
+    is_disabled?: boolean
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    parent_resource_ids?: string[]
+    depends_on_addresses?: string[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install_reason?: string[]
+  }>
+  source_type?: string
+} | {
+  id?: string
+  title: string
+  slug?: string
+  description?: {
+    preinstall?: string
+    postinstall?: string
+  }
+  version?: string
+  deployments?: Array<{
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    triggered_at?: string // date-time
+  }>
+  is_verified?: boolean
+  installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  updated_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  installation_job_ids?: string[]
+  source_blueprint_id?: string
+  archived?: boolean
+  docs_url?: string
+  recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
+  zip_file_name?: string
   // ...
 }
 ```
@@ -1974,7 +2251,6 @@ type BlueprintExportJob = {
     bucket: string
     key: string
   }
-  // ...
 }
 ```
 
@@ -2011,7 +2287,8 @@ type BlueprintInstallationJob = {
   source_blueprint_file?: string
   destination_blueprint_id?: string
   destination_org_id?: string
-  // ...
+  slug?: string
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED"
 }
 ```
 
@@ -2048,6 +2325,76 @@ type BlueprintJob = {
     bucket: string
     key: string
   }
+} | {
+  id?: string
+  events?: Array<{
+    timestamp?: string // date-time
+    message?: string
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    level?: "info" | "warning" | "error"
+    data?: {
+      installed_blueprint_id?: { ... }
+      export_job_id?: { ... }
+      resources?: { ... }
+    }
+  }>
+  triggered_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  source_blueprint_id?: string
+  source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app"
+  source_org_id?: string
+  source_blueprint_file?: string
+  destination_blueprint_id?: string
+  destination_org_id?: string
+  slug?: string
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED"
+} | {
+  id?: string
+  events?: Array<{
+    timestamp?: string // date-time
+    message?: string
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    level?: "info" | "warning" | "error"
+    data?: {
+      installed_blueprint_id?: { ... }
+      export_job_id?: { ... }
+      resources?: { ... }
+    }
+  }>
+  triggered_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  blueprint_id?: string
+  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
+} | {
+  id?: string
+  events?: Array<{
+    timestamp?: string // date-time
+    message?: string
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    level?: "info" | "warning" | "error"
+    data?: {
   // ...
 }
 ```
@@ -2117,7 +2464,15 @@ type BlueprintValidateJob = {
   errors?: Array<{
     error?: string | object
     code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
-  // ...
+    data?: {
+      formattedResource?: { ... }
+      resource?: { ... }
+      resourceDependency?: { ... }
+      resources?: { ... }
+      addresses?: { ... }
+      originalError?: { ... }
+    }
+  }>
 }
 ```
 
@@ -2211,6 +2566,76 @@ type Manifest = {
       dependencies?: { ... }
       changes?: { ... }
       changes_reason?: { ... }
+    }
+    large_resources_to_export_url?: string
+    resources_to_import?: Array<{
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      address?: { ... }
+      dependencies?: { ... }
+      changes?: { ... }
+      changes_reason?: { ... }
+    }> | {
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      address?: { ... }
+      dependencies?: { ... }
+      changes?: { ... }
+      changes_reason?: { ... }
+    }
+    large_resources_to_import_url?: string
+    resource_replacements?: Array<{
+      originalAddress: { ... }
+      replacementId: { ... }
+      replacementName?: { ... }
+    }>
+    is_verified?: boolean
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    source_type?: "file" | "marketplace" | "sandbox"
+    imported_resources?: Array<{
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      address?: { ... }
+      dependencies?: { ... }
+      changes?: { ... }
+      changes_reason?: { ... }
+    }> | {
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      address?: { ... }
+      dependencies?: { ... }
+      changes?: { ... }
+      changes_reason?: { ... }
+    }
+    large_imported_resources_url?: string // uri
+    markdown?: {
+      manifest?: { ... }
+      preinstall?: { ... }
+      postinstall?: { ... }
+    }
+    manifest_id?: string
+    source_blueprint_name?: string
+    source_blueprint_slug?: string
+    source_blueprint_version?: string
+    pre_install_requirements?: string[]
+    source_blueprint_file?: string
+    docs_link?: string
   // ...
 }
 ```
@@ -2248,7 +2673,21 @@ type ManifestItem = {
   }
   manifest_version?: string
   selected_resources_url?: string
-  // ...
+  ready_imported_resources_url?: string
+  deployed_from?: {
+    source_organization_id?: string
+    source_manifest_id?: string
+    source_organization_type?: "sandbox" | "production"
+    last_triggered_at?: string // date-time
+  }
+  deployed_to?: Array<{
+    destination_organization_id?: string
+    destination_manifest_id?: string
+    destination_organization_type?: "sandbox" | "production"
+    last_triggered_at?: string // date-time
+  }>
+  created_at?: string // date-time
+  updated_at?: string // date-time
 }
 ```
 
@@ -2351,7 +2790,8 @@ type VirtualResourceNodeGroup = {
       type?: { ... }
     }>
     changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
-  // ...
+    changes_reason?: string[]
+  }>
 }
 ```
 
@@ -2388,7 +2828,15 @@ type ResourceNode = {
       id?: { ... }
       type?: { ... }
     }>
-  // ...
+    changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    changes_reason?: string[]
+  }>
+  parents?: Array<{
+    id?: string
+    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  }>
+  changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+  changes_reason?: string[]
 }
 ```
 
@@ -2425,6 +2873,76 @@ type Job = {
     name?: string
     source_id?: string
     is_virtual?: boolean
+    address?: string
+    dependencies?: Array<{
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      dependencies?: { ... }
+    }>
+    changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    changes_reason?: string[]
+  }
+  large_resources_to_export_url?: string
+  resources_to_import?: Array<{
+    id: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    name?: string
+    source_id?: string
+    is_virtual?: boolean
+    address?: string
+    dependencies?: Array<{
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      dependencies?: { ... }
+    }>
+    changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    changes_reason?: string[]
+  }> | {
+    id: string
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    name?: string
+    source_id?: string
+    is_virtual?: boolean
+    address?: string
+    dependencies?: Array<{
+      id: { ... }
+      type: { ... }
+      name?: { ... }
+      source_id?: { ... }
+      is_virtual?: { ... }
+      dependencies?: { ... }
+    }>
+    changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    changes_reason?: string[]
+  }
+  large_resources_to_import_url?: string
+  resource_replacements?: Array<{
+    originalAddress: string
+    replacementId: string
+    replacementName?: string
+  }>
+  is_verified?: boolean
+  errors?: Array<{
+    error?: string | object
+    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
+    data?: {
+      formattedResource?: { ... }
+      resource?: { ... }
+      resourceDependency?: { ... }
+      resources?: { ... }
+      addresses?: { ... }
+      originalError?: { ... }
+    }
+  }>
+  source_type?: "file" | "marketplace" | "sandbox"
+  imported_resources?: Array<{
+    id: string
   // ...
 }
 ```
@@ -2479,7 +2997,19 @@ type CommonManifestFields = {
   }
   manifest_version?: string
   selected_resources_url?: string
-  // ...
+  ready_imported_resources_url?: string
+  deployed_from?: {
+    source_organization_id?: string
+    source_manifest_id?: string
+    source_organization_type?: "sandbox" | "production"
+    last_triggered_at?: string // date-time
+  }
+  deployed_to?: Array<{
+    destination_organization_id?: string
+    destination_manifest_id?: string
+    destination_organization_type?: "sandbox" | "production"
+    last_triggered_at?: string // date-time
+  }>
 }
 ```
 
@@ -2525,7 +3055,14 @@ type CommonImportFields = {
       id: { ... }
       type: { ... }
       name?: { ... }
-  // ...
+      source_id?: { ... }
+      is_virtual?: { ... }
+      dependencies?: { ... }
+    }>
+    changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    changes_reason?: string[]
+  }
+  large_imported_resources_url?: string // uri
 }
 ```
 

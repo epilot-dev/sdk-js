@@ -77,16 +77,14 @@ const { data } = await client.queryEntities(
     filters: [
       {
         type: 'entity_workflows_only_in_closed_or_cancelled_status',
-        related_entity_schemas: [ /* ... */ ],
+        related_entity_schemas: ['string'],
         lookback_period_days: 0
       }
     ],
     from: 0,
     size: 0,
     hydrate: true,
-    fields: [
-      'string'
-    ]
+    fields: ['string']
   },
 )
 ```
@@ -309,7 +307,11 @@ const { data } = await client.getConfig({
     "saved_view_id": "string",
     "include_deleted": "true",
     "filters": [
-      {}
+      {
+        "type": "entity_workflows_only_in_closed_or_cancelled_status",
+        "related_entity_schemas": ["string"],
+        "lookback_period_days": 0
+      }
     ]
   },
   "schedule": {
@@ -322,9 +324,7 @@ const { data } = await client.getConfig({
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
   "next_run_at": "string",
-  "relations_for_deletion": [
-    "contact"
-  ],
+  "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -393,7 +393,11 @@ const { data } = await client.upsertConfig(
       saved_view_id: 'string',
       include_deleted: 'true',
       filters: [
-        { /* ... */ }
+        {
+          type: 'entity_workflows_only_in_closed_or_cancelled_status',
+          related_entity_schemas: ['string'],
+          lookback_period_days: 0
+        }
       ]
     },
     schedule: {
@@ -402,9 +406,7 @@ const { data } = await client.upsertConfig(
       start_date: 'string',
       end_date: 'string'
     },
-    relations_for_deletion: [
-      'contact'
-    ],
+    relations_for_deletion: ['contact'],
     enabled: true
   },
 )
@@ -422,7 +424,11 @@ const { data } = await client.upsertConfig(
     "saved_view_id": "string",
     "include_deleted": "true",
     "filters": [
-      {}
+      {
+        "type": "entity_workflows_only_in_closed_or_cancelled_status",
+        "related_entity_schemas": ["string"],
+        "lookback_period_days": 0
+      }
     ]
   },
   "schedule": {
@@ -435,9 +441,7 @@ const { data } = await client.upsertConfig(
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
   "next_run_at": "string",
-  "relations_for_deletion": [
-    "contact"
-  ],
+  "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -473,13 +477,28 @@ const { data } = await client.listConfigs({
       "id": "string",
       "type": "deletion",
       "entity_schema": "string",
-      "query": {},
-      "schedule": {},
+      "query": {
+        "saved_view_id": "string",
+        "include_deleted": "true",
+        "filters": [
+          {
+            "type": "entity_workflows_only_in_closed_or_cancelled_status",
+            "related_entity_schemas": ["string"],
+            "lookback_period_days": 0
+          }
+        ]
+      },
+      "schedule": {
+        "frequency": "interval",
+        "interval_days": 1,
+        "start_date": "string",
+        "end_date": "string"
+      },
       "enabled": true,
       "created_at": "1970-01-01T00:00:00.000Z",
       "last_updated_at": "1970-01-01T00:00:00.000Z",
       "next_run_at": "string",
-      "relations_for_deletion": [],
+      "relations_for_deletion": ["contact"],
       "last_run_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -525,7 +544,11 @@ const { data } = await client.listJobs({
       "started_at": "1970-01-01T00:00:00.000Z",
       "completed_at": "1970-01-01T00:00:00.000Z",
       "error": "string",
-      "report": {},
+      "report": {
+        "bucket": "string",
+        "key": "string",
+        "format": "csv"
+      },
       "created_at": "1970-01-01T00:00:00.000Z",
       "last_updated_at": "1970-01-01T00:00:00.000Z",
       "trigger": "schedule",

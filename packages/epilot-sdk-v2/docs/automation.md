@@ -215,9 +215,7 @@ Get multiple automation flows by their IDs
 const { data } = await client.batchGetFlows(
   null,
   {
-    ids: [
-      '7791b04a-16d2-44a2-9af9-2d59c25c512f'
-    ]
+    ids: ['7791b04a-16d2-44a2-9af9-2d59c25c512f']
   },
 )
 ```
@@ -359,9 +357,7 @@ const { data } = await client.startExecution(
     "_title": "string",
     "_org": "string",
     "_schema": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "_created_at": "1970-01-01T00:00:00.000Z",
     "_updated_at": "1970-01-01T00:00:00.000Z"
   },
@@ -518,7 +514,10 @@ const { data } = await client.getBulkJob({
   "entity_query": {
     "type": "refs",
     "data": [
-      {}
+      {
+        "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+        "entity_schema": "string"
+      }
     ]
   },
   "pagination_state": {
@@ -526,9 +525,7 @@ const { data } = await client.getBulkJob({
     "pages_processed": 0,
     "total_processed": 0,
     "stable_query_id": "string",
-    "search_after": [
-      "string"
-    ],
+    "search_after": ["string"],
     "has_more": true
   },
   "execution_summary": [
@@ -587,7 +584,10 @@ const { data } = await client.patchBulkJob(
   "entity_query": {
     "type": "refs",
     "data": [
-      {}
+      {
+        "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+        "entity_schema": "string"
+      }
     ]
   },
   "pagination_state": {
@@ -595,9 +595,7 @@ const { data } = await client.patchBulkJob(
     "pages_processed": 0,
     "total_processed": 0,
     "stable_query_id": "string",
-    "search_after": [
-      "string"
-    ],
+    "search_after": ["string"],
     "has_more": true
   },
   "execution_summary": [
@@ -643,9 +641,7 @@ const { data } = await client.getExecution({
     "_title": "string",
     "_org": "string",
     "_schema": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "_created_at": "1970-01-01T00:00:00.000Z",
     "_updated_at": "1970-01-01T00:00:00.000Z"
   },
@@ -769,9 +765,7 @@ const { data } = await client.cancelExecution({
     "_title": "string",
     "_org": "string",
     "_schema": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "_created_at": "1970-01-01T00:00:00.000Z",
     "_updated_at": "1970-01-01T00:00:00.000Z"
   },
@@ -920,7 +914,7 @@ const { data } = await client.resumeExecutionWithToken(
       "_title": "string",
       "_org": "string",
       "_schema": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "_created_at": "1970-01-01T00:00:00.000Z",
       "_updated_at": "1970-01-01T00:00:00.000Z"
     },
@@ -966,11 +960,11 @@ const { data } = await client.resumeExecutionWithToken(
     "config": {
       "mapping_config": {},
       "target_schema": "string",
-      "target_unique": [],
+      "target_unique": ["string"],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     },
     "allow_failure": true,
     "created_automatically": true,
@@ -1084,6 +1078,76 @@ type AutomationFlow = {
   } | {
     id?: string // uuid
     type: "entity_operation"
+    configuration: {
+      schema?: { ... }
+      operations?: { ... }
+      include_activities?: { ... }
+      exclude_activities?: { ... }
+      filter_config?: { ... }
+      ecp_config?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "activity"
+    configuration: {
+      schema?: { ... }
+      types?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "entity_manual"
+    configuration: {
+      schema?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "received_email"
+    configuration: {
+      message_type?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "new_email_thread"
+    configuration: {
+      shared_inbox_ids?: { ... }
+      direction: { ... }
+    }
+  } | {
+    id?: string // uuid
+    type: "flows_trigger"
+    configuration: {
+      source_id: { ... }
+      journey_id?: { ... }
+    }
+  }>
+  trigger_conditions?: Array<{
+    source: string
+    comparison: "equals" | "any_of" | "not_empty" | "is_empty"
+    value?: string | number | string[] | number[]
+  }>
+  entity_schema?: string
+  conditions?: Array<{
+    id?: string
+    schedule_id?: string
+    evaluationResult?: boolean
+    statements?: Array<{
+      id?: { ... }
+      source?: { ... }
+      operation?: { ... }
+      values?: { ... }
+    }>
+  }>
+  schedules?: Array<{
+    id: string
+    scheduleApiId?: string
+    numberOfUnits?: number
+    timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
+    timeRelation?: "after" | "before"
+    source: {
+      id: { ... }
+      origin: { ... }
+      schema?: { ... }
+      attribute?: { ... }
   // ...
 }
 ```
@@ -1141,6 +1205,76 @@ type SearchAutomationsResp = {
     } | {
       id?: { ... }
       type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    }>
+    trigger_conditions?: Array<{
+      source: { ... }
+      comparison: { ... }
+      value?: { ... }
+    }>
+    entity_schema?: string
+    conditions?: Array<{
+      id?: { ... }
+      schedule_id?: { ... }
+      evaluationResult?: { ... }
+      statements?: { ... }
+    }>
+    schedules?: Array<{
+      id: { ... }
+      scheduleApiId?: { ... }
+      numberOfUnits?: { ... }
+      timePeriod?: { ... }
+      timeRelation?: { ... }
+      source: { ... }
+    }>
+    actions: Array<{
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      id?: { ... }
   // ...
 }
 ```
@@ -1178,7 +1312,45 @@ type AnyTrigger = {
       operation?: { ... }
       activity?: { ... }
     }
-  // ...
+    ecp_config?: {
+      origin?: { ... }
+      portal_id?: { ... }
+      file_config?: { ... }
+    }
+  }
+} | {
+  id?: string // uuid
+  type: "activity"
+  configuration: {
+    schema?: string
+    types?: "CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal" | string[]
+  }
+} | {
+  id?: string // uuid
+  type: "entity_manual"
+  configuration: {
+    schema?: string
+  }
+} | {
+  id?: string // uuid
+  type: "received_email"
+  configuration: {
+    message_type?: "RECEIVED"
+  }
+} | {
+  id?: string // uuid
+  type: "new_email_thread"
+  configuration: {
+    shared_inbox_ids?: string[]
+    direction: "INBOUND" | "OUTBOUND" | "BOTH"
+  }
+} | {
+  id?: string // uuid
+  type: "flows_trigger"
+  configuration: {
+    source_id: string // uuid
+    journey_id?: string // uuid
+  }
 }
 ```
 
@@ -1215,6 +1387,76 @@ type AnyAction = {
     }>
     relation_attributes?: Array<{
       target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }
+} | {
+  type?: "trigger-workflow"
+  config?: {
+    target_workflow?: string
+    conditions?: Array<{
+      source: { ... }
+      comparison: { ... }
+      value?: { ... }
+      schema?: { ... }
+    }>
+    assignees?: string[]
+    assign_steps?: Array<{
+      step_id?: { ... }
+      step_name?: { ... }
+      user_ids?: { ... }
+    }>
+    filter_with_purposes?: boolean
+  }
+} | {
+  type?: "trigger-share-entity"
+  config?: {
+    partner_org_ids?: string[]
+  }
+} | {
+  type?: "trigger-webhook"
+  config?: {
+    event_id?: string
+    entity_sources?: string[]
+    target_webhook_id?: string
+    sync?: boolean
+  }
+} | {
+  type?: "inform-erp"
+  config?: {
+    entity_sources?: string[]
+    target_webhook_id?: string
+    sync?: boolean
+  }
+} | {
+  type?: "trigger-event"
+  config?: {
+    event_name: string
+    event_inputs?: Record<string, unknown>
+  }
+} | {
+  type?: "create-document"
+  config?: {
+    template_id?: string
+    filename?: string
+  }
+} | {
+  type?: "send-email"
+  config?: {
+    email_template_id?: string
+    language_code?: "de" | "en"
+    notify_portal_user_only?: boolean
+    skip_creating_entities?: boolean
+    wait_for_confirmation?: boolean
+    attachments?: Array<{
+      source_filter?: { ... }
+    }>
   // ...
 }
 ```
@@ -1252,6 +1494,76 @@ type AnyActionConfig = {
       source?: { ... }
       value_json: { ... }
       target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+} | {
+  id?: string
+  flow_action_id?: string
+  name?: string
+  type?: "trigger-workflow"
+  config?: {
+    target_workflow?: string
+    conditions?: Array<{
+      source: { ... }
+      comparison: { ... }
+      value?: { ... }
+      schema?: { ... }
+    }>
+    assignees?: string[]
+    assign_steps?: Array<{
+      step_id?: { ... }
+      step_name?: { ... }
+      user_ids?: { ... }
+    }>
+    filter_with_purposes?: boolean
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+} | {
+  id?: string
+  flow_action_id?: string
+  name?: string
+  type?: "trigger-workflow"
+  config?: {
+    partner_org_ids?: string[]
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+} | {
+  id?: string
   // ...
 }
 ```
@@ -1402,7 +1714,27 @@ type CartCheckoutActionConfig = {
     } | {
       mode: { ... }
       target: { ... }
-  // ...
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+    target_unique?: string[]
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
 }
 ```
 
@@ -1439,7 +1771,15 @@ type CartCheckoutAction = {
       source: { ... }
     } | {
       mode: { ... }
-  // ...
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+    target_unique?: string[]
+  }
 }
 ```
 
@@ -1476,7 +1816,24 @@ type CartCheckoutConfig = {
       _uniq?: { ... }
       _copy?: { ... }
     } | unknown
-  // ...
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    value: unknown
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    source: string
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    source?: string
+    value_json: string
+    target_unique?: string[]
+  }>
+  linkback_relation_attribute?: string
+  linkback_relation_tags?: string[]
+  target_unique?: string[]
 }
 ```
 
@@ -1513,7 +1870,27 @@ type MapEntityActionConfig = {
       source?: { ... }
       value_json: { ... }
       target_unique?: { ... }
-  // ...
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
 }
 ```
 
@@ -1550,7 +1927,15 @@ type MapEntityAction = {
     }>
     relation_attributes?: Array<{
       target: { ... }
-  // ...
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }
 }
 ```
 
@@ -1587,7 +1972,24 @@ type MapEntityConfig = {
     source?: string
     value_json: string
     target_unique?: string[]
-  // ...
+  }>
+  relation_attributes?: Array<{
+    target: string
+    target_tags?: string[]
+    target_tags_include_source?: boolean
+    source_filter?: {
+      limit?: { ... }
+      schema?: { ... }
+      attribute?: { ... }
+      relation_tag?: { ... }
+      tag?: { ... }
+      self?: { ... }
+    }
+    related_to?: Record<string, unknown>
+    mode: "append" | "prepend" | "set"
+  }>
+  linkback_relation_attribute?: string
+  linkback_relation_tags?: string[]
 }
 ```
 
@@ -1937,7 +2339,6 @@ type TriggerWorkflowActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
-  // ...
 }
 ```
 
@@ -2394,6 +2795,76 @@ type AutomationExecution = {
       operation?: { ... }
       values?: { ... }
     }>
+  }>
+  schedules?: Array<{
+    id: string
+    scheduleApiId?: string
+    numberOfUnits?: number
+    timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
+    timeRelation?: "after" | "before"
+    source: {
+      id: { ... }
+      origin: { ... }
+      schema?: { ... }
+      attribute?: { ... }
+    }
+  }>
+  actions: Array<{
+    type?: "map-entity"
+    config?: {
+      mapping_config?: { ... }
+      target_schema: { ... }
+      target_unique?: { ... }
+      mapping_attributes?: { ... }
+      relation_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+    }
+  } | {
+    type?: "trigger-workflow"
+    config?: {
+      target_workflow?: { ... }
+      conditions?: { ... }
+      assignees?: { ... }
+      assign_steps?: { ... }
+      filter_with_purposes?: { ... }
+    }
+  } | {
+    type?: "trigger-share-entity"
+    config?: {
+      partner_org_ids?: { ... }
+    }
+  } | {
+    type?: "trigger-webhook"
+    config?: {
+      event_id?: { ... }
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "inform-erp"
+    config?: {
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "trigger-event"
+    config?: {
+      event_name: { ... }
+      event_inputs?: { ... }
+    }
+  } | {
+    type?: "create-document"
+    config?: {
+      template_id?: { ... }
+      filename?: { ... }
+    }
+  } | {
+    type?: "send-email"
+    config?: {
+      email_template_id?: { ... }
   // ...
 }
 ```
@@ -2557,6 +3028,76 @@ type GetExecutionsResp = {
     }>
     schedules?: Array<{
       id: { ... }
+      scheduleApiId?: { ... }
+      numberOfUnits?: { ... }
+      timePeriod?: { ... }
+      timeRelation?: { ... }
+      source: { ... }
+    }>
+    actions: Array<{
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      id?: { ... }
+      flow_action_id?: { ... }
+      name?: { ... }
+      type?: { ... }
+      config?: { ... }
+      allow_failure?: { ... }
+      created_automatically?: { ... }
+      is_bulk_action?: { ... }
+      reason?: { ... }
+      condition_id?: { ... }
+      schedule_id?: { ... }
+      execution_status?: { ... }
+      started_at?: { ... }
+      updated_at?: { ... }
+      outputs?: { ... }
+      error_output?: { ... }
+      retry_strategy?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    }>
+    resume_token?: string
+    trigger_context?: Record<string, string>
+    version?: number
+    trigger_event?: {
+      type?: { ... }
+      org_id: { ... }
+      entity_id: { ... }
+      caller?: { ... }
+    } | {
+      type?: { ... }
+      org_id: { ... }
+      activity_id: { ... }
   // ...
 }
 ```
@@ -2624,7 +3165,39 @@ type BulkTriggerRequest = {
     }>
     exists?: {
       field: { ... }
-  // ...
+    }
+    $and?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $not?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+  }>
+  trigger_context?: Record<string, string>
 }
 ```
 
@@ -2670,7 +3243,20 @@ type BulkTriggerJob = {
   }
   pagination_state?: {
     page_size?: number
-  // ...
+    pages_processed?: number
+    total_processed?: number
+    stable_query_id?: string
+    search_after?: string | number[]
+    has_more?: boolean
+  }
+  execution_summary?: Array<{
+    entity_id: string
+    entity_schema?: string
+    execution_id?: string
+    execution_status: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
+    timestamp?: string // date-time
+    error?: string
+  }>
 }
 ```
 
@@ -2887,6 +3473,76 @@ type EntitySearchFilter = Array<{
       lt?: { ... }
       lte?: { ... }
       format?: { ... }
+      relation?: { ... }
+      time_zone?: { ... }
+    }>
+    exists?: {
+      field: { ... }
+    }
+    $and?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $not?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+  }>
+  $or?: Array<{
+    term?: Record<string, string | number | boolean>
+    terms?: Record<string, string | number | boolean[]>
+    ids?: {
+      values?: { ... }
+    }
+    range?: Record<string, {
+      gt?: { ... }
+      gte?: { ... }
+      lt?: { ... }
+      lte?: { ... }
+      format?: { ... }
+      relation?: { ... }
+      time_zone?: { ... }
+    }>
+    exists?: {
+      field: { ... }
+    }
+    $and?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
   // ...
 }
 ```
@@ -2960,8 +3616,25 @@ type FilterConditionOnEvent = {
   } | {
     prefix?: string
   } | {
-  // ...
-}
+    suffix?: string
+  } | {
+    wildcard?: string
+  }>>>
+} | Record<string, Array<string | {
+  equals-ignore-case?: string
+} | {
+  anything-but?: string[]
+} | {
+  numeric?: string | number[]
+} | {
+  exists?: boolean
+} | {
+  prefix?: string
+} | {
+  suffix?: string
+} | {
+  wildcard?: string
+}>>
 ```
 
 ### `EqualsIgnoreCaseCondition`
@@ -3053,7 +3726,10 @@ type OrCondition = {
   } | {
     prefix?: string
   } | {
-  // ...
+    suffix?: string
+  } | {
+    wildcard?: string
+  }>>>
 }
 ```
 
@@ -3090,8 +3766,25 @@ type DiffAdded = {
   } | {
     prefix?: string
   } | {
-  // ...
-}
+    suffix?: string
+  } | {
+    wildcard?: string
+  }>>>
+} | Record<string, Array<string | {
+  equals-ignore-case?: string
+} | {
+  anything-but?: string[]
+} | {
+  numeric?: string | number[]
+} | {
+  exists?: boolean
+} | {
+  prefix?: string
+} | {
+  suffix?: string
+} | {
+  wildcard?: string
+}>>
 ```
 
 ### `DiffUpdated`
@@ -3127,8 +3820,25 @@ type DiffUpdated = {
   } | {
     prefix?: string
   } | {
-  // ...
-}
+    suffix?: string
+  } | {
+    wildcard?: string
+  }>>>
+} | Record<string, Array<string | {
+  equals-ignore-case?: string
+} | {
+  anything-but?: string[]
+} | {
+  numeric?: string | number[]
+} | {
+  exists?: boolean
+} | {
+  prefix?: string
+} | {
+  suffix?: string
+} | {
+  wildcard?: string
+}>>
 ```
 
 ### `DiffDeleted`
@@ -3164,8 +3874,25 @@ type DiffDeleted = {
   } | {
     prefix?: string
   } | {
-  // ...
-}
+    suffix?: string
+  } | {
+    wildcard?: string
+  }>>>
+} | Record<string, Array<string | {
+  equals-ignore-case?: string
+} | {
+  anything-but?: string[]
+} | {
+  numeric?: string | number[]
+} | {
+  exists?: boolean
+} | {
+  prefix?: string
+} | {
+  suffix?: string
+} | {
+  wildcard?: string
+}>>
 ```
 
 ### `OrConditionForDiff`
@@ -3248,6 +3975,76 @@ type ResumeResp = {
     schedules?: Array<{
       id: { ... }
       scheduleApiId?: { ... }
+      numberOfUnits?: { ... }
+      timePeriod?: { ... }
+      timeRelation?: { ... }
+      source: { ... }
+    }>
+    actions: Array<{
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      id?: { ... }
+      flow_action_id?: { ... }
+      name?: { ... }
+      type?: { ... }
+      config?: { ... }
+      allow_failure?: { ... }
+      created_automatically?: { ... }
+      is_bulk_action?: { ... }
+      reason?: { ... }
+      condition_id?: { ... }
+      schedule_id?: { ... }
+      execution_status?: { ... }
+      started_at?: { ... }
+      updated_at?: { ... }
+      outputs?: { ... }
+      error_output?: { ... }
+      retry_strategy?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    }>
+    resume_token?: string
+    trigger_context?: Record<string, string>
+    version?: number
+    trigger_event?: {
+      type?: { ... }
+      org_id: { ... }
+      entity_id: { ... }
+      caller?: { ... }
+    } | {
+      type?: { ... }
+      org_id: { ... }
+      activity_id: { ... }
+      activity_type: { ... }
   // ...
 }
 ```

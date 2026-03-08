@@ -65,9 +65,7 @@ const { data } = await client.createAccessToken(
   {
     name: 'Postman Access Token',
     token_type: 'api',
-    assignments: [
-      '123:owner'
-    ],
+    assignments: ['123:owner'],
     expires_in: 3600
   },
 )
@@ -85,9 +83,7 @@ const { data } = await client.createAccessToken(
   "token_type": "api",
   "journey_id": "string",
   "portal_id": "string",
-  "assignments": [
-    "123:owner"
-  ],
+  "assignments": ["123:owner"],
   "last_used": "2026-02-24"
 }
 ```
@@ -120,9 +116,7 @@ const { data } = await client.listAccessTokens({
     "token_type": "api",
     "journey_id": "string",
     "portal_id": "string",
-    "assignments": [
-      "123:owner"
-    ],
+    "assignments": ["123:owner"],
     "last_used": "2026-02-24"
   }
 ]
@@ -155,9 +149,7 @@ const { data } = await client.revokeAccessToken({
   "token_type": "api",
   "journey_id": "string",
   "portal_id": "string",
-  "assignments": [
-    "123:owner"
-  ],
+  "assignments": ["123:owner"],
   "last_used": "2026-02-24"
 }
 ```
@@ -433,7 +425,7 @@ type AccessTokenItem = {
 
 ### `RoleId`
 
-Format: <organization_id>:<slug>
+Format: `<organization_id>`:`<slug>`
 
 ```ts
 type RoleId = string

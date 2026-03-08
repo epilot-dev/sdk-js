@@ -80,20 +80,7 @@ const { data } = await client.getTemplateMeta(
     "header": 2.54,
     "footer": 2.54
   },
-  "variables": [
-    "order.billing_contact.0.salutation",
-    "order.billing_contact.0.title",
-    "order_table",
-    "stayHardStatic",
-    "opportunity[attribute_name]",
-    "opportunity[\"attribute_name\"]",
-    "opportunity.[attribute_name]",
-    "attribute_name",
-    "opportunities.0.attribute_name",
-    "opportunities[0].attribute_name",
-    "contact.opportunities[0].attribute_name",
-    "opportunities[Primary].attribute_name"
-  ]
+  "variables": ["order.billing_contact.0.salutation", "order.billing_contact.0.title", "order_table", "stayHardStatic", "opportunity[attribute_name]", "opportunity[\"attribute_name\"]", "opportunity.[attribute_name]", "attribute_name", "opportunities.0.attribute_name", "opportunities[0].attribute_name", "contact.opportunities[0].attribute_name", "opportunities[Primary].attribute_name"]
 }
 ```
 
@@ -161,32 +148,54 @@ const { data } = await client.generateDocumentV2(
   "message": "string",
   "ics_output": {
     "output_document": {
-      "s3ref": {}
+      "s3ref": {
+        "bucket": "document-api-preview-prod",
+        "key": "preview/my-appointment.ics"
+      }
     }
   },
   "pdf_output": {
     "preview_url": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.pdf",
     "output_document": {
-      "s3ref": {}
+      "s3ref": {
+        "bucket": "document-api-preview-prod",
+        "key": "preview/my-template.pdf"
+      }
     }
   },
   "docx_output": {
     "preview_url": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.docx",
     "output_document": {
-      "s3ref": {}
+      "s3ref": {
+        "bucket": "document-api-preview-prod",
+        "key": "preview/my-template.docx"
+      }
     }
   },
   "xlsx_output": {
     "preview_url": "https://document-api-prod.s3.eu-central-1.amazonaws.com/preview/my-template-OR-001.xlsx",
     "output_document": {
-      "s3ref": {}
+      "s3ref": {
+        "bucket": "document-api-preview-prod",
+        "key": "preview/my-template.xlsx"
+      }
     }
   },
   "error_output": {
     "error_message": "string",
     "error_code": "PARSE_ERROR",
     "error_details": [
-      {}
+      {
+        "explanation": "string",
+        "context": {
+          "invalid_variables": [
+            {
+              "variable": "string",
+              "error": "string"
+            }
+          ]
+        }
+      }
     ]
   },
   "variable_payload": {
@@ -474,7 +483,9 @@ type DocumentGenerationV2Request = {
     enable_data_table_margin_autofix?: boolean
     template_with_datatable?: boolean
     enabled_template_settings_persistence?: boolean
-  // ...
+    misconfigured_margins?: boolean
+    file_entity_id?: string // uuid
+  }
 }
 ```
 
@@ -511,7 +522,40 @@ type DocumentGenerationV2Response = {
       filename?: { ... }
       s3ref?: { ... }
     }
-  // ...
+  }
+  error_output?: {
+    error_message?: string
+    error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT"
+    error_details?: Array<{
+      explanation?: { ... }
+      context?: { ... }
+    }> | Array<{
+      items?: { ... }
+    }> | Array<{
+      id?: { ... }
+      context?: { ... }
+      explanation?: { ... }
+    }>
+  }
+  variable_payload?: {
+    additionalProperties?: string
+  }
+  template_settings?: {
+    custom_margins?: {
+      top?: { ... }
+      bottom?: { ... }
+    }
+    suggested_margins?: {
+      top?: { ... }
+      bottom?: { ... }
+    }
+    display_margin_guidelines?: boolean
+    enable_data_table_margin_autofix?: boolean
+    template_with_datatable?: boolean
+    enabled_template_settings_persistence?: boolean
+    misconfigured_margins?: boolean
+    file_entity_id?: string // uuid
+  }
 }
 ```
 

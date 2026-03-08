@@ -161,17 +161,9 @@ const { data } = await client.searchAssignable(
     q: '',
     from: 0,
     size: 25,
-    org_ids: [
-      '123'
-    ],
+    org_ids: ['123'],
     portalUsersEntityIdScope: '',
-    types: [
-      'user',
-      'partner_user',
-      'partner_organization',
-      'ecp',
-      'group'
-    ]
+    types: ['user', 'partner_user', 'partner_organization', 'ecp', 'group']
   },
 )
 ```
@@ -186,7 +178,10 @@ const { data } = await client.searchAssignable(
     {
       "type": "user",
       "display_name": "Example User",
-      "image_uri": {},
+      "image_uri": {
+        "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
+        "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+      },
       "org_id": "123",
       "created_at": "2022-02-08T04:44:32.246Z",
       "activated_at": "2022-02-08T04:44:32.246Z",
@@ -231,7 +226,10 @@ const { data } = await client.batchGetAssignable(
     {
       "type": "user",
       "display_name": "Example User",
-      "image_uri": {},
+      "image_uri": {
+        "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
+        "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+      },
       "org_id": "123",
       "created_at": "2022-02-08T04:44:32.246Z",
       "activated_at": "2022-02-08T04:44:32.246Z",
@@ -399,8 +397,17 @@ const { data } = await client.getPartnerUsers({
       "name": "John Doe",
       "email": "user@example.com",
       "status": "Active",
-      "image": {},
-      "roles": []
+      "image": {
+        "original": "https://example.com/path",
+        "thumbnail_32": "https://example.com/path"
+      },
+      "roles": [
+        {
+          "id": "role-123",
+          "slug": "admin",
+          "name": "Administrator"
+        }
+      ]
     }
   ]
 }
@@ -424,10 +431,7 @@ const { data } = await client.createPartnerUser(
   {
     email: 'user@example.com',
     language: 'en',
-    roles: [
-      'role-123',
-      'role-456'
-    ]
+    roles: ['role-123', 'role-456']
   },
 )
 ```
@@ -523,8 +527,27 @@ const { data } = await client.createPartnerRole(
         action: 'entity-read',
         resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
         effect: 'allow',
-        conditions: [ /* ... */ ],
-        dependencies: [ /* ... */ ]
+        conditions: [
+          {
+            attribute: 'workflows.primary.task_name',
+            operation: 'equals',
+            values: ['Qualification']
+          }
+        ],
+        dependencies: [
+          {
+            action: 'entity-read',
+            resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+            effect: 'allow',
+            conditions: [
+              {
+                attribute: 'workflows.primary.task_name',
+                operation: 'equals',
+                values: ['Qualification']
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -565,8 +588,27 @@ const { data } = await client.updatePartnerRole(
         action: 'entity-read',
         resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
         effect: 'allow',
-        conditions: [ /* ... */ ],
-        dependencies: [ /* ... */ ]
+        conditions: [
+          {
+            attribute: 'workflows.primary.task_name',
+            operation: 'equals',
+            values: ['Qualification']
+          }
+        ],
+        dependencies: [
+          {
+            action: 'entity-read',
+            resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+            effect: 'allow',
+            conditions: [
+              {
+                attribute: 'workflows.primary.task_name',
+                operation: 'equals',
+                values: ['Qualification']
+              }
+            ]
+          }
+        ]
       }
     ],
     id: '123:owner',
@@ -605,10 +647,7 @@ const { data } = await client.assignPartnerUserRoles(
     userId: 'example',
   },
   {
-    roleIds: [
-      'role-123',
-      'role-456'
-    ]
+    roleIds: ['role-123', 'role-456']
   },
 )
 ```
@@ -646,10 +685,7 @@ const { data } = await client.unassignPartnerUserRoles(
     userId: 'example',
   },
   {
-    roleIds: [
-      'role-123',
-      'role-456'
-    ]
+    roleIds: ['role-123', 'role-456']
   },
 )
 ```
@@ -764,7 +800,56 @@ type Assignable = {
 } | {
   type: "partner_organization"
   display_name: string
-  // ...
+  image_uri?: {
+    original: string // uri
+    thumbnail_32?: string // uri
+  }
+  org_id: string
+  created_at?: string
+  activated_at?: string
+  status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+  partner_id: string
+  email?: string
+  geolocations?: Array<{
+    address?: {
+      street?: { ... }
+      street_number?: { ... }
+      city?: { ... }
+      postal_code?: { ... }
+      country?: { ... }
+    }
+    lat: number
+    lng: number
+    addressLabel?: string
+    relevance?: number
+  }>
+  phone?: string
+  activity_radius?: number
+} | {
+  type: "ecp"
+  display_name: string
+  image_uri?: {
+    original: string // uri
+    thumbnail_32?: string // uri
+  }
+  org_id: string
+  created_at?: string
+  activated_at?: string
+  status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+  user_id: string
+  email?: string
+} | {
+  type: string
+  display_name: string
+  image_uri?: {
+    original: string // uri
+    thumbnail_32?: string // uri
+  }
+  org_id: string
+  created_at?: string
+  activated_at?: string
+  status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+  group_id?: string
 }
 ```
 
@@ -1059,7 +1144,7 @@ type EqualsCondition = {
 
 ### `RoleId`
 
-Format: <organization_id>:<slug>
+Format: `<organization_id>`:`<slug>`
 
 ```ts
 type RoleId = string

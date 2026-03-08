@@ -90,10 +90,7 @@ const { data } = await client.createAgent(
     category: 'message',
     icon: 'mail-reply',
     system_prompt: 'string',
-    tools: [
-      'entity.search',
-      'message.draft'
-    ],
+    tools: ['entity.search', 'message.draft'],
     model_config: {
       model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
       temperature: 0.7,
@@ -106,13 +103,23 @@ const { data } = await client.createAgent(
     input_parameters_schema: {
       type: 'object',
       parameters: [
-        { /* ... */ },
-        { /* ... */ },
+        {
+          name: 'target_schema',
+          label: 'Target Schema',
+          type: 'entity-schema',
+          description: 'Entity type to create'
+        },
+        {
+          name: 'confidence_threshold',
+          label: 'Confidence Threshold',
+          type: 'number',
+          minimum: 0,
+          maximum: 1,
+          default: 0.8
+        },
         /* ... 1 more */
       ],
-      required: [
-        'target_schema'
-      ]
+      required: ['target_schema']
     }
   },
 )
@@ -130,17 +137,10 @@ const { data } = await client.createAgent(
   "category": "message",
   "icon": "string",
   "source": "system",
-  "availability": [
-    "flows",
-    "copilot"
-  ],
-  "allowed_entity_schemas": [
-    "message"
-  ],
+  "availability": ["flows", "copilot"],
+  "allowed_entity_schemas": ["message"],
   "system_prompt": "string",
-  "tools": [
-    "string"
-  ],
+  "tools": ["string"],
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
@@ -153,12 +153,22 @@ const { data } = await client.createAgent(
   "input_parameters_schema": {
     "type": "object",
     "parameters": [
-      {},
-      {}
+      {
+        "name": "target_schema",
+        "label": "Target Schema",
+        "type": "entity-schema",
+        "description": "Entity type to create"
+      },
+      {
+        "name": "confidence_threshold",
+        "label": "Confidence Threshold",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.8
+      }
     ],
-    "required": [
-      "target_schema"
-    ]
+    "required": ["target_schema"]
   },
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -199,16 +209,39 @@ const { data } = await client.listAgents({
       "category": "message",
       "icon": "string",
       "source": "system",
-      "availability": [],
-      "allowed_entity_schemas": [],
+      "availability": ["flows", "copilot"],
+      "allowed_entity_schemas": ["message"],
       "system_prompt": "string",
-      "tools": [],
-      "model_config": {},
+      "tools": ["string"],
+      "model_config": {
+        "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "temperature": 0.7,
+        "max_tokens": 4096
+      },
       "max_iterations": 0,
       "execution_pattern": "direct",
       "execution_mode": "automatic",
       "output_schema": {},
-      "input_parameters_schema": {},
+      "input_parameters_schema": {
+        "type": "object",
+        "parameters": [
+          {
+            "name": "target_schema",
+            "label": "Target Schema",
+            "type": "entity-schema",
+            "description": "Entity type to create"
+          },
+          {
+            "name": "confidence_threshold",
+            "label": "Confidence Threshold",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.8
+          }
+        ],
+        "required": ["target_schema"]
+      },
       "version": 0,
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
@@ -247,17 +280,10 @@ const { data } = await client.getAgentById({
   "category": "message",
   "icon": "string",
   "source": "system",
-  "availability": [
-    "flows",
-    "copilot"
-  ],
-  "allowed_entity_schemas": [
-    "message"
-  ],
+  "availability": ["flows", "copilot"],
+  "allowed_entity_schemas": ["message"],
   "system_prompt": "string",
-  "tools": [
-    "string"
-  ],
+  "tools": ["string"],
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
@@ -270,12 +296,22 @@ const { data } = await client.getAgentById({
   "input_parameters_schema": {
     "type": "object",
     "parameters": [
-      {},
-      {}
+      {
+        "name": "target_schema",
+        "label": "Target Schema",
+        "type": "entity-schema",
+        "description": "Entity type to create"
+      },
+      {
+        "name": "confidence_threshold",
+        "label": "Confidence Threshold",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.8
+      }
     ],
-    "required": [
-      "target_schema"
-    ]
+    "required": ["target_schema"]
   },
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -305,9 +341,7 @@ const { data } = await client.updateAgentById(
     category: 'message',
     icon: 'string',
     system_prompt: 'string',
-    tools: [
-      'string'
-    ],
+    tools: ['string'],
     model_config: {
       model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
       temperature: 0.7,
@@ -320,13 +354,23 @@ const { data } = await client.updateAgentById(
     input_parameters_schema: {
       type: 'object',
       parameters: [
-        { /* ... */ },
-        { /* ... */ },
+        {
+          name: 'target_schema',
+          label: 'Target Schema',
+          type: 'entity-schema',
+          description: 'Entity type to create'
+        },
+        {
+          name: 'confidence_threshold',
+          label: 'Confidence Threshold',
+          type: 'number',
+          minimum: 0,
+          maximum: 1,
+          default: 0.8
+        },
         /* ... 1 more */
       ],
-      required: [
-        'target_schema'
-      ]
+      required: ['target_schema']
     }
   },
 )
@@ -344,17 +388,10 @@ const { data } = await client.updateAgentById(
   "category": "message",
   "icon": "string",
   "source": "system",
-  "availability": [
-    "flows",
-    "copilot"
-  ],
-  "allowed_entity_schemas": [
-    "message"
-  ],
+  "availability": ["flows", "copilot"],
+  "allowed_entity_schemas": ["message"],
   "system_prompt": "string",
-  "tools": [
-    "string"
-  ],
+  "tools": ["string"],
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
@@ -367,12 +404,22 @@ const { data } = await client.updateAgentById(
   "input_parameters_schema": {
     "type": "object",
     "parameters": [
-      {},
-      {}
+      {
+        "name": "target_schema",
+        "label": "Target Schema",
+        "type": "entity-schema",
+        "description": "Entity type to create"
+      },
+      {
+        "name": "confidence_threshold",
+        "label": "Confidence Threshold",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "default": 0.8
+      }
     ],
-    "required": [
-      "target_schema"
-    ]
+    "required": ["target_schema"]
   },
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -419,7 +466,10 @@ const { data } = await client.executeAgent(
       task_id: 'string',
       custom_data: {},
       flow_context: [
-        { /* ... */ }
+        {
+          entity_id: 'string',
+          entity_schema: 'string'
+        }
       ]
     },
     parameters: {},
@@ -459,10 +509,50 @@ const { data } = await client.executeAgent(
     "input": {},
     "description": "string",
     "preview": {
-      "action": {},
-      "source": {},
-      "target": {},
-      "changes": [],
+      "action": {
+        "type": "move",
+        "verb": "Move Thread"
+      },
+      "source": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "target": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "changes": [
+        {
+          "field": "string",
+          "label": "string",
+          "from": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          },
+          "to": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          }
+        }
+      ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
     }
@@ -514,10 +604,76 @@ const { data } = await client.listExecutions({
       "status": "pending",
       "input": {},
       "parameters": {},
-      "result": {},
-      "error": {},
-      "pending_action": {},
-      "metrics": {},
+      "result": {
+        "response": "string",
+        "structured_output": {}
+      },
+      "error": {
+        "code": "TIMEOUT",
+        "message": "string",
+        "details": {}
+      },
+      "pending_action": {
+        "tool": "string",
+        "input": {},
+        "description": "string",
+        "preview": {
+          "action": {
+            "type": "move",
+            "verb": "Move Thread"
+          },
+          "source": {
+            "type": "inbox",
+            "id": "string",
+            "name": "Support Inbox",
+            "schema": "string",
+            "icon": "string",
+            "url": "string"
+          },
+          "target": {
+            "type": "inbox",
+            "id": "string",
+            "name": "Support Inbox",
+            "schema": "string",
+            "icon": "string",
+            "url": "string"
+          },
+          "changes": [
+            {
+              "field": "string",
+              "label": "string",
+              "from": {
+                "type": "text",
+                "value": {},
+                "values": ["string"],
+                "id": "string",
+                "name": "string",
+                "schema": "string",
+                "color": "success"
+              },
+              "to": {
+                "type": "text",
+                "value": {},
+                "values": ["string"],
+                "id": "string",
+                "name": "string",
+                "schema": "string",
+                "color": "success"
+              }
+            }
+          ],
+          "metadata": {},
+          "summary": "This email discusses solar panel installation and should be handled by the Service team."
+        }
+      },
+      "metrics": {
+        "total_tokens": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_cost_usd": 0,
+        "duration_ms": 0,
+        "iteration_count": 0
+      },
       "started_at": "1970-01-01T00:00:00.000Z",
       "completed_at": "1970-01-01T00:00:00.000Z"
     }
@@ -570,10 +726,50 @@ const { data } = await client.getExecution({
     "input": {},
     "description": "string",
     "preview": {
-      "action": {},
-      "source": {},
-      "target": {},
-      "changes": [],
+      "action": {
+        "type": "move",
+        "verb": "Move Thread"
+      },
+      "source": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "target": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "changes": [
+        {
+          "field": "string",
+          "label": "string",
+          "from": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          },
+          "to": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          }
+        }
+      ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
     }
@@ -635,10 +831,50 @@ const { data } = await client.cancelExecution({
     "input": {},
     "description": "string",
     "preview": {
-      "action": {},
-      "source": {},
-      "target": {},
-      "changes": [],
+      "action": {
+        "type": "move",
+        "verb": "Move Thread"
+      },
+      "source": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "target": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "changes": [
+        {
+          "field": "string",
+          "label": "string",
+          "from": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          },
+          "to": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          }
+        }
+      ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
     }
@@ -682,7 +918,10 @@ const { data } = await client.getExecutionTrace({
     {
       "iteration_index": 0,
       "thought": "string",
-      "action": {},
+      "action": {
+        "tool": "string",
+        "input": {}
+      },
       "observation": {},
       "timestamp": "1970-01-01T00:00:00.000Z",
       "tokens_used": 0,
@@ -742,10 +981,50 @@ const { data } = await client.approveExecution(
     "input": {},
     "description": "string",
     "preview": {
-      "action": {},
-      "source": {},
-      "target": {},
-      "changes": [],
+      "action": {
+        "type": "move",
+        "verb": "Move Thread"
+      },
+      "source": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "target": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "changes": [
+        {
+          "field": "string",
+          "label": "string",
+          "from": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          },
+          "to": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          }
+        }
+      ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
     }
@@ -812,10 +1091,50 @@ const { data } = await client.rejectExecution(
     "input": {},
     "description": "string",
     "preview": {
-      "action": {},
-      "source": {},
-      "target": {},
-      "changes": [],
+      "action": {
+        "type": "move",
+        "verb": "Move Thread"
+      },
+      "source": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "target": {
+        "type": "inbox",
+        "id": "string",
+        "name": "Support Inbox",
+        "schema": "string",
+        "icon": "string",
+        "url": "string"
+      },
+      "changes": [
+        {
+          "field": "string",
+          "label": "string",
+          "from": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          },
+          "to": {
+            "type": "text",
+            "value": {},
+            "values": ["string"],
+            "id": "string",
+            "name": "string",
+            "schema": "string",
+            "color": "success"
+          }
+        }
+      ],
       "metadata": {},
       "summary": "This email discusses solar panel installation and should be handled by the Service team."
     }
@@ -883,7 +1202,14 @@ type CreateAgentRequest = {
       enum?: { ... }
       minimum?: { ... }
       maximum?: { ... }
-  // ...
+      step?: { ... }
+      minLength?: { ... }
+      maxLength?: { ... }
+      schemaFilter?: { ... }
+      attributeTypeFilter?: { ... }
+    }>
+    required?: string[]
+  }
 }
 ```
 
@@ -920,7 +1246,14 @@ type UpdateAgentRequest = {
       enum?: { ... }
       minimum?: { ... }
       maximum?: { ... }
-  // ...
+      step?: { ... }
+      minLength?: { ... }
+      maxLength?: { ... }
+      schemaFilter?: { ... }
+      attributeTypeFilter?: { ... }
+    }>
+    required?: string[]
+  }
 }
 ```
 
@@ -957,7 +1290,23 @@ type AgentDefinition = {
       description?: { ... }
       default?: { ... }
       multi?: { ... }
-  // ...
+      dependsOn?: { ... }
+      visibleWhen?: { ... }
+      enum?: { ... }
+      minimum?: { ... }
+      maximum?: { ... }
+      step?: { ... }
+      minLength?: { ... }
+      maxLength?: { ... }
+      schemaFilter?: { ... }
+      attributeTypeFilter?: { ... }
+    }>
+    required?: string[]
+  }
+  version?: number
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: string
 }
 ```
 
@@ -994,7 +1343,9 @@ type ListAgentsResponse = {
     version?: number
     created_at?: string // date-time
     updated_at?: string // date-time
-  // ...
+    created_by?: string
+  }>
+  next_cursor?: string
 }
 ```
 
@@ -1031,7 +1382,14 @@ type ListExecutionsResponse = {
       total_tokens?: { ... }
       input_tokens?: { ... }
       output_tokens?: { ... }
-  // ...
+      total_cost_usd?: { ... }
+      duration_ms?: { ... }
+      iteration_count?: { ... }
+    }
+    started_at?: string // date-time
+    completed_at?: string // date-time
+  }>
+  next_cursor?: string
 }
 ```
 
@@ -1108,7 +1466,18 @@ type ExecutionResponse = {
       changes?: { ... }
       metadata?: { ... }
       summary?: { ... }
-  // ...
+    }
+  }
+  metrics?: {
+    total_tokens?: number
+    input_tokens?: number
+    output_tokens?: number
+    total_cost_usd?: number
+    duration_ms?: number
+    iteration_count?: number
+  }
+  started_at?: string // date-time
+  completed_at?: string // date-time
 }
 ```
 
@@ -1185,7 +1554,18 @@ type PendingAction = {
       label?: { ... }
       from?: { ... }
       to?: { ... }
-  // ...
+    }>
+    metadata?: Record<string, {
+      type: { ... }
+      value?: { ... }
+      values?: { ... }
+      id?: { ... }
+      name?: { ... }
+      schema?: { ... }
+      color?: { ... }
+    }>
+    summary?: string
+  }
 }
 ```
 
@@ -1247,7 +1627,29 @@ type ToolPreview = {
       values?: { ... }
       id?: { ... }
       name?: { ... }
-  // ...
+      schema?: { ... }
+      color?: { ... }
+    }
+    to?: {
+      type: { ... }
+      value?: { ... }
+      values?: { ... }
+      id?: { ... }
+      name?: { ... }
+      schema?: { ... }
+      color?: { ... }
+    }
+  }>
+  metadata?: Record<string, {
+    type: "text" | "number" | "boolean" | "list" | "entity" | "badge"
+    value?: unknown
+    values?: string[]
+    id?: string
+    name?: string
+    schema?: string
+    color?: "success" | "warning" | "error" | "info"
+  }>
+  summary?: string
 }
 ```
 

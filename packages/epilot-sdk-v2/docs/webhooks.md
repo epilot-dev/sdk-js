@@ -145,11 +145,14 @@ const { data } = await client.getConfigs({
     "enabled": true,
     "auth": {
       "authType": "BASIC",
-      "basicAuthConfig": {}
+      "basicAuthConfig": {
+        "username": "secretUsername",
+        "password": "secret7825@!"
+      }
     },
     "filter": {
       "keyToFilter": "customer_request.productId",
-      "supportedValues": []
+      "supportedValues": ["2324245", "5253642"]
     }
   }
 ]
@@ -182,10 +185,7 @@ const { data } = await client.createConfig(
     },
     filter: {
       keyToFilter: 'customer_request.productId',
-      supportedValues: [
-        '2324245',
-        '5253642'
-      ]
+      supportedValues: ['2324245', '5253642']
     }
   },
 )
@@ -209,10 +209,7 @@ const { data } = await client.createConfig(
   },
   "filter": {
     "keyToFilter": "customer_request.productId",
-    "supportedValues": [
-      "2324245",
-      "5253642"
-    ]
+    "supportedValues": ["2324245", "5253642"]
   }
 }
 ```
@@ -251,10 +248,7 @@ const { data } = await client.getConfig({
   },
   "filter": {
     "keyToFilter": "customer_request.productId",
-    "supportedValues": [
-      "2324245",
-      "5253642"
-    ]
+    "supportedValues": ["2324245", "5253642"]
   }
 }
 ```
@@ -288,10 +282,7 @@ const { data } = await client.updateConfig(
     },
     filter: {
       keyToFilter: 'customer_request.productId',
-      supportedValues: [
-        '2324245',
-        '5253642'
-      ]
+      supportedValues: ['2324245', '5253642']
     }
   },
 )
@@ -315,10 +306,7 @@ const { data } = await client.updateConfig(
   },
   "filter": {
     "keyToFilter": "customer_request.productId",
-    "supportedValues": [
-      "2324245",
-      "5253642"
-    ]
+    "supportedValues": ["2324245", "5253642"]
   }
 }
 ```
@@ -403,10 +391,7 @@ const { data } = await client.batchReplayEvents(
     configId: 'example',
   },
   {
-    eventIds: [
-      '2f1b7cf8-ff55-4359-966f-e56f39a52c94',
-      '48c984bf-466b-470b-b743-d07cea168243'
-    ]
+    eventIds: ['2f1b7cf8-ff55-4359-966f-e56f39a52c94', '48c984bf-466b-470b-b743-d07cea168243']
   },
 )
 ```
@@ -567,8 +552,25 @@ const { data } = await client.getWebhookEventsV2(
       "url": "string",
       "created_at": "2021-04-27T12:01:13.000Z",
       "event_name": "string",
-      "http_response": {},
-      "metadata": {},
+      "http_response": {
+        "status_code": 0,
+        "message": "string",
+        "body": {},
+        "code": "string"
+      },
+      "metadata": {
+        "action": "Manual triggered by user with id 123456",
+        "origin": "string",
+        "creation_timestamp": "string",
+        "webhook_id": "string",
+        "webhook_name": "string",
+        "automation_name": "string",
+        "organization_id": "string",
+        "user_id": "string",
+        "correlation_id": "string",
+        "execution_id": "string",
+        "action_id": "string"
+      },
       "status": "succeeded",
       "http_method": "GET",
       "payload": "string"
@@ -649,7 +651,12 @@ type EventListResponse = {
     status?: "succeeded" | "failed" | "in_progress"
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
-  // ...
+  }>
+  next_cursor?: {
+    created_at?: string // date-time
+    event_id?: string
+  }
+  has_more?: boolean
 }
 ```
 
@@ -780,7 +787,21 @@ type WebhookConfig = {
     }
   }
   filter?: {
-  // ...
+    keyToFilter: string
+    supportedValues: string[]
+  }
+  payloadConfiguration?: {
+    hydrate_entity?: boolean
+    include_relations?: boolean
+    include_activity?: boolean
+    include_changed_attributes?: boolean
+    custom_headers?: Record<string, string>
+  }
+  enableStaticIP?: boolean
+  status?: "active" | "inactive" | "incomplete"
+  jsonataExpression?: string
+  _manifest?: string // uuid[]
+  signingSecret?: string
 }
 ```
 

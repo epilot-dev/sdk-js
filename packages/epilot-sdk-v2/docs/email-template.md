@@ -75,16 +75,9 @@ const { data } = await client.saveTemplate(
   null,
   {
     _id: 'cd7809ba-a111-4dd9-8d15-18eb4de0faed',
-    _tags: [
-      'template'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
-    _purpose: [
-      'a0ec23ac-12f8-4d89-9a63-91cba3787f2a',
-      '310cd388-2f15-4b5b-8f98-ca14c1e03304'
-    ],
+    _tags: ['template'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
+    _purpose: ['a0ec23ac-12f8-4d89-9a63-91cba3787f2a', '310cd388-2f15-4b5b-8f98-ca14c1e03304'],
     name: 'Order confirmation',
     brand_id: 0,
     from: {
@@ -147,18 +140,11 @@ const { data } = await client.saveTemplate(
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "automatic email template"
-  ],
+  "_tags": ["automatic email template"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
-  "_purpose": [
-    "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
-    "310cd388-2f15-4b5b-8f98-ca14c1e03304"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["a0ec23ac-12f8-4d89-9a63-91cba3787f2a", "310cd388-2f15-4b5b-8f98-ca14c1e03304"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "name": "Order confirmation",
   "brand_id": 0,
   "from": {
@@ -237,18 +223,11 @@ const { data } = await client.getTemplateDetail({
     "_title": "string",
     "_org": "206801",
     "_schema": "message",
-    "_tags": [
-      "automatic email template"
-    ],
+    "_tags": ["automatic email template"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-10T09:14:31.990Z",
-    "_purpose": [
-      "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
-      "310cd388-2f15-4b5b-8f98-ca14c1e03304"
-    ],
-    "_manifest": [
-      "123e4567-e89b-12d3-a456-426614174000"
-    ],
+    "_purpose": ["a0ec23ac-12f8-4d89-9a63-91cba3787f2a", "310cd388-2f15-4b5b-8f98-ca14c1e03304"],
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "name": "Order confirmation",
     "brand_id": 0,
     "from": {
@@ -256,21 +235,44 @@ const { data } = await client.getTemplateDetail({
       "email": "no-reply@epilot.cloud"
     },
     "to": [
-      {}
+      {
+        "name": "Ny Huynh",
+        "email": "ny.huynh@axonactive.com"
+      }
     ],
     "cc": [
-      {}
+      {
+        "name": "Ny Huynh",
+        "email": "ny.huynh@axonactive.com"
+      }
     ],
     "bcc": [
-      {}
+      {
+        "name": "Ny Huynh",
+        "email": "ny.huynh@axonactive.com"
+      }
     ],
     "subject": "We have received your order!",
     "body": "Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly",
     "attachments": [
-      {}
+      {
+        "cid": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "size": 451349,
+        "content_type": "application/pdf",
+        "url": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "bucket": "893487340562-message-attachment",
+        "object_key": "attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "inline": false,
+        "send_as_link": false,
+        "type": "Document template",
+        "copy_to_message": true
+      }
     ],
     "file": {
-      "$relation": []
+      "$relation": [
+        {}
+      ]
     },
     "created_by": 1234,
     "updated_by": 1234,
@@ -299,16 +301,9 @@ const { data } = await client.updateTemplateDetail(
   },
   {
     _id: 'cd7809ba-a111-4dd9-8d15-18eb4de0faed',
-    _tags: [
-      'template'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
-    _purpose: [
-      'a0ec23ac-12f8-4d89-9a63-91cba3787f2a',
-      '310cd388-2f15-4b5b-8f98-ca14c1e03304'
-    ],
+    _tags: ['template'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
+    _purpose: ['a0ec23ac-12f8-4d89-9a63-91cba3787f2a', '310cd388-2f15-4b5b-8f98-ca14c1e03304'],
     name: 'Order confirmation',
     brand_id: 0,
     from: {
@@ -371,18 +366,11 @@ const { data } = await client.updateTemplateDetail(
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "automatic email template"
-  ],
+  "_tags": ["automatic email template"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
-  "_purpose": [
-    "a0ec23ac-12f8-4d89-9a63-91cba3787f2a",
-    "310cd388-2f15-4b5b-8f98-ca14c1e03304"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["a0ec23ac-12f8-4d89-9a63-91cba3787f2a", "310cd388-2f15-4b5b-8f98-ca14c1e03304"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "name": "Order confirmation",
   "brand_id": 0,
   "from": {
@@ -459,7 +447,10 @@ const { data } = await client.replaceVariablesAsync(
       main_entity_id: '63753437-c9e2-4e83-82bb-b1c666514561',
       user_id: '123452',
       custom_variables: [
-        { /* ... */ }
+        {
+          variable: '{{abc.xyz}}',
+          value: 'ReplacedValue'
+        }
       ]
     },
     must_include_unsubscribe_link: false,
@@ -486,21 +477,57 @@ const { data } = await client.replaceVariablesAsync(
       "_title": "string",
       "_org": "206801",
       "_schema": "message",
-      "_tags": [],
+      "_tags": ["automatic email template"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-10T09:14:31.990Z",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["a0ec23ac-12f8-4d89-9a63-91cba3787f2a", "310cd388-2f15-4b5b-8f98-ca14c1e03304"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "name": "Order confirmation",
       "brand_id": 0,
-      "from": {},
-      "to": [],
-      "cc": [],
-      "bcc": [],
+      "from": {
+        "name": "epilot",
+        "email": "no-reply@epilot.cloud"
+      },
+      "to": [
+        {
+          "name": "Ny Huynh",
+          "email": "ny.huynh@axonactive.com"
+        }
+      ],
+      "cc": [
+        {
+          "name": "Ny Huynh",
+          "email": "ny.huynh@axonactive.com"
+        }
+      ],
+      "bcc": [
+        {
+          "name": "Ny Huynh",
+          "email": "ny.huynh@axonactive.com"
+        }
+      ],
       "subject": "We have received your order!",
       "body": "Hi Ms Ny Huynh, </br> Thank you for your order. We will contact you shortly",
-      "attachments": [],
-      "file": {},
+      "attachments": [
+        {
+          "cid": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+          "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+          "size": 451349,
+          "content_type": "application/pdf",
+          "url": "https://go.epilot.cloud/attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+          "bucket": "893487340562-message-attachment",
+          "object_key": "attachments/3e7c616a-3e89-4f92-b4c5-ea5ab140e3dd/Produktinformationen_epilot360_Double_Opt_in.pdf",
+          "inline": false,
+          "send_as_link": false,
+          "type": "Document template",
+          "copy_to_message": true
+        }
+      ],
+      "file": {
+        "$relation": [
+          {}
+        ]
+      },
       "created_by": 1234,
       "updated_by": 1234,
       "system_template": false
@@ -553,13 +580,12 @@ const { data } = await client.bulkSendMessage(
     "skip_creating_entities": true,
     "email_template_id": "511ceb90-f738-47aa-8b1e-915ace0ae13c",
     "must_include_unsubscribe_link": true,
-    "recipient_ids": [
-      "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-      "3fa85f64-5717-4562-b3fc-2c963f66afa8"
-    ],
+    "recipient_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6", "3fa85f64-5717-4562-b3fc-2c963f66afa7", "3fa85f64-5717-4562-b3fc-2c963f66afa8"],
     "custom_variables": [
-      {}
+      {
+        "variable": "{{abc.xyz}}",
+        "value": "ReplacedValue"
+      }
     ]
   },
   "created_by": "1234",
@@ -572,22 +598,22 @@ const { data } = await client.bulkSendMessage(
   "queued": [
     {
       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "email_to": [],
-      "email_with_consent": []
+      "email_to": ["recipient@example.com"],
+      "email_with_consent": ["recipient@example.com"]
     }
   ],
   "sent": [
     {
       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "message_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "email_to": []
+      "email_to": ["recipient@example.com"]
     }
   ],
   "failed": [
     {
       "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "error": "string",
-      "email_to": []
+      "email_to": ["recipient@example.com"]
     }
   ]
 }
@@ -665,7 +691,20 @@ type EmailTemplateRequest = {
     filename: string
     size: number
     content_type: string
-  // ...
+    url?: string
+    bucket: string
+    object_key: string
+    inline?: boolean
+    send_as_link?: boolean
+    type?: string
+    copy_to_message?: boolean
+  }>
+  file?: {
+    $relation?: object[]
+  }
+  system_template?: boolean
+  created_by?: string
+  updated_by?: string
 }
 ```
 
@@ -702,7 +741,25 @@ type EmailTemplateEntity = {
   }>
   subject?: string
   body?: string
-  // ...
+  attachments?: Array<{
+    cid?: string
+    filename: string
+    size: number
+    content_type: string
+    url?: string
+    bucket: string
+    object_key: string
+    inline?: boolean
+    send_as_link?: boolean
+    type?: string
+    copy_to_message?: boolean
+  }>
+  file?: {
+    $relation?: object[]
+  }
+  created_by?: string
+  updated_by?: string
+  system_template?: boolean
 }
 ```
 
@@ -854,7 +911,28 @@ type EmailTemplateResponse = {
       email: { ... }
     }>
     subject?: string
-  // ...
+    body?: string
+    attachments?: Array<{
+      cid?: { ... }
+      filename: { ... }
+      size: { ... }
+      content_type: { ... }
+      url?: { ... }
+      bucket: { ... }
+      object_key: { ... }
+      inline?: { ... }
+      send_as_link?: { ... }
+      type?: { ... }
+      copy_to_message?: { ... }
+    }>
+    file?: {
+      $relation?: { ... }
+    }
+    created_by?: string
+    updated_by?: string
+    system_template?: boolean
+  }
+  relations?: object[]
 }
 ```
 
@@ -891,7 +969,11 @@ type AsyncEmailTemplateResponse = {
       attachments?: { ... }
       file?: { ... }
       created_by?: { ... }
-  // ...
+      updated_by?: { ... }
+      system_template?: { ... }
+    }
+    relations?: object[]
+  }
 }
 ```
 
@@ -985,7 +1067,22 @@ type BulkSendMessageJob = {
   approved_at?: string // date-time
   approve_action?: "APPROVE_WITH_CONSENT" | "APPROVE_ALL"
   task_token?: string
-  // ...
+  total_queued?: number
+  queued?: Array<{
+    entity_id: string
+    email_to: string[]
+    email_with_consent: string[]
+  }>
+  sent?: Array<{
+    entity_id: string
+    message_id: string
+    email_to?: string[]
+  }>
+  failed?: Array<{
+    entity_id: string
+    error: string
+    email_to?: string[]
+  }>
 }
 ```
 

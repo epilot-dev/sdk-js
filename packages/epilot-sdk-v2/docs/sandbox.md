@@ -300,7 +300,7 @@ type OrgId = string
 
 Unique identifier for a pipeline.
 
-The format for a pipeline is: `<sandbox_org>::<production_org>`
+The format for a pipeline is: ``<sandbox_org>`::`<production_org>``
 
 
 ```ts

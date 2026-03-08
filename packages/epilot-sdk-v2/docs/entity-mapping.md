@@ -105,14 +105,67 @@ const { data } = await client.storeConfig(
         name: 'string',
         allow_failure: true,
         target_schema: 'string',
-        target_unique: [ /* ... */ ],
-        loop_config: { /* ... */ },
+        target_unique: ['string'],
+        loop_config: {
+          source_path: 'string',
+          length: 'the length of the array'
+        },
         conditionMode: 'oneOf',
-        conditions: [ /* ... */ ],
-        mapping_attributes: [ /* ... */ ],
-        relation_attributes: [ /* ... */ ],
+        conditions: [
+          {
+            _exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _equals: {
+              source: 'string',
+              value: 'string'
+            },
+            _not_exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _any_of: {
+              source: 'string',
+              value: 'string'
+            }
+          }
+        ],
+        mapping_attributes: [
+          {
+            target: '_tags',
+            operation: {
+              _append: ['new', 'tags'],
+              _uniq: true
+            }
+          },
+          {
+            mode: 'copy_if_exists',
+            target: 'string',
+            value: {}
+          }
+        ],
+        relation_attributes: [
+          {
+            target: 'string',
+            target_tags: ['string'],
+            target_tags_include_source: false,
+            override_with_source_filter: false,
+            source_filter: {
+              limit: 0,
+              schema: 'string',
+              attribute: 'string',
+              relation_tag: 'string',
+              tag: 'string',
+              self: false
+            },
+            related_to: {},
+            mode: 'append',
+            origin: 'system_recommendation'
+          }
+        ],
         linkback_relation_attribute: 'mapped_entities',
-        linkback_relation_tags: [ /* ... */ ]
+        linkback_relation_tags: ['string']
       }
     ],
     created_at: '1970-01-01T00:00:00.000Z',
@@ -151,14 +204,67 @@ const { data } = await client.storeConfig(
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -212,14 +318,67 @@ const { data } = await client.getConfig({
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -273,14 +432,67 @@ const { data } = await client.deleteConfig({
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -324,12 +536,93 @@ const { data } = await client.getAllVersions({
   "configs": [
     {
       "id": "string",
-      "source": {},
-      "targets": [],
+      "source": {
+        "type": "journey",
+        "config": {
+          "journey_id": "string"
+        }
+      },
+      "targets": [
+        {
+          "id": "string",
+          "name": "string",
+          "allow_failure": true,
+          "target_schema": "string",
+          "target_unique": ["string"],
+          "loop_config": {
+            "source_path": "string",
+            "length": "the length of the array"
+          },
+          "conditionMode": "oneOf",
+          "conditions": [
+            {
+              "_exists": {
+                "source": "string",
+                "value": "string"
+              },
+              "_equals": {
+                "source": "string",
+                "value": "string"
+              },
+              "_not_exists": {
+                "source": "string",
+                "value": "string"
+              },
+              "_any_of": {
+                "source": "string",
+                "value": "string"
+              }
+            }
+          ],
+          "mapping_attributes": [
+            {
+              "target": "_tags",
+              "operation": {
+                "_append": ["new", "tags"],
+                "_uniq": true
+              }
+            },
+            {
+              "mode": "copy_if_exists",
+              "target": "string",
+              "value": {}
+            }
+          ],
+          "relation_attributes": [
+            {
+              "target": "string",
+              "target_tags": ["string"],
+              "target_tags_include_source": false,
+              "override_with_source_filter": false,
+              "source_filter": {
+                "limit": 0,
+                "schema": "string",
+                "attribute": "string",
+                "relation_tag": "string",
+                "tag": "string",
+                "self": false
+              },
+              "related_to": {},
+              "mode": "append",
+              "origin": "system_recommendation"
+            }
+          ],
+          "linkback_relation_attribute": "mapped_entities",
+          "linkback_relation_tags": ["string"]
+        }
+      ],
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {},
-      "last_updated_by": {},
+      "created_by": {
+        "type": "user",
+        "org_id": "string",
+        "user_id": "string"
+      },
+      "last_updated_by": {
+        "type": "user",
+        "org_id": "string",
+        "user_id": "string"
+      },
       "org_id": "66",
       "version": 2
     }
@@ -366,14 +659,67 @@ const { data } = await client.storeNewVersion(
         name: 'string',
         allow_failure: true,
         target_schema: 'string',
-        target_unique: [ /* ... */ ],
-        loop_config: { /* ... */ },
+        target_unique: ['string'],
+        loop_config: {
+          source_path: 'string',
+          length: 'the length of the array'
+        },
         conditionMode: 'oneOf',
-        conditions: [ /* ... */ ],
-        mapping_attributes: [ /* ... */ ],
-        relation_attributes: [ /* ... */ ],
+        conditions: [
+          {
+            _exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _equals: {
+              source: 'string',
+              value: 'string'
+            },
+            _not_exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _any_of: {
+              source: 'string',
+              value: 'string'
+            }
+          }
+        ],
+        mapping_attributes: [
+          {
+            target: '_tags',
+            operation: {
+              _append: ['new', 'tags'],
+              _uniq: true
+            }
+          },
+          {
+            mode: 'copy_if_exists',
+            target: 'string',
+            value: {}
+          }
+        ],
+        relation_attributes: [
+          {
+            target: 'string',
+            target_tags: ['string'],
+            target_tags_include_source: false,
+            override_with_source_filter: false,
+            source_filter: {
+              limit: 0,
+              schema: 'string',
+              attribute: 'string',
+              relation_tag: 'string',
+              tag: 'string',
+              self: false
+            },
+            related_to: {},
+            mode: 'append',
+            origin: 'system_recommendation'
+          }
+        ],
         linkback_relation_attribute: 'mapped_entities',
-        linkback_relation_tags: [ /* ... */ ]
+        linkback_relation_tags: ['string']
       }
     ],
     created_at: '1970-01-01T00:00:00.000Z',
@@ -412,14 +758,67 @@ const { data } = await client.storeNewVersion(
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -474,14 +873,67 @@ const { data } = await client.getConfigVersion({
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -527,14 +979,67 @@ const { data } = await client.executeMapping(
         name: 'string',
         allow_failure: true,
         target_schema: 'string',
-        target_unique: [ /* ... */ ],
-        loop_config: { /* ... */ },
+        target_unique: ['string'],
+        loop_config: {
+          source_path: 'string',
+          length: 'the length of the array'
+        },
         conditionMode: 'oneOf',
-        conditions: [ /* ... */ ],
-        mapping_attributes: [ /* ... */ ],
-        relation_attributes: [ /* ... */ ],
+        conditions: [
+          {
+            _exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _equals: {
+              source: 'string',
+              value: 'string'
+            },
+            _not_exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _any_of: {
+              source: 'string',
+              value: 'string'
+            }
+          }
+        ],
+        mapping_attributes: [
+          {
+            target: '_tags',
+            operation: {
+              _append: ['new', 'tags'],
+              _uniq: true
+            }
+          },
+          {
+            mode: 'copy_if_exists',
+            target: 'string',
+            value: {}
+          }
+        ],
+        relation_attributes: [
+          {
+            target: 'string',
+            target_tags: ['string'],
+            target_tags_include_source: false,
+            override_with_source_filter: false,
+            source_filter: {
+              limit: 0,
+              schema: 'string',
+              attribute: 'string',
+              relation_tag: 'string',
+              tag: 'string',
+              self: false
+            },
+            related_to: {},
+            mode: 'append',
+            origin: 'system_recommendation'
+          }
+        ],
         linkback_relation_attribute: 'mapped_entities',
-        linkback_relation_tags: [ /* ... */ ]
+        linkback_relation_tags: ['string']
       }
     ]
   },
@@ -552,7 +1057,7 @@ const { data } = await client.executeMapping(
       "_schema": "string",
       "_title": "string",
       "_org": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "_created_at": "string",
       "_updated_at": "string",
       "required": {}
@@ -560,8 +1065,77 @@ const { data } = await client.executeMapping(
   ],
   "failures": [
     {
-      "target": {},
-      "error": {}
+      "target": {
+        "id": "string",
+        "name": "string",
+        "allow_failure": true,
+        "target_schema": "string",
+        "target_unique": ["string"],
+        "loop_config": {
+          "source_path": "string",
+          "length": "the length of the array"
+        },
+        "conditionMode": "oneOf",
+        "conditions": [
+          {
+            "_exists": {
+              "source": "string",
+              "value": "string"
+            },
+            "_equals": {
+              "source": "string",
+              "value": "string"
+            },
+            "_not_exists": {
+              "source": "string",
+              "value": "string"
+            },
+            "_any_of": {
+              "source": "string",
+              "value": "string"
+            }
+          }
+        ],
+        "mapping_attributes": [
+          {
+            "target": "_tags",
+            "operation": {
+              "_append": ["new", "tags"],
+              "_uniq": true
+            }
+          },
+          {
+            "mode": "copy_if_exists",
+            "target": "string",
+            "value": {}
+          }
+        ],
+        "relation_attributes": [
+          {
+            "target": "string",
+            "target_tags": ["string"],
+            "target_tags_include_source": false,
+            "override_with_source_filter": false,
+            "source_filter": {
+              "limit": 0,
+              "schema": "string",
+              "attribute": "string",
+              "relation_tag": "string",
+              "tag": "string",
+              "self": false
+            },
+            "related_to": {},
+            "mode": "append",
+            "origin": "system_recommendation"
+          }
+        ],
+        "linkback_relation_attribute": "mapped_entities",
+        "linkback_relation_tags": ["string"]
+      },
+      "error": {
+        "isSilent": true,
+        "message": "string"
+      }
     }
   ],
   "warnings": [
@@ -616,14 +1190,67 @@ const { data } = await client.searchConfigs(
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -693,11 +1320,27 @@ const { data } = await client.executeRelations(
         entity_schema: 'submission'
       },
       relation_attributes: [
-        { /* ... */ }
+        {
+          target: 'string',
+          target_tags: ['string'],
+          target_tags_include_source: false,
+          override_with_source_filter: false,
+          source_filter: {
+            limit: 0,
+            schema: 'string',
+            attribute: 'string',
+            relation_tag: 'string',
+            tag: 'string',
+            self: false
+          },
+          related_to: {},
+          mode: 'append',
+          origin: 'system_recommendation'
+        }
       ],
       linkback: {
         attribute: 'mapped_entities',
-        relation_tags: [ /* ... */ ]
+        relation_tags: ['string']
       }
     },
     additional_relations: [
@@ -720,7 +1363,7 @@ const { data } = await client.executeRelations(
       "source_entity_id": "string",
       "target_entity_id": "string",
       "relation_attr": "string",
-      "tags": []
+      "tags": ["string"]
     }
   ]
 }
@@ -760,14 +1403,67 @@ const { data } = await client.getMappingConfig({
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -816,14 +1512,67 @@ const { data } = await client.putMappingConfig(
         name: 'string',
         allow_failure: true,
         target_schema: 'string',
-        target_unique: [ /* ... */ ],
-        loop_config: { /* ... */ },
+        target_unique: ['string'],
+        loop_config: {
+          source_path: 'string',
+          length: 'the length of the array'
+        },
         conditionMode: 'oneOf',
-        conditions: [ /* ... */ ],
-        mapping_attributes: [ /* ... */ ],
-        relation_attributes: [ /* ... */ ],
+        conditions: [
+          {
+            _exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _equals: {
+              source: 'string',
+              value: 'string'
+            },
+            _not_exists: {
+              source: 'string',
+              value: 'string'
+            },
+            _any_of: {
+              source: 'string',
+              value: 'string'
+            }
+          }
+        ],
+        mapping_attributes: [
+          {
+            target: '_tags',
+            operation: {
+              _append: ['new', 'tags'],
+              _uniq: true
+            }
+          },
+          {
+            mode: 'copy_if_exists',
+            target: 'string',
+            value: {}
+          }
+        ],
+        relation_attributes: [
+          {
+            target: 'string',
+            target_tags: ['string'],
+            target_tags_include_source: false,
+            override_with_source_filter: false,
+            source_filter: {
+              limit: 0,
+              schema: 'string',
+              attribute: 'string',
+              relation_tag: 'string',
+              tag: 'string',
+              self: false
+            },
+            related_to: {},
+            mode: 'append',
+            origin: 'system_recommendation'
+          }
+        ],
         linkback_relation_attribute: 'mapped_entities',
-        linkback_relation_tags: [ /* ... */ ]
+        linkback_relation_tags: ['string']
       }
     ],
     created_at: '1970-01-01T00:00:00.000Z',
@@ -862,14 +1611,67 @@ const { data } = await client.putMappingConfig(
       "name": "string",
       "allow_failure": true,
       "target_schema": "string",
-      "target_unique": [],
-      "loop_config": {},
+      "target_unique": ["string"],
+      "loop_config": {
+        "source_path": "string",
+        "length": "the length of the array"
+      },
       "conditionMode": "oneOf",
-      "conditions": [],
-      "mapping_attributes": [],
-      "relation_attributes": [],
+      "conditions": [
+        {
+          "_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_equals": {
+            "source": "string",
+            "value": "string"
+          },
+          "_not_exists": {
+            "source": "string",
+            "value": "string"
+          },
+          "_any_of": {
+            "source": "string",
+            "value": "string"
+          }
+        }
+      ],
+      "mapping_attributes": [
+        {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        },
+        {
+          "mode": "copy_if_exists",
+          "target": "string",
+          "value": {}
+        }
+      ],
+      "relation_attributes": [
+        {
+          "target": "string",
+          "target_tags": ["string"],
+          "target_tags_include_source": false,
+          "override_with_source_filter": false,
+          "source_filter": {
+            "limit": 0,
+            "schema": "string",
+            "attribute": "string",
+            "relation_tag": "string",
+            "tag": "string",
+            "self": false
+          },
+          "related_to": {},
+          "mode": "append",
+          "origin": "system_recommendation"
+        }
+      ],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": []
+      "linkback_relation_tags": ["string"]
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -944,7 +1746,12 @@ type MappingConfigsResp = {
     }
     last_updated_by?: {
       type: { ... }
-  // ...
+      org_id?: { ... }
+      user_id?: { ... }
+    }
+    org_id?: string
+    version?: number
+  }>
 }
 ```
 
@@ -981,8 +1788,51 @@ type MappingConfigs = Array<{
     }>
     mapping_attributes: Array<{
       target: { ... }
-  // ...
-}
+      operation: { ... }
+      origin?: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      value: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  last_updated_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  org_id?: string
+  version?: number
+}>
 ```
 
 ### `MappingConfig`
@@ -1018,7 +1868,50 @@ type MappingConfig = {
     }>
     mapping_attributes: Array<{
       target: { ... }
-  // ...
+      operation: { ... }
+      origin?: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      value: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  last_updated_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  org_id?: string
+  version?: number
 }
 ```
 
@@ -1055,7 +1948,50 @@ type MappingConfigV2 = {
     }>
     mapping_attributes: Array<{
       target: { ... }
-  // ...
+      operation: { ... }
+      origin?: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      value: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  last_updated_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  org_id?: string
+  version?: number
 }
 ```
 
@@ -1092,7 +2028,48 @@ type MappingConfigCommonFields = {
     }>
     mapping_attributes: Array<{
       target: { ... }
-  // ...
+      operation: { ... }
+      origin?: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      value: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  created_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
+  last_updated_by?: {
+    type: "user" | "internal_service"
+    org_id?: string
+    user_id?: string
+  }
 }
 ```
 
@@ -1211,7 +2188,30 @@ type ExecuteMappingReq = {
       mode: { ... }
       target: { ... }
       value: { ... }
-  // ...
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
 }
 ```
 
@@ -1248,7 +2248,12 @@ type ExecuteMappingResp = {
       isSilent?: { ... }
       message?: { ... }
     }
-  // ...
+  }>
+  warnings?: Array<{
+    explanation: string
+    context?: string
+    id?: string
+  }>
 }
 ```
 
@@ -1285,7 +2290,30 @@ type MappingFailure = {
       mode: { ... }
       target: { ... }
       source: { ... }
-  // ...
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }
+  error?: {
+    isSilent?: boolean
+    message?: string
+  }
 }
 ```
 
@@ -1386,7 +2414,52 @@ type TargetConfig = {
     }
   }>
   mapping_attributes: Array<{
-  // ...
+    target: string
+    operation: {
+      _set?: { ... }
+      _append?: { ... }
+      _prepend?: { ... }
+      _uniq?: { ... }
+      _retain_old_values?: { ... }
+      _copy?: { ... }
+      _template?: { ... }
+      _random?: { ... }
+    } | string | boolean | number | Record<string, unknown> | unknown[]
+    origin?: "system_recommendation" | "user_manually" | "entity_updating_system_recommendation"
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    value: unknown
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    source: string
+  } | {
+    mode: "copy_if_exists" | "append_if_exists" | "set_value"
+    target: string
+    source?: string
+    value_json: string
+    target_unique?: string[]
+  }>
+  relation_attributes?: Array<{
+    target: string
+    target_tags?: string[]
+    target_tags_include_source?: boolean
+    override_with_source_filter?: boolean
+    source_filter?: {
+      limit?: { ... }
+      schema?: { ... }
+      attribute?: { ... }
+      relation_tag?: { ... }
+      tag?: { ... }
+      self?: { ... }
+    }
+    related_to?: Record<string, unknown>
+    mode: "append" | "prepend" | "set"
+    origin?: "system_recommendation" | "user_manually" | "entity_updating_system_recommendation"
+  }>
+  linkback_relation_attribute?: string
+  linkback_relation_tags?: string[]
 }
 ```
 
@@ -1634,7 +2707,15 @@ type MappingHistoryResp = {
       allow_failure?: { ... }
       target_schema: { ... }
       target_unique?: { ... }
-  // ...
+      loop_config?: { ... }
+      conditionMode?: { ... }
+      conditions?: { ... }
+      mapping_attributes: { ... }
+      relation_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -1671,7 +2752,48 @@ type MappingHistoryEntry = {
     target_schema: string
     target_unique?: string[]
     loop_config?: {
-  // ...
+      source_path?: { ... }
+      length?: { ... }
+    }
+    conditionMode?: "oneOf" | "anyOf" | "allOf"
+    conditions?: Array<{
+      _exists?: { ... }
+      _equals?: { ... }
+      _not_exists?: { ... }
+      _any_of?: { ... }
+    }>
+    mapping_attributes: Array<{
+      target: { ... }
+      operation: { ... }
+      origin?: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      value: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source: { ... }
+    } | {
+      mode: { ... }
+      target: { ... }
+      source?: { ... }
+      value_json: { ... }
+      target_unique?: { ... }
+    }>
+    relation_attributes?: Array<{
+      target: { ... }
+      target_tags?: { ... }
+      target_tags_include_source?: { ... }
+      override_with_source_filter?: { ... }
+      source_filter?: { ... }
+      related_to?: { ... }
+      mode: { ... }
+      origin?: { ... }
+    }>
+    linkback_relation_attribute?: string
+    linkback_relation_tags?: string[]
+  }>
 }
 ```
 
@@ -1708,7 +2830,18 @@ type MappingSource = {
     origin?: "system_recommendation" | "user_manually" | "entity_updating_system_recommendation"
   }
   title: string
-  // ...
+  sub_title?: string
+  repeatable?: boolean
+  target_settings?: {
+    allowed_ui_actions?: "schema-select" | "attribute-select" | "target-delete" | "target-add" | "target"[]
+    locked?: "each" | "first" | "system_recommendation"
+    isSingleTarget?: boolean
+    visibility?: {
+      mode: { ... }
+      if: { ... }
+      message?: { ... }
+    }
+  }
 }
 ```
 

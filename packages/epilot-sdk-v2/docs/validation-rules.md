@@ -72,8 +72,40 @@ const { data } = await client.getValidationRules()
     {
       "title": "string",
       "placeholder": "string",
-      "used_by": [],
-      "rule": {},
+      "used_by": [
+        {
+          "type": "journey",
+          "schema_slug": "string",
+          "source_id": "string"
+        }
+      ],
+      "rule": {
+        "type": "regex",
+        "conditions": {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            },
+            {
+              "all": [
+                {
+                  "fact": "inputValue",
+                  "operator": "regexMatch",
+                  "value": "string",
+                  "params": {
+                    "errorMessage": "string"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
       "_schema_version": "string",
       "_id": "string",
       "_organization_id": "string",
@@ -112,7 +144,28 @@ const { data } = await client.createValidationRule(
     rule: {
       type: 'regex',
       conditions: {
-        all: [ /* ... */ ]
+        all: [
+          {
+            fact: 'inputValue',
+            operator: 'regexMatch',
+            value: 'string',
+            params: {
+              errorMessage: 'string'
+            }
+          },
+          {
+            all: [
+              {
+                fact: 'inputValue',
+                operator: 'regexMatch',
+                value: 'string',
+                params: {
+                  errorMessage: 'string'
+                }
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -136,7 +189,28 @@ const { data } = await client.createValidationRule(
   "rule": {
     "type": "regex",
     "conditions": {
-      "all": []
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "_schema_version": "string",
@@ -182,7 +256,28 @@ const { data } = await client.getValidationRuleById({
   "rule": {
     "type": "regex",
     "conditions": {
-      "all": []
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "_schema_version": "string",
@@ -223,7 +318,28 @@ const { data } = await client.updateValidationRule(
     rule: {
       type: 'regex',
       conditions: {
-        all: [ /* ... */ ]
+        all: [
+          {
+            fact: 'inputValue',
+            operator: 'regexMatch',
+            value: 'string',
+            params: {
+              errorMessage: 'string'
+            }
+          },
+          {
+            all: [
+              {
+                fact: 'inputValue',
+                operator: 'regexMatch',
+                value: 'string',
+                params: {
+                  errorMessage: 'string'
+                }
+              }
+            ]
+          }
+        ]
       }
     }
   },
@@ -247,7 +363,28 @@ const { data } = await client.updateValidationRule(
   "rule": {
     "type": "regex",
     "conditions": {
-      "all": []
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "_schema_version": "string",
@@ -314,7 +451,28 @@ const { data } = await client.addUsedByReference(
   "rule": {
     "type": "regex",
     "conditions": {
-      "all": []
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "_schema_version": "string",
@@ -367,7 +525,28 @@ const { data } = await client.removeUsedByReference(
   "rule": {
     "type": "regex",
     "conditions": {
-      "all": []
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "_schema_version": "string",
@@ -441,7 +620,12 @@ type UpdateValidationRuleRequest = {
     type: "numeric"
     conditions: {
       all: { ... }
-  // ...
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  }
 }
 ```
 
@@ -478,7 +662,12 @@ type ValidationRuleBase = {
     type: "numeric"
     conditions: {
       all: { ... }
-  // ...
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  }
 }
 ```
 
@@ -545,7 +734,18 @@ type RegexRuleType = {
     }>
   } | {
     not: {
-  // ...
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  }
 }
 ```
 
@@ -584,7 +784,63 @@ type PatternRuleType = {
     } | {
       not: { ... }
     }>
-  // ...
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  }
 }
 ```
 
@@ -623,7 +879,63 @@ type NumericRuleType = {
     } | {
       not: { ... }
     }>
-  // ...
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      all: { ... }
+    } | {
+      any: { ... }
+    } | {
+      not: { ... }
+    }
+  }
 }
 ```
 
@@ -662,7 +974,66 @@ type RegexCondition = {
       params?: { ... }
     }
   }>
-  // ...
+} | {
+  any: Array<{
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }
+  }>
+} | {
+  not: {
+    fact: "inputValue"
+    operator: "regexMatch"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }
+  }
 }
 ```
 
@@ -751,6 +1122,76 @@ type PatternCondition = {
     }
   } | {
     fact: "static-check"
+    operator: "equal" | "notEqual"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
   // ...
 }
 ```
@@ -790,6 +1231,76 @@ type PatternNestedCondition = {
     }
   } | {
     fact: "static-check"
+    operator: "equal" | "notEqual"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  }>
+} | {
+  any: Array<{
+    fact: "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check" | "total-length"
+    operator: "exactlyNDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+    operator: "in" | "notIn" | "contains" | "doesNotContain"
+    value: string[]
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+    operator: "equal" | "notEqual"
+    value: string
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  }>
+} | {
+  not: {
+    fact: "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check" | "total-length"
+    operator: "exactlyNDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      start?: { ... }
+      end?: { ... }
+    }
+  } | {
+    fact: "static-check"
+    operator: "in" | "notIn" | "contains" | "doesNotContain"
+    value: string[]
+    params?: {
   // ...
 }
 ```
@@ -829,7 +1340,12 @@ type PatternFactCondition = {
 } | {
   fact: "static-check"
   operator: "equal" | "notEqual"
-  // ...
+  value: string
+  params?: {
+    errorMessage?: string
+    start?: number
+    end?: number
+  }
 }
 ```
 
@@ -868,6 +1384,76 @@ type NumericCondition = {
     params?: {
       errorMessage?: { ... }
     }
+  } | {
+    all: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    any: Array<{
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }>
+  } | {
+    not: {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    } | {
+      fact: { ... }
+      operator: { ... }
+      value: { ... }
+      params?: { ... }
+    }
+  }>
+} | {
+  any: Array<{
+    fact: "numeric-value" | "total-length"
   // ...
 }
 ```
@@ -907,7 +1493,69 @@ type NumericNestedCondition = {
     params?: {
       errorMessage?: { ... }
     }
-  // ...
+  }>
+} | {
+  any: Array<{
+    fact: "numeric-value" | "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "integer-digits-count"
+    operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      allowLeadingZeroes?: { ... }
+    }
+  } | {
+    fact: "decimal-digits-count"
+    operator: "equal" | "minDecimalDigits" | "maxDecimalDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "has-leading-zeroes"
+    operator: "equal" | "notAllowed"
+    value: boolean
+    params?: {
+      errorMessage?: { ... }
+    }
+  }>
+} | {
+  not: {
+    fact: "numeric-value" | "total-length"
+    operator: "equal" | "notEqual" | "lessThan" | "lessThanInclusive" | "greaterThan" | "greaterThanInclusive"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "integer-digits-count"
+    operator: "equal" | "exactlyNDigits" | "minIntegerDigits" | "maxIntegerDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+      allowLeadingZeroes?: { ... }
+    }
+  } | {
+    fact: "decimal-digits-count"
+    operator: "equal" | "minDecimalDigits" | "maxDecimalDigits"
+    value: number
+    params?: {
+      errorMessage?: { ... }
+    }
+  } | {
+    fact: "has-leading-zeroes"
+    operator: "equal" | "notAllowed"
+    value: boolean
+    params?: {
+      errorMessage?: { ... }
+    }
+  }
 }
 ```
 

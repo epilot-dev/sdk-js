@@ -98,19 +98,20 @@ const { data } = await client.changeCampaignStatus({
     "_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
     "_org": "string",
     "_owners": [
-      {}
+      {
+        "org_id": "123",
+        "user_id": "123"
+      }
     ],
     "_schema": "string",
     "_title": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "_created_at": "1970-01-01T00:00:00.000Z",
     "_updated_at": "1970-01-01T00:00:00.000Z",
     "_acl": {
-      "view": [],
-      "edit": [],
-      "delete": []
+      "view": ["org:456"],
+      "edit": ["org:456"],
+      "delete": ["org:456"]
     },
     "name": "string",
     "goal": "string",
@@ -120,7 +121,12 @@ const { data } = await client.changeCampaignStatus({
     "flow_id": "string",
     "job_id": "string",
     "target": {
-      "$relation": []
+      "$relation": [
+        {
+          "entity_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+          "_tags": ["string"]
+        }
+      ]
     }
   }
 }
@@ -185,7 +191,13 @@ const { data } = await client.getCampaignPortals({
       "name": "string"
     },
     "widgets": [
-      {}
+      {
+        "id": "string",
+        "headline": {
+          "en": "string",
+          "de": "string"
+        }
+      }
     ]
   }
 ]
@@ -207,9 +219,7 @@ const { data } = await client.retriggerCampaignAutomations(
     campaign_id: 'example',
   },
   {
-    recipient_ids: [
-      '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-    ]
+    recipient_ids: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
   },
 )
 ```
@@ -251,9 +261,7 @@ const { data } = await client.matchCampaigns(
         entity_schema: 'string'
       }
     ],
-    campaign_ids: [
-      'b8c01433-5556-4e2b-aad4-6f5348d1df84'
-    ]
+    campaign_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
   },
 )
 ```
@@ -266,7 +274,41 @@ const { data } = await client.matchCampaigns(
   "hits": 0,
   "results": [
     {
-      "campaign": {}
+      "campaign": {
+        "_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+        "_org": "string",
+        "_owners": [
+          {
+            "org_id": "123",
+            "user_id": "123"
+          }
+        ],
+        "_schema": "string",
+        "_title": "string",
+        "_tags": ["string"],
+        "_created_at": "1970-01-01T00:00:00.000Z",
+        "_updated_at": "1970-01-01T00:00:00.000Z",
+        "_acl": {
+          "view": ["org:456"],
+          "edit": ["org:456"],
+          "delete": ["org:456"]
+        },
+        "name": "string",
+        "goal": "string",
+        "status": "draft",
+        "start_date": "string",
+        "end_date": "string",
+        "flow_id": "string",
+        "job_id": "string",
+        "target": {
+          "$relation": [
+            {
+              "entity_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+              "_tags": ["string"]
+            }
+          ]
+        }
+      }
     }
   ]
 }
@@ -292,9 +334,7 @@ const { data } = await client.matchTargets(
         entity_schema: 'string'
       }
     ],
-    target_ids: [
-      'b8c01433-5556-4e2b-aad4-6f5348d1df84'
-    ]
+    target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
   },
 )
 ```
@@ -307,7 +347,30 @@ const { data } = await client.matchTargets(
   "hits": 0,
   "results": [
     {
-      "target": {}
+      "target": {
+        "_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+        "_org": "string",
+        "_owners": [
+          {
+            "org_id": "123",
+            "user_id": "123"
+          }
+        ],
+        "_schema": "string",
+        "_title": "string",
+        "_tags": ["string"],
+        "_created_at": "1970-01-01T00:00:00.000Z",
+        "_updated_at": "1970-01-01T00:00:00.000Z",
+        "_acl": {
+          "view": ["org:456"],
+          "edit": ["org:456"],
+          "delete": ["org:456"]
+        },
+        "name": "string",
+        "description": "string",
+        "entity_schema": "string",
+        "entity_filters": {}
+      }
     }
   ]
 }
@@ -327,9 +390,7 @@ Get target queries
 const { data } = await client.getTargetQueries(
   null,
   {
-    target_ids: [
-      'b8c01433-5556-4e2b-aad4-6f5348d1df84'
-    ]
+    target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
   },
 )
 ```
@@ -709,7 +770,6 @@ type Campaign = {
       _tags?: { ... }
     }>
   }
-  // ...
 }
 ```
 

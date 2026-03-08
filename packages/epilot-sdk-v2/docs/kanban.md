@@ -70,23 +70,42 @@ const { data } = await client.createKanbanBoard(
     created_by: 'string',
     org_id: 'string',
     updated_by: 'string',
-    shared_with: [
-      'string'
-    ],
+    shared_with: ['string'],
     shared_with_org: true,
-    owners: [
-      'string'
-    ],
+    owners: ['string'],
     config: {
       dataset: 'workflow_tasks_overview',
       swimlanes: [
-        { /* ... */ }
+        {
+          id: 'string',
+          title: 'Swimlane 1',
+          position: 1,
+          filter: {
+            items: [
+              {
+                key: 'assignee',
+                operator: 'EQUALS',
+                value: '100020',
+                data_type: 'string'
+              }
+            ],
+            combination: 'OR'
+          },
+          title_chip_variant: 'success'
+        }
       ],
       card_config: {
-        fields: [ /* ... */ ]
+        fields: ['assignee']
       },
       board_filter: {
-        items: [ /* ... */ ],
+        items: [
+          {
+            key: 'assignee',
+            operator: 'EQUALS',
+            value: '100020',
+            data_type: 'string'
+          }
+        ],
         combination: 'OR'
       },
       sorting: {
@@ -112,23 +131,42 @@ const { data } = await client.createKanbanBoard(
   "created_by": "string",
   "org_id": "string",
   "updated_by": "string",
-  "shared_with": [
-    "string"
-  ],
+  "shared_with": ["string"],
   "shared_with_org": true,
-  "owners": [
-    "string"
-  ],
+  "owners": ["string"],
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
-      {}
+      {
+        "id": "string",
+        "title": "Swimlane 1",
+        "position": 1,
+        "filter": {
+          "items": [
+            {
+              "key": "assignee",
+              "operator": "EQUALS",
+              "value": "100020",
+              "data_type": "string"
+            }
+          ],
+          "combination": "OR"
+        },
+        "title_chip_variant": "success"
+      }
     ],
     "card_config": {
-      "fields": []
+      "fields": ["assignee"]
     },
     "board_filter": {
-      "items": [],
+      "items": [
+        {
+          "key": "assignee",
+          "operator": "EQUALS",
+          "value": "100020",
+          "data_type": "string"
+        }
+      ],
       "combination": "OR"
     },
     "sorting": {
@@ -170,13 +208,9 @@ const { data } = await client.getKanbanBoards({
     "created_by": "string",
     "org_id": "string",
     "updated_by": "string",
-    "shared_with": [
-      "string"
-    ],
+    "shared_with": ["string"],
     "shared_with_org": true,
-    "owners": [
-      "string"
-    ]
+    "owners": ["string"]
   }
 ]
 ```
@@ -210,23 +244,42 @@ const { data } = await client.getKanbanBoard({
   "created_by": "string",
   "org_id": "string",
   "updated_by": "string",
-  "shared_with": [
-    "string"
-  ],
+  "shared_with": ["string"],
   "shared_with_org": true,
-  "owners": [
-    "string"
-  ],
+  "owners": ["string"],
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
-      {}
+      {
+        "id": "string",
+        "title": "Swimlane 1",
+        "position": 1,
+        "filter": {
+          "items": [
+            {
+              "key": "assignee",
+              "operator": "EQUALS",
+              "value": "100020",
+              "data_type": "string"
+            }
+          ],
+          "combination": "OR"
+        },
+        "title_chip_variant": "success"
+      }
     ],
     "card_config": {
-      "fields": []
+      "fields": ["assignee"]
     },
     "board_filter": {
-      "items": [],
+      "items": [
+        {
+          "key": "assignee",
+          "operator": "EQUALS",
+          "value": "100020",
+          "data_type": "string"
+        }
+      ],
       "combination": "OR"
     },
     "sorting": {
@@ -262,23 +315,42 @@ const { data } = await client.updateKanbanBoard(
     created_by: 'string',
     org_id: 'string',
     updated_by: 'string',
-    shared_with: [
-      'string'
-    ],
+    shared_with: ['string'],
     shared_with_org: true,
-    owners: [
-      'string'
-    ],
+    owners: ['string'],
     config: {
       dataset: 'workflow_tasks_overview',
       swimlanes: [
-        { /* ... */ }
+        {
+          id: 'string',
+          title: 'Swimlane 1',
+          position: 1,
+          filter: {
+            items: [
+              {
+                key: 'assignee',
+                operator: 'EQUALS',
+                value: '100020',
+                data_type: 'string'
+              }
+            ],
+            combination: 'OR'
+          },
+          title_chip_variant: 'success'
+        }
       ],
       card_config: {
-        fields: [ /* ... */ ]
+        fields: ['assignee']
       },
       board_filter: {
-        items: [ /* ... */ ],
+        items: [
+          {
+            key: 'assignee',
+            operator: 'EQUALS',
+            value: '100020',
+            data_type: 'string'
+          }
+        ],
         combination: 'OR'
       },
       sorting: {
@@ -304,23 +376,42 @@ const { data } = await client.updateKanbanBoard(
   "created_by": "string",
   "org_id": "string",
   "updated_by": "string",
-  "shared_with": [
-    "string"
-  ],
+  "shared_with": ["string"],
   "shared_with_org": true,
-  "owners": [
-    "string"
-  ],
+  "owners": ["string"],
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
-      {}
+      {
+        "id": "string",
+        "title": "Swimlane 1",
+        "position": 1,
+        "filter": {
+          "items": [
+            {
+              "key": "assignee",
+              "operator": "EQUALS",
+              "value": "100020",
+              "data_type": "string"
+            }
+          ],
+          "combination": "OR"
+        },
+        "title_chip_variant": "success"
+      }
     ],
     "card_config": {
-      "fields": []
+      "fields": ["assignee"]
     },
     "board_filter": {
-      "items": [],
+      "items": [
+        {
+          "key": "assignee",
+          "operator": "EQUALS",
+          "value": "100020",
+          "data_type": "string"
+        }
+      ],
       "combination": "OR"
     },
     "sorting": {
@@ -350,13 +441,9 @@ const { data } = await client.patchKanbanBoard(
   {
     title: 'Board 1',
     description: 'Board description',
-    shared_with: [
-      'string'
-    ],
+    shared_with: ['string'],
     shared_with_org: true,
-    owners: [
-      'string'
-    ]
+    owners: ['string']
   },
 )
 ```
@@ -374,23 +461,42 @@ const { data } = await client.patchKanbanBoard(
   "created_by": "string",
   "org_id": "string",
   "updated_by": "string",
-  "shared_with": [
-    "string"
-  ],
+  "shared_with": ["string"],
   "shared_with_org": true,
-  "owners": [
-    "string"
-  ],
+  "owners": ["string"],
   "config": {
     "dataset": "workflow_tasks_overview",
     "swimlanes": [
-      {}
+      {
+        "id": "string",
+        "title": "Swimlane 1",
+        "position": 1,
+        "filter": {
+          "items": [
+            {
+              "key": "assignee",
+              "operator": "EQUALS",
+              "value": "100020",
+              "data_type": "string"
+            }
+          ],
+          "combination": "OR"
+        },
+        "title_chip_variant": "success"
+      }
     ],
     "card_config": {
-      "fields": []
+      "fields": ["assignee"]
     },
     "board_filter": {
-      "items": [],
+      "items": [
+        {
+          "key": "assignee",
+          "operator": "EQUALS",
+          "value": "100020",
+          "data_type": "string"
+        }
+      ],
       "combination": "OR"
     },
     "sorting": {
@@ -490,9 +596,7 @@ const { data } = await client.flowsAutocomplete({
 
 ```json
 {
-  "results": [
-    "value"
-  ],
+  "results": ["value"],
   "hits": 42
 }
 ```
@@ -513,7 +617,12 @@ const { data } = await client.executeFlowsQuery(
   {
     filters: {
       items: [
-        { /* ... */ }
+        {
+          key: 'assignee',
+          operator: 'EQUALS',
+          value: '100020',
+          data_type: 'string'
+        }
       ],
       combination: 'OR'
     },
@@ -599,7 +708,10 @@ type Board = {
     }
     sorting?: {
       field: { ... }
-  // ...
+      direction?: { ... }
+    }
+    search_query?: string
+  }
 }
 ```
 

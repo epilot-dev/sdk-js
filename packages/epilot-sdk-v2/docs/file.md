@@ -155,20 +155,12 @@ const { data } = await client.saveFileV2(
       {
         entity_id: 'ef7d985c-2385-44f4-9c71-ae06a52264f8',
         _schema: 'contact',
-        _tags: [ /* ... */ ]
+        _tags: ['string']
       }
     ],
-    _tags: [
-      'tag1',
-      'tag2'
-    ],
-    _purpose: [
-      '8d396871-95a0-4c9d-bb4d-9eda9c35776c',
-      'da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _tags: ['tag1', 'tag2'],
+    _purpose: ['8d396871-95a0-4c9d-bb4d-9eda9c35776c', 'da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     filename: 'document.pdf',
     type: 'document',
     mime_type: 'application/pdf',
@@ -191,17 +183,9 @@ const { data } = await client.saveFileV2(
   "_schema": "file",
   "_org": "123",
   "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
-  "_tags": [
-    "tag1",
-    "tag2"
-  ],
-  "_purpose": [
-    "8d396871-95a0-4c9d-bb4d-9eda9c35776c",
-    "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_tags": ["tag1", "tag2"],
+  "_purpose": ["8d396871-95a0-4c9d-bb4d-9eda9c35776c", "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "filename": "document.pdf",
   "type": "document",
   "mime_type": "application/pdf",
@@ -224,15 +208,9 @@ const { data } = await client.saveFileV2(
   "_updated_at": "1970-01-01T00:00:00.000Z",
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_acl": {
-    "view": [
-      "org:456"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
   "_owners": [
     {
@@ -272,17 +250,9 @@ const { data } = await client.getFile({
   "_schema": "file",
   "_org": "123",
   "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
-  "_tags": [
-    "tag1",
-    "tag2"
-  ],
-  "_purpose": [
-    "8d396871-95a0-4c9d-bb4d-9eda9c35776c",
-    "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_tags": ["tag1", "tag2"],
+  "_purpose": ["8d396871-95a0-4c9d-bb4d-9eda9c35776c", "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "filename": "document.pdf",
   "type": "document",
   "mime_type": "application/pdf",
@@ -305,15 +275,9 @@ const { data } = await client.getFile({
   "_updated_at": "1970-01-01T00:00:00.000Z",
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_acl": {
-    "view": [
-      "org:456"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
   "_owners": [
     {
@@ -353,17 +317,9 @@ const { data } = await client.deleteFile({
   "_schema": "file",
   "_org": "123",
   "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
-  "_tags": [
-    "tag1",
-    "tag2"
-  ],
-  "_purpose": [
-    "8d396871-95a0-4c9d-bb4d-9eda9c35776c",
-    "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_tags": ["tag1", "tag2"],
+  "_purpose": ["8d396871-95a0-4c9d-bb4d-9eda9c35776c", "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "filename": "document.pdf",
   "type": "document",
   "mime_type": "application/pdf",
@@ -386,15 +342,9 @@ const { data } = await client.deleteFile({
   "_updated_at": "1970-01-01T00:00:00.000Z",
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_acl": {
-    "view": [
-      "org:456"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
   "_owners": [
     {
@@ -763,18 +713,11 @@ const { data } = await client.getUserSchemaFileCollections({
     "slug": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents",
     "name": "Documents",
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "parents": [
-      "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"
-    ],
+    "parents": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"],
     "starred": false,
     "order": 0,
-    "enabled_locations": [
-      "string"
-    ],
-    "enabled_purposes": [
-      "9eefcb98-93cf-4c5b-a040-f1d26d57c177",
-      "5c544c09-a691-43ed-a7fa-0a8b44b5b161"
-    ],
+    "enabled_locations": ["string"],
+    "enabled_purposes": ["9eefcb98-93cf-4c5b-a040-f1d26d57c177", "5c544c09-a691-43ed-a7fa-0a8b44b5b161"],
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-01-02T12:00:00Z"
   }
@@ -798,16 +741,10 @@ const { data } = await client.createUserSchemaFileCollection(
   },
   {
     name: 'string',
-    parents: [
-      'string'
-    ],
+    parents: ['string'],
     starred: false,
-    enabled_locations: [
-      'string'
-    ],
-    enabled_purposes: [
-      'string'
-    ]
+    enabled_locations: ['string'],
+    enabled_purposes: ['string']
   },
 )
 ```
@@ -820,18 +757,11 @@ const { data } = await client.createUserSchemaFileCollection(
   "slug": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents",
   "name": "Documents",
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "parents": [
-    "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"
-  ],
+  "parents": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"],
   "starred": false,
   "order": 0,
-  "enabled_locations": [
-    "string"
-  ],
-  "enabled_purposes": [
-    "9eefcb98-93cf-4c5b-a040-f1d26d57c177",
-    "5c544c09-a691-43ed-a7fa-0a8b44b5b161"
-  ],
+  "enabled_locations": ["string"],
+  "enabled_purposes": ["9eefcb98-93cf-4c5b-a040-f1d26d57c177", "5c544c09-a691-43ed-a7fa-0a8b44b5b161"],
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-01-02T12:00:00Z"
 }
@@ -855,16 +785,10 @@ const { data } = await client.updateUserSchemaFileCollection(
   },
   {
     name: 'string',
-    parents: [
-      'string'
-    ],
+    parents: ['string'],
     starred: false,
-    enabled_locations: [
-      'string'
-    ],
-    enabled_purposes: [
-      'string'
-    ]
+    enabled_locations: ['string'],
+    enabled_purposes: ['string']
   },
 )
 ```
@@ -877,18 +801,11 @@ const { data } = await client.updateUserSchemaFileCollection(
   "slug": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents",
   "name": "Documents",
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "parents": [
-    "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"
-  ],
+  "parents": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"],
   "starred": false,
   "order": 0,
-  "enabled_locations": [
-    "string"
-  ],
-  "enabled_purposes": [
-    "9eefcb98-93cf-4c5b-a040-f1d26d57c177",
-    "5c544c09-a691-43ed-a7fa-0a8b44b5b161"
-  ],
+  "enabled_locations": ["string"],
+  "enabled_purposes": ["9eefcb98-93cf-4c5b-a040-f1d26d57c177", "5c544c09-a691-43ed-a7fa-0a8b44b5b161"],
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-01-02T12:00:00Z"
 }
@@ -936,17 +853,9 @@ const { data } = await client.getFilesInCollection({
     "_schema": "file",
     "_org": "123",
     "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
-    "_tags": [
-      "tag1",
-      "tag2"
-    ],
-    "_purpose": [
-      "8d396871-95a0-4c9d-bb4d-9eda9c35776c",
-      "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"
-    ],
-    "_manifest": [
-      "123e4567-e89b-12d3-a456-426614174000"
-    ],
+    "_tags": ["tag1", "tag2"],
+    "_purpose": ["8d396871-95a0-4c9d-bb4d-9eda9c35776c", "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"],
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "filename": "document.pdf",
     "type": "document",
     "mime_type": "application/pdf",
@@ -958,17 +867,26 @@ const { data } = await client.getFilesInCollection({
     "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
     "s3ref": {},
     "versions": [
-      {}
+      {
+        "s3ref": {},
+        "filename": "document.pdf",
+        "size_bytes": 1234,
+        "readable_size": "1.2 MB",
+        "mime_type": "image/jpeg"
+      }
     ],
     "_updated_at": "1970-01-01T00:00:00.000Z",
     "_created_at": "1970-01-01T00:00:00.000Z",
     "_acl": {
-      "view": [],
-      "edit": [],
-      "delete": []
+      "view": ["org:456"],
+      "edit": ["org:456"],
+      "delete": ["org:456"]
     },
     "_owners": [
-      {}
+      {
+        "org_id": "123",
+        "user_id": "123"
+      }
     ],
     "__additional": {}
   }
@@ -1000,18 +918,11 @@ const { data } = await client.getGlobalFileCollections({
     "slug": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents",
     "name": "Documents",
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "parents": [
-      "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"
-    ],
+    "parents": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"],
     "starred": false,
     "order": 0,
-    "enabled_locations": [
-      "string"
-    ],
-    "enabled_purposes": [
-      "9eefcb98-93cf-4c5b-a040-f1d26d57c177",
-      "5c544c09-a691-43ed-a7fa-0a8b44b5b161"
-    ],
+    "enabled_locations": ["string"],
+    "enabled_purposes": ["9eefcb98-93cf-4c5b-a040-f1d26d57c177", "5c544c09-a691-43ed-a7fa-0a8b44b5b161"],
     "created_at": "2024-01-01T12:00:00Z",
     "updated_at": "2024-01-02T12:00:00Z"
   }
@@ -1117,7 +1028,13 @@ type FileEntity = {
   _acl?: {
     view?: string[]
     edit?: string[]
-  // ...
+    delete?: string[]
+  }
+  _owners?: Array<{
+    org_id: string
+    user_id?: string
+  }>
+  __additional?: Record<string, unknown>
 }
 ```
 
@@ -1245,7 +1162,35 @@ type SaveFilePayload = {
   }>
   _tags?: string[]
   _purpose?: string[]
-  // ...
+  _manifest?: string // uuid[]
+  filename?: string
+  type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown"
+  mime_type?: string
+  size_bytes?: number
+  readable_size?: string
+  access_control?: "private" | "public-read"
+  public_url?: string // url
+  custom_download_url?: string // uri
+  source_url?: string // uri
+} | {
+  _id?: object
+  file_entity_id?: string
+  relations?: Array<{
+    entity_id: string
+    _schema?: string
+    _tags?: string[]
+  }>
+  _tags?: string[]
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  filename?: string
+  type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown"
+  mime_type?: string
+  size_bytes?: number
+  readable_size?: string
+  access_control?: "private" | "public-read"
+  public_url?: string // url
+  custom_download_url?: string // uri
 }
 ```
 
@@ -1282,7 +1227,35 @@ type SaveFilePayloadV2 = {
   }>
   _tags?: string[]
   _purpose?: string[]
-  // ...
+  _manifest?: string // uuid[]
+  filename?: string
+  type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown"
+  mime_type?: string
+  size_bytes?: number
+  readable_size?: string
+  access_control?: "private" | "public-read"
+  public_url?: string // url
+  custom_download_url?: string // uri
+  source_url?: string // uri
+} | {
+  _id?: object
+  file_entity_id?: string
+  relations?: Array<{
+    entity_id: string
+    _schema?: string
+    _tags?: string[]
+  }>
+  _tags?: string[]
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  filename?: string
+  type?: "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown"
+  mime_type?: string
+  size_bytes?: number
+  readable_size?: string
+  access_control?: "private" | "public-read"
+  public_url?: string // url
+  custom_download_url?: string // uri
 }
 ```
 

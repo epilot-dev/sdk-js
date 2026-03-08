@@ -301,7 +301,7 @@ const { data } = await client.createOrder(
         external_fees_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
-        coupon_ids: [ /* ... */ ],
+        coupon_ids: ['string'],
         taxes: [ /* ... */ ],
         recurrences: [ /* ... */ ],
         _coupons: [ /* ... */ ],
@@ -330,7 +330,7 @@ const { data } = await client.createOrder(
         external_fees_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
-        coupon_ids: [ /* ... */ ],
+        coupon_ids: ['string'],
         taxes: [ /* ... */ ],
         recurrences: [ /* ... */ ],
         _coupons: [ /* ... */ ],
@@ -346,7 +346,7 @@ const { data } = await client.createOrder(
         _product: { /* ... */ },
         is_composite_price: true,
         item_components: [ /* ... */ ],
-        selected_price_component_ids: [ /* ... */ ],
+        selected_price_component_ids: ['string'],
         price_component_coupon_ids: {},
         _price: { /* ... */ }
       }
@@ -362,7 +362,7 @@ const { data } = await client.createOrder(
     billing_phone: 'string',
     billing_address: [
       {
-        _tags: [ /* ... */ ],
+        _tags: ['billing'],
         street: 'string',
         street_number: 'string',
         postal_code: 'string',
@@ -378,7 +378,7 @@ const { data } = await client.createOrder(
     ],
     delivery_address: [
       {
-        _tags: [ /* ... */ ],
+        _tags: ['billing'],
         street: 'string',
         street_number: 'string',
         postal_code: 'string',
@@ -404,9 +404,7 @@ const { data } = await client.createOrder(
         coupons: [ /* ... */ ]
       }
     ],
-    _tags: [
-      'string'
-    ]
+    _tags: ['string']
   },
 )
 ```
@@ -499,7 +497,7 @@ const { data } = await client.createOrder(
   "delivery_address": [],
   "dates": [
     {
-      "_tags": [],
+      "_tags": ["Instalation Date"],
       "dates": "",
       "value": "2022-06-30T16:29:00.000Z"
     }
@@ -534,7 +532,7 @@ const { data } = await client.putOrder(
         external_fees_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
-        coupon_ids: [ /* ... */ ],
+        coupon_ids: ['string'],
         taxes: [ /* ... */ ],
         recurrences: [ /* ... */ ],
         _coupons: [ /* ... */ ],
@@ -563,7 +561,7 @@ const { data } = await client.putOrder(
         external_fees_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
-        coupon_ids: [ /* ... */ ],
+        coupon_ids: ['string'],
         taxes: [ /* ... */ ],
         recurrences: [ /* ... */ ],
         _coupons: [ /* ... */ ],
@@ -579,7 +577,7 @@ const { data } = await client.putOrder(
         _product: { /* ... */ },
         is_composite_price: true,
         item_components: [ /* ... */ ],
-        selected_price_component_ids: [ /* ... */ ],
+        selected_price_component_ids: ['string'],
         price_component_coupon_ids: {},
         _price: { /* ... */ }
       }
@@ -595,7 +593,7 @@ const { data } = await client.putOrder(
     billing_phone: 'string',
     billing_address: [
       {
-        _tags: [ /* ... */ ],
+        _tags: ['billing'],
         street: 'string',
         street_number: 'string',
         postal_code: 'string',
@@ -611,7 +609,7 @@ const { data } = await client.putOrder(
     ],
     delivery_address: [
       {
-        _tags: [ /* ... */ ],
+        _tags: ['billing'],
         street: 'string',
         street_number: 'string',
         postal_code: 'string',
@@ -637,9 +635,7 @@ const { data } = await client.putOrder(
         coupons: [ /* ... */ ]
       }
     ],
-    _tags: [
-      'string'
-    ]
+    _tags: ['string']
   },
 )
 ```
@@ -732,7 +728,7 @@ const { data } = await client.putOrder(
   "delivery_address": [],
   "dates": [
     {
-      "_tags": [],
+      "_tags": ["Instalation Date"],
       "dates": "",
       "value": "2022-06-30T16:29:00.000Z"
     }
@@ -764,7 +760,32 @@ const { data } = await client.$checkoutCart(
     redeemed_promos: [
       {
         code: 'string',
-        coupons: [ /* ... */ ]
+        coupons: [
+          {
+            _id: '123e4567-e89b-12d3-a456-426614174000',
+            _schema: 'coupon',
+            _org: 'org_12345',
+            _created_at: '2024-01-15T10:00:00.000Z',
+            _updated_at: '2024-01-20T12:00:00.000Z',
+            _title: 'Sample Coupon',
+            name: 'Sample Coupon',
+            type: 'fixed',
+            fixed_value: 555,
+            fixed_value_currency: 'USD',
+            fixed_value_decimal: '5.55',
+            active: true,
+            category: 'cashback',
+            prices: {
+              $relation: [
+                {
+                  entity_id: 'abc12345-def6-7890-gh12-ijklmnopqrst',
+                  _tags: ['discount', 'special'],
+                  _schema: 'price'
+                }
+              ]
+            }
+          }
+        ]
       }
     ],
     mode: 'create_order'
@@ -948,7 +969,15 @@ const { data } = await client.$validatePromoCodes(
       "fixed_value_decimal": "5.55",
       "active": true,
       "category": "cashback",
-      "prices": {}
+      "prices": {
+        "$relation": [
+          {
+            "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+            "_tags": ["discount", "special"],
+            "_schema": "price"
+          }
+        ]
+      }
     }
   ]
 }
@@ -970,9 +999,7 @@ const { data } = await client.$availabilityCheck(
     X-Ivy-Org-ID: 'example',
   },
   {
-    products: [
-      'string'
-    ],
+    products: ['string'],
     filters: {
       location: {
         street: 'string',
@@ -1131,14 +1158,24 @@ const { data } = await client.$searchExternalProducts(
       journey_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       entity_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       journey_name: 'journey name',
-      journey_tags: [
-        'string'
-      ],
+      journey_tags: ['string'],
       journey_url_params: {},
       current_step_name: 'step name',
       current_block_name: 'block name',
       steps_data: [
-        { /* ... */ }
+        {
+          step_name: 'string',
+          step_index: 0,
+          blocks: {
+            Adresse: {
+              countryCode: 'DE',
+              city: 'Koblenz',
+              zipCode: '56068',
+              streetName: 'Am Alten Hospital',
+              houseNumber: '123'
+            }
+          }
+        }
       ]
     }
   },
@@ -1180,14 +1217,24 @@ const { data } = await client.$searchExternalProductRecommendations(
       journey_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       entity_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       journey_name: 'journey name',
-      journey_tags: [
-        'string'
-      ],
+      journey_tags: ['string'],
       journey_url_params: {},
       current_step_name: 'step name',
       current_block_name: 'block name',
       steps_data: [
-        { /* ... */ }
+        {
+          step_name: 'string',
+          step_index: 0,
+          blocks: {
+            Adresse: {
+              countryCode: 'DE',
+              city: 'Koblenz',
+              zipCode: '56068',
+              streetName: 'Am Alten Hospital',
+              houseNumber: '123'
+            }
+          }
+        }
       ]
     }
   },
@@ -1438,10 +1485,7 @@ const { data } = await client.$getExternalCatalogProducts(
       journey_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       entity_id: '9e1b3346-a8df-53e1-99b4-f485745db55f',
       journey_name: 'Product Selection Journey',
-      journey_tags: [
-        'electricity',
-        'residential'
-      ],
+      journey_tags: ['electricity', 'residential'],
       journey_url_params: {
         utm_source: 'google',
         utm_campaign: 'spring2024'
@@ -1449,7 +1493,19 @@ const { data } = await client.$getExternalCatalogProducts(
       current_step_name: 'Product Selection',
       current_block_name: 'Energy Products',
       steps_data: [
-        { /* ... */ }
+        {
+          step_name: 'Address Information',
+          step_index: 0,
+          blocks: {
+            Adresse: {
+              countryCode: 'DE',
+              city: 'Koblenz',
+              zipCode: '56068',
+              streetName: 'Am Alten Hospital',
+              houseNumber: '123'
+            }
+          }
+        }
       ]
     }
   },
@@ -1495,10 +1551,7 @@ const { data } = await client.$getExternalCatalogProductRecommendations(
       journey_id: '8d0a2235-97ce-42d0-88a3-e374634ca44e',
       entity_id: '9e1b3346-a8df-53e1-99b4-f485745db55f',
       journey_name: 'Product Selection Journey',
-      journey_tags: [
-        'electricity',
-        'residential'
-      ],
+      journey_tags: ['electricity', 'residential'],
       journey_url_params: {
         utm_source: 'google',
         utm_campaign: 'spring2024'
@@ -1506,7 +1559,19 @@ const { data } = await client.$getExternalCatalogProductRecommendations(
       current_step_name: 'Product Selection',
       current_block_name: 'Energy Products',
       steps_data: [
-        { /* ... */ }
+        {
+          step_name: 'Address Information',
+          step_index: 0,
+          blocks: {
+            Adresse: {
+              countryCode: 'DE',
+              city: 'Koblenz',
+              zipCode: '56068',
+              streetName: 'Am Alten Hospital',
+              houseNumber: '123'
+            }
+          }
+        }
       ]
     }
   },
@@ -1560,9 +1625,7 @@ const { data } = await client.$productRecommendations(
     X-Ivy-Org-ID: 'example',
   },
   {
-    product_recommendation_ids: [
-      'string'
-    ],
+    product_recommendation_ids: ['string'],
     catalog_item: {
       product_id: 'string',
       price_id: 'string'
@@ -1602,12 +1665,63 @@ const { data } = await client.$productRecommendations(
       "description": "Annual internet service",
       "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
       "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
-      "taxes": [],
+      "taxes": [
+        {
+          "amount": 600,
+          "tax": {
+            "active": true,
+            "description": "Without Behaviour",
+            "rate": 6,
+            "region": "DE",
+            "type": "VAT",
+            "_created_at": "2022-02-07T14:49:08.831Z",
+            "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+            "_org": "739224",
+            "_schema": "tax",
+            "_title": "Tax Without Behaviour",
+            "_updated_at": "2022-02-07T14:49:08.831Z"
+          }
+        }
+      ],
       "unit_amount": 10000,
       "unit_amount_net": 10000,
       "pricing_model": "per_unit",
-      "_price": {},
-      "_product": {}
+      "_price": {
+        "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+        "unit_amount": 10000,
+        "unit_amount_currency": "EUR",
+        "unit_amount_decimal": "100.00",
+        "sales_tax": "standard",
+        "is_tax_inclusive": false,
+        "price_display_in_journeys": "show_price",
+        "type": "one_time",
+        "billing_period": "weekly",
+        "billing_duration_unit": "months",
+        "notice_time_unit": "months",
+        "termination_time_unit": "months",
+        "renewal_duration_unit": "months",
+        "_schema": "price",
+        "_title": "Solar Panel Module",
+        "description": "Solar Panel Module",
+        "active": true,
+        "tax": {
+          "$relation": [
+            {
+              "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+            }
+          ]
+        },
+        "_org": "728",
+        "_created_at": "2022-06-03T16:04:10.369Z",
+        "_updated_at": "2022-06-03T16:04:10.369Z",
+        "pricing_model": "per_unit"
+      },
+      "_product": {
+        "name": "Cool box",
+        "type": "product",
+        "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+        "_title": "Cool box"
+      }
     }
   ]
 }
@@ -1670,7 +1784,64 @@ type Product = {
     }>
     _schema: string
     _org: string
-  // ...
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  product_downloads?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  } | Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  price_options?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  }
+  _availability_files?: Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  _id?: string
+  _title?: string
+  _org_id?: string
+  _created_at?: string
+  _updated_at?: string
 }
 ```
 
@@ -1709,7 +1880,42 @@ type Opportunity = {
   dates?: Array<{
     _tags?: string[]
     value?: string
-  // ...
+  }>
+  billing_address?: {
+    $relation_ref?: Array<{
+      entity_id?: { ... }
+      path?: { ... }
+    }>
+  }
+  delivery_address?: {
+    $relation_ref?: Array<{
+      entity_id?: { ... }
+      path?: { ... }
+    }>
+  }
+  address?: {
+    $relation_ref?: Array<{
+      entity_id?: { ... }
+      path?: { ... }
+    }>
+  }
+  items?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  }
+  _org_id?: string
+  _id?: string
+  _created_at?: string
+  _updated_at?: string
+  source_type?: string
+  source_id?: string
+  source?: {
+    http?: string
+    title?: string
+  }
+  _tags?: string[]
 }
 ```
 
@@ -1748,6 +1954,76 @@ type Order = {
     _tags?: string[]
     street?: string
     street_number?: string
+    postal_code?: string
+    city?: string
+    country?: string
+    additional_info?: string
+    company_name?: string
+    first_name?: string
+    last_name?: string
+    salutation?: string
+    title?: string
+  }>
+  currency?: string
+  delivery_address?: Array<{
+    _tags?: string[]
+    street?: string
+    street_number?: string
+    postal_code?: string
+    city?: string
+    country?: string
+    additional_info?: string
+    company_name?: string
+    first_name?: string
+    last_name?: string
+    salutation?: string
+    title?: string
+  }>
+  payment_method?: Array<{
+    type?: string
+    details?: Record<string, unknown>
+  }>
+  line_items?: Array<{
+    metadata?: Array<{
+      key?: { ... }
+      value?: { ... }
+    }>
+    quantity?: number
+    product_id?: string
+    price_id?: string
+    description?: string
+    product_description?: string
+    product_name?: string
+    price_mappings?: Array<{
+      price_id?: { ... }
+      frequency_unit?: { ... }
+      name?: { ... }
+      value?: { ... }
+      metadata?: { ... }
+    }>
+    is_tax_inclusive?: boolean
+    _product?: {
+      description?: { ... }
+      code?: { ... }
+      type?: { ... }
+      name?: { ... }
+      categories?: { ... }
+      feature?: { ... }
+      cross_sellable_products?: { ... }
+      product_images?: { ... }
+      product_downloads?: { ... }
+      price_options?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+  } | {
+    metadata?: Array<{
+      key?: { ... }
+      value?: { ... }
   // ...
 }
 ```
@@ -1939,7 +2215,21 @@ type ExternalFeeMetadata = {
     }>
     variable_ht?: Record<string, {
       amount: { ... }
-  // ...
+      amount_decimal: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+    }>
+    variable_nt?: Record<string, {
+      amount: { ... }
+      amount_decimal: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+    }>
+  }
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
 }
 ```
 
@@ -2043,7 +2333,68 @@ type CatalogSearchResult = {
       $relation?: { ... }
     }>
     product_downloads?: {
-  // ...
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  } | {
+    billing_duration_amount?: number
+    billing_duration_unit?: "days" | "weeks" | "months" | "years"
+    notice_time_amount?: number
+    notice_time_unit?: "days" | "weeks" | "months" | "years"
+    termination_time_amount?: number
+    termination_time_unit?: "days" | "weeks" | "months" | "years"
+    renewal_duration_amount?: number
+    renewal_duration_unit?: "days" | "weeks" | "months" | "years"
+  } | {
+    _id: string // uuid
+    _title: string
+    _org: string
+    _schema: "coupon"
+    _tags?: string[]
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    name: string
+    description?: string
+    type: "fixed" | "percentage"
+    category: "discount" | "cashback"
+    percentage_value?: string
+    fixed_value?: number
+    fixed_value_decimal?: string
+    fixed_value_currency?: string
+    cashback_period?: "0" | "12"
+    active?: boolean
+    requires_promo_code?: boolean
+  }>
 }
 ```
 
@@ -2385,7 +2736,21 @@ type ComputePriceResult = {
     }>
     variable_ht?: Record<string, {
       amount: { ... }
-  // ...
+      amount_decimal: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+    }>
+    variable_nt?: Record<string, {
+      amount: { ... }
+      amount_decimal: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+    }>
+  }
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
 }
 ```
 
@@ -2656,6 +3021,76 @@ type CartDto = {
   delivery_address?: {
     _tags?: string[]
     street?: string
+    street_number?: string
+    postal_code?: string
+    city?: string
+    country?: string
+    additional_info?: string
+    company_name?: string
+    first_name?: string
+    last_name?: string
+    salutation?: string
+    title?: string
+  }
+  source_type?: string
+  source_id?: string
+  source?: {
+    http?: string
+    title?: string
+  }
+  additional_addresses?: Array<{
+    _tags?: string[]
+    street?: string
+    street_number?: string
+    postal_code?: string
+    city?: string
+    country?: string
+    additional_info?: string
+    company_name?: string
+    first_name?: string
+    last_name?: string
+    salutation?: string
+    title?: string
+  }>
+  payment_method?: {
+    type?: string
+    details?: Record<string, unknown>
+  }
+  line_items: Array<{
+    external_fees_mappings?: Array<{
+      price_id?: { ... }
+      frequency_unit?: { ... }
+      amount_total?: { ... }
+      amount_total_decimal?: { ... }
+    }>
+    external_fees_metadata?: {
+      amount_total: { ... }
+      amount_total_decimal: { ... }
+      amount_static?: { ... }
+      amount_static_decimal?: { ... }
+      amount_variable_ht?: { ... }
+      amount_variable_decimal_ht?: { ... }
+      unit_amount_variable_ht?: { ... }
+      unit_amount_variable_decimal_ht?: { ... }
+      amount_variable_nt?: { ... }
+      amount_variable_decimal_nt?: { ... }
+      unit_amount_variable_nt?: { ... }
+      unit_amount_variable_decimal_nt?: { ... }
+      currency: { ... }
+      billing_period: { ... }
+      breakdown: { ... }
+      _meta?: { ... }
+    }
+    external_price_metadata?: {
+      market: { ... }
+      bidding_zone: { ... }
+      price: { ... }
+      _meta?: { ... }
+    }
+    _immutable_pricing_details?: {
+      items?: { ... }
+      amount_subtotal?: { ... }
+      amount_total?: { ... }
   // ...
 }
 ```
@@ -2695,6 +3130,76 @@ type CheckoutCart = {
     }
     delivery_address?: {
       _tags?: { ... }
+      street?: { ... }
+      street_number?: { ... }
+      postal_code?: { ... }
+      city?: { ... }
+      country?: { ... }
+      additional_info?: { ... }
+      company_name?: { ... }
+      first_name?: { ... }
+      last_name?: { ... }
+      salutation?: { ... }
+      title?: { ... }
+    }
+    source_type?: string
+    source_id?: string
+    source?: {
+      http?: { ... }
+      title?: { ... }
+    }
+    additional_addresses?: Array<{
+      _tags?: { ... }
+      street?: { ... }
+      street_number?: { ... }
+      postal_code?: { ... }
+      city?: { ... }
+      country?: { ... }
+      additional_info?: { ... }
+      company_name?: { ... }
+      first_name?: { ... }
+      last_name?: { ... }
+      salutation?: { ... }
+      title?: { ... }
+    }>
+    payment_method?: {
+      type?: { ... }
+      details?: { ... }
+    }
+    line_items: Array<{
+      external_fees_mappings?: { ... }
+      external_fees_metadata?: { ... }
+      external_price_metadata?: { ... }
+      _immutable_pricing_details?: { ... }
+      coupon_ids?: { ... }
+      taxes?: { ... }
+      recurrences?: { ... }
+      _coupons?: { ... }
+      type?: { ... }
+      billing_period?: { ... }
+      unit_amount?: { ... }
+      unit_amount_gross?: { ... }
+      unit_amount_currency?: { ... }
+      unit_amount_decimal?: { ... }
+      is_composite_price?: { ... }
+      pricing_model?: { ... }
+      _price?: { ... }
+    } | {
+      external_fees_mappings?: { ... }
+      external_fees_metadata?: { ... }
+      external_price_metadata?: { ... }
+      _immutable_pricing_details?: { ... }
+      coupon_ids?: { ... }
+      taxes?: { ... }
+      recurrences?: { ... }
+      _coupons?: { ... }
+      is_composite_price: { ... }
+      item_components?: { ... }
+      selected_price_component_ids?: { ... }
+      price_component_coupon_ids?: { ... }
+      _price?: { ... }
+    }>
+    files?: string[]
   // ...
 }
 ```
@@ -2734,6 +3239,76 @@ type CheckoutCartResult = {
       street_number?: { ... }
       postal_code?: { ... }
       city?: { ... }
+      country?: { ... }
+      additional_info?: { ... }
+      company_name?: { ... }
+      first_name?: { ... }
+      last_name?: { ... }
+      salutation?: { ... }
+      title?: { ... }
+    }>
+    currency?: string
+    delivery_address?: Array<{
+      _tags?: { ... }
+      street?: { ... }
+      street_number?: { ... }
+      postal_code?: { ... }
+      city?: { ... }
+      country?: { ... }
+      additional_info?: { ... }
+      company_name?: { ... }
+      first_name?: { ... }
+      last_name?: { ... }
+      salutation?: { ... }
+      title?: { ... }
+    }>
+    payment_method?: Array<{
+      type?: { ... }
+      details?: { ... }
+    }>
+    line_items?: Array<{
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    } | {
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    }>
+    products?: {
+      $relation?: { ... }
+    }
+    prices?: {
+      $relation?: { ... }
+    }
+    coupons?: {
+      $relation?: { ... }
+    }
+    amount_subtotal?: number
+    amount_total?: number
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    _org_id?: string
+    _id?: string
+    _created_at?: string
+    _updated_at?: string
   // ...
 }
 ```
@@ -2794,7 +3369,57 @@ type BasePriceItemCommon = {
       feature?: { ... }
     }>
     cross_sellable_products?: {
-  // ...
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
 }
 ```
 
@@ -2831,6 +3456,76 @@ type PriceItemDtoUnion = {
     }
     _meta?: {
       signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  external_price_metadata?: {
+    market: "day_ahead"
+    bidding_zone: "AT" | "DE-LU"
+    price: {
+      unit_amount: { ... }
+      unit_amount_decimal: { ... }
+      unit_amount_currency: { ... }
+      timestamp: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  _immutable_pricing_details?: {
+    items?: Array<{
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    } | {
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    }>
+    amount_subtotal?: number
+    amount_total?: number
+    unit_amount_gross?: number
+    unit_amount_net?: number
+    amount_tax?: number
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    currency?: string
+    redeemed_promos?: Array<{
+      code: { ... }
+      coupons: { ... }
+    }>
+  }
+  coupon_ids?: string[]
+  taxes?: Array<{
+    rate?: string
+    tax?: {
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      type: { ... }
+      description?: { ... }
   // ...
 }
 ```
@@ -2870,6 +3565,76 @@ type PriceItemsDto = Array<{
     }
     _meta?: {
       signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  external_price_metadata?: {
+    market: "day_ahead"
+    bidding_zone: "AT" | "DE-LU"
+    price: {
+      unit_amount: { ... }
+      unit_amount_decimal: { ... }
+      unit_amount_currency: { ... }
+      timestamp: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  _immutable_pricing_details?: {
+    items?: Array<{
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    } | {
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    }>
+    amount_subtotal?: number
+    amount_total?: number
+    unit_amount_gross?: number
+    unit_amount_net?: number
+    amount_tax?: number
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    currency?: string
+    redeemed_promos?: Array<{
+      code: { ... }
+      coupons: { ... }
+    }>
+  }
+  coupon_ids?: string[]
+  taxes?: Array<{
+    rate?: string
+    tax?: {
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      type: { ... }
+      description?: { ... }
   // ...
 }
 ```
@@ -2909,7 +3674,57 @@ type BasePriceItemDto = {
       feature?: { ... }
     }>
     cross_sellable_products?: {
-  // ...
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
 }
 ```
 
@@ -2948,6 +3763,76 @@ type PriceItemDto = {
     }
     _meta?: {
       signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  external_price_metadata?: {
+    market: "day_ahead"
+    bidding_zone: "AT" | "DE-LU"
+    price: {
+      unit_amount: { ... }
+      unit_amount_decimal: { ... }
+      unit_amount_currency: { ... }
+      timestamp: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  _immutable_pricing_details?: {
+    items?: Array<{
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    } | {
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    }>
+    amount_subtotal?: number
+    amount_total?: number
+    unit_amount_gross?: number
+    unit_amount_net?: number
+    amount_tax?: number
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    currency?: string
+    redeemed_promos?: Array<{
+      code: { ... }
+      coupons: { ... }
+    }>
+  }
+  coupon_ids?: string[]
+  taxes?: Array<{
+    rate?: string
+    tax?: {
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      type: { ... }
+      description?: { ... }
   // ...
 }
 ```
@@ -2987,6 +3872,76 @@ type CompositePriceItemDto = {
     }
     _meta?: {
       signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  external_price_metadata?: {
+    market: "day_ahead"
+    bidding_zone: "AT" | "DE-LU"
+    price: {
+      unit_amount: { ... }
+      unit_amount_decimal: { ... }
+      unit_amount_currency: { ... }
+      timestamp: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
+  _immutable_pricing_details?: {
+    items?: Array<{
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    } | {
+      metadata?: { ... }
+      quantity?: { ... }
+      product_id?: { ... }
+      price_id?: { ... }
+      description?: { ... }
+      product_description?: { ... }
+      product_name?: { ... }
+      price_mappings?: { ... }
+      is_tax_inclusive?: { ... }
+      _product?: { ... }
+    }>
+    amount_subtotal?: number
+    amount_total?: number
+    unit_amount_gross?: number
+    unit_amount_net?: number
+    amount_tax?: number
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    currency?: string
+    redeemed_promos?: Array<{
+      code: { ... }
+      coupons: { ... }
+    }>
+  }
+  coupon_ids?: string[]
+  taxes?: Array<{
+    rate?: string
+    tax?: {
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      type: { ... }
+      description?: { ... }
   // ...
 }
 ```
@@ -3119,6 +4074,76 @@ type OrderPayload = {
     external_price_metadata?: {
       market: { ... }
       bidding_zone: { ... }
+      price: { ... }
+      _meta?: { ... }
+    }
+    _immutable_pricing_details?: {
+      items?: { ... }
+      amount_subtotal?: { ... }
+      amount_total?: { ... }
+      unit_amount_gross?: { ... }
+      unit_amount_net?: { ... }
+      amount_tax?: { ... }
+      total_details?: { ... }
+      currency?: { ... }
+      redeemed_promos?: { ... }
+    }
+    coupon_ids?: string[]
+    taxes?: Array<{
+      rate?: { ... }
+      tax?: { ... }
+    }>
+    recurrences?: Array<{
+      amount_subtotal?: { ... }
+      amount_subtotal_decimal?: { ... }
+      amount_total?: { ... }
+      amount_total_decimal?: { ... }
+      cashback_amount?: { ... }
+      cashback_amount_decimal?: { ... }
+      cashback_period?: { ... }
+      after_cashback_amount_total?: { ... }
+      after_cashback_amount_total_decimal?: { ... }
+      discount_amount?: { ... }
+      discount_amount_decimal?: { ... }
+      discount_percentage?: { ... }
+      before_discount_amount_total?: { ... }
+      before_discount_amount_total_decimal?: { ... }
+      before_discount_amount_subtotal?: { ... }
+      before_discount_amount_subtotal_decimal?: { ... }
+    }>
+    _coupons?: Array<{
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      name: { ... }
+      description?: { ... }
+      type: { ... }
+      category: { ... }
+      percentage_value?: { ... }
+      fixed_value?: { ... }
+      fixed_value_decimal?: { ... }
+      fixed_value_currency?: { ... }
+      cashback_period?: { ... }
+      active?: { ... }
+      requires_promo_code?: { ... }
+    }>
+    type?: "one_time" | "recurring"
+    billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly"
+    unit_amount?: number
+    unit_amount_gross?: number
+    unit_amount_currency?: string
+    unit_amount_decimal?: string
+    is_composite_price?: false
+    pricing_model?: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag"
+    _price?: {
+      billing_duration_amount?: { ... }
+      billing_duration_unit?: { ... }
+      notice_time_amount?: { ... }
+      notice_time_unit?: { ... }
   // ...
 }
 ```
@@ -3158,6 +4183,76 @@ type PriceItems = Array<{
       feature?: { ... }
     }>
     cross_sellable_products?: {
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
+} | {
+  metadata?: Array<{
+    key?: string
+    value?: string
+  }>
+  quantity?: number
+  product_id?: string
+  price_id?: string
+  description?: string
+  product_description?: string
+  product_name?: string
+  price_mappings?: Array<{
+    price_id?: string
+    frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time"
+    name?: string
+    value?: number
+    metadata?: Record<string, string>
+  }>
+  is_tax_inclusive?: boolean
   // ...
 }
 ```
@@ -3197,7 +4292,57 @@ type CompositePriceItem = {
       feature?: { ... }
     }>
     cross_sellable_products?: {
-  // ...
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
 }
 ```
 
@@ -3236,7 +4381,57 @@ type BasePriceItem = {
       feature?: { ... }
     }>
     cross_sellable_products?: {
-  // ...
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
 }
 ```
 
@@ -3335,7 +4530,57 @@ type PriceItem = {
       feature?: { ... }
     }>
     cross_sellable_products?: {
-  // ...
+      $relation?: { ... }
+    }
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    price_options?: {
+      $relation?: { ... }
+    }
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    _id?: string
+    _title?: string
+    _org_id?: string
+    _created_at?: string
+    _updated_at?: string
+  }
 }
 ```
 
@@ -3478,7 +4723,17 @@ type TotalDetails = {
     }>
     cashbacks?: Array<{
       cashback_period: { ... }
-  // ...
+      amount_total: { ... }
+    }>
+    recurrencesByTax?: Array<{
+      type?: { ... }
+      billing_period?: { ... }
+      amount_total: { ... }
+      amount_subtotal: { ... }
+      amount_tax?: { ... }
+      tax?: { ... }
+    }>
+  }
 }
 ```
 
@@ -3517,6 +4772,76 @@ type PricingDetails = {
       cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
+      price_options?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+  } | {
+    metadata?: Array<{
+      key?: { ... }
+      value?: { ... }
+    }>
+    quantity?: number
+    product_id?: string
+    price_id?: string
+    description?: string
+    product_description?: string
+    product_name?: string
+    price_mappings?: Array<{
+      price_id?: { ... }
+      frequency_unit?: { ... }
+      name?: { ... }
+      value?: { ... }
+      metadata?: { ... }
+    }>
+    is_tax_inclusive?: boolean
+    _product?: {
+      description?: { ... }
+      code?: { ... }
+      type?: { ... }
+      name?: { ... }
+      categories?: { ... }
+      feature?: { ... }
+      cross_sellable_products?: { ... }
+      product_images?: { ... }
+      product_downloads?: { ... }
+      price_options?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+  }>
+  amount_subtotal?: number
+  amount_total?: number
+  unit_amount_gross?: number
+  unit_amount_net?: number
+  amount_tax?: number
+  total_details?: {
+    amount_shipping?: number
+    amount_tax?: number
+    breakdown?: {
+      taxes?: { ... }
+      recurrences?: { ... }
+      cashbacks?: { ... }
+      recurrencesByTax?: { ... }
+    }
+  }
+  currency?: string
+  redeemed_promos?: Array<{
+    code: string
+    coupons: Array<{
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
   // ...
 }
 ```
@@ -3585,6 +4910,76 @@ type PricingDetailsResponse = {
       cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
+      price_options?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+  } | {
+    metadata?: Array<{
+      key?: { ... }
+      value?: { ... }
+    }>
+    quantity?: number
+    product_id?: string
+    price_id?: string
+    description?: string
+    product_description?: string
+    product_name?: string
+    price_mappings?: Array<{
+      price_id?: { ... }
+      frequency_unit?: { ... }
+      name?: { ... }
+      value?: { ... }
+      metadata?: { ... }
+    }>
+    is_tax_inclusive?: boolean
+    _product?: {
+      description?: { ... }
+      code?: { ... }
+      type?: { ... }
+      name?: { ... }
+      categories?: { ... }
+      feature?: { ... }
+      cross_sellable_products?: { ... }
+      product_images?: { ... }
+      product_downloads?: { ... }
+      price_options?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+  }>
+  amount_subtotal?: number
+  amount_total?: number
+  unit_amount_gross?: number
+  unit_amount_net?: number
+  amount_tax?: number
+  total_details?: {
+    amount_shipping?: number
+    amount_tax?: number
+    breakdown?: {
+      taxes?: { ... }
+      recurrences?: { ... }
+      cashbacks?: { ... }
+      recurrencesByTax?: { ... }
+    }
+  }
+  currency?: string
+  redeemed_promos?: Array<{
+    code: string
+    coupons: Array<{
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
   // ...
 }
 ```
@@ -4009,7 +5404,15 @@ type PriceGetAg = {
   additional_markups?: Record<string, {
     amount_decimal: string
     amount: number
-  // ...
+    amount_net?: number
+    amount_net_decimal?: string
+    amount_gross?: number
+    amount_gross_decimal?: string
+  }>
+  unit_amount_gross: number
+  unit_amount_gross_decimal?: string
+  unit_amount_net: number
+  unit_amount_net_decimal?: string
 }
 ```
 
@@ -4157,7 +5560,45 @@ type ExternalCatalogPortalRequest = {
       billing_duration_unit?: { ... }
       notice_time_amount?: { ... }
       notice_time_unit?: { ... }
-  // ...
+      termination_time_amount?: { ... }
+      termination_time_unit?: { ... }
+      renewal_duration_amount?: { ... }
+      renewal_duration_unit?: { ... }
+      billing_due_day?: { ... }
+      installment_amount?: { ... }
+      balance?: { ... }
+      meters?: { ... }
+      payment?: { ... }
+      last_sync_at?: { ... }
+      external_id?: { ... }
+    }
+    contact: {
+      _id?: { ... }
+      salutation?: { ... }
+      title?: { ... }
+      first_name?: { ... }
+      last_name?: { ... }
+      customer_number?: { ... }
+      birthdate?: { ... }
+      email?: { ... }
+      phone?: { ... }
+      communication_preference?: { ... }
+      address?: { ... }
+      payment?: { ... }
+      account?: { ... }
+      marketing_permission?: { ... }
+      contact_owner?: { ... }
+      consent_email_marketing?: { ... }
+      consent_sms_marketing?: { ... }
+      consent_phone_call?: { ... }
+      consent_print_marketing?: { ... }
+      portal_users?: { ... }
+      opportunities?: { ... }
+      orders?: { ... }
+      contracts?: { ... }
+      external_id?: { ... }
+    }
+  }
 }
 ```
 
@@ -4232,7 +5673,63 @@ type PortalContext = {
     notice_time_unit?: "weeks" | "months" | "years"
     termination_time_amount?: number
     termination_time_unit?: "weeks" | "months" | "years"
-  // ...
+    renewal_duration_amount?: number
+    renewal_duration_unit?: "weeks" | "months" | "years"
+    billing_due_day?: number
+    installment_amount?: {
+      value?: { ... }
+      currency?: { ... }
+    }
+    balance?: {
+      value?: { ... }
+      currency?: { ... }
+    }
+    meters?: string[]
+    payment?: string
+    last_sync_at?: string // date
+    external_id?: string
+  }
+  contact: {
+    _id?: string
+    salutation?: "Mr." | "Ms. / Mrs." | "Company" | "Contact Person" | "Company/Contact Person" | "Spouse" | "Family" | "Ownership" | "Assembly" | "Other"
+    title?: "Dr." | "Prof." | "Prof. Dr."
+    first_name?: string
+    last_name?: string
+    customer_number?: string
+    birthdate?: string // date
+    email?: Array<{
+      email?: { ... }
+      _primary?: { ... }
+    }>
+    phone?: Array<{
+      phone?: { ... }
+      _primary?: { ... }
+    }>
+    communication_preference?: "postal" | "portal"
+    address?: Array<{
+      _primary?: { ... }
+      postal_code?: { ... }
+      city?: { ... }
+      street?: { ... }
+      street_number?: { ... }
+      country?: { ... }
+    }>
+    payment?: Array<{
+      _primary?: { ... }
+    }>
+    account?: string[]
+    marketing_permission?: boolean
+    contact_owner?: string
+    consent_email_marketing?: object
+    consent_sms_marketing?: object
+    consent_phone_call?: object
+    consent_print_marketing?: object
+    portal_users?: string[]
+    opportunities?: string[]
+    orders?: string[]
+    contracts?: string[]
+    external_id?: string
+  }
 }
 ```
 
@@ -4294,7 +5791,11 @@ type SearchExternalCatalogRecommendationsResult = {
       currency?: { ... }
       redeemed_promos?: { ... }
     }
-  // ...
+    _meta: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }>
 }
 ```
 
@@ -4333,7 +5834,21 @@ type ExternalCatalogItem = {
     unit_amount_gross?: number
     unit_amount_net?: number
     amount_tax?: number
-  // ...
+    total_details?: {
+      amount_shipping?: { ... }
+      amount_tax?: { ... }
+      breakdown?: { ... }
+    }
+    currency?: string
+    redeemed_promos?: Array<{
+      code: { ... }
+      coupons: { ... }
+    }>
+  }
+  _meta: {
+    signature: string
+    timestamp: number
+  }
 }
 ```
 

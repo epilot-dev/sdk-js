@@ -281,7 +281,7 @@ const { data } = await client.listSchemas({
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "enable_setting": [],
+      "enable_setting": ["360_features"],
       "name": "Contact",
       "plural": "Contacts",
       "description": "Example description",
@@ -297,7 +297,7 @@ const { data } = await client.listSchemas({
       "layout_settings": {},
       "dialog_config": {},
       "attributes": [],
-      "_purpose": [],
+      "_purpose": ["string"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -339,9 +339,7 @@ const { data } = await client.getSchema({
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "feature_flag": "FF_MY_FEATURE_FLAG",
-  "enable_setting": [
-    "360_features"
-  ],
+  "enable_setting": ["360_features"],
   "name": "Contact",
   "plural": "Contacts",
   "description": "Example description",
@@ -354,8 +352,8 @@ const { data } = await client.getSchema({
   "ui_config": {
     "table_view": {
       "view_type": "default",
-      "row_actions": [],
-      "bulk_actions": [],
+      "row_actions": ["string"],
+      "bulk_actions": ["string"],
       "navbar_actions": [],
       "enable_thumbnails": false
     },
@@ -366,12 +364,12 @@ const { data } = await client.getSchema({
     "edit_view": {
       "view_type": "default",
       "search_params": {},
-      "summary_attributes": []
+      "summary_attributes": ["email"]
     },
     "single_view": {
       "view_type": "default",
       "search_params": {},
-      "summary_attributes": []
+      "summary_attributes": ["email"]
     },
     "list_item": {
       "summary_attributes": [],
@@ -388,8 +386,8 @@ const { data } = await client.getSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
       "ui_config": {},
       "ui_hooks": [],
@@ -430,9 +428,7 @@ const { data } = await client.getSchema({
       "label": "First Name"
     }
   ],
-  "_purpose": [
-    "string"
-  ],
+  "_purpose": ["string"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -450,8 +446,8 @@ const { data } = await client.getSchema({
       "type": "headline",
       "enable_divider": false,
       "divider": "top_divider",
-      "_purpose": [],
-      "_manifest": []
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -478,9 +474,7 @@ const { data } = await client.putSchema(
     version: 1,
     blueprint: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     feature_flag: 'FF_MY_FEATURE_FLAG',
-    enable_setting: [
-      '360_features'
-    ],
+    enable_setting: ['360_features'],
     name: 'Contact',
     plural: 'Contacts',
     description: 'Example description',
@@ -493,8 +487,8 @@ const { data } = await client.putSchema(
     ui_config: {
       table_view: {
         view_type: 'default',
-        row_actions: [ /* ... */ ],
-        bulk_actions: [ /* ... */ ],
+        row_actions: ['string'],
+        bulk_actions: ['string'],
         navbar_actions: [ /* ... */ ],
         enable_thumbnails: false
       },
@@ -505,12 +499,12 @@ const { data } = await client.putSchema(
       edit_view: {
         view_type: 'default',
         search_params: {},
-        summary_attributes: [ /* ... */ ]
+        summary_attributes: ['email']
       },
       single_view: {
         view_type: 'default',
         search_params: {},
-        summary_attributes: [ /* ... */ ]
+        summary_attributes: ['email']
       },
       list_item: {
         summary_attributes: [ /* ... */ ],
@@ -527,8 +521,8 @@ const { data } = await client.putSchema(
         name: 'customer_messaging',
         title: 'Messaging',
         attributes: [ /* ... */ ],
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
         ui_config: { /* ... */ },
         ui_hooks: [ /* ... */ ],
@@ -570,9 +564,7 @@ const { data } = await client.putSchema(
       },
       /* ... 5 more */
     ],
-    _purpose: [
-      'string'
-    ],
+    _purpose: ['string'],
     explicit_search_mappings: {
       image: {
         type: 'keyword',
@@ -590,8 +582,8 @@ const { data } = await client.putSchema(
         type: 'headline',
         enable_divider: false,
         divider: 'top_divider',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ]
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000']
       }
     ]
   },
@@ -615,9 +607,7 @@ const { data } = await client.putSchema(
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "feature_flag": "FF_MY_FEATURE_FLAG",
-  "enable_setting": [
-    "360_features"
-  ],
+  "enable_setting": ["360_features"],
   "name": "Contact",
   "plural": "Contacts",
   "description": "Example description",
@@ -630,8 +620,8 @@ const { data } = await client.putSchema(
   "ui_config": {
     "table_view": {
       "view_type": "default",
-      "row_actions": [],
-      "bulk_actions": [],
+      "row_actions": ["string"],
+      "bulk_actions": ["string"],
       "navbar_actions": [],
       "enable_thumbnails": false
     },
@@ -642,12 +632,12 @@ const { data } = await client.putSchema(
     "edit_view": {
       "view_type": "default",
       "search_params": {},
-      "summary_attributes": []
+      "summary_attributes": ["email"]
     },
     "single_view": {
       "view_type": "default",
       "search_params": {},
-      "summary_attributes": []
+      "summary_attributes": ["email"]
     },
     "list_item": {
       "summary_attributes": [],
@@ -664,8 +654,8 @@ const { data } = await client.putSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
       "ui_config": {},
       "ui_hooks": [],
@@ -706,9 +696,7 @@ const { data } = await client.putSchema(
       "label": "First Name"
     }
   ],
-  "_purpose": [
-    "string"
-  ],
+  "_purpose": ["string"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -726,8 +714,8 @@ const { data } = await client.putSchema(
       "type": "headline",
       "enable_divider": false,
       "divider": "top_divider",
-      "_purpose": [],
-      "_manifest": []
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -825,12 +813,12 @@ const { data } = await client.getJsonSchema({
     "title": {
       "type": "string",
       "nullable": true,
-      "enum": []
+      "enum": ["Dr.", "Prof.", "Prof. Dr.", null]
     },
     "salutation": {
       "type": "string",
       "nullable": true,
-      "enum": []
+      "enum": ["Mr.", "Ms. / Mrs.", "Company", "Contact Person", "Company/Contact Person", "Spouse", "Family", "Ownership", "Assembly", "Other", null]
     },
     "first_name": {
       "type": "string"
@@ -871,19 +859,7 @@ const { data } = await client.getJsonSchema({
       "items": {}
     }
   },
-  "required": [
-    "first_name",
-    "last_name",
-    "_id",
-    "_org",
-    "_owners",
-    "_schema",
-    "_title",
-    "_tags",
-    "_created_at",
-    "_updated_at",
-    "_acl"
-  ]
+  "required": ["first_name", "last_name", "_id", "_org", "_owners", "_schema", "_title", "_tags", "_created_at", "_updated_at", "_acl"]
 }
 ```
 
@@ -947,7 +923,7 @@ const { data } = await client.getSchemaVersions({
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "enable_setting": [],
+      "enable_setting": ["360_features"],
       "name": "Contact",
       "plural": "Contacts",
       "description": "Example description",
@@ -963,7 +939,7 @@ const { data } = await client.getSchemaVersions({
       "layout_settings": {},
       "dialog_config": {},
       "attributes": [],
-      "_purpose": [],
+      "_purpose": ["string"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -979,7 +955,7 @@ const { data } = await client.getSchemaVersions({
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "enable_setting": [],
+      "enable_setting": ["360_features"],
       "name": "Contact",
       "plural": "Contacts",
       "description": "Example description",
@@ -995,7 +971,7 @@ const { data } = await client.getSchemaVersions({
       "layout_settings": {},
       "dialog_config": {},
       "attributes": [],
-      "_purpose": [],
+      "_purpose": ["string"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1032,8 +1008,8 @@ const { data } = await client.listAvailableCapabilities({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
       "ui_config": {},
       "ui_hooks": [],
@@ -1074,7 +1050,7 @@ const { data } = await client.listSchemaBlueprints()
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "enable_setting": [],
+      "enable_setting": ["360_features"],
       "name": "Contact",
       "plural": "Contacts",
       "description": "Example description",
@@ -1090,7 +1066,7 @@ const { data } = await client.listSchemaBlueprints()
       "layout_settings": {},
       "dialog_config": {},
       "attributes": [],
-      "_purpose": [],
+      "_purpose": ["string"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1118,26 +1094,19 @@ const { data } = await client.searchEntities(
     from: 0,
     size: 10,
     hydrate: false,
-    fields: [
-      '_id',
-      '_title',
-      'first_name',
-      'account',
-      '!account.*._files',
-      '**._product'
-    ],
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
-        terms: { /* ... */ }
+        terms: {
+          field: '_tags.keyword'
+        }
       }
     },
     include_deleted: 'false',
     highlight: {},
     stable_for: 0,
     stable_query_id: 'string',
-    search_after: [
-      'string'
-    ]
+    search_after: ['string']
   },
 )
 ```
@@ -1152,27 +1121,42 @@ const { data } = await client.searchEntities(
     {
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_org": "123",
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "123",
+          "user_id": "123"
+        }
+      ],
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_acl": {},
-      "_manifest": []
+      "_acl": {
+        "view": ["org:456", "org:789"],
+        "edit": ["org:456"],
+        "delete": ["org:456"]
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "aggregations": {
     "contact-count-per-tag": {
       "doc_count_error_upper_bound": 0,
       "sum_other_doc_count": 23,
-      "buckets": []
+      "buckets": [
+        {
+          "key": "automation",
+          "doc_count": 108
+        },
+        {
+          "key": "primary",
+          "doc_count": 66
+        }
+      ]
     }
   },
   "stable_query_id": "string",
-  "sort_end": [
-    1747905443332,
-    "0.000023312468"
-  ]
+  "sort_end": [1747905443332, "0.000023312468"]
 }
 ```
 
@@ -1193,17 +1177,21 @@ const { data } = await client.listEntities(
     query: {
       query_string: {
         query: 'status:active',
-        fields: [ /* ... */ ],
+        fields: ['_title', '_tags', 'status'],
         default_operator: 'OR',
         lenient: true
       }
     },
     filter: [
       {
-        term: { /* ... */ }
+        term: {
+          _schema: 'contact'
+        }
       },
       {
-        terms: { /* ... */ }
+        terms: {
+          status: ['active']
+        }
       }
     ],
     allow_targeting_all_schemas: false,
@@ -1211,17 +1199,12 @@ const { data } = await client.listEntities(
     from: 0,
     size: 10,
     hydrate: false,
-    fields: [
-      '_id',
-      '_title',
-      'first_name',
-      'account',
-      '!account.*._files',
-      '**._product'
-    ],
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
-        terms: { /* ... */ }
+        terms: {
+          field: '_tags.keyword'
+        }
       }
     },
     include_deleted: 'false',
@@ -1229,9 +1212,7 @@ const { data } = await client.listEntities(
     highlight: {},
     stable_for: 0,
     stable_query_id: 'string',
-    search_after: [
-      'string'
-    ]
+    search_after: ['string']
   },
 )
 ```
@@ -1246,27 +1227,42 @@ const { data } = await client.listEntities(
     {
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_org": "123",
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "123",
+          "user_id": "123"
+        }
+      ],
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_acl": {},
-      "_manifest": []
+      "_acl": {
+        "view": ["org:456", "org:789"],
+        "edit": ["org:456"],
+        "delete": ["org:456"]
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "aggregations": {
     "contact-count-per-tag": {
       "doc_count_error_upper_bound": 0,
       "sum_other_doc_count": 23,
-      "buckets": []
+      "buckets": [
+        {
+          "key": "automation",
+          "doc_count": 108
+        },
+        {
+          "key": "primary",
+          "doc_count": 66
+        }
+      ]
     }
   },
   "stable_query_id": "string",
-  "sort_end": [
-    1747905443332,
-    "0.000023312468"
-  ]
+  "sort_end": [1747905443332, "0.000023312468"]
 }
 ```
 
@@ -1290,13 +1286,27 @@ const { data } = await client.queryEntityGraph(
     },
     graph: {
       nodes: [
-        { /* ... */ },
-        { /* ... */ },
+        {
+          id: 'portal_user',
+          schema: 'portal_user',
+          cardinality: 'one'
+        },
+        {
+          id: 'contact',
+          schema: 'contact',
+          cardinality: 'one'
+        },
         /* ... 1 more */
       ],
       edges: [
-        { /* ... */ },
-        { /* ... */ }
+        {
+          from: 'portal_user',
+          to: 'contact'
+        },
+        {
+          from: 'contact',
+          to: 'billing_accounts'
+        }
       ]
     },
     hydrate: false
@@ -1310,16 +1320,9 @@ const { data } = await client.queryEntityGraph(
 ```json
 {
   "nodes": {
-    "portal_user": [
-      "550e8400-e29b-41d4-a716-446655440001"
-    ],
-    "contact": [
-      "550e8400-e29b-41d4-a716-446655440002"
-    ],
-    "billing_accounts": [
-      "550e8400-e29b-41d4-a716-446655440003",
-      "550e8400-e29b-41d4-a716-446655440004"
-    ]
+    "portal_user": ["550e8400-e29b-41d4-a716-446655440001"],
+    "contact": ["550e8400-e29b-41d4-a716-446655440002"],
+    "billing_accounts": ["550e8400-e29b-41d4-a716-446655440003", "550e8400-e29b-41d4-a716-446655440004"]
   },
   "entityNodes": {
     "portal_user": {
@@ -1331,8 +1334,14 @@ const { data } = await client.queryEntityGraph(
       "_schema": "contact"
     },
     "billing_accounts": [
-      {},
-      {}
+      {
+        "_id": "550e8400-e29b-41d4-a716-446655440003",
+        "_schema": "billing_account"
+      },
+      {
+        "_id": "550e8400-e29b-41d4-a716-446655440004",
+        "_schema": "billing_account"
+      }
     ]
   },
   "edges": [
@@ -1377,27 +1386,15 @@ const { data } = await client.createEntity(
       }
     ],
     _schema: 'contact',
-    _tags: [
-      'example',
-      'mock'
-    ],
+    _tags: ['example', 'mock'],
     _created_at: '2021-02-09T12:41:43.662Z',
     _updated_at: '2021-02-09T12:41:43.662Z',
     _acl: {
-      view: [
-        'org:456',
-        'org:789'
-      ],
-      edit: [
-        'org:456'
-      ],
-      delete: [
-        'org:456'
-      ]
+      view: ['org:456', 'org:789'],
+      edit: ['org:456'],
+      delete: ['org:456']
     },
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1416,27 +1413,15 @@ const { data } = await client.createEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1465,27 +1450,15 @@ const { data } = await client.validateEntity(
       }
     ],
     _schema: 'contact',
-    _tags: [
-      'example',
-      'mock'
-    ],
+    _tags: ['example', 'mock'],
     _created_at: '2021-02-09T12:41:43.662Z',
     _updated_at: '2021-02-09T12:41:43.662Z',
     _acl: {
-      view: [
-        'org:456',
-        'org:789'
-      ],
-      edit: [
-        'org:456'
-      ],
-      delete: [
-        'org:456'
-      ]
+      view: ['org:456', 'org:789'],
+      edit: ['org:456'],
+      delete: ['org:456']
     },
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1499,8 +1472,10 @@ const { data } = await client.validateEntity(
   "errors": [
     {
       "code": "custom",
-      "params": {},
-      "path": [],
+      "params": {
+        "type": "missing_field"
+      },
+      "path": ["first_name"],
       "message": "Invalid input"
     }
   ]
@@ -1532,27 +1507,15 @@ const { data } = await client.validateEntityV2(
       }
     ],
     _schema: 'contact',
-    _tags: [
-      'example',
-      'mock'
-    ],
+    _tags: ['example', 'mock'],
     _created_at: '2021-02-09T12:41:43.662Z',
     _updated_at: '2021-02-09T12:41:43.662Z',
     _acl: {
-      view: [
-        'org:456',
-        'org:789'
-      ],
-      edit: [
-        'org:456'
-      ],
-      delete: [
-        'org:456'
-      ]
+      view: ['org:456', 'org:789'],
+      edit: ['org:456'],
+      delete: ['org:456']
     },
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1601,30 +1564,26 @@ const { data } = await client.upsertEntity(
     strict: true,
   },
   {
-    unique_key: [
-      '_id'
-    ],
+    unique_key: ['_id'],
     entity: {
       _id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       _org: '123',
       _owners: [
-        { /* ... */ }
+        {
+          org_id: '123',
+          user_id: '123'
+        }
       ],
       _schema: 'contact',
-      _tags: [
-        'example',
-        'mock'
-      ],
+      _tags: ['example', 'mock'],
       _created_at: '2021-02-09T12:41:43.662Z',
       _updated_at: '2021-02-09T12:41:43.662Z',
       _acl: {
-        view: [ /* ... */ ],
-        edit: [ /* ... */ ],
-        delete: [ /* ... */ ]
+        view: ['org:456', 'org:789'],
+        edit: ['org:456'],
+        delete: ['org:456']
       },
-      _manifest: [
-        '123e4567-e89b-12d3-a456-426614174000'
-      ]
+      _manifest: ['123e4567-e89b-12d3-a456-426614174000']
     }
   },
 )
@@ -1644,27 +1603,15 @@ const { data } = await client.upsertEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1701,27 +1648,15 @@ const { data } = await client.getEntityV2({
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1760,27 +1695,15 @@ const { data } = await client.restoreEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1818,27 +1741,15 @@ const { data } = await client.reindexEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1869,35 +1780,42 @@ const { data } = await client.getEntity({
     "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "_org": "123",
     "_owners": [
-      {}
+      {
+        "org_id": "123",
+        "user_id": "123"
+      }
     ],
     "_schema": "contact",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_acl": {
-      "view": [],
-      "edit": [],
-      "delete": []
+      "view": ["org:456", "org:789"],
+      "edit": ["org:456"],
+      "delete": ["org:456"]
     },
-    "_manifest": [
-      "123e4567-e89b-12d3-a456-426614174000"
-    ]
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
   },
   "relations": [
     {
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_org": "123",
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "123",
+          "user_id": "123"
+        }
+      ],
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_acl": {},
-      "_manifest": []
+      "_acl": {
+        "view": ["org:456", "org:789"],
+        "edit": ["org:456"],
+        "delete": ["org:456"]
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -1933,27 +1851,15 @@ const { data } = await client.updateEntity(
       }
     ],
     _schema: 'contact',
-    _tags: [
-      'example',
-      'mock'
-    ],
+    _tags: ['example', 'mock'],
     _created_at: '2021-02-09T12:41:43.662Z',
     _updated_at: '2021-02-09T12:41:43.662Z',
     _acl: {
-      view: [
-        'org:456',
-        'org:789'
-      ],
-      edit: [
-        'org:456'
-      ],
-      delete: [
-        'org:456'
-      ]
+      view: ['org:456', 'org:789'],
+      edit: ['org:456'],
+      delete: ['org:456']
     },
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1972,27 +1878,15 @@ const { data } = await client.updateEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -2027,27 +1921,15 @@ const { data } = await client.patchEntity(
       }
     ],
     _schema: 'contact',
-    _tags: [
-      'example',
-      'mock'
-    ],
+    _tags: ['example', 'mock'],
     _created_at: '2021-02-09T12:41:43.662Z',
     _updated_at: '2021-02-09T12:41:43.662Z',
     _acl: {
-      view: [
-        'org:456',
-        'org:789'
-      ],
-      edit: [
-        'org:456'
-      ],
-      delete: [
-        'org:456'
-      ]
+      view: ['org:456', 'org:789'],
+      edit: ['org:456'],
+      delete: ['org:456']
     },
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -2066,27 +1948,15 @@ const { data } = await client.patchEntity(
     }
   ],
   "_schema": "contact",
-  "_tags": [
-    "example",
-    "mock"
-  ],
+  "_tags": ["example", "mock"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-09T12:41:43.662Z",
   "_acl": {
-    "view": [
-      "org:456",
-      "org:789"
-    ],
-    "edit": [
-      "org:456"
-    ],
-    "delete": [
-      "org:456"
-    ]
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -2132,9 +2002,7 @@ const { data } = await client.autocomplete({
 ```json
 {
   "hits": 1,
-  "results": [
-    "value"
-  ]
+  "results": ["value"]
 }
 ```
 
@@ -2152,9 +2020,7 @@ Creates a request to queue the deletion of all entities in the system. This is a
 const { data } = await client.wipeAllEntities(
   null,
   {
-    schemas: [
-      'contact'
-    ]
+    schemas: ['contact']
   },
 )
 ```
@@ -2206,7 +2072,23 @@ const { data } = await client.createActivity(
   "pending": false,
   "caller": {
     "EpilotAuth": {
-      "token": {}
+      "token": {
+        "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+        "cognito:groups": ["Administrator"],
+        "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+        "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+        "custom:ivy_org_id": "739224",
+        "cognito:username": "n.ahmad@epilot.cloud",
+        "custom:ivy_user_id": "10006129",
+        "cognito:roles": ["arn:aws:iam::912468240823:role/base-administrator-role"],
+        "aud": "6e0jbdnger7nmoktaaflarue1l",
+        "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+        "token_use": "id",
+        "auth_time": 1614333023,
+        "exp": 1614336623,
+        "iat": 1614333023,
+        "email": "n.ahmad@epilot.cloud"
+      }
     }
   }
 }
@@ -2304,7 +2186,23 @@ const { data } = await client.attachActivity({
   "pending": false,
   "caller": {
     "EpilotAuth": {
-      "token": {}
+      "token": {
+        "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+        "cognito:groups": ["Administrator"],
+        "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+        "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+        "custom:ivy_org_id": "739224",
+        "cognito:username": "n.ahmad@epilot.cloud",
+        "custom:ivy_user_id": "10006129",
+        "cognito:roles": ["arn:aws:iam::912468240823:role/base-administrator-role"],
+        "aud": "6e0jbdnger7nmoktaaflarue1l",
+        "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+        "token_use": "id",
+        "auth_time": 1614333023,
+        "exp": 1614336623,
+        "iat": 1614333023,
+        "email": "n.ahmad@epilot.cloud"
+      }
     }
   }
 }
@@ -2393,32 +2291,28 @@ const { data } = await client.getRelations({
     "org_id": "string",
     "_schema": "contact",
     "attribute": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "reverse": true
   },
   {
     "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "_org": "123",
     "_owners": [
-      {}
+      {
+        "org_id": "123",
+        "user_id": "123"
+      }
     ],
     "_schema": "contact",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_acl": {
-      "view": [],
-      "edit": [],
-      "delete": []
+      "view": ["org:456", "org:789"],
+      "edit": ["org:456"],
+      "delete": ["org:456"]
     },
-    "_manifest": [
-      "123e4567-e89b-12d3-a456-426614174000"
-    ]
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
   }
 ]
 ```
@@ -2447,9 +2341,7 @@ const { data } = await client.addRelations(
       org_id: 'string',
       _schema: 'contact',
       attribute: 'string',
-      _tags: [
-        'string'
-      ],
+      _tags: ['string'],
       reverse: true
     }
   ],
@@ -2465,9 +2357,7 @@ const { data } = await client.addRelations(
   "org_id": "string",
   "_schema": "contact",
   "attribute": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "reverse": true
 }
 ```
@@ -2496,9 +2386,7 @@ const { data } = await client.removeRelations(
       org_id: 'string',
       _schema: 'contact',
       attribute: 'string',
-      _tags: [
-        'string'
-      ],
+      _tags: ['string'],
       reverse: true
     }
   ],
@@ -2538,19 +2426,28 @@ const { data } = await client.getRelationsV2({
       "org_id": "string",
       "_schema": "contact",
       "attribute": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "reverse": true
     },
     {
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_org": "123",
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "123",
+          "user_id": "123"
+        }
+      ],
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_acl": {},
-      "_manifest": []
+      "_acl": {
+        "view": ["org:456", "org:789"],
+        "edit": ["org:456"],
+        "delete": ["org:456"]
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -2594,19 +2491,28 @@ const { data } = await client.getRelationsV3({
       "org_id": "string",
       "_schema": "contact",
       "attribute": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "reverse": true
     },
     {
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_org": "123",
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "123",
+          "user_id": "123"
+        }
+      ],
       "_schema": "contact",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_acl": {},
-      "_manifest": []
+      "_acl": {
+        "view": ["org:456", "org:789"],
+        "edit": ["org:456"],
+        "delete": ["org:456"]
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -2660,9 +2566,7 @@ const { data } = await client.updateRelation(
     activity_id: 'example',
   },
   {
-    _tags: [
-      'string'
-    ]
+    _tags: ['string']
   },
 )
 ```
@@ -2676,9 +2580,7 @@ const { data } = await client.updateRelation(
   "org_id": "string",
   "_schema": "contact",
   "attribute": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "reverse": true
 }
 ```
@@ -2727,26 +2629,19 @@ const { data } = await client.exportEntities(
     from: 0,
     size: 10,
     hydrate: false,
-    fields: [
-      '_id',
-      '_title',
-      'first_name',
-      'account',
-      '!account.*._files',
-      '**._product'
-    ],
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
-        terms: { /* ... */ }
+        terms: {
+          field: '_tags.keyword'
+        }
       }
     },
     include_deleted: 'false',
     highlight: {},
     stable_for: 0,
     stable_query_id: 'string',
-    search_after: [
-      'string'
-    ]
+    search_after: ['string']
   },
 )
 ```
@@ -2803,14 +2698,29 @@ const { data } = await client.listSavedViews({
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "created_at": "string",
       "updated_at": "string",
-      "slug": [],
+      "slug": ["contact"],
       "name": "View listing German",
       "org": "66",
       "shared": true,
-      "isFavoritedBy": [],
-      "created_by": {},
-      "ui_config": {},
-      "shared_with": []
+      "isFavoritedBy": ["11701"],
+      "created_by": {
+        "user_id": "10598"
+      },
+      "ui_config": {
+        "filters": {
+          "customer_name": "suresh test",
+          "_tags": "360"
+        },
+        "table_layout": {
+          "opportunity": {
+            "page": 1,
+            "sort": "_created_at:desc",
+            "pageSize": 25,
+            "columnSettings": []
+          }
+        }
+      },
+      "shared_with": ["112233"]
     }
   ]
 }
@@ -2830,15 +2740,11 @@ Creates a new saved view
 const { data } = await client.createSavedView(
   null,
   {
-    slug: [
-      'contact'
-    ],
+    slug: ['contact'],
     name: 'View listing German',
     org: '66',
     shared: true,
-    isFavoritedBy: [
-      '11701'
-    ],
+    isFavoritedBy: ['11701'],
     created_by: {
       user_id: '10598'
     },
@@ -2848,12 +2754,15 @@ const { data } = await client.createSavedView(
         _tags: '360'
       },
       table_layout: {
-        opportunity: { /* ... */ }
+        opportunity: {
+          page: 1,
+          sort: '_created_at:desc',
+          pageSize: 25,
+          columnSettings: []
+        }
       }
     },
-    shared_with: [
-      '112233'
-    ]
+    shared_with: ['112233']
   },
 )
 ```
@@ -2866,15 +2775,11 @@ const { data } = await client.createSavedView(
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "created_at": "string",
   "updated_at": "string",
-  "slug": [
-    "contact"
-  ],
+  "slug": ["contact"],
   "name": "View listing German",
   "org": "66",
   "shared": true,
-  "isFavoritedBy": [
-    "11701"
-  ],
+  "isFavoritedBy": ["11701"],
   "created_by": {
     "user_id": "10598"
   },
@@ -2884,12 +2789,15 @@ const { data } = await client.createSavedView(
       "_tags": "360"
     },
     "table_layout": {
-      "opportunity": {}
+      "opportunity": {
+        "page": 1,
+        "sort": "_created_at:desc",
+        "pageSize": 25,
+        "columnSettings": []
+      }
     }
   },
-  "shared_with": [
-    "112233"
-  ]
+  "shared_with": ["112233"]
 }
 ```
 
@@ -2917,15 +2825,11 @@ const { data } = await client.getSavedView({
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "created_at": "string",
   "updated_at": "string",
-  "slug": [
-    "contact"
-  ],
+  "slug": ["contact"],
   "name": "View listing German",
   "org": "66",
   "shared": true,
-  "isFavoritedBy": [
-    "11701"
-  ],
+  "isFavoritedBy": ["11701"],
   "created_by": {
     "user_id": "10598"
   },
@@ -2935,12 +2839,15 @@ const { data } = await client.getSavedView({
       "_tags": "360"
     },
     "table_layout": {
-      "opportunity": {}
+      "opportunity": {
+        "page": 1,
+        "sort": "_created_at:desc",
+        "pageSize": 25,
+        "columnSettings": []
+      }
     }
   },
-  "shared_with": [
-    "112233"
-  ]
+  "shared_with": ["112233"]
 }
 ```
 
@@ -2963,15 +2870,11 @@ const { data } = await client.updateSavedView(
     id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     created_at: 'string',
     updated_at: 'string',
-    slug: [
-      'contact'
-    ],
+    slug: ['contact'],
     name: 'View listing German',
     org: '66',
     shared: true,
-    isFavoritedBy: [
-      '11701'
-    ],
+    isFavoritedBy: ['11701'],
     created_by: {
       user_id: '10598'
     },
@@ -2981,12 +2884,15 @@ const { data } = await client.updateSavedView(
         _tags: '360'
       },
       table_layout: {
-        opportunity: { /* ... */ }
+        opportunity: {
+          page: 1,
+          sort: '_created_at:desc',
+          pageSize: 25,
+          columnSettings: []
+        }
       }
     },
-    shared_with: [
-      '112233'
-    ]
+    shared_with: ['112233']
   },
 )
 ```
@@ -2999,15 +2905,11 @@ const { data } = await client.updateSavedView(
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "created_at": "string",
   "updated_at": "string",
-  "slug": [
-    "contact"
-  ],
+  "slug": ["contact"],
   "name": "View listing German",
   "org": "66",
   "shared": true,
-  "isFavoritedBy": [
-    "11701"
-  ],
+  "isFavoritedBy": ["11701"],
   "created_by": {
     "user_id": "10598"
   },
@@ -3017,12 +2919,15 @@ const { data } = await client.updateSavedView(
       "_tags": "360"
     },
     "table_layout": {
-      "opportunity": {}
+      "opportunity": {
+        "page": 1,
+        "sort": "_created_at:desc",
+        "pageSize": 25,
+        "columnSettings": []
+      }
     }
   },
-  "shared_with": [
-    "112233"
-  ]
+  "shared_with": ["112233"]
 }
 ```
 
@@ -3042,15 +2947,11 @@ const { data } = await client.patchSavedView(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    slug: [
-      'contact'
-    ],
+    slug: ['contact'],
     name: 'View listing German',
     org: '66',
     shared: true,
-    isFavoritedBy: [
-      '11701'
-    ],
+    isFavoritedBy: ['11701'],
     created_by: {
       user_id: '10598'
     },
@@ -3060,12 +2961,15 @@ const { data } = await client.patchSavedView(
         _tags: '360'
       },
       table_layout: {
-        opportunity: { /* ... */ }
+        opportunity: {
+          page: 1,
+          sort: '_created_at:desc',
+          pageSize: 25,
+          columnSettings: []
+        }
       }
     },
-    shared_with: [
-      '112233'
-    ]
+    shared_with: ['112233']
   },
 )
 ```
@@ -3078,15 +2982,11 @@ const { data } = await client.patchSavedView(
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "created_at": "string",
   "updated_at": "string",
-  "slug": [
-    "contact"
-  ],
+  "slug": ["contact"],
   "name": "View listing German",
   "org": "66",
   "shared": true,
-  "isFavoritedBy": [
-    "11701"
-  ],
+  "isFavoritedBy": ["11701"],
   "created_by": {
     "user_id": "10598"
   },
@@ -3096,12 +2996,15 @@ const { data } = await client.patchSavedView(
       "_tags": "360"
     },
     "table_layout": {
-      "opportunity": {}
+      "opportunity": {
+        "page": 1,
+        "sort": "_created_at:desc",
+        "pageSize": 25,
+        "columnSettings": []
+      }
     }
   },
-  "shared_with": [
-    "112233"
-  ]
+  "shared_with": ["112233"]
 }
 ```
 
@@ -3143,14 +3046,29 @@ const { data } = await client.listFavoriteViewsForUser()
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "created_at": "string",
       "updated_at": "string",
-      "slug": [],
+      "slug": ["contact"],
       "name": "View listing German",
       "org": "66",
       "shared": true,
-      "isFavoritedBy": [],
-      "created_by": {},
-      "ui_config": {},
-      "shared_with": []
+      "isFavoritedBy": ["11701"],
+      "created_by": {
+        "user_id": "10598"
+      },
+      "ui_config": {
+        "filters": {
+          "customer_name": "suresh test",
+          "_tags": "360"
+        },
+        "table_layout": {
+          "opportunity": {
+            "page": 1,
+            "sort": "_created_at:desc",
+            "pageSize": 25,
+            "columnSettings": []
+          }
+        }
+      },
+      "shared_with": ["112233"]
     }
   ]
 }
@@ -3193,7 +3111,7 @@ const { data } = await client.listTaxonomies({
       "created_by": "10598",
       "enabled": true,
       "order": 10,
-      "enabled_locations": []
+      "enabled_locations": ["account", "string"]
     }
   ]
 }
@@ -3226,10 +3144,7 @@ const { data } = await client.createTaxonomy(
     created_by: '10598',
     enabled: true,
     order: 10,
-    enabled_locations: [
-      'account',
-      'string'
-    ]
+    enabled_locations: ['account', 'string']
   },
 )
 ```
@@ -3252,10 +3167,7 @@ const { data } = await client.createTaxonomy(
   "created_by": "10598",
   "enabled": true,
   "order": 10,
-  "enabled_locations": [
-    "account",
-    "string"
-  ]
+  "enabled_locations": ["account", "string"]
 }
 ```
 
@@ -3293,10 +3205,7 @@ const { data } = await client.getTaxonomy({
   "created_by": "10598",
   "enabled": true,
   "order": 10,
-  "enabled_locations": [
-    "account",
-    "string"
-  ]
+  "enabled_locations": ["account", "string"]
 }
 ```
 
@@ -3329,10 +3238,7 @@ const { data } = await client.updateTaxonomy(
     created_by: '10598',
     enabled: true,
     order: 10,
-    enabled_locations: [
-      'account',
-      'string'
-    ]
+    enabled_locations: ['account', 'string']
   },
 )
 ```
@@ -3355,10 +3261,7 @@ const { data } = await client.updateTaxonomy(
   "created_by": "10598",
   "enabled": true,
   "order": 10,
-  "enabled_locations": [
-    "account",
-    "string"
-  ]
+  "enabled_locations": ["account", "string"]
 }
 ```
 
@@ -3398,15 +3301,15 @@ const { data } = await client.updateClassificationsForTaxonomy(
         id: 'taxonomy-slug:classification-slug',
         slug: 'wallbox-pv',
         name: 'Wallbox PV',
-        parents: [ /* ... */ ],
+        parents: ['taxonomy-slug:classification-slug'],
         color: '#FF5733',
         created_at: '1970-01-01T00:00:00.000Z',
         updated_at: '1970-01-01T00:00:00.000Z',
         archived: false,
         starred: false,
-        enabled_locations: [ /* ... */ ],
-        enabled_purposes: [ /* ... */ ],
-        _manifest: [ /* ... */ ]
+        enabled_locations: ['account', 'string'],
+        enabled_purposes: ['string'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000']
       }
     ],
     update: [
@@ -3414,21 +3317,18 @@ const { data } = await client.updateClassificationsForTaxonomy(
         id: 'taxonomy-slug:classification-slug',
         slug: 'wallbox-pv',
         name: 'Wallbox PV',
-        parents: [ /* ... */ ],
+        parents: ['taxonomy-slug:classification-slug'],
         color: '#FF5733',
         created_at: '1970-01-01T00:00:00.000Z',
         updated_at: '1970-01-01T00:00:00.000Z',
         archived: false,
         starred: false,
-        enabled_locations: [ /* ... */ ],
-        enabled_purposes: [ /* ... */ ],
-        _manifest: [ /* ... */ ]
+        enabled_locations: ['account', 'string'],
+        enabled_purposes: ['string'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000']
       }
     ],
-    delete: [
-      'taxonomy-slug:classification-slug',
-      'taxonomy-slug:classification-slug'
-    ]
+    delete: ['taxonomy-slug:classification-slug', 'taxonomy-slug:classification-slug']
   },
 )
 ```
@@ -3443,15 +3343,15 @@ const { data } = await client.updateClassificationsForTaxonomy(
       "id": "taxonomy-slug:classification-slug",
       "slug": "wallbox-pv",
       "name": "Wallbox PV",
-      "parents": [],
+      "parents": ["taxonomy-slug:classification-slug"],
       "color": "#FF5733",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "archived": false,
       "starred": false,
-      "enabled_locations": [],
-      "enabled_purposes": [],
-      "_manifest": []
+      "enabled_locations": ["account", "string"],
+      "enabled_purposes": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "updated": [
@@ -3459,15 +3359,15 @@ const { data } = await client.updateClassificationsForTaxonomy(
       "id": "taxonomy-slug:classification-slug",
       "slug": "wallbox-pv",
       "name": "Wallbox PV",
-      "parents": [],
+      "parents": ["taxonomy-slug:classification-slug"],
       "color": "#FF5733",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "archived": false,
       "starred": false,
-      "enabled_locations": [],
-      "enabled_purposes": [],
-      "_manifest": []
+      "enabled_locations": ["account", "string"],
+      "enabled_purposes": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "deleted": {}
@@ -3491,24 +3391,15 @@ const { data } = await client.createTaxonomyClassification(
     id: 'taxonomy-slug:classification-slug',
     slug: 'wallbox-pv',
     name: 'Wallbox PV',
-    parents: [
-      'taxonomy-slug:classification-slug'
-    ],
+    parents: ['taxonomy-slug:classification-slug'],
     color: '#FF5733',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     archived: false,
     starred: false,
-    enabled_locations: [
-      'account',
-      'string'
-    ],
-    enabled_purposes: [
-      'string'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    enabled_locations: ['account', 'string'],
+    enabled_purposes: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -3521,24 +3412,15 @@ const { data } = await client.createTaxonomyClassification(
   "id": "taxonomy-slug:classification-slug",
   "slug": "wallbox-pv",
   "name": "Wallbox PV",
-  "parents": [
-    "taxonomy-slug:classification-slug"
-  ],
+  "parents": ["taxonomy-slug:classification-slug"],
   "color": "#FF5733",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "archived": false,
   "starred": false,
-  "enabled_locations": [
-    "account",
-    "string"
-  ],
-  "enabled_purposes": [
-    "string"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "enabled_locations": ["account", "string"],
+  "enabled_purposes": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -3566,24 +3448,15 @@ const { data } = await client.getTaxonomyClassification({
   "id": "taxonomy-slug:classification-slug",
   "slug": "wallbox-pv",
   "name": "Wallbox PV",
-  "parents": [
-    "taxonomy-slug:classification-slug"
-  ],
+  "parents": ["taxonomy-slug:classification-slug"],
   "color": "#FF5733",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "archived": false,
   "starred": false,
-  "enabled_locations": [
-    "account",
-    "string"
-  ],
-  "enabled_purposes": [
-    "string"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "enabled_locations": ["account", "string"],
+  "enabled_purposes": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -3606,24 +3479,15 @@ const { data } = await client.updateTaxonomyClassification(
     id: 'taxonomy-slug:classification-slug',
     slug: 'wallbox-pv',
     name: 'Wallbox PV',
-    parents: [
-      'taxonomy-slug:classification-slug'
-    ],
+    parents: ['taxonomy-slug:classification-slug'],
     color: '#FF5733',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     archived: false,
     starred: false,
-    enabled_locations: [
-      'account',
-      'string'
-    ],
-    enabled_purposes: [
-      'string'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    enabled_locations: ['account', 'string'],
+    enabled_purposes: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -3636,24 +3500,15 @@ const { data } = await client.updateTaxonomyClassification(
   "id": "taxonomy-slug:classification-slug",
   "slug": "wallbox-pv",
   "name": "Wallbox PV",
-  "parents": [
-    "taxonomy-slug:classification-slug"
-  ],
+  "parents": ["taxonomy-slug:classification-slug"],
   "color": "#FF5733",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "archived": false,
   "starred": false,
-  "enabled_locations": [
-    "account",
-    "string"
-  ],
-  "enabled_purposes": [
-    "string"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "enabled_locations": ["account", "string"],
+  "enabled_purposes": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -3681,24 +3536,15 @@ const { data } = await client.deleteTaxonomyClassification({
   "id": "taxonomy-slug:classification-slug",
   "slug": "wallbox-pv",
   "name": "Wallbox PV",
-  "parents": [
-    "taxonomy-slug:classification-slug"
-  ],
+  "parents": ["taxonomy-slug:classification-slug"],
   "color": "#FF5733",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "archived": false,
   "starred": false,
-  "enabled_locations": [
-    "account",
-    "string"
-  ],
-  "enabled_purposes": [
-    "string"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "enabled_locations": ["account", "string"],
+  "enabled_purposes": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -3730,15 +3576,15 @@ const { data } = await client.taxonomyAutocomplete({
       "id": "taxonomy-slug:classification-slug",
       "slug": "wallbox-pv",
       "name": "Wallbox PV",
-      "parents": [],
+      "parents": ["taxonomy-slug:classification-slug"],
       "color": "#FF5733",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "archived": false,
       "starred": false,
-      "enabled_locations": [],
-      "enabled_purposes": [],
-      "_manifest": []
+      "enabled_locations": ["account", "string"],
+      "enabled_purposes": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -3783,15 +3629,15 @@ const { data } = await client.taxonomiesClassificationsSearch(
       "id": "taxonomy-slug:classification-slug",
       "slug": "wallbox-pv",
       "name": "Wallbox PV",
-      "parents": [],
+      "parents": ["taxonomy-slug:classification-slug"],
       "color": "#FF5733",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "archived": false,
       "starred": false,
-      "enabled_locations": [],
-      "enabled_purposes": [],
-      "_manifest": []
+      "enabled_locations": ["account", "string"],
+      "enabled_purposes": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "hits": 10
@@ -3827,15 +3673,15 @@ const { data } = await client.listTaxonomyClassificationsForSchema({
       "id": "taxonomy-slug:classification-slug",
       "slug": "wallbox-pv",
       "name": "Wallbox PV",
-      "parents": [],
+      "parents": ["taxonomy-slug:classification-slug"],
       "color": "#FF5733",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "archived": false,
       "starred": false,
-      "enabled_locations": [],
-      "enabled_purposes": [],
-      "_manifest": []
+      "enabled_locations": ["account", "string"],
+      "enabled_purposes": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ]
 }
@@ -3848,7 +3694,7 @@ const { data } = await client.listTaxonomyClassificationsForSchema({
 ### `getTaxonomyBulkActionJobs`
 
 Gets bulk actions jobs by job status:
-- <undefined> = all active jobs
+- ``<undefined>`` = all active jobs
 - PENDING = all active jobs
 - FAILED = all failed jobs
 - COMPLETED = all completed jobs
@@ -3962,9 +3808,7 @@ const { data } = await client.bulkMoveClassifications(
   {
     job_id: 'string',
     target_taxonomy: 'purpose',
-    classification_ids: [
-      'taxonomy-slug:classification-slug'
-    ]
+    classification_ids: ['taxonomy-slug:classification-slug']
   },
 )
 ```
@@ -3996,9 +3840,7 @@ const { data } = await client.bulkMergeClassifications(
   {
     job_id: 'string',
     target_classification: 'purpose',
-    classification_ids: [
-      'taxonomy-slug:classification-slug'
-    ]
+    classification_ids: ['taxonomy-slug:classification-slug']
   },
 )
 ```
@@ -4030,9 +3872,7 @@ const { data } = await client.bulkDeleteClassifications(
   null,
   {
     job_id: 'string',
-    classification_ids: [
-      'taxonomy-slug:classification-slug'
-    ]
+    classification_ids: ['taxonomy-slug:classification-slug']
   },
 )
 ```
@@ -4078,12 +3918,8 @@ const { data } = await client.createSchemaAttribute(
     hide_label: true,
     icon: 'string',
     render_condition: 'string',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     constraints: {
       disablePast: true
     },
@@ -4138,12 +3974,8 @@ const { data } = await client.createSchemaAttribute(
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
     "disablePast": true
   },
@@ -4213,12 +4045,8 @@ const { data } = await client.getSchemaAttribute({
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
     "disablePast": true
   },
@@ -4283,12 +4111,8 @@ const { data } = await client.putSchemaAttribute(
     hide_label: true,
     icon: 'string',
     render_condition: 'string',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     constraints: {
       disablePast: true
     },
@@ -4343,12 +4167,8 @@ const { data } = await client.putSchemaAttribute(
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
     "disablePast": true
   },
@@ -4418,12 +4238,8 @@ const { data } = await client.deleteSchemaAttribute({
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
     "disablePast": true
   },
@@ -4491,8 +4307,8 @@ const { data } = await client.createSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
         feature_flag: 'FF_MY_FEATURE_FLAG',
         settings_flag: [ /* ... */ ],
@@ -4528,8 +4344,8 @@ const { data } = await client.createSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
         feature_flag: 'FF_MY_FEATURE_FLAG',
         settings_flag: [ /* ... */ ],
@@ -4546,12 +4362,8 @@ const { data } = await client.createSchemaCapability(
       },
       /* ... 32 more */
     ],
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
     ui_config: {
       is_filterable: true
@@ -4612,8 +4424,8 @@ const { data } = await client.createSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -4649,8 +4461,8 @@ const { data } = await client.createSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -4666,12 +4478,8 @@ const { data } = await client.createSchemaCapability(
       "type": "link"
     }
   ],
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
   "ui_config": {
     "is_filterable": true
@@ -4747,8 +4555,8 @@ const { data } = await client.getSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -4784,8 +4592,8 @@ const { data } = await client.getSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -4801,12 +4609,8 @@ const { data } = await client.getSchemaCapability({
       "type": "link"
     }
   ],
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
   "ui_config": {
     "is_filterable": true
@@ -4877,8 +4681,8 @@ const { data } = await client.putSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
         feature_flag: 'FF_MY_FEATURE_FLAG',
         settings_flag: [ /* ... */ ],
@@ -4914,8 +4718,8 @@ const { data } = await client.putSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
-        _purpose: [ /* ... */ ],
-        _manifest: [ /* ... */ ],
+        _purpose: ['taxonomy-slug:classification-slug'],
+        _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
         feature_flag: 'FF_MY_FEATURE_FLAG',
         settings_flag: [ /* ... */ ],
@@ -4932,12 +4736,8 @@ const { data } = await client.putSchemaCapability(
       },
       /* ... 32 more */
     ],
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
     ui_config: {
       is_filterable: true
@@ -4998,8 +4798,8 @@ const { data } = await client.putSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -5035,8 +4835,8 @@ const { data } = await client.putSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -5052,12 +4852,8 @@ const { data } = await client.putSchemaCapability(
       "type": "link"
     }
   ],
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
   "ui_config": {
     "is_filterable": true
@@ -5133,8 +4929,8 @@ const { data } = await client.deleteSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -5170,8 +4966,8 @@ const { data } = await client.deleteSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
-      "_purpose": [],
-      "_manifest": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
       "feature_flag": "FF_MY_FEATURE_FLAG",
       "settings_flag": [],
@@ -5187,12 +4983,8 @@ const { data } = await client.deleteSchemaCapability({
       "type": "link"
     }
   ],
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
   "ui_config": {
     "is_filterable": true
@@ -5244,12 +5036,8 @@ const { data } = await client.createSchemaGroup(
     order: 0,
     expanded: false,
     render_condition: '_is_composite_price = "false"',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     feature_flag: 'FF_MY_FEATURE_FLAG',
     settings_flag: [
       {
@@ -5277,12 +5065,8 @@ const { data } = await client.createSchemaGroup(
   "order": 0,
   "expanded": false,
   "render_condition": "_is_composite_price = \"false\"",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "feature_flag": "FF_MY_FEATURE_FLAG",
   "settings_flag": [
     {
@@ -5325,12 +5109,8 @@ const { data } = await client.getSchemaGroup({
   "order": 0,
   "expanded": false,
   "render_condition": "_is_composite_price = \"false\"",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "feature_flag": "FF_MY_FEATURE_FLAG",
   "settings_flag": [
     {
@@ -5368,12 +5148,8 @@ const { data } = await client.putSchemaGroup(
     order: 0,
     expanded: false,
     render_condition: '_is_composite_price = "false"',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     feature_flag: 'FF_MY_FEATURE_FLAG',
     settings_flag: [
       {
@@ -5401,12 +5177,8 @@ const { data } = await client.putSchemaGroup(
   "order": 0,
   "expanded": false,
   "render_condition": "_is_composite_price = \"false\"",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "feature_flag": "FF_MY_FEATURE_FLAG",
   "settings_flag": [
     {
@@ -5449,12 +5221,8 @@ const { data } = await client.deleteSchemaGroup({
   "order": 0,
   "expanded": false,
   "render_condition": "_is_composite_price = \"false\"",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "feature_flag": "FF_MY_FEATURE_FLAG",
   "settings_flag": [
     {
@@ -5494,12 +5262,8 @@ const { data } = await client.createSchemaGroupHeadline(
     type: 'headline',
     enable_divider: false,
     divider: 'top_divider',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     composite_id: 'contact:97644baa-083f-4e49-9188-fcff2ecaad7d',
     schema: 'contact'
   },
@@ -5520,12 +5284,8 @@ const { data } = await client.createSchemaGroupHeadline(
   "type": "headline",
   "enable_divider": false,
   "divider": "top_divider",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -5561,12 +5321,8 @@ const { data } = await client.getSchemaGroupHeadline({
   "type": "headline",
   "enable_divider": false,
   "divider": "top_divider",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -5597,12 +5353,8 @@ const { data } = await client.putSchemaGroupHeadline(
     type: 'headline',
     enable_divider: false,
     divider: 'top_divider',
-    _purpose: [
-      'taxonomy-slug:classification-slug'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ],
+    _purpose: ['taxonomy-slug:classification-slug'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     composite_id: 'contact:97644baa-083f-4e49-9188-fcff2ecaad7d',
     schema: 'contact'
   },
@@ -5623,12 +5375,8 @@ const { data } = await client.putSchemaGroupHeadline(
   "type": "headline",
   "enable_divider": false,
   "divider": "top_divider",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -5664,12 +5412,8 @@ const { data } = await client.deleteSchemaGroupHeadline({
   "type": "headline",
   "enable_divider": false,
   "divider": "top_divider",
-  "_purpose": [
-    "taxonomy-slug:classification-slug"
-  ],
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_purpose": ["taxonomy-slug:classification-slug"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -5748,6 +5492,76 @@ type EntitySchema = {
     }
     create_view?: {
       view_type?: { ... }
+      search_params?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    edit_view?: {
+      view_type?: { ... }
+      search_params?: { ... }
+      summary_attributes?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    single_view?: {
+      view_type?: { ... }
+      search_params?: { ... }
+      summary_attributes?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    list_item?: {
+      summary_attributes?: { ... }
+      quick_actions?: { ... }
+      ui_config?: { ... }
+    }
+    sharing?: {
+      show_sharing_button?: { ... }
+    }
+  }
+  capabilities: Array<{
+    id?: string
+    name: string
+    title?: string
+    attributes?: Array<{
+      id?: { ... }
+      name: { ... }
+      label: { ... }
+      placeholder?: { ... }
+      hidden?: { ... }
+      show_in_table?: { ... }
+      sortable?: { ... }
+      required?: { ... }
+      readonly?: { ... }
+      deprecated?: { ... }
+      default_value?: { ... }
+      group?: { ... }
+      order?: { ... }
+      layout?: { ... }
+      hide_label?: { ... }
+      icon?: { ... }
+      render_condition?: { ... }
+      _purpose?: { ... }
+      _manifest?: { ... }
+      constraints?: { ... }
+      feature_flag?: { ... }
+      settings_flag?: { ... }
+      value_formatter?: { ... }
+      preview_value_formatter?: { ... }
+      entity_builder_disable_edit?: { ... }
+      protected?: { ... }
+      info_helpers?: { ... }
+      explicit_searchable?: { ... }
+      exclude_from_search?: { ... }
   // ...
 }
 ```
@@ -5785,6 +5599,76 @@ type EntitySchemaItem = {
       bulk_actions?: { ... }
       navbar_actions?: { ... }
       enable_thumbnails?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    create_view?: {
+      view_type?: { ... }
+      search_params?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    edit_view?: {
+      view_type?: { ... }
+      search_params?: { ... }
+      summary_attributes?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    single_view?: {
+      view_type?: { ... }
+      search_params?: { ... }
+      summary_attributes?: { ... }
+    } | {
+      view_type?: { ... }
+      route?: { ... }
+    } | {
+      view_type?: { ... }
+    }
+    list_item?: {
+      summary_attributes?: { ... }
+      quick_actions?: { ... }
+      ui_config?: { ... }
+    }
+    sharing?: {
+      show_sharing_button?: { ... }
+    }
+  }
+  capabilities: Array<{
+    id?: string
+    name: string
+    title?: string
+    attributes?: Array<{
+      id?: { ... }
+      name: { ... }
+      label: { ... }
+      placeholder?: { ... }
+      hidden?: { ... }
+      show_in_table?: { ... }
+      sortable?: { ... }
+      required?: { ... }
+      readonly?: { ... }
+      deprecated?: { ... }
+      default_value?: { ... }
+      group?: { ... }
+      order?: { ... }
+      layout?: { ... }
+      hide_label?: { ... }
+      icon?: { ... }
+      render_condition?: { ... }
+      _purpose?: { ... }
+      _manifest?: { ... }
+      constraints?: { ... }
+      feature_flag?: { ... }
   // ...
 }
 ```
@@ -5946,6 +5830,76 @@ type Attribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "string"
+  multiline?: boolean
+  rich_text?: boolean
+  rows?: number | string
+} | {
+  id?: string
+  name: string
+  label: string
+  placeholder?: string
+  hidden?: boolean
+  show_in_table?: boolean
+  sortable?: boolean
+  required?: boolean
+  readonly?: boolean
+  deprecated?: boolean
+  default_value?: unknown
+  group?: string
+  order?: number
+  layout?: string
+  hide_label?: boolean
+  icon?: string
+  render_condition?: string
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  constraints?: object
+  feature_flag?: string
+  settings_flag?: Array<{
+    name?: string
+    enabled?: boolean
+  }>
+  value_formatter?: string
+  preview_value_formatter?: string
+  entity_builder_disable_edit?: boolean
+  protected?: boolean
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "link"
+} | {
+  id?: string
+  name: string
+  label: string
+  placeholder?: string
+  hidden?: boolean
+  show_in_table?: boolean
+  sortable?: boolean
+  required?: boolean
+  readonly?: boolean
+  deprecated?: boolean
+  default_value?: unknown
+  group?: string
+  order?: number
+  layout?: string
   // ...
 }
 ```
@@ -5992,7 +5946,16 @@ type BaseAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
 }
 ```
 
@@ -6029,7 +5992,20 @@ type TextAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "string"
+  multiline?: boolean
+  rich_text?: boolean
+  rows?: number | string
 }
 ```
 
@@ -6066,7 +6042,17 @@ type LinkAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "link"
 }
 ```
 
@@ -6103,7 +6089,17 @@ type InternalAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "internal"
 }
 ```
 
@@ -6140,7 +6136,18 @@ type BooleanAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "boolean"
+  display_type?: "switch" | "checkbox"
 }
 ```
 
@@ -6177,7 +6184,17 @@ type DateAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "date" | "datetime"
 }
 ```
 
@@ -6214,7 +6231,17 @@ type CountryAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "country"
 }
 ```
 
@@ -6251,7 +6278,22 @@ type SelectAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "select" | "radio"
+  options?: Array<{
+    value: string
+    title?: string
+  } | string>
+  allow_any?: boolean
 }
 ```
 
@@ -6288,7 +6330,24 @@ type MultiSelectAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "multiselect" | "checkbox"
+  disable_case_sensitive?: boolean
+  allow_extra_options?: boolean
+  options?: Array<string | {
+    value: string
+    title?: string
+  }>
+  allow_any?: boolean
 }
 ```
 
@@ -6325,7 +6384,21 @@ type StatusAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "status"
+  options?: Array<string | {
+    value: string
+    title?: string
+  }>
 }
 ```
 
@@ -6362,7 +6435,19 @@ type SequenceAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "sequence"
+  prefix?: string
+  start_number?: number
 }
 ```
 
@@ -6399,7 +6484,22 @@ type FileAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "image" | "file"
+  multiple?: boolean
+  allowed_extensions?: string[]
+  display_images_landscaped?: boolean
+  enable_description?: boolean
+  default_access_control?: "public-read" | "private"
 }
 ```
 
@@ -6436,7 +6536,24 @@ type CurrencyAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "currency"
+  currency_selector_only?: boolean
+  currency: Array<{
+    code: string
+    description: string
+    symbol: string
+    flag?: string
+  }>
 }
 ```
 
@@ -6497,7 +6614,46 @@ type RelationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "relation"
+  relation_type?: "has_many" | "has_one"
+  reverse_attributes?: Record<string, string>
+  relation_affinity_mode?: "weak" | "strong"
+  enable_relation_picker?: boolean
+  edit_mode?: "list-view"
+  details_view_mode_enabled?: boolean
+  relation_picker_filter?: {
+    q: string
+  }
+  actions?: Array<{
+    action_type?: "add_existing" | "create_new" | "create_from_existing"
+    label?: string
+    default?: boolean
+    feature_flag?: string
+    settings_flag?: Array<{
+      name?: { ... }
+      enabled?: { ... }
+    }>
+    new_entity_item?: Record<string, unknown>
+  }>
+  drawer_size?: "small" | "medium" | "large"
+  summary_fields?: Array<string | {
+    field?: string
+    display_as?: string
+  }>
+  allowedSchemas?: string[]
+  enable_relation_tags?: boolean
+  add_button_label?: string
+  search_placeholder?: string
 }
 ```
 
@@ -6534,7 +6690,18 @@ type UserRelationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "relation_user"
+  multiple?: boolean
 }
 ```
 
@@ -6571,7 +6738,17 @@ type PartnerOrganisationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "partner_organisation"
 }
 ```
 
@@ -6608,7 +6785,17 @@ type PortalAccessAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "portal_access"
 }
 ```
 
@@ -6670,7 +6857,18 @@ type AddressAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "address"
+  default_address_fields?: string[]
 }
 ```
 
@@ -6707,7 +6905,18 @@ type AddressRelationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "relation_address"
+  default_address_fields?: string[]
 }
 ```
 
@@ -6744,7 +6953,17 @@ type PaymentMethodRelationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "relation_payment_method"
 }
 ```
 
@@ -6781,7 +7000,17 @@ type InvitationEmailAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "invitation_email"
 }
 ```
 
@@ -6818,7 +7047,17 @@ type AutomationAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "automation"
 }
 ```
 
@@ -6855,7 +7094,17 @@ type InternalUserAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "internal_user"
 }
 ```
 
@@ -6892,7 +7141,17 @@ type PurposeAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "purpose"
 }
 ```
 
@@ -6929,7 +7188,16 @@ type RepeatableAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
 }
 ```
 
@@ -6966,7 +7234,19 @@ type TagsAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "tags"
+  options?: string[]
+  suggestions?: string[]
 }
 ```
 
@@ -7003,7 +7283,20 @@ type MessageEmailAddressAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "message_email_address"
+  address?: string
+  send_status?: string
+  email_type?: string
 }
 ```
 
@@ -7040,7 +7333,20 @@ type NumberAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "number"
+  data_type?: "number" | "string"
+  format?: string
+  show_separator?: boolean
 }
 ```
 
@@ -7077,7 +7383,19 @@ type ConsentAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "consent"
+  topic: string
+  identifiers?: string[]
 }
 ```
 
@@ -7114,7 +7432,17 @@ type OrderedListAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "ordered_list"
 }
 ```
 
@@ -7151,7 +7479,17 @@ type EmailAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "email"
 }
 ```
 
@@ -7188,7 +7526,17 @@ type PhoneAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "phone"
 }
 ```
 
@@ -7225,7 +7573,17 @@ type PaymentAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "payment"
 }
 ```
 
@@ -7262,7 +7620,17 @@ type PriceComponentAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "price_component"
 }
 ```
 
@@ -7299,7 +7667,20 @@ type ComputedAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "computed"
+  computed?: boolean
+  amount_field?: string
+  currency_field?: string
 }
 ```
 
@@ -7336,7 +7717,17 @@ type PartnerStatusAttribute = {
   preview_value_formatter?: string
   entity_builder_disable_edit?: boolean
   protected?: boolean
-  // ...
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "partner_status"
 }
 ```
 
@@ -7452,6 +7843,76 @@ type EntityCapability = {
       name?: { ... }
       enabled?: { ... }
     }>
+    value_formatter?: string
+    preview_value_formatter?: string
+    entity_builder_disable_edit?: boolean
+    protected?: boolean
+    info_helpers?: {
+      hint_text?: { ... }
+      hint_text_key?: { ... }
+      hint_custom_component?: { ... }
+      hint_tooltip_placement?: { ... }
+    }
+    explicit_searchable?: boolean
+    exclude_from_search?: boolean
+    repeatable?: boolean
+    has_primary?: boolean
+    type: "string"
+    multiline?: boolean
+    rich_text?: boolean
+    rows?: number | string
+  } | {
+    id?: string
+    name: string
+    label: string
+    placeholder?: string
+    hidden?: boolean
+    show_in_table?: boolean
+    sortable?: boolean
+    required?: boolean
+    readonly?: boolean
+    deprecated?: boolean
+    default_value?: unknown
+    group?: string
+    order?: number
+    layout?: string
+    hide_label?: boolean
+    icon?: string
+    render_condition?: string
+    _purpose?: string[]
+    _manifest?: string // uuid[]
+    constraints?: object
+    feature_flag?: string
+    settings_flag?: Array<{
+      name?: { ... }
+      enabled?: { ... }
+    }>
+    value_formatter?: string
+    preview_value_formatter?: string
+    entity_builder_disable_edit?: boolean
+    protected?: boolean
+    info_helpers?: {
+      hint_text?: { ... }
+      hint_text_key?: { ... }
+      hint_custom_component?: { ... }
+      hint_tooltip_placement?: { ... }
+    }
+    explicit_searchable?: boolean
+    exclude_from_search?: boolean
+    repeatable?: boolean
+    has_primary?: boolean
+    type: "link"
+  } | {
+    id?: string
+    name: string
+    label: string
+    placeholder?: string
+    hidden?: boolean
+    show_in_table?: boolean
+    sortable?: boolean
+    required?: boolean
+    readonly?: boolean
+    deprecated?: boolean
   // ...
 }
 ```
@@ -7489,6 +7950,76 @@ type EntityCapabilityWithCompositeID = {
       name?: { ... }
       enabled?: { ... }
     }>
+    value_formatter?: string
+    preview_value_formatter?: string
+    entity_builder_disable_edit?: boolean
+    protected?: boolean
+    info_helpers?: {
+      hint_text?: { ... }
+      hint_text_key?: { ... }
+      hint_custom_component?: { ... }
+      hint_tooltip_placement?: { ... }
+    }
+    explicit_searchable?: boolean
+    exclude_from_search?: boolean
+    repeatable?: boolean
+    has_primary?: boolean
+    type: "string"
+    multiline?: boolean
+    rich_text?: boolean
+    rows?: number | string
+  } | {
+    id?: string
+    name: string
+    label: string
+    placeholder?: string
+    hidden?: boolean
+    show_in_table?: boolean
+    sortable?: boolean
+    required?: boolean
+    readonly?: boolean
+    deprecated?: boolean
+    default_value?: unknown
+    group?: string
+    order?: number
+    layout?: string
+    hide_label?: boolean
+    icon?: string
+    render_condition?: string
+    _purpose?: string[]
+    _manifest?: string // uuid[]
+    constraints?: object
+    feature_flag?: string
+    settings_flag?: Array<{
+      name?: { ... }
+      enabled?: { ... }
+    }>
+    value_formatter?: string
+    preview_value_formatter?: string
+    entity_builder_disable_edit?: boolean
+    protected?: boolean
+    info_helpers?: {
+      hint_text?: { ... }
+      hint_text_key?: { ... }
+      hint_custom_component?: { ... }
+      hint_tooltip_placement?: { ... }
+    }
+    explicit_searchable?: boolean
+    exclude_from_search?: boolean
+    repeatable?: boolean
+    has_primary?: boolean
+    type: "link"
+  } | {
+    id?: string
+    name: string
+    label: string
+    placeholder?: string
+    hidden?: boolean
+    show_in_table?: boolean
+    sortable?: boolean
+    required?: boolean
+    readonly?: boolean
+    deprecated?: boolean
   // ...
 }
 ```
@@ -8036,7 +8567,47 @@ type EntityListParams = {
     $and?: Array<{
       term?: { ... }
       terms?: { ... }
-  // ...
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $not?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+  }>
+  allow_targeting_all_schemas?: boolean
+  sort?: string | string[]
+  from?: number
+  size?: number
+  hydrate?: boolean
+  fields?: string[]
+  aggs?: object
+  include_deleted?: "true" | "false" | "only"
+  include_scores?: boolean
+  highlight?: unknown
+  stable_for?: number
+  stable_query_id?: string
+  search_after?: string | number[]
 }
 ```
 
@@ -8075,6 +8646,76 @@ type SearchFilter = Array<{
       lt?: { ... }
       lte?: { ... }
       format?: { ... }
+      relation?: { ... }
+      time_zone?: { ... }
+    }>
+    exists?: {
+      field: { ... }
+    }
+    $and?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $not?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+  }>
+  $or?: Array<{
+    term?: Record<string, string | number | boolean>
+    terms?: Record<string, string | number | boolean[]>
+    ids?: {
+      values?: { ... }
+    }
+    range?: Record<string, {
+      gt?: { ... }
+      gte?: { ... }
+      lt?: { ... }
+      lte?: { ... }
+      format?: { ... }
+      relation?: { ... }
+      time_zone?: { ... }
+    }>
+    exists?: {
+      field: { ... }
+    }
+    $and?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
+      exists?: { ... }
+      $and?: { ... }
+      $or?: { ... }
+      $not?: { ... }
+    }>
+    $or?: Array<{
+      term?: { ... }
+      terms?: { ... }
+      ids?: { ... }
+      range?: { ... }
   // ...
 }
 ```
@@ -8235,7 +8876,25 @@ type GraphQueryResponse = {
       org_id: { ... }
       user_id?: { ... }
     }>
-  // ...
+    _schema?: string
+    _title?: string
+    _tags?: string[]
+    _created_at?: string // date-time
+    _updated_at?: string // date-time
+    _deleted_at?: string // date-time
+    _acl?: {
+      view?: { ... }
+      edit?: { ... }
+      delete?: { ... }
+    }
+    _purpose?: string[]
+    _purpose_name?: string[]
+    _manifest?: string // uuid[]
+  }>>
+  edges: Array<{
+    from: string
+    to: string
+  }>
 }
 ```
 
@@ -8370,7 +9029,55 @@ type EntityOperation = {
     }
     _purpose?: string[]
     _purpose_name?: string[]
-  // ...
+    _manifest?: string // uuid[]
+  }
+  diff?: {
+    added?: {
+      _id?: { ... }
+      _org?: { ... }
+      _owners?: { ... }
+      _schema?: { ... }
+      _title?: { ... }
+      _tags?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+      _deleted_at?: { ... }
+      _acl?: { ... }
+      _purpose?: { ... }
+      _purpose_name?: { ... }
+      _manifest?: { ... }
+    }
+    updated?: {
+      _id?: { ... }
+      _org?: { ... }
+      _owners?: { ... }
+      _schema?: { ... }
+      _title?: { ... }
+      _tags?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+      _deleted_at?: { ... }
+      _acl?: { ... }
+      _purpose?: { ... }
+      _purpose_name?: { ... }
+      _manifest?: { ... }
+    }
+    deleted?: {
+      _id?: { ... }
+      _org?: { ... }
+      _owners?: { ... }
+      _schema?: { ... }
+      _title?: { ... }
+      _tags?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+      _deleted_at?: { ... }
+      _acl?: { ... }
+      _purpose?: { ... }
+      _purpose_name?: { ... }
+      _manifest?: { ... }
+    }
+  }
 }
 ```
 
@@ -8426,7 +9133,9 @@ type ActivityItem = {
     diff?: {
       added?: { ... }
       updated?: { ... }
-  // ...
+      deleted?: { ... }
+    }
+  }>
 }
 ```
 
@@ -8634,7 +9343,6 @@ type ClassificationsUpdate = {
     _manifest?: string // uuid[]
   }>
   delete?: string | string[]
-  // ...
 }
 ```
 

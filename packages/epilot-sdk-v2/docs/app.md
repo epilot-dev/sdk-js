@@ -149,10 +149,16 @@ const { data } = await client.getPublicFacingComponent({
   "component": {
     "component_type": "CUSTOM_JOURNEY_BLOCK",
     "configuration": {
-      "override_dev_mode": {},
+      "override_dev_mode": {
+        "override_url": "http://localhost:3000"
+      },
       "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
       "component_tag": "string",
-      "component_args": [],
+      "component_args": [
+        {
+          "type": "text"
+        }
+      ],
       "component_size": 0,
       "component_mapping": {}
     }
@@ -186,21 +192,39 @@ const { data } = await client.listConfigurations({
     {
       "app_id": "string",
       "name": "string",
-      "author": {},
+      "author": {
+        "name": "string",
+        "company": "string",
+        "email": "string"
+      },
       "dev_mode": true,
-      "versions": [],
-      "public_versions": [],
+      "versions": ["string"],
+      "public_versions": ["string"],
       "support_email": "string",
       "latest_version": "string",
       "category": "string",
       "icon_url": "string",
       "documentation_url": "string",
-      "description": {},
-      "notifications": {},
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "notifications": {
+        "email": "developer@example.com",
+        "events": ["app.installed"]
+      },
       "owner_org_id": "string",
       "internal": false,
-      "pricing": {},
-      "configuration_audit": {}
+      "pricing": {
+        "pricing_type": "FREE",
+        "billing_frequency": "MONTHLY"
+      },
+      "configuration_audit": {
+        "created_at": "string",
+        "created_by": "string",
+        "updated_at": "string",
+        "updated_by": "string"
+      }
     }
   ],
   "pagination": {
@@ -271,21 +295,39 @@ const { data } = await client.listPublicConfigurations({
     {
       "app_id": "string",
       "name": "string",
-      "author": {},
+      "author": {
+        "name": "string",
+        "company": "string",
+        "email": "string"
+      },
       "dev_mode": true,
-      "versions": [],
-      "public_versions": [],
+      "versions": ["string"],
+      "public_versions": ["string"],
       "support_email": "string",
       "latest_version": "string",
       "category": "string",
       "icon_url": "string",
       "documentation_url": "string",
-      "description": {},
-      "notifications": {},
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "notifications": {
+        "email": "developer@example.com",
+        "events": ["app.installed"]
+      },
       "owner_org_id": "string",
       "internal": false,
-      "pricing": {},
-      "configuration_audit": {}
+      "pricing": {
+        "pricing_type": "FREE",
+        "billing_frequency": "MONTHLY"
+      },
+      "configuration_audit": {
+        "created_at": "string",
+        "created_by": "string",
+        "updated_at": "string",
+        "updated_by": "string"
+      }
     }
   ],
   "pagination": {
@@ -411,12 +453,8 @@ const { data } = await client.getConfiguration({
     "email": "string"
   },
   "dev_mode": true,
-  "versions": [
-    "string"
-  ],
-  "public_versions": [
-    "string"
-  ],
+  "versions": ["string"],
+  "public_versions": ["string"],
   "support_email": "string",
   "latest_version": "string",
   "category": "string",
@@ -428,9 +466,7 @@ const { data } = await client.getConfiguration({
   },
   "notifications": {
     "email": "developer@example.com",
-    "events": [
-      "app.installed"
-    ]
+    "events": ["app.installed"]
   },
   "owner_org_id": "string",
   "internal": false,
@@ -447,7 +483,20 @@ const { data } = await client.getConfiguration({
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {}
+      "configuration": {
+        "override_dev_mode": {
+          "override_url": "http://localhost:3000"
+        },
+        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+        "component_tag": "string",
+        "component_args": [
+          {
+            "type": "text"
+          }
+        ],
+        "component_size": 0,
+        "component_mapping": {}
+      }
     }
   ],
   "visibility": "private",
@@ -461,7 +510,10 @@ const { data } = await client.getConfiguration({
   "role": {
     "id": "string",
     "grants": [
-      {}
+      {
+        "action": "string",
+        "resource": "string"
+      }
     ]
   },
   "blueprint_ref": {
@@ -504,9 +556,7 @@ const { data } = await client.patchMetadata(
     documentation_url: 'string',
     notifications: {
       email: 'developer@example.com',
-      events: [
-        'app.installed'
-      ]
+      events: ['app.installed']
     },
     pricing: {
       pricing_type: 'FREE',
@@ -553,24 +603,14 @@ const { data } = await client.queryEvents(
       preset: '1h'
     },
     filters: {
-      source: [
-        'CUSTOM_JOURNEY_BLOCK'
-      ],
-      component_id: [
-        'string'
-      ],
-      event_type: [
-        'ERROR'
-      ],
+      source: ['CUSTOM_JOURNEY_BLOCK'],
+      component_id: ['string'],
+      event_type: ['ERROR'],
       correlation_id: 'string'
     },
     aggregation: {
-      group_by: [
-        'source'
-      ],
-      metrics: [
-        'count'
-      ]
+      group_by: ['source'],
+      metrics: ['count']
     },
     pagination: {
       page: 1,
@@ -596,14 +636,14 @@ const { data } = await client.queryEvents(
       "preset": "1h"
     },
     "filters": {
-      "source": [],
-      "component_id": [],
-      "event_type": [],
+      "source": ["CUSTOM_JOURNEY_BLOCK"],
+      "component_id": ["string"],
+      "event_type": ["ERROR"],
       "correlation_id": "string"
     },
     "aggregation": {
-      "group_by": [],
-      "metrics": []
+      "group_by": ["source"],
+      "metrics": ["count"]
     },
     "pagination": {
       "page": 1,
@@ -617,7 +657,22 @@ const { data } = await client.queryEvents(
   "results": {
     "type": "raw",
     "events": [
-      {}
+      {
+        "app_id": "string",
+        "version": "string",
+        "event_id": "string",
+        "component_id": "string",
+        "timestamp": "string",
+        "correlation_id": "string",
+        "event_type": "ERROR",
+        "source": "CUSTOM_JOURNEY_BLOCK",
+        "actor": {
+          "org_id": "string",
+          "user_id": "string",
+          "type": "user"
+        },
+        "details": {}
+      }
     ]
   },
   "pagination": {
@@ -635,7 +690,7 @@ const { data } = await client.queryEvents(
 
 ### `createBundleUploadUrl`
 
-Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path
+Generate a presigned URL for uploading app bundle to /``<app-id>``/bundle.js path
 
 `POST /v1/app-configurations/{appId}/bundle`
 
@@ -673,7 +728,7 @@ const { data } = await client.createBundleUploadUrl(
 
 ### `createZipUploadUrl`
 
-Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path
+Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /``<app-id>``/ path
 
 `POST /v1/app-configurations/{appId}/zip`
 
@@ -712,7 +767,7 @@ const { data } = await client.createZipUploadUrl(
 
 ### `createLogoUploadUrl`
 
-Generate a presigned URL for uploading app logo to /<app-id>/logo.png path
+Generate a presigned URL for uploading app logo to /``<app-id>``/logo.png path
 
 `POST /v1/app-configurations/{appId}/logo`
 
@@ -748,7 +803,7 @@ const { data } = await client.createLogoUploadUrl(
 
 ### `deleteLogo`
 
-Delete the app logo from /<app-id>/logo.png path
+Delete the app logo from /``<app-id>``/logo.png path
 
 `DELETE /v1/app-configurations/{appId}/logo`
 
@@ -783,7 +838,25 @@ const { data } = await client.listVersions({
     {
       "app_id": "string",
       "owner_org_id": "string",
-      "components": [],
+      "components": [
+        {
+          "component_type": "CUSTOM_JOURNEY_BLOCK",
+          "configuration": {
+            "override_dev_mode": {
+              "override_url": "http://localhost:3000"
+            },
+            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+            "component_tag": "string",
+            "component_args": [
+              {
+                "type": "text"
+              }
+            ],
+            "component_size": 0,
+            "component_mapping": {}
+          }
+        }
+      ],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -792,9 +865,27 @@ const { data } = await client.listVersions({
       "deprecated_at": "string",
       "changelog": "string",
       "review_status": "approved",
-      "role": {},
-      "blueprint_ref": {},
-      "version_audit": {}
+      "role": {
+        "id": "string",
+        "grants": [
+          {
+            "action": "string",
+            "resource": "string"
+          }
+        ]
+      },
+      "blueprint_ref": {
+        "manifest_id": "string",
+        "job_id": "string"
+      },
+      "version_audit": {
+        "created_at": "string",
+        "created_by": "string",
+        "updated_at": "string",
+        "updated_by": "string",
+        "versioned_at": "string",
+        "versioned_by": "string"
+      }
     }
   ],
   "pagination": {
@@ -835,12 +926,8 @@ const { data } = await client.getVersion({
     "email": "string"
   },
   "dev_mode": true,
-  "versions": [
-    "string"
-  ],
-  "public_versions": [
-    "string"
-  ],
+  "versions": ["string"],
+  "public_versions": ["string"],
   "support_email": "string",
   "latest_version": "string",
   "category": "string",
@@ -852,9 +939,7 @@ const { data } = await client.getVersion({
   },
   "notifications": {
     "email": "developer@example.com",
-    "events": [
-      "app.installed"
-    ]
+    "events": ["app.installed"]
   },
   "owner_org_id": "string",
   "internal": false,
@@ -871,7 +956,20 @@ const { data } = await client.getVersion({
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {}
+      "configuration": {
+        "override_dev_mode": {
+          "override_url": "http://localhost:3000"
+        },
+        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+        "component_tag": "string",
+        "component_args": [
+          {
+            "type": "text"
+          }
+        ],
+        "component_size": 0,
+        "component_mapping": {}
+      }
     }
   ],
   "visibility": "private",
@@ -885,7 +983,10 @@ const { data } = await client.getVersion({
   "role": {
     "id": "string",
     "grants": [
-      {}
+      {
+        "action": "string",
+        "resource": "string"
+      }
     ]
   },
   "blueprint_ref": {
@@ -1045,7 +1146,9 @@ const { data } = await client.createComponent(
       component_url: 'https://cdn.apps.com/123/v1.0.0/bundle.js',
       component_tag: 'string',
       component_args: [
-        { /* ... */ }
+        {
+          type: 'text'
+        }
       ],
       component_size: 0,
       component_mapping: {}
@@ -1062,10 +1165,16 @@ const { data } = await client.createComponent(
   "component": {
     "component_type": "CUSTOM_JOURNEY_BLOCK",
     "configuration": {
-      "override_dev_mode": {},
+      "override_dev_mode": {
+        "override_url": "http://localhost:3000"
+      },
       "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
       "component_tag": "string",
-      "component_args": [],
+      "component_args": [
+        {
+          "type": "text"
+        }
+      ],
       "component_size": 0,
       "component_mapping": {}
     }
@@ -1099,7 +1208,9 @@ const { data } = await client.patchComponent(
       component_url: 'https://cdn.apps.com/123/v1.0.0/bundle.js',
       component_tag: 'string',
       component_args: [
-        { /* ... */ }
+        {
+          type: 'text'
+        }
       ],
       component_size: 0,
       component_mapping: {}
@@ -1182,13 +1293,49 @@ const { data } = await client.listInstallations({
       "owner_org_id": "string",
       "enabled": true,
       "name": "string",
-      "option_values": [],
-      "components": [],
+      "option_values": [
+        {
+          "component_id": "string",
+          "options": [
+            {
+              "key": "string",
+              "value": {}
+            }
+          ]
+        }
+      ],
+      "components": [
+        {
+          "component_type": "CUSTOM_JOURNEY_BLOCK",
+          "configuration": {
+            "override_dev_mode": {
+              "override_url": "http://localhost:3000"
+            },
+            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+            "component_tag": "string",
+            "component_args": [
+              {
+                "type": "text"
+              }
+            ],
+            "component_size": 0,
+            "component_mapping": {}
+          }
+        }
+      ],
       "installed_version": "string",
       "role": "string",
-      "blueprint_ref": {},
-      "installation_audit": {},
-      "_manifest": []
+      "blueprint_ref": {
+        "manifest_id": "string",
+        "job_id": "string"
+      },
+      "installation_audit": {
+        "created_at": "string",
+        "created_by": "string",
+        "updated_at": "string",
+        "updated_by": "string"
+      },
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
   "pagination": {
@@ -1228,13 +1375,31 @@ const { data } = await client.getInstallation({
   "option_values": [
     {
       "component_id": "string",
-      "options": []
+      "options": [
+        {
+          "key": "string",
+          "value": {}
+        }
+      ]
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {}
+      "configuration": {
+        "override_dev_mode": {
+          "override_url": "http://localhost:3000"
+        },
+        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+        "component_tag": "string",
+        "component_args": [
+          {
+            "type": "text"
+          }
+        ],
+        "component_size": 0,
+        "component_mapping": {}
+      }
     }
   ],
   "installed_version": "string",
@@ -1249,9 +1414,7 @@ const { data } = await client.getInstallation({
     "updated_at": "string",
     "updated_by": "string"
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1275,12 +1438,15 @@ const { data } = await client.install(
     option_values: [
       {
         component_id: 'string',
-        options: [ /* ... */ ]
+        options: [
+          {
+            key: 'string',
+            value: {}
+          }
+        ]
       }
     ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1298,13 +1464,31 @@ const { data } = await client.install(
   "option_values": [
     {
       "component_id": "string",
-      "options": []
+      "options": [
+        {
+          "key": "string",
+          "value": {}
+        }
+      ]
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {}
+      "configuration": {
+        "override_dev_mode": {
+          "override_url": "http://localhost:3000"
+        },
+        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+        "component_tag": "string",
+        "component_args": [
+          {
+            "type": "text"
+          }
+        ],
+        "component_size": 0,
+        "component_mapping": {}
+      }
     }
   ],
   "installed_version": "string",
@@ -1319,9 +1503,7 @@ const { data } = await client.install(
     "updated_at": "string",
     "updated_by": "string"
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1345,12 +1527,15 @@ const { data } = await client.patchInstallation(
     option_values: [
       {
         component_id: 'string',
-        options: [ /* ... */ ]
+        options: [
+          {
+            key: 'string',
+            value: {}
+          }
+        ]
       }
     ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1397,13 +1582,31 @@ const { data } = await client.promoteVersion({
   "option_values": [
     {
       "component_id": "string",
-      "options": []
+      "options": [
+        {
+          "key": "string",
+          "value": {}
+        }
+      ]
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {}
+      "configuration": {
+        "override_dev_mode": {
+          "override_url": "http://localhost:3000"
+        },
+        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+        "component_tag": "string",
+        "component_args": [
+          {
+            "type": "text"
+          }
+        ],
+        "component_size": 0,
+        "component_mapping": {}
+      }
     }
   ],
   "installed_version": "string",
@@ -1418,9 +1621,7 @@ const { data } = await client.promoteVersion({
     "updated_at": "string",
     "updated_by": "string"
   },
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ]
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1854,7 +2055,20 @@ type ExternalProductCatalogConfig = {
     }
     type: "product-recommendations"
     auth?: {
-  // ...
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+    }
+    call: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+    }
+  }>
 }
 ```
 
@@ -1951,7 +2165,43 @@ type PortalExtensionComponent = {
       resolved?: { ... }
       use_static_ips?: { ... }
     } | {
-  // ...
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      intervals?: { ... }
+      auth?: { ... }
+      call: { ... }
+      resolved?: { ... }
+      use_static_ips?: { ... }
+    } | {
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      intervals?: { ... }
+      auth?: { ... }
+      call: { ... }
+      resolved?: { ... }
+      use_static_ips?: { ... }
+    } | {
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      plausibility_mode?: { ... }
+      auth?: { ... }
+      call: { ... }
+      resolved: { ... }
+      use_static_ips?: { ... }
+    }>
+    links?: Array<{
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      type: { ... }
+      condition?: { ... }
+      auth?: { ... }
+      redirect: { ... }
+    }>
+  }
 }
 ```
 
@@ -1988,6 +2238,76 @@ type PortalExtensionConfig = {
     name?: {
       en?: { ... }
       de: { ... }
+    }
+    type: "contractIdentification"
+    auth?: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+      cache?: { ... }
+    }
+    call: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers: { ... }
+      body?: { ... }
+      result?: { ... }
+    }
+    assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
+    contact_relation_attribute?: string
+    explanation?: {
+      en: { ... }
+    }
+    use_static_ips?: boolean
+  } | {
+    id: string
+    name?: {
+      en?: { ... }
+      de: { ... }
+    }
+    type: "priceDataRetrieval"
+    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+    auth?: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+      cache?: { ... }
+    }
+    call: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+    }
+    resolved?: {
+      dataPath?: { ... }
+    }
+    use_static_ips?: boolean
+  } | {
+    id: string
+    name?: {
+      en?: { ... }
+      de: { ... }
+    }
+    type: "consumptionDataRetrieval"
+    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+    auth?: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+      cache?: { ... }
+    }
+    call: {
+      method?: { ... }
+      url: { ... }
   // ...
 }
 ```
@@ -2069,7 +2389,8 @@ type PortalExtensionHookContractIdentification = {
   contact_relation_attribute?: string
   explanation?: {
     en: string
-  // ...
+  }
+  use_static_ips?: boolean
 }
 ```
 
@@ -2112,7 +2433,8 @@ type PortalExtensionHookMeterReadingPlausibilityCheck = {
     valid?: string
     upper_limit?: string
     lower_limit?: string
-  // ...
+  }
+  use_static_ips?: boolean
 }
 ```
 
@@ -2153,7 +2475,6 @@ type PortalExtensionHookPriceDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
-  // ...
 }
 ```
 
@@ -2194,7 +2515,6 @@ type PortalExtensionHookConsumptionDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
-  // ...
 }
 ```
 
@@ -2235,7 +2555,6 @@ type PortalExtensionHookCostDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
-  // ...
 }
 ```
 
@@ -2491,7 +2810,12 @@ type ConfigurationMetadata = {
     pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN"
     billing_frequency?: "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM"
   }
-  // ...
+  configuration_audit?: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
+  }
 }
 ```
 
@@ -2530,7 +2854,26 @@ type ConfigurationVersion = {
   is_beta?: boolean
   deprecated_at?: string
   changelog?: string
-  // ...
+  review_status?: "approved" | "rejected" | "pending"
+  role?: {
+    id?: string
+    grants?: Array<{
+      action: { ... }
+      resource?: { ... }
+    }>
+  }
+  blueprint_ref?: {
+    manifest_id?: string
+    job_id?: string
+  }
+  version_audit: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
+    versioned_at?: string
+    versioned_by?: string
+  }
 }
 ```
 
@@ -2589,7 +2932,22 @@ type Installation = {
       description?: { ... }
       value?: { ... }
       type: { ... }
-  // ...
+    }>
+    surfaces?: object
+  }>
+  installed_version: string
+  role?: string
+  blueprint_ref?: {
+    manifest_id?: string
+    job_id?: string
+  }
+  installation_audit?: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
+  }
+  _manifest?: string // uuid[]
 }
 ```
 
@@ -2628,7 +2986,69 @@ type PublicConfiguration = {
     }
     description?: {
       en?: { ... }
-  // ...
+      de: { ... }
+    }
+    options?: Array<{
+      key: { ... }
+      label?: { ... }
+      required?: { ... }
+      description?: { ... }
+      value?: { ... }
+      type: { ... }
+    }>
+    surfaces?: object
+  }>
+  is_beta?: boolean
+  deprecated_at?: string
+  version: string
+  role?: {
+    id?: string
+    grants?: Array<{
+      action: { ... }
+      resource?: { ... }
+    }>
+  }
+  blueprint_ref?: {
+    manifest_id?: string
+    job_id?: string
+  }
+  latest_version?: string
+  public?: boolean
+  versions?: Array<{
+    app_id: string
+    owner_org_id: string
+    components: Array<{
+      id: { ... }
+      name?: { ... }
+      description?: { ... }
+      options?: { ... }
+      surfaces?: { ... }
+    }>
+    visibility?: "public" | "private"
+    public?: boolean
+    pending?: boolean
+    version: string
+    is_beta?: boolean
+    deprecated_at?: string
+    changelog?: string
+    review_status?: "approved" | "rejected" | "pending"
+    role?: {
+      id?: { ... }
+      grants?: { ... }
+    }
+    blueprint_ref?: {
+      manifest_id?: { ... }
+      job_id?: { ... }
+    }
+    version_audit: {
+      created_at?: { ... }
+      created_by?: { ... }
+      updated_at?: { ... }
+      updated_by?: { ... }
+      versioned_at?: { ... }
+      versioned_by?: { ... }
+    }
+  }>
 }
 ```
 
@@ -2667,7 +3087,59 @@ type Configuration = {
     pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN"
     billing_frequency?: "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM"
   }
-  // ...
+  configuration_audit?: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
+  }
+  components: Array<{
+    id: string
+    name?: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    options?: Array<{
+      key: { ... }
+      label?: { ... }
+      required?: { ... }
+      description?: { ... }
+      value?: { ... }
+      type: { ... }
+    }>
+    surfaces?: object
+  }>
+  visibility?: "public" | "private"
+  public?: boolean
+  pending?: boolean
+  version: string
+  is_beta?: boolean
+  deprecated_at?: string
+  changelog?: string
+  review_status?: "approved" | "rejected" | "pending"
+  role?: {
+    id?: string
+    grants?: Array<{
+      action: { ... }
+      resource?: { ... }
+    }>
+  }
+  blueprint_ref?: {
+    manifest_id?: string
+    job_id?: string
+  }
+  version_audit: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
+    versioned_at?: string
+    versioned_by?: string
+  }
 }
 ```
 
@@ -2808,7 +3280,29 @@ type EventsQueryResponse = {
     type?: "raw"
     events?: Array<{
       app_id: { ... }
-  // ...
+      version: { ... }
+      event_id?: { ... }
+      component_id: { ... }
+      timestamp?: { ... }
+      correlation_id?: { ... }
+      event_type: { ... }
+      source: { ... }
+      actor: { ... }
+      details?: { ... }
+    }>
+  } | {
+    type?: "aggregated"
+    groups?: Array<{
+      dimensions?: { ... }
+      metrics?: { ... }
+    }>
+  }
+  pagination?: {
+    page?: number
+    page_size?: number
+    total_items?: number
+    has_next?: boolean
+  }
 }
 ```
 

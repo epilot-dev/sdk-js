@@ -91,7 +91,20 @@ const { data } = await client.listCurrentRoles()
       "type": "user_role",
       "expires_at": "2028-07-21T17:32:28Z",
       "organization_id": "123",
-      "grants": [],
+      "grants": [
+        {
+          "action": "entity-read",
+          "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+          "effect": "allow",
+          "conditions": [
+            {
+              "attribute": "workflows.primary.task_name",
+              "operation": "equals",
+              "values": ["Qualification"]
+            }
+          ]
+        }
+      ],
       "parent_role": "123:owner"
     }
   ]
@@ -125,7 +138,20 @@ const { data } = await client.listAllRoles()
       "type": "user_role",
       "expires_at": "2028-07-21T17:32:28Z",
       "organization_id": "123",
-      "grants": [],
+      "grants": [
+        {
+          "action": "entity-read",
+          "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+          "effect": "allow",
+          "conditions": [
+            {
+              "attribute": "workflows.primary.task_name",
+              "operation": "equals",
+              "values": ["Qualification"]
+            }
+          ]
+        }
+      ],
       "parent_role": "123:owner"
     }
   ]
@@ -165,7 +191,13 @@ const { data } = await client.createRole(
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow",
-      "conditions": []
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
     }
   ],
   "parent_role": "123:owner"
@@ -186,18 +218,9 @@ Search Roles
 const { data } = await client.searchRoles(
   null,
   {
-    role_ids: [
-      '123:manager',
-      '456:owner'
-    ],
-    org_ids: [
-      '123',
-      '456'
-    ],
-    slugs: [
-      'manager',
-      'owner'
-    ],
+    role_ids: ['123:manager', '456:owner'],
+    org_ids: ['123', '456'],
+    slugs: ['manager', 'owner'],
     query: 'Administrator',
     limit: 1,
     offset: 1
@@ -219,7 +242,20 @@ const { data } = await client.searchRoles(
       "type": "user_role",
       "expires_at": "2028-07-21T17:32:28Z",
       "organization_id": "123",
-      "grants": [],
+      "grants": [
+        {
+          "action": "entity-read",
+          "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+          "effect": "allow",
+          "conditions": [
+            {
+              "attribute": "workflows.primary.task_name",
+              "operation": "equals",
+              "values": ["Qualification"]
+            }
+          ]
+        }
+      ],
       "parent_role": "123:owner"
     }
   ]
@@ -258,7 +294,13 @@ const { data } = await client.getRole({
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow",
-      "conditions": []
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
     }
   ],
   "parent_role": "123:owner"
@@ -292,7 +334,13 @@ const { data } = await client.putRole(
         action: 'entity-read',
         resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
         effect: 'allow',
-        conditions: [ /* ... */ ]
+        conditions: [
+          {
+            attribute: 'workflows.primary.task_name',
+            operation: 'equals',
+            values: ['Qualification']
+          }
+        ]
       }
     ],
     parent_role: '123:owner'
@@ -316,7 +364,13 @@ const { data } = await client.putRole(
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow",
-      "conditions": []
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
     }
   ],
   "parent_role": "123:owner"
@@ -355,7 +409,13 @@ const { data } = await client.deleteRole({
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow",
-      "conditions": []
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
     }
   ],
   "parent_role": "123:owner"
@@ -394,9 +454,7 @@ const { data } = await client.getAssignedRolesForUser({
 <summary>Response</summary>
 
 ```json
-[
-  "123:owner"
-]
+["123:owner"]
 ```
 
 </details>
@@ -414,9 +472,7 @@ const { data } = await client.assignRoles(
   {
     userId: 'example',
   },
-  [
-    '123:owner'
-  ],
+  ['123:owner'],
 )
 ```
 
@@ -424,9 +480,7 @@ const { data } = await client.assignRoles(
 <summary>Response</summary>
 
 ```json
-[
-  "123:owner"
-]
+["123:owner"]
 ```
 
 </details>
@@ -452,9 +506,7 @@ const { data } = await client.addAssignment({
 ```json
 {
   "user_id": "1",
-  "roles": [
-    "123:owner"
-  ]
+  "roles": ["123:owner"]
 }
 ```
 
@@ -481,9 +533,7 @@ const { data } = await client.removeAssignment({
 ```json
 {
   "user_id": "1",
-  "roles": [
-    "123:owner"
-  ]
+  "roles": ["123:owner"]
 }
 ```
 
@@ -509,7 +559,7 @@ const { data } = await client.listAllAssignments()
   "assignments": [
     {
       "user_id": "1",
-      "roles": []
+      "roles": ["123:owner"]
     }
   ]
 }
@@ -569,7 +619,7 @@ type EqualsCondition = {
 
 ### `RoleId`
 
-Format: <organization_id>:<slug>
+Format: `<organization_id>`:`<slug>`
 
 ```ts
 type RoleId = string
@@ -745,7 +795,45 @@ type Role = {
   pricing_tier?: string
 } | {
   id: string
-  // ...
+  name: string
+  slug: string
+  type: "share_role"
+  expires_at?: string // date-time
+  organization_id: string
+  grants: Array<{
+    action: string
+    resource?: string
+    effect?: "allow" | "deny"
+    conditions?: object[]
+  }>
+} | {
+  id: string
+  name: string
+  slug: string
+  type: "partner_role"
+  expires_at?: string // date-time
+  organization_id: string
+  grants: Array<{
+    action: string
+    resource?: string
+    effect?: "allow" | "deny"
+    conditions?: object[]
+  }>
+  partner_org_id?: object
+  vendor_enforced_user_limit?: number
+} | {
+  id: string
+  name: string
+  slug: string
+  type: "portal_role"
+  expires_at?: string // date-time
+  organization_id: string
+  grants: Array<{
+    action: string
+    resource?: string
+    effect?: "allow" | "deny"
+    conditions?: object[]
+  }>
 }
 ```
 
@@ -839,7 +927,48 @@ type OrgRoles = {
       conditions?: { ... }
     }>
     pricing_tier?: string
-  // ...
+  } | {
+    id: string
+    name: string
+    slug: string
+    type: "share_role"
+    expires_at?: string // date-time
+    organization_id: string
+    grants: Array<{
+      action: { ... }
+      resource?: { ... }
+      effect?: { ... }
+      conditions?: { ... }
+    }>
+  } | {
+    id: string
+    name: string
+    slug: string
+    type: "partner_role"
+    expires_at?: string // date-time
+    organization_id: string
+    grants: Array<{
+      action: { ... }
+      resource?: { ... }
+      effect?: { ... }
+      conditions?: { ... }
+    }>
+    partner_org_id?: object
+    vendor_enforced_user_limit?: number
+  } | {
+    id: string
+    name: string
+    slug: string
+    type: "portal_role"
+    expires_at?: string // date-time
+    organization_id: string
+    grants: Array<{
+      action: { ... }
+      resource?: { ... }
+      effect?: { ... }
+      conditions?: { ... }
+    }>
+  }>
 }
 ```
 

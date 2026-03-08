@@ -74,8 +74,27 @@ const { data } = await client.getLogs(
       "event_name": "deleteWorkflow",
       "status_code": 200,
       "timestamp": "2021-06-01T12:00:00Z",
-      "caller": {},
-      "http": {},
+      "caller": {
+        "user_email": "max.mustermann@mail.com",
+        "user_id": 123456,
+        "trigger_type": "user"
+      },
+      "http": {
+        "method": "GET",
+        "ip": null,
+        "headers": {
+          "Authorization": "Bearer token"
+        },
+        "query": {
+          "limit": 50,
+          "page": 0
+        },
+        "pathParams": {
+          "eventId": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+        },
+        "path": "/v1/logs",
+        "domainName": "audit-logs.sls.epilot.io"
+      },
       "detail": "{\"workflow_id\": \"123456\"}",
       "activity": "Workflow with ID 123456 was deleted",
       "source_url": "string"
@@ -121,9 +140,16 @@ const { data } = await client.getLogById({
     "http": {
       "method": "GET",
       "ip": null,
-      "headers": {},
-      "query": {},
-      "pathParams": {},
+      "headers": {
+        "Authorization": "Bearer token"
+      },
+      "query": {
+        "limit": 50,
+        "page": 0
+      },
+      "pathParams": {
+        "eventId": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+      },
       "path": "/v1/logs",
       "domainName": "audit-logs.sls.epilot.io"
     },

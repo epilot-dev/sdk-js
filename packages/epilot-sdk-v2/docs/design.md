@@ -83,7 +83,85 @@ const { data } = await client.getAllDesigns()
 [
   {
     "designs": [
-      {}
+      {
+        "id": "string",
+        "created_at": "2021-01-30T08:30:00Z",
+        "created_by": "string",
+        "edited": true,
+        "last_modified_at": "string",
+        "brand_id": "string",
+        "brand_name": "string",
+        "user": {
+          "emailaddress": "string",
+          "fullname": "string",
+          "name": "string",
+          "userid": "string"
+        },
+        "style_name": "string",
+        "style": {
+          "logo": {
+            "main": {
+              "name": "string",
+              "display_name": "string",
+              "file_type": "LOGO",
+              "s3_object_key": "string",
+              "url": "string"
+            }
+          },
+          "palette": {
+            "primary": "string",
+            "secondary": "string",
+            "error": "string",
+            "background": "string",
+            "paper": "string",
+            "navbar": "string",
+            "portal_login_background": "string"
+          },
+          "typography": {
+            "font": {
+              "font_id": "string",
+              "font_name": "string",
+              "font_family": "string",
+              "font_weight_regular": "string",
+              "font_weight_medium": "string",
+              "font_weight_bold": "string",
+              "urls": [
+                {
+                  "type": "WOFF2",
+                  "url": "string"
+                }
+              ]
+            },
+            "primary": "string",
+            "secondary": "string"
+          },
+          "shape": {
+            "border_radius": 0
+          },
+          "consumer": {
+            "widgets": [
+              {
+                "id": "string",
+                "name": "string"
+              }
+            ],
+            "customer_portals": [
+              {
+                "id": "string",
+                "name": "string"
+              }
+            ]
+          }
+        },
+        "is_default": true,
+        "custom_theme": "string",
+        "use_custom_theme": true,
+        "design_tokens": {
+          "coupon": "string",
+          "cashback": "string",
+          "custom_css": "string"
+        }
+      }
     ]
   }
 ]
@@ -114,11 +192,59 @@ const { data } = await client.addDesign(
       },
       style_name: 'string',
       style: {
-        logo: { /* ... */ },
-        palette: { /* ... */ },
-        typography: { /* ... */ },
-        shape: { /* ... */ },
-        consumer: { /* ... */ }
+        logo: {
+          main: {
+            name: 'string',
+            display_name: 'string',
+            file_type: 'LOGO',
+            s3_object_key: 'string',
+            url: 'string'
+          }
+        },
+        palette: {
+          primary: 'string',
+          secondary: 'string',
+          error: 'string',
+          background: 'string',
+          paper: 'string',
+          navbar: 'string',
+          portal_login_background: 'string'
+        },
+        typography: {
+          font: {
+            font_id: 'string',
+            font_name: 'string',
+            font_family: 'string',
+            font_weight_regular: 'string',
+            font_weight_medium: 'string',
+            font_weight_bold: 'string',
+            urls: [
+              {
+                type: 'WOFF2',
+                url: 'string'
+              }
+            ]
+          },
+          primary: 'string',
+          secondary: 'string'
+        },
+        shape: {
+          border_radius: 0
+        },
+        consumer: {
+          widgets: [
+            {
+              id: 'string',
+              name: 'string'
+            }
+          ],
+          customer_portals: [
+            {
+              id: 'string',
+              name: 'string'
+            }
+          ]
+        }
       },
       is_default: true,
       custom_theme: 'string',
@@ -154,11 +280,59 @@ const { data } = await client.addDesign(
     },
     "style_name": "string",
     "style": {
-      "logo": {},
-      "palette": {},
-      "typography": {},
-      "shape": {},
-      "consumer": {}
+      "logo": {
+        "main": {
+          "name": "string",
+          "display_name": "string",
+          "file_type": "LOGO",
+          "s3_object_key": "string",
+          "url": "string"
+        }
+      },
+      "palette": {
+        "primary": "string",
+        "secondary": "string",
+        "error": "string",
+        "background": "string",
+        "paper": "string",
+        "navbar": "string",
+        "portal_login_background": "string"
+      },
+      "typography": {
+        "font": {
+          "font_id": "string",
+          "font_name": "string",
+          "font_family": "string",
+          "font_weight_regular": "string",
+          "font_weight_medium": "string",
+          "font_weight_bold": "string",
+          "urls": [
+            {
+              "type": "WOFF2",
+              "url": "string"
+            }
+          ]
+        },
+        "primary": "string",
+        "secondary": "string"
+      },
+      "shape": {
+        "border_radius": 0
+      },
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
     },
     "is_default": true,
     "custom_theme": "string",
@@ -209,11 +383,59 @@ const { data } = await client.getDesign({
     },
     "style_name": "string",
     "style": {
-      "logo": {},
-      "palette": {},
-      "typography": {},
-      "shape": {},
-      "consumer": {}
+      "logo": {
+        "main": {
+          "name": "string",
+          "display_name": "string",
+          "file_type": "LOGO",
+          "s3_object_key": "string",
+          "url": "string"
+        }
+      },
+      "palette": {
+        "primary": "string",
+        "secondary": "string",
+        "error": "string",
+        "background": "string",
+        "paper": "string",
+        "navbar": "string",
+        "portal_login_background": "string"
+      },
+      "typography": {
+        "font": {
+          "font_id": "string",
+          "font_name": "string",
+          "font_family": "string",
+          "font_weight_regular": "string",
+          "font_weight_medium": "string",
+          "font_weight_bold": "string",
+          "urls": [
+            {
+              "type": "WOFF2",
+              "url": "string"
+            }
+          ]
+        },
+        "primary": "string",
+        "secondary": "string"
+      },
+      "shape": {
+        "border_radius": 0
+      },
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
     },
     "is_default": true,
     "custom_theme": "string",
@@ -268,11 +490,59 @@ const { data } = await client.updateDesign(
       },
       style_name: 'string',
       style: {
-        logo: { /* ... */ },
-        palette: { /* ... */ },
-        typography: { /* ... */ },
-        shape: { /* ... */ },
-        consumer: { /* ... */ }
+        logo: {
+          main: {
+            name: 'string',
+            display_name: 'string',
+            file_type: 'LOGO',
+            s3_object_key: 'string',
+            url: 'string'
+          }
+        },
+        palette: {
+          primary: 'string',
+          secondary: 'string',
+          error: 'string',
+          background: 'string',
+          paper: 'string',
+          navbar: 'string',
+          portal_login_background: 'string'
+        },
+        typography: {
+          font: {
+            font_id: 'string',
+            font_name: 'string',
+            font_family: 'string',
+            font_weight_regular: 'string',
+            font_weight_medium: 'string',
+            font_weight_bold: 'string',
+            urls: [
+              {
+                type: 'WOFF2',
+                url: 'string'
+              }
+            ]
+          },
+          primary: 'string',
+          secondary: 'string'
+        },
+        shape: {
+          border_radius: 0
+        },
+        consumer: {
+          widgets: [
+            {
+              id: 'string',
+              name: 'string'
+            }
+          ],
+          customer_portals: [
+            {
+              id: 'string',
+              name: 'string'
+            }
+          ]
+        }
       },
       is_default: true,
       custom_theme: 'string',
@@ -406,11 +676,59 @@ const { data } = await client.getConsumerDesign({
     },
     "style_name": "string",
     "style": {
-      "logo": {},
-      "palette": {},
-      "typography": {},
-      "shape": {},
-      "consumer": {}
+      "logo": {
+        "main": {
+          "name": "string",
+          "display_name": "string",
+          "file_type": "LOGO",
+          "s3_object_key": "string",
+          "url": "string"
+        }
+      },
+      "palette": {
+        "primary": "string",
+        "secondary": "string",
+        "error": "string",
+        "background": "string",
+        "paper": "string",
+        "navbar": "string",
+        "portal_login_background": "string"
+      },
+      "typography": {
+        "font": {
+          "font_id": "string",
+          "font_name": "string",
+          "font_family": "string",
+          "font_weight_regular": "string",
+          "font_weight_medium": "string",
+          "font_weight_bold": "string",
+          "urls": [
+            {
+              "type": "WOFF2",
+              "url": "string"
+            }
+          ]
+        },
+        "primary": "string",
+        "secondary": "string"
+      },
+      "shape": {
+        "border_radius": 0
+      },
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
     },
     "is_default": true,
     "custom_theme": "string",
@@ -542,7 +860,8 @@ type GetAllDesignsRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
-  // ...
+    }
+  }>
 }
 ```
 
@@ -630,7 +949,8 @@ type AddDesignRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
-  // ...
+    }
+  }
 }
 ```
 
@@ -667,7 +987,8 @@ type GetDesignRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
-  // ...
+    }
+  }
 }
 ```
 
@@ -759,7 +1080,13 @@ type DesignItem = {
     }
     shape?: {
       border_radius?: { ... }
-  // ...
+    }
+    consumer: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  is_default?: boolean
 }
 ```
 

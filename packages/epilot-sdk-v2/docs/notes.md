@@ -69,9 +69,7 @@ Creates a new Note entry
 const { data } = await client.createNote(
   null,
   {
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     type: 'string',
     entity_id: 'string',
     parent_id: 'string',
@@ -88,12 +86,8 @@ const { data } = await client.createNote(
       }
     ],
     content: 'string',
-    attachments: [
-      'string'
-    ],
-    read_by: [
-      'string'
-    ]
+    attachments: ['string'],
+    read_by: ['string']
   },
 )
 ```
@@ -147,9 +141,7 @@ const { data } = await client.updateNote(
     _created_at: '1970-01-01T00:00:00.000Z',
     _updated_at: '1970-01-01T00:00:00.000Z',
     _created_by: 'string',
-    _tags: [
-      'string'
-    ],
+    _tags: ['string'],
     _acl: {},
     _owners: [
       {
@@ -160,17 +152,23 @@ const { data } = await client.updateNote(
     type: 'string',
     context_entities: {
       $relation: [
-        { /* ... */ }
+        {
+          entity_id: 'string'
+        }
       ]
     },
     parent: {
       $relation: [
-        { /* ... */ }
+        {
+          entity_id: 'string'
+        }
       ]
     },
     attachments: {
       $relation: [
-        { /* ... */ }
+        {
+          entity_id: 'string'
+        }
       ]
     },
     content: 'string',
@@ -189,9 +187,7 @@ const { data } = await client.updateNote(
       email: 'string',
       phone: 'string'
     },
-    read_by: [
-      'string'
-    ],
+    read_by: ['string'],
     reactions: {}
   },
 )
@@ -277,9 +273,14 @@ const { data } = await client.getNoteContexts({
       "_created_at": "1970-01-01T00:00:00.000Z",
       "_updated_at": "1970-01-01T00:00:00.000Z",
       "_created_by": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "_acl": {},
-      "_owners": [],
+      "_owners": [
+        {
+          "org_id": "string",
+          "user_id": "string"
+        }
+      ],
       "type": "string"
     }
   }
@@ -336,10 +337,7 @@ const { data } = await client.toggleNoteReactions(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    emojis: [
-      'thumbs-up',
-      'heart'
-    ]
+    emojis: ['thumbs-up', 'heart']
   },
 )
 ```
@@ -479,7 +477,15 @@ type NotePatchRequestBody = {
   }>
   pinned_at?: string // date-time
   created_by?: {
-  // ...
+    type: "user" | "group"
+    user_id?: string
+    display_name?: string
+    org_id?: string
+    email?: string
+    phone?: string
+  }
+  read_by?: string[]
+  reactions?: Record<string, string[]>
 }
 ```
 
@@ -550,7 +556,21 @@ type NotePutRequestBody = {
     }>
   }
   content?: string
-  // ...
+  contexts?: Array<{
+    type: "workflow_execution" | "workflow_task" | "workflow_configuration" | "journey_configuration" | "entity"
+    id: string
+  }>
+  pinned_at?: string // date-time
+  created_by?: {
+    type: "user" | "group"
+    user_id?: string
+    display_name?: string
+    org_id?: string
+    email?: string
+    phone?: string
+  }
+  read_by?: string[]
+  reactions?: Record<string, string[]>
 }
 ```
 

@@ -94,12 +94,62 @@ const { data } = await client.getNotificationsV2({
       "type": "workflow",
       "redirect_url": "https://epilot.cloud",
       "organization_id": "206801",
-      "title": {},
-      "message": {},
-      "payload": {},
-      "caller": {},
-      "operations": [],
-      "force_notify_users": {}
+      "title": {
+        "en": "My custom notification",
+        "de": "Meine benutzerdefinierte Aktivität"
+      },
+      "message": {
+        "en": "{{caller}} did something with {{contact.entity.id}} {{branch.name}}.",
+        "de": "{{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}."
+      },
+      "payload": {
+        "entity": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "schema": "contact"
+        }
+      },
+      "caller": {
+        "EpilotAuth": {
+          "token": {
+            "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+            "cognito:groups": ["Administrator"],
+            "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+            "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+            "custom:ivy_org_id": "739224",
+            "cognito:username": "n.ahmad@epilot.cloud",
+            "custom:ivy_user_id": "10006129",
+            "cognito:roles": ["arn:aws:iam::912468240823:role/base-administrator-role"],
+            "aud": "6e0jbdnger7nmoktaaflarue1l",
+            "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+            "token_use": "id",
+            "auth_time": 1614333023,
+            "exp": 1614336623,
+            "iat": 1614333023,
+            "email": "n.ahmad@epilot.cloud"
+          }
+        }
+      },
+      "operations": [
+        {
+          "entity": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "operation": "updateEntity",
+          "params": {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "slug": "contact"
+          },
+          "payload": {
+            "_schema": "contact",
+            "_org": "123",
+            "status": "Inactive"
+          }
+        }
+      ],
+      "force_notify_users": {
+        "12345": {
+          "email": false,
+          "in_app": false
+        }
+      }
     }
   ]
 }
@@ -140,15 +190,38 @@ const { data } = await client.createNotification(
     },
     caller: {
       EpilotAuth: {
-        token: { /* ... */ }
+        token: {
+          sub: '476e9b48-42f4-4234-a2b0-4668b34626ce',
+          'cognito:groups': ['Administrator'],
+          'cognito:preferred_role': 'arn:aws:iam::912468240823:role/base-administrator-role',
+          iss: 'https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D',
+          'custom:ivy_org_id': '739224',
+          'cognito:username': 'n.ahmad@epilot.cloud',
+          'custom:ivy_user_id': '10006129',
+          'cognito:roles': ['arn:aws:iam::912468240823:role/base-administrator-role'],
+          aud: '6e0jbdnger7nmoktaaflarue1l',
+          event_id: 'cd5f5583-d90c-4db5-8e99-5f5dd29a4d75',
+          token_use: 'id',
+          auth_time: 1614333023,
+          exp: 1614336623,
+          iat: 1614333023,
+          email: 'n.ahmad@epilot.cloud'
+        }
       }
     },
     operations: [
       {
         entity: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         operation: 'updateEntity',
-        params: { /* ... */ },
-        payload: { /* ... */ }
+        params: {
+          id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          slug: 'contact'
+        },
+        payload: {
+          _schema: 'contact',
+          _org: '123',
+          status: 'Inactive'
+        }
       }
     ],
     force_notify_users: {
@@ -158,13 +231,7 @@ const { data } = await client.createNotification(
       }
     },
     read_state: false,
-    visibility_user_ids: [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5'
-    ]
+    visibility_user_ids: ['1', '2', '3', '4', '5']
   },
 )
 ```
@@ -201,12 +268,62 @@ const { data } = await client.getNotifications({
       "type": "workflow",
       "redirect_url": "https://epilot.cloud",
       "organization_id": "206801",
-      "title": {},
-      "message": {},
-      "payload": {},
-      "caller": {},
-      "operations": [],
-      "force_notify_users": {}
+      "title": {
+        "en": "My custom notification",
+        "de": "Meine benutzerdefinierte Aktivität"
+      },
+      "message": {
+        "en": "{{caller}} did something with {{contact.entity.id}} {{branch.name}}.",
+        "de": "{{caller}} habe etwas damit gemacht {{contact.entity.id}} {{branch.name}}."
+      },
+      "payload": {
+        "entity": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "schema": "contact"
+        }
+      },
+      "caller": {
+        "EpilotAuth": {
+          "token": {
+            "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+            "cognito:groups": ["Administrator"],
+            "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+            "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+            "custom:ivy_org_id": "739224",
+            "cognito:username": "n.ahmad@epilot.cloud",
+            "custom:ivy_user_id": "10006129",
+            "cognito:roles": ["arn:aws:iam::912468240823:role/base-administrator-role"],
+            "aud": "6e0jbdnger7nmoktaaflarue1l",
+            "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+            "token_use": "id",
+            "auth_time": 1614333023,
+            "exp": 1614336623,
+            "iat": 1614333023,
+            "email": "n.ahmad@epilot.cloud"
+          }
+        }
+      },
+      "operations": [
+        {
+          "entity": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "operation": "updateEntity",
+          "params": {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "slug": "contact"
+          },
+          "payload": {
+            "_schema": "contact",
+            "_org": "123",
+            "status": "Inactive"
+          }
+        }
+      ],
+      "force_notify_users": {
+        "12345": {
+          "email": false,
+          "in_app": false
+        }
+      }
     }
   ]
 }
@@ -256,15 +373,38 @@ const { data } = await client.getNotification({
   },
   "caller": {
     "EpilotAuth": {
-      "token": {}
+      "token": {
+        "sub": "476e9b48-42f4-4234-a2b0-4668b34626ce",
+        "cognito:groups": ["Administrator"],
+        "cognito:preferred_role": "arn:aws:iam::912468240823:role/base-administrator-role",
+        "iss": "https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_6lZSgmU6D",
+        "custom:ivy_org_id": "739224",
+        "cognito:username": "n.ahmad@epilot.cloud",
+        "custom:ivy_user_id": "10006129",
+        "cognito:roles": ["arn:aws:iam::912468240823:role/base-administrator-role"],
+        "aud": "6e0jbdnger7nmoktaaflarue1l",
+        "event_id": "cd5f5583-d90c-4db5-8e99-5f5dd29a4d75",
+        "token_use": "id",
+        "auth_time": 1614333023,
+        "exp": 1614336623,
+        "iat": 1614333023,
+        "email": "n.ahmad@epilot.cloud"
+      }
     }
   },
   "operations": [
     {
       "entity": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "operation": "updateEntity",
-      "params": {},
-      "payload": {}
+      "params": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "slug": "contact"
+      },
+      "payload": {
+        "_schema": "contact",
+        "_org": "123",
+        "status": "Inactive"
+      }
     }
   ],
   "force_notify_users": {
@@ -346,12 +486,21 @@ const { data } = await client.listNotificationTemplates({
       "_schema": "string",
       "_title": "string",
       "_org": "string",
-      "_tags": [],
+      "_tags": ["string"],
       "_created_at": "1970-01-01T00:00:00.000Z",
       "_updated_at": "1970-01-01T00:00:00.000Z",
-      "_manifest": [],
-      "_owners": [],
-      "_acl": {},
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+      "_owners": [
+        {
+          "org_id": "string",
+          "user_id": "string"
+        }
+      ],
+      "_acl": {
+        "view": ["string"],
+        "edit": ["string"],
+        "delete": ["string"]
+      },
       "name": "string",
       "type": "string",
       "notification_title": "string",
@@ -390,12 +539,8 @@ const { data } = await client.createNotificationTemplate(
     action_url: 'string',
     style: 'string',
     _title: 'string',
-    _tags: [
-      'string'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _tags: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -409,14 +554,10 @@ const { data } = await client.createNotificationTemplate(
   "_schema": "string",
   "_title": "string",
   "_org": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_updated_at": "1970-01-01T00:00:00.000Z",
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "_owners": [
     {
       "org_id": "string",
@@ -424,15 +565,9 @@ const { data } = await client.createNotificationTemplate(
     }
   ],
   "_acl": {
-    "view": [
-      "string"
-    ],
-    "edit": [
-      "string"
-    ],
-    "delete": [
-      "string"
-    ]
+    "view": ["string"],
+    "edit": ["string"],
+    "delete": ["string"]
   },
   "name": "string",
   "type": "string",
@@ -472,14 +607,10 @@ const { data } = await client.getNotificationTemplate({
   "_schema": "string",
   "_title": "string",
   "_org": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_updated_at": "1970-01-01T00:00:00.000Z",
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "_owners": [
     {
       "org_id": "string",
@@ -487,15 +618,9 @@ const { data } = await client.getNotificationTemplate({
     }
   ],
   "_acl": {
-    "view": [
-      "string"
-    ],
-    "edit": [
-      "string"
-    ],
-    "delete": [
-      "string"
-    ]
+    "view": ["string"],
+    "edit": ["string"],
+    "delete": ["string"]
   },
   "name": "string",
   "type": "string",
@@ -533,12 +658,8 @@ const { data } = await client.updateNotificationTemplate(
     action_url: 'string',
     style: 'string',
     _title: 'string',
-    _tags: [
-      'string'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _tags: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -552,14 +673,10 @@ const { data } = await client.updateNotificationTemplate(
   "_schema": "string",
   "_title": "string",
   "_org": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_updated_at": "1970-01-01T00:00:00.000Z",
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "_owners": [
     {
       "org_id": "string",
@@ -567,15 +684,9 @@ const { data } = await client.updateNotificationTemplate(
     }
   ],
   "_acl": {
-    "view": [
-      "string"
-    ],
-    "edit": [
-      "string"
-    ],
-    "delete": [
-      "string"
-    ]
+    "view": ["string"],
+    "edit": ["string"],
+    "delete": ["string"]
   },
   "name": "string",
   "type": "string",
@@ -613,12 +724,8 @@ const { data } = await client.patchNotificationTemplate(
     action_url: 'string',
     style: 'string',
     _title: 'string',
-    _tags: [
-      'string'
-    ],
-    _manifest: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    _tags: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -632,14 +739,10 @@ const { data } = await client.patchNotificationTemplate(
   "_schema": "string",
   "_title": "string",
   "_org": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_updated_at": "1970-01-01T00:00:00.000Z",
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "_owners": [
     {
       "org_id": "string",
@@ -647,15 +750,9 @@ const { data } = await client.patchNotificationTemplate(
     }
   ],
   "_acl": {
-    "view": [
-      "string"
-    ],
-    "edit": [
-      "string"
-    ],
-    "delete": [
-      "string"
-    ]
+    "view": ["string"],
+    "edit": ["string"],
+    "delete": ["string"]
   },
   "name": "string",
   "type": "string",
@@ -695,14 +792,10 @@ const { data } = await client.deleteNotificationTemplate({
   "_schema": "string",
   "_title": "string",
   "_org": "string",
-  "_tags": [
-    "string"
-  ],
+  "_tags": ["string"],
   "_created_at": "1970-01-01T00:00:00.000Z",
   "_updated_at": "1970-01-01T00:00:00.000Z",
-  "_manifest": [
-    "123e4567-e89b-12d3-a456-426614174000"
-  ],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "_owners": [
     {
       "org_id": "string",
@@ -710,15 +803,9 @@ const { data } = await client.deleteNotificationTemplate({
     }
   ],
   "_acl": {
-    "view": [
-      "string"
-    ],
-    "edit": [
-      "string"
-    ],
-    "delete": [
-      "string"
-    ]
+    "view": ["string"],
+    "edit": ["string"],
+    "delete": ["string"]
   },
   "name": "string",
   "type": "string",
@@ -756,12 +843,8 @@ const { data } = await client.sendPreview(
       action_url: 'string',
       style: 'string',
       _title: 'string',
-      _tags: [
-        'string'
-      ],
-      _manifest: [
-        '123e4567-e89b-12d3-a456-426614174000'
-      ]
+      _tags: ['string'],
+      _manifest: ['123e4567-e89b-12d3-a456-426614174000']
     },
     context_ids: {}
   },
@@ -842,7 +925,8 @@ type NotificationItem = {
       slug?: { ... }
     }
     payload?: object
-  // ...
+  }>
+  force_notify_users?: Record<string, unknown>
 }
 ```
 
@@ -879,7 +963,8 @@ type Notification = {
     payload?: object
   }>
   force_notify_users?: Record<string, unknown>
-  // ...
+  read_state?: boolean
+  visibility_user_ids?: string[]
 }
 ```
 
@@ -916,7 +1001,6 @@ type NotificationBase = {
     payload?: object
   }>
   force_notify_users?: Record<string, unknown>
-  // ...
 }
 ```
 
@@ -1088,7 +1172,7 @@ type NotificationTemplateListResponse = {
     created_by?: string
     updated_by?: string
   }>
-  // ...
+  hits?: number
 }
 ```
 

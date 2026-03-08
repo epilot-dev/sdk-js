@@ -150,15 +150,16 @@ const { data } = await client.signUpUser(
     "preferred_language": "de",
     "signature": "<p>Thanks</p>",
     "custom_navigation": "5gbe4nkp6jsfq",
-    "roles": [
-      "Owner"
-    ],
+    "roles": ["Owner"],
     "image_uri": {
       "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
       "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
     },
     "properties": [
-      {}
+      {
+        "name": "profileImageName",
+        "value": "avatar.png"
+      }
     ]
   },
   "organization": {
@@ -312,11 +313,40 @@ const { data } = await client.listUsersV2({
       "custom_start_page": "/app/dashboard",
       "custom_navigation": "5gbe4nkp6jsfq",
       "override_release_channel": "canary",
-      "feature_preferences": {},
-      "image_uri": {},
-      "favorites": {},
-      "email_notification_setting": {},
-      "properties": []
+      "feature_preferences": {
+        "feature_name": true
+      },
+      "image_uri": {
+        "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+        "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+      },
+      "favorites": {
+        "entity_views": {
+          "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+          "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+        },
+        "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+      },
+      "email_notification_setting": {
+        "added_participant_opportunity": true,
+        "assigned_opportunity": true,
+        "assigned_task": true,
+        "comment_opportunity": true,
+        "deleted_task": true,
+        "escalated_task": true,
+        "message_receive_opportunity": true,
+        "message_send_opportunity": true,
+        "created_task": true,
+        "created_opportunity_manual": true,
+        "created_opportunity_auto": true,
+        "deleted_opportunity": true
+      },
+      "properties": [
+        {
+          "name": "profileImageName",
+          "value": "avatar.png"
+        }
+      ]
     }
   ]
 }
@@ -565,9 +595,7 @@ const { data } = await client.deleteUserV2({
   "preferred_language": "de",
   "signature": "<p>Thanks</p>",
   "custom_navigation": "5gbe4nkp6jsfq",
-  "roles": [
-    "Owner"
-  ],
+  "roles": ["Owner"],
   "image_uri": {
     "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
     "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
@@ -597,9 +625,7 @@ const { data } = await client.inviteUser(
   {
     email: 'test@example.com',
     language: 'en',
-    roles: [
-      '123:owner'
-    ]
+    roles: ['123:owner']
   },
 )
 ```
@@ -866,10 +892,7 @@ const { data } = await client.createGroup(
   null,
   {
     name: 'Finance',
-    user_ids: [
-      '123',
-      '456'
-    ]
+    user_ids: ['123', '456']
   },
 )
 ```
@@ -1096,10 +1119,7 @@ const { data } = await client.updateGroup(
   },
   {
     name: 'Finance',
-    user_ids: [
-      '123',
-      '456'
-    ]
+    user_ids: ['123', '456']
   },
 )
 ```
@@ -1340,12 +1360,28 @@ const { data } = await client.createNavigation(
     name: 'Sales Team Navigation',
     configuration: {
       customer_relations: [
-        { /* ... */ },
-        { /* ... */ }
+        {
+          key: 'dashboard'
+        },
+        {
+          key: 'contact'
+        }
       ],
       configurations: [
-        { /* ... */ },
-        { /* ... */ }
+        {
+          name: 'Product Catalog',
+          subItems: [
+            {
+              key: 'product'
+            },
+            {
+              key: 'price'
+            }
+          ]
+        },
+        {
+          key: 'journey'
+        }
       ]
     }
   },
@@ -1361,12 +1397,28 @@ const { data } = await client.createNavigation(
   "name": "Sales Team Navigation",
   "configuration": {
     "customer_relations": [
-      {},
-      {}
+      {
+        "key": "dashboard"
+      },
+      {
+        "key": "contact"
+      }
     ],
     "configurations": [
-      {},
-      {}
+      {
+        "name": "Product Catalog",
+        "subItems": [
+          {
+            "key": "product"
+          },
+          {
+            "key": "price"
+          }
+        ]
+      },
+      {
+        "key": "journey"
+      }
     ]
   }
 }
@@ -1397,12 +1449,28 @@ const { data } = await client.getNavigation({
   "name": "Sales Team Navigation",
   "configuration": {
     "customer_relations": [
-      {},
-      {}
+      {
+        "key": "dashboard"
+      },
+      {
+        "key": "contact"
+      }
     ],
     "configurations": [
-      {},
-      {}
+      {
+        "name": "Product Catalog",
+        "subItems": [
+          {
+            "key": "product"
+          },
+          {
+            "key": "price"
+          }
+        ]
+      },
+      {
+        "key": "journey"
+      }
     ]
   }
 }
@@ -1533,7 +1601,7 @@ const { data } = await client.getUserLoginParametersV2({
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
       "cognito_oauth_domain": "epilot-org-123",
-      "cognito_oauth_scopes": [],
+      "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
       "passkey_enabled": true
     }
@@ -1632,7 +1700,7 @@ const { data } = await client.resolveDiscoverableCredential(
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
       "cognito_oauth_domain": "epilot-org-123",
-      "cognito_oauth_scopes": [],
+      "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
       "passkey_enabled": true
     }
@@ -1698,9 +1766,7 @@ const { data } = await client.completePasskeyRegistration(
   "credential_id": "string",
   "friendly_name": "My Laptop",
   "created_at": "1970-01-01T00:00:00.000Z",
-  "transports": [
-    "string"
-  ],
+  "transports": ["string"],
   "aaguid": "string"
 }
 ```
@@ -1729,7 +1795,7 @@ const { data } = await client.listPasskeys()
       "credential_id": "string",
       "friendly_name": "My Laptop",
       "created_at": "1970-01-01T00:00:00.000Z",
-      "transports": [],
+      "transports": ["string"],
       "aaguid": "string"
     }
   ]
@@ -1805,9 +1871,7 @@ const { data } = await client.getMe()
   "preferred_language": "de",
   "signature": "<p>Thanks</p>",
   "custom_navigation": "5gbe4nkp6jsfq",
-  "roles": [
-    "Owner"
-  ],
+  "roles": ["Owner"],
   "image_uri": {
     "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
     "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
@@ -1855,9 +1919,17 @@ const { data } = await client.listUsers({
       "preferred_language": "de",
       "signature": "<p>Thanks</p>",
       "custom_navigation": "5gbe4nkp6jsfq",
-      "roles": [],
-      "image_uri": {},
-      "properties": []
+      "roles": ["Owner"],
+      "image_uri": {
+        "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+        "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+      },
+      "properties": [
+        {
+          "name": "profileImageName",
+          "value": "avatar.png"
+        }
+      ]
     }
   ]
 }
@@ -1892,9 +1964,7 @@ const { data } = await client.getUser({
   "preferred_language": "de",
   "signature": "<p>Thanks</p>",
   "custom_navigation": "5gbe4nkp6jsfq",
-  "roles": [
-    "Owner"
-  ],
+  "roles": ["Owner"],
   "image_uri": {
     "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
     "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
@@ -1939,7 +2009,7 @@ const { data } = await client.getUserLoginParameters({
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
       "cognito_oauth_domain": "epilot-org-123",
-      "cognito_oauth_scopes": [],
+      "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
       "passkey_enabled": true
     }
@@ -2186,7 +2256,8 @@ type UserV2 = {
   email_notification_setting?: Record<string, unknown>
   properties?: Array<{
     name: string
-  // ...
+    value: string
+  }>
 }
 ```
 
@@ -2283,7 +2354,50 @@ type Group = {
     override_release_channel?: "canary" | "rc" | "stable" | null
     feature_preferences?: Record<string, unknown>
     image_uri?: {
-  // ...
+      original?: { ... }
+      thumbnail_32?: { ... }
+    }
+    favorites?: Record<string, unknown>
+    email_notification_setting?: Record<string, unknown>
+    properties?: Array<{
+      name: { ... }
+      value: { ... }
+    }>
+    crt_index?: number
+  }
+  users?: Array<{
+    id?: string
+    organization_id?: string
+    created_at?: string // date-time
+    activated_at?: string // date-time
+    display_name?: string
+    status?: "Active" | "Pending" | "Deactivated" | "Deleted"
+    email?: string // email
+    draft_email?: string // email
+    department?: string
+    phone?: string
+    secondary_phone?: string
+    mfa_enabled?: boolean
+    phone_verified?: boolean
+    token?: string
+    signature?: string
+    is_signature_enabled?: boolean
+    preferred_language?: string
+    custom_start_page?: string
+    custom_navigation?: string
+    override_release_channel?: "canary" | "rc" | "stable" | null
+    feature_preferences?: Record<string, unknown>
+    image_uri?: {
+      original?: { ... }
+      thumbnail_32?: { ... }
+    }
+    favorites?: Record<string, unknown>
+    email_notification_setting?: Record<string, unknown>
+    properties?: Array<{
+      name: { ... }
+      value: { ... }
+    }>
+  }>
 }
 ```
 

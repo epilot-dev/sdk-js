@@ -146,10 +146,7 @@ const { data } = await client.updateMessage()
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -200,22 +197,22 @@ const { data } = await client.updateMessage()
   ],
   "file": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "is_message_attachment": true,
+        "may_be_signature_attachment": true,
+        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+        "inline": false,
+        "send_as_link": false
+      }
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
   "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-  "user_read_message": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
-  "send_status": [
-    "SEND"
-  ],
+  "user_read_message": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
+  "send_status": ["SEND"],
   "type": "SENT",
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
@@ -246,10 +243,7 @@ const { data } = await client.getMessage({
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -300,22 +294,22 @@ const { data } = await client.getMessage({
   ],
   "file": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "is_message_attachment": true,
+        "may_be_signature_attachment": true,
+        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+        "inline": false,
+        "send_as_link": false
+      }
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
   "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-  "user_read_message": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
-  "send_status": [
-    "SEND"
-  ],
+  "user_read_message": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
+  "send_status": ["SEND"],
   "type": "SENT",
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
@@ -366,14 +360,7 @@ const { data } = await client.searchMessages(
   {
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX',
-    fields: [
-      '_id',
-      '_title',
-      'first_name',
-      'account',
-      '!account.*._files',
-      '**._product'
-    ],
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     from: 0,
     size: 10,
     hydrate: false,
@@ -396,7 +383,7 @@ const { data } = await client.searchMessages(
       "_title": "string",
       "_org": "206801",
       "_schema": "message",
-      "_tags": [],
+      "_tags": ["pricing", "INBOX"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-10T09:14:31.990Z",
       "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -404,17 +391,65 @@ const { data } = await client.searchMessages(
       "subject": "Request for solar panel price",
       "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
       "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
-      "from": {},
-      "reply_to": {},
-      "to": [],
-      "cc": [],
-      "bcc": [],
-      "file": {},
+      "from": {
+        "name": "epilot",
+        "address": "messaging@epilot.cloud",
+        "email_type": "INTERNAL",
+        "send_status": "SEND",
+        "send_error": {}
+      },
+      "reply_to": {
+        "name": "epilot",
+        "address": "messaging@epilot.cloud",
+        "email_type": "INTERNAL",
+        "send_status": "SEND",
+        "send_error": {}
+      },
+      "to": [
+        {
+          "name": "epilot",
+          "address": "messaging@epilot.cloud",
+          "email_type": "INTERNAL",
+          "send_status": "SEND",
+          "send_error": {}
+        }
+      ],
+      "cc": [
+        {
+          "name": "epilot",
+          "address": "messaging@epilot.cloud",
+          "email_type": "INTERNAL",
+          "send_status": "SEND",
+          "send_error": {}
+        }
+      ],
+      "bcc": [
+        {
+          "name": "epilot",
+          "address": "messaging@epilot.cloud",
+          "email_type": "INTERNAL",
+          "send_status": "SEND",
+          "send_error": {}
+        }
+      ],
+      "file": {
+        "$relation": [
+          {
+            "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+            "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+            "is_message_attachment": true,
+            "may_be_signature_attachment": true,
+            "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+            "inline": false,
+            "send_as_link": false
+          }
+        ]
+      },
       "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
       "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-      "user_read_message": [],
-      "org_read_message": [],
-      "send_status": [],
+      "user_read_message": ["206801", "200109"],
+      "org_read_message": ["789372", "210291"],
+      "send_status": ["SEND"],
       "type": "SENT",
       "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
     }
@@ -480,10 +515,7 @@ const { data } = await client.markReadMessageV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    scopes: [
-      'organization',
-      'user'
-    ]
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -545,10 +577,7 @@ const { data } = await client.markUnreadMessageV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    scopes: [
-      'organization',
-      'user'
-    ]
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -585,12 +614,12 @@ const { data } = await client.searchThreads(
       "_title": "string",
       "_org": "206801",
       "_schema": "message",
-      "_tags": [],
+      "_tags": ["pricing", "INBOX"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-10T09:14:31.990Z",
       "topic": "CUSTOMER_MESSAGE",
-      "assigned_to": [],
-      "org_read_message": [],
+      "assigned_to": ["206801", "200109"],
+      "org_read_message": ["789372", "210291"],
       "done": false,
       "latest_message": {},
       "latest_trash_message": {},
@@ -616,14 +645,7 @@ const { data } = await client.searchThreadsV2(
   {
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX',
-    fields: [
-      '_id',
-      '_title',
-      'first_name',
-      'account',
-      '!account.*._files',
-      '**._product'
-    ],
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     from: 0,
     size: 10,
     hydrate: false,
@@ -646,12 +668,12 @@ const { data } = await client.searchThreadsV2(
       "_title": "string",
       "_org": "206801",
       "_schema": "message",
-      "_tags": [],
+      "_tags": ["pricing", "INBOX"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-10T09:14:31.990Z",
       "topic": "CUSTOMER_MESSAGE",
-      "assigned_to": [],
-      "org_read_message": [],
+      "assigned_to": ["206801", "200109"],
+      "org_read_message": ["789372", "210291"],
       "done": false,
       "latest_message": {},
       "latest_trash_message": {},
@@ -686,9 +708,7 @@ const { data } = await client.searchIds(
 ```json
 {
   "hits": 14,
-  "results": [
-    "string"
-  ]
+  "results": ["string"]
 }
 ```
 
@@ -715,21 +735,12 @@ const { data } = await client.updateThread()
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "topic": "CUSTOMER_MESSAGE",
-  "assigned_to": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
+  "assigned_to": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
   "done": false,
   "latest_message": {
     "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -765,17 +776,9 @@ const { data } = await client.updateThread()
     },
     "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
     "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-    "user_read_message": [
-      "206801",
-      "200109"
-    ],
-    "org_read_message": [
-      "789372",
-      "210291"
-    ],
-    "send_status": [
-      "SEND"
-    ],
+    "user_read_message": ["206801", "200109"],
+    "org_read_message": ["789372", "210291"],
+    "send_status": ["SEND"],
     "type": "SENT",
     "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
   },
@@ -813,17 +816,9 @@ const { data } = await client.updateThread()
     },
     "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
     "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-    "user_read_message": [
-      "206801",
-      "200109"
-    ],
-    "org_read_message": [
-      "789372",
-      "210291"
-    ],
-    "send_status": [
-      "SEND"
-    ],
+    "user_read_message": ["206801", "200109"],
+    "org_read_message": ["789372", "210291"],
+    "send_status": ["SEND"],
     "type": "SENT",
     "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
   },
@@ -915,7 +910,11 @@ const { data } = await client.getThreadTimeline({
 {
   "events": [
     {
-      "data": {},
+      "data": {
+        "type": "THREAD_DONE",
+        "user_id": "123",
+        "organization_id": "456"
+      },
       "timestamp": "2024-01-01T00:00:00.000Z"
     }
   ]
@@ -964,13 +963,8 @@ Perform a bulk action of marking an array of thread ids as read
 const { data } = await client.threadBulkActionsRead(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ],
-    scopes: [
-      'organization',
-      'user'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -987,13 +981,8 @@ Perform a bulk action of marking an array of thread ids as unread
 const { data } = await client.threadBulkActionsUnread(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ],
-    scopes: [
-      'organization',
-      'user'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -1010,9 +999,7 @@ Perform a bulk action of marking an array of thread ids favorite
 const { data } = await client.threadBulkActionsFavorite(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1029,9 +1016,7 @@ Perform a bulk action of marking an array of thread ids unfavorited
 const { data } = await client.threadBulkActionsUnfavorite(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1048,9 +1033,7 @@ Perform a bulk action of trashing an array of threads
 const { data } = await client.threadBulkActionsTrash(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1067,9 +1050,7 @@ Perform a bulk action of untrashing an array of threads
 const { data } = await client.threadBulkActionsUntrash(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1086,9 +1067,7 @@ Performs a bulk permanent delete for all threads
 const { data } = await client.threadBulkActionsDelete(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1105,9 +1084,7 @@ Perform a bulk action of marking an array of threads as done
 const { data } = await client.threadBulkActionsDone(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1124,9 +1101,7 @@ Perform a bulk action of marking an array of threads as open
 const { data } = await client.threadBulkActionsOpen(
   null,
   {
-    ids: [
-      '6b299eda-4018-4554-8965-c4b5598e6531'
-    ]
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531']
   },
 )
 ```
@@ -1159,10 +1134,7 @@ const { data } = await client.markReadThreadV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    scopes: [
-      'organization',
-      'user'
-    ]
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -1195,10 +1167,7 @@ const { data } = await client.markUnreadThreadV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    scopes: [
-      'organization',
-      'user'
-    ]
+    scopes: ['organization', 'user']
   },
 )
 ```
@@ -1264,9 +1233,7 @@ const { data } = await client.assignUsers(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    assigned_to: [
-      '206801'
-    ]
+    assigned_to: ['206801']
   },
 )
 ```
@@ -1285,12 +1252,8 @@ const { data } = await client.assignUsersV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    add: [
-      '206801'
-    ],
-    remove: [
-      '206801'
-    ]
+    add: ['206801'],
+    remove: ['206801']
   },
 )
 ```
@@ -1347,10 +1310,7 @@ const { data } = await client.createDraft(
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -1401,22 +1361,22 @@ const { data } = await client.createDraft(
   ],
   "file": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "is_message_attachment": true,
+        "may_be_signature_attachment": true,
+        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+        "inline": false,
+        "send_as_link": false
+      }
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
   "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-  "user_read_message": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
-  "send_status": [
-    "SEND"
-  ],
+  "user_read_message": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
+  "send_status": ["SEND"],
   "type": "SENT",
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
@@ -1445,10 +1405,7 @@ const { data } = await client.sendDraft()
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -1499,22 +1456,22 @@ const { data } = await client.sendDraft()
   ],
   "file": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "is_message_attachment": true,
+        "may_be_signature_attachment": true,
+        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+        "inline": false,
+        "send_as_link": false
+      }
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
   "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-  "user_read_message": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
-  "send_status": [
-    "SEND"
-  ],
+  "user_read_message": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
+  "send_status": ["SEND"],
   "type": "SENT",
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
@@ -1552,10 +1509,7 @@ const { data } = await client.getMessageV2({
   "_title": "string",
   "_org": "206801",
   "_schema": "message",
-  "_tags": [
-    "pricing",
-    "INBOX"
-  ],
+  "_tags": ["pricing", "INBOX"],
   "_created_at": "2021-02-09T12:41:43.662Z",
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
@@ -1606,22 +1560,22 @@ const { data } = await client.getMessageV2({
   ],
   "file": {
     "$relation": [
-      {}
+      {
+        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
+        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
+        "is_message_attachment": true,
+        "may_be_signature_attachment": true,
+        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
+        "inline": false,
+        "send_as_link": false
+      }
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
   "in_reply_to": "<CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
-  "user_read_message": [
-    "206801",
-    "200109"
-  ],
-  "org_read_message": [
-    "789372",
-    "210291"
-  ],
-  "send_status": [
-    "SEND"
-  ],
+  "user_read_message": ["206801", "200109"],
+  "org_read_message": ["789372", "210291"],
+  "send_status": ["SEND"],
   "type": "SENT",
   "template_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
 }
@@ -1698,6 +1652,76 @@ type Thread = {
       address: { ... }
       email_type?: { ... }
       send_status?: { ... }
+      send_error?: { ... }
+    }>
+    cc?: Array<{
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }>
+    bcc?: Array<{
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }>
+    file?: {
+      $relation?: { ... }
+    }
+    references?: string
+    in_reply_to?: string
+    user_read_message?: string[]
+    org_read_message?: string[]
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"[]
+    type?: "SENT" | "RECEIVED"
+    template_id?: string
+  }
+  latest_trash_message?: {
+    message_id?: string
+    sender?: string
+    subject: string
+    html?: string
+    text?: string
+    from: {
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }
+    reply_to?: {
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }
+    to?: Array<{
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }>
+    cc?: Array<{
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }>
+    bcc?: Array<{
+      name?: { ... }
+      address: { ... }
+      email_type?: { ... }
+      send_status?: { ... }
+      send_error?: { ... }
+    }>
+    file?: {
+      $relation?: { ... }
   // ...
 }
 ```
@@ -1735,7 +1759,35 @@ type Message = {
   cc?: Array<{
     name?: string
     address: string
-  // ...
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  bcc?: Array<{
+    name?: string
+    address: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  file?: {
+    $relation?: Array<{
+      entity_id: { ... }
+      filename?: { ... }
+      is_message_attachment?: { ... }
+      may_be_signature_attachment?: { ... }
+      cid?: { ... }
+      inline?: { ... }
+      send_as_link?: { ... }
+    }>
+  }
+  references?: string
+  in_reply_to?: string
+  user_read_message?: string[]
+  org_read_message?: string[]
+  send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"[]
+  type?: "SENT" | "RECEIVED"
+  template_id?: string
 }
 ```
 
@@ -1772,7 +1824,42 @@ type MessageV2 = {
   to?: Array<{
     name?: string
     address: string
-  // ...
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  cc?: Array<{
+    name?: string
+    address: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  bcc?: Array<{
+    name?: string
+    address: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  file?: {
+    $relation?: Array<{
+      entity_id: { ... }
+      filename?: { ... }
+      is_message_attachment?: { ... }
+      may_be_signature_attachment?: { ... }
+      cid?: { ... }
+      inline?: { ... }
+      send_as_link?: { ... }
+    }>
+  }
+  references?: string
+  in_reply_to?: string
+  user_read_message?: string[]
+  org_read_message?: string[]
+  send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"[]
+  type?: "SENT" | "RECEIVED"
+  template_id?: string
 }
 ```
 
@@ -1853,7 +1940,33 @@ type MessageRequestParams = {
     email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
     send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
     send_error?: object
-  // ...
+  }>
+  cc?: Array<{
+    name?: string
+    address: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  bcc?: Array<{
+    name?: string
+    address: string
+    email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER"
+    send_status?: "SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR"
+    send_error?: object
+  }>
+  file?: {
+    $relation?: Array<{
+      entity_id: { ... }
+      filename?: { ... }
+      is_message_attachment?: { ... }
+      may_be_signature_attachment?: { ... }
+      cid?: { ... }
+      inline?: { ... }
+      send_as_link?: { ... }
+    }>
+  }
+  template_id?: string
 }
 ```
 

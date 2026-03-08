@@ -43,9 +43,7 @@ const { data } = await client.deduplicate(
   [
     {
       toKeep: 'string',
-      toDelete: [
-        'string'
-      ]
+      toDelete: ['string']
     }
   ],
 )
@@ -64,12 +62,13 @@ const { data } = await client.deduplicate(
     "_updated_at": "1970-01-01T00:00:00.000Z",
     "_created_by": "string",
     "created_by": "string",
-    "_tags": [
-      "string"
-    ],
+    "_tags": ["string"],
     "_acl": {},
     "_owners": [
-      {}
+      {
+        "org_id": "string",
+        "user_id": "string"
+      }
     ],
     "type": "string"
   }

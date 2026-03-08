@@ -369,9 +369,7 @@ const { data } = await client.upsertPortal(
         enabled: true
       },
       entry_point: 'PASSWORD',
-      preferred_sso_providers: [
-        'office-365-login'
-      ],
+      preferred_sso_providers: ['office-365-login'],
       auto_redirect_to_sso: true
     },
     cognito_details: {
@@ -388,18 +386,10 @@ const { data } = await client.upsertPortal(
       }
     },
     config: 'string',
-    contact_identifiers: [
-      'email',
-      'last_name'
-    ],
+    contact_identifiers: ['email', 'last_name'],
     approval_state_attributes: {
-      contact: [
-        'name',
-        'address'
-      ],
-      contract: [
-        'installment_amount'
-      ]
+      contact: ['name', 'address'],
+      contract: ['installment_amount']
     },
     email_templates: {
       confirmAccount: '5da0a718-c822-403d-9f5d-20d4584e0528',
@@ -426,7 +416,7 @@ const { data } = await client.upsertPortal(
     entity_identifiers: {
       type: {
         isEnabled: true,
-        attributes: [ /* ... */ ]
+        attributes: ['contract_number']
       }
     },
     contract_identifiers: [
@@ -475,36 +465,16 @@ const { data } = await client.upsertPortal(
       }
     ],
     allowed_file_extensions: {
-      document: [
-        'pdf'
-      ],
-      image: [
-        'jpg'
-      ],
-      spreadsheet: [
-        'xls'
-      ],
-      presentation: [
-        'ppt'
-      ],
-      audioVideo: [
-        'mp4'
-      ],
-      email: [
-        'eml'
-      ],
-      archive: [
-        'zip'
-      ],
-      cad: [
-        'cad'
-      ],
-      calendar: [
-        'ics'
-      ],
-      other: [
-        'txt'
-      ]
+      document: ['pdf'],
+      image: ['jpg'],
+      spreadsheet: ['xls'],
+      presentation: ['ppt'],
+      audioVideo: ['mp4'],
+      email: ['eml'],
+      archive: ['zip'],
+      cad: ['cad'],
+      calendar: ['ics'],
+      other: ['txt']
     },
     prevent_search_engine_indexing: true,
     meter_reading_grace_period: 0,
@@ -552,9 +522,7 @@ const { data } = await client.upsertPortal(
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -571,18 +539,10 @@ const { data } = await client.upsertPortal(
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -609,7 +569,7 @@ const { data } = await client.upsertPortal(
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -657,36 +617,16 @@ const { data } = await client.upsertPortal(
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -905,9 +845,7 @@ const { data } = await client.getPortalConfigByDomain({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -924,18 +862,10 @@ const { data } = await client.getPortalConfigByDomain({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -962,7 +892,7 @@ const { data } = await client.getPortalConfigByDomain({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -1010,36 +940,16 @@ const { data } = await client.getPortalConfigByDomain({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -1128,9 +1038,7 @@ const { data } = await client.getPortalConfig({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -1147,18 +1055,10 @@ const { data } = await client.getPortalConfig({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -1185,7 +1085,7 @@ const { data } = await client.getPortalConfig({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -1233,36 +1133,16 @@ const { data } = await client.getPortalConfig({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -1349,13 +1229,71 @@ const { data } = await client.getPortalExtensions({
     },
     "version": "string",
     "options": [
-      {}
+      {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "type": "text",
+        "description": {
+          "en": "string"
+        },
+        "default": "string",
+        "required": false
+      }
     ],
     "links": [
-      {}
+      {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "description": {
+          "en": "string"
+        },
+        "type": "seamless",
+        "condition": "{{Contact.customer_number | is_not_empty}}",
+        "auth": {
+          "method": "GET",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "cache": {
+            "key": "{{Options.api_key}}",
+            "ttl": "{{AuthResponse.data.expires_in}}"
+          }
+        },
+        "redirect": {
+          "url": "string",
+          "params": {}
+        }
+      }
     ],
     "hooks": [
-      {}
+      {
+        "type": "registrationIdentifiersCheck",
+        "auth": {
+          "method": "GET",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "cache": {
+            "key": "{{Options.api_key}}",
+            "ttl": "{{AuthResponse.data.expires_in}}"
+          }
+        },
+        "call": {
+          "method": "POST",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "result": "string"
+        },
+        "use_static_ips": false
+      }
     ]
   }
 ]
@@ -1385,35 +1323,74 @@ const { data } = await client.getPublicPortalExtensionDetails({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {}
+      "name": {
+        "en": "string"
+      }
     },
     "hook": {
-      "explanation": {}
+      "explanation": {
+        "en": "This process will give you access to all Contracts kept"
+      }
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {}
+      "name": {
+        "en": "string"
+      }
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1455,13 +1432,71 @@ const { data } = await client.getPortalExtensionsV3({
     },
     "version": "string",
     "options": [
-      {}
+      {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "type": "text",
+        "description": {
+          "en": "string"
+        },
+        "default": "string",
+        "required": false
+      }
     ],
     "links": [
-      {}
+      {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "description": {
+          "en": "string"
+        },
+        "type": "seamless",
+        "condition": "{{Contact.customer_number | is_not_empty}}",
+        "auth": {
+          "method": "GET",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "cache": {
+            "key": "{{Options.api_key}}",
+            "ttl": "{{AuthResponse.data.expires_in}}"
+          }
+        },
+        "redirect": {
+          "url": "string",
+          "params": {}
+        }
+      }
     ],
     "hooks": [
-      {}
+      {
+        "type": "registrationIdentifiersCheck",
+        "auth": {
+          "method": "GET",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "cache": {
+            "key": "{{Options.api_key}}",
+            "ttl": "{{AuthResponse.data.expires_in}}"
+          }
+        },
+        "call": {
+          "method": "POST",
+          "url": "string",
+          "params": {},
+          "headers": {},
+          "body": {},
+          "result": "string"
+        },
+        "use_static_ips": false
+      }
     ]
   }
 ]
@@ -1495,35 +1530,74 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {},
-      "hook": {}
+      "extension": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        }
+      },
+      "hook": {
+        "id": "string",
+        "name": {
+          "en": "string"
+        },
+        "intervals": ["string"]
+      }
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {}
+      "name": {
+        "en": "string"
+      }
     },
     "hook": {
-      "explanation": {}
+      "explanation": {
+        "en": "This process will give you access to all Contracts kept"
+      }
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {}
+      "name": {
+        "en": "string"
+      }
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1645,7 +1719,18 @@ const { data } = await client.getPrices({
       "unit_amount": 1234,
       "unit_amount_currency": "EUR",
       "unit_amount_decimal": "12.34",
-      "components": {},
+      "components": {
+        "auction_price_amount": 1000,
+        "auction_price_amount_decimal": "10.00",
+        "taxes_levies_amount": 50,
+        "taxes_levies_amount_decimal": "0.50",
+        "source_fee_amount": 50,
+        "source_fee_amount_decimal": "0.50",
+        "grid_fee_amount": 100,
+        "grid_fee_amount_decimal": "1.00",
+        "margin_amount": 34,
+        "margin_amount_decimal": "0.34"
+      },
       "tax_behavior": "exclusive",
       "tax_rate": 19
     }
@@ -1691,9 +1776,7 @@ const { data } = await client.getExternalLinks({
       "color": "string",
       "size": 0
     },
-    "extension_link_id": [
-      "string"
-    ]
+    "extension_link_id": ["string"]
   }
 ]
 ```
@@ -1736,9 +1819,7 @@ const { data } = await client.getExternalLinksV3({
       "color": "string",
       "size": 0
     },
-    "extension_link_id": [
-      "string"
-    ]
+    "extension_link_id": ["string"]
   }
 ]
 ```
@@ -1821,9 +1902,7 @@ const { data } = await client.getPublicPortalConfig({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -1840,18 +1919,10 @@ const { data } = await client.getPublicPortalConfig({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -1878,7 +1949,7 @@ const { data } = await client.getPublicPortalConfig({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -1926,36 +1997,16 @@ const { data } = await client.getPublicPortalConfig({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -2044,9 +2095,7 @@ const { data } = await client.getOrgPortalConfig({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -2063,18 +2112,10 @@ const { data } = await client.getOrgPortalConfig({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -2101,7 +2142,7 @@ const { data } = await client.getOrgPortalConfig({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -2149,36 +2190,16 @@ const { data } = await client.getOrgPortalConfig({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -2272,9 +2293,7 @@ const { data } = await client.getPublicPortalConfigV3({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -2291,18 +2310,10 @@ const { data } = await client.getPublicPortalConfigV3({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -2329,7 +2340,7 @@ const { data } = await client.getPublicPortalConfigV3({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -2377,36 +2388,16 @@ const { data } = await client.getPublicPortalConfigV3({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -2495,9 +2486,7 @@ const { data } = await client.getOrgPortalConfigV3({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -2514,18 +2503,10 @@ const { data } = await client.getOrgPortalConfigV3({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -2552,7 +2533,7 @@ const { data } = await client.getOrgPortalConfigV3({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -2600,36 +2581,16 @@ const { data } = await client.getOrgPortalConfigV3({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -2709,7 +2670,7 @@ const { data } = await client.getAllPortalConfigs()
       "auth_settings": {},
       "cognito_details": {},
       "config": "string",
-      "contact_identifiers": [],
+      "contact_identifiers": ["email", "last_name"],
       "approval_state_attributes": {},
       "email_templates": {},
       "images": {},
@@ -2967,16 +2928,28 @@ const { data } = await client.getPublicPortalWidgets({
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "schema": "string"
     },
     {
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "content": "string"
     }
   ]
@@ -3004,16 +2977,28 @@ const { data } = await client.upsertPortalWidget(
         id: 'string',
         type: 'ACTION_WIDGET',
         listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
+        headline: {
+          en: 'string',
+          de: 'string'
+        },
+        subHeadline: {
+          en: 'string',
+          de: 'string'
+        },
         schema: 'string'
       },
       {
         id: 'string',
         type: 'ACTION_WIDGET',
         listIndex: 0,
-        headline: { /* ... */ },
-        subHeadline: { /* ... */ },
+        headline: {
+          en: 'string',
+          de: 'string'
+        },
+        subHeadline: {
+          en: 'string',
+          de: 'string'
+        },
         content: 'string'
       },
       /* ... 7 more */
@@ -3032,16 +3017,28 @@ const { data } = await client.upsertPortalWidget(
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "schema": "string"
     },
     {
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "content": "string"
     }
   ]
@@ -3075,16 +3072,28 @@ const { data } = await client.getPortalWidgets({
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "schema": "string"
     },
     {
       "id": "string",
       "type": "ACTION_WIDGET",
       "listIndex": 0,
-      "headline": {},
-      "subHeadline": {},
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
       "content": "string"
     }
   ]
@@ -3120,28 +3129,19 @@ const { data } = await client.replaceECPTemplateVariables(
     "invitationLink": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
-    "userEmailsOnEntity": [
-      "john@doe.com",
-      "mary@doe.com"
-    ]
+    "userEmailsOnEntity": ["john@doe.com", "mary@doe.com"]
   },
   "installerPortal": {
     "invitationLink": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
-    "userEmailsOnEntity": [
-      "peter@doe.com",
-      "jane@doe.com"
-    ]
+    "userEmailsOnEntity": ["peter@doe.com", "jane@doe.com"]
   },
   "portalUser": {
     "invitationLink": "https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
-    "userEmailsOnEntity": [
-      "peter@doe.com",
-      "jane@doe.com"
-    ]
+    "userEmailsOnEntity": ["peter@doe.com", "jane@doe.com"]
   }
 }
 ```
@@ -3306,22 +3306,46 @@ const { data } = await client.extraPermissionAttributes()
 {
   "data": {
     "contact": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ],
     "contract": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ],
     "order": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ],
     "opportunity": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ],
     "meter": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ],
     "meter_counter": [
-      {}
+      {
+        "name": "string",
+        "label": "string",
+        "group": "string"
+      }
     ]
   }
 }
@@ -3404,10 +3428,7 @@ const { data } = await client.getContact()
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "contact"
@@ -3417,7 +3438,7 @@ const { data } = await client.getContact()
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -3428,19 +3449,36 @@ const { data } = await client.getContact()
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
+      "templates_output": {
+        "content_top_name": "Customer #123456",
+        "main_content_name": "Orange Flexible A2 (654321)",
+        "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+        "nested_content": {
+          "title": "Orange Flexible A2",
+          "subtitle": "654321"
+        }
+      },
       "_schema": "contact"
     }
   ],
   "journey_actions": [
     {
       "journey_id": "string",
-      "action_label": {},
+      "action_label": {
+        "en": "string",
+        "de": "string"
+      },
       "slug": "string",
-      "rules": []
+      "rules": [
+        {
+          "entity": "string",
+          "attribute": "string",
+          "attribute_value": "string"
+        }
+      ]
     }
   ]
 }
@@ -3472,10 +3510,7 @@ const { data } = await client.updateContact(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "contact"
@@ -3508,10 +3543,7 @@ const { data } = await client.getECPContact({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "contact"
@@ -3648,10 +3680,7 @@ const { data } = await client.getPortalUser()
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "portal_user"
@@ -3685,10 +3714,7 @@ const { data } = await client.updatePortalUser(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "portal_user"
@@ -3801,7 +3827,7 @@ const { data } = await client.fetchPortalUsersByRelatedEntity({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "portal_user"
@@ -3921,9 +3947,7 @@ Get recipients to notify on automation
 const { data } = await client.getRecipientsToNotifyOnAutomation(
   null,
   {
-    emails: [
-      'john@doe.com'
-    ],
+    emails: ['john@doe.com'],
     template_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     context_id: '5da0a718-c822-403d-9f5d-20d4584e0528'
   },
@@ -4022,11 +4046,25 @@ const { data } = await client.getAllOrders({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "order",
-      "journey_actions": {}
+      "journey_actions": {
+        "journey_id": "string",
+        "action_label": {
+          "en": "string",
+          "de": "string"
+        },
+        "slug": "string",
+        "rules": [
+          {
+            "entity": "string",
+            "attribute": "string",
+            "attribute_value": "string"
+          }
+        ]
+      }
     }
   ]
 }
@@ -4062,10 +4100,7 @@ const { data } = await client.postOrderAcceptance(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "order"
@@ -4098,10 +4133,7 @@ const { data } = await client.getOrder({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "order"
@@ -4111,7 +4143,7 @@ const { data } = await client.getOrder({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -4122,7 +4154,7 @@ const { data } = await client.getOrder({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "templates_output": {},
@@ -4134,7 +4166,7 @@ const { data } = await client.getOrder({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "product"
@@ -4145,7 +4177,7 @@ const { data } = await client.getOrder({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "product"
@@ -4160,7 +4192,7 @@ const { data } = await client.getOrder({
       "creationTime": "2021-04-27T12:01:13.000Z",
       "lastUpdateTime": "2021-04-27T12:01:13.000Z",
       "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": [],
+      "assignedTo": ["252", "29052"],
       "flow": []
     }
   ],
@@ -4203,10 +4235,7 @@ const { data } = await client.updateOrder(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "order"
@@ -4241,11 +4270,25 @@ const { data } = await client.getAllOpportunities({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "opportunity",
-      "journey_actions": {}
+      "journey_actions": {
+        "journey_id": "string",
+        "action_label": {
+          "en": "string",
+          "de": "string"
+        },
+        "slug": "string",
+        "rules": [
+          {
+            "entity": "string",
+            "attribute": "string",
+            "attribute_value": "string"
+          }
+        ]
+      }
     }
   ]
 }
@@ -4278,7 +4321,7 @@ const { data } = await client.getSearchableAttributesForOpportunities({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "opportunity"
@@ -4304,15 +4347,9 @@ const { data } = await client.getSearchResultsForOpportunities(
     size: 1,
   },
   {
-    addresses: [
-      'string'
-    ],
-    customers: [
-      'string'
-    ],
-    purposes: [
-      '5da0a718-c822-403d-9f5d-20d4584e0528'
-    ],
+    addresses: ['string'],
+    customers: ['string'],
+    purposes: ['5da0a718-c822-403d-9f5d-20d4584e0528'],
     workflows: [
       {}
     ]
@@ -4330,7 +4367,7 @@ const { data } = await client.getSearchResultsForOpportunities(
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "opportunity"
@@ -4364,10 +4401,7 @@ const { data } = await client.getOpportunity({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "opportunity"
@@ -4377,7 +4411,7 @@ const { data } = await client.getOpportunity({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "order"
@@ -4388,7 +4422,7 @@ const { data } = await client.getOpportunity({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -4399,7 +4433,7 @@ const { data } = await client.getOpportunity({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "templates_output": {},
@@ -4415,7 +4449,7 @@ const { data } = await client.getOpportunity({
       "creationTime": "2021-04-27T12:01:13.000Z",
       "lastUpdateTime": "2021-04-27T12:01:13.000Z",
       "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": [],
+      "assignedTo": ["252", "29052"],
       "flow": []
     }
   ],
@@ -4458,10 +4492,7 @@ const { data } = await client.updateOpportunity(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "opportunity"
@@ -4497,7 +4528,7 @@ const { data } = await client.getAllRequests({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "opportunity"
@@ -4533,7 +4564,7 @@ const { data } = await client.getAllContracts({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "contract_name": "Grid Contract",
@@ -4558,7 +4589,21 @@ const { data } = await client.getAllContracts({
       "installment_amount": 10050,
       "balance": 8990,
       "balance_currency": "EUR",
-      "journey_actions": {}
+      "journey_actions": {
+        "journey_id": "string",
+        "action_label": {
+          "en": "string",
+          "de": "string"
+        },
+        "slug": "string",
+        "rules": [
+          {
+            "entity": "string",
+            "attribute": "string",
+            "attribute_value": "string"
+          }
+        ]
+      }
     }
   ]
 }
@@ -4589,10 +4634,7 @@ const { data } = await client.getContract({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "contract_name": "Grid Contract",
@@ -4623,7 +4665,7 @@ const { data } = await client.getContract({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "order"
@@ -4634,7 +4676,7 @@ const { data } = await client.getContract({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "meter"
@@ -4645,7 +4687,7 @@ const { data } = await client.getContract({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -4656,7 +4698,7 @@ const { data } = await client.getContract({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "templates_output": {},
@@ -4672,7 +4714,7 @@ const { data } = await client.getContract({
       "creationTime": "2021-04-27T12:01:13.000Z",
       "lastUpdateTime": "2021-04-27T12:01:13.000Z",
       "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": [],
+      "assignedTo": ["252", "29052"],
       "flow": []
     }
   ],
@@ -4715,10 +4757,7 @@ const { data } = await client.updateContract(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "contract_name": "Grid Contract",
@@ -4781,10 +4820,18 @@ const { data } = await client.addContractByIdentifiers(
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
+      "templates_output": {
+        "content_top_name": "Customer #123456",
+        "main_content_name": "Orange Flexible A2 (654321)",
+        "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+        "nested_content": {
+          "title": "Orange Flexible A2",
+          "subtitle": "654321"
+        }
+      },
       "_schema": "contact"
     }
   ],
@@ -4858,7 +4905,12 @@ const { data } = await client.getEntityActivityFeed({
       "type": "MyCustomActivity",
       "title": "My custom activity",
       "message": "{{caller}} did something with {{entity payload.entity.id}}.",
-      "payload": {}
+      "payload": {
+        "entity": {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "schema": "contact"
+        }
+      }
     }
   ]
 }
@@ -4929,10 +4981,18 @@ const { data } = await client.searchPaymentRelationsInEntities({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
+      "templates_output": {
+        "content_top_name": "Customer #123456",
+        "main_content_name": "Orange Flexible A2 (654321)",
+        "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+        "nested_content": {
+          "title": "Orange Flexible A2",
+          "subtitle": "654321"
+        }
+      },
       "_schema": "contact"
     }
   ],
@@ -5000,7 +5060,10 @@ const { data } = await client.saveEntityFile(
       {
         filename: 'document.pdf',
         access_control: 'private',
-        s3ref: { /* ... */ }
+        s3ref: {
+          bucket: 12345,
+          key: 12345
+        }
       }
     ]
   },
@@ -5017,7 +5080,7 @@ const { data } = await client.saveEntityFile(
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -5042,9 +5105,7 @@ const { data } = await client.deleteEntityFile(
   {
     entity_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     entity_type: 'order',
-    file_entity_ids: [
-      '5da0a718-c822-403d-9f5d-20d4584e0528'
-    ]
+    file_entity_ids: ['5da0a718-c822-403d-9f5d-20d4584e0528']
   },
 )
 ```
@@ -5067,7 +5128,10 @@ const { data } = await client.savePortalFiles(
         filename: 12345,
         file_type: 'orderRightTeaser',
         _tags: 12345,
-        s3ref: { /* ... */ }
+        s3ref: {
+          bucket: 12345,
+          key: 12345
+        }
       }
     ]
   },
@@ -5084,7 +5148,7 @@ const { data } = await client.savePortalFiles(
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "file"
@@ -5114,10 +5178,18 @@ const { data } = await client.getRegistrationIdentifiers()
 {
   "data": {
     "contact": [
-      {}
+      {
+        "label": "First name",
+        "name": "first_name",
+        "type": "string"
+      }
     ],
     "contract": [
-      {}
+      {
+        "label": "Contract number",
+        "name": "contract_number",
+        "type": "string"
+      }
     ]
   }
 }
@@ -5148,10 +5220,7 @@ const { data } = await client.getFileById({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "file",
@@ -5162,7 +5231,11 @@ const { data } = await client.getFileById({
     "type": "document",
     "mime_type": "application/pdf",
     "_relations": [
-      {}
+      {
+        "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+        "_schema": "contact",
+        "_title": "Opportunity ABC"
+      }
     ],
     "is_new": true
   }
@@ -5194,10 +5267,7 @@ const { data } = await client.trackFileDownloaded({
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "file",
@@ -5208,7 +5278,11 @@ const { data } = await client.trackFileDownloaded({
     "type": "document",
     "mime_type": "application/pdf",
     "_relations": [
-      {}
+      {
+        "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+        "_schema": "contact",
+        "_title": "Opportunity ABC"
+      }
     ],
     "is_new": true
   }
@@ -5249,11 +5323,17 @@ const { data } = await client.getBillingEvents({
       "billing_amount": 10050,
       "billing_currency": "EUR",
       "external_id": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
-      "contract": {},
+      "contract": {
+        "$relation": [
+          {
+            "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+          }
+        ]
+      },
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "type": "installment",
@@ -5317,18 +5397,25 @@ const { data } = await client.getBillingAccount({
     "balance_decimal": "string",
     "balance_currency": "EUR",
     "billing_contact": {
-      "$relation": []
+      "$relation": [
+        {
+          "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+        }
+      ]
     },
     "billing_address": {
-      "$relation_ref": []
+      "$relation_ref": [
+        {
+          "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896",
+          "path": "address",
+          "_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+        }
+      ]
     },
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z"
   },
@@ -5337,10 +5424,18 @@ const { data } = await client.getBillingAccount({
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
+      "templates_output": {
+        "content_top_name": "Customer #123456",
+        "main_content_name": "Orange Flexible A2 (654321)",
+        "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+        "nested_content": {
+          "title": "Orange Flexible A2",
+          "subtitle": "654321"
+        }
+      },
       "_schema": "contact"
     }
   ]
@@ -5447,10 +5542,7 @@ const { data } = await client.getPortalUserEntity(
     slug: 'contact',
     entity_id: '3ec28ab5-8598-41ef-9486-b57fca1d5e2a',
     hydrate: false,
-    fields: [
-      '_id',
-      '_title'
-    ],
+    fields: ['_id', '_title'],
     templates: {
       content_top_name: 'Customer #{{contract.customer_number}}',
       main_content_name: '{{contract.contract_name}} ({{contract.contract_number}})',
@@ -5462,10 +5554,16 @@ const { data } = await client.getPortalUserEntity(
     },
     filters: [
       {
-        term: { /* ... */ }
+        term: {
+          'status.keyword': 'active'
+        }
       },
       {
-        range: { /* ... */ }
+        range: {
+          _created_at: {
+            gte: '2023-01-01'
+          }
+        }
       }
     ],
     filters_context: [
@@ -5477,9 +5575,7 @@ const { data } = await client.getPortalUserEntity(
       },
       /* ... 1 more */
     ],
-    targets: [
-      '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
-    ]
+    targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a']
   },
 )
 ```
@@ -5493,17 +5589,17 @@ const { data } = await client.getPortalUserEntity(
     "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "templates_output": {
       "content_top_name": "Customer #123456",
       "main_content_name": "Orange Flexible A2 (654321)",
       "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
-      "nested_content": {}
+      "nested_content": {
+        "title": "Orange Flexible A2",
+        "subtitle": "654321"
+      }
     },
     "_schema": "contact"
   }
@@ -5526,12 +5622,7 @@ const { data } = await client.searchPortalUserEntities(
   {
     slug: 'contact',
     q: 'contract',
-    q_fields: [
-      '_title',
-      'customer._title',
-      'customer.first_name',
-      'customer.last_name'
-    ],
+    q_fields: ['_title', 'customer._title', 'customer.first_name', 'customer.last_name'],
     group: 'customer._title',
     group_title: '{{customer[Primary].first_name}} {{customer[Primary].last_name}}',
     group_size: 100,
@@ -5541,10 +5632,7 @@ const { data } = await client.searchPortalUserEntities(
     from: 0,
     size: 100,
     hydrate: false,
-    fields: [
-      '_id',
-      '_title'
-    ],
+    fields: ['_id', '_title'],
     templates: {
       content_top_name: 'Customer #{{contract.customer_number}}',
       main_content_name: '{{contract.contract_name}} ({{contract.contract_number}})',
@@ -5552,10 +5640,16 @@ const { data } = await client.searchPortalUserEntities(
     },
     filters: [
       {
-        term: { /* ... */ }
+        term: {
+          'status.keyword': 'active'
+        }
       },
       {
-        range: { /* ... */ }
+        range: {
+          _created_at: {
+            gte: '2023-01-01'
+          }
+        }
       }
     ],
     filters_context: [
@@ -5567,9 +5661,7 @@ const { data } = await client.searchPortalUserEntities(
       },
       /* ... 1 more */
     ],
-    targets: [
-      '3ec28ab5-8598-41ef-9486-b57fca1d5e2a'
-    ]
+    targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a']
   },
 )
 ```
@@ -5584,10 +5676,18 @@ const { data } = await client.searchPortalUserEntities(
       "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
+      "templates_output": {
+        "content_top_name": "Customer #123456",
+        "main_content_name": "Orange Flexible A2 (654321)",
+        "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+        "nested_content": {
+          "title": "Orange Flexible A2",
+          "subtitle": "654321"
+        }
+      },
       "_schema": "contact"
     }
   ],
@@ -5622,7 +5722,7 @@ const { data } = await client.canTriggerPortalFlow(
     ecp_config: {
       file_config: {
         shared_with_end_customer: true,
-        _tags: [ /* ... */ ]
+        _tags: ['example', 'mock']
       }
     }
   },
@@ -5692,9 +5792,7 @@ const { data } = await client.updateWorkflowStepAsDone({
   "sectionId": "lzxsw2sblj7",
   "type": "STEP",
   "entityRefId": "q1d6vcbsqvn",
-  "assignedTo": [
-    "10014532"
-  ],
+  "assignedTo": ["10014532"],
   "lastUpdated": "2024-01-13T05:18:43.838Z",
   "ecp": {},
   "userIds": [],
@@ -5739,8 +5837,32 @@ const { data } = await client.getEntityWorkflows({
       "creationTime": "2021-04-27T12:01:13.000Z",
       "lastUpdateTime": "2021-04-27T12:01:13.000Z",
       "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": [],
-      "flow": []
+      "assignedTo": ["252", "29052"],
+      "flow": [
+        {
+          "id": "sectionId1",
+          "name": "Initial Information Gathering",
+          "steps": [
+            {
+              "id": "sada5641f3a21",
+              "name": "Call client and confirm address and product",
+              "status": "ASSIGNED",
+              "assignedTo": ["11"]
+            },
+            {
+              "id": "sada5641f3a22",
+              "name": "Check product availability",
+              "status": "UNASSIGNED"
+            }
+          ]
+        },
+        {
+          "id": "firstLevelStepId1",
+          "name": "Print and send catalog",
+          "status": "SKIPPED",
+          "dueDate": "2023-01-15T20:00:00"
+        }
+      ]
     }
   ]
 }
@@ -5781,9 +5903,7 @@ const { data } = await client.uploadMeterReadingPhoto(
     },
     "reading": "000123.45",
     "sector": "water",
-    "meter_numbers": [
-      "00123456"
-    ]
+    "meter_numbers": ["00123456"]
   }
 }
 ```
@@ -6026,9 +6146,7 @@ const { data } = await client.getPortalPage({
 {
   "slug": "dashboard",
   "path": "/dashboard",
-  "schema": [
-    "string"
-  ],
+  "schema": ["string"],
   "visibility": {},
   "content": {},
   "design": {},
@@ -6064,9 +6182,7 @@ const { data } = await client.updatePortalPage(
   {
     slug: 'dashboard',
     path: '/dashboard',
-    schema: [
-      'string'
-    ],
+    schema: ['string'],
     visibility: {},
     content: {},
     design: {},
@@ -6090,9 +6206,7 @@ const { data } = await client.updatePortalPage(
 {
   "slug": "dashboard",
   "path": "/dashboard",
-  "schema": [
-    "string"
-  ],
+  "schema": ["string"],
   "visibility": {},
   "content": {},
   "design": {},
@@ -6152,9 +6266,7 @@ const { data } = await client.getPortalPages({
   {
     "slug": "dashboard",
     "path": "/dashboard",
-    "schema": [
-      "string"
-    ],
+    "schema": ["string"],
     "visibility": {},
     "content": {},
     "design": {},
@@ -6191,9 +6303,7 @@ const { data } = await client.createPortalPage(
   {
     slug: 'dashboard',
     path: '/dashboard',
-    schema: [
-      'string'
-    ],
+    schema: ['string'],
     visibility: {},
     content: {},
     design: {},
@@ -6217,9 +6327,7 @@ const { data } = await client.createPortalPage(
 {
   "slug": "dashboard",
   "path": "/dashboard",
-  "schema": [
-    "string"
-  ],
+  "schema": ["string"],
   "visibility": {},
   "content": {},
   "design": {},
@@ -6263,9 +6371,7 @@ const { data } = await client.getPublicPages({
   {
     "slug": "dashboard",
     "path": "/dashboard",
-    "schema": [
-      "string"
-    ],
+    "schema": ["string"],
     "visibility": {},
     "content": {},
     "design": {},
@@ -6306,9 +6412,7 @@ const { data } = await client.getDefaultPages()
   {
     "slug": "dashboard",
     "path": "/dashboard",
-    "schema": [
-      "string"
-    ],
+    "schema": ["string"],
     "visibility": {},
     "content": {},
     "design": {},
@@ -6526,9 +6630,7 @@ const { data } = await client.getUserEntryPoint({
 {
   "user_exists": true,
   "entry_point": "PASSWORD",
-  "preferred_sso_providers": [
-    "office-365-login"
-  ],
+  "preferred_sso_providers": ["office-365-login"],
   "is_soft_deleted": true
 }
 ```
@@ -6711,9 +6813,7 @@ const { data } = await client.createPortalConfig(
         enabled: true
       },
       entry_point: 'PASSWORD',
-      preferred_sso_providers: [
-        'office-365-login'
-      ],
+      preferred_sso_providers: ['office-365-login'],
       auto_redirect_to_sso: true
     },
     cognito_details: {
@@ -6730,18 +6830,10 @@ const { data } = await client.createPortalConfig(
       }
     },
     config: 'string',
-    contact_identifiers: [
-      'email',
-      'last_name'
-    ],
+    contact_identifiers: ['email', 'last_name'],
     approval_state_attributes: {
-      contact: [
-        'name',
-        'address'
-      ],
-      contract: [
-        'installment_amount'
-      ]
+      contact: ['name', 'address'],
+      contract: ['installment_amount']
     },
     email_templates: {
       confirmAccount: '5da0a718-c822-403d-9f5d-20d4584e0528',
@@ -6768,7 +6860,7 @@ const { data } = await client.createPortalConfig(
     entity_identifiers: {
       type: {
         isEnabled: true,
-        attributes: [ /* ... */ ]
+        attributes: ['contract_number']
       }
     },
     contract_identifiers: [
@@ -6817,36 +6909,16 @@ const { data } = await client.createPortalConfig(
       }
     ],
     allowed_file_extensions: {
-      document: [
-        'pdf'
-      ],
-      image: [
-        'jpg'
-      ],
-      spreadsheet: [
-        'xls'
-      ],
-      presentation: [
-        'ppt'
-      ],
-      audioVideo: [
-        'mp4'
-      ],
-      email: [
-        'eml'
-      ],
-      archive: [
-        'zip'
-      ],
-      cad: [
-        'cad'
-      ],
-      calendar: [
-        'ics'
-      ],
-      other: [
-        'txt'
-      ]
+      document: ['pdf'],
+      image: ['jpg'],
+      spreadsheet: ['xls'],
+      presentation: ['ppt'],
+      audioVideo: ['mp4'],
+      email: ['eml'],
+      archive: ['zip'],
+      cad: ['cad'],
+      calendar: ['ics'],
+      other: ['txt']
     },
     prevent_search_engine_indexing: true,
     meter_reading_grace_period: 0,
@@ -6860,7 +6932,7 @@ const { data } = await client.createPortalConfig(
       {
         slug: 'dashboard',
         path: '/dashboard',
-        schema: [ /* ... */ ],
+        schema: ['string'],
         visibility: {},
         content: {},
         design: {},
@@ -6932,9 +7004,7 @@ const { data } = await client.createPortalConfig(
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -6951,18 +7021,10 @@ const { data } = await client.createPortalConfig(
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -6989,7 +7051,7 @@ const { data } = await client.createPortalConfig(
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -7037,36 +7099,16 @@ const { data } = await client.createPortalConfig(
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -7105,7 +7147,7 @@ const { data } = await client.createPortalConfig(
     {
       "slug": "dashboard",
       "path": "/dashboard",
-      "schema": [],
+      "schema": ["string"],
       "visibility": {},
       "content": {},
       "design": {},
@@ -7194,9 +7236,7 @@ const { data } = await client.getPortalConfigV3({
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -7213,18 +7253,10 @@ const { data } = await client.getPortalConfigV3({
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -7251,7 +7283,7 @@ const { data } = await client.getPortalConfigV3({
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -7299,36 +7331,16 @@ const { data } = await client.getPortalConfigV3({
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -7367,7 +7379,7 @@ const { data } = await client.getPortalConfigV3({
     {
       "slug": "dashboard",
       "path": "/dashboard",
-      "schema": [],
+      "schema": ["string"],
       "visibility": {},
       "content": {},
       "design": {},
@@ -7451,9 +7463,7 @@ const { data } = await client.putPortalConfig(
         enabled: true
       },
       entry_point: 'PASSWORD',
-      preferred_sso_providers: [
-        'office-365-login'
-      ],
+      preferred_sso_providers: ['office-365-login'],
       auto_redirect_to_sso: true
     },
     cognito_details: {
@@ -7470,18 +7480,10 @@ const { data } = await client.putPortalConfig(
       }
     },
     config: 'string',
-    contact_identifiers: [
-      'email',
-      'last_name'
-    ],
+    contact_identifiers: ['email', 'last_name'],
     approval_state_attributes: {
-      contact: [
-        'name',
-        'address'
-      ],
-      contract: [
-        'installment_amount'
-      ]
+      contact: ['name', 'address'],
+      contract: ['installment_amount']
     },
     email_templates: {
       confirmAccount: '5da0a718-c822-403d-9f5d-20d4584e0528',
@@ -7508,7 +7510,7 @@ const { data } = await client.putPortalConfig(
     entity_identifiers: {
       type: {
         isEnabled: true,
-        attributes: [ /* ... */ ]
+        attributes: ['contract_number']
       }
     },
     contract_identifiers: [
@@ -7557,36 +7559,16 @@ const { data } = await client.putPortalConfig(
       }
     ],
     allowed_file_extensions: {
-      document: [
-        'pdf'
-      ],
-      image: [
-        'jpg'
-      ],
-      spreadsheet: [
-        'xls'
-      ],
-      presentation: [
-        'ppt'
-      ],
-      audioVideo: [
-        'mp4'
-      ],
-      email: [
-        'eml'
-      ],
-      archive: [
-        'zip'
-      ],
-      cad: [
-        'cad'
-      ],
-      calendar: [
-        'ics'
-      ],
-      other: [
-        'txt'
-      ]
+      document: ['pdf'],
+      image: ['jpg'],
+      spreadsheet: ['xls'],
+      presentation: ['ppt'],
+      audioVideo: ['mp4'],
+      email: ['eml'],
+      archive: ['zip'],
+      cad: ['cad'],
+      calendar: ['ics'],
+      other: ['txt']
     },
     prevent_search_engine_indexing: true,
     meter_reading_grace_period: 0,
@@ -7625,7 +7607,7 @@ const { data } = await client.putPortalConfig(
       {
         slug: 'dashboard',
         path: '/dashboard',
-        schema: [ /* ... */ ],
+        schema: ['string'],
         visibility: {},
         content: {},
         design: {},
@@ -7699,9 +7681,7 @@ const { data } = await client.putPortalConfig(
       "enabled": true
     },
     "entry_point": "PASSWORD",
-    "preferred_sso_providers": [
-      "office-365-login"
-    ],
+    "preferred_sso_providers": ["office-365-login"],
     "auto_redirect_to_sso": true
   },
   "cognito_details": {
@@ -7718,18 +7698,10 @@ const { data } = await client.putPortalConfig(
     }
   },
   "config": "string",
-  "contact_identifiers": [
-    "email",
-    "last_name"
-  ],
+  "contact_identifiers": ["email", "last_name"],
   "approval_state_attributes": {
-    "contact": [
-      "name",
-      "address"
-    ],
-    "contract": [
-      "installment_amount"
-    ]
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
   },
   "email_templates": {
     "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
@@ -7756,7 +7728,7 @@ const { data } = await client.putPortalConfig(
   "entity_identifiers": {
     "type": {
       "isEnabled": true,
-      "attributes": []
+      "attributes": ["contract_number"]
     }
   },
   "contract_identifiers": [
@@ -7804,36 +7776,16 @@ const { data } = await client.putPortalConfig(
     }
   ],
   "allowed_file_extensions": {
-    "document": [
-      "pdf"
-    ],
-    "image": [
-      "jpg"
-    ],
-    "spreadsheet": [
-      "xls"
-    ],
-    "presentation": [
-      "ppt"
-    ],
-    "audioVideo": [
-      "mp4"
-    ],
-    "email": [
-      "eml"
-    ],
-    "archive": [
-      "zip"
-    ],
-    "cad": [
-      "cad"
-    ],
-    "calendar": [
-      "ics"
-    ],
-    "other": [
-      "txt"
-    ]
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
   },
   "prevent_search_engine_indexing": true,
   "meter_reading_grace_period": 0,
@@ -7872,7 +7824,7 @@ const { data } = await client.putPortalConfig(
     {
       "slug": "dashboard",
       "path": "/dashboard",
-      "schema": [],
+      "schema": ["string"],
       "visibility": {},
       "content": {},
       "design": {},
@@ -7946,7 +7898,7 @@ const { data } = await client.listAllPortalConfigs()
       "auth_settings": {},
       "cognito_details": {},
       "config": "string",
-      "contact_identifiers": [],
+      "contact_identifiers": ["email", "last_name"],
       "approval_state_attributes": {},
       "email_templates": {},
       "images": {},
@@ -7992,9 +7944,7 @@ const { data } = await client.swapPortalConfig(
   {
     source_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     target_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
-    items_to_swap: [
-      'all'
-    ]
+    items_to_swap: ['all']
   },
 )
 ```
@@ -8023,9 +7973,7 @@ const { data } = await client.invitePartner(
   null,
   {
     email: 'string',
-    represents_contact_list: [
-      '5da0a718-c822-403d-9f5d-20d4584e0528'
-    ]
+    represents_contact_list: ['5da0a718-c822-403d-9f5d-20d4584e0528']
   },
 )
 ```
@@ -8356,7 +8304,6 @@ type UpdateOnlyPortalConfigAttributes = {
       phone?: { ... }
     }>
   }
-  // ...
 }
 ```
 
@@ -8393,6 +8340,76 @@ type CommonConfigAttributes = {
     }
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
+    type?: {
+      isEnabled?: { ... }
+      attributes?: { ... }
+    }
+  }
+  contract_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  contract_selector_config?: {
+    show_inactive?: boolean
+    title_path?: string
+  }
+  registration_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  triggered_journeys?: Array<{
+    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
+    journey_id?: string // uuid
+  }>
+  entity_edit_rules?: Array<{
+    slug?: string
+    attribute?: string
+    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
+    cadence_period_type?: "days" | "weeks" | "months"
+    cadence_period?: number
+    changes_allowed?: number
+    grace_period?: number
   // ...
 }
 ```
@@ -8430,6 +8447,76 @@ type UpsertPortalConfig = {
       phone?: { ... }
     }>
   }
+  enabled?: boolean
+  name?: string
+  domain: string
+  is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
+  design_id?: string // uuid
+  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  user_account_self_management?: boolean
+  feature_settings?: {
+    start_page?: boolean
+    billing?: boolean
+    change_due_date?: boolean
+    new_design?: boolean
+  }
+  accessToken?: string
+  advanced_mfa?: {
+    enabled?: boolean
+  }
+  auth_settings?: {
+    passwordless_login?: {
+      enabled?: { ... }
+    }
+    entry_point?: "PASSWORD" | "SSO"
+    preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
   // ...
 }
 ```
@@ -8467,6 +8554,76 @@ type PortalConfig = {
     }
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
+    type?: {
+      isEnabled?: { ... }
+      attributes?: { ... }
+    }
+  }
+  contract_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  contract_selector_config?: {
+    show_inactive?: boolean
+    title_path?: string
+  }
+  registration_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  triggered_journeys?: Array<{
+    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
+    journey_id?: string // uuid
+  }>
+  entity_edit_rules?: Array<{
+    slug?: string
+    attribute?: string
+    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
+    cadence_period_type?: "days" | "weeks" | "months"
+    cadence_period?: number
+    changes_allowed?: number
+    grace_period?: number
   // ...
 }
 ```
@@ -8504,6 +8661,76 @@ type UpsertPortalWidget = {
   } | {
     id: string
     type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    listIndex: number
+    headline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    subHeadline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    actions?: Array<{
+      _id: { ... }
+      type: { ... }
+      label: { ... }
+      url: { ... }
+      rules?: { ... }
+    }>
+  } | {
+    id: string
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    listIndex: number
+    headline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    subHeadline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    imageUrl?: string
+    button?: {
+      label?: { ... }
+      url?: { ... }
+    }
+  } | {
+    id: string
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    listIndex: number
+    headline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    subHeadline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+  } | {
+    id: string
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    listIndex: number
+    headline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    subHeadline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+  } | {
+    id: string
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    listIndex: number
+    headline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    subHeadline?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    schema?: string
   // ...
 }
 ```
@@ -8768,6 +8995,76 @@ type PortalWidget = {
   id: string
   type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
   listIndex: number
+  headline?: {
+    en?: string
+    de?: string
+  }
+  subHeadline?: {
+    en?: string
+    de?: string
+  }
+  actions?: Array<{
+    _id: string
+    type: "link" | "journey"
+    label: {
+      en?: { ... }
+      de?: { ... }
+    }
+    url: string
+    rules?: Array<{
+      attribute: { ... }
+      attribute_value: { ... }
+      entity: { ... }
+    }>
+  }>
+} | {
+  id: string
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  listIndex: number
+  headline?: {
+    en?: string
+    de?: string
+  }
+  subHeadline?: {
+    en?: string
+    de?: string
+  }
+  imageUrl?: string
+  button?: {
+    label?: {
+      en?: { ... }
+      de?: { ... }
+    }
+    url?: string
+  }
+} | {
+  id: string
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  listIndex: number
+  headline?: {
+    en?: string
+    de?: string
+  }
+  subHeadline?: {
+    en?: string
+    de?: string
+  }
+} | {
+  id: string
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  listIndex: number
+  headline?: {
+    en?: string
+    de?: string
+  }
+  subHeadline?: {
+    en?: string
+    de?: string
+  }
+} | {
+  id: string
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  listIndex: number
   // ...
 }
 ```
@@ -8850,7 +9147,34 @@ type OrganizationSettings = {
   }
   end_customer_portal?: {
     enabled?: boolean
-  // ...
+  }
+  installer_portal?: {
+    enabled?: boolean
+  }
+  entity_schema_builder?: {
+    enabled?: boolean
+  }
+  logic_editor_preview?: {
+    enabled?: boolean
+  }
+  new_navigation?: {
+    enabled?: boolean
+  }
+  partnering?: {
+    enabled?: boolean
+  }
+  product-availability?: {
+    enabled?: boolean
+  }
+  sso?: {
+    enabled?: boolean
+  }
+  submission_preview?: {
+    enabled?: boolean
+  }
+  user_roles_preview?: {
+    enabled?: boolean
+  }
 }
 ```
 
@@ -9648,7 +9972,28 @@ type PublicExtensionCapabilities = {
     }
     hook?: {
       id?: { ... }
-  // ...
+      name?: { ... }
+      intervals?: { ... }
+    }
+  }>
+  contractIdentification?: {
+    extension?: {
+      id?: { ... }
+      name?: { ... }
+    }
+    hook?: {
+      explanation?: { ... }
+    }
+  }
+  meterReadingPlausibilityCheck?: {
+    extension?: {
+      id?: { ... }
+      name?: { ... }
+    }
+    hook?: {
+      plausibility_mode?: { ... }
+    }
+  }
 }
 ```
 
@@ -9746,7 +10091,25 @@ type Extension = {
     }
     description?: {
       en: { ... }
-  // ...
+    }
+    type: "seamless"
+    condition?: string
+    auth?: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+      cache?: { ... }
+    }
+    redirect: {
+      url?: { ... }
+      params?: { ... }
+    }
+  }>
+  hooks?: Array<{
+    id?: string
+  }>
 }
 ```
 
@@ -10160,7 +10523,37 @@ type ProviderConfig = {
       energy?: { ... }
       gas?: { ... }
     }
-  // ...
+  }
+  entity_matching?: {
+    portal_user?: Record<string, string>
+    contact?: Record<string, string>
+    auto_create_cognito_user?: boolean
+  }
+  oidc_config?: {
+    type?: "authorization_code" | "implicit"
+    oidc_issuer: string
+    redirect_uri?: string
+    client_id: string
+    client_secret?: string
+    has_client_secret?: boolean
+    scope: string
+    metadata?: {
+      authorization_endpoint?: { ... }
+      token_endpoint?: { ... }
+      userinfo_endpoint?: { ... }
+      logout_uri?: { ... }
+      logout_redirect_uri?: { ... }
+      skip_login_as_logout?: { ... }
+      mobile_redirect_uri?: { ... }
+      test_auth_username?: { ... }
+      test_auth_password?: { ... }
+    }
+    prompt?: "login" | "select_account" | "consent"
+  }
+  mobile_oidc_config?: {
+    client_id?: string
+    client_secret?: string
+  }
 }
 ```
 
@@ -10484,6 +10877,76 @@ type CommonConfigAttributesV3 = {
     }
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
+    type?: {
+      isEnabled?: { ... }
+      attributes?: { ... }
+    }
+  }
+  contract_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  contract_selector_config?: {
+    show_inactive?: boolean
+    title_path?: string
+  }
+  registration_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  triggered_journeys?: Array<{
+    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
+    journey_id?: string // uuid
+  }>
+  entity_edit_rules?: Array<{
+    slug?: string
+    attribute?: string
+    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
+    cadence_period_type?: "days" | "weeks" | "months"
+    cadence_period?: number
+    changes_allowed?: number
+    grace_period?: number
   // ...
 }
 ```
@@ -10529,6 +10992,76 @@ type UpsertPortalConfigV3 = {
       phone?: { ... }
     }>
   }
+  enabled?: boolean
+  name?: string
+  domain?: string
+  is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
+  design_id?: string // uuid
+  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  user_account_self_management?: boolean
+  feature_settings?: {
+    start_page?: boolean
+    billing?: boolean
+    change_due_date?: boolean
+    new_design?: boolean
+  }
+  accessToken?: string
+  advanced_mfa?: {
+    enabled?: boolean
+  }
+  auth_settings?: {
+    passwordless_login?: {
+      enabled?: { ... }
+    }
+    entry_point?: "PASSWORD" | "SSO"
+    preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
   // ...
 }
 ```
@@ -10566,6 +11099,76 @@ type PortalConfigV3 = {
       phone?: { ... }
     }>
   }
+  enabled?: boolean
+  name?: string
+  domain?: string
+  is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
+  design_id?: string // uuid
+  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  user_account_self_management?: boolean
+  feature_settings?: {
+    start_page?: boolean
+    billing?: boolean
+    change_due_date?: boolean
+    new_design?: boolean
+  }
+  accessToken?: string
+  advanced_mfa?: {
+    enabled?: boolean
+  }
+  auth_settings?: {
+    passwordless_login?: {
+      enabled?: { ... }
+    }
+    entry_point?: "PASSWORD" | "SSO"
+    preferred_sso_providers?: string[]
+    auto_redirect_to_sso?: boolean
+  }
+  cognito_details?: {
+    cognito_user_pool_client_id?: string
+    cognito_user_pool_arn?: string
+    cognito_user_pool_id?: string
+    password_policy?: {
+      minimum_length?: { ... }
+      maximum_length?: { ... }
+      require_lowercase?: { ... }
+      require_uppercase?: { ... }
+      require_numbers?: { ... }
+      require_symbols?: { ... }
+    }
+  }
+  config?: string
+  contact_identifiers?: string[]
+  approval_state_attributes?: Record<string, string[]>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  images?: {
+    orderLeftTeaser?: string
+    orderRightTeaser?: string
+    welcomeBanner?: string
+  }
+  entity_identifiers?: {
   // ...
 }
 ```

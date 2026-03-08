@@ -113,9 +113,7 @@ Batch Get Purposes
 const { data } = await client.batchGetPurposes(
   null,
   {
-    purposeIds: [
-      '123e4567-e89b-12d3-a456-426614174000'
-    ]
+    purposeIds: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```

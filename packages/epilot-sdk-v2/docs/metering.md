@@ -95,7 +95,7 @@ const { data } = await client.getCustomerMeters()
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "meter",
@@ -105,13 +105,51 @@ const { data } = await client.getCustomerMeters()
       "tariff_type": "Peak load tariff",
       "meter_number": "J-1093-1AK",
       "sector": "power",
-      "location": [],
+      "location": [
+        {
+          "country": "Germany",
+          "city": "Koln",
+          "postal_code": 81475,
+          "street": "Melatengürtel",
+          "street_number": 71,
+          "additional_info": "5. Etage",
+          "_tags": ["billing", "delivery"]
+        }
+      ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
       "calibration_date": "2022-10-10T00:00:00.000Z",
-      "contract": {},
-      "customer": {},
-      "journey_actions": {},
+      "contract": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      },
+      "customer": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      },
+      "journey_actions": {
+        "journey_id": "string",
+        "action_label": {
+          "en": "string",
+          "de": "string"
+        },
+        "slug": "string",
+        "rules": [
+          {
+            "entity": "string",
+            "attribute": "string",
+            "attribute_value": "string"
+          }
+        ]
+      },
       "last_reading": "2022-10-10T00:00:00.000Z",
       "current_consumption": 100.5
     }
@@ -145,7 +183,7 @@ const { data } = await client.getMetersByContractId({
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "meter",
@@ -155,12 +193,36 @@ const { data } = await client.getMetersByContractId({
       "tariff_type": "Peak load tariff",
       "meter_number": "J-1093-1AK",
       "sector": "power",
-      "location": [],
+      "location": [
+        {
+          "country": "Germany",
+          "city": "Koln",
+          "postal_code": 81475,
+          "street": "Melatengürtel",
+          "street_number": 71,
+          "additional_info": "5. Etage",
+          "_tags": ["billing", "delivery"]
+        }
+      ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
       "calibration_date": "2022-10-10T00:00:00.000Z",
-      "contract": {},
-      "customer": {}
+      "contract": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      },
+      "customer": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      }
     }
   ]
 }
@@ -194,10 +256,7 @@ const { data } = await client.updateMeter(
     "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "meter",
@@ -208,16 +267,34 @@ const { data } = await client.updateMeter(
     "meter_number": "J-1093-1AK",
     "sector": "power",
     "location": [
-      {}
+      {
+        "country": "Germany",
+        "city": "Koln",
+        "postal_code": 81475,
+        "street": "Melatengürtel",
+        "street_number": 71,
+        "additional_info": "5. Etage",
+        "_tags": ["billing", "delivery"]
+      }
     ],
     "used_for": "Domestic Usage",
     "manufacturer": "Energy One",
     "calibration_date": "2022-10-10T00:00:00.000Z",
     "contract": {
-      "$relation": []
+      "$relation": [
+        {
+          "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "_slug": "contact"
+        }
+      ]
     },
     "customer": {
-      "$relation": []
+      "$relation": [
+        {
+          "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "_slug": "contact"
+        }
+      ]
     }
   }
 }
@@ -249,7 +326,7 @@ const { data } = await client.getMeter({
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "meter",
@@ -259,21 +336,61 @@ const { data } = await client.getMeter({
       "tariff_type": "Peak load tariff",
       "meter_number": "J-1093-1AK",
       "sector": "power",
-      "location": [],
+      "location": [
+        {
+          "country": "Germany",
+          "city": "Koln",
+          "postal_code": 81475,
+          "street": "Melatengürtel",
+          "street_number": 71,
+          "additional_info": "5. Etage",
+          "_tags": ["billing", "delivery"]
+        }
+      ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
       "calibration_date": "2022-10-10T00:00:00.000Z",
-      "contract": {},
-      "customer": {}
+      "contract": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      },
+      "customer": {
+        "$relation": [
+          {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "_slug": "contact"
+          }
+        ]
+      }
     },
     "journey_actions": {
       "journey_id": "string",
-      "action_label": {},
+      "action_label": {
+        "en": "string",
+        "de": "string"
+      },
       "slug": "string",
-      "rules": []
+      "rules": [
+        {
+          "entity": "string",
+          "attribute": "string",
+          "attribute_value": "string"
+        }
+      ]
     },
     "relations": [
-      {}
+      {
+        "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "_title": "Example Entity",
+        "_org": "123",
+        "_tags": ["example", "mock"],
+        "_created_at": "2021-02-09T12:41:43.662Z",
+        "_updated_at": "2021-02-09T12:41:43.662Z"
+      }
     ]
   }
 }
@@ -305,7 +422,7 @@ const { data } = await client.getMeterCounters({
       "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "_title": "Example Entity",
       "_org": "123",
-      "_tags": [],
+      "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "_schema": "meter_counter",
@@ -349,10 +466,7 @@ const { data } = await client.getCounterDetails({
     "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "_title": "Example Entity",
     "_org": "123",
-    "_tags": [
-      "example",
-      "mock"
-    ],
+    "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "meter_counter",
@@ -463,7 +577,10 @@ const { data } = await client.createMeterReadings(
         status: 'valid',
         external_id: 'string',
         remark: 'Customer reported unusual consumption',
-        metadata: { /* ... */ },
+        metadata: {
+          registration_id: '1234567890',
+          business_unit: 'ABC'
+        },
         note: 'string',
         unit: 'string'
       }
@@ -490,7 +607,10 @@ const { data } = await client.createMeterReadings(
       "status": "valid",
       "external_id": "string",
       "remark": "Customer reported unusual consumption",
-      "metadata": {},
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      },
       "note": "string",
       "unit": "string"
     }
@@ -527,7 +647,10 @@ const { data } = await client.createPortalMeterReadings(
         status: 'valid',
         external_id: 'string',
         remark: 'Customer reported unusual consumption',
-        metadata: { /* ... */ },
+        metadata: {
+          registration_id: '1234567890',
+          business_unit: 'ABC'
+        },
         note: 'string',
         unit: 'string'
       }
@@ -554,7 +677,10 @@ const { data } = await client.createPortalMeterReadings(
       "status": "valid",
       "external_id": "string",
       "remark": "Customer reported unusual consumption",
-      "metadata": {},
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      },
       "note": "string",
       "unit": "string"
     }
@@ -580,9 +706,7 @@ const { data } = await client.batchWriteMeterReadings(
     activity_id: 'example',
   },
   {
-    identifiers: [
-      'string'
-    ],
+    identifiers: ['string'],
     readings: [
       {
         value: 240,
@@ -596,7 +720,10 @@ const { data } = await client.batchWriteMeterReadings(
         status: 'valid',
         external_id: 'string',
         remark: 'Customer reported unusual consumption',
-        metadata: { /* ... */ },
+        metadata: {
+          registration_id: '1234567890',
+          business_unit: 'ABC'
+        },
         note: 'string',
         unit: 'string',
         operation: 'create'
@@ -624,7 +751,10 @@ const { data } = await client.batchWriteMeterReadings(
       "status": "valid",
       "external_id": "string",
       "remark": "Customer reported unusual consumption",
-      "metadata": {},
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      },
       "note": "string",
       "unit": "string"
     }
@@ -650,7 +780,29 @@ const { data } = await client.createMeterReadingFromSubmission(
     entity: {
       _org: '123',
       meterReadings: [
-        { /* ... */ }
+        {
+          meterId: 'string',
+          readings: [
+            {
+              counterId: 'string',
+              direction: 'feed-in',
+              unit: 'string',
+              value: 240
+            }
+          ],
+          readingValue: 240,
+          readingDate: '2022-10-10T10:10:00.000Z',
+          readBy: 'John Doe',
+          reason: '',
+          maloId: 'A09-123',
+          obisNumber: 'A-34',
+          readingUnit: 'string',
+          meterType: 'one_tariff',
+          feedInValue: 240,
+          feedOutValue: 240,
+          htValue: 240,
+          ntValue: 240
+        }
       ]
     }
   },
@@ -796,7 +948,10 @@ const { data } = await client.getReadingsByInterval({
       "status": "valid",
       "external_id": "string",
       "remark": "Customer reported unusual consumption",
-      "metadata": {},
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      },
       "note": "string",
       "unit": "string"
     }
@@ -1009,7 +1164,6 @@ type Meter = {
       _slug?: { ... }
     }>
   }
-  // ...
 }
 ```
 

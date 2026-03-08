@@ -113,13 +113,13 @@ const extractSchemaTypes = (client: ClientInfo): SchemaDoc[] => {
   }));
 };
 
-const MAX_EXAMPLE_LINES = 30;
+const MAX_EXAMPLE_LINES = 100;
 
-const MAX_DEPTH = 3;
+const TRUNCATED_DEPTH = 3;
 
 const MAX_ARRAY_ITEMS = 2;
 
-const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
+const toJsObject = (value: unknown, indent = 0, depth = 0, maxDepth = Infinity): string => {
   const pad = '  '.repeat(indent);
   const inner = '  '.repeat(indent + 1);
 
@@ -129,22 +129,25 @@ const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
 
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
-    if (depth >= MAX_DEPTH) return '[ /* ... */ ]';
     const hasComplexItems = value.some((v) => typeof v === 'object' && v !== null);
-    const limit = hasComplexItems ? MAX_ARRAY_ITEMS : value.length;
-    const shown = value.slice(0, limit);
-    const items = shown.map((v) => `${inner}${toJsObject(v, indent + 1, depth + 1)}`);
-    if (value.length > limit) items.push(`${inner}/* ... ${value.length - limit} more */`);
+    if (!hasComplexItems) {
+      const inline = value.map((v) => toJsObject(v, 0, depth + 1, maxDepth)).join(', ');
+      return `[${inline}]`;
+    }
+    if (depth >= maxDepth) return '[ /* ... */ ]';
+    const shown = value.slice(0, MAX_ARRAY_ITEMS);
+    const items = shown.map((v) => `${inner}${toJsObject(v, indent + 1, depth + 1, maxDepth)}`);
+    if (value.length > MAX_ARRAY_ITEMS) items.push(`${inner}/* ... ${value.length - MAX_ARRAY_ITEMS} more */`);
     return `[\n${items.join(',\n')}\n${pad}]`;
   }
 
   if (typeof value === 'object') {
     const entries = Object.entries(value);
     if (entries.length === 0) return '{}';
-    if (depth >= MAX_DEPTH) return '{ /* ... */ }';
+    if (depth >= maxDepth) return '{ /* ... */ }';
     const props = entries.map(([k, v]) => {
       const key = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k) ? k : `'${k}'`;
-      return `${inner}${key}: ${toJsObject(v, indent + 1, depth + 1)}`;
+      return `${inner}${key}: ${toJsObject(v, indent + 1, depth + 1, maxDepth)}`;
     });
     return `{\n${props.join(',\n')}\n${pad}}`;
   }
@@ -152,7 +155,7 @@ const toJsObject = (value: unknown, indent = 0, depth = 0): string => {
   return String(value);
 };
 
-const toJsonObject = (value: unknown, indent = 0, depth = 0): string => {
+const toJsonObject = (value: unknown, indent = 0, depth = 0, maxDepth = Infinity): string => {
   const pad = '  '.repeat(indent);
   const inner = '  '.repeat(indent + 1);
 
@@ -162,20 +165,23 @@ const toJsonObject = (value: unknown, indent = 0, depth = 0): string => {
 
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
-    if (depth >= MAX_DEPTH) return '[]';
     const hasComplexItems = value.some((v) => typeof v === 'object' && v !== null);
-    const limit = hasComplexItems ? MAX_ARRAY_ITEMS : value.length;
-    const shown = value.slice(0, limit);
-    const items = shown.map((v) => `${inner}${toJsonObject(v, indent + 1, depth + 1)}`);
+    if (!hasComplexItems) {
+      const inline = value.map((v) => toJsonObject(v, 0, depth + 1, maxDepth)).join(', ');
+      return `[${inline}]`;
+    }
+    if (depth >= maxDepth) return '[]';
+    const shown = value.slice(0, MAX_ARRAY_ITEMS);
+    const items = shown.map((v) => `${inner}${toJsonObject(v, indent + 1, depth + 1, maxDepth)}`);
     return `[\n${items.join(',\n')}\n${pad}]`;
   }
 
   if (typeof value === 'object') {
     const entries = Object.entries(value);
     if (entries.length === 0) return '{}';
-    if (depth >= MAX_DEPTH) return '{}';
+    if (depth >= maxDepth) return '{}';
     const props = entries.map(([k, v]) => {
-      return `${inner}${JSON.stringify(k)}: ${toJsonObject(v, indent + 1, depth + 1)}`;
+      return `${inner}${JSON.stringify(k)}: ${toJsonObject(v, indent + 1, depth + 1, maxDepth)}`;
     });
     return `{\n${props.join(',\n')}\n${pad}}`;
   }
@@ -186,7 +192,11 @@ const toJsonObject = (value: unknown, indent = 0, depth = 0): string => {
 const mockJsExample = (schema: Schema): string | null => {
   try {
     const example = mock(schema as any);
-    return toJsObject(example);
+    const full = toJsObject(example);
+    if (full.split('\n').length > MAX_EXAMPLE_LINES) {
+      return toJsObject(example, 0, 0, TRUNCATED_DEPTH);
+    }
+    return full;
   } catch {
     return null;
   }
@@ -195,7 +205,11 @@ const mockJsExample = (schema: Schema): string | null => {
 const mockJsonExample = (schema: Schema): string | null => {
   try {
     const example = mock(schema as any);
-    return toJsonObject(example);
+    const full = toJsonObject(example);
+    if (full.split('\n').length > MAX_EXAMPLE_LINES) {
+      return toJsonObject(example, 0, 0, TRUNCATED_DEPTH);
+    }
+    return full;
   } catch {
     return null;
   }

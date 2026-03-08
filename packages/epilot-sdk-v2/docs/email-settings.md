@@ -123,13 +123,8 @@ const { data } = await client.provisionEpilotEmailAddress(
   "updated_by": "user-456",
   "address": "sales@yourcompany.com",
   "name": "Sales Team",
-  "user_ids": [
-    "user-123",
-    "user-456"
-  ],
-  "group_ids": [
-    "group-789"
-  ],
+  "user_ids": ["user-123", "user-456"],
+  "group_ids": ["group-789"],
   "default_signature_id": "sig-abc",
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
@@ -169,13 +164,8 @@ const { data } = await client.setEmailAddressPrimary(
   "updated_by": "user-456",
   "address": "sales@yourcompany.com",
   "name": "Sales Team",
-  "user_ids": [
-    "user-123",
-    "user-456"
-  ],
-  "group_ids": [
-    "group-789"
-  ],
+  "user_ids": ["user-123", "user-456"],
+  "group_ids": ["group-789"],
   "default_signature_id": "sig-abc",
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
@@ -212,13 +202,8 @@ const { data } = await client.getEmailAddress({
   "updated_by": "user-456",
   "address": "sales@yourcompany.com",
   "name": "Sales Team",
-  "user_ids": [
-    "user-123",
-    "user-456"
-  ],
-  "group_ids": [
-    "group-789"
-  ],
+  "user_ids": ["user-123", "user-456"],
+  "group_ids": ["group-789"],
   "default_signature_id": "sig-abc",
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
@@ -258,13 +243,8 @@ const { data } = await client.updateEmailAddress(
   },
   {
     name: 'Sales Team',
-    user_ids: [
-      'user-123',
-      'user-456'
-    ],
-    group_ids: [
-      'group-789'
-    ],
+    user_ids: ['user-123', 'user-456'],
+    group_ids: ['group-789'],
     default_signature_id: 'sig-abc',
     shared_inbox_id: 'inbox-xyz',
     is_active: true
@@ -284,13 +264,8 @@ const { data } = await client.updateEmailAddress(
   "updated_by": "user-456",
   "address": "sales@yourcompany.com",
   "name": "Sales Team",
-  "user_ids": [
-    "user-123",
-    "user-456"
-  ],
-  "group_ids": [
-    "group-789"
-  ],
+  "user_ids": ["user-123", "user-456"],
+  "group_ids": ["group-789"],
   "default_signature_id": "sig-abc",
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
@@ -326,13 +301,8 @@ const { data } = await client.listEmailAddresses()
     "updated_by": "user-456",
     "address": "sales@yourcompany.com",
     "name": "Sales Team",
-    "user_ids": [
-      "user-123",
-      "user-456"
-    ],
-    "group_ids": [
-      "group-789"
-    ],
+    "user_ids": ["user-123", "user-456"],
+    "group_ids": ["group-789"],
     "default_signature_id": "sig-abc",
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
@@ -358,12 +328,8 @@ const { data } = await client.addEmailAddress(
   {
     address: 'support@yourcompany.com',
     name: 'Customer Support',
-    user_ids: [
-      'user-123'
-    ],
-    group_ids: [
-      'group-456'
-    ],
+    user_ids: ['user-123'],
+    group_ids: ['group-456'],
     default_signature_id: 'sig-789',
     shared_inbox_id: 'inbox-abc'
   },
@@ -382,13 +348,8 @@ const { data } = await client.addEmailAddress(
   "updated_by": "user-456",
   "address": "sales@yourcompany.com",
   "name": "Sales Team",
-  "user_ids": [
-    "user-123",
-    "user-456"
-  ],
-  "group_ids": [
-    "group-789"
-  ],
+  "user_ids": ["user-123", "user-456"],
+  "group_ids": ["group-789"],
   "default_signature_id": "sig-abc",
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
@@ -425,10 +386,7 @@ const { data } = await client.getSharedInbox({
   "updated_by": "user-456",
   "name": "Customer Support",
   "color": "#4CAF50",
-  "assignees": [
-    "user-123",
-    "user-456"
-  ],
+  "assignees": ["user-123", "user-456"],
   "description": "Incoming customer support requests",
   "bucket_id": "bucket-xyz"
 }
@@ -467,10 +425,7 @@ const { data } = await client.updateSharedInbox(
   {
     color: '#4CAF50',
     name: 'Customer Support',
-    assignees: [
-      'user-123',
-      'user-456'
-    ],
+    assignees: ['user-123', 'user-456'],
     description: 'Incoming customer support requests'
   },
 )
@@ -488,10 +443,7 @@ const { data } = await client.updateSharedInbox(
   "updated_by": "user-456",
   "name": "Customer Support",
   "color": "#4CAF50",
-  "assignees": [
-    "user-123",
-    "user-456"
-  ],
+  "assignees": ["user-123", "user-456"],
   "description": "Incoming customer support requests",
   "bucket_id": "bucket-xyz"
 }
@@ -524,10 +476,7 @@ const { data } = await client.listSharedInboxes()
     "updated_by": "user-456",
     "name": "Customer Support",
     "color": "#4CAF50",
-    "assignees": [
-      "user-123",
-      "user-456"
-    ],
+    "assignees": ["user-123", "user-456"],
     "description": "Incoming customer support requests",
     "bucket_id": "bucket-xyz"
   }
@@ -551,10 +500,7 @@ const { data } = await client.addSharedInbox(
     id: 'support-inbox',
     color: '#2196F3',
     name: 'Sales Inquiries',
-    assignees: [
-      'user-123',
-      'user-456'
-    ],
+    assignees: ['user-123', 'user-456'],
     description: 'Inbound sales and pricing requests'
   },
 )
@@ -572,10 +518,7 @@ const { data } = await client.addSharedInbox(
   "updated_by": "user-456",
   "name": "Customer Support",
   "color": "#4CAF50",
-  "assignees": [
-    "user-123",
-    "user-456"
-  ],
+  "assignees": ["user-123", "user-456"],
   "description": "Incoming customer support requests",
   "bucket_id": "bucket-xyz"
 }
@@ -660,7 +603,7 @@ const { data } = await client.getOutlookConnectionStatus()
       "connected_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "tenant_id": "string",
-      "scopes": [],
+      "scopes": ["string"],
       "expires_at": "1970-01-01T00:00:00.000Z",
       "is_token_valid": true
     }
@@ -696,9 +639,7 @@ const { data } = await client.disconnectOutlook(
 {
   "success": true,
   "tenant_id": "string",
-  "affected_shared_inboxes": [
-    "string"
-  ]
+  "affected_shared_inboxes": ["string"]
 }
 ```
 
@@ -739,13 +680,8 @@ const { data } = await client.connectOutlookMailbox(
     "updated_by": "user-456",
     "address": "sales@yourcompany.com",
     "name": "Sales Team",
-    "user_ids": [
-      "user-123",
-      "user-456"
-    ],
-    "group_ids": [
-      "group-789"
-    ],
+    "user_ids": ["user-123", "user-456"],
+    "group_ids": ["group-789"],
     "default_signature_id": "sig-abc",
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
@@ -862,9 +798,7 @@ const { data } = await client.retryMailboxSync(
   {
     sync_id: 'string',
     scope: 'all_failed',
-    message_ids: [
-      'string'
-    ]
+    message_ids: ['string']
   },
 )
 ```

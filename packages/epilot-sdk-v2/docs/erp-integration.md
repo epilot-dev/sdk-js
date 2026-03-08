@@ -308,8 +308,12 @@ const { data } = await client.simulateMappingV2(
   ],
   "meter_readings_updates": [
     {
-      "meter": {},
-      "meter_counter": {},
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
       "attributes": {}
     }
   ],
@@ -364,8 +368,12 @@ const { data } = await client.simulateMapping(
   ],
   "meter_readings_updates": [
     {
-      "meter": {},
-      "meter_counter": {},
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
       "attributes": {}
     }
   ],
@@ -406,10 +414,24 @@ const { data } = await client.listIntegrations()
       "updated_at": "1970-01-01T00:00:00.000Z",
       "name": "string",
       "description": "string",
-      "access_token_ids": [],
-      "app_ids": [],
-      "environment_config": [],
-      "settings": {}
+      "access_token_ids": ["string"],
+      "app_ids": ["string"],
+      "environment_config": [
+        {
+          "key": "string",
+          "label": "string",
+          "type": "String",
+          "description": "string",
+          "required": false,
+          "order": 0
+        }
+      ],
+      "settings": {
+        "autoRefresh": {
+          "enabled": false,
+          "freshnessThresholdMinutes": 1
+        }
+      }
     }
   ]
 }
@@ -431,12 +453,8 @@ const { data } = await client.createIntegration(
   {
     name: 'string',
     description: 'string',
-    access_token_ids: [
-      'string'
-    ],
-    app_ids: [
-      'string'
-    ],
+    access_token_ids: ['string'],
+    app_ids: ['string'],
     environment_config: [
       {
         key: 'string',
@@ -468,12 +486,8 @@ const { data } = await client.createIntegration(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -520,12 +534,8 @@ const { data } = await client.getIntegration({
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -575,12 +585,8 @@ const { data } = await client.updateIntegration(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -694,9 +700,7 @@ const { data } = await client.replayEvents(
     integrationId: 'example',
   },
   {
-    event_ids: [
-      'string'
-    ]
+    event_ids: ['string']
   },
 )
 ```
@@ -706,9 +710,7 @@ const { data } = await client.replayEvents(
 
 ```json
 {
-  "event_ids": [
-    "string"
-  ]
+  "event_ids": ["string"]
 }
 ```
 
@@ -1006,8 +1008,8 @@ const { data } = await client.listIntegrationsV2()
       "updated_at": "1970-01-01T00:00:00.000Z",
       "name": "string",
       "description": "string",
-      "access_token_ids": [],
-      "app_ids": [],
+      "access_token_ids": ["string"],
+      "app_ids": ["string"],
       "environment_config": [],
       "settings": {},
       "use_cases": []
@@ -1032,12 +1034,8 @@ const { data } = await client.createIntegrationV2(
   {
     name: 'string',
     description: 'string',
-    access_token_ids: [
-      'string'
-    ],
-    app_ids: [
-      'string'
-    ],
+    access_token_ids: ['string'],
+    app_ids: ['string'],
     environment_config: [
       {
         key: 'string',
@@ -1080,12 +1078,8 @@ const { data } = await client.createIntegrationV2(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -1146,12 +1140,8 @@ const { data } = await client.getIntegrationV2({
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -1207,12 +1197,8 @@ const { data } = await client.updateIntegrationV2(
   {
     name: 'string',
     description: 'string',
-    access_token_ids: [
-      'string'
-    ],
-    app_ids: [
-      'string'
-    ],
+    access_token_ids: ['string'],
+    app_ids: ['string'],
     environment_config: [
       {
         key: 'string',
@@ -1255,12 +1241,8 @@ const { data } = await client.updateIntegrationV2(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "name": "string",
   "description": "string",
-  "access_token_ids": [
-    "string"
-  ],
-  "app_ids": [
-    "string"
-  ],
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
   "environment_config": [
     {
       "key": "string",
@@ -1474,14 +1456,8 @@ const { data } = await client.getMonitoringStats(
   {
     from_date: '2025-01-01T00:00:00Z',
     to_date: '2025-01-31T23:59:59Z',
-    inbound_group_by: [
-      'use_case_id',
-      'status'
-    ],
-    outbound_group_by: [
-      'event_name',
-      'status'
-    ]
+    inbound_group_by: ['use_case_id', 'status'],
+    outbound_group_by: ['event_name', 'status']
   },
 )
 ```
@@ -1555,8 +1531,19 @@ const { data } = await client.getMonitoringTimeSeries(
   "buckets": [
     {
       "timestamp": "1970-01-01T00:00:00.000Z",
-      "inbound": {},
-      "outbound": {}
+      "inbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "warning_count": 0,
+        "skipped_count": 0,
+        "total_count": 0
+      },
+      "outbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "pending_count": 0,
+        "total_count": 0
+      }
     }
   ]
 }
@@ -1591,9 +1578,21 @@ const { data } = await client.getOutboundStatus({
       "useCaseEnabled": true,
       "eventCatalogEvent": "contract.created",
       "eventEnabled": true,
-      "webhooks": [],
+      "webhooks": [
+        {
+          "webhookId": "string",
+          "webhookName": "string",
+          "enabled": true
+        }
+      ],
       "status": "ok",
-      "conflicts": []
+      "conflicts": [
+        {
+          "type": "event_disabled",
+          "webhookId": "string",
+          "message": "string"
+        }
+      ]
     }
   ]
 }
@@ -2019,7 +2018,23 @@ type IntegrationWithUseCases = {
       mappings: { ... }
     }
   } | {
-  // ...
+    id: string // uuid
+    integrationId: string // uuid
+    name: string
+    slug?: string
+    type: "file_proxy"
+    enabled: boolean
+    change_description?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+    configuration?: {
+      requires_vpc?: { ... }
+      auth?: { ... }
+      params?: { ... }
+      steps: { ... }
+      response: { ... }
+    }
+  }>
 }
 ```
 
@@ -2056,7 +2071,18 @@ type UpsertIntegrationWithUseCasesRequest = {
       entities?: { ... }
       meter_readings?: { ... }
     }
-  // ...
+  } | {
+    id?: string // uuid
+    name: string
+    slug?: string
+    enabled: boolean
+    change_description?: string
+    type: "outbound"
+    configuration?: {
+      event_catalog_event: { ... }
+      mappings: { ... }
+    }
+  }>
 }
 ```
 
@@ -2095,7 +2121,26 @@ type InboundIntegrationEventConfiguration = {
     reading_matching?: "external_id" | "strict-date"
     mode?: "upsert" | "delete" | "upsert-prune-scope"
     scope?: {
-  // ...
+      source?: { ... }
+    }
+    meter: {
+      unique_ids: { ... }
+    }
+    meter_counter?: {
+      unique_ids: { ... }
+    }
+    fields: Array<{
+      attribute: { ... }
+      field?: { ... }
+      jsonataExpression?: { ... }
+      constant?: { ... }
+      _type?: { ... }
+      enabled?: { ... }
+      relations?: { ... }
+      relation_refs?: { ... }
+      file_proxy_url?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -2156,7 +2201,25 @@ type IntegrationEntity = {
     jsonataExpression?: string
     constant?: unknown
     _type?: "email" | "phone"
-  // ...
+    enabled?: boolean | string
+    relations?: {
+      operation: { ... }
+      items?: { ... }
+      jsonataExpression?: { ... }
+    }
+    relation_refs?: {
+      operation: { ... }
+      items?: { ... }
+      jsonataExpression?: { ... }
+    }
+    file_proxy_url?: {
+      use_case_slug: { ... }
+      params?: { ... }
+    } | {
+      use_case_id: { ... }
+      params?: { ... }
+    }
+  }>
 }
 ```
 
@@ -2193,7 +2256,26 @@ type IntegrationMeterReading = {
     field?: string
     jsonataExpression?: string
     constant?: unknown
-  // ...
+    _type?: "email" | "phone"
+    enabled?: boolean | string
+    relations?: {
+      operation: { ... }
+      items?: { ... }
+      jsonataExpression?: { ... }
+    }
+    relation_refs?: {
+      operation: { ... }
+      items?: { ... }
+      jsonataExpression?: { ... }
+    }
+    file_proxy_url?: {
+      use_case_slug: { ... }
+      params?: { ... }
+    } | {
+      use_case_id: { ... }
+      params?: { ... }
+    }
+  }>
 }
 ```
 
@@ -2284,7 +2366,21 @@ type IntegrationEntityField = {
     use_case_slug: string
     params?: Record<string, {
       field: { ... }
-  // ...
+    } | {
+      constant: { ... }
+    } | {
+      jsonataExpression: { ... }
+    }>
+  } | {
+    use_case_id: string
+    params?: Record<string, {
+      field: { ... }
+    } | {
+      constant: { ... }
+    } | {
+      jsonataExpression: { ... }
+    }>
+  }
 }
 ```
 
@@ -2376,7 +2472,22 @@ type EmbeddedUseCaseRequest = {
 } | {
   id?: string // uuid
   name: string
-  // ...
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "outbound"
+  configuration?: {
+    event_catalog_event: string
+    mappings: Array<{
+      id: { ... }
+      name: { ... }
+      jsonata_expression: { ... }
+      enabled: { ... }
+      delivery: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }
 }
 ```
 
@@ -2499,7 +2610,6 @@ type InboundUseCase = {
       fields: { ... }
     }>
   }
-  // ...
 }
 ```
 
@@ -2564,7 +2674,21 @@ type FileProxyUseCase = {
       name: { ... }
       required: { ... }
       description?: { ... }
-  // ...
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2601,7 +2725,73 @@ type UseCase = {
       fields: { ... }
     }>
   }
-  // ...
+} | {
+  id: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  type: "outbound"
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  configuration?: {
+    event_catalog_event: string
+    mappings: Array<{
+      id: { ... }
+      name: { ... }
+      jsonata_expression: { ... }
+      enabled: { ... }
+      delivery: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }
+} | {
+  id: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  type: "file_proxy"
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  configuration?: {
+    requires_vpc?: boolean
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2638,7 +2828,58 @@ type CreateUseCaseRequest = {
   slug?: string
   enabled: boolean
   type: "outbound"
-  // ...
+  configuration?: {
+    event_catalog_event: string
+    mappings: Array<{
+      id: { ... }
+      name: { ... }
+      jsonata_expression: { ... }
+      enabled: { ... }
+      delivery: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }
+} | {
+  name: string
+  slug?: string
+  enabled: boolean
+  type: "file_proxy"
+  configuration?: {
+    requires_vpc?: boolean
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2739,7 +2980,16 @@ type CreateFileProxyUseCaseRequest = {
       url: { ... }
       method: { ... }
       headers?: { ... }
-  // ...
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2776,7 +3026,61 @@ type UpdateUseCaseRequest = {
   name?: string
   slug?: string
   enabled?: boolean
-  // ...
+  change_description?: string
+  type?: "outbound"
+  configuration?: {
+    event_catalog_event: string
+    mappings: Array<{
+      id: { ... }
+      name: { ... }
+      jsonata_expression: { ... }
+      enabled: { ... }
+      delivery: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }
+} | {
+  name?: string
+  slug?: string
+  enabled?: boolean
+  change_description?: string
+  type?: "file_proxy"
+  configuration?: {
+    requires_vpc?: boolean
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2880,7 +3184,17 @@ type UpdateFileProxyUseCaseRequest = {
     steps: Array<{
       url: { ... }
       method: { ... }
-  // ...
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -2917,6 +3231,76 @@ type UseCaseHistoryEntry = {
       meter: { ... }
       meter_counter?: { ... }
       fields: { ... }
+    }>
+  }
+} | {
+  id: string // uuid
+  useCaseId: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  history_created_at: string // date-time
+  type: "outbound"
+  configuration?: {
+    event_catalog_event: string
+    mappings: Array<{
+      id: { ... }
+      name: { ... }
+      jsonata_expression: { ... }
+      enabled: { ... }
+      delivery: { ... }
+      created_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }
+} | {
+  id: string // uuid
+  useCaseId: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  history_created_at: string // date-time
+  type: "file_proxy"
+  configuration?: {
+    requires_vpc?: boolean
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
   // ...
 }
 ```
@@ -2971,7 +3355,8 @@ type InboundUseCaseHistoryEntry = {
       meter: { ... }
       meter_counter?: { ... }
       fields: { ... }
-  // ...
+    }>
+  }
 }
 ```
 
@@ -3038,7 +3423,23 @@ type FileProxyUseCaseHistoryEntry = {
     }
     params?: Array<{
       name: { ... }
-  // ...
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
 }
 ```
 
@@ -3080,7 +3481,10 @@ type FileProxyUseCaseConfiguration = {
   }>
   response: {
     body: string
-  // ...
+    encoding: "base64" | "binary"
+    filename?: string
+    content_type?: string
+  }
 }
 ```
 

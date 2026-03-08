@@ -1,77 +1,41 @@
-import type { Document } from 'openapi-client-axios';
+import type { Document } from 'openapi-client-axios'
 
-import { createApiClient } from '../client-factory';
-import { createApiHandle } from '../proxy';
-import type { ApiHandle } from '../types';
-export { authorize } from '../authorize';
-export type { TokenArg } from '../authorize';
-import type { Client } from '../types/targeting';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AutomationRecipientPayload,
-  AutomationStatus,
-  BaseEntityAcl,
-  BaseEntityOwner,
-  BaseError,
-  BaseNanoID,
-  BaseRecipientPayload,
-  BaseRelation,
-  BaseSystemFields,
-  BaseSystemFieldsRequired,
-  BaseSystemId,
-  BaseTags,
-  BaseUUID,
-  Campaign,
-  CampaignStatus,
-  ClientError,
-  CreateRecipientPayload,
-  ExecutionSummaryItem,
-  GetTargetQueriesParams,
-  JobStatus,
-  MatchCampaignParams,
-  MatchTargetParams,
-  PortalRecipientPayload,
-  PortalStatus,
-  Recipient,
-  RetriggerAutomationsRequest,
-  RetriggerAutomationsResult,
-  ServerError,
-  Target,
-  TargetQueryResult,
-  UpdatePortalStatusRequest,
-  UpdateRecipientPayload,
-} from '../types/targeting';
+import { createApiClient } from '../client-factory'
+import { createApiHandle } from '../proxy'
+import type { ApiHandle } from '../types'
+export { authorize } from '../authorize'
+export type { TokenArg } from '../authorize'
+import type { Client } from '../types/targeting'
+export type { Client, PathsDictionary, OperationMethods, AutomationRecipientPayload, AutomationStatus, BaseEntityAcl, BaseEntityOwner, BaseError, BaseNanoID, BaseRecipientPayload, BaseRelation, BaseSystemFields, BaseSystemFieldsRequired, BaseSystemId, BaseTags, BaseUUID, Campaign, CampaignStatus, ClientError, CreateRecipientPayload, ExecutionSummaryItem, GetTargetQueriesParams, JobStatus, MatchCampaignParams, MatchTargetParams, PortalRecipientPayload, PortalStatus, Recipient, RetriggerAutomationsRequest, RetriggerAutomationsResult, ServerError, Target, TargetQueryResult, UpdatePortalStatusRequest, UpdateRecipientPayload } from '../types/targeting'
 
 const loadDefinition = async (): Promise<Document> => {
-  const mod = await import('../definitions/targeting.json');
-  return (mod.default ?? mod) as unknown as Document;
-};
+  const mod = await import('../definitions/targeting.json')
+  return (mod.default ?? mod) as unknown as Document
+}
 
-let _instance: Client | null = null;
+let _instance: Client | null = null
 
 const resolve = async (): Promise<Client> => {
   if (!_instance) {
-    const definition = await loadDefinition();
-    _instance = createApiClient<Client>({ definition });
+    const definition = await loadDefinition()
+    _instance = createApiClient<Client>({ definition })
   }
-  return _instance;
-};
+  return _instance
+}
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
   loadDefinition,
-});
+})
 
 /** Get the cached singleton client (lazy-initialized on first call) */
-export const getClient = _handle.getClient;
+export const getClient = _handle.getClient
 
 /** Create a fresh client instance (not cached) */
-export const createClient = _handle.createClient;
+export const createClient = _handle.createClient
 
 /**
  * API handle — also exposes operations directly:
  * `targeting.someOperation(...)` calls forwarded to lazy singleton
  */
-export const targeting = _handle;
+export const targeting = _handle
