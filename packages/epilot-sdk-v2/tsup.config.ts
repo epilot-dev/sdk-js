@@ -1,17 +1,17 @@
-import { readdirSync } from 'fs'
-import { resolve } from 'path'
+import { readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsup';
 
 // Discover all API entry files for multi-entry build
-const apisDir = resolve(__dirname, 'src/apis')
-const apiEntries: Record<string, string> = {}
+const apisDir = resolve(__dirname, 'src/apis');
+const apiEntries: Record<string, string> = {};
 
 try {
-  const files = readdirSync(apisDir).filter((f) => f.endsWith('.ts') && !f.startsWith('_'))
+  const files = readdirSync(apisDir).filter((f) => f.endsWith('.ts') && !f.startsWith('_'));
   for (const file of files) {
-    const name = file.replace('.ts', '')
-    apiEntries[`apis/${name}`] = `src/apis/${file}`
+    const name = file.replace('.ts', '');
+    apiEntries[`apis/${name}`] = `src/apis/${file}`;
   }
 } catch {
   // apis directory may not exist yet before generation
@@ -41,4 +41,4 @@ export default defineConfig([
     banner: { js: '#!/usr/bin/env node' },
     external: ['openapi-client-axios-typegen'],
   },
-])
+]);

@@ -6,8 +6,8 @@
  * npm usage: npm run openapi <path-to-openapi.yml>
  * direct usage: node ./update-openapi.js <default_source> <source>
  */
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 
 const defaultSrc = process.argv[2];
 const overrideSrc = process.argv[3];
@@ -27,7 +27,7 @@ function deduplicateServers(spec, fallbackServerURL) {
   const uniqueServers = [];
 
   for (const server of servers) {
-    if (server && server.url && !seen.has(server.url)) {
+    if (server?.url && !seen.has(server.url)) {
       seen.add(server.url);
       uniqueServers.push(server);
     }
@@ -67,7 +67,7 @@ execSync(
 console.log('===> Deduplicating servers...');
 const spec = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8'));
 const deduplicatedSpec = deduplicateServers(spec, serverURL);
-fs.writeFileSync(OUTPUT_FILE, JSON.stringify(deduplicatedSpec, null, 2) + '\n');
+fs.writeFileSync(OUTPUT_FILE, `${JSON.stringify(deduplicatedSpec, null, 2)}\n`);
 
 // store optimized runtime version for client
 console.log('===> Generating openapi-runtime.json');

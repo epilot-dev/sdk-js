@@ -1,13 +1,16 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
   "files": {
-    "includes": ["**"],
-    "experimentalScannerIgnores": [
-      "**/node_modules",
-      "**/dist",
-      "**/*.d.ts",
-      "**/openapi.json",
-      "**/openapi-runtime.json"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/*.d.ts",
+      "!**/tsconfig.json",
+      "!**/package.json",
+      "!**/openapi.json",
+      "!**/openapi-runtime.json",
+      "!.*"
     ]
   },
   "formatter": {
@@ -23,6 +26,13 @@
       "semicolons": "always",
       "bracketSpacing": true,
       "quoteProperties": "asNeeded"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
     }
   },
   "linter": {

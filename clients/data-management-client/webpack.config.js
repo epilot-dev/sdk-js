@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const path = require('path');
+const path = require('node:path');
 
 const CopyPlugin = require('copy-webpack-plugin');
 
@@ -29,5 +29,3 @@ module.exports = {
     libraryTarget: 'commonjs',
   },
 };
-
-

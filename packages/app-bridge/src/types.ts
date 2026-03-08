@@ -248,7 +248,7 @@ export interface AppBridgeEventMap {
     outgoing: Record<string, never>;
     incoming: PageContextPayload;
   };
-  'navigate': {
+  navigate: {
     outgoing: { subPath: string };
     incoming: never;
   };

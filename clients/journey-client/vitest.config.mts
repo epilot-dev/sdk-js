@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   assetsInclude: ['**/*.yml'],
@@ -6,7 +6,7 @@ export default defineConfig({
     coverage: {
       include: ['src/**/*'],
       provider: 'v8',
-      reporter: ['text-summary', 'html', 'cobertura']
+      reporter: ['text-summary', 'html', 'cobertura'],
     },
     globals: true,
     outputFile: 'test-report.xml',
@@ -14,11 +14,11 @@ export default defineConfig({
       threads: {
         // Tests don't rely on globals but can't currently run concurrently
         // -> this improves performance by skipping test-level isolation.
-        singleThread: true
-      }
+        singleThread: true,
+      },
     },
     reporters: ['default', 'junit'],
     silent: true,
-    watch: false
-  }
-})
+    watch: false,
+  },
+});

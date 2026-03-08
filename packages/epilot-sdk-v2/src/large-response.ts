@@ -8,10 +8,7 @@ export type LargeResponseConfig = {
 const CONTENT_TYPE = 'application/large-response.vnd+json';
 const REF_PROPERTY = '$payload_ref';
 
-export const applyLargeResponseInterceptor = (params: {
-  client: AxiosInstance;
-  config: LargeResponseConfig;
-}) => {
+export const applyLargeResponseInterceptor = (params: { client: AxiosInstance; config: LargeResponseConfig }) => {
   const { client, config } = params;
 
   if (config.enabled === false) return;

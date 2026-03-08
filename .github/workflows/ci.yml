@@ -11,6 +11,23 @@ permissions:
   contents: write
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm lint
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -26,7 +43,6 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm lint
       - run: pnpm test
 
   auto-release:
@@ -61,13 +77,19 @@ jobs:
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
 
+      - name: Generate, build and test
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          pnpm --filter @epilot/sdk generate
+          pnpm --filter @epilot/sdk build
+          pnpm --filter @epilot/sdk test
+
       - name: Bump version, commit and tag
         if: steps.check.outputs.changed == 'true'
         id: version
         run: |
-          pnpm install --frozen-lockfile
-          pnpm build
-
           cd packages/epilot-sdk-v2
           NEW_VERSION=$(npm version patch --no-git-tag-version)
           echo "version=${NEW_VERSION#v}" >> "$GITHUB_OUTPUT"
@@ -75,7 +97,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add packages/epilot-sdk-v2/package.json
+          git add packages/epilot-sdk-v2/
           git commit -m "@epilot/sdk@${NEW_VERSION#v}"
           git tag "@epilot/sdk@${NEW_VERSION#v}"
           git push origin main --follow-tags
@@ -87,7 +109,7 @@ jobs:
 
   publish:
     name: Publish to npm
-    needs: [test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/@epilot/sdk@')
     steps:

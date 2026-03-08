@@ -248,7 +248,7 @@
   },
   "scripts": {
     "generate": "tsx ../../scripts/generate-sdk-v2.ts",
-    "build": "npm run generate && tsup",
+    "build": "tsup",
     "build:watch": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",

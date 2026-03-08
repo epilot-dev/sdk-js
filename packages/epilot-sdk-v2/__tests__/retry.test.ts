@@ -24,25 +24,21 @@ const createMockHeaders = (values: Record<string, unknown> = {}) => {
   const store = { ...values };
   return {
     ...store,
-    set: (key: string, value: string) => { store[key] = value; },
+    set: (key: string, value: string) => {
+      store[key] = value;
+    },
     get: (key: string) => store[key],
   };
 };
 
-const createAxiosError = (params: {
-  status: number;
-  retryAfter?: string;
-  retryCount?: number;
-}): AxiosError => {
+const createAxiosError = (params: { status: number; retryAfter?: string; retryCount?: number }): AxiosError => {
   const headers: Record<string, string> = {};
   if (params.retryAfter !== undefined) {
     headers['retry-after'] = params.retryAfter;
   }
 
   const requestHeaders = createMockHeaders(
-    params.retryCount !== undefined
-      ? { 'x-epilot-sdk-retry-count': params.retryCount }
-      : {},
+    params.retryCount !== undefined ? { 'x-epilot-sdk-retry-count': params.retryCount } : {},
   );
 
   return {

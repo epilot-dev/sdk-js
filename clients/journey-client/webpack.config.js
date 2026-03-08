@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const path = require('path')
+const path = require('node:path');
 
-const CopyPlugin = require('copy-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/definition.ts',
@@ -11,18 +11,18 @@ module.exports = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
   plugins: [
     new CopyPlugin({
-      patterns: [{ from: '*.d.ts', context: './src' }]
-    })
+      patterns: [{ from: '*.d.ts', context: './src' }],
+    }),
   ],
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'definition.js',
-    libraryTarget: 'commonjs'
-  }
-}
+    libraryTarget: 'commonjs',
+  },
+};
