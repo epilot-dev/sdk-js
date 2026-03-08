@@ -374,7 +374,7 @@ import type { Client, Entity } from '@epilot/sdk/entity'
 
 When you call `authorize()`, `headers()`, `retry()`, `largeResponse()`, or `interceptors`, the SDK invalidates all cached client instances. The next operation call creates a fresh client with the updated configuration.
 
-**Proxy operations are always up to date** — calls like `epilot.entity.getEntity(...)` re-resolve the client on every invocation, so they always use the latest config.
+**Operation methods are always up to date** — calls like `epilot.entity.getEntity(...)` re-resolve the client on every invocation, so they always use the latest config.
 
 **Direct `getClient()` references can go stale** — if you hold a reference and then change config, your reference still points to the old client:
 
@@ -387,6 +387,6 @@ epilot.authorize('new-token') // invalidates all cached clients
 // epilot.entity.getEntity(...) will use a new client with the new token
 ```
 
-If you need a long-lived reference that survives config changes, call `getClient()` again after changing config — or use proxy operations directly.
+If you need a long-lived reference that survives config changes, call `getClient()` again after changing config, or use operation methods directly.
 
 </details>
