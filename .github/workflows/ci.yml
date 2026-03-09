@@ -106,7 +106,7 @@ jobs:
 
       - name: Publish @epilot/sdk
         if: steps.check.outputs.changed == 'true'
-        run: npm publish
+        run: npm publish --ignore-scripts
         working-directory: packages/epilot-sdk-v2
 
   publish:
@@ -132,5 +132,5 @@ jobs:
       - run: pnpm build
 
       - name: Publish @epilot/sdk
-        run: npm publish
+        run: npm publish --ignore-scripts
         working-directory: packages/epilot-sdk-v2
