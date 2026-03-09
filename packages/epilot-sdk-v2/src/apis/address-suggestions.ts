@@ -1,6 +1,8 @@
 import type { Document } from 'openapi-client-axios';
 
 import { createApiClient } from '../client-factory';
+import { expand } from '../compact';
+import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
 import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
@@ -23,16 +25,16 @@ export type {
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {
-  const mod = require('../definitions/address-suggestions.json');
-  return (mod.default ?? mod) as unknown as Document;
+  const mod = require('../definitions/address-suggestions-runtime.json');
+  return expand((mod.default ?? mod) as CompactDefinition) as Document;
 };
 
 let _instance: Client | null = null;
 
 const resolve = (): Client => {
   if (!_instance) {
-    const definition = loadDefinition();
-    _instance = createApiClient<Client>({ definition });
+    const def = loadDefinition();
+    _instance = createApiClient<Client>({ definition: def });
   }
   return _instance;
 };

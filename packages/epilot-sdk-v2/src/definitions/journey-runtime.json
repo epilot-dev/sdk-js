@@ -1,0 +1,27 @@
+{
+  "s": "https://journey-config.sls.epilot.io",
+  "o": [
+    ["getJourneysByOrgId", "get", "/v1/journey/organization/{id}", [["id", "p", true], ["hydrate", "q"]]],
+    ["getJourney", "get", "/v1/journey/configuration/{id}", [["id", "p", true], ["source", "q"], ["orgId", "q"]]],
+    ["removeJourney", "delete", "/v1/journey/configuration/{id}", [["id", "p", true]]],
+    [
+      "getJourneyProducts",
+      "get",
+      "/v1/journey/products/{id}",
+      [["id", "p", true], ["source", "q"], ["postal_code", "q"], ["city", "q"], ["street", "q"], ["street_number", "q"]]
+    ],
+    ["createJourney", "post", "/v1/journey/configuration", [["skipAutomation", "q"]], 1],
+    ["updateJourney", "put", "/v1/journey/configuration", null, 1],
+    ["patchUpdateJourney", "patch", "/v1/journey/configuration", null, 1],
+    ["searchJourneys", "post", "/v1/journey/configuration/search", null, 1],
+    ["generateDocument", "post", "/v1/journey/document:generate", null, 1],
+    ["createJourneyV2", "post", "/v2/journey/configuration", [["skipAutomation", "q"]], 1],
+    ["updateJourneyV2", "put", "/v2/journey/configuration", null, 1],
+    ["patchUpdateJourneyV2", "patch", "/v2/journey/configuration", null, 1],
+    ["getJourneyV2", "get", "/v2/journey/configuration/{id}", [["id", "p", true]]],
+    ["removeJourneyV2", "delete", "/v2/journey/configuration/{id}", [["id", "p", true]]],
+    ["getSettingsForJourney", "get", "/v1/journey/{id}/settings", [["id", "p", true]]],
+    ["getButtonOptions", "get", "/v1/journey/button-options", [["fileId", "q", true]]]
+  ],
+  "v": "3.0.0"
+}

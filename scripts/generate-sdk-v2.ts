@@ -18,6 +18,7 @@ const ROOT = resolve(__dirname, '..');
 const CLIENTS_DIR = resolve(ROOT, 'clients');
 const V2_DIR = resolve(ROOT, 'packages/epilot-sdk-v2');
 const DEFS_DIR = resolve(V2_DIR, 'src/definitions');
+const RUNTIME_DEFS_DIR = resolve(V2_DIR, 'definitions');
 const TYPES_DIR = resolve(V2_DIR, 'src/types');
 const APIS_DIR = resolve(V2_DIR, 'src/apis');
 
@@ -62,6 +63,111 @@ const copyDefinitions = (clients: ClientInfo[]) => {
     const src = resolve(CLIENTS_DIR, client.dirName, 'src/openapi-runtime.json');
     const dest = resolve(DEFS_DIR, `${client.kebabName}.json`);
     copyFileSync(src, dest);
+  }
+};
+
+const copyFullDefinitions = (clients: ClientInfo[]) => {
+  mkdirSync(RUNTIME_DEFS_DIR, { recursive: true });
+
+  for (const client of clients) {
+    if (!client.hasDefinition) continue;
+    // Prefer the full spec (openapi.json), fall back to runtime
+    const fullSrc = resolve(CLIENTS_DIR, client.dirName, 'src/openapi.json');
+    const runtimeSrc = resolve(CLIENTS_DIR, client.dirName, 'src/openapi-runtime.json');
+    const src = existsSync(fullSrc) ? fullSrc : runtimeSrc;
+    const dest = resolve(RUNTIME_DEFS_DIR, `${client.kebabName}.json`);
+    copyFileSync(src, dest);
+  }
+};
+
+type CompactParam = [string, string, ...unknown[]];
+type CompactRefParam = [string];
+type CompactOp = [string, string, string, (CompactParam | CompactRefParam)?, (0 | 1)?];
+
+const compactifyParam = (p: Record<string, unknown>): unknown[] => {
+  if (p.$ref) {
+    return [(p.$ref as string).split('/').pop()!];
+  }
+  const loc = ({ path: 'p', query: 'q', header: 'h', cookie: 'c' } as Record<string, string>)[p.in as string] || 'q';
+  const cp: unknown[] = [p.name as string, loc];
+  if (p.required) cp.push(true);
+  if (p.style) {
+    if (!p.required) cp.push(false); // placeholder for required
+    cp.push(p.style as string);
+  }
+  if (p.explode !== undefined) {
+    cp.push(p.explode as boolean);
+  }
+  return cp;
+};
+
+const compactifyData = (specPath: string): Record<string, unknown> => {
+  const raw = JSON.parse(readFileSync(specPath, 'utf-8'));
+  const server: string = raw.servers?.[0]?.url || '';
+  const openapiVersion: string = raw.openapi || '3.0.2';
+  const paths = raw.paths || {};
+
+  const ops: CompactOp[] = [];
+  const pathParams: Record<string, unknown[][]> = {};
+
+  for (const [path, methods] of Object.entries(paths) as [string, Record<string, unknown>][]) {
+    // Capture path-level parameters
+    if (methods.parameters) {
+      pathParams[path] = (methods.parameters as Record<string, unknown>[]).map(compactifyParam);
+    }
+
+    for (const [method, rawOp] of Object.entries(methods)) {
+      if (method === 'parameters') continue;
+      const op = rawOp as Record<string, unknown>;
+      if (typeof op !== 'object' || !op.operationId) continue;
+
+      const params = (op.parameters || []) as Record<string, unknown>[];
+      const compactParams = params.map(compactifyParam);
+
+      const hasBody = op.requestBody ? 1 : 0;
+      const entry: CompactOp = [op.operationId as string, method, path];
+      if (compactParams.length > 0 || hasBody) entry.push(compactParams.length > 0 ? compactParams : undefined);
+      if (hasBody) entry.push(1);
+
+      ops.push(entry);
+    }
+  }
+
+  // Component parameters
+  const componentParams = raw.components?.parameters as Record<string, Record<string, unknown>> | undefined;
+
+  const result: Record<string, unknown> = { s: server, o: ops };
+  if (openapiVersion !== '3.0.2') result.v = openapiVersion;
+
+  if (componentParams && Object.keys(componentParams).length > 0) {
+    const cpObj: Record<string, unknown[]> = {};
+    for (const [refName, p] of Object.entries(componentParams)) {
+      cpObj[refName] = compactifyParam(p);
+    }
+    result.cp = cpObj;
+  }
+
+  if (Object.keys(pathParams).length > 0) {
+    result.pp = pathParams;
+  }
+
+  return result;
+};
+
+const generateCompactDefinitions = (clients: ClientInfo[]) => {
+  mkdirSync(DEFS_DIR, { recursive: true });
+  mkdirSync(RUNTIME_DEFS_DIR, { recursive: true });
+
+  for (const client of clients) {
+    if (!client.hasDefinition) continue;
+    const src = resolve(CLIENTS_DIR, client.dirName, 'src/openapi-runtime.json');
+    const compactData = compactifyData(src);
+    const json = JSON.stringify(compactData);
+
+    // src/definitions/ for vitest (source imports)
+    writeFileSync(resolve(DEFS_DIR, `${client.kebabName}-runtime.json`), json);
+    // definitions/ at package root for built dist (require('../definitions/...') from dist/)
+    writeFileSync(resolve(RUNTIME_DEFS_DIR, `${client.kebabName}-runtime.json`), json);
   }
 };
 
@@ -238,6 +344,8 @@ const generateApiFile = (client: ClientInfo): string => {
     `import type { Document } from 'openapi-client-axios'`,
     ``,
     `import { createApiClient } from '../client-factory'`,
+    `import { expand } from '../compact'`,
+    `import type { CompactDefinition } from '../compact'`,
     `import { createApiHandle } from '../proxy'`,
     `import type { ApiHandle } from '../types'`,
     `export { authorize } from '../authorize'`,
@@ -259,16 +367,16 @@ const generateApiFile = (client: ClientInfo): string => {
     ``,
     `/* eslint-disable @typescript-eslint/no-require-imports */`,
     `const loadDefinition = (): Document => {`,
-    `  const mod = require('../definitions/${client.kebabName}.json')`,
-    `  return (mod.default ?? mod) as unknown as Document`,
+    `  const mod = require('../definitions/${client.kebabName}-runtime.json')`,
+    `  return expand((mod.default ?? mod) as CompactDefinition) as Document`,
     `}`,
     ``,
     `let _instance: ${clientType} | null = null`,
     ``,
     `const resolve = (): ${clientType} => {`,
     `  if (!_instance) {`,
-    `    const definition = loadDefinition()`,
-    `    _instance = createApiClient<${clientType}>({ definition })`,
+    `    const def = loadDefinition()`,
+    `    _instance = createApiClient<${clientType}>({ definition: def })`,
     `  }`,
     `  return _instance`,
     `}`,
@@ -297,18 +405,19 @@ const generateApiFile = (client: ClientInfo): string => {
 const generateRegistry = (clients: ClientInfo[]): string => {
   const validClients = clients.filter((c) => c.hasDefinition);
 
-  const _imports = validClients.map((_c) => `import type { Document } from 'openapi-client-axios'`);
-
   const lines = [
     `import type { Document } from 'openapi-client-axios'`,
     ``,
+    `import { expand } from '../compact'`,
+    `import type { CompactDefinition } from '../compact'`,
     `import { registerApi } from '../registry'`,
     `import type { ApiEntry } from '../types'`,
     ``,
     `/* eslint-disable @typescript-eslint/no-require-imports */`,
-    `const loadDef = (id: string): Document => {`,
-    `  const mod = require(id)`,
-    `  return (mod.default ?? mod) as unknown as Document`,
+    `const base = '../definitions/'`,
+    `const loadDef = (name: string): Document => {`,
+    `  const mod = require(base + name + '-runtime.json')`,
+    `  return expand((mod.default ?? mod) as CompactDefinition) as Document`,
     `}`,
     ``,
     `export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {`,
@@ -319,7 +428,7 @@ const generateRegistry = (clients: ClientInfo[]): string => {
       `  registerApi({`,
       `    registry,`,
       `    name: '${client.apiName}',`,
-      `    loader: () => loadDef('../definitions/${client.kebabName}.json'),`,
+      `    loader: () => loadDef('${client.kebabName}'),`,
       `  })`,
     );
   }
@@ -373,6 +482,7 @@ const generateSubpathExports = (clients: ClientInfo[]): Record<string, Record<st
       import: `./dist/apis/${client.kebabName}.js`,
       require: `./dist/apis/${client.kebabName}.cjs`,
     };
+    exports[`./${client.kebabName}/openapi.json`] = `./definitions/${client.kebabName}.json`;
   }
 
   return exports;
@@ -886,8 +996,11 @@ const main = () => {
   const validClients = clients.filter((c) => c.hasDefinition);
   console.log(`${validClients.length} clients have openapi-runtime.json`);
 
-  console.log('Copying definitions...');
-  copyDefinitions(clients);
+  console.log('Generating compact definitions...');
+  generateCompactDefinitions(clients);
+
+  console.log('Copying full OpenAPI definitions...');
+  copyFullDefinitions(clients);
 
   console.log('Copying types...');
   copyTypes(clients);

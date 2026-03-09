@@ -1,0 +1,48 @@
+{
+  "s": "https://targeting.sls.epilot.io",
+  "o": [
+    ["changeCampaignStatus", "post", "/v1/campaign/{campaign_id}/status", [["CampaignIdPathParam"]]],
+    ["getCampaignJobStatus", "get", "/v1/campaign/{campaign_id}/job", [["CampaignIdPathParam"]]],
+    ["getCampaignPortals", "get", "/v1/campaign/{campaign_id}/portals", [["CampaignIdPathParam"]]],
+    [
+      "retriggerCampaignAutomations",
+      "post",
+      "/v1/campaign/{campaign_id}/automations:retrigger",
+      [["CampaignIdPathParam"]],
+      1
+    ],
+    ["matchCampaigns", "post", "/v1/campaign:match", null, 1],
+    ["matchTargets", "post", "/v1/target:match", null, 1],
+    ["getTargetQueries", "post", "/v1/target/queries", null, 1],
+    ["createRecipient", "post", "/v1/campaign/{campaign_id}/recipient", [["CampaignIdPathParam"]], 1],
+    [
+      "updateRecipient",
+      "patch",
+      "/v1/campaign/{campaign_id}/recipient/{recipient_id}",
+      [["CampaignIdPathParam"], ["RecipientIdPathParam"]],
+      1
+    ],
+    [
+      "updateRecipientPortalStatus",
+      "patch",
+      "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status",
+      [["CampaignIdPathParam"], ["RecipientIdPathParam"]],
+      1
+    ],
+    [
+      "getRecipients",
+      "get",
+      "/v1/campaign/{campaign_id}/recipients",
+      [
+        ["CampaignIdPathParam"],
+        ["limit", "q"],
+        ["next", "q"],
+        ["q", "q"],
+        ["automation_status", "q"],
+        ["portal_status", "q"]
+      ]
+    ]
+  ],
+  "v": "3.0.3",
+  "cp": { "CampaignIdPathParam": ["campaign_id", "p", true], "RecipientIdPathParam": ["recipient_id", "p", true] }
+}

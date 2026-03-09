@@ -16,7 +16,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "publish-packages": "changeset publish",
-    "generate-sdk": "tsx scripts/generate-sdk-v2.ts"
+    "generate-sdk": "tsx scripts/generate-sdk-v2.ts && pnpm lint:fix"
   },
   "keywords": [
     "epilot",

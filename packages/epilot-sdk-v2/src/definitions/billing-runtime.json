@@ -1,0 +1,21 @@
+{
+  "s": "https://billing.sls.epilot.io",
+  "o": [
+    [
+      "getBillingEvents",
+      "get",
+      "/v1/billing/events",
+      [["from", "q"], ["size", "q"], ["entity_id", "q"], ["event_type", "q"], ["date_after", "q"], ["date_before", "q"]]
+    ],
+    ["createBillingEvent", "post", "/v1/billing/events", null, 1],
+    ["getBillingEvent", "get", "/v1/billing/events/{id}", [["id", "p", true]]],
+    ["updateBillingEvent", "patch", "/v1/billing/events/{id}", [["id", "p", true]], 1],
+    ["deleteBillingEvent", "delete", "/v1/billing/events/{id}", [["id", "p", true]]],
+    ["getBillingEventByExternalId", "get", "/v1/billing/external/{external_id}", [["external_id", "p", true]]],
+    ["createContractEntity", "post", "/v1/billing/contracts", null, 1],
+    ["updateContractEntity", "patch", "/v1/billing/contracts/{id}", [["id", "p", true]], 1],
+    ["deleteContractEntity", "delete", "/v1/billing/contracts/{id}", [["id", "p", true]]],
+    ["getCustomerBalance", "get", "/v1/billing/customers/{id}/balance", [["id", "p", true]]]
+  ],
+  "v": "3.0.3"
+}

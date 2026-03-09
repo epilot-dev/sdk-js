@@ -1,0 +1,89 @@
+{
+  "s": "https://workflows-execution.sls.epilot.io",
+  "o": [
+    ["getExecutions", "get", "/v1/workflows/executions", [["context", "q"], ["schema", "q"]]],
+    ["createExecution", "post", "/v1/workflows/executions", null, 1],
+    ["getExecution", "get", "/v1/workflows/executions/{executionId}", [["executionId", "p", true]]],
+    ["updateExecution", "patch", "/v1/workflows/executions/{executionId}", [["executionId", "p", true]], 1],
+    ["deleteExecution", "delete", "/v1/workflows/executions/{executionId}", [["executionId", "p", true]]],
+    ["createStep", "post", "/v1/workflows/executions/{executionId}/steps", [["executionId", "p", true]], 1],
+    [
+      "updateStep",
+      "patch",
+      "/v1/workflows/executions/{executionId}/steps/{stepId}",
+      [["executionId", "p", true], ["stepId", "p", true]],
+      1
+    ],
+    [
+      "deleteStep",
+      "delete",
+      "/v1/workflows/executions/{executionId}/steps/{stepId}",
+      [["executionId", "p", true], ["stepId", "p", true]]
+    ],
+    ["searchExecutions", "post", "/v1/workflows/executions/search", null, 1],
+    ["searchSteps", "post", "/v1/workflows/executions/steps/search", null, 1],
+    [
+      "getClosingReasonExecution",
+      "get",
+      "/v1/workflows/executions/{executionId}/closing-reasons",
+      [["executionId", "p", true]]
+    ],
+    ["startFlowExecution", "post", "/v2/flows/executions", null, 1],
+    ["getFlowExecution", "get", "/v2/flows/executions/{execution_id}", [["ExecutionIdParam"]]],
+    ["patchFlowExecution", "patch", "/v2/flows/executions/{execution_id}", [["ExecutionIdParam"]], 1],
+    [
+      "deleteFlowExecution",
+      "delete",
+      "/v2/flows/executions/{execution_id}",
+      [["ExecutionIdParam"], ["SoftDeleteParam"]]
+    ],
+    ["searchFlowExecutions", "post", "/v2/flows/executions:search", null, 1],
+    [
+      "patchTask",
+      "patch",
+      "/v2/flows/executions/{execution_id}/tasks/{task_id}",
+      [["ExecutionIdParam"], ["TaskIdParam"]],
+      1
+    ],
+    [
+      "runTaskAutomation",
+      "post",
+      "/v2/flows/executions/{execution_id}/tasks/{task_id}/automation:run",
+      [["ExecutionIdParam"], ["TaskIdParam"]]
+    ],
+    [
+      "executeTask",
+      "post",
+      "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute",
+      [["ExecutionIdParam"], ["TaskIdParam"]]
+    ],
+    [
+      "patchPhase",
+      "patch",
+      "/v2/flows/executions/{execution_id}/phases/{phase_id}",
+      [["ExecutionIdParam"], ["PhaseIdParam"]],
+      1
+    ],
+    ["addTask", "post", "/v2/flows/executions/{execution_id}/tasks", [["ExecutionIdParam"]], 1],
+    [
+      "cancelTaskSchedule",
+      "delete",
+      "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule",
+      [["ExecutionIdParam"], ["TaskIdParam"]]
+    ],
+    [
+      "cancelSchedule",
+      "post",
+      "/v2/flows/executions/{execution_id}/schedules/{schedule_id}",
+      [["ExecutionIdParam"], ["ScheduleIdParam"]]
+    ]
+  ],
+  "v": "3.0.0",
+  "cp": {
+    "ExecutionIdParam": ["execution_id", "p", true],
+    "TaskIdParam": ["task_id", "p", true],
+    "PhaseIdParam": ["phase_id", "p", true],
+    "ScheduleIdParam": ["schedule_id", "p", true],
+    "SoftDeleteParam": ["soft", "q"]
+  }
+}

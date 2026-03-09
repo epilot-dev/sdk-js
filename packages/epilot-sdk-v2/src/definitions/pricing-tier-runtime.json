@@ -1,0 +1,5 @@
+{
+  "s": "https://pricing-tier.sls.epilot.io",
+  "o": [["getCurrentPricingTier", "get", "/v2/pricing-tiers/me"]],
+  "v": "3.0.3"
+}

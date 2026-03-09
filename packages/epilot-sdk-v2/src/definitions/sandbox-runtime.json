@@ -1,0 +1,13 @@
+{
+  "s": "https://sandbox.sls.epilot.io",
+  "o": [
+    ["listPipelines", "get", "/v1/sandbox/pipelines"],
+    ["createPipeline", "post", "/v1/sandbox/pipelines", null, 1],
+    ["getPipeline", "get", "/v1/sandbox/pipelines/{pipeline_id}", [["pipeline_id", "p", true]]],
+    ["deletePipeline", "delete", "/v1/sandbox/pipelines/{pipeline_id}", [["pipeline_id", "p", true]]],
+    ["generatePipelineToken", "get", "/v1/sandbox/pipelines/{pipeline_id}/token", [["pipeline_id", "p", true]]],
+    ["requestSandbox", "post", "/v1/sandbox:request", null, 1],
+    ["listSandboxRequests", "get", "/v1/sandbox/requests"]
+  ],
+  "v": "3.0.3"
+}

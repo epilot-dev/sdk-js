@@ -1,0 +1,23 @@
+{
+  "s": "https://entity-mapping.sls.epilot.io",
+  "o": [
+    ["storeConfig", "post", "/v1/mappings", [["with_id", "q"]], 1],
+    ["getConfig", "get", "/v1/mappings/{id}", [["id", "p", true]]],
+    ["deleteConfig", "delete", "/v1/mappings/{id}", [["id", "p", true]]],
+    ["getAllVersions", "get", "/v1/mappings/{id}/versions", [["id", "p", true]]],
+    ["storeNewVersion", "post", "/v1/mappings/{id}/versions", [["id", "p", true]], 1],
+    ["getConfigVersion", "get", "/v1/mappings/{id}/versions/{version}", [["id", "p", true], ["version", "p", true]]],
+    ["executeMapping", "post", "/v1/mappings:execute", [["preview_mode", "q"]], 1],
+    ["searchConfigs", "post", "/v1/mappings:search", null, 1],
+    [
+      "queryMappingHistory",
+      "get",
+      "/v1/mappings/history",
+      [["from", "q"], ["to", "q"], ["targetEntityId", "q"], ["sourceEntityId", "q"]]
+    ],
+    ["executeRelations", "post", "/v1/relations:execute", null, 1],
+    ["getMappingConfig", "get", "/v2/mappings/{id}", [["id", "p", true]]],
+    ["putMappingConfig", "put", "/v2/mappings/{id}", [["id", "p", true]], 1]
+  ],
+  "v": "3.0.3"
+}

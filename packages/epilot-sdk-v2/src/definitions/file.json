@@ -1,30 +1,130 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "",
-    "version": ""
+    "title": "File API",
+    "version": "1.10.0",
+    "description": "The File API enables you to upload, store, manage, and share files within the epilot platform.\n\n## Key Features\n- **Upload files** to temporary storage and save them permanently as File entities\n- **Generate previews** (thumbnails) for images and documents\n- **Create public links** to share private files externally\n- **Organize files** into collections for better management\n- **Version control** with automatic file versioning on updates\n\n## File Upload Workflow\n1. Call `uploadFileV2` to get a pre-signed S3 URL\n2. Upload your file directly to S3 using the pre-signed URL (PUT request)\n3. Call `saveFileV2` with the S3 reference to create a permanent File entity\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
+  "tags": [
+    {
+      "name": "File",
+      "description": "Core file operations for uploading, saving, retrieving, and deleting files.\n\nFiles are stored as epilot entities with the `file` schema and support:\n- Multiple versions (each save creates a new version)\n- Custom metadata and tags\n- Relations to other entities (contacts, orders, etc.)\n- Access control (private or public-read)\n"
+    },
+    {
+      "name": "Preview",
+      "description": "Generate thumbnail previews for files. Supports images, PDFs, and common document formats.\n\nPreview images are generated on-demand and cached for performance.\nYou can specify custom dimensions using the `w` (width) and `h` (height) parameters.\n"
+    },
+    {
+      "name": "Public Links",
+      "description": "Create shareable public links for private files.\n\nPublic links allow external users to access files without authentication.\nLinks are permanent until revoked and include the filename for user-friendly URLs.\n"
+    },
+    {
+      "name": "Session",
+      "description": "Browser session management for cookie-based authentication.\n\nUse `getSession` to convert a Bearer token into a session cookie. This enables:\n- Direct use of preview URLs in `<img>` tags\n- File downloads without manual token handling\n\n**Typical flow:**\n1. Authenticate and obtain a Bearer token\n2. Call `GET /v1/files/session` with the Bearer token\n3. Subsequent requests use the session cookie automatically\n"
+    },
+    {
+      "name": "Deprecated",
+      "description": "Legacy API endpoints scheduled for removal.\n\n**Important:** These endpoints will be removed on **2025-06-30**.\nPlease migrate to the v2 equivalents before this date.\n\n| Deprecated Endpoint | Replacement |\n|---------------------|-------------|\n| `POST /v1/files/upload` | `POST /v2/files/upload` |\n| `POST /v1/files` | `POST /v2/files` |\n"
+    },
+    {
+      "name": "file_schema",
+      "x-displayName": "File",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/FileEntity\" />\n"
+    },
+    {
+      "name": "File Collections",
+      "description": "Organize files into collections (folders) for better management.\n\nCollections can be:\n- **User-scoped**: Personal collections visible only to the creating user\n- **Global**: Shared collections available to all users for a schema\n\nCollections support hierarchical organization with parent-child relationships.\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": ["File", "Preview", "Public Links", "Session", "File Collections", "Deprecated"]
+    },
+    {
+      "name": "Schemas",
+      "tags": ["file_schema"]
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "CookieAuth": []
+    }
+  ],
   "paths": {
     "/v2/files/upload": {
       "post": {
         "operationId": "uploadFileV2",
+        "summary": "uploadFileV2",
+        "description": "Create pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the saveFileV2 operation to store file file permanently.\n",
+        "tags": ["File"],
         "parameters": [
           {
             "name": "file_entity_id",
-            "in": "query"
+            "in": "query",
+            "description": "Use this parameter when uploading a file directly to an existing file entity.\n\nNote: still requires calling saveFileV2 to save the file permanently.\n",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           }
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              },
+              "examples": {
+                "Upload an image file": {
+                  "description": "Upload an image file",
+                  "value": {
+                    "filename": "image.png",
+                    "mime_type": "image/png"
+                  }
+                },
+                "Upload a document": {
+                  "description": "Upload an image file",
+                  "value": {
+                    "filename": "document.pdf",
+                    "mime_type": "application/pdf"
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUpload"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v2/files": {
       "post": {
         "operationId": "saveFileV2",
+        "summary": "saveFileV2",
+        "description": "Saves a permanent file entity. Updates an existing file entity when `_id` is passed.\n\nSaves metadata to file entity and stores a version when `s3ref` or `source_url` is passed.\n",
+        "tags": ["File"],
         "parameters": [
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
@@ -47,34 +147,217 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/SaveFilePayloadV2"
+                  },
+                  {
+                    "type": "array",
+                    "description": "Batch version mode: array of s3ref payloads to add multiple versions to a single file entity.\nAll payloads must target the same file entity (_id or file_entity_id).\nRequires version_only=true query parameter.\nS3 operations run in parallel, with a single entity update at the end.\n",
+                    "items": {
+                      "$ref": "#/components/schemas/BatchSaveFileVersionPayload"
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                ]
+              },
+              "examples": {
+                "New file from s3ref": {
+                  "description": "Standard epilot file entity with S3 Ref",
+                  "value": {
+                    "type": "document",
+                    "filename": "document.pdf",
+                    "_tags": ["string"],
+                    "access_control": "private",
+                    "s3ref": {
+                      "bucket": "epilot-prod-user-content",
+                      "key": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                    }
+                  }
+                },
+                "Update existing file with relations": {
+                  "description": "Update existing file entity with _id",
+                  "value": {
+                    "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                    "filename": "document.pdf",
+                    "access_control": "private",
+                    "custom_download_url": "https://some-api-url.com/download?file_id=123",
+                    "shared_with_end_customer": true,
+                    "relations": [
+                      {
+                        "entity_id": "77a1e0cc-7b92-4d41-8cce-eefd317ec004",
+                        "_schema": "contact"
+                      }
+                    ]
+                  }
+                },
+                "New file from source_url": {
+                  "description": "New epilot file entity from a source_url",
+                  "value": {
+                    "type": "document",
+                    "filename": "document.pdf",
+                    "_tags": ["string"],
+                    "access_control": "private",
+                    "source_url": "https://docs.epilot.io/document.pdf"
+                  }
+                },
+                "File with custom download URL (external)": {
+                  "description": "Custom file entity with custom download url",
+                  "value": {
+                    "type": "document",
+                    "filename": "document.pdf",
+                    "_tags": ["string"],
+                    "access_control": "private",
+                    "custom_download_url": "https://some-api-url.com/download?file_id=123",
+                    "shared_with_end_customer": true
+                  }
+                },
+                "Batch save multiple versions": {
+                  "description": "Save multiple file versions in a single request (parallel S3 processing)",
+                  "value": [
+                    {
+                      "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "filename": "photo1.jpg",
+                      "access_control": "private",
+                      "s3ref": {
+                        "bucket": "epilot-prod-user-content",
+                        "key": "123/temp/abc/photo1.jpg"
+                      }
+                    },
+                    {
+                      "_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "filename": "photo2.jpg",
+                      "access_control": "private",
+                      "s3ref": {
+                        "bucket": "epilot-prod-user-content",
+                        "key": "123/temp/def/photo2.jpg"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Created or updated File Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/upload": {
       "post": {
         "operationId": "uploadFile",
+        "summary": "uploadFile",
         "deprecated": true,
+        "description": "**DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files/upload` instead.\n\n## Migration Guide\nReplace calls to this endpoint with `uploadFileV2`:\n\n| v1 Parameter | v2 Parameter | Notes |\n|--------------|--------------|-------|\n| `file_entity_id` | `file_entity_id` | No change |\n\nThe v2 response includes the same fields with improved structure.\n\n---\n\nCreate pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the saveFile operation to store file file permanently.\n",
+        "tags": ["Deprecated"],
         "parameters": [
           {
             "name": "file_entity_id",
-            "in": "query"
+            "in": "query",
+            "description": "file entity id",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           }
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              },
+              "examples": {
+                "Upload a document": {
+                  "value": {
+                    "filename": "document.pdf",
+                    "mime_type": "application/pdf"
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/S3Ref"
+                        },
+                        {
+                          "example": {
+                            "bucket": "epilot-prod-user-content",
+                            "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                          }
+                        }
+                      ]
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    },
+                    "public_url": {
+                      "description": "Returned only if file is permanent i.e. file_entity_id is passed",
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files": {
       "post": {
         "operationId": "saveFile",
+        "summary": "saveFile",
         "deprecated": true,
+        "description": "**DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files` instead.\n\n## Migration Guide\nReplace calls to this endpoint with `saveFileV2`:\n\n| v1 Feature | v2 Feature | Notes |\n|------------|------------|-------|\n| `activity_id` param | `activity_id` param | No change |\n| `async` param | `async` param | No change |\n| - | `fill_activity` param | New in v2 |\n| - | `strict` param | New in v2 |\n| - | `delete_temp_file` param | New in v2, defaults to true |\n\nThe v2 endpoint supports additional parameters for better control over file saving behavior.\n\n---\n\nCreate / Update a permanent File entity.\n\nMakes file object permanent and saves metadata to file entity.\n",
+        "tags": ["Deprecated"],
         "parameters": [
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
@@ -88,24 +371,72 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFilePayload"
+              },
+              "examples": {
+                "Save file with S3 reference": {
+                  "value": {
+                    "filename": "document.pdf",
+                    "type": "document",
+                    "access_control": "private",
+                    "s3ref": {
+                      "bucket": "epilot-prod-user-content",
+                      "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "Created File Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v2/files/{id}": {
       "get": {
         "operationId": "getFile",
+        "summary": "getFile",
+        "description": "Get a file entity by id",
+        "tags": ["File"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           },
           {
             "name": "source_url",
-            "in": "query"
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Generate a source_url for the file entity, if it doesn't have one"
+            }
           },
           {
             "$ref": "#/components/parameters/StrictQueryParam"
@@ -114,19 +445,53 @@
             "$ref": "#/components/parameters/AsyncOperationQueryParam"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "File Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       },
       "delete": {
         "operationId": "deleteFile",
+        "summary": "deleteFile",
+        "description": "Delete a file entity by id",
+        "tags": ["File"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           },
           {
             "name": "purge",
-            "in": "query"
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Provide `true` to permanently delete the file from storage, otherwise it will be soft-deleted"
+            }
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
@@ -135,327 +500,1215 @@
             "$ref": "#/components/parameters/StrictQueryParam"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "The deleted file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileEntity"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/{id}/download": {
       "get": {
         "operationId": "downloadFile",
+        "summary": "downloadFile",
+        "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n",
+        "tags": ["File"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           },
           {
             "name": "version",
-            "in": "query"
+            "in": "query",
+            "description": "Index of the file version to download (0 = latest)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
           },
           {
             "name": "attachment",
-            "in": "query"
+            "in": "query",
+            "description": "Controls the Content-Disposition header. Set to `true` to trigger browser download dialog, `false` to display inline.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Pre-signed download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Pre-signed S3 URL valid for downloading the file",
+                      "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    }
+                  }
+                },
+                "example": {
+                  "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&..."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files:downloadS3": {
       "post": {
         "operationId": "downloadS3File",
+        "summary": "downloadS3File",
+        "description": "Generate a pre-signed download URL for a file using its S3 reference.\n\nUse this endpoint when you have the S3 bucket and key but not the file entity ID.\n",
+        "tags": ["File"],
         "parameters": [
           {
             "name": "s3_key",
             "in": "query",
-            "required": true
+            "required": true,
+            "description": "The S3 object key",
+            "schema": {
+              "type": "string"
+            },
+            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
           },
           {
             "name": "s3_bucket",
             "in": "query",
-            "required": true
+            "required": true,
+            "description": "The S3 bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "example": "epilot-prod-user-content"
           },
           {
             "name": "attachment",
-            "in": "query"
+            "in": "query",
+            "description": "Controls the Content-Disposition header. Set to `true` to trigger browser download dialog, `false` to display inline.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Pre-signed download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Pre-signed S3 URL valid for downloading the file",
+                      "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files:downloadFiles": {
       "post": {
         "operationId": "downloadFiles",
+        "summary": "downloadFiles",
+        "description": "Bulk generate pre-signed download URLs for multiple files in a single request.\n\nThis is more efficient than calling `downloadFile` multiple times when you need to download several files.\n",
+        "tags": ["File"],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadFilesPayload"
+              },
+              "examples": {
+                "Download multiple files": {
+                  "value": [
+                    {
+                      "id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "version": 0
+                    },
+                    {
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "version": 0
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Generated download URLs for each requested file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "download_url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Pre-signed S3 URL for downloading the file",
+                        "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                      },
+                      "file_entity_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The file entity ID (matches the requested ID)"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/document.pdf?X-Amz-...",
+                    "file_entity_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+                  },
+                  {
+                    "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/image.png?X-Amz-...",
+                    "file_entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
+        "summary": "previewFile",
+        "description": "Generate a thumbnail preview for a file entity.\n\nSupported file types include images (PNG, JPEG, GIF, WebP), PDFs, and common document formats.\nThe preview is returned as an image (PNG or JPEG).\n\n**Tip:** Use with CookieAuth to embed previews directly in `<img>` tags.\n",
+        "tags": ["Preview"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           },
           {
             "name": "version",
-            "in": "query"
+            "in": "query",
+            "description": "Index of the file version to preview (0 = latest)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
           },
           {
             "name": "w",
-            "in": "query"
+            "in": "query",
+            "description": "Desired width in pixels (maintains aspect ratio if only width is specified)",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           },
           {
             "name": "h",
-            "in": "query"
+            "in": "query",
+            "description": "Desired height in pixels (maintains aspect ratio if only height is specified)",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files:previewS3": {
       "post": {
         "operationId": "previewS3File",
+        "summary": "previewS3File",
+        "description": "Generate a thumbnail preview from an S3 reference.\n\nUse this endpoint when you have the S3 bucket and key but not the file entity ID.\n",
+        "tags": ["Preview"],
         "parameters": [
           {
             "name": "w",
-            "in": "query"
+            "in": "query",
+            "description": "Desired width in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           },
           {
             "name": "h",
-            "in": "query"
+            "in": "query",
+            "description": "Desired height in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           }
         ],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/S3Ref"
+              },
+              "examples": {
+                "Preview from S3": {
+                  "value": {
+                    "bucket": "epilot-prod-user-content",
+                    "key": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/image.png"
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       },
       "get": {
         "operationId": "previewS3FileGet",
+        "summary": "previewS3FileGet",
+        "description": "Get a thumbnail preview from an S3 reference using query parameters.\n\nThis GET variant is useful for embedding previews directly in `<img>` tags.\n",
+        "tags": ["Preview"],
         "parameters": [
           {
             "name": "key",
             "in": "query",
-            "required": true
+            "description": "The S3 object key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/image.png"
           },
           {
             "name": "bucket",
             "in": "query",
-            "required": true
+            "description": "The S3 bucket name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "epilot-prod-user-content"
           },
           {
             "name": "w",
-            "in": "query"
+            "in": "query",
+            "description": "Desired width in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           },
           {
             "name": "h",
-            "in": "query"
+            "in": "query",
+            "description": "Desired height in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/public/{id}/preview": {
       "get": {
         "operationId": "previewPublicFile",
+        "summary": "previewPublicFile",
+        "description": "Generate a thumbnail preview for a public file entity.\n\n**No authentication required.** This endpoint only works for files with `access_control: public-read`.\n",
+        "security": [],
+        "tags": ["Preview"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the public file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           },
           {
             "name": "version",
-            "in": "query"
+            "in": "query",
+            "description": "Index of the file version to preview (0 = latest)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
           },
           {
             "name": "w",
-            "in": "query"
+            "in": "query",
+            "description": "Desired width in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           },
           {
             "name": "h",
-            "in": "query"
+            "in": "query",
+            "description": "Desired height in pixels",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 200
           },
           {
             "name": "org_id",
-            "in": "query"
+            "in": "query",
+            "description": "Organization ID that owns the file",
+            "schema": {
+              "type": "string"
+            },
+            "example": "123"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Generated thumbnail image for a public file",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "File is not public",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 403,
+                  "error": "File is not publicly accessible"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/session": {
       "get": {
         "operationId": "getSession",
-        "responses": {}
+        "summary": "getSession",
+        "description": "Start a browser session by converting a Bearer token into a server-side cookie.\n\n**Use case:** After calling this endpoint, you can use preview URLs directly in `<img>` tags\nwithout needing to set the Authorization header manually.\n\n**Example flow:**\n1. Call this endpoint with your Bearer token: `GET /v1/files/session` with `Authorization: Bearer <token>`\n2. The server sets an HTTP-only cookie named `token`\n3. Use preview URLs directly: `<img src=\"https://file.sls.epilot.io/v1/files/{id}/preview\" />`\n",
+        "tags": ["Session"],
+        "responses": {
+          "200": {
+            "description": "Session started successfully. A session cookie has been set.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "HTTP-only session cookie containing the authentication token",
+                "schema": {
+                  "type": "string",
+                  "example": "token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; Path=/"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
       },
       "delete": {
         "operationId": "deleteSession",
-        "responses": {}
+        "summary": "deleteSession",
+        "description": "End a browser session by deleting the token cookie.\n\nCall this endpoint to log out and clear the session cookie.\n",
+        "tags": ["Session"],
+        "responses": {
+          "200": {
+            "description": "Session deleted successfully. The session cookie has been cleared."
+          }
+        }
       }
     },
     "/v1/files/{id}/public/links": {
       "post": {
         "operationId": "generatePublicLink",
+        "summary": "generatePublicLink",
+        "description": "Generate a public link to share a private file externally.\n\nThe generated link:\n- Is permanent until explicitly revoked\n- Includes the filename for user-friendly URLs\n- Does not require authentication to access\n- Redirects to a signed download URL when accessed\n\n**Use case:** Share invoices, contracts, or documents with external parties who don't have epilot accounts.\n",
+        "tags": ["Public Links"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the file entity to share",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
           }
         ],
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "Public link generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "The public URL that can be shared externally"
+                },
+                "example": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c/invoice-2023-12.pdf"
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       },
       "get": {
         "operationId": "listPublicLinksForFile",
+        "summary": "listPublicLinksForFile",
+        "description": "**Not yet implemented.**\n\nThis endpoint will fetch all public links previously generated for a file.\n",
+        "x-not-implemented": true,
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "type": "string"
+            },
+            "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
           }
         ],
-        "responses": {}
+        "tags": ["Public Links"],
+        "responses": {
+          "200": {
+            "description": "Public links retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PublicLink"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "id": "3ef5c6d9-818d-45e6-8efb-b1de59079a1c",
+                      "link": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c/invoice.pdf",
+                      "last_accessed_at": "2024-01-15T10:30:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 501,
+                  "error": "Not Implemented"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/files/public/links/{id}/{filename}": {
       "get": {
         "operationId": "accessPublicLink",
+        "summary": "accessPublicLink",
+        "security": [],
+        "tags": ["Public Links"],
+        "description": "Access a file via its public link.\n\n**No authentication required.** This endpoint redirects to a signed S3 URL for downloading the file.\n\nThe filename in the URL is for user-friendliness and SEO; the actual file is identified by the link ID.\n",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the public link (not the file entity ID)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
           },
           {
             "name": "filename",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The filename (for user-friendly URLs)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "invoice-2023-12.pdf"
           },
           {
             "name": "hash",
             "in": "query",
-            "required": false
+            "required": false,
+            "description": "Optional cache-busting hash to force re-download",
+            "schema": {
+              "type": "string"
+            },
+            "example": "abc123"
           }
         ],
-        "responses": {}
+        "responses": {
+          "302": {
+            "description": "Redirect to a signed S3 URL for downloading the file",
+            "headers": {
+              "Location": {
+                "description": "The signed S3 URL to download the file",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/document.pdf?X-Amz-..."
+              }
+            }
+          },
+          "404": {
+            "description": "Public link not found or has been revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 404,
+                  "error": "Public link not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/public/links/{id}": {
       "delete": {
         "operationId": "revokePublicLink",
+        "summary": "revokePublicLink",
+        "description": "**Not yet implemented.**\n\nThis endpoint will revoke a public link, making the file inaccessible via that link.\n",
+        "x-not-implemented": true,
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The UUID of the public link to revoke",
+            "schema": {
+              "type": "string"
+            },
+            "example": "13d22918-36bd-4227-9ad4-2cb978788c8d"
           }
         ],
-        "responses": {}
+        "tags": ["Public Links"],
+        "responses": {
+          "204": {
+            "description": "Public link revoked successfully"
+          },
+          "501": {
+            "description": "Not implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 501,
+                  "error": "Not Implemented"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/files/download:verify": {
       "post": {
         "operationId": "verifyCustomDownloadUrl",
+        "summary": "verifyCustomDownloadUrl",
+        "description": "Verify that a custom download URL is valid and has not expired.\n\nUse this endpoint to validate custom download URLs before redirecting users.\nCustom download URLs include a signature and expiration time for security.\n",
+        "tags": ["File"],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyCustomDownloadUrlPayload"
+              },
+              "examples": {
+                "Verify URL": {
+                  "value": {
+                    "custom_download_url": "https://some-api-url.com?file_id=123&expires_at=1699273500029&signature=abcdefg"
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "description": "Whether the URL is valid and not expired"
+                    }
+                  }
+                },
+                "examples": {
+                  "Valid URL": {
+                    "value": {
+                      "valid": true
+                    }
+                  },
+                  "Invalid URL": {
+                    "value": {
+                      "valid": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/files/public/upload": {
       "post": {
         "operationId": "uploadFilePublic",
+        "summary": "uploadFilePublic",
+        "security": [],
+        "description": "Create a pre-signed S3 URL for uploading a file without authentication.\n\n**No authentication required.** This endpoint is intended for public-facing forms and journeys\nwhere end-users need to upload files without logging in.\n\nThe uploaded file is stored temporarily (one week). Use `saveFileV2` with proper authentication\nto store the file permanently.\n\n**Security note:** Files uploaded via this endpoint are temporary and require authenticated\naccess to be saved permanently.\n",
+        "tags": ["File"],
         "requestBody": {
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              },
+              "examples": {
+                "Upload an image": {
+                  "description": "Upload an image file",
+                  "value": {
+                    "filename": "image.png",
+                    "mime_type": "image/png"
+                  }
+                },
+                "Upload a document": {
+                  "description": "Upload a PDF document",
+                  "value": {
+                    "filename": "document.pdf",
+                    "mime_type": "application/pdf"
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for uploading the file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/S3Ref"
+                        },
+                        {
+                          "description": "S3 reference to use when saving the file permanently"
+                        },
+                        {
+                          "example": {
+                            "bucket": "epilot-prod-user-content",
+                            "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                          }
+                        }
+                      ]
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "Pre-signed URL for uploading the file via PUT request",
+                      "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Error message if the upload preparation failed",
+                      "example": "File entity not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/{slug}/collections": {
       "get": {
         "operationId": "getUserSchemaFileCollections",
+        "summary": "getUserSchemaFileCollections",
+        "description": "Get all file collections for the current user within a specific schema.\n\nCollections help organize files into logical groups (e.g., \"Contracts\", \"Invoices\").\nUser collections are private to the creating user.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The entity schema slug (e.g., order, opportunity, contact)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "opportunity"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "List of collections for the user and schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileCollectionItem"
+                  }
+                },
+                "example": [
+                  {
+                    "slug": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents",
+                    "name": "Documents",
+                    "id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                    "parents": [],
+                    "starred": false,
+                    "order": 0,
+                    "created_at": "2024-01-01T12:00:00Z",
+                    "updated_at": "2024-01-02T12:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       },
       "post": {
         "operationId": "createUserSchemaFileCollection",
+        "summary": "createUserSchemaFileCollection",
+        "description": "Create a new file collection for the current user within a specific schema.\n\nThe collection will be private to the creating user and associated with the specified schema.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The entity schema slug (e.g., order, opportunity, contact)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "opportunity"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionCreateRequest"
+              },
+              "examples": {
+                "Create collection": {
+                  "value": {
+                    "name": "Contracts",
+                    "starred": false
+                  }
+                },
+                "Create nested collection": {
+                  "value": {
+                    "name": "2024 Contracts",
+                    "parents": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:contracts"]
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "File collection created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/{slug}/collections/{collectionSlug}": {
       "put": {
         "operationId": "updateUserSchemaFileCollection",
+        "summary": "updateUserSchemaFileCollection",
+        "description": "Update an existing file collection.\n\nYou can update the name, parent relationships, starred status, and enabled locations/purposes.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The entity schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "opportunity"
           },
           {
             "name": "collectionSlug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The collection slug identifier",
+            "schema": {
+              "type": "string"
+            },
+            "example": "documents"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCollectionAttributes"
+              },
+              "examples": {
+                "Rename collection": {
+                  "value": {
+                    "name": "Important Documents"
+                  }
+                },
+                "Star collection": {
+                  "value": {
+                    "starred": true
+                  }
+                }
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "File collection updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCollectionItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       },
       "delete": {
         "operationId": "deleteUserSchemaFileCollection",
+        "summary": "deleteUserSchemaFileCollection",
+        "description": "Delete a file collection.\n\n**Note:** Deleting a collection does not delete the files within it.\nFiles will remain but will no longer be associated with this collection.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The entity schema slug (e.g., order, opportunity)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "opportunity"
           },
           {
             "name": "collectionSlug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The collection slug identifier",
+            "schema": {
+              "type": "string"
+            },
+            "example": "documents"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "File collection deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/entity/{id}/collections/{collectionSlug}/files": {
       "get": {
         "operationId": "getFilesInCollection",
+        "summary": "getFilesInCollection",
+        "description": "Get all files within a specific collection for an entity.\n\nThe schema is automatically derived from the entity. This endpoint requires\nview permission on the parent entity to access its files.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "$ref": "#/components/parameters/EntityIdPathParam"
@@ -463,88 +1716,1002 @@
           {
             "name": "collectionSlug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The collection slug identifier",
+            "schema": {
+              "type": "string"
+            },
+            "example": "documents"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "List of files in the collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileEntity"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "description": "Insufficient permissions to view the entity's files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 403,
+                  "error": "User must have permission to view this entity to access its files"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity or collection not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                "example": {
+                  "status": 404,
+                  "error": "Entity not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v1/collections/{schemaSlug}": {
       "get": {
         "operationId": "getGlobalFileCollections",
+        "summary": "getGlobalFileCollections",
+        "description": "Get all global file collections for a specific schema.\n\nGlobal collections are shared across all users in the organization for the specified schema.\nUnlike user collections, these are visible to everyone with access to entities of that schema.\n",
+        "tags": ["File Collections"],
         "parameters": [
           {
             "name": "schemaSlug",
             "in": "path",
-            "required": true
+            "required": true,
+            "description": "The entity schema slug (e.g., order, opportunity, contact)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "order"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "List of global collections for the schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileCollectionItem"
+                  }
+                },
+                "example": [
+                  {
+                    "slug": "_system_files_collection_schema_order:templates",
+                    "name": "Templates",
+                    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "parents": [],
+                    "starred": false,
+                    "order": 0,
+                    "created_at": "2024-01-01T12:00:00Z",
+                    "updated_at": "2024-01-01T12:00:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer token authentication using epilot OAuth2 JWT tokens.\n\n**When to use:** Server-to-server integrations, API clients, and programmatic access.\n\n**How to obtain a token:**\n1. Use the epilot Auth API to authenticate\n2. Include the token in the `Authorization` header: `Authorization: Bearer <token>`\n\n**Example:**\n```\nAuthorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...\n```\n\n**Token contents:** The JWT contains user identity, organization ID, and permissions.\n"
+      },
+      "CookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "Cookie-based session authentication for browser applications.\n\n**When to use:** Browser-based applications that need to:\n- Embed file previews directly in `<img>` tags\n- Download files without JavaScript token handling\n- Access files from HTML elements that cannot set custom headers\n\n**How to establish a session:**\n1. Obtain a Bearer token via EpilotAuth\n2. Call `GET /v1/files/session` with the Bearer token\n3. The server sets an HTTP-only cookie named `token`\n4. Subsequent requests automatically include the cookie\n\n**Security note:** The cookie is HTTP-only and secure, protecting against XSS attacks.\n"
+      }
+    },
+    "schemas": {
+      "EntityId": {
+        "type": "string",
+        "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "contact"
+      },
+      "ActivityId": {
+        "type": "string",
+        "format": "ulid",
+        "description": "See https://github.com/ulid/spec",
+        "example": "01F130Q52Q6MWSNS8N2AVXV4JN"
+      },
+      "FileEntityId": {
+        "oneOf": [
+          {
+            "type": "string",
+            "maxLength": 0,
+            "description": "Empty string (used when file ID not yet assigned)"
+          },
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "Valid UUID v4"
+          }
+        ],
+        "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+      },
+      "FileAttributes": {
+        "type": "object",
+        "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["tag1", "tag2"]
+          },
+          "_purpose": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["8d396871-95a0-4c9d-bb4d-9eda9c35776c", "da7cdf9a-01be-40c9-a29c-9a8f9f0de6f8"]
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "type": {
+            "$ref": "#/components/schemas/FileType"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "MIME type of the file",
+            "example": "application/pdf"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes",
+            "example": 1234,
+            "readOnly": true
+          },
+          "readable_size": {
+            "type": "string",
+            "example": "1.2 MB",
+            "description": "Human readable file size",
+            "readOnly": true
+          },
+          "access_control": {
+            "type": "string",
+            "default": "private",
+            "enum": ["private", "public-read"]
+          },
+          "public_url": {
+            "description": "Direct URL for file (public only if file access control is public-read)",
+            "type": "string",
+            "format": "url",
+            "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
+            "readOnly": true
+          },
+          "custom_download_url": {
+            "$ref": "#/components/schemas/CustomDownloadUrl"
+          }
+        }
+      },
+      "FileType": {
+        "type": "string",
+        "enum": [
+          "document",
+          "document_template",
+          "text",
+          "image",
+          "video",
+          "audio",
+          "spreadsheet",
+          "presentation",
+          "font",
+          "archive",
+          "application",
+          "unknown"
+        ]
+      },
+      "CustomDownloadUrl": {
+        "description": "Custom external download url used for the file",
+        "type": "string",
+        "format": "uri",
+        "example": "https://some-api-url.com/download?file_id=123"
+      },
+      "FileEntity": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "_title": {
+                "type": "string",
+                "example": "document.pdf"
+              },
+              "_schema": {
+                "type": "string",
+                "enum": ["file"],
+                "readOnly": true
+              },
+              "_org": {
+                "type": "string",
+                "example": "123",
+                "readOnly": true
+              },
+              "_id": {
+                "$ref": "#/components/schemas/FileEntityId"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/FileAttributes"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_url": {
+                "type": "string",
+                "description": "Source URL for the file. Included if the entity was created from source_url, or when ?source_url=true",
+                "example": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf"
+              },
+              "s3ref": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/S3Ref"
+                  },
+                  {
+                    "readOnly": true
+                  }
+                ]
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FileItem"
+                },
+                "readOnly": true
+              },
+              "_updated_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true
+              },
+              "_created_at": {
+                "type": "string",
+                "format": "date-time",
+                "readOnly": true
+              },
+              "_acl": {
+                "$ref": "#/components/schemas/BaseEntityAcl"
+              },
+              "_owners": {
+                "type": "array",
+                "readOnly": true,
+                "items": {
+                  "$ref": "#/components/schemas/BaseEntityOwner"
+                }
+              },
+              "__additional": {
+                "type": "object",
+                "description": "Additional fields that are not part of the schema",
+                "additionalProperties": true,
+                "nullable": true
+              }
+            },
+            "required": ["_title", "_schema", "_org", "_id", "filename", "type", "access_control", "versions"]
+          }
+        ]
+      },
+      "CommonSaveFilePayload": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileEntityId"
+              },
+              {
+                "description": "if passed, adds a new version to existing file entity"
+              }
+            ]
+          },
+          "file_entity_id": {
+            "type": "string",
+            "description": "Deprecated, use _id instead",
+            "deprecated": true
+          },
+          "relations": {
+            "type": "array",
+            "description": "List of entities to relate the file to",
+            "items": {
+              "$ref": "#/components/schemas/FileRelationItem"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "SaveS3FilePayload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonSaveFilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/FileAttributes"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Ref"
+              }
+            }
+          }
+        ]
+      },
+      "SaveFileFromSourceURLPayload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonSaveFilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/FileAttributes"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_url": {
+                "$ref": "#/components/schemas/CustomDownloadUrl"
+              }
+            }
+          }
+        ]
+      },
+      "SaveCustomFilePayload": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonSaveFilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/FileAttributes"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "custom_download_url": {
+                "$ref": "#/components/schemas/CustomDownloadUrl"
+              }
+            }
+          }
+        ]
+      },
+      "SaveFilePayload": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SaveS3FilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/SaveFileFromSourceURLPayload"
+          },
+          {
+            "$ref": "#/components/schemas/SaveCustomFilePayload"
+          }
+        ]
+      },
+      "SaveFilePayloadV2": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SaveS3FilePayload"
+          },
+          {
+            "$ref": "#/components/schemas/SaveFileFromSourceURLPayload"
+          },
+          {
+            "$ref": "#/components/schemas/SaveCustomFilePayload"
+          }
+        ]
+      },
+      "BatchSaveFileVersionPayload": {
+        "type": "object",
+        "description": "Payload for batch version save. Only s3ref payloads are supported.",
+        "properties": {
+          "_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileEntityId"
+              },
+              {
+                "description": "Target file entity to add version to"
+              }
+            ]
+          },
+          "file_entity_id": {
+            "type": "string",
+            "description": "Deprecated, use _id instead",
+            "deprecated": true
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "mime_type": {
+            "type": "string",
+            "example": "application/pdf"
+          },
+          "access_control": {
+            "type": "string",
+            "default": "private",
+            "enum": ["private", "public-read"]
+          },
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Ref"
+          }
+        },
+        "required": ["s3ref"],
+        "additionalProperties": false
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "mime_type": {
+            "description": "MIME type of file",
+            "type": "string",
+            "example": "application/pdf",
+            "default": "application/octet-stream"
+          },
+          "index_tag": {
+            "type": "string",
+            "example": "2f6a377c8e78",
+            "maxLength": 64,
+            "description": "Used to index the file at the storage layer, which helps when browsing for this file"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "example": {
+              "color": "blue"
+            },
+            "description": "Allows passing in custom metadata for the file, expects key-value pairs of string type"
+          }
+        },
+        "required": ["filename"]
+      },
+      "FileUpload": {
+        "type": "object",
+        "properties": {
+          "s3ref": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/S3Ref"
+              },
+              {
+                "example": {
+                  "bucket": "epilot-prod-user-content",
+                  "key": "123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+                }
+              }
+            ]
+          },
+          "upload_url": {
+            "type": "string",
+            "format": "url",
+            "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/temp/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf?AWSParams=123"
+          },
+          "public_url": {
+            "description": "Returned only if file is permanent i.e. file_entity_id is passed",
+            "type": "string",
+            "format": "url",
+            "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          }
+        }
+      },
+      "DownloadFilesPayload": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/components/schemas/FileEntityId"
+            },
+            "version": {
+              "type": "integer",
+              "description": "File version",
+              "example": 0
+            }
+          },
+          "required": ["id"]
+        }
+      },
+      "VerifyCustomDownloadUrlPayload": {
+        "type": "object",
+        "properties": {
+          "custom_download_url": {
+            "description": "Custom external download url with signature and expiration time",
+            "type": "string",
+            "example": "https://some-api-url.com?file_id=123&expires_at=1699273500029&signature=abcdefg"
+          }
+        },
+        "required": ["custom_download_url"]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "epilot-prod-user-content"
+          },
+          "key": {
+            "type": "string",
+            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          }
+        },
+        "required": ["bucket", "key"]
+      },
+      "S3Ref": {
+        "$ref": "#/components/schemas/S3Reference"
+      },
+      "FileItem": {
+        "type": "object",
+        "properties": {
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Ref"
+          },
+          "filename": {
+            "type": "string",
+            "example": "document.pdf"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "example": 1234
+          },
+          "readable_size": {
+            "type": "string",
+            "example": "1.2 MB"
+          },
+          "mime_type": {
+            "type": "string",
+            "example": "image/jpeg"
+          }
+        }
+      },
+      "FileRelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_schema": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["entity_id"]
+      },
+      "PublicLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the public link",
+            "example": "3ef5c6d9-818d-45e6-8efb-b1de59079a1c"
+          },
+          "link": {
+            "type": "string",
+            "description": "Public link of the file",
+            "example": "https://file.sls.epilot.io/v1/files/public/links/3ef5c6d9-818d-45e6-8efb-b1de59079a1c"
+          },
+          "last_accessed_at": {
+            "type": "string",
+            "description": "The most recent timestamp when the file was accessed"
+          }
+        }
+      },
+      "BaseEntityOwner": {
+        "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "123"
+          }
+        },
+        "required": ["org_id"]
+      },
+      "BaseEntityAcl": {
+        "type": "object",
+        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+        "properties": {
+          "view": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "edit": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          }
+        }
+      },
+      "ErrorObject": {
+        "description": "A generic error returned by the API",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The HTTP status code of the error",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message",
+            "example": "Bad Request"
+          }
+        }
+      },
+      "FileCollectionId": {
+        "description": "Generated uuid for a file collection",
+        "type": "string",
+        "format": "uuid"
+      },
+      "FileCollectionItem": {
+        "description": "A file collection with identifiers and timestamps",
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Full slug for the collection. Format depends on collection type:\n- User collection: `_system_files_collection_{entity_uuid}_{user_id}:{collection_name}`\n  Example: `_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents`\n- Global collection: `_system_files_collection_schema_{schema_slug}:{collection_name}`\n  Example: `_system_files_collection_schema_opportunity:templates`\n",
+            "example": "_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234:documents"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the collection",
+            "example": "Documents"
+          },
+          "id": {
+            "$ref": "#/components/schemas/FileCollectionId"
+          },
+          "parents": {
+            "type": "array",
+            "description": "Array of parent collection slugs, empty array if top-level collection. Format depends on collection type:\n- User collection: `_system_files_collection_{entity_uuid}_{user_id}`\n  Example: `[\"_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234\"]`\n- Global collection: `_system_files_collection_schema_{schema_slug}`\n  Example: `[\"_system_files_collection_schema_opportunity\"]`\n",
+            "items": {
+              "type": "string"
+            },
+            "example": ["_system_files_collection_3fa85f64-5717-4562-b3fc-2c963f66afa6_10234"]
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "Whether the collection is starred / favorited",
+            "example": false
+          },
+          "order": {
+            "type": "number",
+            "description": "Display order for the collection",
+            "example": 0
+          },
+          "enabled_locations": {
+            "description": "List of location slugs where the collection is enabled. If empty, enabled for all.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled_purposes": {
+            "description": "List of purpose slugs where the collection is enabled. If empty, enabled for all.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["9eefcb98-93cf-4c5b-a040-f1d26d57c177", "5c544c09-a691-43ed-a7fa-0a8b44b5b161"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the collection was created",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the collection was last updated",
+            "example": "2024-01-02T12:00:00Z"
+          }
+        },
+        "required": ["name"]
+      },
+      "FileCollectionAttributes": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the collection"
+          },
+          "parents": {
+            "type": "array",
+            "description": "Array of parent collection slugs, empty array if top-level collection",
+            "items": {
+              "type": "string"
+            }
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "Whether the collection is starred / favorited",
+            "default": false
+          },
+          "enabled_locations": {
+            "description": "List of location slugs where the collection is enabled. If empty, enabled for all.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled_purposes": {
+            "description": "List of purpose IDs where the collection is enabled. If empty, enabled for all.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FileCollectionCreateRequest": {
+        "description": "Request body for creating a file collection",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileCollectionAttributes"
+          },
+          {
+            "type": "object",
+            "required": ["name"]
+          }
+        ]
+      }
+    },
     "parameters": {
       "EntityIdPathParam": {
         "name": "id",
+        "description": "Entity id",
         "in": "path",
-        "required": true
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/EntityId"
+        }
       },
       "StrictQueryParam": {
         "name": "strict",
         "in": "query",
-        "required": false
+        "required": false,
+        "description": "When passed true, the response will contain only fields that match the schema, with non-matching fields included in `__additional`",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
       },
       "ActivityIdQueryParam": {
         "name": "activity_id",
+        "description": "Activity to include in event feed",
         "in": "query",
-        "required": false
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/ActivityId"
+        }
       },
       "FillActivityQueryParam": {
         "name": "fill_activity",
+        "description": "Update the diff and entity for the custom activity included in the query.\nPending state on activity is automatically ended when activity is filled.\n",
         "in": "query",
-        "required": false
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
       },
       "AsyncOperationQueryParam": {
         "name": "async",
+        "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
         "in": "query",
-        "required": false
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
       },
       "DeleteTempFileQueryParam": {
         "name": "delete_temp_file",
+        "description": "Delete the temp file from S3 after copying it permanently",
         "in": "query",
-        "required": false
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": true
+        }
       },
       "VersionOnlyQueryParam": {
         "name": "version_only",
         "in": "query",
-        "required": false
+        "description": "When true, only adds a new file version and updates the entity's\ns3ref to point to the new version, without overwriting the entity's\nexisting top-level metadata. The entity's filename, type, and other\nfields are preserved as-is. The new version entry in the versions\narray will contain the file-level metadata (filename, mime_type, etc).\nOnly applies when updating an existing entity (_id or file_entity_id is set).\n",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "responses": {
       "BadRequestError": {
+        "description": "Invalid request parameters or payload",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 400,
+                    "error": "Bad Request: filename is required"
+                  }
+                }
+              ]
+            }
+          }
         }
       },
       "UnauthorizedError": {
+        "description": "Authentication required or invalid credentials",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 401,
+                    "error": "Unauthorized: Invalid or expired token"
+                  }
+                }
+              ]
+            }
+          }
         }
       },
       "ForbiddenError": {
+        "description": "Insufficient permissions to access the resource",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 403,
+                    "error": "Forbidden: You do not have permission to access this file"
+                  }
+                }
+              ]
+            }
+          }
         }
       },
       "NotFoundError": {
+        "description": "The requested resource was not found",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 404,
+                    "error": "Not Found: File entity not found"
+                  }
+                }
+              ]
+            }
+          }
         }
       },
       "InternalServerError": {
+        "description": "An unexpected error occurred on the server",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 500,
+                    "error": "Internal Server Error"
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     }

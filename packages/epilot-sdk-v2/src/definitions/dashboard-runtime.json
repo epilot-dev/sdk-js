@@ -1,0 +1,14 @@
+{
+  "s": "https://dashboard.sls.epilot.io",
+  "o": [
+    ["listDashboards", "get", "/v1/dashboard/dashboards"],
+    ["createDashboard", "post", "/v1/dashboard/dashboards", null, 1],
+    ["getDashboard", "get", "/v1/dashboard/dashboards/{id}"],
+    ["putDashboard", "put", "/v1/dashboard/dashboards/{id}", null, 1],
+    ["deleteDashboard", "delete", "/v1/dashboard/dashboards/{id}"],
+    ["listAvailableVisualisations", "get", "/v1/dashboard/visualisations"],
+    ["listAvailableExamples", "get", "/v1/dashboard/examples"]
+  ],
+  "v": "3.0.0",
+  "pp": { "/v1/dashboard/dashboards/{id}": [["id", "p", true]] }
+}

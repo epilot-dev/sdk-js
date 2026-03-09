@@ -1,0 +1,34 @@
+{
+  "s": "https://address-suggestions-api.sls.epilot.io",
+  "o": [
+    [
+      "getAddresses",
+      "get",
+      "/v1/public/suggestions",
+      [
+        ["X-Epilot-Org-ID", "h", true],
+        ["s3FileUrl", "q"],
+        ["fileId", "q"],
+        ["countryCodeSearchTerm", "q"],
+        ["postalCodeSearchTerm", "q"],
+        ["streetSearchTerm", "q"]
+      ]
+    ],
+    ["validateAddresses", "get", "/v1/suggestions:validate", [["s3FileUrl", "q"], ["fileId", "q"]]],
+    [
+      "checkAvailability",
+      "get",
+      "/v1/public/availability:check",
+      [
+        ["X-Epilot-Org-ID", "h", true],
+        ["files", "q", true],
+        ["countryCode", "q", true],
+        ["postalCode", "q", true],
+        ["street", "q"],
+        ["streetNumber", "q"]
+      ]
+    ],
+    ["validateAddressesFile", "get", "/v1/addresses-files:validate", [["fileId", "q"]]]
+  ],
+  "v": "3.0.3"
+}

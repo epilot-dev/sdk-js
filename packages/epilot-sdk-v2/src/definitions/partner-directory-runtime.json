@@ -1,0 +1,45 @@
+{
+  "s": "https://partner-directory-api.sls.epilot.io",
+  "o": [
+    ["approvePartner", "post", "/v1/partners/{id}/approve", [["id", "p", true]]],
+    ["rejectPartner", "post", "/v1/partners/{id}/reject", [["id", "p", true]]],
+    ["searchAssignable", "post", "/v1/partners/assignables:search", null, 1],
+    ["batchGetAssignable", "post", "/v1/partners/assignables:batchGet", null, 1],
+    ["getPartnerByToken", "get", "/v1/partner-directory/public/getPartnerByToken", [["token", "q", true]]],
+    ["activatePartner", "post", "/v1/partner-directory/public/activate", [["token", "q", true]], 1],
+    ["searchGeolocationForText", "post", "/v1/geolocation/text:search", null, 1],
+    ["invitePartnerV2", "post", "/v2/partners/{id}/invite", [["id", "p", true]], 1],
+    ["getPartnerUsers", "get", "/v2/partners/{orgId}/users", [["orgId", "p", true]]],
+    ["createPartnerUser", "post", "/v2/partners/{orgId}/users", [["orgId", "p", true]], 1],
+    [
+      "deletePartnerUser",
+      "delete",
+      "/v2/partners/{orgId}/users/{userId}",
+      [["orgId", "p", true], ["userId", "p", true]]
+    ],
+    ["getPartnerRoles", "get", "/v2/partners/{orgId}/roles", [["orgId", "p", true]]],
+    ["createPartnerRole", "post", "/v2/partners/{orgId}/roles", [["orgId", "p", true]], 1],
+    [
+      "updatePartnerRole",
+      "put",
+      "/v2/partners/{orgId}/roles/{roleId}",
+      [["orgId", "p", true], ["roleId", "p", true]],
+      1
+    ],
+    [
+      "assignPartnerUserRoles",
+      "post",
+      "/v2/partners/{orgId}/users/{userId}/roles",
+      [["orgId", "p", true], ["userId", "p", true]],
+      1
+    ],
+    [
+      "unassignPartnerUserRoles",
+      "delete",
+      "/v2/partners/{orgId}/users/{userId}/roles",
+      [["orgId", "p", true], ["userId", "p", true]],
+      1
+    ]
+  ],
+  "v": "3.0.3"
+}

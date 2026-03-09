@@ -1,243 +1,247 @@
 import type { Document } from 'openapi-client-axios';
 
+import { expand } from '../compact';
+import type { CompactDefinition } from '../compact';
 import { registerApi } from '../registry';
 import type { ApiEntry } from '../types';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-const loadDef = (id: string): Document => {
-  const mod = require(id);
-  return (mod.default ?? mod) as unknown as Document;
+const base = '../definitions/';
+const loadDef = (name: string): Document => {
+  // biome-ignore lint/style/useTemplate: dynamic concatenation prevents tsup from inlining definitions
+  const mod = require(base + name + '-runtime.json');
+  return expand((mod.default ?? mod) as CompactDefinition) as Document;
 };
 
 export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   registerApi({
     registry,
     name: 'accessToken',
-    loader: () => loadDef('../definitions/access-token.json'),
+    loader: () => loadDef('access-token'),
   });
   registerApi({
     registry,
     name: 'address',
-    loader: () => loadDef('../definitions/address.json'),
+    loader: () => loadDef('address'),
   });
   registerApi({
     registry,
     name: 'addressSuggestions',
-    loader: () => loadDef('../definitions/address-suggestions.json'),
+    loader: () => loadDef('address-suggestions'),
   });
   registerApi({
     registry,
     name: 'aiAgents',
-    loader: () => loadDef('../definitions/ai-agents.json'),
+    loader: () => loadDef('ai-agents'),
   });
   registerApi({
     registry,
     name: 'app',
-    loader: () => loadDef('../definitions/app.json'),
+    loader: () => loadDef('app'),
   });
   registerApi({
     registry,
     name: 'auditLogs',
-    loader: () => loadDef('../definitions/audit-logs.json'),
+    loader: () => loadDef('audit-logs'),
   });
   registerApi({
     registry,
     name: 'automation',
-    loader: () => loadDef('../definitions/automation.json'),
+    loader: () => loadDef('automation'),
   });
   registerApi({
     registry,
     name: 'billing',
-    loader: () => loadDef('../definitions/billing.json'),
+    loader: () => loadDef('billing'),
   });
   registerApi({
     registry,
     name: 'blueprintManifest',
-    loader: () => loadDef('../definitions/blueprint-manifest.json'),
+    loader: () => loadDef('blueprint-manifest'),
   });
   registerApi({
     registry,
     name: 'consent',
-    loader: () => loadDef('../definitions/consent.json'),
+    loader: () => loadDef('consent'),
   });
   registerApi({
     registry,
     name: 'customerPortal',
-    loader: () => loadDef('../definitions/customer-portal.json'),
+    loader: () => loadDef('customer-portal'),
   });
   registerApi({
     registry,
     name: 'dashboard',
-    loader: () => loadDef('../definitions/dashboard.json'),
+    loader: () => loadDef('dashboard'),
   });
   registerApi({
     registry,
     name: 'dataManagement',
-    loader: () => loadDef('../definitions/data-management.json'),
+    loader: () => loadDef('data-management'),
   });
   registerApi({
     registry,
     name: 'deduplication',
-    loader: () => loadDef('../definitions/deduplication.json'),
+    loader: () => loadDef('deduplication'),
   });
   registerApi({
     registry,
     name: 'design',
-    loader: () => loadDef('../definitions/design.json'),
+    loader: () => loadDef('design'),
   });
   registerApi({
     registry,
     name: 'document',
-    loader: () => loadDef('../definitions/document.json'),
+    loader: () => loadDef('document'),
   });
   registerApi({
     registry,
     name: 'emailSettings',
-    loader: () => loadDef('../definitions/email-settings.json'),
+    loader: () => loadDef('email-settings'),
   });
   registerApi({
     registry,
     name: 'emailTemplate',
-    loader: () => loadDef('../definitions/email-template.json'),
+    loader: () => loadDef('email-template'),
   });
   registerApi({
     registry,
     name: 'entity',
-    loader: () => loadDef('../definitions/entity.json'),
+    loader: () => loadDef('entity'),
   });
   registerApi({
     registry,
     name: 'entityMapping',
-    loader: () => loadDef('../definitions/entity-mapping.json'),
+    loader: () => loadDef('entity-mapping'),
   });
   registerApi({
     registry,
     name: 'environments',
-    loader: () => loadDef('../definitions/environments.json'),
+    loader: () => loadDef('environments'),
   });
   registerApi({
     registry,
     name: 'erpIntegration',
-    loader: () => loadDef('../definitions/erp-integration.json'),
+    loader: () => loadDef('erp-integration'),
   });
   registerApi({
     registry,
     name: 'eventCatalog',
-    loader: () => loadDef('../definitions/event-catalog.json'),
+    loader: () => loadDef('event-catalog'),
   });
   registerApi({
     registry,
     name: 'file',
-    loader: () => loadDef('../definitions/file.json'),
+    loader: () => loadDef('file'),
   });
   registerApi({
     registry,
     name: 'iban',
-    loader: () => loadDef('../definitions/iban.json'),
+    loader: () => loadDef('iban'),
   });
   registerApi({
     registry,
     name: 'journey',
-    loader: () => loadDef('../definitions/journey.json'),
+    loader: () => loadDef('journey'),
   });
   registerApi({
     registry,
     name: 'kanban',
-    loader: () => loadDef('../definitions/kanban.json'),
+    loader: () => loadDef('kanban'),
   });
   registerApi({
     registry,
     name: 'message',
-    loader: () => loadDef('../definitions/message.json'),
+    loader: () => loadDef('message'),
   });
   registerApi({
     registry,
     name: 'metering',
-    loader: () => loadDef('../definitions/metering.json'),
+    loader: () => loadDef('metering'),
   });
   registerApi({
     registry,
     name: 'notes',
-    loader: () => loadDef('../definitions/notes.json'),
+    loader: () => loadDef('notes'),
   });
   registerApi({
     registry,
     name: 'notification',
-    loader: () => loadDef('../definitions/notification.json'),
+    loader: () => loadDef('notification'),
   });
   registerApi({
     registry,
     name: 'organization',
-    loader: () => loadDef('../definitions/organization.json'),
+    loader: () => loadDef('organization'),
   });
   registerApi({
     registry,
     name: 'partnerDirectory',
-    loader: () => loadDef('../definitions/partner-directory.json'),
+    loader: () => loadDef('partner-directory'),
   });
   registerApi({
     registry,
     name: 'permissions',
-    loader: () => loadDef('../definitions/permissions.json'),
+    loader: () => loadDef('permissions'),
   });
   registerApi({
     registry,
     name: 'pricing',
-    loader: () => loadDef('../definitions/pricing.json'),
+    loader: () => loadDef('pricing'),
   });
   registerApi({
     registry,
     name: 'pricingTier',
-    loader: () => loadDef('../definitions/pricing-tier.json'),
+    loader: () => loadDef('pricing-tier'),
   });
   registerApi({
     registry,
     name: 'purpose',
-    loader: () => loadDef('../definitions/purpose.json'),
+    loader: () => loadDef('purpose'),
   });
   registerApi({
     registry,
     name: 'sandbox',
-    loader: () => loadDef('../definitions/sandbox.json'),
+    loader: () => loadDef('sandbox'),
   });
   registerApi({
     registry,
     name: 'submission',
-    loader: () => loadDef('../definitions/submission.json'),
+    loader: () => loadDef('submission'),
   });
   registerApi({
     registry,
     name: 'targeting',
-    loader: () => loadDef('../definitions/targeting.json'),
+    loader: () => loadDef('targeting'),
   });
   registerApi({
     registry,
     name: 'templateVariables',
-    loader: () => loadDef('../definitions/template-variables.json'),
+    loader: () => loadDef('template-variables'),
   });
   registerApi({
     registry,
     name: 'user',
-    loader: () => loadDef('../definitions/user.json'),
+    loader: () => loadDef('user'),
   });
   registerApi({
     registry,
     name: 'validationRules',
-    loader: () => loadDef('../definitions/validation-rules.json'),
+    loader: () => loadDef('validation-rules'),
   });
   registerApi({
     registry,
     name: 'webhooks',
-    loader: () => loadDef('../definitions/webhooks.json'),
+    loader: () => loadDef('webhooks'),
   });
   registerApi({
     registry,
     name: 'workflow',
-    loader: () => loadDef('../definitions/workflow.json'),
+    loader: () => loadDef('workflow'),
   });
   registerApi({
     registry,
     name: 'workflowDefinition',
-    loader: () => loadDef('../definitions/workflow-definition.json'),
+    loader: () => loadDef('workflow-definition'),
   });
 };

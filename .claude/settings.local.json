@@ -25,7 +25,9 @@
       "Bash(tar xzf epilot-axios-large-response-0.0.2.tgz)",
       "Bash(pnpm test:*)",
       "Bash(pnpm:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(du:*)",
+      "Bash(wc:*)"
     ],
     "deny": []
   }

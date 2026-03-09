@@ -1,23 +1,84 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "",
-    "version": ""
+    "title": "Dashboard API",
+    "version": "0.0.1",
+    "description": "API to store the dashboard configuration for the epilot 360 dashboard\n"
   },
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Dashboards"
+    },
+    {
+      "name": "Visualisations"
+    },
+    {
+      "name": "Examples"
+    }
+  ],
   "paths": {
     "/v1/dashboard/dashboards": {
       "get": {
         "operationId": "listDashboards",
-        "responses": {}
+        "summary": "listDashboards",
+        "description": "List dashboards available to the user",
+        "tags": ["Dashboards"],
+        "responses": {
+          "200": {
+            "description": "List of dashboards available to the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Dashboard"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "post": {
         "operationId": "createDashboard",
+        "summary": "createDashboard",
+        "description": "Create new dashboard",
+        "tags": ["Dashboards"],
         "requestBody": {
+          "description": "The dashboard to create",
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Dashboard"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "description": "The created dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/dashboard/dashboards/{id}": {
@@ -25,41 +86,375 @@
         {
           "name": "id",
           "in": "path",
-          "required": true
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/DashboardID"
+          }
         }
       ],
       "get": {
         "operationId": "getDashboard",
-        "responses": {}
+        "summary": "getDashboard",
+        "description": "Get dashboard by ID",
+        "tags": ["Dashboards"],
+        "responses": {
+          "200": {
+            "description": "The dashboard with the passed ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
       },
       "put": {
         "operationId": "putDashboard",
+        "summary": "putDashboard",
+        "description": "Update a dashboard by ID",
+        "tags": ["Dashboards"],
         "requestBody": {
+          "description": "The updated dashboard",
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Dashboard"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "description": "The dashboard with the passed ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "operationId": "deleteDashboard",
-        "responses": {}
+        "summary": "deleteDashboard",
+        "description": "Delete a dashboard by ID",
+        "tags": ["Dashboards"],
+        "responses": {
+          "200": {
+            "description": "The deleted dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/dashboard/visualisations": {
       "get": {
         "operationId": "listAvailableVisualisations",
-        "responses": {}
+        "summary": "listAvailableVisualisations",
+        "description": "Returns list of available Visualisations to configure new dashboard tiles",
+        "tags": ["Visualisations"],
+        "responses": {
+          "200": {
+            "description": "List of available Visualisations to configure new dashboard tiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Visualisation"
+                      },
+                      "example": [
+                        {
+                          "visualisation": "timechart",
+                          "title": "Time Series Visualisation",
+                          "description": "Visualise your metrics with respect to time series",
+                          "package_name": "@epilot360/highcharts"
+                        },
+                        {
+                          "visualisation": "kpi",
+                          "title": "KPI Visualisation",
+                          "description": "Visualise your key performance indicators",
+                          "package_name": "@epilot360/kpi"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/dashboard/examples": {
       "get": {
         "operationId": "listAvailableExamples",
-        "responses": {}
+        "summary": "listAvailableExamples",
+        "description": "Returns list of available exampless for visualisations to configure new dashboard tiles",
+        "tags": ["Examples"],
+        "responses": {
+          "200": {
+            "description": "List of available exampless for visualisations to configure new dashboard tiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Example"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
-  "components": {},
+  "components": {
+    "schemas": {
+      "DashboardID": {
+        "description": "Unique identifier for dashboard",
+        "type": "string",
+        "format": "uuid",
+        "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      },
+      "Dashboard": {
+        "type": "object",
+        "description": "Adashboard configuration with tiles",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/DashboardID"
+          },
+          "title": {
+            "type": "string",
+            "example": "Employee Dashboard"
+          },
+          "tiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardTile"
+            },
+            "example": [
+              {
+                "id": "e4af1297-1fd6-440f-9846-f475f580d40f",
+                "coordinates": {},
+                "visualisation": "timechart",
+                "visualisation_config": {
+                  "query": {
+                    "dataset": "entity_operations",
+                    "measure": "count_operations",
+                    "filters": [
+                      {
+                        "operation": ["createEntity"]
+                      },
+                      {
+                        "entity_schema": ["opportunity"]
+                      }
+                    ],
+                    "dimensions": [
+                      {
+                        "time_with_granularity": "month"
+                      },
+                      {
+                        "entity_attribute": "source.title"
+                      }
+                    ]
+                  },
+                  "options": {
+                    "type": "line"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "required": ["title", "tiles"]
+      },
+      "DashboardTileID": {
+        "description": "Unique identifier for a tile in a dashboard",
+        "type": "string",
+        "format": "uuid",
+        "example": "e4af1297-1fd6-440f-9846-f475f580d40f"
+      },
+      "DashboardTile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/DashboardTileID"
+          },
+          "coordinates": {
+            "type": "object"
+          },
+          "title": {
+            "type": "string",
+            "example": "Number of opportunities created by journeys every month"
+          },
+          "visualisation_id": {
+            "$ref": "#/components/schemas/VisualisationId"
+          },
+          "visualisation_config": {
+            "$ref": "#/components/schemas/VisualisationConfig"
+          }
+        }
+      },
+      "VisualisationConfig": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/timechartVisualisationConfig"
+          }
+        ]
+      },
+      "timechartVisualisationConfig": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "$ref": "#/components/schemas/DatalakeQuery"
+          },
+          "options": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "type": "bar"
+            }
+          }
+        }
+      },
+      "ExampleID": {
+        "description": "Unique identifier for a visualisation examples for tiles in a dashboard",
+        "type": "string",
+        "format": "uuid",
+        "example": "e4af1297-1fd6-440f-9846-f475f580d40f"
+      },
+      "Example": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ExampleID"
+          },
+          "title": {
+            "type": "string",
+            "example": "Number of opportunities created by journeys every month"
+          },
+          "visualisation": {
+            "$ref": "#/components/schemas/VisualisationId"
+          },
+          "query": {
+            "$ref": "#/components/schemas/DatalakeQuery"
+          }
+        }
+      },
+      "DatalakeQuery": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "example": "entity_operations"
+          },
+          "measure": {
+            "type": "string",
+            "example": "count_operations"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "example": {
+                "time_with_granularity": "year-month"
+              }
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "example": {
+                "entity_schema": "opportunity"
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "VisualisationId": {
+        "description": "Unique identifier for a Visualisation",
+        "type": "string",
+        "example": "timechart",
+        "enum": [
+          "kpi",
+          "funnel",
+          "toplist",
+          "timechart",
+          "pie",
+          "bar",
+          "entity_list",
+          "markdown",
+          "news_feed",
+          "workflow"
+        ]
+      },
+      "Visualisation": {
+        "type": "object",
+        "description": "A Visualisation that can be used to configure tiles in dashboards",
+        "properties": {
+          "visualisation": {
+            "$ref": "#/components/schemas/VisualisationId"
+          },
+          "title": {
+            "type": "string",
+            "example": "Time Series Visualisation"
+          },
+          "description": {
+            "type": "string"
+          },
+          "package_name": {
+            "type": "string",
+            "description": "Package name of the Visualisation MFE bundle to import",
+            "example": "@epilot360/highcharts"
+          },
+          "import_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to Visualisation MFE bundle to import",
+            "example": "https://epilot-dashboard-visualisations.epilot.io/epilot360-datalake-visualisation/bundle.js?version=1650592827"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://dashboard.sls.epilot.io"

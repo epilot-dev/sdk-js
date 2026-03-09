@@ -1,0 +1,12 @@
+{
+  "s": "https://email-template.sls.epilot.io",
+  "o": [
+    ["saveTemplate", "post", "/v1/email-template/templates", null, 1],
+    ["getTemplateDetail", "get", "/v1/email-template/templates/{id}", [["id", "p", true]]],
+    ["updateTemplateDetail", "put", "/v1/email-template/templates/{id}", [["id", "p", true]], 1],
+    ["replaceVariables", "post", "/v1/email-template/templates:replace", null, 1],
+    ["replaceVariablesAsync", "post", "/v1/email-template/templates:replaceAsync", [["job_id", "q"]], 1],
+    ["bulkSendMessage", "post", "/v1/email-template/templates:bulkSendMessage", null, 1],
+    ["revertToOriginalTemplate", "post", "/v1/email-template/templates:revert", null, 1]
+  ]
+}

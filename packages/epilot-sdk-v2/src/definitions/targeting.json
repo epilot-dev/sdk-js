@@ -1,51 +1,144 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "",
-    "version": ""
+    "title": "Targeting API",
+    "description": "API for Targeting",
+    "version": "1.1.0"
   },
+  "tags": [
+    {
+      "name": "Campaign",
+      "description": "Campaign Endpoints"
+    },
+    {
+      "name": "Campaign Recipient",
+      "description": "Campaign Recipient Endpoints"
+    },
+    {
+      "name": "Campaign Delivery",
+      "description": "Campaign Delivery Endpoints"
+    },
+    {
+      "name": "Target",
+      "description": "Target Endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
   "servers": [
     {
       "url": "https://targeting.sls.epilot.io"
+    },
+    {
+      "url": "https://targeting.sls.epilot.io"
+    },
+    {
+      "url": "https://targeting.sls.epilot.io",
+      "description": "Production Server"
     }
   ],
   "paths": {
     "/v1/campaign/{campaign_id}/status": {
       "post": {
         "operationId": "changeCampaignStatus",
+        "summary": "Change the status of a campaign",
+        "description": "Change the status of a campaign to a desired status.\n\nThe status can be one of the following: active, inactive.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
+        "tags": ["Campaign"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/job": {
       "get": {
         "operationId": "getCampaignJobStatus",
+        "description": "Get the status of a campaign's automation job",
+        "summary": "Get the status of a campaign's automation job",
+        "tags": ["Campaign"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JobStatusResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/portals": {
       "get": {
         "operationId": "getCampaignPortals",
+        "summary": "Get portals usage info for a campaign",
+        "description": "Get the list of portals and its widgets where the campaign is used.\n",
+        "tags": ["Campaign"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignPortalsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
+        "summary": "Retrigger automations for campaign recipients",
+        "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n",
+        "tags": ["Campaign Delivery"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -54,51 +147,142 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetriggerAutomationsRequest"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RetriggerAutomationsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign:match": {
       "post": {
         "operationId": "matchCampaigns",
+        "summary": "Match campaigns",
+        "description": "Match campaigns based on target entities.\n\nThis endpoint returns the list of campaigns where the provided entities are part of the target.\n",
+        "tags": ["Campaign"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchCampaignParams"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MatchCampaignsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/target:match": {
       "post": {
         "operationId": "matchTargets",
+        "summary": "Match targets",
+        "description": "Find targets from the provided list that include the provide entities.\n",
+        "tags": ["Target"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchTargetParams"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MatchTargetsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/target/queries": {
       "post": {
         "operationId": "getTargetQueries",
+        "summary": "Get target queries",
+        "description": "Transform target filters into Lucene queries for the provided target IDs.\nReturns the transformed query string for each target along with any errors encountered.\n",
+        "tags": ["Target"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTargetQueriesParams"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetTargetQueriesResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/recipient": {
       "post": {
         "operationId": "createRecipient",
+        "summary": "Create a recipient associated with a campaign",
+        "description": "Creates a new recipient associated with a campaign.",
+        "tags": ["Campaign Recipient"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -107,15 +291,37 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecipientPayload"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}": {
       "patch": {
         "operationId": "updateRecipient",
+        "summary": "Update a recipient",
+        "description": "Updates a recipient's attributes.",
+        "tags": ["Campaign Recipient"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -127,15 +333,37 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRecipientPayload"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
       "patch": {
         "operationId": "updateRecipientPortalStatus",
+        "summary": "Update portal status for a campaign recipient",
+        "description": "Updates the portal status for a specific campaign recipient.\nThe portal_status_updated_at timestamp is automatically set when the status changes.\n\nStatus transition rules:\n- From 'sent': can change to 'seen', 'dismissed', or 'clicked'\n- From 'seen': can change to 'dismissed' or 'clicked'\n- From 'dismissed' or 'clicked': cannot be changed (final states)\n",
+        "tags": ["Campaign Recipient"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -147,111 +375,973 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {}
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePortalStatusRequest"
+              }
+            }
           }
         },
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     },
     "/v1/campaign/{campaign_id}/recipients": {
       "get": {
         "operationId": "getRecipients",
+        "summary": "Get campaign recipients",
+        "description": "Get a paginated list of recipients for a campaign.",
+        "tags": ["Campaign Recipient"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
           },
           {
             "name": "limit",
-            "in": "query"
+            "in": "query",
+            "description": "Number of items to return",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
           },
           {
             "name": "next",
-            "in": "query"
+            "in": "query",
+            "description": "Cursor for pagination",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "q",
-            "in": "query"
+            "in": "query",
+            "description": "Search by recipient title",
+            "schema": {
+              "type": "string"
+            }
           },
           {
             "name": "automation_status",
-            "in": "query"
+            "in": "query",
+            "description": "Filter by automation status",
+            "schema": {
+              "$ref": "#/components/schemas/AutomationStatus"
+            }
           },
           {
             "name": "portal_status",
-            "in": "query"
+            "in": "query",
+            "description": "Filter by portal status",
+            "schema": {
+              "$ref": "#/components/schemas/PortalStatus"
+            }
           }
         ],
-        "responses": {}
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
       }
     }
   },
   "components": {
+    "schemas": {
+      "BaseError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 404
+          },
+          "message": {
+            "type": "string",
+            "example": "Entity not found"
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "ServerError": {
+        "$ref": "#/components/schemas/BaseError"
+      },
+      "ClientError": {
+        "oneOf": [
+          {
+            "type": "object",
+            "title": "MessageError",
+            "description": "An error object containing a human-readable message.",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "A descriptive error message.",
+                "example": "The provided input was invalid."
+              }
+            },
+            "required": ["message"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "title": "CodeError",
+            "description": "An error object containing a specific machine-readable error code.",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "A specific machine-readable error code indicating a known error condition.",
+                "enum": [
+                  "CAMPAIGN_NOT_FOUND",
+                  "CAMPAIGN_HAS_NO_TARGET",
+                  "CAMPAIGN_HAS_NO_DELIVERY_METHOD",
+                  "CAMPAIGN_HAS_JOB_IN_PROGRESS",
+                  "CAMPAIGN_HAS_UNEXPECTED_STATUS",
+                  "JOB_TOKEN_MISSING",
+                  "TARGET_WITHOUT_FILTERS"
+                ],
+                "example": "CAMPAIGN_NOT_FOUND"
+              }
+            },
+            "required": ["code"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "title": "StatusedError",
+            "description": "An error object containing a message and an explicit status, typically from a more generic error handler.",
+            "properties": {
+              "error": {
+                "type": "string",
+                "description": "A descriptive error message.",
+                "example": "An unexpected error occurred during processing."
+              },
+              "status": {
+                "type": "integer",
+                "description": "An explicit status code in the body, often mirroring the HTTP status but provided for programmatic access.",
+                "example": 400
+              }
+            },
+            "required": ["error", "status"],
+            "additionalProperties": false
+          }
+        ],
+        "description": "Describes the structure of a client error response, which can be one of several types:\n1. `MessageError`: Contains a 'message' field for general descriptive errors.\n2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.\n3. `StatusedError`: Contains 'error' and 'status' fields.\nThe HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.\n"
+      },
+      "BaseUUID": {
+        "type": "string",
+        "format": "uuid",
+        "example": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+      },
+      "BaseNanoID": {
+        "type": "string",
+        "example": "xHcOoJCa07eysJ1GaQeSb"
+      },
+      "BaseTags": {
+        "type": "array",
+        "nullable": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "BaseRelation": {
+        "type": "object",
+        "properties": {
+          "$relation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "_tags": {
+                  "$ref": "#/components/schemas/BaseTags"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BaseSystemId": {
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          }
+        },
+        "required": ["_id"]
+      },
+      "BaseEntityOwner": {
+        "description": "The user / organization owning this entity.\n\nNote: Owner implicitly has access to the entity regardless of ACLs.\n",
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "123"
+          }
+        },
+        "required": ["org_id"]
+      },
+      "BaseEntityAcl": {
+        "type": "object",
+        "description": "Access control list (ACL) for an entity. Defines sharing access to external orgs or users.",
+        "additionalProperties": true,
+        "readOnly": true,
+        "properties": {
+          "view": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "edit": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          },
+          "delete": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "org:456"
+            }
+          }
+        }
+      },
+      "BaseSystemFields": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization Id the entity belongs to",
+            "readOnly": true
+          },
+          "_owners": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/BaseEntityOwner"
+            }
+          },
+          "_schema": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "_title": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "_tags": {
+            "$ref": "#/components/schemas/BaseTags"
+          },
+          "_created_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "readOnly": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "_acl": {
+            "$ref": "#/components/schemas/BaseEntityAcl"
+          }
+        }
+      },
+      "BaseSystemFieldsRequired": {
+        "type": "object",
+        "required": ["_org", "_owners", "_schema", "_title", "_tags", "_created_at", "_updated_at", "_acl"]
+      },
+      "CampaignStatus": {
+        "type": "string",
+        "default": "draft",
+        "enum": ["draft", "activating", "active", "inactive"]
+      },
+      "ExecutionSummaryItem": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string"
+          },
+          "execution_status": {
+            "type": "string"
+          }
+        }
+      },
+      "JobStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "The status of the automation job",
+            "enum": ["queued", "processing", "finished", "failed", "cancelled", "send_report"]
+          },
+          "execution_summary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionSummaryItem"
+            }
+          }
+        }
+      },
+      "Campaign": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseSystemFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "goal": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/CampaignStatus"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date"
+              },
+              "flow_id": {
+                "type": "string"
+              },
+              "job_id": {
+                "type": "string"
+              },
+              "target": {
+                "$ref": "#/components/schemas/BaseRelation"
+              }
+            }
+          }
+        ]
+      },
+      "Target": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseSystemFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "entity_schema": {
+                "type": "string"
+              },
+              "entity_filters": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      },
+      "MatchCampaignParams": {
+        "type": "object",
+        "properties": {
+          "entity_refs": {
+            "type": "array",
+            "description": "List of entities (e.g. Contacts or Contracts) that should be part of the campaign target.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "entity_schema": {
+                  "type": "string"
+                }
+              },
+              "required": ["entity_id", "entity_schema"],
+              "additionalProperties": false
+            }
+          },
+          "campaign_ids": {
+            "type": "array",
+            "description": "List of campaign IDs to check.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": ["b8c01433-5556-4e2b-aad4-6f5348d1df84"],
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": ["entity_refs", "campaign_ids"],
+        "additionalProperties": false
+      },
+      "MatchTargetParams": {
+        "type": "object",
+        "properties": {
+          "entity_refs": {
+            "type": "array",
+            "description": "List of entities (e.g. Contacts or Contracts) that should be part of the targets.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "entity_schema": {
+                  "type": "string"
+                }
+              },
+              "required": ["entity_id", "entity_schema"],
+              "additionalProperties": false
+            }
+          },
+          "target_ids": {
+            "type": "array",
+            "description": "List of target IDs to check.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": ["b8c01433-5556-4e2b-aad4-6f5348d1df84"],
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": ["entity_refs", "target_ids"],
+        "additionalProperties": false
+      },
+      "GetTargetQueriesParams": {
+        "type": "object",
+        "properties": {
+          "target_ids": {
+            "type": "array",
+            "description": "List of target IDs to transform into queries.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "example": ["b8c01433-5556-4e2b-aad4-6f5348d1df84"],
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": ["target_ids"],
+        "additionalProperties": false
+      },
+      "TargetQueryResult": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "query": {
+            "type": "string",
+            "description": "Transformed query string, or null if transformation failed.",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if query transformation failed."
+          }
+        },
+        "required": ["target_id", "query"]
+      },
+      "AutomationStatus": {
+        "type": "string",
+        "enum": ["pending", "in_progress", "success", "failed", "cancelled"]
+      },
+      "PortalStatus": {
+        "type": "string",
+        "enum": ["sent", "seen", "dismissed", "clicked"]
+      },
+      "Recipient": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "automation_status": {
+            "$ref": "#/components/schemas/AutomationStatus"
+          },
+          "automation_execution_id": {
+            "type": "string"
+          },
+          "portal_status": {
+            "$ref": "#/components/schemas/PortalStatus"
+          },
+          "portal_status_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "portal_state": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BaseRecipientPayload": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "entity_schema": {
+            "type": "string"
+          }
+        },
+        "required": ["entity_id", "entity_schema"]
+      },
+      "AutomationRecipientPayload": {
+        "type": "object",
+        "properties": {
+          "automation_status": {
+            "$ref": "#/components/schemas/AutomationStatus"
+          },
+          "automation_execution_id": {
+            "type": "string"
+          }
+        },
+        "required": ["automation_status", "automation_execution_id"]
+      },
+      "PortalRecipientPayload": {
+        "type": "object",
+        "properties": {
+          "portal_status": {
+            "$ref": "#/components/schemas/PortalStatus"
+          },
+          "portal_state": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["portal_status"]
+      },
+      "CreateRecipientPayload": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseRecipientPayload"
+              },
+              {
+                "$ref": "#/components/schemas/AutomationRecipientPayload"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseRecipientPayload"
+              },
+              {
+                "$ref": "#/components/schemas/PortalRecipientPayload"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseRecipientPayload"
+              },
+              {
+                "$ref": "#/components/schemas/AutomationRecipientPayload"
+              },
+              {
+                "$ref": "#/components/schemas/PortalRecipientPayload"
+              }
+            ]
+          }
+        ]
+      },
+      "UpdateRecipientPayload": {
+        "type": "object",
+        "properties": {
+          "automation_status": {
+            "$ref": "#/components/schemas/AutomationStatus"
+          },
+          "automation_execution_id": {
+            "type": "string"
+          },
+          "portal_status": {
+            "$ref": "#/components/schemas/PortalStatus"
+          },
+          "portal_state": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "RetriggerAutomationsRequest": {
+        "type": "object",
+        "properties": {
+          "recipient_ids": {
+            "type": "array",
+            "description": "List of recipient IDs to retrigger automations for",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": ["recipient_ids"]
+      },
+      "RetriggerAutomationsResult": {
+        "type": "object",
+        "properties": {
+          "recipient_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the recipient"
+          },
+          "result": {
+            "type": "string",
+            "description": "The result of the retriggering operation",
+            "enum": ["success", "failure", "not_found", "invalid_status"]
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "The ID of the new automation execution (if successful)"
+          },
+          "error": {
+            "type": "string",
+            "description": "The error message if the operation failed"
+          }
+        },
+        "required": ["recipient_id", "result"]
+      },
+      "UpdatePortalStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PortalStatus"
+          }
+        },
+        "required": ["status"]
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
     "parameters": {
       "CampaignIdPathParam": {
         "name": "campaign_id",
+        "description": "The campaign ID",
         "in": "path",
-        "required": true
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/BaseUUID"
+        }
       },
       "RecipientIdPathParam": {
         "name": "recipient_id",
+        "description": "The entity ID of the recipient",
         "in": "path",
-        "required": true
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/BaseUUID"
+        }
       }
     },
     "responses": {
       "ClientErrorResponse": {
+        "description": "Any error based on client data errors",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ClientError"
+            }
+          }
         }
       },
       "ServerErrorResponse": {
+        "description": "Any error based on the server-side",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ServerError"
+            }
+          }
         }
       },
       "CampaignResponse": {
+        "description": "Campaign entity response",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "campaign": {
+                  "$ref": "#/components/schemas/Campaign"
+                }
+              }
+            }
+          }
         }
       },
       "JobStatusResponse": {
+        "description": "Campaign job status response",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/JobStatus"
+            }
+          }
         }
       },
       "RecipientResponse": {
+        "description": "Recipient response",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Recipient"
+            }
+          }
         }
       },
       "RecipientsResponse": {
+        "description": "List of campaign recipients",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Recipient"
+                  }
+                },
+                "next": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "Cursor for next page of results"
+                },
+                "total": {
+                  "type": "integer",
+                  "description": "Total number of recipients"
+                }
+              }
+            }
+          }
         }
       },
       "MatchCampaignsResponse": {
+        "description": "List of campaigns where the target entities match the given entities.",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching campaigns."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "List of matching campaigns.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "campaign": {
+                        "$ref": "#/components/schemas/Campaign"
+                      }
+                    },
+                    "required": ["campaign"]
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "MatchTargetsResponse": {
+        "description": "List of targets where the given entities are found.",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching targets."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "List of matching targets.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "$ref": "#/components/schemas/Target"
+                      }
+                    },
+                    "required": ["target"]
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "GetTargetQueriesResponse": {
+        "description": "List of transformed target queries.",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "description": "List of target query results.",
+                  "items": {
+                    "$ref": "#/components/schemas/TargetQueryResult"
+                  }
+                }
+              },
+              "required": ["results"]
+            }
+          }
         }
       },
       "CampaignPortalsResponse": {
+        "description": "List of portals and its widgets where the campaign is used",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "portal": {
+                    "type": "object",
+                    "properties": {
+                      "origin": {
+                        "type": "string",
+                        "description": "The origin of the portal"
+                      },
+                      "domain": {
+                        "type": "string",
+                        "description": "The domain of the portal"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the portal"
+                      }
+                    }
+                  },
+                  "widgets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the widget"
+                        },
+                        "headline": {
+                          "type": "object",
+                          "properties": {
+                            "en": {
+                              "type": "string",
+                              "description": "The headline in English"
+                            },
+                            "de": {
+                              "type": "string",
+                              "description": "The headline in German"
+                            }
+                          }
+                        }
+                      },
+                      "required": ["id"]
+                    }
+                  }
+                },
+                "required": ["portal", "widgets"]
+              }
+            }
+          }
         }
       },
       "RetriggerAutomationsResponse": {
+        "description": "Response to a request to retrigger automations for campaign recipients",
         "content": {
-          "application/json": {}
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "A confirmation message indicating the request was received and processed"
+                },
+                "results": {
+                  "type": "array",
+                  "description": "List of retriggering results",
+                  "items": {
+                    "$ref": "#/components/schemas/RetriggerAutomationsResult"
+                  }
+                }
+              },
+              "required": ["message", "results"]
+            }
+          }
         }
       }
     }
