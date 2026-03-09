@@ -461,6 +461,16 @@ const generateSubpathExports = (clients: ClientInfo[]): Record<string, Record<st
   return exports;
 };
 
+const generateTypesVersions = (clients: ClientInfo[]): Record<string, Record<string, string[]>> => {
+  const paths: Record<string, string[]> = {};
+
+  for (const client of clients.filter((c) => c.hasDefinition)) {
+    paths[client.kebabName] = [`./dist/apis/${client.kebabName}.d.ts`];
+  }
+
+  return { '*': paths };
+};
+
 type ParamInfo = {
   name: string;
   in: string;
@@ -998,6 +1008,7 @@ const main = () => {
   if (existsSync(pkgPath)) {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     pkg.exports = generateSubpathExports(clients);
+    pkg.typesVersions = generateTypesVersions(clients);
     writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
   }
 

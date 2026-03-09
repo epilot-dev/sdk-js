@@ -73,7 +73,7 @@ jobs:
       - uses: actions/setup-node@v5
         if: steps.check.outputs.changed == 'true'
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
 
@@ -124,7 +124,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
 

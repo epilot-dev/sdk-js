@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.0.0-beta.5",
+  "version": "2.0.0-beta.6",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -333,5 +333,147 @@
     "tsx": "^4.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
+  },
+  "typesVersions": {
+    "*": {
+      "access-token": [
+        "./dist/apis/access-token.d.ts"
+      ],
+      "address": [
+        "./dist/apis/address.d.ts"
+      ],
+      "address-suggestions": [
+        "./dist/apis/address-suggestions.d.ts"
+      ],
+      "ai-agents": [
+        "./dist/apis/ai-agents.d.ts"
+      ],
+      "app": [
+        "./dist/apis/app.d.ts"
+      ],
+      "audit-logs": [
+        "./dist/apis/audit-logs.d.ts"
+      ],
+      "automation": [
+        "./dist/apis/automation.d.ts"
+      ],
+      "billing": [
+        "./dist/apis/billing.d.ts"
+      ],
+      "blueprint-manifest": [
+        "./dist/apis/blueprint-manifest.d.ts"
+      ],
+      "consent": [
+        "./dist/apis/consent.d.ts"
+      ],
+      "customer-portal": [
+        "./dist/apis/customer-portal.d.ts"
+      ],
+      "dashboard": [
+        "./dist/apis/dashboard.d.ts"
+      ],
+      "data-management": [
+        "./dist/apis/data-management.d.ts"
+      ],
+      "deduplication": [
+        "./dist/apis/deduplication.d.ts"
+      ],
+      "design": [
+        "./dist/apis/design.d.ts"
+      ],
+      "document": [
+        "./dist/apis/document.d.ts"
+      ],
+      "email-settings": [
+        "./dist/apis/email-settings.d.ts"
+      ],
+      "email-template": [
+        "./dist/apis/email-template.d.ts"
+      ],
+      "entity": [
+        "./dist/apis/entity.d.ts"
+      ],
+      "entity-mapping": [
+        "./dist/apis/entity-mapping.d.ts"
+      ],
+      "environments": [
+        "./dist/apis/environments.d.ts"
+      ],
+      "erp-integration": [
+        "./dist/apis/erp-integration.d.ts"
+      ],
+      "event-catalog": [
+        "./dist/apis/event-catalog.d.ts"
+      ],
+      "file": [
+        "./dist/apis/file.d.ts"
+      ],
+      "iban": [
+        "./dist/apis/iban.d.ts"
+      ],
+      "journey": [
+        "./dist/apis/journey.d.ts"
+      ],
+      "kanban": [
+        "./dist/apis/kanban.d.ts"
+      ],
+      "message": [
+        "./dist/apis/message.d.ts"
+      ],
+      "metering": [
+        "./dist/apis/metering.d.ts"
+      ],
+      "notes": [
+        "./dist/apis/notes.d.ts"
+      ],
+      "notification": [
+        "./dist/apis/notification.d.ts"
+      ],
+      "organization": [
+        "./dist/apis/organization.d.ts"
+      ],
+      "partner-directory": [
+        "./dist/apis/partner-directory.d.ts"
+      ],
+      "permissions": [
+        "./dist/apis/permissions.d.ts"
+      ],
+      "pricing": [
+        "./dist/apis/pricing.d.ts"
+      ],
+      "pricing-tier": [
+        "./dist/apis/pricing-tier.d.ts"
+      ],
+      "purpose": [
+        "./dist/apis/purpose.d.ts"
+      ],
+      "sandbox": [
+        "./dist/apis/sandbox.d.ts"
+      ],
+      "submission": [
+        "./dist/apis/submission.d.ts"
+      ],
+      "targeting": [
+        "./dist/apis/targeting.d.ts"
+      ],
+      "template-variables": [
+        "./dist/apis/template-variables.d.ts"
+      ],
+      "user": [
+        "./dist/apis/user.d.ts"
+      ],
+      "validation-rules": [
+        "./dist/apis/validation-rules.d.ts"
+      ],
+      "webhooks": [
+        "./dist/apis/webhooks.d.ts"
+      ],
+      "workflow": [
+        "./dist/apis/workflow.d.ts"
+      ],
+      "workflow-definition": [
+        "./dist/apis/workflow-definition.d.ts"
+      ]
+    }
   }
 }
