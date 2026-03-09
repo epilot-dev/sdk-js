@@ -1,6 +1,4 @@
 /* Auto-copied from journey-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -308,6 +306,22 @@ export declare namespace Components {
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
                 /**
+                 * Country code for address format (e.g. DE, AT, CH, LU)
+                 */
+                addressSuggestionsCountryCode?: string | null;
+                /**
+                 * Whether address auto-complete is enabled
+                 */
+                addressSuggestionsEnableAutoComplete?: boolean;
+                /**
+                 * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                 */
+                addressSuggestionsSource?: string[];
+                /**
+                 * Whether free text input is allowed when auto-complete is on
+                 */
+                addressSuggestionsEnableFreeText?: boolean;
+                /**
                  * This property is deprecated and will be removed in a future version
                  */
                 useNewDesign?: boolean;
@@ -536,6 +550,22 @@ export declare namespace Components {
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
                 /**
+                 * Country code for address format (e.g. DE, AT, CH, LU)
+                 */
+                addressSuggestionsCountryCode?: string | null;
+                /**
+                 * Whether address auto-complete is enabled
+                 */
+                addressSuggestionsEnableAutoComplete?: boolean;
+                /**
+                 * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                 */
+                addressSuggestionsSource?: string[];
+                /**
+                 * Whether free text input is allowed when auto-complete is on
+                 */
+                addressSuggestionsEnableFreeText?: boolean;
+                /**
                  * This property is deprecated and will be removed in a future version
                  */
                 useNewDesign?: boolean;
@@ -740,6 +770,22 @@ export declare namespace Components {
                 addressSuggestionsFileUrl?: string | null;
                 addressSuggestionsFileId?: string | null;
                 /**
+                 * Country code for address format (e.g. DE, AT, CH, LU)
+                 */
+                addressSuggestionsCountryCode?: string | null;
+                /**
+                 * Whether address auto-complete is enabled
+                 */
+                addressSuggestionsEnableAutoComplete?: boolean;
+                /**
+                 * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                 */
+                addressSuggestionsSource?: string[];
+                /**
+                 * Whether free text input is allowed when auto-complete is on
+                 */
+                addressSuggestionsEnableFreeText?: boolean;
+                /**
                  * This property is deprecated and will be removed in a future version
                  */
                 useNewDesign?: boolean;
@@ -796,6 +842,70 @@ export declare namespace Components {
         }[];
         export interface JourneyResponse {
             createdJourney?: Journey;
+        }
+        export interface JourneyValidationError {
+            /**
+             * Error type identifier
+             * example:
+             * ValidationError
+             */
+            error: string;
+            /**
+             * High-level error message
+             * example:
+             * Journey configuration validation failed
+             */
+            message: string;
+            /**
+             * Detailed validation errors for each pattern that failed
+             */
+            details: {
+                /**
+                 * Validation pattern that failed
+                 */
+                pattern?: string;
+                severity?: "critical" | "high" | "medium" | "low";
+                /**
+                 * Detailed error message
+                 */
+                message?: string;
+                /**
+                 * Number of issues found
+                 */
+                count?: number;
+            }[];
+        }
+        export interface JourneyValidationResponse {
+            /**
+             * Whether the journey configuration is valid
+             */
+            valid: boolean;
+            /**
+             * List of detected validation errors
+             */
+            errors: {
+                /**
+                 * Pattern type (e.g. PatternA_DotsInStepId)
+                 */
+                type?: string;
+                severity?: "critical" | "high" | "medium" | "low";
+                message?: string;
+                affectedStepIds?: string[];
+                count?: number;
+                autoFix?: {
+                    feasible?: boolean;
+                    confidence?: "high" | "medium" | "low";
+                    reason?: string;
+                    details?: string;
+                };
+            }[];
+            /**
+             * List of warnings (non-critical issues)
+             */
+            warnings?: {
+                type?: string;
+                message?: string;
+            }[];
         }
         /**
          * Patch request to update a journey (journey id is required) Support for nested properties (e.g. steps[0].uischema.elements[0].products) is supported.
@@ -1033,7 +1143,7 @@ export declare namespace Components {
             /**
              * The file entity id, used when persisting a new template version with updated settings
              * example:
-             * 1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p
+             * 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
              */
             file_entity_id?: string; // uuid
         }
@@ -1085,6 +1195,7 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.JourneyCreationRequest;
         namespace Responses {
             export type $201 = Components.Schemas.Journey;
+            export type $400 = Components.Schemas.JourneyValidationError;
         }
     }
     namespace CreateJourneyV2 {
@@ -1105,6 +1216,7 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.JourneyCreationRequestV2;
         namespace Responses {
             export type $201 = Components.Schemas.JourneyCreationRequestV2;
+            export type $400 = Components.Schemas.JourneyValidationError;
         }
     }
     namespace GenerateDocument {
@@ -1305,6 +1417,7 @@ export declare namespace Paths {
         Components.Schemas.PatchUpdateJourneyRequest;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyResponse;
+            export type $400 = Components.Schemas.JourneyValidationError;
             export interface $404 {
                 /**
                  * example:
@@ -1322,6 +1435,7 @@ export declare namespace Paths {
         Components.Schemas.PatchUpdateJourneyRequest;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export type $400 = Components.Schemas.JourneyValidationError;
             export interface $404 {
                 /**
                  * example:
@@ -1383,6 +1497,7 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $400 = Components.Schemas.JourneyValidationError;
             export interface $409 {
             }
         }
@@ -1391,6 +1506,7 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.JourneyCreationRequestV2;
         namespace Responses {
             export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            export type $400 = Components.Schemas.JourneyValidationError;
             export interface $404 {
                 /**
                  * example:
@@ -1786,6 +1902,8 @@ export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequest
 export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
 export type JourneyResponse = Components.Schemas.JourneyResponse;
+export type JourneyValidationError = Components.Schemas.JourneyValidationError;
+export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
 export type RuleRef = Components.Schemas.RuleRef;
 export type S3Reference = Components.Schemas.S3Reference;

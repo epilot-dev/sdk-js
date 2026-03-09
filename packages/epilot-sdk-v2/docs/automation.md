@@ -50,7 +50,6 @@ const { data } = await automationClient.searchFlows(...)
 - [`AutomationFlowId`](#automationflowid)
 - [`AutomationActionId`](#automationactionid)
 - [`AutomationFlow`](#automationflow)
-- [`WorkflowContext`](#workflowcontext)
 - [`WorkflowContextRole`](#workflowcontextrole)
 - [`SearchAutomationsResp`](#searchautomationsresp)
 - [`AnyTrigger`](#anytrigger)
@@ -1115,8 +1114,7 @@ type AutomationFlow = {
   } | {
     id?: string // uuid
     type: "flows_trigger"
-    configuration: {
-      source_id: { ... }
+    configuration?: {
       journey_id?: { ... }
     }
   }>
@@ -1148,19 +1146,8 @@ type AutomationFlow = {
       origin: { ... }
       schema?: { ... }
       attribute?: { ... }
+    }
   // ...
-}
-```
-
-### `WorkflowContext`
-
-For automation that are connected to workflows V2, this field tracks various information about the workflow.
-
-```ts
-type WorkflowContext = {
-  workflow_id: string // uuid
-  task_id?: string // uuid
-  workflow_role: "trigger_workflow" | "run_task_automation"
 }
 ```
 
@@ -1221,7 +1208,7 @@ type SearchAutomationsResp = {
     } | {
       id?: { ... }
       type: { ... }
-      configuration: { ... }
+      configuration?: { ... }
     }>
     trigger_conditions?: Array<{
       source: { ... }
@@ -1347,8 +1334,7 @@ type AnyTrigger = {
 } | {
   id?: string // uuid
   type: "flows_trigger"
-  configuration: {
-    source_id: string // uuid
+  configuration?: {
     journey_id?: string // uuid
   }
 }
@@ -3323,8 +3309,7 @@ type AutomationTrigger = {
 type FlowsTrigger = {
   id?: string // uuid
   type: "flows_trigger"
-  configuration: {
-    source_id: string // uuid
+  configuration?: {
     journey_id?: string // uuid
   }
 }

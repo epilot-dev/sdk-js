@@ -56,6 +56,8 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`Journey`](#journey)
 - [`JourneyFeatureFlags`](#journeyfeatureflags)
 - [`JourneyAuditInfo`](#journeyauditinfo)
+- [`JourneyValidationResponse`](#journeyvalidationresponse)
+- [`JourneyValidationError`](#journeyvalidationerror)
 - [`S3Reference`](#s3reference)
 - [`TemplateSettings`](#templatesettings)
 - [`GenerateDocumentResponse`](#generatedocumentresponse)
@@ -183,6 +185,10 @@ const { data } = await client.getJourney({
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "useAustrianLabels": true,
     "enableDarkMode": true,
@@ -264,10 +270,16 @@ const { data } = await client.getJourneyProducts({
     "_org": "string",
     "code": "string",
     "description": "string",
-    "feature": [],
-    "product_images": [],
+    "feature": [
+      {}
+    ],
+    "product_images": [
+      {}
+    ],
     "legal_footnote": "string",
-    "product_downloads": [],
+    "product_downloads": [
+      {}
+    ],
     "price": {}
   }
 ]
@@ -364,6 +376,10 @@ const { data } = await client.createJourney(
       entityTags: ['string'],
       addressSuggestionsFileUrl: 'string',
       addressSuggestionsFileId: 'string',
+      addressSuggestionsCountryCode: 'string',
+      addressSuggestionsEnableAutoComplete: true,
+      addressSuggestionsSource: ['string'],
+      addressSuggestionsEnableFreeText: true,
       useNewDesign: true,
       useAustrianLabels: true,
       enableDarkMode: true,
@@ -471,6 +487,10 @@ const { data } = await client.createJourney(
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "useAustrianLabels": true,
     "enableDarkMode": true,
@@ -592,6 +612,10 @@ const { data } = await client.updateJourney(
       entityTags: ['string'],
       addressSuggestionsFileUrl: 'string',
       addressSuggestionsFileId: 'string',
+      addressSuggestionsCountryCode: 'string',
+      addressSuggestionsEnableAutoComplete: true,
+      addressSuggestionsSource: ['string'],
+      addressSuggestionsEnableFreeText: true,
       useNewDesign: true,
       useAustrianLabels: true,
       enableDarkMode: true,
@@ -683,6 +707,10 @@ const { data } = await client.patchUpdateJourney(
       "entityTags": ["string"],
       "addressSuggestionsFileUrl": "string",
       "addressSuggestionsFileId": "string",
+      "addressSuggestionsCountryCode": "string",
+      "addressSuggestionsEnableAutoComplete": true,
+      "addressSuggestionsSource": ["string"],
+      "addressSuggestionsEnableFreeText": true,
       "useNewDesign": true,
       "useAustrianLabels": true,
       "enableDarkMode": true,
@@ -829,7 +857,7 @@ const { data } = await client.generateDocument(
     "template_with_datatable": false,
     "enabled_template_settings_persistence": false,
     "misconfigured_margins": false,
-    "file_entity_id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    "file_entity_id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
   }
 }
 ```
@@ -925,6 +953,10 @@ const { data } = await client.createJourneyV2(
       entityTags: ['string'],
       addressSuggestionsFileUrl: 'string',
       addressSuggestionsFileId: 'string',
+      addressSuggestionsCountryCode: 'string',
+      addressSuggestionsEnableAutoComplete: true,
+      addressSuggestionsSource: ['string'],
+      addressSuggestionsEnableFreeText: true,
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
@@ -1022,6 +1054,10 @@ const { data } = await client.createJourneyV2(
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
@@ -1127,6 +1163,10 @@ const { data } = await client.updateJourneyV2(
       entityTags: ['string'],
       addressSuggestionsFileUrl: 'string',
       addressSuggestionsFileId: 'string',
+      addressSuggestionsCountryCode: 'string',
+      addressSuggestionsEnableAutoComplete: true,
+      addressSuggestionsSource: ['string'],
+      addressSuggestionsEnableFreeText: true,
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
@@ -1224,6 +1264,10 @@ const { data } = await client.updateJourneyV2(
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
@@ -1340,6 +1384,10 @@ const { data } = await client.patchUpdateJourneyV2(
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
@@ -1452,6 +1500,10 @@ const { data } = await client.getJourneyV2({
     "entityTags": ["string"],
     "addressSuggestionsFileUrl": "string",
     "addressSuggestionsFileId": "string",
+    "addressSuggestionsCountryCode": "string",
+    "addressSuggestionsEnableAutoComplete": true,
+    "addressSuggestionsSource": ["string"],
+    "addressSuggestionsEnableFreeText": true,
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
@@ -1621,6 +1673,10 @@ type JourneyResponse = {
       entityTags?: { ... }
       addressSuggestionsFileUrl?: { ... }
       addressSuggestionsFileId?: { ... }
+      addressSuggestionsCountryCode?: { ... }
+      addressSuggestionsEnableAutoComplete?: { ... }
+      addressSuggestionsSource?: { ... }
+      addressSuggestionsEnableFreeText?: { ... }
       useNewDesign?: { ... }
       useAustrianLabels?: { ... }
       enableDarkMode?: { ... }
@@ -1761,6 +1817,10 @@ type JourneyCreationRequest = {
     entityTags?: string[]
     addressSuggestionsFileUrl?: string
     addressSuggestionsFileId?: string
+    addressSuggestionsCountryCode?: string
+    addressSuggestionsEnableAutoComplete?: boolean
+    addressSuggestionsSource?: string[]
+    addressSuggestionsEnableFreeText?: boolean
     useNewDesign?: boolean
     useAustrianLabels?: boolean
     enableDarkMode?: boolean
@@ -1776,8 +1836,7 @@ type JourneyCreationRequest = {
   }
   validationRules?: Record<string, string | Record<string, string>>
   createdBy?: string
-  updatedBy?: string
-  __lastModifiedAt?: string
+  // ...
 }
 ```
 
@@ -1862,6 +1921,10 @@ type JourneyCreationRequestV2 = {
     entityTags?: string[]
     addressSuggestionsFileUrl?: string
     addressSuggestionsFileId?: string
+    addressSuggestionsCountryCode?: string
+    addressSuggestionsEnableAutoComplete?: boolean
+    addressSuggestionsSource?: string[]
+    addressSuggestionsEnableFreeText?: boolean
     useNewDesign?: boolean
     thirdPartyCookies?: boolean
     accessMode?: "PUBLIC" | "PRIVATE"
@@ -1993,6 +2056,10 @@ type Journey = {
     entityTags?: string[]
     addressSuggestionsFileUrl?: string
     addressSuggestionsFileId?: string
+    addressSuggestionsCountryCode?: string
+    addressSuggestionsEnableAutoComplete?: boolean
+    addressSuggestionsSource?: string[]
+    addressSuggestionsEnableFreeText?: boolean
     useNewDesign?: boolean
     useAustrianLabels?: boolean
     enableDarkMode?: boolean
@@ -2008,10 +2075,6 @@ type Journey = {
   }
   validationRules?: Record<string, string | Record<string, string>>
   createdBy?: string
-  updatedBy?: string
-  __lastModifiedAt?: string
-  createdAt: string
-  lastModifiedAt: string
   // ...
 }
 ```
@@ -2033,6 +2096,46 @@ type JourneyAuditInfo = {
   deletedAt?: string
   version: number
   revisions: number
+}
+```
+
+### `JourneyValidationResponse`
+
+```ts
+type JourneyValidationResponse = {
+  valid: boolean
+  errors: Array<{
+    type?: string
+    severity?: "critical" | "high" | "medium" | "low"
+    message?: string
+    affectedStepIds?: string[]
+    count?: number
+    autoFix?: {
+      feasible?: { ... }
+      confidence?: { ... }
+      reason?: { ... }
+      details?: { ... }
+    }
+  }>
+  warnings?: Array<{
+    type?: string
+    message?: string
+  }>
+}
+```
+
+### `JourneyValidationError`
+
+```ts
+type JourneyValidationError = {
+  error: string
+  message: string
+  details: Array<{
+    pattern?: string
+    severity?: "critical" | "high" | "medium" | "low"
+    message?: string
+    count?: number
+  }>
 }
 ```
 
