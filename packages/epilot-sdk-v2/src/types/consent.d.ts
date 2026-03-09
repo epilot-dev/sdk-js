@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface ConsentEvent {
             type: "OPT_IN" | "OPT_OUT" | "DOUBLE_OPT_IN_REQUESTED" | "DOUBLE_OPT_IN";
@@ -119,7 +119,7 @@ declare namespace Components {
         export type OrganizationId = string;
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace HandleOptInWithToken {
         namespace Parameters {
             export type Lang = string;

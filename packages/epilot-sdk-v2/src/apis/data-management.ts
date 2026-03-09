@@ -8,33 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/data-management';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Config,
-  ConfigSchedule,
-  ConfigType,
-  CreateJobRequest,
-  DeletionRelationEntitySchema,
-  IntervalConfigSchedule,
-  Job,
-  JobDetails,
-  JobReport,
-  JobReportFormat,
-  JobReportUrlResponse,
-  JobStatus,
-  JobTrigger,
-  ListConfigsResponse,
-  ListJobsResponse,
-  QueryConfig,
-  QueryEntitiesRequest,
-  QueryEntitiesResult,
-  QueryFilter,
-  QueryFilterType,
-  UpdateJobRequest,
-  UpsertConfigRequest,
-} from '../types/data-management';
+export type * from '../types/data-management';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

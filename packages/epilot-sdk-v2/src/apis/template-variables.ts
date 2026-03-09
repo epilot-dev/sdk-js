@@ -8,22 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/template-variables';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CategoryResult,
-  CustomVariable,
-  CustomVariablesSearchParams,
-  ExternalCustomVariable,
-  Language,
-  ReplacementOutput,
-  ReplacementOutputV2,
-  TemplateType,
-  VariableContext,
-  VariableParameters,
-  VariableResult,
-} from '../types/template-variables';
+export type * from '../types/template-variables';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -8,41 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/partner-directory';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ActivatePartnerPayload,
-  Address,
-  AddressGeolocation,
-  AssignRolesPayload,
-  Assignable,
-  AssignableEcpPlaceholder,
-  AssignableGroup,
-  AssignableOrganization,
-  AssignablePartnerUser,
-  AssignableUser,
-  BaseAssignable,
-  BaseRoleForCreate,
-  CreatePartnerRolePayload,
-  CreatePartnerUserPayload,
-  EqualsCondition,
-  Geolocation,
-  Grant,
-  GrantCondition,
-  GrantWithDependencies,
-  InviteToken,
-  OrganizationId,
-  Partner,
-  PartnerId,
-  PartnerInvitationPayload,
-  PartnerRole,
-  PartnerUser,
-  RoleId,
-  SearchGeolocation,
-  UpdatePartnerRolePayload,
-  User,
-} from '../types/partner-directory';
+export type * from '../types/partner-directory';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

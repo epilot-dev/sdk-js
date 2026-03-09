@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface AgentDefinition {
             agent_id?: /**
@@ -831,7 +831,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace ApproveExecution {
         namespace Parameters {
             export type ExecutionId = string; // uuid

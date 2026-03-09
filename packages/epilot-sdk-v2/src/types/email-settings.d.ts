@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Parameters {
         export type EmailAddressId = string;
         export type SharedInboxId = string;
@@ -734,7 +734,7 @@ declare namespace Components {
         export type WhitelistEmailAddressSetting = "whitelist_email_address";
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AddDomain {
         export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {

@@ -8,34 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/message';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Address,
-  AttachmentsRelation,
-  BaseEntity,
-  BulkActionsPayload,
-  BulkActionsPayloadWithScopes,
-  ErrorResponse,
-  FieldsParam,
-  File,
-  Message,
-  MessageRequestParams,
-  MessageV2,
-  MoveThreadPayload,
-  ReadMessagePayload,
-  ReadingScope,
-  SearchIDParams,
-  SearchParams,
-  SearchParamsV2,
-  Thread,
-  ThreadDoneEvent,
-  ThreadOpenEvent,
-  ThreadTimeline,
-  TimelineEvent,
-  TimelineEventData,
-} from '../types/message';
+export type * from '../types/message';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

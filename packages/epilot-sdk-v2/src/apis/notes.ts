@@ -8,27 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/notes';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ContextType,
-  CreatedByType,
-  Entity,
-  NonHydratedNoteEntity,
-  NoteContexts,
-  NoteEntity,
-  NoteEntityParent,
-  NoteGetRequestResponse,
-  NotePatchRequestBody,
-  NotePostRequestBody,
-  NotePutRequestBody,
-  NoteSearchByContextRequestBody,
-  NotesSearchRequestResponse,
-  ReactionRequest,
-  ToggleReactionsRequest,
-  WorkflowExecution,
-} from '../types/notes';
+export type * from '../types/notes';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

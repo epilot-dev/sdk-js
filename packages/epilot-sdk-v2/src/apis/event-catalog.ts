@@ -8,28 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/event-catalog';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CommonEventMetadata,
-  ContextEntity,
-  EntityOperationTrigger,
-  Event,
-  EventConfig,
-  EventConfigBase,
-  EventJsonSchema,
-  FieldsParam,
-  GraphDefinition,
-  GraphEdge,
-  GraphNode,
-  PrimitiveField,
-  SchemaField,
-  SearchOptions,
-  TriggerEventPayload,
-  TriggerEventResponse,
-  UpdateEventPayload,
-} from '../types/event-catalog';
+export type * from '../types/event-catalog';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

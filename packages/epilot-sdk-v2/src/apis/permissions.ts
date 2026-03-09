@@ -8,36 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/permissions';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Assignment,
-  Assignments,
-  BaseRole,
-  BaseRoleForCreate,
-  CreateRolePayload,
-  EqualsCondition,
-  Error,
-  Grant,
-  GrantCondition,
-  GrantWithDependencies,
-  InternalAssignment,
-  OrgAssignments,
-  OrgRole,
-  OrgRoles,
-  OrganizationId,
-  PartnerRole,
-  PortalRole,
-  Role,
-  RoleId,
-  RolePayload,
-  RoleSearchInput,
-  ShareRole,
-  Slug,
-  UserId,
-  UserRole,
-} from '../types/permissions';
+export type * from '../types/permissions';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

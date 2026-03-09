@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export type ContextType = "workflow_execution" | "workflow_task" | "workflow_configuration" | "journey_configuration" | "entity";
         export type CreatedByType = "user" | "group";
@@ -572,7 +572,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AddNoteReaction {
         namespace Parameters {
             /**

@@ -8,17 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/environments';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  EnvironmentValueType,
-  EnvironmentVariable,
-  EnvironmentVariableCreateRequest,
-  EnvironmentVariableList,
-  EnvironmentVariableListItem,
-  EnvironmentVariableUpdateRequest,
-} from '../types/environments';
+export type * from '../types/environments';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

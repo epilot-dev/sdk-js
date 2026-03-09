@@ -8,23 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/kanban';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Board,
-  BoardFilter,
-  BoardSummary,
-  DynamicDateValue,
-  FilterGroup,
-  FilterItem,
-  FilterOperator,
-  FlowsQueryRequest,
-  FlowsQueryResult,
-  Sorting,
-  Swimlane,
-  ValueType,
-} from '../types/kanban';
+export type * from '../types/kanban';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

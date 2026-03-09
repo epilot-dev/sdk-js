@@ -8,22 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/dashboard';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Dashboard,
-  DashboardID,
-  DashboardTile,
-  DashboardTileID,
-  DatalakeQuery,
-  Example,
-  ExampleID,
-  timechartVisualisationConfig,
-  Visualisation,
-  VisualisationConfig,
-  VisualisationId,
-} from '../types/dashboard';
+export type * from '../types/dashboard';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -8,39 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/email-template';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ApproveAction,
-  ApprovedAt,
-  AsyncEmailTemplateResponse,
-  Attachment,
-  AttachmentResponse,
-  BaseEntity,
-  BulkSendMessageJob,
-  BulkSendMessageRequest,
-  BulkSendMessageRequestWithQuery,
-  CreateSystemTemplatesReq,
-  CreateSystemTemplatesResp,
-  CreatedAt,
-  CreatedBy,
-  CustomVariables,
-  EmailTemplateEntity,
-  EmailTemplateRequest,
-  EmailTemplateResponse,
-  From,
-  OrgId,
-  PresignedRequest,
-  PresignedResponse,
-  SkipCreatingEntities,
-  TaskToken,
-  TemplateType,
-  To,
-  UpdatedAt,
-  UserResponse,
-  VariableParameters,
-} from '../types/email-template';
+export type * from '../types/email-template';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

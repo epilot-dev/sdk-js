@@ -8,27 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/document';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ConvertDocumentRequest,
-  ConvertDocumentResponse,
-  DocumentGenerationV2Request,
-  DocumentGenerationV2Response,
-  DocumentMetaRequest,
-  DocumentMetaResponse,
-  DocxTemplaterErrorDetail,
-  DocxTemplaterErrorDetails,
-  ErrorCode,
-  ErrorOutput,
-  InternalErrorDetail,
-  InternalErrorDetails,
-  InvalidCustomVariableErrorDetail,
-  InvalidCustomVariableErrorDetails,
-  S3Reference,
-  TemplateSettings,
-} from '../types/document';
+export type * from '../types/document';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

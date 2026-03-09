@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
         /**
@@ -1103,7 +1103,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace ChangeReasonStatus {
         namespace Parameters {
             export type ReasonId = string;

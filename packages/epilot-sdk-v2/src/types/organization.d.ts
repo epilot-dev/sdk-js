@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface CreateOrganizationRequest {
             /**
@@ -369,7 +369,7 @@ declare namespace Components {
         };
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace DeleteSettingsValue {
         namespace Parameters {
             export type Key = string;

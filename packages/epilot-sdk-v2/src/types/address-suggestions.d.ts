@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * The address suggestions entity
@@ -154,7 +154,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CheckAvailability {
         export interface HeaderParameters {
             "X-Epilot-Org-ID": Parameters.XEpilotOrgID;

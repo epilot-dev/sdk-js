@@ -8,22 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/organization';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CreateOrganizationRequest,
-  DataPoint,
-  DataPointsResponse,
-  InternalOrganization,
-  Organization,
-  OrganizationCleanupStatus,
-  OrganizationId,
-  OrganizationToCleanup,
-  SettingKey,
-  Settings,
-  SettingsValue,
-} from '../types/organization';
+export type * from '../types/organization';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

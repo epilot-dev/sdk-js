@@ -8,43 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/targeting';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AutomationRecipientPayload,
-  AutomationStatus,
-  BaseEntityAcl,
-  BaseEntityOwner,
-  BaseError,
-  BaseNanoID,
-  BaseRecipientPayload,
-  BaseRelation,
-  BaseSystemFields,
-  BaseSystemFieldsRequired,
-  BaseSystemId,
-  BaseTags,
-  BaseUUID,
-  Campaign,
-  CampaignStatus,
-  ClientError,
-  CreateRecipientPayload,
-  ExecutionSummaryItem,
-  GetTargetQueriesParams,
-  JobStatus,
-  MatchCampaignParams,
-  MatchTargetParams,
-  PortalRecipientPayload,
-  PortalStatus,
-  Recipient,
-  RetriggerAutomationsRequest,
-  RetriggerAutomationsResult,
-  ServerError,
-  Target,
-  TargetQueryResult,
-  UpdatePortalStatusRequest,
-  UpdateRecipientPayload,
-} from '../types/targeting';
+export type * from '../types/targeting';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

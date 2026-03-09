@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * An epilot access token
@@ -186,7 +186,7 @@ declare namespace Components {
         export type SandboxToken = string;
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CreatePipeline {
         export type RequestBody = Components.Schemas.CreatePipelineRequest;
         namespace Responses {

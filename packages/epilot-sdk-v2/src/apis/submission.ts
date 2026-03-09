@@ -8,16 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/submission';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  OptIn,
-  S3Reference,
-  SubmissionEntity,
-  SubmissionNonce,
-  SubmissionPayload,
-} from '../types/submission';
+export type * from '../types/submission';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

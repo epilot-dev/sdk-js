@@ -8,30 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/notification';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CreateNotificationTemplateInput,
-  Entity,
-  EntityAcl,
-  EntityId,
-  EntityOperation,
-  EntityOwner,
-  EntitySlug,
-  Error,
-  Id,
-  Notification,
-  NotificationBase,
-  NotificationCallerContext,
-  NotificationId,
-  NotificationItem,
-  NotificationTemplate,
-  NotificationTemplateListResponse,
-  SendPreviewInput,
-  SendPreviewResponse,
-  UpdateNotificationTemplateInput,
-} from '../types/notification';
+export type * from '../types/notification';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

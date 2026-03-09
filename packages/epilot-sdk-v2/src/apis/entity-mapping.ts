@@ -8,51 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/entity-mapping';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AppendValueMapper,
-  AttributeOrigin,
-  ConditionNode,
-  CopyValueMapper,
-  Entity,
-  EntityRef,
-  ExecuteMappingReq,
-  ExecuteMappingResp,
-  ExecuteRelationsReq,
-  ExecuteRelationsResp,
-  JourneyRef,
-  Loop_Index_String,
-  MapCondition,
-  MappingAttribute,
-  MappingAttributeMode,
-  MappingAttributeV2,
-  MappingConfig,
-  MappingConfigCommonFields,
-  MappingConfigV2,
-  MappingConfigs,
-  MappingConfigsResp,
-  MappingFailure,
-  MappingHistoryEntry,
-  MappingHistoryResp,
-  MappingSource,
-  MappingSourceProperty,
-  MappingSourceTargetType,
-  MappingWarning,
-  NewRelationItem,
-  OperationNode,
-  OperationObjectNode,
-  Owner,
-  PrimitiveJSONValue,
-  RandomOperation,
-  RelationAttribute,
-  RelationItem,
-  SearchMappingReq,
-  SetValueMapper,
-  SourceConfig,
-  TargetConfig,
-} from '../types/entity-mapping';
+export type * from '../types/entity-mapping';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

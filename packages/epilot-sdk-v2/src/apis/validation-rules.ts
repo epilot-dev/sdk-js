@@ -8,29 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/validation-rules';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CreateValidationRuleRequest,
-  GetValidationRulesResponse,
-  NumericCondition,
-  NumericFactCondition,
-  NumericNestedCondition,
-  NumericRuleType,
-  PatternCondition,
-  PatternFactCondition,
-  PatternNestedCondition,
-  PatternRuleType,
-  RegexCondition,
-  RegexFactCondition,
-  RegexNestedCondition,
-  RegexRuleType,
-  UpdateValidationRuleRequest,
-  UsedBy,
-  ValidationRule,
-  ValidationRuleBase,
-} from '../types/validation-rules';
+export type * from '../types/validation-rules';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

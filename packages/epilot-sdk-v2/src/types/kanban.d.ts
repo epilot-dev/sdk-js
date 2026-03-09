@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface Board {
             id?: string;
@@ -173,7 +173,7 @@ declare namespace Components {
         export type ValueType = /* The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values */ string | /* Dynamic date keywords that resolve to actual dates at runtime */ DynamicDateValue | number | boolean | (string | /* Dynamic date keywords that resolve to actual dates at runtime */ DynamicDateValue | number | boolean)[];
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace ClearDefaultKanbanBoard {
         namespace Responses {
             export interface $200 {

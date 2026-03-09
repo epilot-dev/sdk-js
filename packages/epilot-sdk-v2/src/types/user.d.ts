@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface CognitoDetails {
             /**
@@ -939,7 +939,7 @@ declare namespace Components {
         export type VerificationToken = string;
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace ActivateUser {
         namespace Parameters {
             export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;

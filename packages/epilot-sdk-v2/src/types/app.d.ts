@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace RequestBodies {
         export interface CreateBundlePresignedRequest {
             /**
@@ -2089,7 +2089,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CloneVersion {
         namespace Parameters {
             export type AppId = string;

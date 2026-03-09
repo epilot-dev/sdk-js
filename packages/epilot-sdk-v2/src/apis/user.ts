@@ -8,49 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/user';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  CognitoDetails,
-  CreateGroupReq,
-  DataPoint,
-  DataPointsResponse,
-  Group,
-  GroupId,
-  Hydrate,
-  InviteToken,
-  Limit,
-  LoginParameters,
-  Navigation,
-  NavigationConfiguration,
-  NavigationCreateRequest,
-  NavigationGroupItem,
-  NavigationId,
-  NavigationItem,
-  NavigationKeyItem,
-  Offset,
-  Organization,
-  OrganizationDetail,
-  OrganizationId,
-  PartnerInvitationToken,
-  Passkey,
-  PasskeyAuthenticationOptions,
-  PasskeyRegistrationOptions,
-  PasskeyRegistrationResponse,
-  Query,
-  SignupUserPayload,
-  UpdateGroupReq,
-  User,
-  UserActivationPayload,
-  UserDetail,
-  UserId,
-  UserInvitationPayload,
-  UserV2,
-  UserVerificationPayload,
-  Username,
-  VerificationToken,
-} from '../types/user';
+export type * from '../types/user';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface CreateValidationRuleRequest {
             /**
@@ -469,7 +469,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AddUsedByReference {
         namespace Parameters {
             export type RuleId = string;

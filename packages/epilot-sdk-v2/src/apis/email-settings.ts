@@ -8,38 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/email-settings';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ConnectedOutlookEmail,
-  CreateEmailAddressPayload,
-  CreateSharedInboxPayload,
-  Domain,
-  EmailAddressResponse,
-  EmailAddressSetting,
-  EmailDomainSetting,
-  ErrorResponse,
-  InboxBucketResponse,
-  MailboxSyncFolderStatuses,
-  MailboxSyncStatus,
-  MailboxSyncStatuses,
-  MailboxSyncTimeframePeriods,
-  OutlookConnectionError,
-  OutlookConnectionStatus,
-  ProvisionEpilotEmailAddressPayload,
-  RestrictDuplicatesWithinSetting,
-  SetEmailAddressPrimaryPayload,
-  Setting,
-  SettingMeta,
-  SettingType,
-  SettingsResponse,
-  SharedInboxResponse,
-  SignatureSetting,
-  UpdateEmailAddressPayload,
-  UpdateSharedInboxPayload,
-  WhitelistEmailAddressSetting,
-} from '../types/email-settings';
+export type * from '../types/email-settings';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

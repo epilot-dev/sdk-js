@@ -8,38 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/design';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AddConsumerReq,
-  AddDesignReq,
-  AddDesignRes,
-  BrandItem,
-  ConsumerData,
-  Custom_Style,
-  CustomerPortalData,
-  DesignItem,
-  ErrorResp,
-  FileData,
-  FontData,
-  FontResponseUrl,
-  GetAllDesignsRes,
-  GetBrandsRes,
-  GetDesignRes,
-  GetFilesRes,
-  ItemMetada,
-  Journey,
-  LogoData,
-  PaletteData,
-  ShapeData,
-  TypographyData,
-  UpdateDesignReq,
-  UploadFileReq,
-  UploadFileRes,
-  WidgetData,
-  WidgetPortalData,
-} from '../types/design';
+export type * from '../types/design';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -8,42 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/file';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ActivityId,
-  BaseEntityAcl,
-  BaseEntityOwner,
-  BatchSaveFileVersionPayload,
-  CommonSaveFilePayload,
-  CustomDownloadUrl,
-  DownloadFilesPayload,
-  EntityId,
-  EntitySlug,
-  ErrorObject,
-  FileAttributes,
-  FileCollectionAttributes,
-  FileCollectionCreateRequest,
-  FileCollectionId,
-  FileCollectionItem,
-  FileEntity,
-  FileEntityId,
-  FileItem,
-  FileRelationItem,
-  FileType,
-  FileUpload,
-  PublicLink,
-  S3Ref,
-  S3Reference,
-  SaveCustomFilePayload,
-  SaveFileFromSourceURLPayload,
-  SaveFilePayload,
-  SaveFilePayloadV2,
-  SaveS3FilePayload,
-  UploadFilePayload,
-  VerifyCustomDownloadUrlPayload,
-} from '../types/file';
+export type * from '../types/file';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

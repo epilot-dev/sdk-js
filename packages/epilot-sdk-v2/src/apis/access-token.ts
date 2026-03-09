@@ -8,27 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/access-token';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AccessToken,
-  AccessTokenId,
-  AccessTokenItem,
-  AccessTokenJourneyId,
-  AccessTokenName,
-  AccessTokenParameters,
-  AccessTokenType,
-  AppTokenParameters,
-  Assignments,
-  AssumeTokenParameters,
-  ExpiresIn,
-  JourneyTokenParameters,
-  PortalId,
-  PortalTokenParameters,
-  RoleId,
-  TokenParameters,
-} from '../types/access-token';
+export type * from '../types/access-token';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

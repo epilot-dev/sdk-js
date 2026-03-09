@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export interface PricingTier {
             [name: string]: any;
@@ -40,7 +40,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace GetCurrentPricingTier {
         namespace Responses {
             export type $200 = Components.Schemas.PricingTier;

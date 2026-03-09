@@ -8,35 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/webhooks';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ApiKeyConfig,
-  Auth,
-  AuthType,
-  BasicAuthConfig,
-  BatchReplayRequest,
-  CustomHeader,
-  CustomOAuthParameter,
-  ErrorResp,
-  EventConfigEntry,
-  EventConfigResp,
-  EventListResponse,
-  ExampleRequest,
-  ExampleResponse,
-  ExecutionPayload,
-  Filter,
-  HttpMethod,
-  Metadata,
-  OAuthConfig,
-  PayloadConfiguration,
-  PublicKeyResponse,
-  SearchOptions,
-  TriggerWebhookResp,
-  WebhookConfig,
-  WebhookEvent,
-} from '../types/webhooks';
+export type * from '../types/webhooks';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -8,30 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/journey';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ButtonOption,
-  GenerateDocumentRequest,
-  GenerateDocumentResponse,
-  GetJourneysResponse,
-  GetSettingsForJourney,
-  Journey,
-  JourneyAuditInfo,
-  JourneyCreationRequest,
-  JourneyCreationRequestV2,
-  JourneyFeatureFlags,
-  JourneyProductsResponse,
-  JourneyResponse,
-  PatchUpdateJourneyRequest,
-  RuleRef,
-  S3Reference,
-  SearchJourneysQueryRequest,
-  SearchJourneysResponse,
-  TemplateSettings,
-  ValidationRuleRef,
-} from '../types/journey';
+export type * from '../types/journey';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Parameters {
         export type CampaignIdPathParam = /**
          * example:
@@ -1527,7 +1527,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace ChangeCampaignStatus {
         namespace Parameters {
             export type CampaignId = /**

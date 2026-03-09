@@ -8,40 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/metering';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  ActionLabel,
-  ActivityId,
-  BaseEntity,
-  CounterReadingOnSubmission,
-  Direction,
-  Entity,
-  EntityId,
-  EntityItem,
-  EntityRelation,
-  EntitySlug,
-  ErrorResp,
-  Id,
-  JourneyActions,
-  Meter,
-  MeterCounter,
-  MeterReading,
-  PortalMeterReading,
-  ReadBy,
-  Reading,
-  ReadingStatus,
-  ReadingWithMeter,
-  Reason,
-  ReasonString,
-  Rule,
-  Source,
-  SubmissionMeterReading,
-  TariffType,
-  Unit,
-  UpdateMeterReading,
-} from '../types/metering';
+export type * from '../types/metering';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

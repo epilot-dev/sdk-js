@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         export type EnvironmentValueType = "String" | "SecretString";
         export interface EnvironmentVariable {
@@ -53,7 +53,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CreateEnvironmentVariable {
         export type RequestBody = Components.Schemas.EnvironmentVariableCreateRequest;
         namespace Responses {

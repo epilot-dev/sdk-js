@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Parameters {
         export type ActivityIdQueryParam = /**
          * See https://github.com/ulid/spec
@@ -944,7 +944,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AccessPublicLink {
         namespace Parameters {
             export type Filename = string;

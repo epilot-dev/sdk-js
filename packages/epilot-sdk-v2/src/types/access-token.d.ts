@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * A JWT Access Token
@@ -144,7 +144,7 @@ declare namespace Components {
         export type TokenParameters = AccessTokenParameters | JourneyTokenParameters | PortalTokenParameters | AssumeTokenParameters | AppTokenParameters;
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CreateAccessToken {
         export type RequestBody = Components.Schemas.TokenParameters;
         namespace Responses {

@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Responses {
         export type BadRequest = Schemas.ErrorResponse;
         export type Conflict = Schemas.ErrorResponse;
@@ -676,7 +676,7 @@ declare namespace Components {
         export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent;
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AssignThread {
         namespace Parameters {
             export type Id = string;

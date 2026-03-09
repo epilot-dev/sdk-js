@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Responses {
         export type BadRequest = Schemas.ErrorResponseBase;
         export interface ERPUpdatesResponse {
@@ -2680,7 +2680,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AcknowledgeTracking {
         export interface RequestBody {
             /**

@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Responses {
         export interface ConfirmUserInvalidRequest {
             /**
@@ -6938,7 +6938,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AddContractByIdentifiers {
         /**
          * Identifier-value pairs per schema to identify the contract

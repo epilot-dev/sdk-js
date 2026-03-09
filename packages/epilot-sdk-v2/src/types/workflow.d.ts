@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Parameters {
         export type ExecutionIdParam = string;
         export type PhaseIdParam = string;
@@ -1900,7 +1900,7 @@ declare namespace Components {
         export type WorkflowStatus = "STARTED" | "DONE" | "CLOSED";
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AddTask {
         namespace Parameters {
             export type ExecutionId = string;

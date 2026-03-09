@@ -8,14 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/deduplication';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  DeduplicateRequestBody,
-  DeduplicateRequestResponse,
-  Entity,
-} from '../types/deduplication';
+export type * from '../types/deduplication';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

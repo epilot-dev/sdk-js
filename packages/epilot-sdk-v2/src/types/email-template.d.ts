@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * Type of approval action for the bulk message request.
@@ -831,7 +831,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace BulkSendMessage {
         export type RequestBody = /**
          * It takes an entity query to derive recipient_ids, treating each as a separate mainEntity to construct individual messages.

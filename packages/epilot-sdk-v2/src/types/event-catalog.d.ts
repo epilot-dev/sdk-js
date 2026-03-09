@@ -9,7 +9,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * Common metadata fields present in all event payloads
@@ -1036,7 +1036,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace GetEvent {
         namespace Parameters {
             export type EventName = string;

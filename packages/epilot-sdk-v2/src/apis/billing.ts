@@ -8,23 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/billing';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  Balance,
-  BaseBillingEvent,
-  BaseEntity,
-  BillingEvent,
-  Contract,
-  ContractItem,
-  Currency,
-  EntityId,
-  EntityRelationItem,
-  EntitySlug,
-  InstallmentEvent,
-  ReimbursementEvent,
-} from '../types/billing';
+export type * from '../types/billing';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

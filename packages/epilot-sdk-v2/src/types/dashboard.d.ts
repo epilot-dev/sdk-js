@@ -7,7 +7,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Schemas {
         /**
          * Adashboard configuration with tiles
@@ -195,7 +195,7 @@ declare namespace Components {
         export type VisualisationId = "kpi" | "funnel" | "toplist" | "timechart" | "pie" | "bar" | "entity_list" | "markdown" | "news_feed" | "workflow";
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace CreateDashboard {
         export type RequestBody = /* Adashboard configuration with tiles */ Components.Schemas.Dashboard;
         namespace Responses {

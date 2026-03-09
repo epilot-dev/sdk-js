@@ -168,7 +168,8 @@ const copyTypes = (clients: ClientInfo[]) => {
     const src = resolve(CLIENTS_DIR, client.dirName, 'src/openapi.d.ts');
     let content = readFileSync(src, 'utf-8');
 
-    // Replace openapi-client-axios import paths if needed
+    // Make ambient namespaces explicitly exported so they can be re-exported
+    content = content.replace(/^declare namespace /gm, 'export declare namespace ');
     content = `/* Auto-copied from ${client.dirName} */\n${content}`;
 
     const dest = resolve(TYPES_DIR, `${client.kebabName}.d.ts`);
@@ -310,22 +311,6 @@ const mockJsonExample = (schema: Schema): string | null => {
   }
 };
 
-const extractExportedSchemas = (client: ClientInfo): string[] => {
-  const typesPath = resolve(CLIENTS_DIR, client.dirName, 'src/openapi.d.ts');
-  if (!existsSync(typesPath)) return [];
-
-  const content = readFileSync(typesPath, 'utf-8');
-  const schemas: string[] = [];
-
-  // Match lines like: export type FooBar = Components.Schemas.FooBar;
-  const re = /^export type (\w+) = Components\.Schemas\.\w+;/gm;
-  for (const m of content.matchAll(re)) {
-    schemas.push(m[1]);
-  }
-
-  return schemas;
-};
-
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
 
@@ -344,10 +329,8 @@ const generateApiFile = (client: ClientInfo): string => {
   if (client.hasTypes) {
     lines.push(`import type { Client } from '../types/${client.kebabName}'`);
 
-    // Re-export types including all schema types for migration compatibility
-    const schemas = extractExportedSchemas(client);
-    const allExports = ['Client', 'PathsDictionary', 'OperationMethods', ...schemas];
-    lines.push(`export type { ${allExports.join(', ')} } from '../types/${client.kebabName}'`);
+    lines.push(`export type * from '../types/${client.kebabName}'`);
+    lines.push(`export type { OpenAPIClient } from 'openapi-client-axios'`);
   } else {
     lines.push(`import type { AxiosInstance } from 'axios'`);
   }

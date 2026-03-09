@@ -8,21 +8,8 @@ import type { ApiHandle } from '../types';
 export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/address';
-export type {
-  Client,
-  PathsDictionary,
-  OperationMethods,
-  AddressSuggestion,
-  AddressSuggestions,
-  AvailabilityCheckParams,
-  AvailabilityDate,
-  AvailabilityFilters,
-  AvailabilityLocation,
-  AvailabilityResult,
-  ErrorResponse,
-  ValidateAvailabilityFileError,
-  ValidateAvailabilityFileResult,
-} from '../types/address';
+export type * from '../types/address';
+export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {
