@@ -1,44 +1,189 @@
-import type { Document } from 'openapi-client-axios'
+import type { Document } from 'openapi-client-axios';
 
-import { createApiClient } from '../client-factory'
-import { expand } from '../compact'
-import type { CompactDefinition } from '../compact'
-import { createApiHandle } from '../proxy'
-import type { ApiHandle } from '../types'
-export { authorize } from '../authorize'
-export type { TokenArg } from '../authorize'
-import type { Client } from '../types/pricing'
-export type { Client, PathsDictionary, OperationMethods, Address, Amounts, AvailabilityCheckParams, AvailabilityFilters, AvailabilityLocation, AvailabilityResult, AverageMarketPriceRecord, AverageMarketPriceResult, BaseCompositePrice, BaseCouponCommon, BaseMarketPriceRecord, BasePriceItem, BasePriceItemCommon, BasePriceItemDto, BasicAuthCredentials, BasicAuthIntegration, BillingPeriod, CartDto, CashbackAmount, CashbackAmounts, CashbackPeriod, CatalogSearch, CatalogSearchResult, CheckoutCart, CheckoutCartResult, CheckoutMode, CompositePrice, CompositePriceItem, CompositePriceItemDto, ComputePriceParams, ComputePriceParamsBase, ComputePriceParamsGas, ComputePriceParamsPower, ComputePriceResult, ComputedBasePrice, ComputedPriceBreakdown, ComputedPriceComponents, ConsumptionTypeGetAg, Coupon, CouponItem, CouponWithoutPromoCodes, Currency, CustomContext, Customer, DiscountAmounts, DynamicTariffInterval, DynamicTariffMode, EntityId, EntityItem, EntityRelation, Error, ExternalCatalogConfigurationRequest, ExternalCatalogCustomRequest, ExternalCatalogItem, ExternalCatalogJourneyRequest, ExternalCatalogPortalRequest, ExternalCatalogRequest, ExternalFeeMapping, ExternalFeeMappings, ExternalFeeMetadata, ExternalPriceMetadata, File, GasConcessionType, HistoricMarketPriceRecord, HistoricMarketPricesResult, HydratedCompositePrice, IntegrationAuthCredentials, IntegrationCredentialsResult, IntegrationId, JourneyContext, MarkupPricingModel, MetaData, NonHydratedCompositePrice, OAuthCredentials, OAuthIntegration, Offer, Opportunity, OpportunitySource, Order, OrderPayload, OrderRelation, OrderSource, OrderStatus, PaymentMethod, PortalContext, PowerMeterType, Price, PriceAmounts, PriceComponentRelation, PriceConditions, PriceDynamicTariff, PriceGetAg, PriceInputMapping, PriceInputMappings, PriceItem, PriceItemDto, PriceItemDtoUnion, PriceItems, PriceItemsDto, PriceTier, PriceTierDisplayMode, PricingDetails, PricingDetailsResponse, PricingModel, Product, ProductCategory, ProductRecommendation, ProductRecommendationResponse, ProductRecommendationSearch, PromoCode, PromoCodeValidationResponse, Provider, RecurrenceAmount, RecurrenceAmountDto, RecurrenceAmountWithTax, RedeemedPromo, SalesTax, SaveIntegrationCredentialsParams, SearchExternalCatalogParams, SearchExternalCatalogRecommendationsResult, SearchExternalCatalogResult, SearchProvidersParams, SearchProvidersResult, SearchStreetsParams, SearchStreetsResult, SignatureMeta, SpotMarketBiddingZone, SpotMarketDataFrequency, SpotMarketType, Street, TariffTypeGetAg, Tax, TaxAmount, TaxAmountBreakdown, TaxAmountDto, TaxBreakdownInfo, TierDetails, TotalDetails, TypeGetAg, ValidateAvailabilityFileError, ValidateAvailabilityFileResult } from '../types/pricing'
+import { createApiClient } from '../client-factory';
+import { expand } from '../compact';
+import type { CompactDefinition } from '../compact';
+import { createApiHandle } from '../proxy';
+import type { ApiHandle } from '../types';
+export { authorize } from '../authorize';
+export type { TokenArg } from '../authorize';
+import type { Client } from '../types/pricing';
+export type {
+  Client,
+  PathsDictionary,
+  OperationMethods,
+  Address,
+  Amounts,
+  AvailabilityCheckParams,
+  AvailabilityFilters,
+  AvailabilityLocation,
+  AvailabilityResult,
+  AverageMarketPriceRecord,
+  AverageMarketPriceResult,
+  BaseCompositePrice,
+  BaseCouponCommon,
+  BaseMarketPriceRecord,
+  BasePriceItem,
+  BasePriceItemCommon,
+  BasePriceItemDto,
+  BasicAuthCredentials,
+  BasicAuthIntegration,
+  BillingPeriod,
+  CartDto,
+  CashbackAmount,
+  CashbackAmounts,
+  CashbackPeriod,
+  CatalogSearch,
+  CatalogSearchResult,
+  CheckoutCart,
+  CheckoutCartResult,
+  CheckoutMode,
+  CompositePrice,
+  CompositePriceItem,
+  CompositePriceItemDto,
+  ComputePriceParams,
+  ComputePriceParamsBase,
+  ComputePriceParamsGas,
+  ComputePriceParamsPower,
+  ComputePriceResult,
+  ComputedBasePrice,
+  ComputedPriceBreakdown,
+  ComputedPriceComponents,
+  ConsumptionTypeGetAg,
+  Coupon,
+  CouponItem,
+  CouponWithoutPromoCodes,
+  Currency,
+  CustomContext,
+  Customer,
+  DiscountAmounts,
+  DynamicTariffInterval,
+  DynamicTariffMode,
+  EntityId,
+  EntityItem,
+  EntityRelation,
+  Error,
+  ExternalCatalogConfigurationRequest,
+  ExternalCatalogCustomRequest,
+  ExternalCatalogItem,
+  ExternalCatalogJourneyRequest,
+  ExternalCatalogPortalRequest,
+  ExternalCatalogRequest,
+  ExternalFeeMapping,
+  ExternalFeeMappings,
+  ExternalFeeMetadata,
+  ExternalPriceMetadata,
+  File,
+  GasConcessionType,
+  HistoricMarketPriceRecord,
+  HistoricMarketPricesResult,
+  HydratedCompositePrice,
+  IntegrationAuthCredentials,
+  IntegrationCredentialsResult,
+  IntegrationId,
+  JourneyContext,
+  MarkupPricingModel,
+  MetaData,
+  NonHydratedCompositePrice,
+  OAuthCredentials,
+  OAuthIntegration,
+  Offer,
+  Opportunity,
+  OpportunitySource,
+  Order,
+  OrderPayload,
+  OrderRelation,
+  OrderSource,
+  OrderStatus,
+  PaymentMethod,
+  PortalContext,
+  PowerMeterType,
+  Price,
+  PriceAmounts,
+  PriceComponentRelation,
+  PriceConditions,
+  PriceDynamicTariff,
+  PriceGetAg,
+  PriceInputMapping,
+  PriceInputMappings,
+  PriceItem,
+  PriceItemDto,
+  PriceItemDtoUnion,
+  PriceItems,
+  PriceItemsDto,
+  PriceTier,
+  PriceTierDisplayMode,
+  PricingDetails,
+  PricingDetailsResponse,
+  PricingModel,
+  Product,
+  ProductCategory,
+  ProductRecommendation,
+  ProductRecommendationResponse,
+  ProductRecommendationSearch,
+  PromoCode,
+  PromoCodeValidationResponse,
+  Provider,
+  RecurrenceAmount,
+  RecurrenceAmountDto,
+  RecurrenceAmountWithTax,
+  RedeemedPromo,
+  SalesTax,
+  SaveIntegrationCredentialsParams,
+  SearchExternalCatalogParams,
+  SearchExternalCatalogRecommendationsResult,
+  SearchExternalCatalogResult,
+  SearchProvidersParams,
+  SearchProvidersResult,
+  SearchStreetsParams,
+  SearchStreetsResult,
+  SignatureMeta,
+  SpotMarketBiddingZone,
+  SpotMarketDataFrequency,
+  SpotMarketType,
+  Street,
+  TariffTypeGetAg,
+  Tax,
+  TaxAmount,
+  TaxAmountBreakdown,
+  TaxAmountDto,
+  TaxBreakdownInfo,
+  TierDetails,
+  TotalDetails,
+  TypeGetAg,
+  ValidateAvailabilityFileError,
+  ValidateAvailabilityFileResult,
+} from '../types/pricing';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {
-  const mod = require('../definitions/pricing-runtime.json')
-  return expand((mod.default ?? mod) as CompactDefinition) as Document
-}
+  const mod = require('../definitions/pricing-runtime.json');
+  return expand((mod.default ?? mod) as CompactDefinition) as Document;
+};
 
-let _instance: Client | null = null
+let _instance: Client | null = null;
 
 const resolve = (): Client => {
   if (!_instance) {
-    const def = loadDefinition()
-    _instance = createApiClient<Client>({ definition: def })
+    const def = loadDefinition();
+    _instance = createApiClient<Client>({ definition: def });
   }
-  return _instance
-}
+  return _instance;
+};
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
   createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
-})
+});
 
 /** Get the cached singleton client (lazy-initialized on first call) */
-export const getClient = _handle.getClient
+export const getClient = _handle.getClient;
 
 /** Create a fresh client instance (not cached) */
-export const createClient = _handle.createClient
+export const createClient = _handle.createClient;
 
 /**
  * API handle — also exposes operations directly:
  * `pricing.someOperation(...)` calls forwarded to lazy singleton
  */
-export const pricing = _handle
+export const pricing = _handle;

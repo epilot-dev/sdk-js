@@ -55,17 +55,6 @@ const discoverClients = (): ClientInfo[] => {
   });
 };
 
-const copyDefinitions = (clients: ClientInfo[]) => {
-  mkdirSync(DEFS_DIR, { recursive: true });
-
-  for (const client of clients) {
-    if (!client.hasDefinition) continue;
-    const src = resolve(CLIENTS_DIR, client.dirName, 'src/openapi-runtime.json');
-    const dest = resolve(DEFS_DIR, `${client.kebabName}.json`);
-    copyFileSync(src, dest);
-  }
-};
-
 const copyFullDefinitions = (clients: ClientInfo[]) => {
   mkdirSync(RUNTIME_DEFS_DIR, { recursive: true });
 
@@ -416,6 +405,7 @@ const generateRegistry = (clients: ClientInfo[]): string => {
     `/* eslint-disable @typescript-eslint/no-require-imports */`,
     `const base = '../definitions/'`,
     `const loadDef = (name: string): Document => {`,
+    `  // biome-ignore lint/style/useTemplate: dynamic concatenation prevents tsup from inlining definitions`,
     `  const mod = require(base + name + '-runtime.json')`,
     `  return expand((mod.default ?? mod) as CompactDefinition) as Document`,
     `}`,

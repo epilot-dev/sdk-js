@@ -10,6 +10,7 @@
       "!**/package.json",
       "!**/openapi.json",
       "!**/openapi-runtime.json",
+      "!**/definitions/*.json",
       "!.*"
     ]
   },
