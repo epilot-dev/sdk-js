@@ -99,6 +99,7 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          pnpm lint:fix
           git add packages/epilot-sdk-v2/ README.md
           git commit -m "@epilot/sdk@${NEW_VERSION}"
           git tag "@epilot/sdk@${NEW_VERSION}"
