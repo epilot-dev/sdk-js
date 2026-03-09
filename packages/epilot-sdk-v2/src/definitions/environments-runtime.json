@@ -1,12 +1,1 @@
-{
-  "s": "https://environments.sls.epilo.io",
-  "o": [
-    ["listEnvironmentVariables", "get", "/v1/environments"],
-    ["createEnvironmentVariable", "post", "/v1/environments", null, 1],
-    ["getEnvironmentVariable", "get", "/v1/environments/{key}"],
-    ["updateEnvironmentVariable", "put", "/v1/environments/{key}", null, 1],
-    ["deleteEnvironmentVariable", "delete", "/v1/environments/{key}"]
-  ],
-  "v": "3.0.3",
-  "pp": { "/v1/environments/{key}": [["key", "p", true]] }
-}
+{"s":"https://environments.sls.epilo.io","o":[["listEnvironmentVariables","get","/v1/environments"],["createEnvironmentVariable","post","/v1/environments",null,1],["getEnvironmentVariable","get","/v1/environments/{key}"],["updateEnvironmentVariable","put","/v1/environments/{key}",null,1],["deleteEnvironmentVariable","delete","/v1/environments/{key}"]],"v":"3.0.3","pp":{"/v1/environments/{key}":[["key","p",true]]}}

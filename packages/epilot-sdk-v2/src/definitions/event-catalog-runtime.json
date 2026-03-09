@@ -1,13 +1,1 @@
-{
-  "s": "https://event-catalog.sls.epilot.io",
-  "o": [
-    ["listEvents", "get", "/v1/events"],
-    ["getEvent", "get", "/v1/events/{event_name}", [["event_name", "p", true]]],
-    ["patchEvent", "patch", "/v1/events/{event_name}", [["event_name", "p", true]], 1],
-    ["getEventJSONSchema", "get", "/v1/events/{event_name}/json_schema", [["event_name", "p", true]]],
-    ["getEventExample", "get", "/v1/events/{event_name}/example", [["event_name", "p", true]]],
-    ["searchEventHistory", "post", "/v1/events/{event_name}:history", [["event_name", "p", true]], 1],
-    ["triggerEvent", "post", "/v1/events/{event_name}:trigger", [["event_name", "p", true]], 1]
-  ],
-  "v": "3.0.0"
-}
+{"s":"https://event-catalog.sls.epilot.io","o":[["listEvents","get","/v1/events"],["getEvent","get","/v1/events/{event_name}",[["event_name","p",true]]],["patchEvent","patch","/v1/events/{event_name}",[["event_name","p",true]],1],["getEventJSONSchema","get","/v1/events/{event_name}/json_schema",[["event_name","p",true]]],["getEventExample","get","/v1/events/{event_name}/example",[["event_name","p",true]]],["searchEventHistory","post","/v1/events/{event_name}:history",[["event_name","p",true]],1],["triggerEvent","post","/v1/events/{event_name}:trigger",[["event_name","p",true]],1]],"v":"3.0.0"}

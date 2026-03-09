@@ -1,14 +1,1 @@
-{
-  "s": "https://address.sls.epilot.io",
-  "o": [
-    [
-      "getAddressSuggestions",
-      "get",
-      "/v1/public/suggestions",
-      [["fileRef", "q", true], ["countryCodeSearchTerm", "q"], ["postalCodeSearchTerm", "q"], ["streetSearchTerm", "q"]]
-    ],
-    ["availabilityCheck", "post", "/v1/public/availability", null, 1],
-    ["validateAvailabilityFile", "get", "/v1/availability/{id}/validate", [["id", "p", true]]]
-  ],
-  "v": "3.1.0"
-}
+{"s":"https://address.sls.epilot.io","o":[["getAddressSuggestions","get","/v1/public/suggestions",[["fileRef","q",true],["countryCodeSearchTerm","q"],["postalCodeSearchTerm","q"],["streetSearchTerm","q"]]],["availabilityCheck","post","/v1/public/availability",null,1],["validateAvailabilityFile","get","/v1/availability/{id}/validate",[["id","p",true]]]],"v":"3.1.0"}

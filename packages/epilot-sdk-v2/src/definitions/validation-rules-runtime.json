@@ -1,13 +1,1 @@
-{
-  "s": "https://validation-rules.sls.epilot.io",
-  "o": [
-    ["getValidationRules", "get", "/v1/validation-rules"],
-    ["createValidationRule", "post", "/v1/validation-rules", null, 1],
-    ["getValidationRuleById", "get", "/v1/validation-rules/{ruleId}", [["ruleId", "p", true]]],
-    ["updateValidationRule", "patch", "/v1/validation-rules/{ruleId}", [["ruleId", "p", true]], 1],
-    ["deleteValidationRule", "delete", "/v1/validation-rules/{ruleId}", [["ruleId", "p", true]]],
-    ["addUsedByReference", "post", "/v1/validation-rules/{ruleId}/used-by", [["ruleId", "p", true]], 1],
-    ["removeUsedByReference", "delete", "/v1/validation-rules/{ruleId}/used-by", [["ruleId", "p", true]], 1]
-  ],
-  "v": "3.0.3"
-}
+{"s":"https://validation-rules.sls.epilot.io","o":[["getValidationRules","get","/v1/validation-rules"],["createValidationRule","post","/v1/validation-rules",null,1],["getValidationRuleById","get","/v1/validation-rules/{ruleId}",[["ruleId","p",true]]],["updateValidationRule","patch","/v1/validation-rules/{ruleId}",[["ruleId","p",true]],1],["deleteValidationRule","delete","/v1/validation-rules/{ruleId}",[["ruleId","p",true]]],["addUsedByReference","post","/v1/validation-rules/{ruleId}/used-by",[["ruleId","p",true]],1],["removeUsedByReference","delete","/v1/validation-rules/{ruleId}/used-by",[["ruleId","p",true]],1]],"v":"3.0.3"}

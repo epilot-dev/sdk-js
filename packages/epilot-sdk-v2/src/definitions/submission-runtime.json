@@ -1,7 +1,1 @@
-{
-  "s": "https://submission.sls.epilot.io",
-  "o": [
-    ["createSubmission", "post", "/v1/submission/submissions", null, 1],
-    ["getNonce", "get", "/v1/submission/nonce/{nonce_id}", [["nonce_id", "p", true]]]
-  ]
-}
+{"s":"https://submission.sls.epilot.io","o":[["createSubmission","post","/v1/submission/submissions",null,1],["getNonce","get","/v1/submission/nonce/{nonce_id}",[["nonce_id","p",true]]]]}

@@ -1,13 +1,1 @@
-{
-  "s": "https://access-token.sls.epilot.io",
-  "o": [
-    ["createAccessToken", "post", "/v1/access-tokens", null, 1],
-    ["listAccessTokens", "get", "/v1/access-tokens", [["token_type", "q"]]],
-    ["revokeAccessToken", "delete", "/v1/access-tokens/{id}", [["id", "p", true]]],
-    ["getAccessTokenJwks", "get", "/v1/access-tokens/.well-known/jwks.json"],
-    ["getAccessTokenOIDC", "get", "/v1/access-tokens/.well-known/openid-configuration"],
-    ["getPublicTokenJwks", "get", "/v1/access-tokens/public/.well-known/jwks.json"],
-    ["getPublicTokenOIDC", "get", "/v1/access-tokens/public/.well-known/openid-configuration"]
-  ],
-  "v": "3.0.3"
-}
+{"s":"https://access-token.sls.epilot.io","o":[["createAccessToken","post","/v1/access-tokens",null,1],["listAccessTokens","get","/v1/access-tokens",[["token_type","q"]]],["revokeAccessToken","delete","/v1/access-tokens/{id}",[["id","p",true]]],["getAccessTokenJwks","get","/v1/access-tokens/.well-known/jwks.json"],["getAccessTokenOIDC","get","/v1/access-tokens/.well-known/openid-configuration"],["getPublicTokenJwks","get","/v1/access-tokens/public/.well-known/jwks.json"],["getPublicTokenOIDC","get","/v1/access-tokens/public/.well-known/openid-configuration"]],"v":"3.0.3"}
