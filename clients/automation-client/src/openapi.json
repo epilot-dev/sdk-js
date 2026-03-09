@@ -1131,9 +1131,6 @@
               "example": "123e4567-e89b-12d3-a456-426614174000"
             },
             "nullable": true
-          },
-          "workflow_context": {
-            "$ref": "#/components/schemas/WorkflowContext"
           }
         },
         "required": [
@@ -1141,29 +1138,6 @@
           "triggers",
           "actions"
         ]
-      },
-      "WorkflowContext": {
-        "type": "object",
-        "description": "For automation that are connected to workflows V2, this field tracks various information about the workflow.",
-        "required": [
-          "workflow_id",
-          "workflow_role"
-        ],
-        "properties": {
-          "workflow_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the workflow this automation is connected to"
-          },
-          "task_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "The ID of the task in the workflow that this automation is connected to"
-          },
-          "workflow_role": {
-            "$ref": "#/components/schemas/WorkflowContextRole"
-          }
-        }
       },
       "WorkflowContextRole": {
         "type": "string",
@@ -3875,25 +3849,16 @@
               "configuration": {
                 "type": "object",
                 "properties": {
-                  "source_id": {
-                    "type": "string",
-                    "format": "uuid",
-                    "description": "The ID of the workflow v2 that triggers this automation"
-                  },
                   "journey_id": {
                     "type": "string",
                     "format": "uuid",
                     "description": "When Journeys are linked to Workflows V2 as Journey Automations, this field will contain the ID of the Journey"
                   }
-                },
-                "required": [
-                  "source_id"
-                ]
+                }
               }
             },
             "required": [
-              "type",
-              "configuration"
+              "type"
             ]
           }
         ]

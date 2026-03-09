@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -1008,7 +1006,6 @@ declare namespace Components {
              * Source blueprint/manifest ID used when automation is created via blueprints.
              */
             _manifest?: string /* uuid */[] | null;
-            workflow_context?: /* For automation that are connected to workflows V2, this field tracks various information about the workflow. */ WorkflowContext;
         }
         /**
          * ID of the Automation Flow
@@ -2312,11 +2309,7 @@ declare namespace Components {
              */
             id?: string; // uuid
             type: "flows_trigger";
-            configuration: {
-                /**
-                 * The ID of the workflow v2 that triggers this automation
-                 */
-                source_id: string; // uuid
+            configuration?: {
                 /**
                  * When Journeys are linked to Workflows V2 as Journey Automations, this field will contain the ID of the Journey
                  */
@@ -3964,20 +3957,6 @@ declare namespace Components {
             wildcard?: string;
         }
         /**
-         * For automation that are connected to workflows V2, this field tracks various information about the workflow.
-         */
-        export interface WorkflowContext {
-            /**
-             * The ID of the workflow this automation is connected to
-             */
-            workflow_id: string; // uuid
-            /**
-             * The ID of the task in the workflow that this automation is connected to
-             */
-            task_id?: string; // uuid
-            workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
-        }
-        /**
          * The role this automation plays in the workflow.
          */
         export type WorkflowContextRole = "trigger_workflow" | "run_task_automation";
@@ -4916,6 +4895,5 @@ export type TriggerWorkflowActionConfig = Components.Schemas.TriggerWorkflowActi
 export type TriggerWorkflowCondition = Components.Schemas.TriggerWorkflowCondition;
 export type TriggerWorkflowConfig = Components.Schemas.TriggerWorkflowConfig;
 export type WildcardCondition = Components.Schemas.WildcardCondition;
-export type WorkflowContext = Components.Schemas.WorkflowContext;
 export type WorkflowContextRole = Components.Schemas.WorkflowContextRole;
 export type WorkflowExecutionContext = Components.Schemas.WorkflowExecutionContext;
