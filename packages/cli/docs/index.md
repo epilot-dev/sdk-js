@@ -43,7 +43,7 @@ npx epilot auth login
 | Metering API | `epilot metering` | 16 | [metering.md](./metering.md) |
 | Notes API | `epilot notes` | 12 | [notes.md](./notes.md) |
 | Notification API | `epilot notification` | 14 | [notification.md](./notification.md) |
-| Organization API | `epilot organization` | 6 | [organization.md](./organization.md) |
+| Organization API | `epilot organization` | 7 | [organization.md](./organization.md) |
 | Partner API | `epilot partner-directory` | 16 | [partner-directory.md](./partner-directory.md) |
 | Permissions API | `epilot permissions` | 13 | [permissions.md](./permissions.md) |
 | Pricing API | `epilot pricing` | 22 | [pricing.md](./pricing.md) |

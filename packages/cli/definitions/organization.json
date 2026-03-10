@@ -2,25 +2,33 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Organization API",
-    "description": "Manage epilot tenant organizations",
-    "version": "1.0.0"
+    "description": "The Organization API provides endpoints for managing epilot tenant organizations.\n\n## Overview\n\nThis API allows you to:\n- **Retrieve organization details** - Get information about the current organization or a specific organization by ID\n- **Update organization profiles** - Modify organization name, contact information, address, and branding assets\n- **Manage organization settings** - Configure organization-wide settings such as feature flags and preferences\n- **Branding configuration** - Set organization logos, email signatures, and style settings\n\n## Organization Types\n\nOrganizations can be configured as:\n- **Production** - Live production environments for real business operations\n- **Sandbox** - Test environments linked to a parent production organization\n",
+    "version": "1.1.0"
   },
   "tags": [
     {
       "name": "Organization",
-      "description": "Organization info"
+      "description": "Endpoints for managing organization profiles and information.\n\nOrganizations represent tenant accounts in the epilot platform. Each organization has:\n- Basic profile information (name, contact details, address)\n- Branding assets (logo, email signature)\n- Configuration settings\n- Usage type (Production or Sandbox)\n"
     },
     {
       "name": "Organization Settings",
-      "description": "Organization Settings"
+      "description": "Endpoints for managing organization-wide configuration settings.\n\nSettings are stored as key-value pairs and can include:\n- Feature flags (e.g., double_opt_in)\n- Integration configurations\n- Platform preferences\n\nSettings values can be strings, numbers, booleans, arrays, or objects.\n"
     },
     {
       "name": "Cleanup",
-      "description": "Internal Cleanup endpoints"
+      "description": "Internal endpoints for organization cleanup operations.\n\nThese endpoints are used by internal services to manage the deletion and cleanup\nof organization data across the platform. They track cleanup status per service\nto ensure complete data removal.\n"
     },
     {
       "name": "Internal",
-      "description": "Internal endpoints"
+      "description": "Internal endpoints for platform administration.\n\nThese endpoints are not part of the public API and are used by internal epilot\nservices for administrative operations such as organization provisioning,\ndata aggregation, and cross-organization queries.\n"
+    },
+    {
+      "name": "HubSpot",
+      "description": "Internal endpoints for HubSpot CRM integration.\n\nThese endpoints provide access to HubSpot company data synchronized with the\nepilot data warehouse for organization mapping and CRM integration purposes.\n"
+    },
+    {
+      "name": "Feature Settings",
+      "description": "Feature flag metadata for the organization settings page.\n\nThis metadata is used by frontend applications to render feature toggles\nwithout hardcoding titles, descriptions, badges, and visibility rules in the UI.\n"
     }
   ],
   "security": [
@@ -33,20 +41,44 @@
       "get": {
         "operationId": "getCurrentOrganization",
         "summary": "getCurrentOrganization",
-        "description": "Get caller's current organization",
+        "description": "Retrieves the organization associated with the authenticated user's current session.\n\nThis endpoint is useful for fetching organization details without knowing the organization ID,\nas it automatically resolves the organization from the authentication token.\n",
         "tags": [
           "Organization"
         ],
         "responses": {
           "200": {
-            "description": "Current organization",
+            "description": "The organization associated with the current authenticated user",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Organization"
+                },
+                "example": {
+                  "id": "739224",
+                  "name": "Epilot",
+                  "email": "contact@epilot.cloud",
+                  "phone": "+49123456789",
+                  "website": "https://epilot.cloud",
+                  "address": {
+                    "country": "Germany",
+                    "city": "Cologne",
+                    "postal_code": "50667",
+                    "street": "Im Mediapark",
+                    "street_number": "8a"
+                  },
+                  "organization_use": "Production",
+                  "created_date": "2021-01-15T10:30:00Z",
+                  "logo_url": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+                  "signature": "<p>Best regards,<br/>The epilot Team</p>"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to access organization data"
           }
         }
       }
@@ -55,7 +87,7 @@
       "get": {
         "operationId": "getOrganization",
         "summary": "getOrganization",
-        "description": "Get an organization",
+        "description": "Retrieves detailed information about a specific organization by its unique identifier.\n\nReturns the organization's profile information including name, contact details,\naddress, branding assets, and configuration.\n",
         "tags": [
           "Organization"
         ],
@@ -67,26 +99,53 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Id of the organization."
+            "description": "The unique identifier of the organization to retrieve"
           }
         ],
         "responses": {
           "200": {
-            "description": "The returned organization",
+            "description": "Organization details retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Organization"
+                },
+                "example": {
+                  "id": "739224",
+                  "name": "Epilot",
+                  "email": "contact@epilot.cloud",
+                  "phone": "+49123456789",
+                  "website": "https://epilot.cloud",
+                  "address": {
+                    "country": "Germany",
+                    "city": "Cologne",
+                    "postal_code": "50667",
+                    "street": "Im Mediapark",
+                    "street_number": "8a"
+                  },
+                  "organization_use": "Production",
+                  "created_date": "2021-01-15T10:30:00Z",
+                  "logo_url": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+                  "signature": "<p>Best regards,<br/>The epilot Team</p>"
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to access this organization"
+          },
+          "404": {
+            "description": "Not Found - Organization with the specified ID does not exist"
           }
         }
       },
       "patch": {
         "operationId": "updateOrganization",
         "summary": "updateOrganization",
-        "description": "Updates an organization",
+        "description": "Updates an organization's profile information.\n\nThis endpoint supports partial updates - only the fields provided in the request body\nwill be modified. Fields not included in the request will retain their current values.\n\nCommon use cases:\n- Updating contact information (email, phone, website)\n- Changing the organization name\n- Updating the postal address\n- Setting or updating branding assets (logo_url, logo_thumbnail_url)\n- Configuring the default email signature\n",
         "tags": [
           "Organization"
         ],
@@ -98,21 +157,38 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Id of the organization."
+            "description": "The unique identifier of the organization to update"
           }
         ],
         "requestBody": {
+          "description": "Organization fields to update. Only provided fields will be modified.",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Organization"
+              },
+              "example": {
+                "name": "Epilot GmbH",
+                "email": "info@epilot.cloud",
+                "phone": "+49221123456",
+                "website": "https://www.epilot.cloud",
+                "address": {
+                  "country": "Germany",
+                  "city": "Cologne",
+                  "postal_code": "50667",
+                  "street": "Im Mediapark",
+                  "street_number": "8a"
+                },
+                "logo_url": "https://example.com/new-logo.png",
+                "signature": "<p>Kind regards,<br/>The epilot Team</p>"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The updated organization",
+            "description": "Organization updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -120,15 +196,27 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body or field values"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to update this organization"
+          },
+          "404": {
+            "description": "Not Found - Organization with the specified ID does not exist"
           }
         }
       }
     },
     "/v2/organization/{org_id}/settings": {
       "get": {
-        "description": "Get full organization settings object",
         "operationId": "getSettings",
         "summary": "getSettings",
+        "description": "Retrieves all configuration settings for an organization.\n\nReturns a key-value map of all settings configured for the organization.\nSettings control various platform features and behaviors including:\n- Feature flags (e.g., double_opt_in, email_tracking)\n- Integration configurations\n- UI preferences\n- Workflow settings\n",
         "tags": [
           "Organization Settings"
         ],
@@ -140,28 +228,55 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Id of the organization."
+            "description": "The unique identifier of the organization"
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the organization settings",
+            "description": "Organization settings retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Settings"
+                },
+                "example": {
+                  "double_opt_in": {
+                    "enabled": true
+                  },
+                  "email_tracking": {
+                    "enabled": true,
+                    "track_opens": true,
+                    "track_clicks": false
+                  },
+                  "default_language": "de",
+                  "workflow_notifications": {
+                    "enabled": true,
+                    "channels": [
+                      "email",
+                      "in_app"
+                    ]
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to access organization settings"
+          },
+          "404": {
+            "description": "Not Found - Organization with the specified ID does not exist"
           }
         }
       }
     },
     "/v2/organization/{org_id}/settings/{key}": {
       "put": {
-        "description": "Updates an organization setting",
         "operationId": "putSettingsValue",
         "summary": "putSettingsValue",
+        "description": "Creates or updates a specific organization setting identified by its key.\n\nThe setting value can be any valid JSON type:\n- String (e.g., \"en\", \"production\")\n- Number (e.g., 100, 3.14)\n- Boolean (e.g., true, false)\n- Object (e.g., {\"enabled\": true, \"threshold\": 50})\n- Array (e.g., [\"email\", \"sms\", \"push\"])\n\nIf the setting key does not exist, it will be created. If it exists, its value\nwill be replaced with the new value.\n",
         "tags": [
           "Organization Settings"
         ],
@@ -173,7 +288,7 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Id of the organization."
+            "description": "The unique identifier of the organization"
           },
           {
             "in": "path",
@@ -182,36 +297,73 @@
               "type": "string"
             },
             "required": true,
-            "description": "Organization setting key"
+            "description": "The setting key to create or update.\nCommon keys include: double_opt_in, email_tracking, default_language, workflow_notifications\n",
+            "example": "double_opt_in"
           }
         ],
         "requestBody": {
-          "description": "Value to set",
+          "description": "The value to set for the specified setting key",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SettingsValue"
+              },
+              "examples": {
+                "boolean_setting": {
+                  "summary": "Boolean setting",
+                  "value": {
+                    "enabled": true
+                  }
+                },
+                "string_setting": {
+                  "summary": "String setting",
+                  "value": "de"
+                },
+                "object_setting": {
+                  "summary": "Object setting",
+                  "value": {
+                    "enabled": true,
+                    "track_opens": true,
+                    "track_clicks": false
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Returns the value of the setting",
+            "description": "Setting updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SettingsValue"
+                },
+                "example": {
+                  "enabled": true
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request - Invalid setting value"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to modify organization settings"
+          },
+          "404": {
+            "description": "Not Found - Organization with the specified ID does not exist"
           }
         }
       },
       "delete": {
-        "description": "Updates an organization nsetting",
         "operationId": "deleteSettingsValue",
         "summary": "deleteSettingsValue",
+        "description": "Removes a specific organization setting identified by its key.\n\nAfter deletion, the setting will no longer appear in the organization's settings\nand any features relying on this setting will use their default behavior.\n",
         "tags": [
           "Organization Settings"
         ],
@@ -223,7 +375,7 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Id of the organization."
+            "description": "The unique identifier of the organization"
           },
           {
             "in": "path",
@@ -232,12 +384,47 @@
               "type": "string"
             },
             "required": true,
-            "description": "Organization setting key"
+            "description": "The setting key to delete",
+            "example": "double_opt_in"
           }
         ],
         "responses": {
           "200": {
-            "description": "Delete successful"
+            "description": "Setting deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to delete organization settings"
+          },
+          "404": {
+            "description": "Not Found - Organization or setting key does not exist"
+          }
+        }
+      }
+    },
+    "/v2/feature-settings": {
+      "get": {
+        "operationId": "getFeatureSettings",
+        "summary": "Get platform configuration metadata",
+        "description": "Returns platform-level configuration metadata including feature flag definitions,\nresource type mappings, and error code severities.\n\nThis data is static (identical for all organizations) and changes infrequently.\nClients should cache responses using the Cache-Control header.\n",
+        "tags": [
+          "Feature Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Platform configuration metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
           }
         }
       }
@@ -255,10 +442,12 @@
     "schemas": {
       "OrganizationId": {
         "type": "string",
+        "description": "Unique identifier for an organization (tenant) in the epilot platform",
         "example": "739224"
       },
       "Organization": {
         "type": "object",
+        "description": "Represents an epilot organization (tenant).\n\nAn organization contains all the configuration, branding, and contact information\nfor a tenant account on the epilot platform.\n",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/OrganizationId"
@@ -316,6 +505,7 @@
           },
           "organization_use": {
             "type": "string",
+            "description": "Indicates whether this is a production or sandbox organization.\nSandbox organizations are linked to a parent production organization for testing purposes.\n",
             "enum": [
               "Production",
               "Sandbox"
@@ -324,6 +514,7 @@
           },
           "parent_production_org_id": {
             "type": "string",
+            "description": "The ID of the parent production organization.\nOnly set for sandbox organizations to link them to their production counterpart.\n",
             "nullable": true
           },
           "created_date": {
@@ -389,10 +580,20 @@
             "type": "number",
             "example": 50,
             "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "description": "Labels/tags associated with the organization for categorization and filtering.\nUsed internally to classify organizations (e.g., \"enterprise\", \"beta-tester\", \"test org\").\n",
+            "items": {
+              "type": "string",
+              "example": "test org"
+            },
+            "nullable": true
           }
         }
       },
       "InternalOrganization": {
+        "description": "Extended organization object with internal-only fields.\n\nIncludes all fields from the base Organization schema plus additional\ninternal metadata used for platform administration and support.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/Organization"
@@ -401,18 +602,26 @@
       },
       "SettingKey": {
         "type": "string",
+        "description": "A unique key identifying an organization setting.\nCommon setting keys include: double_opt_in, email_tracking, default_language, workflow_notifications\n",
         "example": "double_opt_in"
       },
       "Settings": {
         "type": "object",
+        "description": "A key-value map of all organization settings.\nKeys are setting identifiers and values can be any valid JSON type.\n",
         "additionalProperties": true,
         "example": {
           "double_opt_in": {
             "enabled": true
-          }
+          },
+          "email_tracking": {
+            "enabled": true,
+            "track_opens": true
+          },
+          "default_language": "de"
         }
       },
       "SettingsValue": {
+        "description": "The value of an organization setting.\nCan be any valid JSON type: string, number, boolean, array, or object.\n",
         "anyOf": [
           {
             "type": "string"
@@ -441,9 +650,10 @@
       },
       "CreateOrganizationRequest": {
         "type": "object",
+        "description": "Request payload for creating a new organization",
         "properties": {
           "organization_detail": {
-            "description": "Organization detail",
+            "description": "Core organization information for the new tenant",
             "type": "object",
             "required": [
               "name",
@@ -452,21 +662,22 @@
             ],
             "properties": {
               "name": {
-                "description": "Organization name",
+                "description": "Display name for the organization",
                 "type": "string",
                 "example": "epilot"
               },
               "email_address": {
-                "description": "Organization email address",
+                "description": "Primary contact email for the organization",
                 "type": "string",
                 "example": "epilot@epilot.cloud"
               },
               "type": {
-                "description": "type",
+                "description": "Organization type classification.\n- Vendor: Primary organization type for epilot customers\n- Partner: Partner organization type\n",
                 "type": "string",
                 "example": "Vendor"
               },
               "organization_use": {
+                "description": "Whether this is a production or sandbox environment.\nSandbox organizations are for testing and linked to a production org.\n",
                 "type": "string",
                 "enum": [
                   "Production",
@@ -474,24 +685,26 @@
                 ]
               },
               "pricing_tier_id": {
-                "description": "Pricing tier ID",
+                "description": "The ULID of the pricing tier to assign to this organization.\nDetermines feature access and billing.\n",
                 "type": "string",
                 "example": "01GEKHZHSN19KK10ZS92Y3WY9B"
               }
             }
           },
           "owner_user": {
-            "description": "Owner user will receive invitation",
+            "description": "Initial owner user details.\nThis user will receive an invitation email to complete registration\nand become the organization administrator.\n",
             "type": "object",
             "required": [
               "email_address"
             ],
             "properties": {
               "full_name": {
+                "description": "Full name of the owner user",
                 "type": "string",
                 "example": "Ny Huynh"
               },
               "email_address": {
+                "description": "Email address for the invitation (must be unique in the platform)",
                 "type": "string",
                 "example": "ny.huynhthi@axonactive.com"
               }
@@ -501,25 +714,27 @@
       },
       "DataPointsResponse": {
         "type": "array",
+        "description": "List of data point metrics for all organizations",
         "items": {
           "$ref": "#/components/schemas/DataPoint"
         }
       },
       "DataPoint": {
         "type": "object",
+        "description": "Data point metrics for a single organization, used for usage tracking and billing",
         "properties": {
           "id": {
-            "description": "Organization id",
+            "description": "The organization ID (numeric format)",
             "type": "number",
             "example": 206801
           },
           "max_customer": {
-            "description": "Max customer data points last month",
+            "description": "Maximum number of customer entities recorded in the previous month.\nUsed as a high-water mark for billing calculations.\n",
             "type": "number",
             "example": 10
           },
           "actual_customer": {
-            "description": "Actual customer data points",
+            "description": "Current count of customer entities in the organization.\nRepresents the actual usage at the time of the query.\n",
             "type": "number",
             "example": 10
           }
@@ -527,6 +742,7 @@
       },
       "OrganizationToCleanup": {
         "type": "object",
+        "description": "Represents an organization that has been marked for deletion and requires cleanup.\nContains metadata about the deletion request.\n",
         "required": [
           "org_id",
           "deleted_at",
@@ -537,11 +753,13 @@
             "$ref": "#/components/schemas/OrganizationId"
           },
           "deleted_at": {
+            "description": "Timestamp when the organization was marked for deletion",
             "type": "string",
             "format": "date-time",
             "example": "2021-06-01T00:00:00Z"
           },
           "deleted_by": {
+            "description": "User ID of the person who initiated the deletion",
             "type": "string",
             "example": "123456"
           }
@@ -549,6 +767,7 @@
       },
       "OrganizationCleanupStatus": {
         "type": "object",
+        "description": "Records the cleanup status reported by a specific service for an organization.\nEach service that stores organization data reports its cleanup operations here.\n",
         "required": [
           "org_id",
           "service_name"
@@ -558,36 +777,29 @@
             "$ref": "#/components/schemas/OrganizationId"
           },
           "service_name": {
+            "description": "Name of the service reporting its cleanup status",
             "type": "string",
             "example": "organization-api"
           },
           "operations": {
-            "example": [
-              {
-                "action": "Delete",
-                "resource": "OrgTable",
-                "extra_info": "pk: ORG#739224"
-              },
-              {
-                "action": "Archive",
-                "resource": "s3://my-bucket",
-                "extra_info": "my-bucket/my-key.txt"
-              }
-            ],
+            "description": "List of cleanup operations performed by the service.\nEach operation describes what action was taken on which resource.\n",
             "type": "array",
             "items": {
               "type": "object",
               "additionalProperties": true,
               "properties": {
                 "action": {
+                  "description": "The type of cleanup action performed.\nCommon values: Delete, Archive, Purge\n",
                   "type": "string",
                   "example": "Delete"
                 },
                 "resource": {
+                  "description": "The resource that was cleaned up.\nCan be a table name, S3 bucket, or other resource identifier.\n",
                   "type": "string",
                   "example": "OrgTable"
                 },
                 "extra_info": {
+                  "description": "Additional context about the cleanup operation",
                   "anyOf": [
                     {
                       "type": "string"
@@ -612,6 +824,326 @@
                   ]
                 }
               }
+            },
+            "example": [
+              {
+                "action": "Delete",
+                "resource": "OrgTable",
+                "extra_info": "pk: ORG#739224"
+              },
+              {
+                "action": "Archive",
+                "resource": "s3://my-bucket",
+                "extra_info": "my-bucket/my-key.txt"
+              }
+            ]
+          }
+        }
+      },
+      "HubspotCompany": {
+        "type": "object",
+        "description": "Represents a company record from HubSpot CRM synchronized to the epilot data warehouse.\nUsed for CRM integration and organization mapping.\n",
+        "properties": {
+          "company_id": {
+            "type": "string",
+            "description": "The unique HubSpot company identifier",
+            "example": "12345678901"
+          },
+          "company_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The display name of the company in HubSpot",
+            "example": "Acme Corp"
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true,
+            "description": "The primary web domain associated with the company",
+            "example": "acme.com"
+          }
+        }
+      },
+      "HubspotCompaniesResponse": {
+        "type": "object",
+        "description": "Response containing a list of HubSpot companies matching the search criteria",
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "List of HubSpot companies matching the query",
+            "items": {
+              "$ref": "#/components/schemas/HubspotCompany"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of companies in the response",
+            "example": 10
+          }
+        }
+      },
+      "HubspotOrganizationData": {
+        "type": "object",
+        "description": "HubSpot company data associated with an epilot organization.\nContains business metrics and CRM properties synced from HubSpot.\n",
+        "properties": {
+          "company_id": {
+            "type": "string",
+            "description": "The unique HubSpot company identifier",
+            "example": "5278308807"
+          },
+          "company_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The display name of the company in HubSpot",
+            "example": "Stadtwerke Meerbusch Willich Netz"
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true,
+            "description": "The primary web domain associated with the company",
+            "example": "stadtwerke-service.de"
+          },
+          "current_mrr": {
+            "type": "string",
+            "nullable": true,
+            "description": "Current Monthly Recurring Revenue",
+            "example": "11033.33"
+          },
+          "potential_mrr": {
+            "type": "string",
+            "nullable": true,
+            "description": "Potential Monthly Recurring Revenue",
+            "example": "20000"
+          },
+          "company_size": {
+            "type": "string",
+            "nullable": true,
+            "description": "Company size classification",
+            "example": "Large"
+          },
+          "pricing_tier": {
+            "type": "string",
+            "nullable": true,
+            "description": "Current pricing tier",
+            "example": "Professional"
+          },
+          "lifecyclestage": {
+            "type": "string",
+            "nullable": true,
+            "description": "HubSpot lifecycle stage",
+            "example": "customer"
+          },
+          "industry": {
+            "type": "string",
+            "nullable": true,
+            "description": "Industry classification",
+            "example": "Energiedienstleister"
+          },
+          "numberofemployees": {
+            "type": "string",
+            "nullable": true,
+            "description": "Number of employees",
+            "example": "200"
+          },
+          "customer_number": {
+            "type": "string",
+            "nullable": true,
+            "description": "epilot customer number",
+            "example": "10031"
+          },
+          "no_of_users": {
+            "type": "string",
+            "nullable": true,
+            "description": "Number of active users",
+            "example": "34"
+          },
+          "activation_rate": {
+            "type": "string",
+            "nullable": true,
+            "description": "User activation rate",
+            "example": "0.647059"
+          },
+          "active_features": {
+            "type": "string",
+            "nullable": true,
+            "description": "List of active features",
+            "example": "Installer Portal"
+          },
+          "usecases_implemented": {
+            "type": "string",
+            "nullable": true,
+            "description": "Implemented use cases",
+            "example": "GRID: Installations (MGA);GRID: House Connections"
+          },
+          "buyer_journey": {
+            "type": "string",
+            "nullable": true,
+            "description": "Current buyer's journey stage",
+            "example": "Expansion-Ready"
+          },
+          "country": {
+            "type": "string",
+            "nullable": true,
+            "description": "Company country",
+            "example": "Germany"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "description": "Company city",
+            "example": "Willich"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Full HubSpot properties object with all available fields"
+          }
+        }
+      },
+      "FeatureSettings": {
+        "type": "object",
+        "description": "Feature settings metadata served to frontend applications.",
+        "required": [
+          "version",
+          "feature_flags"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Schema version for backwards compatibility",
+            "example": "1.0.0"
+          },
+          "feature_flags": {
+            "type": "array",
+            "description": "Feature flag metadata for the settings page",
+            "items": {
+              "$ref": "#/components/schemas/FeatureFlagMetadata"
+            }
+          }
+        }
+      },
+      "FeatureFlagMetadata": {
+        "type": "object",
+        "description": "Metadata for a single feature flag toggle",
+        "required": [
+          "feature_name",
+          "visibility_rules"
+        ],
+        "properties": {
+          "feature_name": {
+            "type": "string",
+            "description": "Unique identifier matching the organization setting key",
+            "example": "canary"
+          },
+          "title": {
+            "$ref": "#/components/schemas/I18nString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/I18nString"
+          },
+          "badge": {
+            "type": "string",
+            "description": "Badge label shown next to the feature toggle",
+            "enum": [
+              "alpha",
+              "beta",
+              "new",
+              "advanced",
+              "experiment",
+              "deprecated"
+            ]
+          },
+          "confetti": {
+            "type": "boolean",
+            "description": "Whether to show confetti animation when enabled"
+          },
+          "one_way": {
+            "type": "boolean",
+            "description": "Whether the toggle can only be turned on (not off)"
+          },
+          "reverse_checked": {
+            "type": "boolean",
+            "description": "Whether the toggle value is inverted (checked = disabled)"
+          },
+          "is_visible_for_partner": {
+            "type": "boolean",
+            "description": "Whether this feature is visible for partner organizations"
+          },
+          "visibility_rules": {
+            "type": "array",
+            "description": "Rules that must ALL pass for this feature to be visible (implicit AND)",
+            "items": {
+              "$ref": "#/components/schemas/VisibilityRule"
+            }
+          }
+        }
+      },
+      "I18nString": {
+        "type": "object",
+        "description": "Internationalized string with a translation key and optional default value",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Translation key for i18n lookup",
+            "example": "canary_setting.title"
+          },
+          "default_value": {
+            "type": "string",
+            "description": "Fallback value when translation is not available",
+            "example": "Canary Updates"
+          }
+        }
+      },
+      "VisibilityRule": {
+        "type": "object",
+        "description": "A rule that determines feature visibility. Rules are combined with AND logic\nat the top level. Supports boolean combinators (and, or, not) for complex logic.\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The rule type discriminator",
+            "enum": [
+              "always",
+              "never",
+              "advanced_mode",
+              "pricing_tier",
+              "feature_flag",
+              "permission",
+              "setting_enabled",
+              "flag_enabled",
+              "not",
+              "and",
+              "or"
+            ]
+          },
+          "setting_key": {
+            "type": "string",
+            "description": "Setting key for pricing_tier and setting_enabled rules"
+          },
+          "flag_name": {
+            "type": "string",
+            "description": "Flag name for feature_flag and flag_enabled rules"
+          },
+          "action": {
+            "type": "string",
+            "description": "Permission action for permission rules"
+          },
+          "resource": {
+            "type": "string",
+            "description": "Optional resource for permission rules"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/VisibilityRule"
+          },
+          "rules": {
+            "type": "array",
+            "description": "Child rules for and/or combinators",
+            "items": {
+              "$ref": "#/components/schemas/VisibilityRule"
             }
           }
         }
@@ -619,9 +1151,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://organization-v2.sls.epilot.io"
-    },
     {
       "url": "https://organization-v2.sls.epilot.io"
     }

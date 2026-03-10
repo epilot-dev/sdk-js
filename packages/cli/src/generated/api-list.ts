@@ -875,7 +875,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'organization',
     title: 'Organization API',
     serverUrl: 'https://organization-v2.sls.epilot.io',
-    operationCount: 6,
+    operationCount: 7,
     operationIds: [
       'getCurrentOrganization',
       'getOrganization',
@@ -883,6 +883,7 @@ export const API_LIST: ApiInfo[] = [
       'getSettings',
       'putSettingsValue',
       'deleteSettingsValue',
+      'getFeatureSettings',
     ],
   },
   {
