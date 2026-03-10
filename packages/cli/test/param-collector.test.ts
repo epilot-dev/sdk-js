@@ -19,7 +19,11 @@ describe('collectParams', () => {
 
   it('maps positional args to path params in URL template order', () => {
     // Params declared as [id, slug] but template is /{slug}/{id}
-    const reorderedParams = [makeParam('id', 'path', true), makeParam('slug', 'path', true), makeParam('hydrate', 'query', false)];
+    const reorderedParams = [
+      makeParam('id', 'path', true),
+      makeParam('slug', 'path', true),
+      makeParam('hydrate', 'query', false),
+    ];
     const result = collectParams(reorderedParams, undefined, ['contact', '123'], '/v1/{slug}/{id}');
     expect(result).toEqual({ slug: 'contact', id: 123 });
   });

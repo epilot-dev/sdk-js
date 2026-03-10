@@ -1,17 +1,5 @@
 import type { AxiosResponse } from 'axios';
-import {
-  BOLD,
-  RESET,
-  GREEN,
-  RED,
-  DIM,
-  WHITE,
-  BG_GREEN,
-  BG_RED,
-  methodColor,
-  pager,
-  highlightJson,
-} from './utils.js';
+import { BOLD, RESET, RED, DIM, WHITE, BG_GREEN, BG_RED, methodColor, pager, highlightJson } from './utils.js';
 
 export type FormatOptions = {
   json?: boolean;
@@ -56,7 +44,9 @@ export const formatResponse = async (response: AxiosResponse, options: FormatOpt
   const method = (req.method || 'GET').toUpperCase();
   const baseURL = req.baseURL || '';
   const reqUrl = req.url || '';
-  const url = reqUrl.startsWith('http') ? reqUrl : `${baseURL.replace(/\/$/, '')}${reqUrl.startsWith('/') ? '' : '/'}${reqUrl}`;
+  const url = reqUrl.startsWith('http')
+    ? reqUrl
+    : `${baseURL.replace(/\/$/, '')}${reqUrl.startsWith('/') ? '' : '/'}${reqUrl}`;
 
   // Verbose: show full request meta as JSON (like openapicmd)
   if (verbose) {
