@@ -2,12 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Kanban API",
-    "version": "1.2.3"
+    "version": "1.2.3",
+    "description": "The Kanban API provides board management and data query capabilities for epilot's Kanban view feature.\n\nKanban boards allow epilot users to visualize and manage workflow tasks, opportunities, and other entities in a column-based layout.\n\nKey capabilities:\n- Create, read, update, and delete Kanban boards with configurable swimlanes and filters\n- Share boards with individual users or across the entire organization\n- Set and clear the organization-level default board\n- Query and autocomplete Flows data to populate Kanban cards with live entity data\n"
   },
   "tags": [
     {
       "name": "Kanban",
-      "description": "Kanban endpoints"
+      "description": "Endpoints for managing Kanban boards. Boards consist of swimlanes, each with configurable filters to display matching workflow tasks or entities.\nBoards can be owned by individual users and optionally shared with other users or the whole organization.\n"
+    },
+    {
+      "name": "Query",
+      "description": "Endpoints for querying and autocompleting Flows data used to populate Kanban cards.\nThese endpoints support filtering, sorting, and pagination of the underlying workflow task dataset.\n"
     }
   ],
   "security": [
@@ -22,16 +27,48 @@
     "/v1/kanban/board": {
       "post": {
         "operationId": "createKanbanBoard",
-        "summary": "Create a Kanban board",
-        "description": "Create a Kanban board",
+        "summary": "createKanbanBoard",
+        "description": "Creates a new Kanban board with the provided configuration.\n\nA board must have a title and a config containing at least one dataset. Swimlanes and filters can be configured to display specific subsets of workflow tasks or entities.\n",
         "tags": [
           "Kanban"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Board"
+              },
+              "example": {
+                "title": "My Sales Board",
+                "description": "Track open opportunities",
+                "config": {
+                  "dataset": "workflow_tasks_overview",
+                  "swimlanes": [
+                    {
+                      "id": "lane-1",
+                      "title": "New",
+                      "position": 1,
+                      "filter": {
+                        "items": [
+                          {
+                            "key": "status",
+                            "operator": "EQUALS",
+                            "value": "new",
+                            "data_type": "string"
+                          }
+                        ],
+                        "combination": "AND"
+                      }
+                    }
+                  ],
+                  "card_config": {
+                    "fields": [
+                      "assignee",
+                      "due_date"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -43,21 +80,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Board"
+                },
+                "example": {
+                  "id": "board-abc123",
+                  "title": "My Sales Board",
+                  "description": "Track open opportunities",
+                  "org_id": "728224",
+                  "created_by": "user-1",
+                  "created_at": "2024-01-15T09:00:00.000Z",
+                  "updated_at": "2024-01-15T09:00:00.000Z",
+                  "config": {
+                    "dataset": "workflow_tasks_overview",
+                    "swimlanes": []
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - Invalid input data"
+            "description": "Bad request - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -65,8 +143,8 @@
     "/v1/kanban/boards": {
       "get": {
         "operationId": "getKanbanBoards",
-        "summary": "Get all Kanban boards",
-        "description": "Get all Kanban boards",
+        "summary": "getKanbanBoards",
+        "description": "Returns a list of all Kanban boards accessible to the authenticated user.\n\nUse the `filter` query parameter to narrow results to boards the user owns (`owned`) or boards shared with them (`shared`). When omitted, all accessible boards are returned.\n",
         "tags": [
           "Kanban"
         ],
@@ -95,18 +173,54 @@
                   "items": {
                     "$ref": "#/components/schemas/BoardSummary"
                   }
-                }
+                },
+                "example": [
+                  {
+                    "id": "board-abc123",
+                    "title": "My Sales Board",
+                    "description": "Track open opportunities",
+                    "org_id": "728224",
+                    "created_by": "user-1",
+                    "created_at": "2024-01-15T09:00:00.000Z",
+                    "updated_at": "2024-01-15T09:00:00.000Z",
+                    "shared_with_org": false,
+                    "owners": [
+                      "user-1"
+                    ]
+                  }
+                ]
               }
             }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -114,8 +228,8 @@
     "/v1/kanban/board/{boardId}": {
       "get": {
         "operationId": "getKanbanBoard",
-        "summary": "Get a Kanban board",
-        "description": "Get a Kanban board by ID. Use \"default\" as the boardId to get the organization's default board.\n",
+        "summary": "getKanbanBoard",
+        "description": "Retrieves a Kanban board by ID, including its full configuration (swimlanes, filters, sorting, card fields).\n\nUse `\"default\"` as the `boardId` to retrieve the organization's currently configured default board.\n",
         "tags": [
           "Kanban"
         ],
@@ -138,28 +252,100 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Board"
+                },
+                "example": {
+                  "id": "board-abc123",
+                  "title": "My Sales Board",
+                  "description": "Track open opportunities",
+                  "org_id": "728224",
+                  "created_by": "user-1",
+                  "created_at": "2024-01-15T09:00:00.000Z",
+                  "updated_at": "2024-01-15T09:00:00.000Z",
+                  "shared_with_org": false,
+                  "owners": [
+                    "user-1"
+                  ],
+                  "config": {
+                    "dataset": "workflow_tasks_overview",
+                    "swimlanes": [
+                      {
+                        "id": "lane-1",
+                        "title": "New",
+                        "position": 1,
+                        "filter": {
+                          "items": [
+                            {
+                              "key": "status",
+                              "operator": "EQUALS",
+                              "value": "new",
+                              "data_type": "string"
+                            }
+                          ],
+                          "combination": "AND"
+                        }
+                      }
+                    ],
+                    "card_config": {
+                      "fields": [
+                        "assignee",
+                        "due_date"
+                      ]
+                    },
+                    "sorting": {
+                      "field": "created_at",
+                      "direction": "desc"
+                    }
+                  }
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Board not found"
+            "description": "Board not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
       "put": {
         "operationId": "updateKanbanBoard",
-        "summary": "Update a Kanban board",
-        "description": "Update a Kanban board",
+        "summary": "updateKanbanBoard",
+        "description": "Fully replaces the configuration of an existing Kanban board by ID.\n\nAll board fields (title, config, swimlanes, filters) must be provided. Use PATCH for partial updates.\n",
         "tags": [
           "Kanban"
         ],
@@ -170,10 +356,12 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The ID of the board to update."
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -189,31 +377,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Board"
+                },
+                "example": {
+                  "id": "board-abc123",
+                  "title": "Updated Sales Board",
+                  "description": "Track open opportunities",
+                  "org_id": "728224",
+                  "created_by": "user-1",
+                  "created_at": "2024-01-15T09:00:00.000Z",
+                  "updated_at": "2024-01-16T10:30:00.000Z",
+                  "shared_with_org": false,
+                  "owners": [
+                    "user-1"
+                  ],
+                  "config": {
+                    "dataset": "workflow_tasks_overview",
+                    "swimlanes": []
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - Invalid input data"
+            "description": "Bad request - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Board not found"
+            "description": "Board not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
       "patch": {
         "operationId": "patchKanbanBoard",
-        "summary": "Patch a Kanban board",
-        "description": "Patch a Kanban board",
+        "summary": "patchKanbanBoard",
+        "description": "Partially updates fields of an existing Kanban board by ID.\n\nOnly the fields provided in the request body will be updated. Useful for updating sharing settings, ownership, or title without replacing the full board configuration.\n",
         "tags": [
           "Kanban"
         ],
@@ -224,10 +464,12 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The ID of the board to patch."
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -245,10 +487,12 @@
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
+                    },
+                    "description": "Array of user IDs to share the board with"
                   },
                   "shared_with_org": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Whether the board is shared with the entire organization"
                   },
                   "owners": {
                     "type": "array",
@@ -258,6 +502,14 @@
                     "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
                   }
                 }
+              },
+              "example": {
+                "title": "Updated Board Title",
+                "shared_with_org": true,
+                "owners": [
+                  "user-1",
+                  "user-2"
+                ]
               }
             }
           }
@@ -269,31 +521,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Board"
+                },
+                "example": {
+                  "id": "board-abc123",
+                  "title": "Updated Board Title",
+                  "org_id": "728224",
+                  "created_by": "user-1",
+                  "created_at": "2024-01-15T09:00:00.000Z",
+                  "updated_at": "2024-01-16T12:00:00.000Z",
+                  "shared_with_org": true,
+                  "owners": [
+                    "user-1",
+                    "user-2"
+                  ],
+                  "config": {
+                    "dataset": "workflow_tasks_overview",
+                    "swimlanes": []
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - Invalid input data"
+            "description": "Bad request - Invalid input data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Board not found"
+            "description": "Board not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "operationId": "deleteKanbanBoard",
-        "summary": "Delete a Kanban board",
-        "description": "Delete a Kanban board",
+        "summary": "deleteKanbanBoard",
+        "description": "Permanently deletes a Kanban board by ID. This action is irreversible.",
         "tags": [
           "Kanban"
         ],
@@ -304,7 +608,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The ID of the board to delete."
           }
         ],
         "responses": {
@@ -312,16 +617,44 @@
             "description": "Successfully deleted board"
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Board not found"
+            "description": "Board not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -329,8 +662,8 @@
     "/v1/kanban/org/default-board": {
       "put": {
         "operationId": "setDefaultKanbanBoard",
-        "summary": "Set default board for organization",
-        "description": "Set a board as the default board for the organization",
+        "summary": "setDefaultKanbanBoard",
+        "description": "Sets a Kanban board as the default board for the organization.\n\nThe default board is shown to users who access the Kanban view without specifying a specific board ID.\nPass `boardId` as a query parameter to identify the board to set as default.\n",
         "tags": [
           "Kanban"
         ],
@@ -342,7 +675,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The ID of the board to set as default"
+            "description": "The ID of the board to set as default",
+            "example": "board-abc123"
           }
         ],
         "responses": {
@@ -360,31 +694,70 @@
                       "type": "string"
                     }
                   }
+                },
+                "example": {
+                  "message": "Default board set successfully",
+                  "default_board_id": "board-abc123"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - Invalid input data or boardId missing"
+            "description": "Bad request - Invalid input data or boardId missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Board not found"
+            "description": "Board not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "operationId": "clearDefaultKanbanBoard",
-        "summary": "Clear default board for organization",
-        "description": "Remove the default board setting for the organization",
+        "summary": "clearDefaultKanbanBoard",
+        "description": "Removes the default board configuration for the organization.\n\nAfter calling this endpoint, `getKanbanBoard` with `boardId=default` will return a 404 until a new default is set.\n",
         "tags": [
           "Kanban"
         ],
@@ -404,18 +777,43 @@
                       "nullable": true
                     }
                   }
+                },
+                "example": {
+                  "message": "Default board cleared successfully",
+                  "default_board_id": null
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized - Authentication required"
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden - Insufficient permissions"
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -424,7 +822,7 @@
       "get": {
         "operationId": "flowsAutocomplete",
         "summary": "flowsAutocomplete",
-        "description": "Autocomplete flows data\n",
+        "description": "Returns autocomplete suggestions for a given attribute in the Flows dataset.\n\nUse this endpoint to power filter dropdowns and search inputs in the Kanban board configuration UI.\nThe `attribute` parameter specifies which field to autocomplete (e.g. `name`, `assignee`, `status`).\nThe optional `input` parameter filters results to those matching the typed prefix.\n",
         "tags": [
           "Query"
         ],
@@ -432,15 +830,16 @@
           {
             "name": "input",
             "in": "query",
-            "description": "Input to autocomplete",
+            "description": "Typed input string to filter autocomplete suggestions",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "John"
           },
           {
             "name": "attribute",
             "in": "query",
-            "description": "Autocomplete attribute",
+            "description": "The field name to autocomplete values for",
             "schema": {
               "type": "string",
               "example": "name"
@@ -471,7 +870,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Autocomplete results returned successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -510,6 +909,46 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request - Missing or invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -518,26 +957,103 @@
       "post": {
         "operationId": "executeFlowsQuery",
         "summary": "executeFlowsQuery",
-        "description": "Query Flows Data for Kanban View.",
+        "description": "Executes a query against the Flows dataset and returns paginated results for use in Kanban card rendering.\n\nSupports filtering with complex AND/OR logic, sorting, and offset-based pagination.\nResults are used to populate Kanban swimlane cards with real-time workflow task data.\n",
         "tags": [
           "Query"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/FlowsQueryRequest"
+              },
+              "example": {
+                "filters": {
+                  "items": [
+                    {
+                      "key": "status",
+                      "operator": "IS_ONE_OF",
+                      "value": [
+                        "open",
+                        "in_progress"
+                      ],
+                      "data_type": "string"
+                    }
+                  ],
+                  "combination": "AND"
+                },
+                "sorting": {
+                  "field": "created_at",
+                  "direction": "desc"
+                },
+                "from": 0,
+                "size": 10
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Query results",
+            "description": "Query executed successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FlowsQueryResult"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "id": "flow-001",
+                      "status": "open",
+                      "assignee": "user-1",
+                      "created_at": "2024-01-10T08:00:00.000Z"
+                    }
+                  ],
+                  "hits": 42,
+                  "page_number": 1,
+                  "page_size": 10,
+                  "total_pages": 5
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid filter or sort configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -555,15 +1071,32 @@
         "bearerFormat": "JWT"
       },
       "EpilotOrg": {
-        "description": "Overrides the target organization to allow shared tenantaccess",
+        "description": "Overrides the target organization to allow shared tenant access",
         "name": "x-epilot-org-id",
         "in": "header",
         "type": "apiKey"
       }
     },
     "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Standard error response",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message",
+            "example": "Board not found"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 404
+          }
+        }
+      },
       "BoardSummary": {
         "type": "object",
+        "description": "Summary representation of a Kanban board, returned in list responses. Does not include swimlane and filter configuration details.",
         "properties": {
           "id": {
             "type": "string"
@@ -612,6 +1145,7 @@
         }
       },
       "Board": {
+        "description": "Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options.",
         "allOf": [
           {
             "$ref": "#/components/schemas/BoardSummary"
@@ -666,6 +1200,7 @@
       },
       "Swimlane": {
         "type": "object",
+        "description": "A vertical column in a Kanban board that groups workflow tasks or entities matching its filter criteria. Each swimlane has an independent filter and a display position.",
         "properties": {
           "id": {
             "type": "string"
@@ -689,6 +1224,7 @@
       },
       "Sorting": {
         "type": "object",
+        "description": "Defines how query results should be sorted. Specify a field name and sort direction.",
         "properties": {
           "field": {
             "type": "string",
@@ -709,6 +1245,7 @@
       },
       "BoardFilter": {
         "type": "object",
+        "description": "A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR).",
         "properties": {
           "items": {
             "type": "array",
@@ -792,7 +1329,8 @@
           "LAST_WEEK",
           "THIS_MONTH",
           "NEXT_MONTH",
-          "LAST_MONTH"
+          "LAST_MONTH",
+          "TODAY_OR_EARLIER"
         ],
         "description": "Dynamic date keywords that resolve to actual dates at runtime"
       },
@@ -843,44 +1381,61 @@
       },
       "FlowsQueryRequest": {
         "type": "object",
+        "description": "Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination.",
         "properties": {
           "filters": {
-            "$ref": "#/components/schemas/BoardFilter"
+            "$ref": "#/components/schemas/BoardFilter",
+            "description": "Optional filter conditions to narrow the result set using AND/OR logic."
           },
           "sorting": {
-            "$ref": "#/components/schemas/Sorting"
+            "$ref": "#/components/schemas/Sorting",
+            "description": "Sort the results by a specific field and direction."
           },
           "from": {
             "type": "number",
-            "default": 0
+            "default": 0,
+            "description": "Zero-based offset for pagination. Use with `size` to paginate through results.",
+            "example": 0
           },
           "size": {
             "type": "number",
-            "default": 10
+            "default": 10,
+            "description": "Number of results to return per page.",
+            "example": 10
           }
         }
       },
       "FlowsQueryResult": {
         "type": "object",
+        "description": "Paginated result set returned from a Flows query. Each item in `results` is a workflow task record with dynamic fields depending on the dataset configuration.",
         "properties": {
           "results": {
             "type": "array",
+            "description": "Array of matching workflow task records. Fields vary based on the dataset and card configuration.",
             "items": {
               "type": "object",
               "additionalProperties": true
             }
           },
           "hits": {
-            "type": "number"
+            "type": "number",
+            "description": "Total number of records matching the query (across all pages).",
+            "example": 42
           },
           "page_number": {
-            "type": "number"
+            "type": "number",
+            "description": "Current page number (1-based).",
+            "example": 1
           },
           "page_size": {
-            "type": "number"
+            "type": "number",
+            "description": "Number of results per page (matches the `size` request parameter).",
+            "example": 10
           },
           "total_pages": {
-            "type": "number"
+            "type": "number",
+            "description": "Total number of available pages based on `hits` and `page_size`.",
+            "example": 5
           }
         },
         "additionalProperties": true
@@ -919,9 +1474,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://kanban.sls.epilot.io"
-    },
     {
       "url": "https://kanban.sls.epilot.io"
     }
