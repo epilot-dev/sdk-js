@@ -1,0 +1,263 @@
+import type { OpenAPIV3 } from 'openapi-client-axios';
+import OpenAPIClientAxios from 'openapi-client-axios';
+
+import { loadDefinition } from './definition-loader.js';
+import { resolveToken } from './auth-store.js';
+import { getResolvedProfile } from './profiles.js';
+import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
+import { resolveBody, getRequestBodyInfo } from './body-handler.js';
+import { formatResponse } from './response-formatter.js';
+import { isInteractive, pickOperation, printOperationsTable, promptParam } from './interactive.js';
+import { BOLD, RESET, DIM, RED, methodColor } from './utils.js';
+import type { OperationChoice } from './interactive.js';
+
+export type CallArgs = {
+  operation?: string;
+  _args?: string[];
+  param?: string | string[];
+  data?: string;
+  header?: string | string[];
+  include?: boolean;
+  definition?: string;
+  server?: string;
+  profile?: string;
+  token?: string;
+  json?: boolean;
+  verbose?: boolean;
+  interactive?: boolean;
+  jsonata?: string;
+  help?: boolean;
+};
+
+/**
+ * Extract all operations from an OpenAPI spec.
+ */
+const extractOperations = (spec: OpenAPIV3.Document): OperationChoice[] => {
+  const operations: OperationChoice[] = [];
+
+  for (const [path, methods] of Object.entries(spec.paths ?? {})) {
+    if (!methods) continue;
+    for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const) {
+      const op = (methods as Record<string, unknown>)[method] as OpenAPIV3.OperationObject | undefined;
+      if (!op?.operationId) continue;
+      operations.push({
+        operationId: op.operationId,
+        method: method.toUpperCase(),
+        path,
+        summary: (op.summary || op.description || '').substring(0, 80),
+      });
+    }
+  }
+
+  return operations;
+};
+
+/**
+ * Print operation help (--help on a specific operation).
+ */
+const printOperationHelp = (
+  apiName: string,
+  operationId: string,
+  spec: OpenAPIV3.Document,
+): void => {
+  for (const [path, methods] of Object.entries(spec.paths ?? {})) {
+    if (!methods) continue;
+    for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const) {
+      const op = (methods as Record<string, unknown>)[method] as OpenAPIV3.OperationObject | undefined;
+      if (!op || op.operationId !== operationId) continue;
+
+      const color = methodColor(method);
+      process.stdout.write(`\n${BOLD}epilot ${apiName} ${operationId}${RESET}`);
+      if (op.summary) process.stdout.write(` - ${op.summary}`);
+      process.stdout.write('\n\n');
+      process.stdout.write(`${color}${method.toUpperCase()}${RESET} ${path}\n\n`);
+
+      if (op.description && op.description !== op.summary) {
+        process.stdout.write(`${op.description}\n\n`);
+      }
+
+      const params = getOperationParams(spec, operationId);
+      if (params.length > 0) {
+        process.stdout.write(`${BOLD}PARAMETERS${RESET}\n`);
+        for (const p of params) {
+          const required = p.required ? 'required' : 'optional';
+          const schema = p.schema as OpenAPIV3.SchemaObject | undefined;
+          const type = schema?.type || '';
+          process.stdout.write(
+            `  ${BOLD}${p.name}${RESET}  (${p.in}, ${required})  ${type}${DIM}${p.description ? '  ' + p.description : ''}${RESET}\n`,
+          );
+        }
+        process.stdout.write('\n');
+      }
+
+      const reqBody = op.requestBody as OpenAPIV3.RequestBodyObject | undefined;
+      if (reqBody) {
+        process.stdout.write(`${BOLD}REQUEST BODY${RESET}${reqBody.required ? ' (required)' : ''}\n`);
+        if (reqBody.description) {
+          process.stdout.write(`  ${reqBody.description}\n`);
+        }
+        process.stdout.write('\n');
+      }
+
+      // Examples
+      const pathParams = params.filter((p) => p.in === 'path');
+      process.stdout.write(`${BOLD}EXAMPLES${RESET}\n`);
+      const paramExamples = pathParams.map((p) => `-p ${p.name}=<value>`).join(' ');
+      process.stdout.write(`  epilot ${apiName} ${operationId} ${paramExamples}\n`);
+      if (pathParams.length > 0) {
+        const positional = pathParams.map((p) => `<${p.name}>`).join(' ');
+        process.stdout.write(`  epilot ${apiName} ${operationId} ${positional}\n`);
+      }
+      if (reqBody) {
+        process.stdout.write(`  epilot ${apiName} ${operationId} -d '{"key":"value"}'\n`);
+      }
+      process.stdout.write('\n');
+      return;
+    }
+  }
+
+  process.stderr.write(`${RED}Operation "${operationId}" not found.${RESET}\n`);
+  process.exit(1);
+};
+
+/**
+ * Core API call logic.
+ */
+export const callApi = async (apiName: string, args: CallArgs): Promise<void> => {
+  // Load the OpenAPI definition
+  const spec = await loadDefinition(apiName, args.definition);
+  const operations = extractOperations(spec as OpenAPIV3.Document);
+
+  // No operation specified: list operations or interactive pick
+  if (!args.operation) {
+    process.stdout.write(`\n${BOLD}epilot ${apiName}${RESET} - ${(spec as OpenAPIV3.Document).info?.title || apiName}\n\n`);
+    process.stdout.write(`${BOLD}Available operations:${RESET}\n\n`);
+
+    if (isInteractive({ interactive: args.interactive })) {
+      const operationId = await pickOperation(operations);
+      // Re-run with selected operation
+      return callApi(apiName, { ...args, operation: operationId });
+    }
+
+    printOperationsTable(apiName, operations);
+    return;
+  }
+
+  const operationId = args.operation;
+
+  // --help on specific operation
+  if (args.help) {
+    printOperationHelp(apiName, operationId, spec as OpenAPIV3.Document);
+    return;
+  }
+
+  // Validate operation exists
+  const opExists = operations.some((op) => op.operationId === operationId);
+  if (!opExists) {
+    process.stderr.write(`${RED}Unknown operation "${operationId}" for ${apiName}.${RESET}\n`);
+    process.stderr.write(`\nAvailable operations:\n`);
+    for (const op of operations) {
+      process.stderr.write(`  ${op.operationId}\n`);
+    }
+    process.exit(1);
+  }
+
+  // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json)
+  const token = resolveToken(args.token, args.profile);
+  if (!token) {
+    process.stderr.write(`${RED}No authentication token found.${RESET}\n`);
+    process.stderr.write(`Run 'epilot auth login' or pass --token <token>\n`);
+    process.exit(1);
+  }
+
+  // Collect parameters
+  const opParams = getOperationParams(spec as OpenAPIV3.Document, operationId);
+  const positionalArgs = args._args ?? [];
+  let collected = collectParams(opParams, args.param, positionalArgs);
+
+  // Interactive: prompt for missing required params
+  const missing = getMissingRequired(opParams, collected);
+  if (missing.length > 0 && isInteractive({ interactive: args.interactive })) {
+    for (const param of opParams) {
+      if (param.required && !(param.name in collected)) {
+        const value = await promptParam(param.name, param);
+        if (value) collected[param.name] = value;
+      }
+    }
+  }
+
+  // Validate required params
+  const stillMissing = getMissingRequired(opParams, collected);
+  if (stillMissing.length > 0) {
+    process.stderr.write(`${RED}Missing required parameters: ${stillMissing.join(', ')}${RESET}\n`);
+    process.exit(1);
+  }
+
+  // Resolve request body
+  const { hasBody, isRequired } = getRequestBodyInfo(spec as Record<string, unknown>, operationId);
+  const body = await resolveBody(args.data, hasBody, isRequired);
+
+  // Parse custom headers
+  const customHeaders: Record<string, string> = {};
+  if (args.header) {
+    const headers = Array.isArray(args.header) ? args.header : [args.header];
+    for (const h of headers) {
+      const idx = h.indexOf(':');
+      if (idx > 0) {
+        customHeaders[h.substring(0, idx).trim()] = h.substring(idx + 1).trim();
+      }
+    }
+  }
+
+  // Resolve server URL override: --server flag > profile > spec default
+  const serverOverride = args.server || getResolvedProfile(args.profile)?.server;
+  if (serverOverride) {
+    const specDoc = spec as OpenAPIV3.Document;
+    specDoc.servers = [{ url: serverOverride }];
+  }
+
+  // Init OpenAPI client
+  const api = new OpenAPIClientAxios({
+    definition: spec,
+    quick: true,
+  });
+  const client = await api.init();
+
+  // Set auth
+  client.defaults.headers.common.authorization = `Bearer ${token}`;
+
+  // Set custom headers
+  for (const [key, value] of Object.entries(customHeaders)) {
+    client.defaults.headers.common[key] = value;
+  }
+
+  // Execute the call
+  const operationFn = (client as Record<string, unknown>)[operationId];
+  if (typeof operationFn !== 'function') {
+    process.stderr.write(`${RED}Operation "${operationId}" not found on client.${RESET}\n`);
+    process.exit(1);
+  }
+
+  try {
+    const response = await (operationFn as Function)(
+      Object.keys(collected).length > 0 ? collected : null,
+      body,
+      { validateStatus: () => true },
+    );
+
+    await formatResponse(response, {
+      json: args.json,
+      include: args.include,
+      verbose: args.verbose,
+      jsonata: args.jsonata,
+    });
+
+    // Exit with non-zero for error responses
+    if (response.status >= 400) {
+      process.exit(1);
+    }
+  } catch (err) {
+    process.stderr.write(`${RED}Request failed: ${err instanceof Error ? err.message : String(err)}${RESET}\n`);
+    process.exit(1);
+  }
+};

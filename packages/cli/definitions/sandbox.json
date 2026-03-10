@@ -1,0 +1,453 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sandbox API",
+    "version": "0.0.1",
+    "description": "API to set up pipeline connections between epilot orgs to sync and promote configurations (from sandbox to production and vice-versa)\n"
+  },
+  "tags": [
+    {
+      "name": "Pipelines",
+      "description": "Manage Sandbox Pipelines"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/sandbox/pipelines": {
+      "get": {
+        "operationId": "listPipelines",
+        "summary": "listPipelines",
+        "description": "List pipelines the current organization is part of",
+        "tags": [
+          "Pipelines"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pipelines the current organization is part of",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Pipeline"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPipeline",
+        "summary": "createPipeline",
+        "description": "Create a new pipeline by passing an api token from another organization.\n\nNote: The API token should have administrator role access for the other org.\n",
+        "tags": [
+          "Pipelines"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePipelineRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created pipeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sandbox/pipelines/{pipeline_id}": {
+      "get": {
+        "operationId": "getPipeline",
+        "summary": "getPipeline",
+        "description": "Get pipeline by ID",
+        "tags": [
+          "Pipelines"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PipelineId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned pipeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePipeline",
+        "summary": "deletePipeline",
+        "description": "Delete a pipeline by ID",
+        "tags": [
+          "Pipelines"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PipelineId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted pipeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sandbox/pipelines/{pipeline_id}/token": {
+      "get": {
+        "operationId": "generatePipelineToken",
+        "summary": "generatePipelineToken",
+        "description": "Generate a temporary pipeline access token to access the other org from the pipeline",
+        "tags": [
+          "Pipelines"
+        ],
+        "parameters": [
+          {
+            "name": "pipeline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PipelineId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The generated temporary pipeline token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pipeline_token": {
+                      "$ref": "#/components/schemas/PipelineToken"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sandbox:request": {
+      "post": {
+        "operationId": "requestSandbox",
+        "summary": "requestSandbox",
+        "description": "Request a sandbox account for a user",
+        "tags": [
+          "Sandbox Requests"
+        ],
+        "security": [
+          {},
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SandboxRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created sandbox request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SandboxRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sandbox/requests": {
+      "get": {
+        "operationId": "listSandboxRequests",
+        "summary": "listSandboxRequests",
+        "description": "List sandbox requests from users",
+        "tags": [
+          "Sandbox Requests"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sandbox requests made by users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SandboxRequest"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "OrgId": {
+        "description": "Epilot Tenant Organization ID",
+        "type": "string",
+        "example": "54321"
+      },
+      "PipelineId": {
+        "type": "string",
+        "description": "Unique identifier for a pipeline.\n\nThe format for a pipeline is: `<sandbox_org>::<production_org>`\n",
+        "example": "12345::54321"
+      },
+      "PipelineRole": {
+        "type": "string",
+        "description": "The role of the other organization in the pipeline from the perspective of the caller's organization",
+        "enum": [
+          "sandbox",
+          "production"
+        ]
+      },
+      "PipelineItem": {
+        "type": "object",
+        "properties": {
+          "pipeline_id": {
+            "$ref": "#/components/schemas/PipelineId"
+          },
+          "sandbox_org_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrgId"
+              },
+              {
+                "example": "12345"
+              }
+            ]
+          },
+          "sandbox_org_name": {
+            "type": "string",
+            "example": "Sandbox"
+          },
+          "production_org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "production_org_name": {
+            "type": "string",
+            "example": "Production"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "Pipeline": {
+        "allOf": [
+          {
+            "properties": {
+              "pipeline_role": {
+                "$ref": "#/components/schemas/PipelineRole"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/PipelineItem"
+          }
+        ]
+      },
+      "CreatePipelineRequest": {
+        "type": "object",
+        "properties": {
+          "pipeline_role": {
+            "$ref": "#/components/schemas/PipelineRole"
+          },
+          "api_token": {
+            "$ref": "#/components/schemas/SandboxToken"
+          }
+        },
+        "required": [
+          "pipeline_role",
+          "api_token"
+        ]
+      },
+      "AccessToken": {
+        "type": "string",
+        "description": "An epilot access token",
+        "example": "eyJhbGciOiJIUzI1NiIs..."
+      },
+      "SandboxToken": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessToken"
+          },
+          {
+            "description": "An API token generated from the sandbox org"
+          }
+        ]
+      },
+      "PipelineToken": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessToken"
+          },
+          {
+            "description": "A temporary access token"
+          }
+        ]
+      },
+      "SandboxRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the request",
+            "example": 12345,
+            "readOnly": true
+          },
+          "fullname": {
+            "type": "string",
+            "description": "The user who made the request",
+            "example": "John Doe"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "The company name of the user who made the request",
+            "example": "Company Name"
+          },
+          "position": {
+            "type": "string",
+            "description": "The position of the user who made the request",
+            "example": "Software Engineer"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email of the user who made the request",
+            "example": "user@example.com"
+          },
+          "sandbox_usecase": {
+            "type": "string",
+            "description": "The usecase for the request",
+            "example": "Build a payment integration"
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the request",
+            "example": "pending",
+            "enum": [
+              "pending",
+              "created",
+              "rejected"
+            ],
+            "readOnly": true
+          },
+          "connected_to_existing_epilot_customer": {
+            "type": "boolean",
+            "description": "Whether the user is in contact with an existing epilot customer"
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the request was made",
+            "example": "2022-01-01T00:00:00Z",
+            "readOnly": true
+          },
+          "sandbox_request_category": {
+            "type": "string",
+            "description": "The category of the sandbox requested",
+            "enum": [
+              "APP_DEVELOPER_ACCOUNT",
+              "BLUEPRINT_SANDBOX",
+              "OTHER"
+            ]
+          }
+        },
+        "required": [
+          "fullname",
+          "company_name",
+          "position",
+          "email",
+          "sandbox_usecase",
+          "connected_to_existing_epilot_customer"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://sandbox.sls.epilot.io"
+    }
+  ]
+}

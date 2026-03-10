@@ -1,0 +1,344 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Consent API",
+    "version": "1.0.0",
+    "description": "Consent Management for epilot customer entities\n"
+  },
+  "tags": [
+    {
+      "name": "consent",
+      "description": "Consent Management"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/consent/publish": {
+      "post": {
+        "operationId": "publishConsentEvent",
+        "summary": "publishConsentEvent",
+        "description": "Publishes consent event on event bus, which appends to consent store\n",
+        "tags": [
+          "consent"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentEventRequestBody"
+              },
+              "examples": {
+                "OptInEmailMarketing": {
+                  "$ref": "#/components/examples/ConsentOptInEmailMarketing"
+                },
+                "OptInSMSMarketing": {
+                  "$ref": "#/components/examples/ConsentOptInSMSMarketing"
+                },
+                "OptInPhoneCallMarketing": {
+                  "$ref": "#/components/examples/ConsentOptInPhoneCallMarketing"
+                },
+                "OptOutEmailMarketing": {
+                  "$ref": "#/components/examples/ConsentOptOutEmailMarketing"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created opt-in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentEvent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consent/{identifier}": {
+      "get": {
+        "operationId": "listConsentEvents",
+        "summary": "listConsentEvents",
+        "description": "List opt-ins and opt-outs by customer identifier\n",
+        "tags": [
+          "consent"
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ConsentIdentifier"
+            }
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ConsentTopic"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of opt-ins and opt-outs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConsentEvent"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/opt-in/{token}": {
+      "get": {
+        "operationId": "handleOptInWithToken",
+        "summary": "handleOptInWithToken",
+        "security": [],
+        "description": "Endpoint to handle opt-in links\n",
+        "tags": [
+          "consent"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "de"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handler page for opt in links",
+            "content": {
+              "text/html": {
+                "example": "<p>You are subscribed!</p>\n"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Id Token\n"
+      }
+    },
+    "schemas": {
+      "ConsentIdentifier": {
+        "type": "string",
+        "description": "Unique identifier for consent source (e.g. customer email or phone)",
+        "example": "exampleuser@epilot.cloud"
+      },
+      "ConsentTopic": {
+        "type": "string",
+        "description": "Consent Topic (what the person is opting into)",
+        "example": "EMAIL_MARKETING"
+      },
+      "ConsentSource": {
+        "type": "string",
+        "description": "Consent Source (Origin of the Consent Event)",
+        "example": "www.frontend.epilot.cloud"
+      },
+      "ConsentMeta": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "double_opt_in": true,
+          "source_type": "journey",
+          "source_id": "0e4f2a26-14f0-4ada-9294-a7d7a0b9b214",
+          "ip_address": "1.1.1.1",
+          "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+        }
+      },
+      "ConsentEventRequestBody": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "OPT_IN",
+              "OPT_OUT"
+            ]
+          },
+          "topic": {
+            "$ref": "#/components/schemas/ConsentTopic"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ConsentSource"
+          },
+          "identifier": {
+            "$ref": "#/components/schemas/ConsentIdentifier"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ConsentMeta"
+          }
+        },
+        "required": [
+          "type",
+          "topic",
+          "identifier"
+        ]
+      },
+      "ConsentEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "OPT_IN",
+              "OPT_OUT",
+              "DOUBLE_OPT_IN_REQUESTED",
+              "DOUBLE_OPT_IN"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/ConsentTopic"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ConsentSource"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "identifier": {
+            "$ref": "#/components/schemas/ConsentIdentifier"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ConsentMeta"
+          }
+        },
+        "required": [
+          "type",
+          "topic",
+          "identifier"
+        ]
+      },
+      "OrganizationId": {
+        "type": "string",
+        "example": "123"
+      }
+    },
+    "examples": {
+      "ConsentOptInEmailMarketing": {
+        "value": {
+          "type": "OPT_IN",
+          "topic": "EMAIL_MARKETING",
+          "identifier": "exampleuser@epilot.cloud",
+          "source": "frontend.epilot.cloud",
+          "meta": {
+            "ip_address": "1.1.1.1",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          }
+        }
+      },
+      "ConsentOptOutEmailMarketing": {
+        "value": {
+          "type": "OPT_OUT",
+          "topic": "EMAIL_MARKETING",
+          "identifier": "exampleuser@epilot.cloud",
+          "source": "unsubscribe via email",
+          "meta": {
+            "ip_address": "1.1.1.1",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          }
+        }
+      },
+      "ConsentOptInSMSMarketing": {
+        "value": {
+          "type": "OPT_IN",
+          "topic": "SMS_MARKETING",
+          "identifier": "+49 123 1234567",
+          "source": "frontend.epilot.cloud",
+          "meta": {
+            "ip_address": "1.1.1.1",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          }
+        }
+      },
+      "ConsentOptInPhoneCallMarketing": {
+        "value": {
+          "type": "OPT_IN",
+          "topic": "PHONE_CALL_MARKETING",
+          "identifier": "+49 123 1234567",
+          "source": "frontend.epilot.cloud",
+          "meta": {
+            "ip_address": "1.1.1.1",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://consent.sls.epilot.io"
+    },
+    {
+      "url": "https://consent.sls.epilot.io"
+    }
+  ]
+}

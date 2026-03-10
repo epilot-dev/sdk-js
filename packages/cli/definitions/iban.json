@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Iban API",
+    "version": "1.0.0",
+    "description": "API Backend for epilot Iban feature.",
+    "contact": {
+      "name": "Support",
+      "email": "info@epilot.cloud",
+      "url": "https://help.epilot.cloud"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://iban-api.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Ibans",
+      "description": "Operations related to ibans"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/public/iban:validate": {
+      "post": {
+        "operationId": "validateIban",
+        "summary": "validateIban",
+        "description": "Validate an Iban",
+        "security": [
+          {},
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "tags": [
+          "Ibans"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "iban": {
+                    "type": "string",
+                    "description": "IBAN to be validated"
+                  }
+                },
+                "required": [
+                  "iban"
+                ]
+              },
+              "example": {
+                "iban": "DE89370400440532013000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": "Bad Request",
+                  "error": "Invalid request body"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": "Internal Error",
+                  "error": "Internal Server Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Public Access Bearer Token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "description": "Error",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4443 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "App API",
+    "description": "API for managing app publishing and installed app.",
+    "version": "2.0.0"
+  },
+  "tags": [
+    {
+      "name": "App Configuration",
+      "description": "Create and manage app configurations"
+    },
+    {
+      "name": "App Installation",
+      "description": "Install and uninstall apps"
+    },
+    {
+      "name": "App Analytics",
+      "description": "Analytics for installed apps"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://app.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/public/app/{appId}/components/{componentId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration to install"
+        },
+        {
+          "name": "componentId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the component to retrieve"
+        }
+      ],
+      "get": {
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "summary": "getPublicFacingComponent",
+        "description": "Retrieve public facing components for an installed app",
+        "operationId": "getPublicFacingComponent",
+        "tags": [
+          "App Installation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with public app component details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "$ref": "#/components/schemas/BaseComponent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App Installation not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations": {
+      "get": {
+        "summary": "listConfigurations",
+        "description": "List all app configuration metadata owned by an organization. To get full app configuration details, use the /v1/app-configurations/{appId} endpoint.",
+        "operationId": "listConfigurations",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of app configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "configurations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationMetadata"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "createConfiguration",
+        "description": "Create a new private app configuration. To make it public a verification process needs to be triggered",
+        "operationId": "createConfiguration",
+        "tags": [
+          "App Configuration"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateConfigRequest"
+        },
+        "responses": {
+          "201": {
+            "description": "App configuration created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "app_id"
+                  ],
+                  "properties": {
+                    "app_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/public": {
+      "get": {
+        "summary": "listPublicConfigurations",
+        "description": "List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.",
+        "operationId": "listPublicConfigurations",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of public app configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "configurations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationMetadata"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/public/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration to install"
+        }
+      ],
+      "get": {
+        "summary": "getPublicConfiguration",
+        "description": "Retrieve the public configuration of an app to install in your tenant",
+        "operationId": "getPublicConfiguration",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConfiguration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration"
+        }
+      ],
+      "get": {
+        "summary": "getConfiguration",
+        "description": "Retrieve a specific app configuration",
+        "operationId": "getConfiguration",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Configuration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchMetadata",
+        "description": "Patch non-versioned configuration metadata of a given app configuration.",
+        "operationId": "patchMetadata",
+        "tags": [
+          "App Configuration"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PatchConfigMetadataRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Configuration patched successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete app configuration",
+        "description": "Delete an app configuration and all its versions and components.",
+        "operationId": "deleteConfiguration",
+        "tags": [
+          "App Configuration"
+        ],
+        "responses": {
+          "204": {
+            "description": "App configuration deleted successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/events": {
+      "post": {
+        "summary": "queryEvents",
+        "description": "Query analytics events for a specific app with flexible filtering",
+        "operationId": "queryEvents",
+        "tags": [
+          "App Analytics"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventsQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analytics events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/bundle": {
+      "post": {
+        "summary": "createBundleUploadUrl",
+        "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path",
+        "operationId": "createBundleUploadUrl",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateBundlePresignedRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url"
+                  ],
+                  "properties": {
+                    "component_id": {
+                      "type": "string",
+                      "description": "ID of the journye block component"
+                    },
+                    "component_url": {
+                      "type": "string",
+                      "description": "URL of the web component object"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the bundle"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/zip": {
+      "post": {
+        "summary": "createZipUploadUrl",
+        "operationId": "createZipUploadUrl",
+        "description": "Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path\n",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "description": "Version of the app configuration",
+                    "example": "1.0.0"
+                  },
+                  "component_id": {
+                    "type": "string",
+                    "description": "ID of the journey block component"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "example": "dist.zip"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url",
+                    "artifact_url"
+                  ],
+                  "properties": {
+                    "component_id": {
+                      "type": "string",
+                      "description": "ID of the journye block component"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the bundle"
+                    },
+                    "artifact_url": {
+                      "type": "string",
+                      "description": "Public CDN URL for the unpacked artifacts"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/logo": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the app configuration"
+        }
+      ],
+      "post": {
+        "summary": "createLogoUploadUrl",
+        "description": "Generate a presigned URL for uploading app logo to /<app-id>/logo.png path",
+        "operationId": "createLogoUploadUrl",
+        "tags": [
+          "App Configuration"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateLogoPresignedRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "upload_url"
+                  ],
+                  "properties": {
+                    "upload_url": {
+                      "type": "string",
+                      "description": "Presigned S3 URL for uploading the logo"
+                    },
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the upload URL expires"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteLogo",
+        "description": "Delete the app logo from /<app-id>/logo.png path",
+        "operationId": "deleteLogo",
+        "tags": [
+          "App Configuration"
+        ],
+        "responses": {
+          "204": {
+            "description": "Logo deleted successfully"
+          },
+          "404": {
+            "description": "App configuration not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions": {
+      "get": {
+        "summary": "listVersions",
+        "description": "Retrieve a list of versions for an app configuration",
+        "operationId": "listVersions",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of app versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigurationVersion"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}": {
+      "get": {
+        "summary": "getVersion",
+        "description": "Retrieve a specific version of an app configuration",
+        "operationId": "getVersion",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version of the app configuration to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App configuration for specific version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Configuration"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App configuration or version not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteVersion",
+        "description": "Delete a specific version of an app configuration",
+        "operationId": "deleteVersion",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Version deleted successfully"
+          },
+          "400": {
+            "description": "Cannot delete the only remaining version"
+          },
+          "404": {
+            "description": "Version not found"
+          },
+          "409": {
+            "description": "Version is in use by installations"
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchVersion",
+        "description": "Patch an existing app version",
+        "operationId": "patchVersion",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PatchVersionRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Version patched successfully"
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/review": {
+      "get": {
+        "summary": "getReview",
+        "description": "Retrieve the review status of a specific app version",
+        "operationId": "getReview",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to retrieve the review status for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found or no review exists for this version"
+          }
+        }
+      },
+      "post": {
+        "summary": "createReview",
+        "description": "Submit an app version for review to make it public",
+        "operationId": "createReview",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to submit for review"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreateReviewRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Version submitted for review successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components": {
+      "post": {
+        "summary": "createComponent",
+        "description": "Patch an existing app version to create/add a component",
+        "operationId": "createComponent",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "Component created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "component": {
+                      "$ref": "#/components/schemas/BaseComponent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{version}/components/{componentId}": {
+      "patch": {
+        "summary": "patchComponent",
+        "description": "Patch an existing app version to update its components",
+        "operationId": "patchComponent",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the component to update"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpsertComponentRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "Component patched successfully"
+          },
+          "400": {
+            "description": "Invalid version format"
+          },
+          "404": {
+            "description": "Version or component not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "deleteComponent",
+        "description": "Delete a specific component from an app version",
+        "operationId": "deleteComponent",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version to update"
+          },
+          {
+            "name": "componentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the component to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Component deleted successfully"
+          },
+          "404": {
+            "description": "Version or component not found"
+          }
+        }
+      }
+    },
+    "/v1/app-configurations/{appId}/versions/{sourceVersion}/clone-to/{targetVersion}": {
+      "post": {
+        "summary": "cloneVersion",
+        "description": "Clone an existing app version to create a new version",
+        "operationId": "cloneVersion",
+        "tags": [
+          "App Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the app configuration"
+          },
+          {
+            "name": "sourceVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Source version to clone from"
+          },
+          {
+            "name": "targetVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Target version to create"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New version created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "app_id": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "published"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version format or target version already exists"
+          },
+          "404": {
+            "description": "Source version not found"
+          }
+        }
+      }
+    },
+    "/v1/app": {
+      "get": {
+        "summary": "listInstallations",
+        "description": "Retrieve a list of installed apps for the organization.",
+        "operationId": "listInstallations",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "componentType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ComponentType"
+            },
+            "description": "Filter apps by specific component type",
+            "example": "CUSTOM_JOURNEY_BLOCK"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter apps by enabled status"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "apps": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Installation"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/{appId}": {
+      "get": {
+        "summary": "getInstallation",
+        "description": "Retrieve details of an installed app by its ID.",
+        "operationId": "getInstallation",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details about an app installation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Installation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Installation not found."
+          }
+        }
+      },
+      "post": {
+        "summary": "install",
+        "description": "Upsert app installation by its ID.",
+        "operationId": "install",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallRequest"
+        },
+        "responses": {
+          "201": {
+            "description": "App successfully installed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Installation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      },
+      "patch": {
+        "summary": "patchInstallation",
+        "description": "Patch an installed app by its ID.",
+        "operationId": "patchInstallation",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/InstallRequest"
+        },
+        "responses": {
+          "204": {
+            "description": "App installation patched successfully."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "uninstall",
+        "description": "Uninstall an app by its ID.",
+        "operationId": "uninstall",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "App deleted successfully."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        }
+      }
+    },
+    "/v1/app/{appId}/promote-to/{version}": {
+      "post": {
+        "summary": "promoteVersion",
+        "description": "Update an installed app to a new version",
+        "operationId": "promoteVersion",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App successfully promoted to new version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Installation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid version or version not available"
+          },
+          "404": {
+            "description": "App installation not found"
+          }
+        }
+      }
+    },
+    "/v1/app-events": {
+      "post": {
+        "summary": "ingestEvent",
+        "operationId": "ingestEvent",
+        "description": "Internal endpoint for services to submit app events for analytic purposes",
+        "tags": [
+          "App Analytics"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AppEventData"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BatchEventRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Events accepted for processing"
+          },
+          "400": {
+            "description": "Invalid event format"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "CreateReviewRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "technical_contact",
+                "marketing_contact"
+              ],
+              "properties": {
+                "technical_contact": {
+                  "type": "string",
+                  "description": "Email of the technical contact"
+                },
+                "marketing_contact": {
+                  "type": "string",
+                  "description": "Email of the marketing contact"
+                },
+                "demo_url": {
+                  "type": "string",
+                  "description": "URL to a demo of the app"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CreateLogoPresignedRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "filename",
+                "mime_type"
+              ],
+              "properties": {
+                "filename": {
+                  "type": "string",
+                  "description": "Original filename of the logo",
+                  "example": "company-logo.png"
+                },
+                "mime_type": {
+                  "type": "string",
+                  "description": "MIME type of the logo file",
+                  "enum": [
+                    "image/png",
+                    "image/jpeg",
+                    "image/jpg"
+                  ],
+                  "example": "image/png"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CreateBundlePresignedRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "version"
+              ],
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "Version of the app"
+                },
+                "component_id": {
+                  "type": "string",
+                  "description": "ID of the journey block component"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PatchConfigMetadataRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the app"
+                },
+                "description": {
+                  "$ref": "#/components/schemas/TranslatedString"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "documentation_url": {
+                  "type": "string"
+                },
+                "notifications": {
+                  "$ref": "#/components/schemas/NotificationConfig"
+                },
+                "pricing": {
+                  "$ref": "#/components/schemas/Pricing"
+                },
+                "logo_url_key": {
+                  "type": "string",
+                  "description": "S3 key of the logo file"
+                },
+                "support_email": {
+                  "type": "string",
+                  "description": "Email address for support requests"
+                },
+                "dev_mode": {
+                  "type": "boolean",
+                  "description": "Flag to indicate if the app is in dev mode. If true, the app takes the override properties of components into account."
+                }
+              }
+            }
+          }
+        }
+      },
+      "PatchVersionRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest to use for this version"
+                },
+                "role_id": {
+                  "nullable": true,
+                  "type": "string",
+                  "description": "Name of the role"
+                },
+                "grants": {
+                  "$ref": "#/components/schemas/Grants"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UpsertComponentRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BaseComponent"
+            }
+          }
+        }
+      },
+      "CreateConfigRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "description"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the app"
+                },
+                "description": {
+                  "$ref": "#/components/schemas/TranslatedString"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "logo_url_key": {
+                  "type": "string",
+                  "description": "S3 key of the logo file"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InstallRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "Version of the app to update to"
+                },
+                "option_values": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OptionsRef"
+                  },
+                  "description": "Configuration values for the app components"
+                },
+                "_manifest": {
+                  "type": "array",
+                  "description": "Manifest ID used to create/update the entity",
+                  "items": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "Role": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Name of the role"
+          },
+          "grants": {
+            "$ref": "#/components/schemas/Grants"
+          }
+        }
+      },
+      "Options": {
+        "type": "object",
+        "description": "Options for the component configuration",
+        "required": [
+          "key",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique identifier for this configuration option"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label for the configuration option"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Flag to indicate if this option is required"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of what this configuration option does"
+          },
+          "value": {
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ],
+            "description": "The configured value for this option. Is only present when the component is installed."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "boolean",
+              "secret"
+            ]
+          }
+        }
+      },
+      "Option": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key matching a config_option from the component"
+          },
+          "value": {
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ],
+            "description": "The configured value for this option"
+          }
+        }
+      },
+      "OptionsRef": {
+        "type": "object",
+        "required": [
+          "component_id",
+          "options"
+        ],
+        "properties": {
+          "component_id": {
+            "type": "string",
+            "description": "ID of the component these values are for"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          }
+        }
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "description": "The name of the S3 bucket where the JSON file for import is stored.",
+            "example": "my-bucket"
+          },
+          "key": {
+            "type": "string",
+            "description": "The key or path to the JSON file within the S3 bucket.",
+            "example": "manifest.json"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "CUSTOM_JOURNEY_BLOCK",
+          "CUSTOM_PORTAL_BLOCK",
+          "PORTAL_EXTENSION",
+          "CUSTOM_FLOW_ACTION",
+          "ERP_INFORM_TOOLKIT",
+          "CUSTOM_CAPABILITY",
+          "EXTERNAL_PRODUCT_CATALOG",
+          "CUSTOM_PAGE"
+        ],
+        "description": "Type of app component"
+      },
+      "Author": {
+        "type": "object",
+        "required": [
+          "company"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the author",
+            "maxLength": 50
+          },
+          "company": {
+            "type": "string",
+            "description": "Company of the author",
+            "maxLength": 30
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the author",
+            "maxLength": 30
+          }
+        }
+      },
+      "NotificationConfig": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address to receive notifications",
+            "example": "developer@example.com"
+          },
+          "events": {
+            "type": "array",
+            "description": "List of events to subscribe to",
+            "items": {
+              "$ref": "#/components/schemas/NotificationEvent"
+            },
+            "minItems": 0
+          }
+        }
+      },
+      "NotificationEvent": {
+        "type": "string",
+        "enum": [
+          "app.installed",
+          "app.uninstalled"
+        ]
+      },
+      "BaseComponentCommon": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the component"
+          },
+          "name": {
+            "allOf": [
+              {
+                "description": "Name of the component"
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "description": {
+            "allOf": [
+              {
+                "description": "Description of the component"
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "description": "List of options for the app component"
+          },
+          "surfaces": {
+            "type": "object"
+          }
+        }
+      },
+      "BaseComponent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseComponentCommon"
+          },
+          {
+            "type": "object",
+            "discriminator": {
+              "propertyName": "component_type",
+              "mapping": {
+                "CUSTOM_JOURNEY_BLOCK": "#/components/schemas/JourneyBlockComponent",
+                "CUSTOM_PORTAL_BLOCK": "#/components/schemas/PortalBlockComponent",
+                "PORTAL_EXTENSION": "#/components/schemas/PortalExtensionComponent",
+                "CUSTOM_FLOW_ACTION": "#/components/schemas/CustomFlowActionComponent",
+                "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent",
+                "CUSTOM_CAPABILITY": "#/components/schemas/CustomCapabilityComponent",
+                "EXTERNAL_PRODUCT_CATALOG": "#/components/schemas/ExternalProductCatalogComponent",
+                "CUSTOM_PAGE": "#/components/schemas/CustomPageComponent"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JourneyBlockComponent"
+              },
+              {
+                "$ref": "#/components/schemas/PortalBlockComponent"
+              },
+              {
+                "$ref": "#/components/schemas/PortalExtensionComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomFlowActionComponent"
+              },
+              {
+                "$ref": "#/components/schemas/ErpInformToolkitComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomCapabilityComponent"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalProductCatalogComponent"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPageComponent"
+              }
+            ]
+          }
+        ]
+      },
+      "CustomCapabilityComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_CAPABILITY"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "Define what type of capability this is",
+                "type": "string",
+                "enum": [
+                  "tab",
+                  "group"
+                ]
+              },
+              "allowed_schemas": {
+                "description": "Which schemas are supported by the capability. If empty, all schemas are supported.",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "Name of the schema",
+                  "example": "opportunity"
+                }
+              }
+            }
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "capability_config": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
+          }
+        }
+      },
+      "CustomPageComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_PAGE"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/CustomPageConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
+          }
+        }
+      },
+      "CustomPageConfig": {
+        "type": "object",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "URL slug for the page route. Must be unique per organization.",
+            "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+            "example": "zapier"
+          },
+          "nav_label": {
+            "type": "string",
+            "description": "Display label in the navigation sidebar.",
+            "example": "Zapier"
+          },
+          "nav_icon": {
+            "type": "string",
+            "description": "Icon identifier for the navigation item.",
+            "example": "zap"
+          },
+          "nav_description": {
+            "type": "string",
+            "description": "Optional tooltip or description for the navigation item."
+          }
+        }
+      },
+      "JourneyBlockComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_JOURNEY_BLOCK"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/JourneyBlockConfig"
+          }
+        }
+      },
+      "PortalBlockComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_PORTAL_BLOCK"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/PortalBlockConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "portal_block": {
+                "$ref": "#/components/schemas/PortalBlockSurfaceConfig"
+              }
+            }
+          }
+        }
+      },
+      "ErpInformToolkitComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "ERP_INFORM_TOOLKIT"
+            ]
+          },
+          "configuration": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "inbound",
+                  "outbound"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "CustomFlowActionComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "CUSTOM_FLOW_ACTION"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/CustomFlowConfig"
+          },
+          "surfaces": {
+            "type": "object",
+            "properties": {
+              "flow_action_config": {
+                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+              }
+            }
+          }
+        }
+      },
+      "BaseCustomActionConfig": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the custom action"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the custom action"
+          },
+          "wait_for_callback": {
+            "type": "boolean",
+            "description": "Wait for callback_url to be called before completing the action"
+          }
+        }
+      },
+      "ExternalIntegrationCustomActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCustomActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "external_integration"
+                ]
+              },
+              "external_integration_settings": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "URL to call"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "SandboxCustomActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCustomActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "sandbox"
+                ]
+              },
+              "sandbox_settings": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.\n",
+                    "maxLength": 307200
+                  }
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "CustomFlowConfig": {
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/SandboxCustomActionConfig"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig",
+            "sandbox": "#/components/schemas/SandboxCustomActionConfig"
+          }
+        }
+      },
+      "ExternalProductCatalogComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "EXTERNAL_PRODUCT_CATALOG"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/ExternalProductCatalogConfig"
+          }
+        }
+      },
+      "ExternalProductCatalogConfig": {
+        "type": "object",
+        "properties": {
+          "hooks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "products": "#/components/schemas/ExternalProductCatalogHookProducts",
+                  "product-recommendations": "#/components/schemas/ExternalProductCatalogHookProductRecommendations"
+                }
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ExternalProductCatalogHookProducts"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalProductCatalogHookProductRecommendations"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalProductCatalogHookProducts": {
+        "description": "Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "products"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExternalProductCatalogAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalProductCatalogHookProductRecommendations": {
+        "description": "Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "product-recommendations"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExternalProductCatalogAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for the call. Supports variable interpolation. If empty / not provided, the default request context will be used based on the consumer (e.g. Journey).",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "call",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "PORTAL_EXTENSION"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/PortalExtensionConfig"
+          }
+        }
+      },
+      "PortalExtensionConfig": {
+        "type": "object",
+        "properties": {
+          "hooks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "registrationIdentifiersCheck": "#/components/schemas/PortalExtensionHookRegistrationIdentifiersCheck",
+                  "contractIdentification": "#/components/schemas/PortalExtensionHookContractIdentification",
+                  "priceDataRetrieval": "#/components/schemas/PortalExtensionHookPriceDataRetrieval",
+                  "consumptionDataRetrieval": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval",
+                  "costDataRetrieval": "#/components/schemas/PortalExtensionHookCostDataRetrieval",
+                  "meterReadingPlausibilityCheck": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck"
+                }
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookRegistrationIdentifiersCheck"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookContractIdentification"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookPriceDataRetrieval"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookCostDataRetrieval"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck"
+                }
+              ]
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PortalExtensionSeamlessLink"
+                }
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "PortalExtensionHookRegistrationIdentifiersCheck": {
+        "description": "Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:\n  - 200 with contact id if exactly one contact is found\n  - 404 if no contact is found or more than contact is found\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "registrationIdentifiersCheck"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
+              },
+              "result": {
+                "type": "string",
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookContractIdentification": {
+        "description": "Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).\nThe expected response http status code to the call is:\n  - 200 if found\n  - 404 if not found\n\nThe following assignment modes are supported:\n  - `contracts`: We expect the response to contain Contract ids (customizable using `result` property).\n  - `contact_to_contracts`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact as a Customer to the Contracts and (optionally) update the Contact attribute specified by `contact_relation_attribute` to add the matched Contact.\n  - `contact_to_portal_user`: We expect the response to contain a Contact id (customizable using `result` property) and we will assign the Contact to the Portal User. Portal User will be able to see all data including Contracts transitively.\n\nDefaults to `contact_to_contracts` for backwards compatibility. We recommend using `contact_to_portal_user` as it does not influence the data model of business entities.\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "contractIdentification"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to object with all configured identifiers grouped by entity, e.g. `{\"contract\": {\"contract_name\": \"Name\"}}`. Supports variable interpolation."
+              },
+              "result": {
+                "type": "string",
+                "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "assignment_mode": {
+            "type": "string",
+            "enum": [
+              "contracts",
+              "contact_to_contracts",
+              "contact_to_portal_user"
+            ],
+            "description": "Mode of contract assignment. See hook description for mode details.",
+            "default": "contact_to_contracts"
+          },
+          "contact_relation_attribute": {
+            "type": "string",
+            "description": "Name of the Contact attribute to update with the matched Contact ID when using `contact_to_contracts` mode. Must be a Contact relation attribute supporting multiple entities.",
+            "example": "represents_contact"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "This process will give you access to the matching Contracts."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Explanation of the hook."
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookMeterReadingPlausibilityCheck": {
+        "description": "Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:\n  - 200:\n    If meter reading is plausible, the response should contain:\n      - valid: true\n    If meter reading is not plausible, the response should contain:\n      - valid: false\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "meterReadingPlausibilityCheck"
+            ]
+          },
+          "plausibility_mode": {
+            "type": "string",
+            "enum": [
+              "check",
+              "range"
+            ],
+            "default": "check",
+            "description": "Mode for plausibility check:\n- \"check\": Validates meter reading and returns valid: boolean (used during submission)\n- \"range\": Returns min/max allowed values for each counter for validation before submission\n"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to use for the call. Supports variable interpolation.",
+                "additionalProperties": true
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url",
+              "headers",
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "description": "Response to the call",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to an array in the response. If specified and the path points to an array,\nthe hook will map over each item using 'Item' variable for interpolation.\nRelevant only if plausibility_mode is \"range\".\n",
+                "example": "data.results"
+              },
+              "counter_identifiers": {
+                "description": "Counter identifier(s) used to match against the meter's counters.\nCan be a string (counter ID) or an object with counter properties.\nThe backend resolves this to meter_counter_id in the final response.\nRelevant only if plausibility_mode is \"range\".\n",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "obis_code": "{{Item.obis}}"
+                }
+              },
+              "valid": {
+                "type": "string",
+                "description": "Indicate whether the meter reading is plausible. Relevant only if plausibility_mode is \"check\".",
+                "example": "{{CallResponse.data.valid}}"
+              },
+              "upper_limit": {
+                "type": "string",
+                "description": "Upper allowed limit of the meter reading",
+                "example": "{{CallResponse.data.upper_limit}}"
+              },
+              "lower_limit": {
+                "type": "string",
+                "description": "Lower allowed limit of the meter reading",
+                "example": "{{CallResponse.data.lower_limit}}"
+              }
+            },
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call",
+          "resolved"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookPriceDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "priceDataRetrieval"
+            ]
+          },
+          "intervals": {
+            "type": "array",
+            "description": "Intervals supported by the API. If omitted, it is assumed that all intervals are supported.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            }
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookConsumptionDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "consumptionDataRetrieval"
+            ]
+          },
+          "intervals": {
+            "type": "array",
+            "description": "Intervals supported by the API. If omitted, it is assumed that all intervals are supported.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            }
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookCostDataRetrieval": {
+        "description": "Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:\n  - 200 with the time series data\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "costDataRetrieval"
+            ]
+          },
+          "intervals": {
+            "type": "array",
+            "description": "Intervals supported by the API. If omitted, it is assumed that all intervals are supported.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            }
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              }
+            },
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "default": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionSeamlessLink": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the link. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "seamless"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "description": "Controls whether the link should be shown. Supports variable interpolation.",
+            "example": "{{Contact.customer_number | is_not_empty}}"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "redirect": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "URL to redirect to. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "redirect"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionAuthBlock": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use for authentication",
+            "default": "GET"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to use for authentication. Supports variable interpolation."
+          },
+          "params": {
+            "type": "object",
+            "description": "Parameters to append to the URL. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "headers": {
+            "type": "object",
+            "description": "Headers to use for authentication. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "body": {
+            "type": "object",
+            "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
+            "additionalProperties": true
+          },
+          "cache": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Key to use to identify the auth response. Supports interpolation.",
+                "example": "{{Options.api_key}}"
+              },
+              "ttl": {
+                "type": "string",
+                "description": "Time to live in seconds for the cache. Supports interpolation.",
+                "example": "{{AuthResponse.data.expires_in}}"
+              }
+            },
+            "required": [
+              "key",
+              "ttl"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "ExternalProductCatalogAuthBlock": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use for authentication",
+            "default": "GET"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL to use for authentication. Supports variable interpolation."
+          },
+          "params": {
+            "type": "object",
+            "description": "Parameters to append to the URL. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "headers": {
+            "type": "object",
+            "description": "Headers to use for authentication. Supports variable interpolation.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {}
+          },
+          "body": {
+            "type": "object",
+            "description": "JSON body to use for authentication. Supports variable interpolation. Content format is determined by Content-Type header.",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "OverrideDevMode": {
+        "type": "object",
+        "description": "Override URL when app is in dev mode",
+        "properties": {
+          "override_url": {
+            "type": "string",
+            "description": "URL of the web component object in dev mode",
+            "example": "http://localhost:3000"
+          }
+        }
+      },
+      "JourneyBlockConfig": {
+        "type": "object",
+        "required": [
+          "component_url",
+          "component_tag"
+        ],
+        "properties": {
+          "override_dev_mode": {
+            "$ref": "#/components/schemas/OverrideDevMode"
+          },
+          "component_url": {
+            "type": "string",
+            "description": "URL of the web component object",
+            "example": "https://cdn.apps.com/123/v1.0.0/bundle.js",
+            "readOnly": true
+          },
+          "component_tag": {
+            "type": "string",
+            "description": "Custom element tag for the component"
+          },
+          "component_args": {
+            "type": "array",
+            "description": "Arguments to pass to the component",
+            "items": {
+              "$ref": "#/components/schemas/JourneyBlockComponentArgs"
+            }
+          },
+          "component_size": {
+            "type": "number",
+            "description": "Size of the bundle in bytes",
+            "readOnly": true
+          },
+          "component_mapping": {
+            "description": "Define data which is mapped to entity mapping ui blocks",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "string",
+                "boolean",
+                "date",
+                "datetime",
+                "link",
+                "number"
+              ]
+            }
+          }
+        }
+      },
+      "PortalBlockConfig": {
+        "type": "object"
+      },
+      "AppBridgeSurfaceConfig": {
+        "type": "object",
+        "properties": {
+          "app_url": {
+            "type": "string",
+            "description": "URL of the uploaded App Bridge App. This is the entrypoint for the app"
+          },
+          "zip_url": {
+            "type": "string",
+            "description": "URL of the uploaded zip file containing the app"
+          },
+          "override_url": {
+            "type": "string",
+            "description": "URL of the app in dev mode"
+          }
+        }
+      },
+      "PortalBlockSurfaceConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "section": {
+                "description": "Define which section of the portal this block can be placed in",
+                "type": "string",
+                "enum": [
+                  "main",
+                  "footer"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "JourneyBlockComponentArgs": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "key",
+              "label",
+              "type"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Unique identifier for this component arg"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "boolean",
+                  "enum"
+                ]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Flag to indicate if this option is required",
+                "default": false
+              },
+              "description": {
+                "allOf": [
+                  {
+                    "description": "Description of what this component arg does"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TranslatedString"
+                  }
+                ]
+              },
+              "label": {
+                "allOf": [
+                  {
+                    "description": "Human-readable label for the component arg"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TranslatedString"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "text": "#/components/schemas/TextArg",
+                "boolean": "#/components/schemas/BooleanArg",
+                "enum": "#/components/schemas/EnumArg"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TextArg"
+              },
+              {
+                "$ref": "#/components/schemas/BooleanArg"
+              },
+              {
+                "$ref": "#/components/schemas/EnumArg"
+              }
+            ]
+          }
+        ]
+      },
+      "TextArg": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "text"
+            ]
+          }
+        }
+      },
+      "BooleanArg": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "boolean"
+            ]
+          }
+        }
+      },
+      "EnumArg": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "enum"
+            ]
+          },
+          "isMulti": {
+            "type": "boolean",
+            "description": "If true, allows selection of multiple values",
+            "default": false
+          },
+          "options": {
+            "type": "array",
+            "description": "List of options for enum type",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the option"
+                },
+                "label": {
+                  "allOf": [
+                    {
+                      "description": "Display label for the option"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TranslatedString"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "BillingFrequency": {
+        "type": "string",
+        "enum": [
+          "MONTHLY",
+          "QUARTERLY",
+          "YEARLY",
+          "CUSTOM"
+        ],
+        "description": "How often the subscription is billed"
+      },
+      "Pricing": {
+        "type": "object",
+        "properties": {
+          "pricing_type": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "SUBSCRIPTION",
+              "USAGE_BASED",
+              "ONE_TIME",
+              "CUSTOM",
+              "UNKNOWN"
+            ]
+          },
+          "billing_frequency": {
+            "$ref": "#/components/schemas/BillingFrequency"
+          }
+        }
+      },
+      "Audit": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "description": "Timestamp of the creation",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID of the creator",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Timestamp of the last update",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "User ID of the last updater",
+            "readOnly": true
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is under review",
+            "readOnly": true
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
+            "description": "Status of the review"
+          },
+          "requested_at": {
+            "type": "string",
+            "description": "Timestamp of the review",
+            "readOnly": true
+          },
+          "requested_by": {
+            "type": "string",
+            "description": "User ID of the reviewer",
+            "readOnly": true
+          },
+          "technical_contact": {
+            "type": "string",
+            "description": "Email of the technical contact"
+          },
+          "marketing_contact": {
+            "type": "string",
+            "description": "Email of the marketing contact"
+          },
+          "demo_url": {
+            "type": "string",
+            "description": "URL of the demo"
+          }
+        }
+      },
+      "ConfigurationMetadata": {
+        "description": "Basic metadata about your app configuration which does not get versioned",
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "latest_version",
+          "owner_org_id",
+          "app_id",
+          "versions"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the app"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "dev_mode": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in dev mode. If true, the app takes the override_url property of components into account."
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of available versions of the app",
+            "readOnly": true
+          },
+          "public_versions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of available public versions of the app",
+            "readOnly": true
+          },
+          "support_email": {
+            "type": "string",
+            "description": "Email address for support requests"
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "Latest version of the app",
+            "readOnly": true
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the app."
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "URL of the app icon."
+          },
+          "documentation_url": {
+            "type": "string",
+            "description": "URL of the app documentation."
+          },
+          "description": {
+            "allOf": [
+              {
+                "description": "Markdown description of the app."
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "notifications": {
+            "allOf": [
+              {
+                "description": "Configuration for developer notifications"
+              },
+              {
+                "$ref": "#/components/schemas/NotificationConfig"
+              }
+            ]
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner, required for private apps or sandbox accounts",
+            "readOnly": true
+          },
+          "internal": {
+            "type": "boolean",
+            "default": false,
+            "description": "Flag to indicate if the app is built by epilot.",
+            "readOnly": true
+          },
+          "pricing": {
+            "allOf": [
+              {
+                "description": "Pricing information for the app"
+              },
+              {
+                "$ref": "#/components/schemas/Pricing"
+              }
+            ]
+          },
+          "configuration_audit": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "description": "Audit information for the app"
+              },
+              {
+                "$ref": "#/components/schemas/Audit"
+              }
+            ]
+          }
+        }
+      },
+      "ConfigurationVersion": {
+        "description": "Configuration data about your app which is versionable",
+        "type": "object",
+        "required": [
+          "version",
+          "components",
+          "app_id",
+          "version_audit",
+          "owner_org_id"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner",
+            "readOnly": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minItems": 0
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "public",
+              "private"
+            ],
+            "description": "Visibility of the app version",
+            "default": "private",
+            "readOnly": true
+          },
+          "public": {
+            "type": "boolean",
+            "default": false,
+            "deprecated": true,
+            "description": "Flag to indicate if the app is public.",
+            "readOnly": true
+          },
+          "pending": {
+            "type": "boolean",
+            "default": false,
+            "description": "Flag to indicate if the app is pending for verification",
+            "readOnly": true
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true,
+            "maxLength": 10
+          },
+          "is_beta": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in beta.",
+            "readOnly": true
+          },
+          "deprecated_at": {
+            "type": "string",
+            "description": "Timestamp when the app version is deprecated"
+          },
+          "changelog": {
+            "type": "string",
+            "description": "Changelog for the app version",
+            "maxLength": 250
+          },
+          "review_status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
+            "description": "Status of the review process"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
+          },
+          "version_audit": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Audit"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "versioned_at": {
+                    "type": "string",
+                    "description": "Timestamp of the last version update",
+                    "readOnly": true
+                  },
+                  "versioned_by": {
+                    "type": "string",
+                    "description": "User ID of the user who last updated the app",
+                    "readOnly": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Grants": {
+        "type": "array",
+        "description": "Required grants for the app in order to call APIs for the installing tenant",
+        "items": {
+          "type": "object",
+          "required": [
+            "action"
+          ],
+          "properties": {
+            "action": {
+              "type": "string",
+              "description": "The action the app can perform"
+            },
+            "resource": {
+              "type": "string",
+              "description": "The resource the app can access"
+            }
+          }
+        }
+      },
+      "BlueprintRef": {
+        "type": "object",
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "description": "ID of the blueprint"
+          },
+          "job_id": {
+            "type": "string",
+            "description": "ID of the job that created the blueprint"
+          }
+        }
+      },
+      "Installation": {
+        "description": "Information about the installed app. Has configuration data of the installed version",
+        "type": "object",
+        "required": [
+          "app_id",
+          "installer_org_id",
+          "enabled",
+          "name",
+          "components",
+          "installed_version"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration",
+            "readOnly": true
+          },
+          "installer_org_id": {
+            "type": "string",
+            "description": "Unique identifier for the organization the app is installed in",
+            "readOnly": true
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app creator",
+            "readOnly": true
+          },
+          "enabled": {
+            "readOnly": true,
+            "type": "boolean",
+            "default": true,
+            "description": "Flag to indicate if the app is enabled. Enabled is set to true when required option values are set."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the app",
+            "readOnly": true
+          },
+          "option_values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionsRef"
+            },
+            "description": "Configuration values for the app components"
+          },
+          "components": {
+            "description": "List of component configurations for the installed version",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minLength": 0,
+            "readOnly": true
+          },
+          "installed_version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true
+          },
+          "role": {
+            "type": "string",
+            "description": "The name of the role the app can use to access APIs"
+          },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
+          },
+          "installation_audit": {
+            "readOnly": true,
+            "allOf": [
+              {
+                "description": "Audit information for the app"
+              },
+              {
+                "$ref": "#/components/schemas/Audit"
+              }
+            ]
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create/update the entity",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        }
+      },
+      "PublicConfiguration": {
+        "description": "Public configuration of the published app",
+        "type": "object",
+        "required": [
+          "version",
+          "components",
+          "owner_org_id",
+          "app_id",
+          "name"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration"
+          },
+          "support_email": {
+            "type": "string",
+            "description": "Email address for support requests"
+          },
+          "owner_org_id": {
+            "type": "string",
+            "description": "Organization ID of the app owner"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the app"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Author"
+          },
+          "dev_mode": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in dev mode."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of the app."
+          },
+          "icon_url": {
+            "type": "string",
+            "description": "URL of the app icon."
+          },
+          "documentation_url": {
+            "type": "string",
+            "description": "URL of the app documentation."
+          },
+          "description": {
+            "allOf": [
+              {
+                "description": "Markdown description of the app."
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "pricing": {
+            "allOf": [
+              {
+                "description": "Pricing information for the app"
+              },
+              {
+                "$ref": "#/components/schemas/Pricing"
+              }
+            ]
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseComponent"
+            },
+            "minItems": 0
+          },
+          "is_beta": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is in beta.",
+            "readOnly": true
+          },
+          "deprecated_at": {
+            "type": "string",
+            "description": "Timestamp when the app version is deprecated"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app that is installed",
+            "readOnly": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "blueprint_ref": {
+            "$ref": "#/components/schemas/BlueprintRef"
+          },
+          "latest_version": {
+            "type": "string",
+            "description": "Latest version of the app",
+            "readOnly": true
+          },
+          "public": {
+            "type": "boolean",
+            "description": "Flag to indicate if the app is public.",
+            "readOnly": true
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationVersion"
+            },
+            "description": "List of available versions of the app"
+          }
+        }
+      },
+      "Configuration": {
+        "description": "Configuration of the published app",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationMetadata"
+          },
+          {
+            "$ref": "#/components/schemas/ConfigurationVersion"
+          }
+        ]
+      },
+      "TranslatedString": {
+        "type": "object",
+        "required": [
+          "de"
+        ],
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true,
+            "description": "English translation"
+          },
+          "de": {
+            "type": "string",
+            "description": "German translation"
+          }
+        }
+      },
+      "CallerIdentity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "a human readable name of the caller (e.g. user name, token name or email address)",
+            "example": "manifest@epilot.cloud"
+          },
+          "org_id": {
+            "description": "epilot organization id",
+            "type": "string",
+            "example": "911690"
+          },
+          "user_id": {
+            "description": "epilot user id, when called by a user",
+            "type": "string",
+            "example": "11001045"
+          },
+          "token_id": {
+            "description": "token id, when called by API token",
+            "type": "string",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          }
+        },
+        "required": [
+          "org_id"
+        ]
+      },
+      "BatchEventRequest": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppEventData"
+            },
+            "maxItems": 100
+          }
+        }
+      },
+      "Actor": {
+        "type": "object",
+        "readOnly": true,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID of the actor"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID of the actor"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the actor (e.g., user, system)",
+            "enum": [
+              "user",
+              "system"
+            ]
+          }
+        }
+      },
+      "AppEventData": {
+        "type": "object",
+        "required": [
+          "app_id",
+          "event_type",
+          "component_id",
+          "version",
+          "source",
+          "actor"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "ID of the app configuration"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the app configuration"
+          },
+          "event_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "component_id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "readOnly": true
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "ERROR",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/ComponentType"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/Actor"
+          },
+          "details": {
+            "type": "object",
+            "description": "Details about the event",
+            "additionalProperties": true
+          }
+        }
+      },
+      "EventsQuery": {
+        "type": "object",
+        "properties": {
+          "time_range": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start time (ISO 8601)"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time",
+                "description": "End time (ISO 8601)"
+              },
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "1h",
+                  "6h",
+                  "24h",
+                  "7d",
+                  "30d"
+                ],
+                "description": "Predefined time range (alternative to start/end)"
+              }
+            },
+            "description": "Either use preset OR start+end"
+          },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ComponentType"
+                },
+                "description": "Filter by component types"
+              },
+              "component_id": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Filter by specific component IDs"
+              },
+              "event_type": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "ERROR",
+                    "WARNING",
+                    "INFO"
+                  ]
+                },
+                "description": "Filter by event types"
+              },
+              "correlation_id": {
+                "type": "string",
+                "description": "Filter by correlation ID for tracing"
+              }
+            }
+          },
+          "aggregation": {
+            "type": "object",
+            "properties": {
+              "group_by": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "source",
+                    "component_id",
+                    "event_type",
+                    "hour",
+                    "day"
+                  ]
+                },
+                "description": "Group results by specified fields"
+              },
+              "metrics": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "count",
+                    "error_rate",
+                    "unique_users"
+                  ]
+                },
+                "default": [
+                  "count"
+                ],
+                "description": "Metrics to calculate"
+              }
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1
+              },
+              "page_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 100
+              }
+            }
+          },
+          "sort": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "enum": [
+                  "timestamp",
+                  "event_type",
+                  "component_id"
+                ],
+                "default": "timestamp"
+              },
+              "order": {
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "default": "desc"
+              }
+            }
+          }
+        }
+      },
+      "EventsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "$ref": "#/components/schemas/EventsQuery"
+          },
+          "results": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RawEvents"
+              },
+              {
+                "$ref": "#/components/schemas/AggregatedEvents"
+              }
+            ]
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "total_items": {
+                "type": "integer"
+              },
+              "has_next": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "RawEvents": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "raw"
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppEventData"
+            }
+          }
+        }
+      },
+      "AggregatedEvents": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "aggregated"
+            ]
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimensions": {
+                  "type": "object",
+                  "description": "The grouped dimensions e.g., \"source\": \"CUSTOM_JOURNEY_BLOCK\", \"event_type\": \"ERROR\"",
+                  "additionalProperties": true
+                },
+                "metrics": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "error_rate": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
