@@ -62,6 +62,24 @@ export const promptParam = async (
 };
 
 /**
+ * Prompt the user for a bearer token when none is configured.
+ */
+export const promptToken = async (): Promise<string | null> => {
+  const { password } = await import('@inquirer/prompts');
+
+  const token = await password({
+    message: 'No token found. Paste a bearer token (or run `epilot auth login`):',
+    mask: '*',
+    validate: (value) => {
+      if (!value.trim()) return 'Token is required';
+      return true;
+    },
+  });
+
+  return token || null;
+};
+
+/**
  * Print the operations list as a table (non-interactive).
  */
 export const printOperationsTable = (

@@ -16,5 +16,6 @@ export default defineConfig({
     '@inquirer/prompts',
     'open',
     'jsonata',
+    'dereference-json-schema',
   ],
 });

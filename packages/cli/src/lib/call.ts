@@ -1,5 +1,8 @@
 import type { OpenAPIV3 } from 'openapi-client-axios';
-import OpenAPIClientAxios from 'openapi-client-axios';
+import OpenAPIClientAxiosModule from 'openapi-client-axios';
+
+// Handle CJS default export: the default import wraps the module
+const OpenAPIClientAxios = (OpenAPIClientAxiosModule as unknown as { default: typeof OpenAPIClientAxiosModule }).default ?? OpenAPIClientAxiosModule;
 
 import { loadDefinition } from './definition-loader.js';
 import { resolveToken } from './auth-store.js';
@@ -8,7 +11,7 @@ import { collectParams, getOperationParams, getMissingRequired } from './param-c
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
 import { formatResponse } from './response-formatter.js';
 import { isInteractive, pickOperation, printOperationsTable, promptParam } from './interactive.js';
-import { BOLD, RESET, DIM, RED, methodColor } from './utils.js';
+import { BOLD, RESET, DIM, RED, YELLOW, CYAN, GREEN, methodColor } from './utils.js';
 import type { OperationChoice } from './interactive.js';
 
 export type CallArgs = {
@@ -44,7 +47,7 @@ const extractOperations = (spec: OpenAPIV3.Document): OperationChoice[] => {
         operationId: op.operationId,
         method: method.toUpperCase(),
         path,
-        summary: (op.summary || op.description || '').substring(0, 80),
+        summary: ((op.description || '').split('\n')[0] || '').substring(0, 120),
       });
     }
   }
@@ -52,8 +55,80 @@ const extractOperations = (spec: OpenAPIV3.Document): OperationChoice[] => {
   return operations;
 };
 
+// ── Helpers for rich operation help ─────────────────────────────────────────
+
+const sampleParamValue = (p: OpenAPIV3.ParameterObject): string => {
+  const schema = p.schema as OpenAPIV3.SchemaObject | undefined;
+  if (p.example !== undefined) return String(p.example);
+  if (schema?.example !== undefined) return String(schema.example);
+  if (schema?.type === 'boolean') return 'true';
+  if (schema?.type === 'integer' || schema?.type === 'number') return '1';
+  if (p.name === 'id' || p.name.endsWith('_id') || p.name.endsWith('Id'))
+    return '123e4567-e89b-12d3-a456-426614174000';
+  if (p.name === 'slug') return 'contact';
+  if (p.name === 'email') return 'user@example.com';
+  return 'example';
+};
+
+const MAX_BODY_LINES = 30;
+
+const truncateJson = (obj: unknown, depth = 0, maxDepth = 3): unknown => {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj !== 'object') return obj;
+  if (depth >= maxDepth) return Array.isArray(obj) ? [] : {};
+  if (Array.isArray(obj)) {
+    return obj.slice(0, 2).map((item) => truncateJson(item, depth + 1, maxDepth));
+  }
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    result[key] = truncateJson(value, depth + 1, maxDepth);
+  }
+  return result;
+};
+
+const mockFromSchema = (schema: OpenAPIV3.SchemaObject): unknown => {
+  if (schema.example !== undefined) return schema.example;
+  if (schema.default !== undefined) return schema.default;
+  if (schema.enum) return schema.enum[0];
+
+  switch (schema.type) {
+    case 'string':
+      if (schema.format === 'uuid') return '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+      if (schema.format === 'date-time') return '2024-01-01T00:00:00.000Z';
+      if (schema.format === 'email') return 'user@example.com';
+      if (schema.format === 'uri') return 'https://example.com';
+      return 'string';
+    case 'integer':
+    case 'number':
+      return schema.minimum ?? 0;
+    case 'boolean':
+      return false;
+    case 'array': {
+      const items = schema.items as OpenAPIV3.SchemaObject | undefined;
+      if (items) return [mockFromSchema(items)];
+      return [];
+    }
+    case 'object':
+    default: {
+      const props = schema.properties as Record<string, OpenAPIV3.SchemaObject> | undefined;
+      if (!props) return {};
+      const result: Record<string, unknown> = {};
+      for (const [key, propSchema] of Object.entries(props)) {
+        result[key] = mockFromSchema(propSchema);
+      }
+      return result;
+    }
+  }
+};
+
+// @ts-expect-error CJS default import
+import dereferenceJsonSchema from 'dereference-json-schema';
+const { dereferenceSync } = dereferenceJsonSchema as unknown as { dereferenceSync: (schema: unknown) => unknown };
+
+const w = (text: string) => process.stdout.write(text);
+
 /**
- * Print operation help (--help on a specific operation).
+ * Print rich operation help — matching the generated docs quality.
  */
 const printOperationHelp = (
   apiName: string,
@@ -67,51 +142,166 @@ const printOperationHelp = (
       if (!op || op.operationId !== operationId) continue;
 
       const color = methodColor(method);
-      process.stdout.write(`\n${BOLD}epilot ${apiName} ${operationId}${RESET}`);
-      if (op.summary) process.stdout.write(` - ${op.summary}`);
-      process.stdout.write('\n\n');
-      process.stdout.write(`${color}${method.toUpperCase()}${RESET} ${path}\n\n`);
+      const descFirstLine = (op.description || '').split('\n')[0].trim();
 
-      if (op.description && op.description !== op.summary) {
-        process.stdout.write(`${op.description}\n\n`);
+      // ── Title ──
+      w(`\n${BOLD}epilot ${apiName} ${operationId}${RESET}`);
+      if (descFirstLine) w(` — ${descFirstLine}`);
+      w(`\n\n`);
+      w(`  ${color}${method.toUpperCase()}${RESET} ${path}\n`);
+      w(`\n`);
+
+      // ── Full description ──
+      if (op.description) {
+        const restOfDesc = op.description.split('\n').slice(1).join('\n').trim();
+        if (restOfDesc) w(`  ${DIM}${restOfDesc}${RESET}\n\n`);
       }
 
+      // ── Parameters ──
       const params = getOperationParams(spec, operationId);
       if (params.length > 0) {
-        process.stdout.write(`${BOLD}PARAMETERS${RESET}\n`);
+        w(`${BOLD}PARAMETERS${RESET}\n\n`);
+
+        const nameWidth = Math.max(...params.map((p) => p.name.length), 4) + 2;
+
         for (const p of params) {
-          const required = p.required ? 'required' : 'optional';
           const schema = p.schema as OpenAPIV3.SchemaObject | undefined;
           const type = schema?.type || '';
-          process.stdout.write(
-            `  ${BOLD}${p.name}${RESET}  (${p.in}, ${required})  ${type}${DIM}${p.description ? '  ' + p.description : ''}${RESET}\n`,
-          );
+          const format = schema?.format ? ` (${schema.format})` : '';
+          const req = p.required ? `${YELLOW}required${RESET}` : `${DIM}optional${RESET}`;
+          const desc = p.description ? `  ${DIM}${p.description}${RESET}` : '';
+
+          w(`  ${BOLD}${p.name.padEnd(nameWidth)}${RESET} ${p.in.padEnd(6)}  ${type}${format}  ${req}${desc}\n`);
         }
-        process.stdout.write('\n');
+        w(`\n`);
       }
 
+      // ── Request body ──
       const reqBody = op.requestBody as OpenAPIV3.RequestBodyObject | undefined;
       if (reqBody) {
-        process.stdout.write(`${BOLD}REQUEST BODY${RESET}${reqBody.required ? ' (required)' : ''}\n`);
-        if (reqBody.description) {
-          process.stdout.write(`  ${reqBody.description}\n`);
+        w(`${BOLD}REQUEST BODY${RESET}${reqBody.required ? ` ${YELLOW}(required)${RESET}` : ''}\n`);
+        if (reqBody.description) w(`  ${DIM}${reqBody.description}${RESET}\n`);
+
+        // Show mock body
+        const content = reqBody.content?.['application/json'];
+        const bodySchema = content?.schema as OpenAPIV3.SchemaObject | undefined;
+        if (bodySchema) {
+          try {
+            const mockBody = truncateJson(mockFromSchema(bodySchema));
+            const bodyStr = JSON.stringify(mockBody, null, 2);
+            const lines = bodyStr.split('\n');
+            w(`\n`);
+            if (lines.length <= MAX_BODY_LINES) {
+              for (const line of lines) w(`  ${DIM}${line}${RESET}\n`);
+            } else {
+              for (const line of lines.slice(0, MAX_BODY_LINES)) w(`  ${DIM}${line}${RESET}\n`);
+              w(`  ${DIM}  ...${RESET}\n`);
+            }
+          } catch {
+            // skip mock on error
+          }
         }
-        process.stdout.write('\n');
+        w(`\n`);
       }
 
-      // Examples
+      // ── Sample calls ──
+      w(`${BOLD}EXAMPLES${RESET}\n\n`);
+
+      const reqParams = params.filter((p) => p.required || p.in === 'path');
       const pathParams = params.filter((p) => p.in === 'path');
-      process.stdout.write(`${BOLD}EXAMPLES${RESET}\n`);
-      const paramExamples = pathParams.map((p) => `-p ${p.name}=<value>`).join(' ');
-      process.stdout.write(`  epilot ${apiName} ${operationId} ${paramExamples}\n`);
+      const pFlags = reqParams.map((p) => `-p ${p.name}=${sampleParamValue(p)}`);
+
+      // Primary: with -p flags
+      {
+        const parts = [`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}`];
+        for (const pf of pFlags) parts.push(pf);
+        w(parts.join(' \\\n      ') + '\n');
+      }
+      w(`\n`);
+
+      // Positional shorthand
       if (pathParams.length > 0) {
-        const positional = pathParams.map((p) => `<${p.name}>`).join(' ');
-        process.stdout.write(`  epilot ${apiName} ${operationId} ${positional}\n`);
+        const positionalVals = pathParams.map((p) => sampleParamValue(p));
+        w(`  ${DIM}# positional args for path parameters${RESET}\n`);
+        w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId} ${positionalVals.join(' ')}\n`);
+        w(`\n`);
       }
+
+      // With body
       if (reqBody) {
-        process.stdout.write(`  epilot ${apiName} ${operationId} -d '{"key":"value"}'\n`);
+        const content = reqBody.content?.['application/json'];
+        const bodySchema = content?.schema as OpenAPIV3.SchemaObject | undefined;
+        if (bodySchema) {
+          try {
+            const mockBody = truncateJson(mockFromSchema(bodySchema));
+            const compact = JSON.stringify(mockBody);
+            if (compact.length <= 80) {
+              w(`  ${DIM}# with request body${RESET}\n`);
+              w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}`);
+              if (pFlags.length > 0) w(` ${pFlags.join(' ')}`);
+              w(` -d '${compact}'\n`);
+            } else {
+              const pretty = JSON.stringify(mockBody, null, 2);
+              w(`  ${DIM}# with request body${RESET}\n`);
+              const parts = [`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}`];
+              if (pFlags.length > 0) for (const pf of pFlags) parts.push(pf);
+              parts.push(`-d '${pretty}'`);
+              w(parts.join(' \\\n      ') + '\n');
+            }
+            w(`\n`);
+          } catch {
+            // skip
+          }
+        }
+
+        // Stdin pipe
+        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        w(`  ${DIM}# pipe from file${RESET}\n`);
+        w(`  ${GREEN}$${RESET} cat body.json | epilot ${apiName} ${operationId}${pFlagsStr}\n`);
+        w(`\n`);
       }
-      process.stdout.write('\n');
+
+      // JSONata
+      {
+        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        const jsonataExpr = guessJsonataExpr(op);
+        w(`  ${DIM}# filter response with JSONata${RESET}\n`);
+        w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}${pFlagsStr} --jsonata '${jsonataExpr}'\n`);
+        w(`\n`);
+      }
+
+      // Raw JSON for scripting
+      {
+        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        w(`  ${DIM}# raw JSON for scripting${RESET}\n`);
+        w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}${pFlagsStr} --json\n`);
+        w(`\n`);
+      }
+
+      // ── Sample response ──
+      const successResp = ((op.responses as Record<string, unknown>)?.['200'] ||
+        (op.responses as Record<string, unknown>)?.['201']) as OpenAPIV3.ResponseObject | undefined;
+      if (successResp) {
+        const respContent = successResp.content?.['application/json'];
+        const respSchema = respContent?.schema as OpenAPIV3.SchemaObject | undefined;
+        if (respSchema) {
+          try {
+            const mockResp = truncateJson(mockFromSchema(respSchema));
+            const respStr = JSON.stringify(mockResp, null, 2);
+            const lines = respStr.split('\n');
+
+            w(`${BOLD}SAMPLE RESPONSE${RESET}\n\n`);
+            const limit = 40;
+            const shown = lines.length <= limit ? lines : lines.slice(0, limit);
+            for (const line of shown) w(`  ${DIM}${line}${RESET}\n`);
+            if (lines.length > limit) w(`  ${DIM}  ... (${lines.length - limit} more lines)${RESET}\n`);
+            w(`\n`);
+          } catch {
+            // skip
+          }
+        }
+      }
+
       return;
     }
   }
@@ -121,11 +311,37 @@ const printOperationHelp = (
 };
 
 /**
+ * Guess a useful JSONata expression for an operation.
+ */
+const guessJsonataExpr = (op: OpenAPIV3.OperationObject): string => {
+  const successResp = ((op.responses as Record<string, unknown>)?.['200'] ||
+    (op.responses as Record<string, unknown>)?.['201']) as OpenAPIV3.ResponseObject | undefined;
+  if (!successResp) return '$';
+
+  const respContent = successResp.content?.['application/json'];
+  const schema = respContent?.schema as OpenAPIV3.SchemaObject | undefined;
+  if (!schema?.properties) return '$';
+
+  const props = schema.properties as Record<string, unknown>;
+  if (props.results) return 'results[0]';
+  if (props.data) return 'data';
+  if (props.items) return 'items[0]';
+  if (props.hits) return 'hits';
+  if (props.entity) return 'entity._title';
+  if (props.id) return 'id';
+  if (props.email) return 'email';
+
+  const keys = Object.keys(props);
+  return keys.length > 0 ? keys[0] : '$';
+};
+
+/**
  * Core API call logic.
  */
 export const callApi = async (apiName: string, args: CallArgs): Promise<void> => {
-  // Load the OpenAPI definition
-  const spec = await loadDefinition(apiName, args.definition);
+  // Load the OpenAPI definition and dereference all $ref pointers
+  const rawSpec = await loadDefinition(apiName, args.definition);
+  const spec = dereferenceSync(rawSpec) as Record<string, unknown>;
   const operations = extractOperations(spec as OpenAPIV3.Document);
 
   // No operation specified: list operations or interactive pick
@@ -162,12 +378,18 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
     process.exit(1);
   }
 
-  // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json)
-  const token = resolveToken(args.token, args.profile);
+  // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json > interactive prompt)
+  let token = resolveToken(args.token, args.profile);
   if (!token) {
-    process.stderr.write(`${RED}No authentication token found.${RESET}\n`);
-    process.stderr.write(`Run 'epilot auth login' or pass --token <token>\n`);
-    process.exit(1);
+    if (isInteractive({ interactive: args.interactive })) {
+      const { promptToken } = await import('./interactive.js');
+      token = await promptToken();
+    }
+    if (!token) {
+      process.stderr.write(`${RED}No authentication token found.${RESET}\n`);
+      process.stderr.write(`Run 'epilot auth login' or pass --token <token>\n`);
+      process.exit(1);
+    }
   }
 
   // Collect parameters

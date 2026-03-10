@@ -7,6 +7,7 @@ type ParameterObject = OpenAPIV3.ParameterObject;
 
 /**
  * Extract parameters for an operation from the OpenAPI spec.
+ * Expects a dereferenced spec (no $ref pointers in parameters).
  */
 export const getOperationParams = (
   spec: OpenAPIV3.Document,
@@ -24,8 +25,9 @@ export const getOperationParams = (
 
       const opParams = (op.parameters || []) as ParameterObject[];
       // Merge: operation params override path params
-      const merged = [...pathParams];
+      const merged = [...pathParams.filter((p) => p.name)];
       for (const p of opParams) {
+        if (!p.name) continue; // skip unresolved refs
         const idx = merged.findIndex((pp) => pp.name === p.name && pp.in === p.in);
         if (idx >= 0) merged[idx] = p;
         else merged.push(p);

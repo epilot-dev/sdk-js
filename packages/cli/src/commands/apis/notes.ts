@@ -13,6 +13,7 @@ export default defineCommand({
     definition: { type: 'string', description: 'Override OpenAPI spec file/URL' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
     profile: { type: 'string', description: 'Use a named profile' },
+    _ophelp: { type: 'boolean', description: 'Show operation help', required: false },
   },
   run: ({ args, rawArgs }) => {
     // Extract additional positional args (after operationId)
@@ -30,6 +31,7 @@ export default defineCommand({
 
     return callApi('notes', {
       ...args,
+      help: !!(args as Record<string, unknown>)._ophelp,
       _args: positionalArgs,
     });
   },
