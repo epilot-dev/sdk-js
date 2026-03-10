@@ -2530,7 +2530,7 @@ importers:
   packages/cli-wrapper:
     dependencies:
       '@epilot/cli':
-        specifier: ^0.1.1
+        specifier: '*'
         version: 0.1.1(@types/node@25.4.0)(js-yaml@4.1.1)
 
   packages/epilot-sdk-v2:

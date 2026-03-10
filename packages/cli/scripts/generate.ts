@@ -425,6 +425,7 @@ export const main = defineCommand({
     auth: () => import('./commands/auth.js').then((m) => m.default),
     profile: () => import('./commands/profile.js').then((m) => m.default),
     completion: () => import('./commands/completion.js').then((m) => m.default),
+    upgrade: () => import('./commands/upgrade.js').then((m) => m.default),
 ${subCommandEntries.join('\n')}
   },
 });

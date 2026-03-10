@@ -16,7 +16,7 @@ npm install -g @epilot/cli   # scoped package (same thing)
 
 <!-- usage-help -->
 ```
-epilot v0.1.3 — CLI for epilot APIs
+epilot v0.1.4 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -252,7 +252,23 @@ When running in a TTY without required arguments, the CLI prompts interactively:
 
 Disable with `--no-interactive` for CI/scripts.
 
-## Shell Completion
+## Shell Completions
+
+Tab completion for API names, operation IDs, and flags.
+
+```bash
+# Auto-install for your current shell
+epilot completion --install
+
+# Or install for a specific shell
+epilot completion --install bash
+epilot completion --install zsh
+epilot completion --install fish
+```
+
+This adds the completion script to your shell config (`~/.bashrc`, `~/.zshrc`, or `~/.config/fish/completions/epilot.fish`). Restart your shell or source the config file to activate.
+
+You can also set up completions manually:
 
 ```bash
 # Bash — add to ~/.bashrc
@@ -264,8 +280,6 @@ eval "$(epilot completion zsh)"
 # Fish — save to completions dir
 epilot completion fish > ~/.config/fish/completions/epilot.fish
 ```
-
-Provides tab completion for API names, operation IDs, and flags.
 
 ## API Reference
 

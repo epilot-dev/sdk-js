@@ -1,5 +1,9 @@
 import { defineCommand } from 'citty';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { API_LIST } from '../generated/api-list.js';
+import { RESET, GREEN, DIM, YELLOW, RED } from '../lib/utils.js';
 
 const BASH_SCRIPT = `
 _epilot_completions() {
@@ -111,7 +115,7 @@ complete -c epilot -l help -d 'Show help'
 export const handleCompletions = (type: string, api?: string): void => {
   if (type === 'subcommands') {
     const names = API_LIST.map((a) => a.kebabName);
-    names.push('auth', 'profile', 'completion');
+    names.push('auth', 'profile', 'completion', 'upgrade');
     console.log(names.join('\n'));
     return;
   }
@@ -126,32 +130,44 @@ export const handleCompletions = (type: string, api?: string): void => {
 };
 
 export default defineCommand({
-  meta: { name: 'completion', description: 'Generate shell completion scripts' },
+  meta: { name: 'completion', description: 'Generate or install shell completion scripts' },
   args: {
     shell: {
       type: 'positional',
       description: 'Shell type: bash, zsh, or fish',
       required: false,
     },
+    install: {
+      type: 'boolean',
+      description: 'Install completions to your shell config',
+    },
   },
-  run: ({ args }) => {
+  run: async ({ args }) => {
     const shell = args.shell || detectShell();
+
+    if (args.install) {
+      await installCompletions(shell);
+      return;
+    }
 
     switch (shell) {
       case 'bash':
         console.log(BASH_SCRIPT);
         console.log('\n# Add to your ~/.bashrc:');
         console.log('# eval "$(epilot completion bash)"');
+        console.log('# Or run: epilot completion --install');
         break;
       case 'zsh':
         console.log(ZSH_SCRIPT);
         console.log('\n# Add to your ~/.zshrc:');
         console.log('# eval "$(epilot completion zsh)"');
+        console.log('# Or run: epilot completion --install');
         break;
       case 'fish':
         console.log(FISH_SCRIPT);
         console.log('\n# Save to ~/.config/fish/completions/epilot.fish:');
         console.log('# epilot completion fish > ~/.config/fish/completions/epilot.fish');
+        console.log('# Or run: epilot completion --install');
         break;
       default:
         console.error(`Unknown shell: ${shell}. Supported: bash, zsh, fish`);
@@ -159,6 +175,52 @@ export default defineCommand({
     }
   },
 });
+
+const EVAL_LINE_BASH = 'eval "$(epilot completion bash)"';
+const EVAL_LINE_ZSH = 'eval "$(epilot completion zsh)"';
+
+const installCompletions = async (shell: string): Promise<void> => {
+  const home = homedir();
+
+  switch (shell) {
+    case 'bash': {
+      const rcFile = join(home, '.bashrc');
+      addEvalLine(rcFile, EVAL_LINE_BASH, '.bashrc');
+      break;
+    }
+    case 'zsh': {
+      const rcFile = join(home, '.zshrc');
+      addEvalLine(rcFile, EVAL_LINE_ZSH, '.zshrc');
+      break;
+    }
+    case 'fish': {
+      const dir = join(home, '.config', 'fish', 'completions');
+      const file = join(dir, 'epilot.fish');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(file, `${FISH_SCRIPT}\n`);
+      process.stdout.write(`${GREEN}Completions written to ${file}${RESET}\n`);
+      process.stdout.write(`${DIM}Fish will pick them up automatically.${RESET}\n`);
+      break;
+    }
+    default:
+      process.stderr.write(`${RED}Unknown shell: ${shell}. Supported: bash, zsh, fish${RESET}\n`);
+      process.exit(1);
+  }
+};
+
+const addEvalLine = (rcFile: string, evalLine: string, rcName: string): void => {
+  const existing = existsSync(rcFile) ? readFileSync(rcFile, 'utf-8') : '';
+
+  if (existing.includes(evalLine)) {
+    process.stdout.write(`${YELLOW}Completions already installed in ~/${rcName}${RESET}\n`);
+    return;
+  }
+
+  const line = `\n# epilot CLI completions\n${evalLine}\n`;
+  appendFileSync(rcFile, line);
+  process.stdout.write(`${GREEN}Completions added to ~/${rcName}${RESET}\n`);
+  process.stdout.write(`${DIM}Restart your shell or run: source ~/${rcName}${RESET}\n`);
+};
 
 const detectShell = (): string => {
   const shell = process.env.SHELL || '';

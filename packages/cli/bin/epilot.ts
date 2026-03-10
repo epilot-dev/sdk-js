@@ -99,6 +99,7 @@ function printRootHelp() {
   w(`  ${CYAN}auth logout${R}             Remove stored credentials\n`);
   w(`  ${CYAN}profile${R}                 Manage named profiles\n`);
   w(`  ${CYAN}completion${R}              Generate shell completion scripts\n`);
+  w(`  ${CYAN}upgrade${R}                 Upgrade to the latest version\n`);
   w(`\n`);
   w(`${BOLD}APIs${R}\n`);
 

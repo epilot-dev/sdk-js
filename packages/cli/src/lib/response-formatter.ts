@@ -34,7 +34,8 @@ export const formatResponse = async (response: AxiosResponse, options: FormatOpt
   }
 
   // Status badge to stderr (only when both stdout and stderr are TTY — not piped)
-  if (!json && process.stdout.isTTY && process.stderr.isTTY) {
+  // Skip when --include is used since it already shows HTTP/status
+  if (!json && !include && process.stdout.isTTY && process.stderr.isTTY) {
     const statusColor = response.status >= 200 && response.status < 300 ? GREEN : response.status >= 400 ? RED : YELLOW;
     process.stderr.write(
       `${statusColor}${BOLD}${response.status}${RESET} ${statusColor}${response.statusText}${RESET}\n`,

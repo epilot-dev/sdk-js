@@ -69,6 +69,21 @@ describe('formatResponse', () => {
     await formatResponse(makeResponse(200, {}), { include: true });
     const stderrOutput = stderrWrite.mock.calls.map(([s]) => s).join('');
     expect(stderrOutput).toContain('content-type');
+    expect(stderrOutput).toContain('HTTP/200');
+  });
+
+  it('suppresses status badge when --include is used', async () => {
+    await formatResponse(makeResponse(200, { ok: true }), { include: true });
+    const stderrOutput = stderrWrite.mock.calls.map(([s]) => s).join('');
+    // Should show HTTP/200 in the headers section but not the separate bold status badge
+    expect(stderrOutput).toContain('HTTP/200');
+    // The bold status badge line would contain just "200" followed by "OK" with ANSI codes
+    // but the HTTP/ prefix line is the only place 200 should appear
+    const lines = stderrOutput.split('\n');
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: stripping ANSI escape codes
+    const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, '');
+    const badgeLine = lines.find((l) => !l.includes('HTTP/') && /\b200\b/.test(stripAnsi(l)));
+    expect(badgeLine).toBeUndefined();
   });
 
   it('suppresses status badge when stdout is piped', async () => {

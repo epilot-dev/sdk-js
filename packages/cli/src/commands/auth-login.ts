@@ -134,12 +134,20 @@ const browserLogin = async (profileName?: string): Promise<string | null> => {
         const name = url.searchParams.get('name');
 
         // Verify state parameter to prevent CSRF
-        if (returnedState !== state) {
+        if (returnedState && returnedState !== state) {
+          // State was returned but doesn't match — reject (CSRF attempt)
           res.writeHead(403, { 'Content-Type': 'text/html' });
           res.end(
             '<html><body><h1>Login failed</h1><p>Invalid state parameter. This request may not have originated from your CLI session.</p></body></html>',
           );
           return;
+        }
+
+        if (!returnedState) {
+          // State not returned — older login portal, warn but allow
+          process.stderr.write(
+            `${YELLOW}Warning: Login portal did not return state parameter. CSRF protection is not active.${RESET}\n`,
+          );
         }
 
         if (token) {
