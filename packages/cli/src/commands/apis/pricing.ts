@@ -19,6 +19,7 @@ export default defineCommand({
     interactive: { type: 'boolean', description: 'Interactive mode' },
     jsonata: { type: 'string', description: 'JSONata expression to transform response' },
     _ophelp: { type: 'boolean', description: 'Show operation help', required: false },
+    _apihelp: { type: 'boolean', description: 'Show API help', required: false },
   },
   run: ({ args, rawArgs }) => {
     // Extract additional positional args (after operationId)
@@ -37,6 +38,7 @@ export default defineCommand({
     return callApi('pricing', {
       ...args,
       help: !!(args as Record<string, unknown>)._ophelp,
+      _apihelp: !!(args as Record<string, unknown>)._apihelp,
       _args: positionalArgs,
     });
   },

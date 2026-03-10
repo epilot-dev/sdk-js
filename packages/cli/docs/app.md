@@ -66,6 +66,23 @@ Retrieve public facing components for an installed app
 | `appId` | path | string | Yes | ID of the app configuration to install |
 | `componentId` | path | string | Yes | ID of the component to retrieve |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -127,6 +144,23 @@ List all app configuration metadata owned by an organization. To get full app co
 | ---- | -- | ---- | -------- | ----------- |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -204,6 +238,23 @@ Create a new private app configuration. To make it public a verification process
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -248,6 +299,23 @@ List all publicly available app configurations that can be installed. This endpo
 | ---- | -- | ---- | -------- | ----------- |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -329,6 +397,23 @@ Retrieve the public configuration of an app to install in your tenant
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration to install |
 | `version` | query | string | No | Version of the app configuration to retrieve |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -433,6 +518,23 @@ Retrieve a specific app configuration
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration |
 | `version` | query | string | No | Version of the app configuration to retrieve |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -546,6 +648,23 @@ Patch non-versioned configuration metadata of a given app configuration.
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -612,6 +731,23 @@ Delete an app configuration and all its versions and components.
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -646,6 +782,23 @@ Query analytics events for a specific app with flexible filtering
 | `appId` | path | string | Yes | ID of the app configuration |
 
 **Request Body** (required)
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -782,6 +935,23 @@ Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -841,6 +1011,23 @@ Generate a presigned URL to upload a zip file with artifacts that will be unpack
 | `appId` | path | string | Yes | ID of the app configuration |
 
 **Request Body**
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -902,6 +1089,23 @@ Generate a presigned URL for uploading app logo to /<app-id>/logo.png path
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -958,6 +1162,23 @@ Delete the app logo from /<app-id>/logo.png path
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -992,6 +1213,23 @@ Retrieve a list of versions for an app configuration
 | `appId` | path | string | Yes | ID of the app configuration |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1095,6 +1333,23 @@ Retrieve a specific version of an app configuration
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration |
 | `version` | path | string | Yes | Version of the app configuration to retrieve |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1210,6 +1465,23 @@ Patch an existing app version
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -1252,6 +1524,23 @@ Delete a specific version of an app configuration
 | `appId` | path | string | Yes | ID of the app configuration |
 | `version` | path | string | Yes | Version to delete |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -1286,6 +1575,23 @@ Retrieve the review status of a specific app version
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes | ID of the app configuration |
 | `version` | path | string | Yes | Version to retrieve the review status for |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1342,6 +1648,23 @@ Submit an app version for review to make it public
 | `version` | path | string | Yes | Version to submit for review |
 
 **Request Body** (required)
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1405,6 +1728,23 @@ Patch an existing app version to create/add a component
 | `version` | path | string | Yes | Version to update |
 
 **Request Body** (required)
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1502,6 +1842,23 @@ Patch an existing app version to update its components
 
 **Request Body** (required)
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -1571,6 +1928,23 @@ Delete a specific component from an app version
 | `version` | path | string | Yes | Version to update |
 | `componentId` | path | string | Yes | ID of the component to delete |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -1607,6 +1981,23 @@ Clone an existing app version to create a new version
 | `appId` | path | string | Yes | ID of the app configuration |
 | `sourceVersion` | path | string | Yes | Source version to clone from |
 | `targetVersion` | path | string | Yes | Target version to create |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1658,6 +2049,23 @@ Retrieve a list of installed apps for the organization.
 | `enabled` | query | boolean | No | Filter apps by enabled status |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1752,6 +2160,23 @@ Retrieve details of an installed app by its ID.
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes |  |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -1844,6 +2269,23 @@ Upsert app installation by its ID.
 | `appId` | path | string | Yes |  |
 
 **Request Body**
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -1966,6 +2408,23 @@ Patch an installed app by its ID.
 
 **Request Body**
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -2027,6 +2486,23 @@ Uninstall an app by its ID.
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes |  |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -2060,6 +2536,23 @@ Update an installed app to a new version
 | ---- | -- | ---- | -------- | ----------- |
 | `appId` | path | string | Yes |  |
 | `version` | path | string | Yes |  |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -2148,6 +2641,23 @@ Internal endpoint for services to submit app events for analytic purposes
 `POST /v1/app-events`
 
 **Request Body** (required)
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 

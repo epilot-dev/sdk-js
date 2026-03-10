@@ -371,6 +371,7 @@ export default defineCommand({
     interactive: { type: 'boolean', description: 'Interactive mode' },
     jsonata: { type: 'string', description: 'JSONata expression to transform response' },
     _ophelp: { type: 'boolean', description: 'Show operation help', required: false },
+    _apihelp: { type: 'boolean', description: 'Show API help', required: false },
   },
   run: ({ args, rawArgs }) => {
     // Extract additional positional args (after operationId)
@@ -389,6 +390,7 @@ export default defineCommand({
     return callApi('${client.kebabName}', {
       ...args,
       help: !!(args as Record<string, unknown>)._ophelp,
+      _apihelp: !!(args as Record<string, unknown>)._apihelp,
       _args: positionalArgs,
     });
   },
@@ -542,6 +544,25 @@ const generateOperationDoc = (kebabName: string, op: OperationInfo): string[] =>
   if (op.requestBodySchema) {
     lines.push(`**Request Body**${op.requestBodyRequired ? ' (required)' : ''}`, ``);
   }
+
+  // ── Flags ──
+  lines.push(`**Flags**`);
+  lines.push(``);
+  lines.push(`| Flag | Description |`);
+  lines.push(`| ---- | ----------- |`);
+  lines.push(`| \`-p key=value\` | Set a named parameter |`);
+  lines.push(`| \`-d '{...}'\` | Request body JSON |`);
+  lines.push(`| \`-H 'Key: Value'\` | Custom header |`);
+  lines.push(`| \`-t, --token <token>\` | Bearer token for authentication |`);
+  lines.push(`| \`--profile <name>\` | Use a named profile |`);
+  lines.push(`| \`-s, --server <url>\` | Override server base URL |`);
+  lines.push(`| \`-i, --include\` | Include response headers in output |`);
+  lines.push(`| \`--json\` | Output raw JSON (no formatting) |`);
+  lines.push(`| \`-v, --verbose\` | Verbose output (show request details) |`);
+  lines.push(`| \`--jsonata <expr>\` | JSONata expression to transform response |`);
+  lines.push(`| \`--definition <file>\` | Override OpenAPI spec file/URL |`);
+  lines.push(`| \`--no-interactive\` | Disable interactive prompts |`);
+  lines.push(``);
 
   // ── Sample call ──
   lines.push(`**Sample Call**`);

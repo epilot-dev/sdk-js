@@ -39,6 +39,23 @@ Get address suggestions for the given Availability File
 | `postalCodeSearchTerm` | query | string (postal-code) | No | Postal code search term |
 | `streetSearchTerm` | query | string (street-address) | No | street search term |
 
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
+
 **Sample Call**
 
 ```bash
@@ -78,6 +95,23 @@ Check for Entities that contain a matching availability range in related availab
 `POST /v1/public/availability`
 
 **Request Body** (required)
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 
@@ -132,6 +166,23 @@ Validates an already uploaded availability file, it returns an array of errors i
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string (uuid) | Yes | Entity ID of the File Entity with the Availability File. The accepted formats are `.csv` and `.xlsx`. |
+
+**Flags**
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 

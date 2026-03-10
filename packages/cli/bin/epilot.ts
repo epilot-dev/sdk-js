@@ -2,6 +2,16 @@ import { runMain } from 'citty';
 import { main } from '../src/index.js';
 import { API_LIST } from '../src/generated/api-list.js';
 
+// Gracefully handle EPIPE (e.g. piping to `head` or `jq` that closes early)
+process.stdout.on('error', (err) => {
+  if (err.code === 'EPIPE') process.exit(0);
+  throw err;
+});
+process.stderr.on('error', (err) => {
+  if (err.code === 'EPIPE') process.exit(0);
+  throw err;
+});
+
 declare const __CLI_VERSION__: string;
 // tsup injects __CLI_VERSION__ at build time; fall back to package.json for dev (tsx)
 const VERSION =
@@ -54,8 +64,8 @@ if (hasHelp) {
       // `epilot entity getEntity --help` → inject sentinel for operation-level help
       process.argv = [process.argv[0], process.argv[1], ...filteredArgs, '--_ophelp'];
     } else {
-      // `epilot entity --help` → just strip --help so our run() shows the operations table
-      process.argv = [process.argv[0], process.argv[1], ...filteredArgs];
+      // `epilot entity --help` → strip --help, inject sentinel to show operations table
+      process.argv = [process.argv[0], process.argv[1], ...filteredArgs, '--_apihelp'];
     }
   }
 }

@@ -9,14 +9,14 @@ CLI for epilot APIs. Call any epilot API operation directly from the command lin
 npx epilot --help
 
 # Or install globally
-npm install -g @epilot/cli   # scoped package (same thing)
+npm install -g @epilot/cli
 ```
 
 ## Usage
 
 <!-- usage-help -->
 ```
-epilot v0.1.4 — CLI for epilot APIs
+epilot v0.1.7 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]

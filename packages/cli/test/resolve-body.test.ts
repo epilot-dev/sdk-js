@@ -4,6 +4,7 @@ import { resolveBody, loadPayloadCache, savePayloadCache, clearPayloadCache } fr
 // Mock @inquirer/prompts
 vi.mock('@inquirer/prompts', () => ({
   editor: vi.fn(),
+  input: vi.fn().mockResolvedValue(''),
 }));
 
 describe('resolveBody', () => {

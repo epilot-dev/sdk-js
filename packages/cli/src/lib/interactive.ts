@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-client-axios';
-import { methodColor, RESET, DIM } from './utils.js';
+import { RESET, DIM } from './utils.js';
 
 export type OperationChoice = {
   operationId: string;
@@ -34,9 +34,7 @@ export const pickOperation = async (operations: OperationChoice[]): Promise<stri
     source: (input) => {
       if (!input) return choices;
       const term = input.toLowerCase();
-      return choices.filter(
-        (c) => c.value.toLowerCase().includes(term) || c.name.toLowerCase().includes(term),
-      );
+      return choices.filter((c) => c.value.toLowerCase().includes(term) || c.name.toLowerCase().includes(term));
     },
     pageSize: 20,
   });
@@ -88,11 +86,12 @@ export const promptToken = async (): Promise<string | null> => {
 /**
  * Print the operations list as a table (non-interactive).
  */
-export const printOperationsTable = (apiName: string, operations: OperationChoice[]): void => {
-  // Group by first tag or just list them
+export const formatOperationsTable = (apiName: string, operations: OperationChoice[]): string => {
+  const lines: string[] = [];
   for (const op of operations) {
     const desc = op.description ? ` – ${op.description}` : '';
-    process.stdout.write(`  ${op.operationId} ${DIM}${op.method.toUpperCase()} ${op.path}${desc}${RESET}\n`);
+    lines.push(`  ${op.operationId} ${DIM}${op.method.toUpperCase()} ${op.path}${desc}${RESET}`);
   }
-  process.stdout.write(`\nRun \`epilot ${apiName} <operationId> --help\` for details.\n`);
+  lines.push(`\nRun \`epilot ${apiName} <operationId> --help\` for details.\n`);
+  return lines.join('\n');
 };

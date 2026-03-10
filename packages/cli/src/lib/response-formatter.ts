@@ -1,54 +1,107 @@
 import type { AxiosResponse } from 'axios';
-import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from './utils.js';
+import {
+  BOLD,
+  RESET,
+  GREEN,
+  RED,
+  DIM,
+  WHITE,
+  BG_GREEN,
+  BG_RED,
+  methodColor,
+  pager,
+  highlightJson,
+} from './utils.js';
 
 export type FormatOptions = {
   json?: boolean;
   include?: boolean;
   verbose?: boolean;
   jsonata?: string;
+  interactive?: boolean;
+  operationId?: string;
+};
+
+/** Background color for HTTP status code */
+const statusBg = (code: number): string => {
+  if (code >= 400) return BG_RED;
+  return BG_GREEN;
 };
 
 /**
  * Format and output an API response.
  *
- * - Status badge goes to stderr (so it doesn't interfere with piping)
- * - Response body goes to stdout
+ * Default mode: METHOD URL → status badge → highlighted JSON body
+ * --verbose: REQUEST META → RESPONSE META → RESPONSE BODY
+ * --include: RESPONSE META → RESPONSE BODY
+ * --json: raw JSON to stdout (no colors, no metadata)
  */
 export const formatResponse = async (response: AxiosResponse, options: FormatOptions): Promise<void> => {
-  const { json, include, verbose, jsonata } = options;
+  const { json, include, verbose, jsonata, interactive, operationId } = options;
+  const isTTY = process.stdout.isTTY && process.stderr.isTTY;
+  const usePager = !json && isTTY && interactive !== false;
 
-  // Verbose: show request details on stderr
+  // When paging, buffer everything into one string for less.
+  // When piped, write metadata to stderr and body to stdout as before.
+  let buf = '';
+  const meta = (text: string) => {
+    if (usePager) {
+      buf += text;
+    } else {
+      process.stderr.write(text);
+    }
+  };
+
+  const req = response.config;
+  const method = (req.method || 'GET').toUpperCase();
+  const baseURL = req.baseURL || '';
+  const reqUrl = req.url || '';
+  const url = reqUrl.startsWith('http') ? reqUrl : `${baseURL.replace(/\/$/, '')}${reqUrl.startsWith('/') ? '' : '/'}${reqUrl}`;
+
+  // Verbose: show full request meta as JSON (like openapicmd)
   if (verbose) {
-    const req = response.config;
-    process.stderr.write(`${DIM}${req.method?.toUpperCase()} ${req.url}${RESET}\n`);
+    meta(`${DIM}REQUEST META:${RESET}\n`);
+
+    const requestMeta: Record<string, unknown> = {
+      operationId,
+      method,
+      url,
+    };
+    if (req.params && Object.keys(req.params).length > 0) {
+      requestMeta.params = req.params;
+    }
     if (req.headers) {
+      const headers: Record<string, string> = {};
       for (const [key, value] of Object.entries(req.headers)) {
-        if (typeof value === 'string' && key.toLowerCase() !== 'authorization') {
-          process.stderr.write(`${DIM}> ${key}: ${value}${RESET}\n`);
-        } else if (key.toLowerCase() === 'authorization') {
-          process.stderr.write(`${DIM}> ${key}: Bearer ***${RESET}\n`);
+        if (key.toLowerCase() === 'authorization') {
+          headers[key] = 'Bearer ***';
+        } else if (typeof value === 'string') {
+          headers[key] = value;
         }
       }
+      requestMeta.headers = headers;
     }
-    process.stderr.write('\n');
+    meta(`${DIM}${JSON.stringify(requestMeta, null, 2)}${RESET}\n\n`);
   }
 
-  // Status badge to stderr (only when both stdout and stderr are TTY — not piped)
-  // Skip when --include is used since it already shows HTTP/status
-  if (!json && !include && process.stdout.isTTY && process.stderr.isTTY) {
-    const statusColor = response.status >= 200 && response.status < 300 ? GREEN : response.status >= 400 ? RED : YELLOW;
-    process.stderr.write(
-      `${statusColor}${BOLD}${response.status}${RESET} ${statusColor}${response.statusText}${RESET}\n`,
-    );
-  }
-
-  // Include: show response headers
-  if (include) {
-    process.stderr.write(`${DIM}HTTP/${response.status} ${response.statusText}${RESET}\n`);
-    for (const [key, value] of Object.entries(response.headers)) {
-      process.stderr.write(`${DIM}${key}: ${value}${RESET}\n`);
+  // Response meta: --verbose and --include both show it
+  if (verbose || include) {
+    meta(`${DIM}RESPONSE META:${RESET}\n`);
+    const responseMeta: Record<string, unknown> = {
+      code: response.status,
+      status: response.statusText,
+    };
+    if (include) {
+      responseMeta.headers = response.headers;
     }
-    process.stderr.write('\n');
+    meta(`${DIM}${JSON.stringify(responseMeta, null, 2)}${RESET}\n\n`);
+  } else if (!json && isTTY) {
+    // Default mode: colored METHOD + URL, then status badge with background
+    const mColor = methodColor(method);
+    meta(`${mColor}${BOLD}${method}${RESET} ${url}\n`);
+
+    const bg = statusBg(response.status);
+    meta(`${bg}${WHITE}${BOLD} ${response.status} ${RESET} ${response.statusText}\n`);
   }
 
   // Process response data
@@ -66,13 +119,31 @@ export const formatResponse = async (response: AxiosResponse, options: FormatOpt
     }
   }
 
-  // Output body to stdout
+  // Output body
   if (data !== undefined && data !== null) {
+    if (verbose || include) {
+      meta(`${DIM}RESPONSE BODY:${RESET}\n`);
+    }
+
+    let body: string;
     if (typeof data === 'string') {
-      process.stdout.write(`${data}\n`);
+      body = `${data}\n`;
+    } else if (json) {
+      body = `${JSON.stringify(data)}\n`;
     } else {
-      const indent = json ? 0 : 2;
-      process.stdout.write(`${JSON.stringify(data, null, indent)}\n`);
+      const pretty = JSON.stringify(data, null, 2);
+      body = isTTY ? `${highlightJson(pretty)}\n` : `${pretty}\n`;
+    }
+
+    if (usePager) {
+      pager(buf + body);
+    } else {
+      process.stdout.write(body);
+    }
+  } else {
+    meta(`${DIM}(empty response)${RESET}\n`);
+    if (usePager && buf) {
+      pager(buf);
     }
   }
 };

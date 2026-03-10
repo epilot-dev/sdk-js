@@ -12,8 +12,8 @@ import { getResolvedProfile } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
 import { formatResponse } from './response-formatter.js';
-import { isInteractive, pickOperation, printOperationsTable, promptParam } from './interactive.js';
-import { BOLD, RESET, DIM, RED, YELLOW, GREEN, methodColor } from './utils.js';
+import { isInteractive, pickOperation, formatOperationsTable, promptParam } from './interactive.js';
+import { BOLD, RESET, DIM, RED, YELLOW, GREEN, methodColor, pager, highlightJson } from './utils.js';
 import type { OperationChoice } from './interactive.js';
 
 export type CallArgs = {
@@ -32,6 +32,7 @@ export type CallArgs = {
   interactive?: boolean;
   jsonata?: string;
   help?: boolean;
+  _apihelp?: boolean;
 };
 
 /**
@@ -98,8 +99,6 @@ const mockFromSchema = (schema: OpenAPIV3.SchemaObject): unknown => {
 import dereferenceJsonSchema from 'dereference-json-schema';
 const { dereferenceSync } = dereferenceJsonSchema as unknown as { dereferenceSync: (schema: unknown) => unknown };
 
-const w = (text: string) => process.stdout.write(text);
-
 /**
  * Extract the JSON body schema for an operation (if any).
  */
@@ -120,9 +119,15 @@ const getBodySchema = (spec: OpenAPIV3.Document, operationId: string): OpenAPIV3
 };
 
 /**
- * Print rich operation help — matching the generated docs quality.
+ * Build rich operation help text — matching the generated docs quality.
+ * Returns null if the operation is not found.
  */
-const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV3.Document): void => {
+const formatOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV3.Document): string | null => {
+  let out = '';
+  const w = (text: string) => {
+    out += text;
+  };
+
   for (const [path, methods] of Object.entries(spec.paths ?? {})) {
     if (!methods) continue;
     for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const) {
@@ -176,13 +181,13 @@ const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV
         if (bodySchema) {
           try {
             const mockBody = truncateJson(mockFromSchema(bodySchema));
-            const bodyStr = JSON.stringify(mockBody, null, 2);
+            const bodyStr = highlightJson(JSON.stringify(mockBody, null, 2));
             const lines = bodyStr.split('\n');
             w(`\n`);
             if (lines.length <= MAX_BODY_LINES) {
-              for (const line of lines) w(`  ${DIM}${line}${RESET}\n`);
+              for (const line of lines) w(`  ${line}\n`);
             } else {
-              for (const line of lines.slice(0, MAX_BODY_LINES)) w(`  ${DIM}${line}${RESET}\n`);
+              for (const line of lines.slice(0, MAX_BODY_LINES)) w(`  ${line}\n`);
               w(`  ${DIM}  ...${RESET}\n`);
             }
           } catch {
@@ -191,6 +196,22 @@ const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV
         }
         w(`\n`);
       }
+
+      // ── Flags ──
+      w(`${BOLD}FLAGS${RESET}\n\n`);
+      w(`  ${GREEN}-p${RESET} key=value             Set a named parameter\n`);
+      w(`  ${GREEN}-d${RESET} '{...}'               Request body JSON\n`);
+      w(`  ${GREEN}-H${RESET} 'Key: Value'          Custom header\n`);
+      w(`  ${GREEN}-t, --token${RESET} <token>     Bearer token for authentication\n`);
+      w(`  ${GREEN}--profile${RESET} <name>        Use a named profile\n`);
+      w(`  ${GREEN}-s, --server${RESET} <url>      Override server base URL\n`);
+      w(`  ${GREEN}-i, --include${RESET}           Include response headers in output\n`);
+      w(`  ${GREEN}--json${RESET}                  Output raw JSON (no formatting)\n`);
+      w(`  ${GREEN}-v, --verbose${RESET}           Verbose output (show request details)\n`);
+      w(`  ${GREEN}--jsonata${RESET} <expr>        JSONata expression to transform response\n`);
+      w(`  ${GREEN}--definition${RESET} <file>     Override OpenAPI spec file/URL\n`);
+      w(`  ${GREEN}--no-interactive${RESET}        Disable interactive prompts\n`);
+      w(`\n`);
 
       // ── Sample calls ──
       w(`${BOLD}EXAMPLES${RESET}\n\n`);
@@ -281,7 +302,8 @@ const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV
             w(`${BOLD}SAMPLE RESPONSE${RESET}\n\n`);
             const limit = 40;
             const shown = lines.length <= limit ? lines : lines.slice(0, limit);
-            for (const line of shown) w(`  ${DIM}${line}${RESET}\n`);
+            const highlighted = highlightJson(shown.join('\n'));
+            for (const hLine of highlighted.split('\n')) w(`  ${hLine}\n`);
             if (lines.length > limit) w(`  ${DIM}  ... (${lines.length - limit} more lines)${RESET}\n`);
             w(`\n`);
           } catch {
@@ -290,12 +312,11 @@ const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV
         }
       }
 
-      return;
+      return out;
     }
   }
 
-  process.stderr.write(`${RED}Operation "${operationId}" not found.${RESET}\n`);
-  process.exit(1);
+  return null;
 };
 
 /**
@@ -334,18 +355,22 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // No operation specified: list operations or interactive pick
   if (!args.operation) {
-    process.stdout.write(
-      `\n${BOLD}epilot ${apiName}${RESET} - ${(spec as OpenAPIV3.Document).info?.title || apiName}\n\n`,
-    );
-    process.stdout.write(`${BOLD}Available operations:${RESET}\n\n`);
+    const header =
+      `\n${BOLD}epilot ${apiName}${RESET} - ${(spec as OpenAPIV3.Document).info?.title || apiName}\n\n` +
+      `${BOLD}Available operations:${RESET}\n\n`;
 
-    if (isInteractive({ interactive: args.interactive })) {
+    if (!args._apihelp && isInteractive({ interactive: args.interactive })) {
+      process.stdout.write(header);
       const operationId = await pickOperation(operations);
       // Re-run with selected operation
       return callApi(apiName, { ...args, operation: operationId });
     }
 
-    printOperationsTable(apiName, operations);
+    if (args.interactive === false) {
+      process.stdout.write(header + formatOperationsTable(apiName, operations));
+    } else {
+      pager(header + formatOperationsTable(apiName, operations));
+    }
     return;
   }
 
@@ -353,7 +378,17 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // --help on specific operation
   if (args.help) {
-    printOperationHelp(apiName, operationId, spec as OpenAPIV3.Document);
+    const helpText = formatOperationHelp(apiName, operationId, spec as OpenAPIV3.Document);
+    if (helpText) {
+      if (args.interactive === false) {
+        process.stdout.write(helpText);
+      } else {
+        pager(helpText);
+      }
+    } else {
+      process.stderr.write(`${RED}Operation "${operationId}" not found.${RESET}\n`);
+      process.exit(1);
+    }
     return;
   }
 
@@ -475,6 +510,8 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
       include: args.include,
       verbose: args.verbose,
       jsonata: args.jsonata,
+      interactive: args.interactive,
+      operationId,
     });
 
     // Exit with non-zero for error responses

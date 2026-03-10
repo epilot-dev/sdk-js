@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+
 /**
  * Check if a string is valid JSON.
  */
@@ -69,6 +71,37 @@ export const methodColor = (method: string): string => {
   }
 };
 
+/**
+ * Page output through `less` if content is taller than the terminal.
+ * Falls back to direct stdout write if `less` is unavailable or not a TTY.
+ */
+export const pager = (content: string): void => {
+  if (!process.stdout.isTTY) {
+    process.stdout.write(content);
+    return;
+  }
+
+  const lines = content.split('\n').length;
+  const rows = process.stdout.rows || 24;
+
+  if (lines <= rows) {
+    process.stdout.write(content);
+    return;
+  }
+
+  try {
+    const result = spawnSync('less', ['-R', '-F', '-X'], {
+      input: content,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+    if (result.status !== 0 && result.status !== null) {
+      process.stdout.write(content);
+    }
+  } catch {
+    process.stdout.write(content);
+  }
+};
+
 export const RESET = '\x1b[0m';
 export const BOLD = '\x1b[1m';
 export const DIM = '\x1b[2m';
@@ -76,3 +109,25 @@ export const GREEN = '\x1b[32m';
 export const RED = '\x1b[31m';
 export const YELLOW = '\x1b[33m';
 export const CYAN = '\x1b[36m';
+export const WHITE = '\x1b[37m';
+export const BG_GREEN = '\x1b[42m';
+export const BG_RED = '\x1b[41m';
+export const BG_YELLOW = '\x1b[43m';
+export const MAGENTA = '\x1b[35m';
+export const BLUE = '\x1b[34m';
+
+/**
+ * Syntax-highlight a JSON string with ANSI colors.
+ * Keys = cyan, strings = green, numbers = yellow, booleans/null = magenta.
+ */
+export const highlightJson = (jsonStr: string): string =>
+  jsonStr.replace(
+    /("(?:\\.|[^"\\])*")\s*(:)?|(\b(?:true|false|null)\b)|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)/g,
+    (match, str, colon, bool, num) => {
+      if (str && colon) return `${CYAN}${str}${RESET}${colon}`;
+      if (str) return `${GREEN}${str}${RESET}`;
+      if (bool) return `${MAGENTA}${bool}${RESET}`;
+      if (num) return `${YELLOW}${num}${RESET}`;
+      return match;
+    },
+  );

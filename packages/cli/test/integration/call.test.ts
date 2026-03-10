@@ -39,6 +39,8 @@ beforeEach(() => {
   // Simulate TTY so status badge is shown in tests
   Object.defineProperty(process.stdout, 'isTTY', { value: true, writable: true });
   Object.defineProperty(process.stderr, 'isTTY', { value: true, writable: true });
+  // Ensure pager always falls through to direct write in tests
+  Object.defineProperty(process.stdout, 'rows', { value: 9999, writable: true, configurable: true });
 });
 
 afterEach(() => {
@@ -524,28 +526,31 @@ describe('Output modes', () => {
     expect(stderrOutput).toBe(''); // no status badge in --json mode
   });
 
-  it('non-json mode outputs status badge to stderr', async () => {
+  it('non-json mode outputs status badge', async () => {
     await call('entity', { operation: 'listSchemas', json: false });
 
-    // stderr should contain status code
-    expect(stderrOutput).toContain('200');
-    // stdout should have pretty-printed JSON
-    expect(stdoutOutput).toContain('"contact"');
+    const combined = stdoutOutput + stderrOutput;
+    expect(combined).toContain('200');
+    expect(combined).toContain('"contact"');
   });
 
-  it('--include shows response headers', async () => {
+  it('--include shows response meta and body labels', async () => {
     await call('entity', { operation: 'listSchemas', include: true });
 
-    expect(stderrOutput).toContain('200');
-    // Include mode shows HTTP status line in stderr
-    expect(stderrOutput).toMatch(/HTTP/);
+    const combined = stdoutOutput + stderrOutput;
+    expect(combined).toContain('RESPONSE META:');
+    expect(combined).toContain('"code": 200');
+    expect(combined).toContain('RESPONSE BODY:');
   });
 
-  it('--verbose shows request details', async () => {
+  it('--verbose shows request meta and response meta', async () => {
     await call('entity', { operation: 'listSchemas', verbose: true });
 
-    expect(stderrOutput).toContain('GET');
-    expect(stderrOutput).toContain('Bearer ***');
+    const combined = stdoutOutput + stderrOutput;
+    expect(combined).toContain('REQUEST META:');
+    expect(combined).toContain('GET');
+    expect(combined).toContain('Bearer ***');
+    expect(combined).toContain('RESPONSE META:');
   });
 });
 
