@@ -43,13 +43,13 @@ _epilot() {
     '2:operation:->operation' \\
     '*:flags:->flags'
 
-  case "\$state" in
+  case "$state" in
     api)
       subcommands=(\${(f)"$(epilot --_completions subcommands 2>/dev/null)"})
       _describe 'api' subcommands
       ;;
     operation)
-      operations=(\${(f)"$(epilot --_completions operations \$words[2] 2>/dev/null)"})
+      operations=(\${(f)"$(epilot --_completions operations $words[2] 2>/dev/null)"})
       _describe 'operation' operations
       ;;
     flags)
@@ -69,7 +69,7 @@ _epilot() {
         '--definition[Override OpenAPI spec]:file:_files'
         '--help[Show help]'
       )
-      _arguments "\$flags[@]"
+      _arguments "$flags[@]"
       ;;
   esac
 }

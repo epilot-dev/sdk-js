@@ -64,7 +64,7 @@ export const resolveProfileName = (flagProfile?: string): string | null => {
   if (process.env.EPILOT_PROFILE) return process.env.EPILOT_PROFILE;
   const config = loadProfiles();
   if (config.active) return config.active;
-  if (config.profiles['default']) return 'default';
+  if (config.profiles.default) return 'default';
   return null;
 };
 

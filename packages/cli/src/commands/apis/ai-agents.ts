@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { callApi } from '../../lib/call.js';
 
 export default defineCommand({
-  meta: { name: 'ai-agents', description: "AI Agents API - OpenAPI 3.0" },
+  meta: { name: 'ai-agents', description: 'AI Agents API - OpenAPI 3.0' },
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },

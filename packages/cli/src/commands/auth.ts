@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty';
-import { loadCredentials, saveCredentials, removeCredentials } from '../lib/auth-store.js';
+import { loadCredentials, removeCredentials } from '../lib/auth-store.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW } from '../lib/utils.js';
 
 export default defineCommand({
@@ -39,7 +39,9 @@ export default defineCommand({
         process.stdout.write(`${GREEN}${BOLD}Authenticated${RESET} ${DIM}(${tokenType})${RESET}\n`);
 
         // Resolve fields from JWT claims (API token vs Cognito token vs stored creds)
-        const name = (claims?.token_name || claims?.email || claims?.['cognito:username'] || creds.name) as string | undefined;
+        const name = (claims?.token_name || claims?.email || claims?.['cognito:username'] || creds.name) as
+          | string
+          | undefined;
         const orgId = (claims?.org_id || claims?.['custom:ivy_org_id'] || creds.org_id) as string | undefined;
         const userId = (claims?.user_id || claims?.['custom:ivy_user_id'] || creds.user_id) as string | undefined;
         const tokenId = claims?.token_id as string | undefined;
@@ -65,11 +67,12 @@ export default defineCommand({
           const expiry = new Date((claims.exp as number) * 1000);
           const now = new Date();
           const diffMs = expiry.getTime() - now.getTime();
-          const label = diffMs < 0
-            ? `${RED}expired${RESET}`
-            : diffMs < 86400000
-              ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
-              : `${Math.floor(diffMs / 86400000)} days`;
+          const label =
+            diffMs < 0
+              ? `${RED}expired${RESET}`
+              : diffMs < 86400000
+                ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
+                : `${Math.floor(diffMs / 86400000)} days`;
           process.stdout.write(`  Expires: ${expiry.toISOString()} ${DIM}(${label})${RESET}\n`);
         } else if (claims?.iat && !claims?.exp) {
           const issued = new Date((claims.iat as number) * 1000);

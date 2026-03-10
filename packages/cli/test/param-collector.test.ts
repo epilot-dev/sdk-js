@@ -10,11 +10,7 @@ const makeParam = (name: string, location: string, required = false): OpenAPIV3.
 });
 
 describe('collectParams', () => {
-  const params = [
-    makeParam('slug', 'path', true),
-    makeParam('id', 'path', true),
-    makeParam('hydrate', 'query', false),
-  ];
+  const params = [makeParam('slug', 'path', true), makeParam('id', 'path', true), makeParam('hydrate', 'query', false)];
 
   it('maps positional args to path params in order', () => {
     const result = collectParams(params, undefined, ['contact', '123']);
@@ -53,11 +49,7 @@ describe('collectParams', () => {
 });
 
 describe('getMissingRequired', () => {
-  const params = [
-    makeParam('slug', 'path', true),
-    makeParam('id', 'path', true),
-    makeParam('hydrate', 'query', false),
-  ];
+  const params = [makeParam('slug', 'path', true), makeParam('id', 'path', true), makeParam('hydrate', 'query', false)];
 
   it('returns missing required params', () => {
     const missing = getMissingRequired(params, { slug: 'contact' });
@@ -81,9 +73,7 @@ describe('getOperationParams', () => {
     info: { title: 'Test', version: '1.0.0' },
     paths: {
       '/v1/{slug}/{id}': {
-        parameters: [
-          { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
-        ],
+        parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
         get: {
           operationId: 'getEntity',
           parameters: [

@@ -1,119 +1,109 @@
 # epilot CLI
 
-CLI for all epilot APIs. Call any of the 800+ operations across 46 APIs directly from the command line.
+CLI for epilot APIs. Call any epilot API operation directly from the command line.
 
 ## Install
 
 ```bash
+# Run directly (no install needed)
 npx epilot --help
-```
 
-Or install globally:
-
-```bash
-npm install -g epilot
-```
-
-## Quick Start
-
-```bash
-# Authenticate
-epilot auth login
-
-# List entity schemas
-epilot entity listSchemas
-
-# Get an entity by id
-epilot entity getEntity -p slug=contact -p id=abc123
-
-# Same with positional args
-epilot entity getEntity contact abc123
-
-# Search entities with request body
-epilot entity searchEntities -d '{"q":"*","size":10}'
-
-# Pipe body from file
-cat query.json | epilot entity searchEntities
-
-# Filter response with JSONata
-epilot user getMeV2 --jsonata 'email'
-
-# Raw JSON output (for scripting)
-epilot entity listSchemas --json | jq '.results[].slug'
+# Or install globally
+npm install -g @epilot/cli   # scoped package (same thing)
 ```
 
 ## Usage
 
 <!-- usage-help -->
 ```
-CLI for epilot APIs (epilot v0.1.0)
+epilot v0.1.3 — CLI for epilot APIs
 
-USAGE epilot [OPTIONS] auth|profile|completion|access-token|address|address-suggestions|ai-agents|app|audit-logs|automation|billing|blueprint-manifest|consent|customer-portal|dashboard|data-management|deduplication|design|document|email-settings|email-template|entity|entity-mapping|environments|erp-integration|event-catalog|file|iban|journey|kanban|message|metering|notes|notification|organization|partner-directory|permissions|pricing|pricing-tier|purpose|sandbox|submission|targeting|template-variables|user|validation-rules|webhooks|workflow|workflow-definition
+USAGE
+  epilot <api> <operationId> [params...] [flags]
+  epilot <api>                List operations for an API
+  epilot <api> <op> --help    Show operation details
 
-OPTIONS
+FLAGS
+  -t, --token <token>     Bearer token for authentication
+  --profile <name>        Use a named profile (or EPILOT_PROFILE)
+  -s, --server <url>      Override server base URL
+  --json                  Output raw JSON (no formatting)
+  -v, --verbose           Verbose output (show request details)
+  --jsonata <expr>        JSONata expression to transform response
+  --no-interactive        Disable interactive prompts
 
-       -t, --token    Bearer token
-         --profile    Use a named profile (or EPILOT_PROFILE env)
-      -s, --server    Override server base URL
-            --json    Output raw JSON
-     -v, --verbose    Verbose output
-     --interactive    Interactive mode
-  --no-interactive
-         --jsonata    JSONata expression
+PARAMETER FLAGS
+  -p key=value             Set a named parameter
+  -d '{...}'               Request body JSON
+  -H 'Key: Value'          Custom header
+  -i, --include            Include response headers in output
 
 COMMANDS
+  auth login              Authenticate with epilot (browser)
+  auth token              Store an API token directly
+  auth status             Show authentication status
+  auth logout             Remove stored credentials
+  profile                 Manage named profiles
+  completion              Generate shell completion scripts
 
-                 auth    Manage authentication
-              profile    Manage profiles (server URLs, tokens, environments)
-           completion    Generate shell completion scripts
-         access-token    Access Token API
-              address    Address API
-  address-suggestions    Address Suggestions API
-            ai-agents    AI Agents API - OpenAPI 3.0
-                  app    App API
-           audit-logs    Audit Log
-           automation    Automation API
-              billing    Billing API
-   blueprint-manifest    Blueprint Manifest API
-              consent    Consent API
-      customer-portal    Portal API
-            dashboard    Dashboard API
-      data-management    Data Management API
-        deduplication    Deduplication API
-               design    Design Builder API v2
-             document    Document API
-       email-settings    Messaging Settings API
-       email-template    Email template API
-               entity    Entity API
-       entity-mapping    Entity Mapping API
-         environments    Environments API
-      erp-integration    ERP Integration API
-        event-catalog    Event Catalog API
-                 file    File API
-                 iban    Iban API
-              journey    Journey API
-               kanban    Kanban API
-              message    Message API
-             metering    Metering API
-                notes    Notes API
-         notification    Notification API
-         organization    Organization API
-    partner-directory    Partner API
-          permissions    Permissions API
-              pricing    Pricing API
-         pricing-tier    Pricing Tier API
-              purpose    Purpose API
-              sandbox    Sandbox API
-           submission    Submission API
-            targeting    Targeting API
-   template-variables    Template Variables API
-                 user    User API
-     validation-rules    Validation Rules API
-             webhooks    Webhooks
-             workflow    Workflows Executions
-  workflow-definition    Workflows Definitions
+APIs
+  access-token         Access Token API
+  address              Address API
+  address-suggestions  Address Suggestions API
+  ai-agents            AI Agents API - OpenAPI 3.0
+  app                  App API
+  audit-logs           Audit Log
+  automation           Automation API
+  billing              Billing API
+  blueprint-manifest   Blueprint Manifest API
+  consent              Consent API
+  customer-portal      Portal API
+  dashboard            Dashboard API
+  data-management      Data Management API
+  deduplication        Deduplication API
+  design               Design Builder API v2
+  document             Document API
+  email-settings       Messaging Settings API
+  email-template       Email template API
+  entity               Entity API
+  entity-mapping       Entity Mapping API
+  environments         Environments API
+  erp-integration      ERP Integration API
+  event-catalog        Event Catalog API
+  file                 File API
+  iban                 Iban API
+  journey              Journey API
+  kanban               Kanban API
+  message              Message API
+  metering             Metering API
+  notes                Notes API
+  notification         Notification API
+  organization         Organization API
+  partner-directory    Partner API
+  permissions          Permissions API
+  pricing              Pricing API
+  pricing-tier         Pricing Tier API
+  purpose              Purpose API
+  sandbox              Sandbox API
+  submission           Submission API
+  targeting            Targeting API
+  template-variables   Template Variables API
+  user                 User API
+  validation-rules     Validation Rules API
+  webhooks             Webhooks
+  workflow             Workflows Executions
+  workflow-definition  Workflows Definitions
 
-Use epilot <command> --help for more information about a command.
+EXAMPLES
+  $ epilot auth login
+  $ epilot user getMeV2
+  $ epilot entity getEntity contact abc123
+  $ epilot entity searchEntities -d '{"q":"*"}'
+  $ epilot entity searchEntities --jsonata 'results[0]._title'
+  $ echo '{"q":"*"}' | epilot entity searchEntities
+
+Run epilot <api> to list available operations.
+Run epilot <api> <operationId> --help for operation details.
 ```
 <!-- /usage-help -->
 
@@ -279,7 +269,7 @@ Provides tab completion for API names, operation IDs, and flags.
 
 ## API Reference
 
-Full documentation with sample calls and responses for all 46 APIs:
+Full documentation with sample calls and responses for all APIs:
 
 [**docs/index.md**](./docs/index.md)
 

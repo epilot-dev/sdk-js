@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { callApi } from '../../lib/call.js';
 
 export default defineCommand({
-  meta: { name: 'consent', description: "Consent API" },
+  meta: { name: 'consent', description: 'Consent API' },
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },

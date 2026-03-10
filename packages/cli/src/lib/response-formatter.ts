@@ -14,10 +14,7 @@ export type FormatOptions = {
  * - Status badge goes to stderr (so it doesn't interfere with piping)
  * - Response body goes to stdout
  */
-export const formatResponse = async (
-  response: AxiosResponse,
-  options: FormatOptions,
-): Promise<void> => {
+export const formatResponse = async (response: AxiosResponse, options: FormatOptions): Promise<void> => {
   const { json, include, verbose, jsonata } = options;
 
   // Verbose: show request details on stderr
@@ -38,9 +35,7 @@ export const formatResponse = async (
 
   // Status badge to stderr (only when both stdout and stderr are TTY — not piped)
   if (!json && process.stdout.isTTY && process.stderr.isTTY) {
-    const statusColor = response.status >= 200 && response.status < 300 ? GREEN
-      : response.status >= 400 ? RED
-      : YELLOW;
+    const statusColor = response.status >= 200 && response.status < 300 ? GREEN : response.status >= 400 ? RED : YELLOW;
     process.stderr.write(
       `${statusColor}${BOLD}${response.status}${RESET} ${statusColor}${response.statusText}${RESET}\n`,
     );
@@ -73,10 +68,10 @@ export const formatResponse = async (
   // Output body to stdout
   if (data !== undefined && data !== null) {
     if (typeof data === 'string') {
-      process.stdout.write(data + '\n');
+      process.stdout.write(`${data}\n`);
     } else {
       const indent = json ? 0 : 2;
-      process.stdout.write(JSON.stringify(data, null, indent) + '\n');
+      process.stdout.write(`${JSON.stringify(data, null, indent)}\n`);
     }
   }
 };

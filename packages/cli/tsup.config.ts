@@ -1,4 +1,7 @@
 import { defineConfig } from 'tsup';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig({
   entry: { 'bin/epilot': 'bin/epilot.ts' },
@@ -9,6 +12,9 @@ export default defineConfig({
   outDir: 'dist',
   banner: { js: '#!/usr/bin/env node' },
   platform: 'node',
+  define: {
+    __CLI_VERSION__: JSON.stringify(pkg.version),
+  },
   // Keep heavy CJS deps external; they'll be resolved from node_modules at runtime
   external: [
     'openapi-client-axios',

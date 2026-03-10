@@ -87,14 +87,18 @@ const baseArgs: Partial<CallArgs> = {
   json: true,
 };
 
-const call = (apiName: string, args: Partial<CallArgs>) =>
-  callApi(apiName, { ...baseArgs, ...args } as CallArgs);
+const call = (apiName: string, args: Partial<CallArgs>) => callApi(apiName, { ...baseArgs, ...args } as CallArgs);
 
 // ─── Entity API ─────────────────────────────────────────────────────────────
 
 describe('Entity API', () => {
   it('GET listSchemas', async () => {
-    const mockSchemas = { results: [{ slug: 'contact', name: 'Contact' }, { slug: 'order', name: 'Order' }] };
+    const mockSchemas = {
+      results: [
+        { slug: 'contact', name: 'Contact' },
+        { slug: 'order', name: 'Order' },
+      ],
+    };
 
     server.use(
       http.get(`${ENTITY_BASE}/v1/entity/schemas`, ({ request }) => {
@@ -143,7 +147,7 @@ describe('Entity API', () => {
     };
 
     server.use(
-      http.get(`${ENTITY_BASE}/v1/entity/:slug/:id`, ({ params }) => {
+      http.get(`${ENTITY_BASE}/v1/entity/:slug/:id`, (_info) => {
         return HttpResponse.json(mockEntity);
       }),
     );
@@ -325,9 +329,7 @@ describe('Error handling', () => {
       }),
     );
 
-    await expect(
-      call('entity', { operation: 'listSchemas' }),
-    ).rejects.toThrow('process.exit(1)');
+    await expect(call('entity', { operation: 'listSchemas' })).rejects.toThrow('process.exit(1)');
 
     expect(lastExitCode).toBe(1);
     const output = JSON.parse(stdoutOutput);
@@ -369,9 +371,7 @@ describe('Error handling', () => {
   });
 
   it('exits with code 1 for unknown operation', async () => {
-    await expect(
-      call('entity', { operation: 'nonExistentOperation' }),
-    ).rejects.toThrow('process.exit(1)');
+    await expect(call('entity', { operation: 'nonExistentOperation' })).rejects.toThrow('process.exit(1)');
 
     expect(lastExitCode).toBe(1);
     expect(stderrOutput).toContain('Unknown operation');

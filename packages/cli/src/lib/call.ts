@@ -2,7 +2,9 @@ import type { OpenAPIV3 } from 'openapi-client-axios';
 import OpenAPIClientAxiosModule from 'openapi-client-axios';
 
 // Handle CJS default export: the default import wraps the module
-const OpenAPIClientAxios = (OpenAPIClientAxiosModule as unknown as { default: typeof OpenAPIClientAxiosModule }).default ?? OpenAPIClientAxiosModule;
+const OpenAPIClientAxios =
+  (OpenAPIClientAxiosModule as unknown as { default: typeof OpenAPIClientAxiosModule }).default ??
+  OpenAPIClientAxiosModule;
 
 import { loadDefinition } from './definition-loader.js';
 import { resolveToken } from './auth-store.js';
@@ -11,7 +13,7 @@ import { collectParams, getOperationParams, getMissingRequired } from './param-c
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
 import { formatResponse } from './response-formatter.js';
 import { isInteractive, pickOperation, printOperationsTable, promptParam } from './interactive.js';
-import { BOLD, RESET, DIM, RED, YELLOW, CYAN, GREEN, methodColor } from './utils.js';
+import { BOLD, RESET, DIM, RED, YELLOW, GREEN, methodColor } from './utils.js';
 import type { OperationChoice } from './interactive.js';
 
 export type CallArgs = {
@@ -63,8 +65,7 @@ const sampleParamValue = (p: OpenAPIV3.ParameterObject): string => {
   if (schema?.example !== undefined) return String(schema.example);
   if (schema?.type === 'boolean') return 'true';
   if (schema?.type === 'integer' || schema?.type === 'number') return '1';
-  if (p.name === 'id' || p.name.endsWith('_id') || p.name.endsWith('Id'))
-    return '123e4567-e89b-12d3-a456-426614174000';
+  if (p.name === 'id' || p.name.endsWith('_id') || p.name.endsWith('Id')) return '123e4567-e89b-12d3-a456-426614174000';
   if (p.name === 'slug') return 'contact';
   if (p.name === 'email') return 'user@example.com';
   return 'example';
@@ -120,11 +121,7 @@ const getBodySchema = (spec: OpenAPIV3.Document, operationId: string): OpenAPIV3
 /**
  * Print rich operation help — matching the generated docs quality.
  */
-const printOperationHelp = (
-  apiName: string,
-  operationId: string,
-  spec: OpenAPIV3.Document,
-): void => {
+const printOperationHelp = (apiName: string, operationId: string, spec: OpenAPIV3.Document): void => {
   for (const [path, methods] of Object.entries(spec.paths ?? {})) {
     if (!methods) continue;
     for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const) {
@@ -205,7 +202,7 @@ const printOperationHelp = (
       {
         const parts = [`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}`];
         for (const pf of pFlags) parts.push(pf);
-        w(parts.join(' \\\n      ') + '\n');
+        w(`${parts.join(' \\\n      ')}\n`);
       }
       w(`\n`);
 
@@ -236,7 +233,7 @@ const printOperationHelp = (
               const parts = [`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}`];
               if (pFlags.length > 0) for (const pf of pFlags) parts.push(pf);
               parts.push(`-d '${pretty}'`);
-              w(parts.join(' \\\n      ') + '\n');
+              w(`${parts.join(' \\\n      ')}\n`);
             }
             w(`\n`);
           } catch {
@@ -245,7 +242,7 @@ const printOperationHelp = (
         }
 
         // Stdin pipe
-        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        const pFlagsStr = pFlags.length > 0 ? ` ${pFlags.join(' ')}` : '';
         w(`  ${DIM}# pipe from file${RESET}\n`);
         w(`  ${GREEN}$${RESET} cat body.json | epilot ${apiName} ${operationId}${pFlagsStr}\n`);
         w(`\n`);
@@ -253,7 +250,7 @@ const printOperationHelp = (
 
       // JSONata
       {
-        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        const pFlagsStr = pFlags.length > 0 ? ` ${pFlags.join(' ')}` : '';
         const jsonataExpr = guessJsonataExpr(op);
         w(`  ${DIM}# filter response with JSONata${RESET}\n`);
         w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}${pFlagsStr} --jsonata '${jsonataExpr}'\n`);
@@ -262,7 +259,7 @@ const printOperationHelp = (
 
       // Raw JSON for scripting
       {
-        const pFlagsStr = pFlags.length > 0 ? ' ' + pFlags.join(' ') : '';
+        const pFlagsStr = pFlags.length > 0 ? ` ${pFlags.join(' ')}` : '';
         w(`  ${DIM}# raw JSON for scripting${RESET}\n`);
         w(`  ${GREEN}$${RESET} epilot ${apiName} ${operationId}${pFlagsStr} --json\n`);
         w(`\n`);
@@ -336,7 +333,9 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // No operation specified: list operations or interactive pick
   if (!args.operation) {
-    process.stdout.write(`\n${BOLD}epilot ${apiName}${RESET} - ${(spec as OpenAPIV3.Document).info?.title || apiName}\n\n`);
+    process.stdout.write(
+      `\n${BOLD}epilot ${apiName}${RESET} - ${(spec as OpenAPIV3.Document).info?.title || apiName}\n\n`,
+    );
     process.stdout.write(`${BOLD}Available operations:${RESET}\n\n`);
 
     if (isInteractive({ interactive: args.interactive })) {
@@ -385,7 +384,7 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   // Collect parameters
   const opParams = getOperationParams(spec as OpenAPIV3.Document, operationId);
   const positionalArgs = args._args ?? [];
-  let collected = collectParams(opParams, args.param, positionalArgs);
+  const collected = collectParams(opParams, args.param, positionalArgs);
 
   // Interactive: prompt for missing required params
   const missing = getMissingRequired(opParams, collected);
@@ -469,11 +468,9 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   }
 
   try {
-    const response = await (operationFn as Function)(
-      Object.keys(collected).length > 0 ? collected : null,
-      body,
-      { validateStatus: () => true },
-    );
+    const response = await (operationFn as Function)(Object.keys(collected).length > 0 ? collected : null, body, {
+      validateStatus: () => true,
+    });
 
     await formatResponse(response, {
       json: args.json,

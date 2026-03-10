@@ -54,12 +54,18 @@ export const parseParamValue = (value: string): unknown => {
 export const methodColor = (method: string): string => {
   const m = method.toUpperCase();
   switch (m) {
-    case 'GET': return '\x1b[32m'; // green
-    case 'POST': return '\x1b[33m'; // yellow
-    case 'PUT': return '\x1b[34m'; // blue
-    case 'PATCH': return '\x1b[36m'; // cyan
-    case 'DELETE': return '\x1b[31m'; // red
-    default: return '\x1b[37m'; // white
+    case 'GET':
+      return '\x1b[32m'; // green
+    case 'POST':
+      return '\x1b[33m'; // yellow
+    case 'PUT':
+      return '\x1b[34m'; // blue
+    case 'PATCH':
+      return '\x1b[36m'; // cyan
+    case 'DELETE':
+      return '\x1b[31m'; // red
+    default:
+      return '\x1b[37m'; // white
   }
 };
 

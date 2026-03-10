@@ -38,10 +38,7 @@ export const pickOperation = async (operations: OperationChoice[]): Promise<stri
 /**
  * Prompt for a missing parameter value.
  */
-export const promptParam = async (
-  name: string,
-  param: OpenAPIV3.ParameterObject,
-): Promise<string> => {
+export const promptParam = async (name: string, param: OpenAPIV3.ParameterObject): Promise<string> => {
   const { input } = await import('@inquirer/prompts');
 
   const schema = param.schema as OpenAPIV3.SchemaObject | undefined;
@@ -82,19 +79,14 @@ export const promptToken = async (): Promise<string | null> => {
 /**
  * Print the operations list as a table (non-interactive).
  */
-export const printOperationsTable = (
-  apiName: string,
-  operations: OperationChoice[],
-): void => {
+export const printOperationsTable = (apiName: string, operations: OperationChoice[]): void => {
   // Group by first tag or just list them
   for (const op of operations) {
     const color = methodColor(op.method);
     const method = op.method.toUpperCase().padEnd(7);
     const path = op.path;
     const summary = op.summary ? `  ${DIM}${op.summary}${RESET}` : '';
-    process.stdout.write(
-      `  ${color}${method}${RESET} ${path.padEnd(50)} ${op.operationId}${summary}\n`,
-    );
+    process.stdout.write(`  ${color}${method}${RESET} ${path.padEnd(50)} ${op.operationId}${summary}\n`);
   }
   process.stdout.write(`\nRun \`epilot ${apiName} <operationId> --help\` for details.\n`);
 };

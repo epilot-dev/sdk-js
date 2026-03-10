@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { callApi } from '../../lib/call.js';
 
 export default defineCommand({
-  meta: { name: 'automation', description: "Automation API" },
+  meta: { name: 'automation', description: 'Automation API' },
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },

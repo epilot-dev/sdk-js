@@ -1,7 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { existsSync, readFileSync, unlinkSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { homedir } from 'node:os';
 import { resolveBody, loadPayloadCache, savePayloadCache, clearPayloadCache } from '../src/lib/body-handler.js';
 
 // Mock @inquirer/prompts
@@ -126,8 +123,7 @@ describe('resolveBody', () => {
     it('throws after max retries with invalid JSON', async () => {
       const { editor } = await import('@inquirer/prompts');
       vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-      (editor as ReturnType<typeof vi.fn>)
-        .mockResolvedValue('still not json');
+      (editor as ReturnType<typeof vi.fn>).mockResolvedValue('still not json');
 
       await expect(
         resolveBody({

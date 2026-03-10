@@ -9,10 +9,7 @@ type ParameterObject = OpenAPIV3.ParameterObject;
  * Extract parameters for an operation from the OpenAPI spec.
  * Expects a dereferenced spec (no $ref pointers in parameters).
  */
-export const getOperationParams = (
-  spec: OpenAPIV3.Document,
-  operationId: string,
-): ParameterObject[] => {
+export const getOperationParams = (spec: OpenAPIV3.Document, operationId: string): ParameterObject[] => {
   for (const [_path, methods] of Object.entries(spec.paths ?? {})) {
     if (!methods) continue;
 
@@ -72,11 +69,6 @@ export const collectParams = (
  * Validate that all required parameters are provided.
  * Returns list of missing required param names.
  */
-export const getMissingRequired = (
-  params: ParameterObject[],
-  collected: CollectedParams,
-): string[] => {
-  return params
-    .filter((p) => p.required && !(p.name in collected))
-    .map((p) => `${p.name} (${p.in})`);
+export const getMissingRequired = (params: ParameterObject[], collected: CollectedParams): string[] => {
+  return params.filter((p) => p.required && !(p.name in collected)).map((p) => `${p.name} (${p.in})`);
 };

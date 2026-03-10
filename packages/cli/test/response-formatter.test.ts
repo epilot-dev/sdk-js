@@ -2,17 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { formatResponse } from '../src/lib/response-formatter.js';
 import type { AxiosResponse } from 'axios';
 
-const makeResponse = (status: number, data: unknown, statusText = 'OK'): AxiosResponse => ({
-  status,
-  statusText,
-  data,
-  headers: { 'content-type': 'application/json' },
-  config: {
-    method: 'get',
-    url: 'https://example.com/api',
-    headers: {} as any,
-  } as any,
-} as AxiosResponse);
+const makeResponse = (status: number, data: unknown, statusText = 'OK'): AxiosResponse =>
+  ({
+    status,
+    statusText,
+    data,
+    headers: { 'content-type': 'application/json' },
+    config: {
+      method: 'get',
+      url: 'https://example.com/api',
+      headers: {} as any,
+    } as any,
+  }) as AxiosResponse;
 
 describe('formatResponse', () => {
   let stdoutWrite: ReturnType<typeof vi.spyOn>;

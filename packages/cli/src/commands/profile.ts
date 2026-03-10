@@ -1,12 +1,6 @@
 import { defineCommand } from 'citty';
-import {
-  listProfiles,
-  upsertProfile,
-  deleteProfile,
-  setActiveProfile,
-  loadProfiles,
-} from '../lib/profiles.js';
-import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
+import { listProfiles, upsertProfile, deleteProfile, setActiveProfile, loadProfiles } from '../lib/profiles.js';
+import { BOLD, RESET, GREEN, RED, DIM } from '../lib/utils.js';
 
 export default defineCommand({
   meta: {

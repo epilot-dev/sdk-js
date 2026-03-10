@@ -14,10 +14,7 @@ const __dirname = dirname(__filename);
  * 2. .epilot/overrides/<api-name>.json in CWD
  * 3. Bundled definitions/<api-name>.json
  */
-export const loadDefinition = async (
-  apiName: string,
-  definitionOverride?: string,
-): Promise<Document> => {
+export const loadDefinition = async (apiName: string, definitionOverride?: string): Promise<Document> => {
   // 1. Explicit override via flag
   if (definitionOverride) {
     if (definitionOverride.startsWith('http://') || definitionOverride.startsWith('https://')) {
@@ -60,6 +57,6 @@ export const loadDefinition = async (
 
   throw new Error(
     `No OpenAPI definition found for "${apiName}". ` +
-    `Use --definition <file|url> to provide one, or place it at .epilot/overrides/${apiName}.json`,
+      `Use --definition <file|url> to provide one, or place it at .epilot/overrides/${apiName}.json`,
   );
 };
