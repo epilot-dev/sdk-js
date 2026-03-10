@@ -5,12 +5,18 @@ export type CollectedParams = Record<string, unknown>;
 
 type ParameterObject = OpenAPIV3.ParameterObject;
 
+export type OperationParamsResult = {
+  params: ParameterObject[];
+  pathTemplate: string;
+};
+
 /**
  * Extract parameters for an operation from the OpenAPI spec.
  * Expects a dereferenced spec (no $ref pointers in parameters).
+ * Returns both the params and the URL path template.
  */
-export const getOperationParams = (spec: OpenAPIV3.Document, operationId: string): ParameterObject[] => {
-  for (const [_path, methods] of Object.entries(spec.paths ?? {})) {
+export const getOperationParams = (spec: OpenAPIV3.Document, operationId: string): OperationParamsResult => {
+  for (const [path, methods] of Object.entries(spec.paths ?? {})) {
     if (!methods) continue;
 
     // Get path-level params
@@ -29,26 +35,35 @@ export const getOperationParams = (spec: OpenAPIV3.Document, operationId: string
         if (idx >= 0) merged[idx] = p;
         else merged.push(p);
       }
-      return merged;
+      return { params: merged, pathTemplate: path };
     }
   }
-  return [];
+  return { params: [], pathTemplate: '' };
 };
 
 /**
  * Collect parameters from -p flags and positional args.
  *
- * Positional args are mapped to path parameters in declaration order.
+ * Positional args are mapped to path parameters in URL template order
+ * (e.g. /v1/entity/{slug}/{id} → slug first, then id).
  */
 export const collectParams = (
   params: ParameterObject[],
   paramFlags: string | string[] | undefined,
   positionalArgs: string[],
+  pathTemplate?: string,
 ): CollectedParams => {
   const result: CollectedParams = {};
 
-  // Map positional args to path parameters in order
-  const pathParams = params.filter((p) => p.in === 'path');
+  // Map positional args to path parameters in URL template order
+  let pathParams = params.filter((p) => p.in === 'path');
+  if (pathTemplate) {
+    // Extract param names from URL template in order: /v1/{slug}/{id} → ['slug', 'id']
+    const templateOrder = [...pathTemplate.matchAll(/\{([^}]+)\}/g)].map((m) => m[1]);
+    pathParams = templateOrder
+      .map((name) => pathParams.find((p) => p.name === name))
+      .filter((p): p is ParameterObject => !!p);
+  }
   for (let i = 0; i < positionalArgs.length && i < pathParams.length; i++) {
     result[pathParams[i].name] = parseParamValue(positionalArgs[i]);
   }

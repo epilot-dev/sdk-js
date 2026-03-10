@@ -65,6 +65,7 @@ Get all journeys by organization id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -126,6 +127,7 @@ Get journey by id. Private journeys requires valid private token to be passed
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -290,6 +292,7 @@ Remove journey by id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -345,6 +348,7 @@ Get products available in the journey by id. requires public journey token to be
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -422,6 +426,7 @@ Create a Journey
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -687,6 +692,7 @@ Update a Journey
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -838,6 +844,7 @@ Update a Journey (partially / patch). Support for nested properties updates (e.g
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -959,6 +966,7 @@ Search Journeys
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1038,6 +1046,7 @@ Builds document generated from a template with journey values."
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1140,6 +1149,7 @@ Create a Journey
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1373,6 +1383,7 @@ Update a Journey
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1606,6 +1617,7 @@ Update a Journey (partially / patch). Support for nested properties updates (e.g
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1751,6 +1763,7 @@ Get journey by id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1896,6 +1909,7 @@ Remove journey by id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -1946,6 +1960,7 @@ Get settings related to the journey using journey ID.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -2009,6 +2024,7 @@ Get button options from a csv file.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**

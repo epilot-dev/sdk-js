@@ -55,6 +55,7 @@ Returns roles and grants assigned to current user
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -127,6 +128,7 @@ Returns list of all roles in organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -201,6 +203,7 @@ Create role
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -278,6 +281,7 @@ Search Roles
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -377,6 +381,7 @@ Get role by id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -460,6 +465,7 @@ Create or update role
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -577,6 +583,7 @@ Delete role by id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -652,6 +659,7 @@ Makes sure the user has a role in the organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -695,6 +703,7 @@ Get list of assigned roles by user id
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -756,6 +765,7 @@ Assign / unassign roles to users.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -823,6 +833,7 @@ Assign a user to a role.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -887,6 +898,7 @@ Remove role assignment from user
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -944,6 +956,7 @@ Returns list of all assignments in organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**

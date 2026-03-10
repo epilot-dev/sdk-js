@@ -49,6 +49,7 @@ Scan all designs linked to a organization, based in orgId attribute from JWT aut
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -103,6 +104,7 @@ Create a brand new design linked to a organization, based in orgId attribute fro
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -275,6 +277,7 @@ Search for a especific design owned by user organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -368,6 +371,7 @@ Update a especific design owned by user organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -507,6 +511,7 @@ Search and delete for a especific design owned by user organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -559,6 +564,7 @@ Search for a especific design owned by user organization and parse them to a new
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -619,6 +625,7 @@ List all files for the user organization bucket
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -673,6 +680,7 @@ Upload a new file for the user organization bucket
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -732,6 +740,7 @@ Search for a especific design owned by user organization
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -827,6 +836,7 @@ Add a consumer that uses a specific design
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -888,6 +898,7 @@ Remove a consumer that uses a specific design
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**

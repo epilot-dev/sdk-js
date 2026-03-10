@@ -54,6 +54,7 @@ Get address suggestions for the given Availability File
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -111,6 +112,7 @@ Check for Entities that contain a matching availability range in related availab
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -182,6 +184,7 @@ Validates an already uploaded availability file, it returns an array of errors i
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**

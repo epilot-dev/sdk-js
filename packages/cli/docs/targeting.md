@@ -63,6 +63,7 @@ Change the status of a campaign to a desired status.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -158,6 +159,7 @@ Get the status of a campaign's automation job
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -225,6 +227,7 @@ Get the list of portals and its widgets where the campaign is used.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -303,6 +306,7 @@ Retrigger automation executions for specific campaign recipients that have faile
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -375,6 +379,7 @@ Match campaigns based on target entities.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -485,6 +490,7 @@ Find targets from the provided list that include the provide entities.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -584,6 +590,7 @@ Transform target filters into Lucene queries for the provided target IDs.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -653,6 +660,7 @@ Creates a new recipient associated with a campaign.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -744,6 +752,7 @@ Updates a recipient's attributes.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -824,6 +833,7 @@ Updates the portal status for a specific campaign recipient.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
@@ -906,6 +916,7 @@ Get a paginated list of recipients for a campaign.
 | `-v, --verbose` | Verbose output (show request details) |
 | `--jsonata <expr>` | JSONata expression to transform response |
 | `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**

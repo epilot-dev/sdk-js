@@ -31,6 +31,7 @@ export type CallArgs = {
   verbose?: boolean;
   interactive?: boolean;
   jsonata?: string;
+  guided?: boolean;
   help?: boolean;
   _apihelp?: boolean;
 };
@@ -210,6 +211,7 @@ const formatOperationHelp = (apiName: string, operationId: string, spec: OpenAPI
       w(`  ${GREEN}-v, --verbose${RESET}           Verbose output (show request details)\n`);
       w(`  ${GREEN}--jsonata${RESET} <expr>        JSONata expression to transform response\n`);
       w(`  ${GREEN}--definition${RESET} <file>     Override OpenAPI spec file/URL\n`);
+      w(`  ${GREEN}--guided${RESET}                Prompt for all parameters interactively\n`);
       w(`  ${GREEN}--no-interactive${RESET}        Disable interactive prompts\n`);
       w(`\n`);
 
@@ -415,17 +417,26 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   }
 
   // Collect parameters
-  const opParams = getOperationParams(spec as OpenAPIV3.Document, operationId);
+  const { params: opParams, pathTemplate } = getOperationParams(spec as OpenAPIV3.Document, operationId);
   const positionalArgs = args._args ?? [];
-  const collected = collectParams(opParams, args.param, positionalArgs);
+  const collected = collectParams(opParams, args.param, positionalArgs, pathTemplate);
 
-  // Interactive: prompt for missing required params
-  const missing = getMissingRequired(opParams, collected);
-  if (missing.length > 0 && isInteractive({ interactive: args.interactive })) {
+  // Guided mode: prompt for ALL params; otherwise prompt only for missing required
+  if (args.guided && isInteractive({ interactive: args.interactive })) {
     for (const param of opParams) {
-      if (param.required && !(param.name in collected)) {
+      if (!(param.name in collected)) {
         const value = await promptParam(param.name, param);
         if (value) collected[param.name] = value;
+      }
+    }
+  } else {
+    const missing = getMissingRequired(opParams, collected);
+    if (missing.length > 0 && isInteractive({ interactive: args.interactive })) {
+      for (const param of opParams) {
+        if (param.required && !(param.name in collected)) {
+          const value = await promptParam(param.name, param);
+          if (value) collected[param.name] = value;
+        }
       }
     }
   }
@@ -439,8 +450,9 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // Resolve request body
   const { hasBody, isRequired } = getRequestBodyInfo(spec as Record<string, unknown>, operationId);
+  const forceBodyPrompt = args.guided && hasBody;
   let bodyTemplate: unknown | undefined;
-  if (hasBody && isInteractive({ interactive: args.interactive })) {
+  if (hasBody && (forceBodyPrompt || isInteractive({ interactive: args.interactive }))) {
     const bodySchema = getBodySchema(spec as OpenAPIV3.Document, operationId);
     if (bodySchema) {
       try {

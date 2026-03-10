@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 export const main = defineCommand({
   meta: {
     name: 'epilot',
-    version: '0.1.7',
+    version: '0.1.9',
     description: 'CLI for epilot APIs',
   },
   args: {
@@ -12,6 +12,7 @@ export const main = defineCommand({
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
     json: { type: 'boolean', description: 'Output raw JSON' },
     verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
+    guided: { type: 'boolean', description: 'Prompt for all parameters interactively' },
     interactive: { type: 'boolean', default: true, description: 'Interactive mode' },
     jsonata: { type: 'string', description: 'JSONata expression' },
   },

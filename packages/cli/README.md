@@ -1,6 +1,19 @@
-# epilot CLI
+<h1 align="center"><img alt="epilot" src="https://raw.githubusercontent.com/epilot-dev/sdk-js/main/logo.png" width="200"><br>@epilot/cli</h1>
 
-CLI for epilot APIs. Call any epilot API operation directly from the command line.
+<p align="center">
+  <a href="https://github.com/epilot-dev/sdk-js/actions?query=workflow%3ACI"><img src="https://github.com/epilot-dev/sdk-js/workflows/CI/badge.svg" alt="CI"></a>
+  <a href="https://www.npmjs.com/package/@epilot/cli"><img src="https://img.shields.io/npm/v/@epilot/cli.svg" alt="npm version"></a>
+  <a href="https://github.com/epilot-dev/sdk-js/blob/main/"><img src="http://img.shields.io/:license-mit-blue.svg" alt="License"></a>
+</p>
+
+<p align="center">Command-line interface for all epilot APIs. One command to call any operation.</p>
+
+Built for developers, automation scripts, and AI agents. The epilot CLI gives you direct access to the entire epilot platform from your terminal — no SDK setup, no boilerplate, just `npx epilot`.
+
+- **Quick API calls** — look up entities, search data, check configurations without writing code
+- **Automation & scripting** — pipe JSON in/out, `--json` mode for `jq`-friendly output, `--no-interactive` for CI
+- **AI agent tool use** — structured `--json` output and `--no-interactive` mode make it ideal as a tool for LLM agents and MCP servers
+- **Explore & discover** — interactive operation picker, `--guided` mode, and built-in help with sample requests/responses for every operation
 
 ## Install
 
@@ -16,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.7 — CLI for epilot APIs
+epilot v0.1.9 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -30,6 +43,7 @@ FLAGS
   --json                  Output raw JSON (no formatting)
   -v, --verbose           Verbose output (show request details)
   --jsonata <expr>        JSONata expression to transform response
+  --guided                Prompt for all parameters interactively
   --no-interactive        Disable interactive prompts
 
 PARAMETER FLAGS
@@ -246,11 +260,25 @@ epilot entity getEntity contact abc123  # automatically uses override
 
 When running in a TTY without required arguments, the CLI prompts interactively:
 
-- **No operation**: shows an operation picker
+- **No operation**: shows a searchable operation picker
 - **Missing required params**: prompts for each one
 - **No auth token**: prompts to paste a token
 
 Disable with `--no-interactive` for CI/scripts.
+
+### Guided Mode
+
+Use `--guided` to be prompted for **all** parameters, not just required ones. This is useful for exploring an API operation without having to look up every available parameter.
+
+```bash
+# Walk through all parameters for getEntity
+epilot entity getEntity --guided
+
+# Guided mode also opens the body editor for operations with a request body
+epilot entity searchEntities --guided
+```
+
+Each optional parameter shows "(optional, press Enter to skip)" so you can quickly skip ones you don't need.
 
 ## Shell Completions
 

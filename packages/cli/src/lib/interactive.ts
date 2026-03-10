@@ -51,8 +51,9 @@ export const promptParam = async (name: string, param: OpenAPIV3.ParameterObject
   const schema = param.schema as OpenAPIV3.SchemaObject | undefined;
   const defaultValue = schema?.default != null ? String(schema.default) : undefined;
 
+  const hint = param.required ? '(required)' : '(optional, press Enter to skip)';
   const result = await input({
-    message: `${name}${param.required ? ' (required)' : ''}:`,
+    message: `${name} ${hint}:`,
     default: defaultValue,
     validate: (value) => {
       if (param.required && !value.trim()) {

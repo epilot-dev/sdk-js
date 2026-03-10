@@ -368,6 +368,7 @@ export default defineCommand({
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     json: { type: 'boolean', description: 'Output raw JSON' },
     verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
+    guided: { type: 'boolean', description: 'Prompt for all parameters interactively' },
     interactive: { type: 'boolean', description: 'Interactive mode' },
     jsonata: { type: 'string', description: 'JSONata expression to transform response' },
     _ophelp: { type: 'boolean', description: 'Show operation help', required: false },
@@ -420,6 +421,7 @@ export const main = defineCommand({
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
     json: { type: 'boolean', description: 'Output raw JSON' },
     verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
+    guided: { type: 'boolean', description: 'Prompt for all parameters interactively' },
     interactive: { type: 'boolean', default: true, description: 'Interactive mode' },
     jsonata: { type: 'string', description: 'JSONata expression' },
   },
@@ -561,6 +563,7 @@ const generateOperationDoc = (kebabName: string, op: OperationInfo): string[] =>
   lines.push(`| \`-v, --verbose\` | Verbose output (show request details) |`);
   lines.push(`| \`--jsonata <expr>\` | JSONata expression to transform response |`);
   lines.push(`| \`--definition <file>\` | Override OpenAPI spec file/URL |`);
+  lines.push(`| \`--guided\` | Prompt for all parameters interactively |`);
   lines.push(`| \`--no-interactive\` | Disable interactive prompts |`);
   lines.push(``);
 
@@ -734,6 +737,7 @@ const generateDocs = (clients: ClientInfo[]) => {
   indexLines.push(`| \`--verbose\` | \`-v\` | Show full request details |`);
   indexLines.push(`| \`--include\` | \`-i\` | Include response headers |`);
   indexLines.push(`| \`--jsonata <expr>\` | | Transform response with JSONata |`);
+  indexLines.push(`| \`--guided\` | | Prompt for all parameters interactively |`);
   indexLines.push(`| \`--no-interactive\` | | Disable interactive prompts |`);
   indexLines.push(`| \`--definition <file\\|url>\` | | Override OpenAPI spec |`);
   indexLines.push(``);
@@ -798,6 +802,7 @@ const updateReadme = (clients: ClientInfo[]): void => {
     '  --json                  Output raw JSON (no formatting)',
     '  -v, --verbose           Verbose output (show request details)',
     '  --jsonata <expr>        JSONata expression to transform response',
+    '  --guided                Prompt for all parameters interactively',
     '  --no-interactive        Disable interactive prompts',
     '',
     'PARAMETER FLAGS',

@@ -70,6 +70,7 @@ npx epilot auth login
 | `--verbose` | `-v` | Show full request details |
 | `--include` | `-i` | Include response headers |
 | `--jsonata <expr>` | | Transform response with JSONata |
+| `--guided` | | Prompt for all parameters interactively |
 | `--no-interactive` | | Disable interactive prompts |
 | `--definition <file\|url>` | | Override OpenAPI spec |
 

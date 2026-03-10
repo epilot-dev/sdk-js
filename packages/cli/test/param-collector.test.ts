@@ -12,8 +12,15 @@ const makeParam = (name: string, location: string, required = false): OpenAPIV3.
 describe('collectParams', () => {
   const params = [makeParam('slug', 'path', true), makeParam('id', 'path', true), makeParam('hydrate', 'query', false)];
 
-  it('maps positional args to path params in order', () => {
+  it('maps positional args to path params in declaration order (no template)', () => {
     const result = collectParams(params, undefined, ['contact', '123']);
+    expect(result).toEqual({ slug: 'contact', id: 123 });
+  });
+
+  it('maps positional args to path params in URL template order', () => {
+    // Params declared as [id, slug] but template is /{slug}/{id}
+    const reorderedParams = [makeParam('id', 'path', true), makeParam('slug', 'path', true), makeParam('hydrate', 'query', false)];
+    const result = collectParams(reorderedParams, undefined, ['contact', '123'], '/v1/{slug}/{id}');
     expect(result).toEqual({ slug: 'contact', id: 123 });
   });
 
@@ -87,13 +94,14 @@ describe('getOperationParams', () => {
   };
 
   it('merges path-level and operation-level params', () => {
-    const params = getOperationParams(spec, 'getEntity');
+    const { params, pathTemplate } = getOperationParams(spec, 'getEntity');
     expect(params).toHaveLength(3);
     expect(params.map((p) => p.name)).toEqual(['slug', 'id', 'hydrate']);
+    expect(pathTemplate).toBe('/v1/{slug}/{id}');
   });
 
   it('returns empty for unknown operation', () => {
-    const params = getOperationParams(spec, 'nonexistent');
+    const { params } = getOperationParams(spec, 'nonexistent');
     expect(params).toEqual([]);
   });
 });

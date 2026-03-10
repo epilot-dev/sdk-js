@@ -96,6 +96,7 @@ function printRootHelp() {
   w(`  ${GREEN}--json${R}                  Output raw JSON (no formatting)\n`);
   w(`  ${GREEN}-v, --verbose${R}           Verbose output (show request details)\n`);
   w(`  ${GREEN}--jsonata${R} <expr>        JSONata expression to transform response\n`);
+  w(`  ${GREEN}--guided${R}                Prompt for all parameters interactively\n`);
   w(`  ${GREEN}--no-interactive${R}        Disable interactive prompts\n`);
   w(`\n`);
   w(`${BOLD}PARAMETER FLAGS${R}\n`);
