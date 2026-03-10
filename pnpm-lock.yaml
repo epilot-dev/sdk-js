@@ -2533,8 +2533,8 @@ importers:
   packages/cli-wrapper:
     dependencies:
       '@epilot/cli':
-        specifier: '*'
-        version: 0.1.9(@types/node@24.2.0)(js-yaml@4.1.1)
+        specifier: ^0.1.10
+        version: 0.1.10(@types/node@24.2.0)(js-yaml@4.1.1)
 
   packages/epilot-sdk-v2:
     devDependencies:
@@ -2913,8 +2913,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@epilot/cli@0.1.9':
-    resolution: {integrity: sha512-obZZiBvbnMZVeQFjn+xhrPM1PcroNZQVSYMynrapSzjrrOJTkxnT6zl3f2qotLDoQfnS1PJlLQu2uWAthlCZqA==}
+  '@epilot/cli@0.1.10':
+    resolution: {integrity: sha512-pt4+MwtTa46tncqcnEpIzTt8q4kW/vaH11GLR/GouOAOLN+D1DAprDhEvfiKVXCp4ReYUYQfLMzp8xPKEBBqYA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -7867,7 +7867,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@epilot/cli@0.1.9(@types/node@24.2.0)(js-yaml@4.1.1)':
+  '@epilot/cli@0.1.10(@types/node@24.2.0)(js-yaml@4.1.1)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@24.2.0)
       axios: 1.13.6(debug@4.4.1)
