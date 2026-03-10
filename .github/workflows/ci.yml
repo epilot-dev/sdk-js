@@ -140,7 +140,7 @@ jobs:
     name: Auto-release @epilot/cli
     needs: [test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: false # disabled temporarily
     steps:
       - uses: actions/checkout@v5
         with:
