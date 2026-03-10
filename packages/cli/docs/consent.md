@@ -15,22 +15,7 @@ epilot consent
 epilot consent publishConsentEvent
 ```
 
-## Operations
-
-**consent**
-- [`publishConsentEvent`](#publishconsentevent) — Publishes consent event on event bus, which appends to consent store
-- [`listConsentEvents`](#listconsentevents) — List opt-ins and opt-outs by customer identifier
-- [`handleOptInWithToken`](#handleoptinwithtoken) — Endpoint to handle opt-in links
-
-### `publishConsentEvent`
-
-Publishes consent event on event bus, which appends to consent store
-
-`POST /v1/consent/publish`
-
-**Request Body**
-
-**Flags**
+## Common Flags
 
 | Flag | Description |
 | ---- | ----------- |
@@ -47,6 +32,21 @@ Publishes consent event on event bus, which appends to consent store
 | `--definition <file>` | Override OpenAPI spec file/URL |
 | `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
+
+## Operations
+
+**consent**
+- [`publishConsentEvent`](#publishconsentevent) — Publishes consent event on event bus, which appends to consent store
+- [`listConsentEvents`](#listconsentevents) — List opt-ins and opt-outs by customer identifier
+- [`handleOptInWithToken`](#handleoptinwithtoken) — Endpoint to handle opt-in links
+
+### `publishConsentEvent`
+
+Publishes consent event on event bus, which appends to consent store
+
+`POST /v1/consent/publish`
+
+**Request Body**
 
 **Sample Call**
 
@@ -125,24 +125,6 @@ List opt-ins and opt-outs by customer identifier
 | `limit` | query | number | No |  |
 | `from` | query | number | No |  |
 
-**Flags**
-
-| Flag | Description |
-| ---- | ----------- |
-| `-p key=value` | Set a named parameter |
-| `-d '{...}'` | Request body JSON |
-| `-H 'Key: Value'` | Custom header |
-| `-t, --token <token>` | Bearer token for authentication |
-| `--profile <name>` | Use a named profile |
-| `-s, --server <url>` | Override server base URL |
-| `-i, --include` | Include response headers in output |
-| `--json` | Output raw JSON (no formatting) |
-| `-v, --verbose` | Verbose output (show request details) |
-| `--jsonata <expr>` | JSONata expression to transform response |
-| `--definition <file>` | Override OpenAPI spec file/URL |
-| `--guided` | Prompt for all parameters interactively |
-| `--no-interactive` | Disable interactive prompts |
-
 **Sample Call**
 
 ```bash
@@ -204,24 +186,6 @@ Endpoint to handle opt-in links
 | ---- | -- | ---- | -------- | ----------- |
 | `token` | path | string | Yes |  |
 | `lang` | query | string | No |  |
-
-**Flags**
-
-| Flag | Description |
-| ---- | ----------- |
-| `-p key=value` | Set a named parameter |
-| `-d '{...}'` | Request body JSON |
-| `-H 'Key: Value'` | Custom header |
-| `-t, --token <token>` | Bearer token for authentication |
-| `--profile <name>` | Use a named profile |
-| `-s, --server <url>` | Override server base URL |
-| `-i, --include` | Include response headers in output |
-| `--json` | Output raw JSON (no formatting) |
-| `-v, --verbose` | Verbose output (show request details) |
-| `--jsonata <expr>` | JSONata expression to transform response |
-| `--definition <file>` | Override OpenAPI spec file/URL |
-| `--guided` | Prompt for all parameters interactively |
-| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 

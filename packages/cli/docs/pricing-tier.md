@@ -14,18 +14,7 @@ epilot pricing-tier
 epilot pricing-tier getCurrentPricingTier
 ```
 
-## Operations
-
-**Pricing Tier**
-- [`getCurrentPricingTier`](#getcurrentpricingtier) — Get current pricing tier of logged in user
-
-### `getCurrentPricingTier`
-
-Get current pricing tier of logged in user
-
-`GET /v2/pricing-tiers/me`
-
-**Flags**
+## Common Flags
 
 | Flag | Description |
 | ---- | ----------- |
@@ -42,6 +31,17 @@ Get current pricing tier of logged in user
 | `--definition <file>` | Override OpenAPI spec file/URL |
 | `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
+
+## Operations
+
+**Pricing Tier**
+- [`getCurrentPricingTier`](#getcurrentpricingtier) — Get current pricing tier of logged in user
+
+### `getCurrentPricingTier`
+
+Get current pricing tier of logged in user
+
+`GET /v2/pricing-tiers/me`
 
 **Sample Call**
 

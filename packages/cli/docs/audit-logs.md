@@ -15,23 +15,7 @@ epilot audit-logs
 epilot audit-logs getLogs
 ```
 
-## Operations
-
-**Events**
-- [`getLogs`](#getlogs) — Retrieve Audit Log events. Optionally, you can filter them by organization.
-
-**Audit Log**
-- [`getLogById`](#getlogbyid) — Retrieve Audit Log events
-
-### `getLogs`
-
-Retrieve Audit Log events. Optionally, you can filter them by organization.
-
-`POST /v1/logs`
-
-**Request Body**
-
-**Flags**
+## Common Flags
 
 | Flag | Description |
 | ---- | ----------- |
@@ -48,6 +32,22 @@ Retrieve Audit Log events. Optionally, you can filter them by organization.
 | `--definition <file>` | Override OpenAPI spec file/URL |
 | `--guided` | Prompt for all parameters interactively |
 | `--no-interactive` | Disable interactive prompts |
+
+## Operations
+
+**Events**
+- [`getLogs`](#getlogs) — Retrieve Audit Log events. Optionally, you can filter them by organization.
+
+**Audit Log**
+- [`getLogById`](#getlogbyid) — Retrieve Audit Log events
+
+### `getLogs`
+
+Retrieve Audit Log events. Optionally, you can filter them by organization.
+
+`POST /v1/logs`
+
+**Request Body**
 
 **Sample Call**
 
@@ -144,24 +144,6 @@ Retrieve Audit Log events
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `logId` | path | string | Yes | ID of the log event |
-
-**Flags**
-
-| Flag | Description |
-| ---- | ----------- |
-| `-p key=value` | Set a named parameter |
-| `-d '{...}'` | Request body JSON |
-| `-H 'Key: Value'` | Custom header |
-| `-t, --token <token>` | Bearer token for authentication |
-| `--profile <name>` | Use a named profile |
-| `-s, --server <url>` | Override server base URL |
-| `-i, --include` | Include response headers in output |
-| `--json` | Output raw JSON (no formatting) |
-| `-v, --verbose` | Verbose output (show request details) |
-| `--jsonata <expr>` | JSONata expression to transform response |
-| `--definition <file>` | Override OpenAPI spec file/URL |
-| `--guided` | Prompt for all parameters interactively |
-| `--no-interactive` | Disable interactive prompts |
 
 **Sample Call**
 

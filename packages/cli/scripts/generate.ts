@@ -468,6 +468,25 @@ const generateClientDoc = (client: ClientInfo): string => {
   lines.push('```');
   lines.push(``);
 
+  // ── Common Flags ──
+  lines.push(`## Common Flags`, ``);
+  lines.push(`| Flag | Description |`);
+  lines.push(`| ---- | ----------- |`);
+  lines.push(`| \`-p key=value\` | Set a named parameter |`);
+  lines.push(`| \`-d '{...}'\` | Request body JSON |`);
+  lines.push(`| \`-H 'Key: Value'\` | Custom header |`);
+  lines.push(`| \`-t, --token <token>\` | Bearer token for authentication |`);
+  lines.push(`| \`--profile <name>\` | Use a named profile |`);
+  lines.push(`| \`-s, --server <url>\` | Override server base URL |`);
+  lines.push(`| \`-i, --include\` | Include response headers in output |`);
+  lines.push(`| \`--json\` | Output raw JSON (no formatting) |`);
+  lines.push(`| \`-v, --verbose\` | Verbose output (show request details) |`);
+  lines.push(`| \`--jsonata <expr>\` | JSONata expression to transform response |`);
+  lines.push(`| \`--definition <file>\` | Override OpenAPI spec file/URL |`);
+  lines.push(`| \`--guided\` | Prompt for all parameters interactively |`);
+  lines.push(`| \`--no-interactive\` | Disable interactive prompts |`);
+  lines.push(``);
+
   const activeOps = operations.filter((op) => !op.deprecated);
 
   // ── Table of contents ──
@@ -508,16 +527,6 @@ const generateClientDoc = (client: ClientInfo): string => {
     }
   }
 
-  // ── Deprecated ──
-  const deprecatedOps = operations.filter((op) => op.deprecated);
-  if (deprecatedOps.length > 0) {
-    lines.push(`## Deprecated Operations`, ``);
-    for (const op of deprecatedOps) {
-      lines.push(`- ~~\`${op.operationId}\`~~ ${op.method} \`${op.path}\``);
-    }
-    lines.push(``);
-  }
-
   return lines.join('\n');
 };
 
@@ -546,26 +555,6 @@ const generateOperationDoc = (kebabName: string, op: OperationInfo): string[] =>
   if (op.requestBodySchema) {
     lines.push(`**Request Body**${op.requestBodyRequired ? ' (required)' : ''}`, ``);
   }
-
-  // ── Flags ──
-  lines.push(`**Flags**`);
-  lines.push(``);
-  lines.push(`| Flag | Description |`);
-  lines.push(`| ---- | ----------- |`);
-  lines.push(`| \`-p key=value\` | Set a named parameter |`);
-  lines.push(`| \`-d '{...}'\` | Request body JSON |`);
-  lines.push(`| \`-H 'Key: Value'\` | Custom header |`);
-  lines.push(`| \`-t, --token <token>\` | Bearer token for authentication |`);
-  lines.push(`| \`--profile <name>\` | Use a named profile |`);
-  lines.push(`| \`-s, --server <url>\` | Override server base URL |`);
-  lines.push(`| \`-i, --include\` | Include response headers in output |`);
-  lines.push(`| \`--json\` | Output raw JSON (no formatting) |`);
-  lines.push(`| \`-v, --verbose\` | Verbose output (show request details) |`);
-  lines.push(`| \`--jsonata <expr>\` | JSONata expression to transform response |`);
-  lines.push(`| \`--definition <file>\` | Override OpenAPI spec file/URL |`);
-  lines.push(`| \`--guided\` | Prompt for all parameters interactively |`);
-  lines.push(`| \`--no-interactive\` | Disable interactive prompts |`);
-  lines.push(``);
 
   // ── Sample call ──
   lines.push(`**Sample Call**`);
