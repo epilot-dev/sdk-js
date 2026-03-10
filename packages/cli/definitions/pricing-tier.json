@@ -1,0 +1,105 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pricing Tier API",
+    "version": "1.0.0",
+    "description": "Pricing Tier API"
+  },
+  "tags": [
+    {
+      "name": "Pricing Tier",
+      "description": "Pricing Tier"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v2/pricing-tiers/me": {
+      "get": {
+        "operationId": "getCurrentPricingTier",
+        "summary": "getCurrentPricingTier",
+        "description": "Get current pricing tier of logged in user",
+        "tags": [
+          "Pricing Tier"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current pricing tier of logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingTier"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "PricingTier": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": 22
+          },
+          "created_date": {
+            "type": "string"
+          },
+          "updated_date": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "settings": {
+            "type": "object",
+            "description": "Settings",
+            "additionalProperties": true
+          },
+          "override_settings": {
+            "type": "object",
+            "description": "Settings",
+            "additionalProperties": true
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "is_pure_360": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

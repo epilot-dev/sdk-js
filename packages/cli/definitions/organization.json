@@ -1,0 +1,629 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Organization API",
+    "description": "Manage epilot tenant organizations",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Organization",
+      "description": "Organization info"
+    },
+    {
+      "name": "Organization Settings",
+      "description": "Organization Settings"
+    },
+    {
+      "name": "Cleanup",
+      "description": "Internal Cleanup endpoints"
+    },
+    {
+      "name": "Internal",
+      "description": "Internal endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v2/organization/current": {
+      "get": {
+        "operationId": "getCurrentOrganization",
+        "summary": "getCurrentOrganization",
+        "description": "Get caller's current organization",
+        "tags": [
+          "Organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/organization/{org_id}": {
+      "get": {
+        "operationId": "getOrganization",
+        "summary": "getOrganization",
+        "description": "Get an organization",
+        "tags": [
+          "Organization"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Id of the organization."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateOrganization",
+        "summary": "updateOrganization",
+        "description": "Updates an organization",
+        "tags": [
+          "Organization"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Id of the organization."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Organization"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/organization/{org_id}/settings": {
+      "get": {
+        "description": "Get full organization settings object",
+        "operationId": "getSettings",
+        "summary": "getSettings",
+        "tags": [
+          "Organization Settings"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Id of the organization."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the organization settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/organization/{org_id}/settings/{key}": {
+      "put": {
+        "description": "Updates an organization setting",
+        "operationId": "putSettingsValue",
+        "summary": "putSettingsValue",
+        "tags": [
+          "Organization Settings"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Id of the organization."
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Organization setting key"
+          }
+        ],
+        "requestBody": {
+          "description": "Value to set",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsValue"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the value of the setting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsValue"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Updates an organization nsetting",
+        "operationId": "deleteSettingsValue",
+        "summary": "deleteSettingsValue",
+        "tags": [
+          "Organization Settings"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Id of the organization."
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Organization setting key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete successful"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "OrganizationId": {
+        "type": "string",
+        "example": "739224"
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "name": {
+            "type": "string",
+            "description": "Organization name",
+            "example": "Epilot",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Organization contact email",
+            "example": "someone@epilot.cloud",
+            "nullable": true
+          },
+          "phone": {
+            "description": "Organization contact phone",
+            "type": "string",
+            "example": "+49123123123",
+            "nullable": true
+          },
+          "website": {
+            "description": "Organization website",
+            "type": "string",
+            "example": "https://epilot.cloud",
+            "nullable": true
+          },
+          "address": {
+            "description": "Organization postal address",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "country": {
+                "type": "string",
+                "nullable": true
+              },
+              "city": {
+                "type": "string",
+                "nullable": true
+              },
+              "postal_code": {
+                "type": "string",
+                "nullable": true
+              },
+              "street": {
+                "type": "string",
+                "nullable": true
+              },
+              "street_number": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "organization_use": {
+            "type": "string",
+            "enum": [
+              "Production",
+              "Sandbox"
+            ],
+            "nullable": true
+          },
+          "parent_production_org_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Organization created date"
+          },
+          "logo_url": {
+            "description": "Organization logo URL",
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
+          },
+          "logo_thumbnail_url": {
+            "description": "Organization logo thumbnail URL",
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string",
+            "description": "Default email signature of organization",
+            "example": "<p>Thanks</p>",
+            "nullable": true
+          },
+          "is_unlicensed_org": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true,
+            "deprecated": true
+          },
+          "style": {
+            "type": "object",
+            "description": "Organization style setting (e.g. font setting)",
+            "additionalProperties": true,
+            "nullable": true,
+            "deprecated": true
+          },
+          "type": {
+            "type": "string",
+            "deprecated": true,
+            "enum": [
+              "Vendor",
+              "Partner"
+            ],
+            "nullable": true
+          },
+          "symbol": {
+            "deprecated": true,
+            "type": "string",
+            "example": "EPI",
+            "nullable": true
+          },
+          "pricing_tier": {
+            "deprecated": true,
+            "description": "Deprecated - Please use pricing tier api",
+            "type": "string",
+            "example": "professional",
+            "nullable": true
+          },
+          "free_user_limit": {
+            "deprecated": true,
+            "type": "number",
+            "example": 50,
+            "nullable": true
+          }
+        }
+      },
+      "InternalOrganization": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Organization"
+          }
+        ]
+      },
+      "SettingKey": {
+        "type": "string",
+        "example": "double_opt_in"
+      },
+      "Settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "example": {
+          "double_opt_in": {
+            "enabled": true
+          }
+        }
+      },
+      "SettingsValue": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": true
+          }
+        ],
+        "example": {
+          "enabled": true
+        }
+      },
+      "CreateOrganizationRequest": {
+        "type": "object",
+        "properties": {
+          "organization_detail": {
+            "description": "Organization detail",
+            "type": "object",
+            "required": [
+              "name",
+              "type",
+              "pricing_tier_id"
+            ],
+            "properties": {
+              "name": {
+                "description": "Organization name",
+                "type": "string",
+                "example": "epilot"
+              },
+              "email_address": {
+                "description": "Organization email address",
+                "type": "string",
+                "example": "epilot@epilot.cloud"
+              },
+              "type": {
+                "description": "type",
+                "type": "string",
+                "example": "Vendor"
+              },
+              "organization_use": {
+                "type": "string",
+                "enum": [
+                  "Production",
+                  "Sandbox"
+                ]
+              },
+              "pricing_tier_id": {
+                "description": "Pricing tier ID",
+                "type": "string",
+                "example": "01GEKHZHSN19KK10ZS92Y3WY9B"
+              }
+            }
+          },
+          "owner_user": {
+            "description": "Owner user will receive invitation",
+            "type": "object",
+            "required": [
+              "email_address"
+            ],
+            "properties": {
+              "full_name": {
+                "type": "string",
+                "example": "Ny Huynh"
+              },
+              "email_address": {
+                "type": "string",
+                "example": "ny.huynhthi@axonactive.com"
+              }
+            }
+          }
+        }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
+        }
+      },
+      "DataPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Organization id",
+            "type": "number",
+            "example": 206801
+          },
+          "max_customer": {
+            "description": "Max customer data points last month",
+            "type": "number",
+            "example": 10
+          },
+          "actual_customer": {
+            "description": "Actual customer data points",
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "OrganizationToCleanup": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "deleted_at",
+          "deleted_by"
+        ],
+        "properties": {
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2021-06-01T00:00:00Z"
+          },
+          "deleted_by": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      },
+      "OrganizationCleanupStatus": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "service_name"
+        ],
+        "properties": {
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "service_name": {
+            "type": "string",
+            "example": "organization-api"
+          },
+          "operations": {
+            "example": [
+              {
+                "action": "Delete",
+                "resource": "OrgTable",
+                "extra_info": "pk: ORG#739224"
+              },
+              {
+                "action": "Archive",
+                "resource": "s3://my-bucket",
+                "extra_info": "my-bucket/my-key.txt"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "example": "Delete"
+                },
+                "resource": {
+                  "type": "string",
+                  "example": "OrgTable"
+                },
+                "extra_info": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    },
+    {
+      "url": "https://organization-v2.sls.epilot.io"
+    }
+  ]
+}

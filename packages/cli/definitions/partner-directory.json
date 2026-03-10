@@ -1,0 +1,1718 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Partner API",
+    "description": "Management of Partners in epilot",
+    "version": "1.5.0"
+  },
+  "tags": [
+    {
+      "name": "partners",
+      "x-displayName": "Partners",
+      "description": "Partner operations"
+    },
+    {
+      "name": "partner_users",
+      "x-displayName": "Partner Users",
+      "description": "Partner user management operations"
+    },
+    {
+      "name": "partner_schema",
+      "x-displayName": "Partner",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Partner\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "partners",
+        "partner_users"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "partner_schema"
+      ]
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "AsOrganization": []
+    }
+  ],
+  "paths": {
+    "/v1/partners/{id}/approve": {
+      "post": {
+        "operationId": "approvePartner",
+        "summary": "approvePartner",
+        "tags": [
+          "partners"
+        ],
+        "description": "Approve partner request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Approve successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to approve"
+          }
+        }
+      }
+    },
+    "/v1/partners/{id}/reject": {
+      "post": {
+        "operationId": "rejectPartner",
+        "summary": "rejectPartner",
+        "tags": [
+          "partners"
+        ],
+        "description": "Reject partner request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to reject"
+          }
+        }
+      }
+    },
+    "/v1/partners/assignables:search": {
+      "post": {
+        "operationId": "searchAssignable",
+        "summary": "searchAssignables",
+        "description": "Search for assignable users/organizations from this organization and Partners\n\nResults can include:\n - Users in your organization\n - Users in partner organizations\n - Partner organizations\n",
+        "tags": [
+          "partners"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "description": "search query to filter results",
+                    "type": "string",
+                    "default": ""
+                  },
+                  "from": {
+                    "description": "start results from an offset for pagination",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "size": {
+                    "description": "limit number of results to return",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "default": 25
+                  },
+                  "org_ids": {
+                    "description": "filter results to specific organizations. defaults to all orgs",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrganizationId"
+                    }
+                  },
+                  "portalUsersEntityIdScope": {
+                    "description": "Optional parameter if 'types' contains 'ecp' type user. Portal Users will only be fetched in the context of an entity, fetching the related ones through relations and not returning placeholders anymore.",
+                    "type": "string",
+                    "default": ""
+                  },
+                  "types": {
+                    "description": "filter results to specific types of assignables. defaults to all types",
+                    "type": "array",
+                    "default": [
+                      "user",
+                      "partner_user",
+                      "partner_organization",
+                      "ecp",
+                      "group"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "user",
+                        "partner_user",
+                        "partner_organization",
+                        "ecp",
+                        "group",
+                        "parent_organization_user"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "q"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of assignable results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "description": "total number of search results",
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Assignable"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/partners/assignables:batchGet": {
+      "post": {
+        "operationId": "batchGetAssignable",
+        "summary": "batchGet",
+        "description": "Search for assignable users from this organization by its ids\n",
+        "tags": [
+          "partners"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "minItems": 1,
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "description": "user id of assignable",
+                      "type": "string"
+                    },
+                    "org_id": {
+                      "description": "organization id of assignable (optional, defaults to caller org)",
+                      "type": "string"
+                    },
+                    "group_id": {
+                      "description": "group id of assignable (optional)",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of assignable results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "description": "total number of search results",
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Assignable"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/partner-directory/public/getPartnerByToken": {
+      "get": {
+        "operationId": "getPartnerByToken",
+        "summary": "getPartnerByToken",
+        "description": "Get partner by token",
+        "security": [],
+        "tags": [
+          "partners"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found for the partner"
+          }
+        }
+      }
+    },
+    "/v1/partner-directory/public/activate": {
+      "post": {
+        "operationId": "activatePartner",
+        "summary": "activatePartner",
+        "description": "Activate partner using an invite token",
+        "security": [],
+        "tags": [
+          "partners"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "description": "Invite Token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivatePartnerPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activated successfully"
+          },
+          "404": {
+            "description": "Token not found for the partner"
+          }
+        }
+      }
+    },
+    "/v1/geolocation/text:search": {
+      "post": {
+        "operationId": "searchGeolocationForText",
+        "summary": "searchGeolocationForText",
+        "tags": [
+          "partners"
+        ],
+        "description": "Converts a given string, in the format of an address, to geo-location latitude and longitude",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchGeolocation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Geo-location converted from text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Geolocation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No text provided"
+          },
+          "404": {
+            "description": "No geo-location found for text"
+          }
+        }
+      }
+    },
+    "/v2/partners/{id}/invite": {
+      "post": {
+        "operationId": "invitePartnerV2",
+        "summary": "invitePartnerV2",
+        "tags": [
+          "partners"
+        ],
+        "description": "Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/PartnerId"
+            },
+            "required": true,
+            "description": "The Id of partner"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInvitationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partner"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to invite"
+          }
+        }
+      }
+    },
+    "/v2/partners/{orgId}/users": {
+      "get": {
+        "operationId": "getPartnerUsers",
+        "summary": "getPartnerUsers",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Get all users for a partner organization with their roles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of partner users with roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PartnerUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to fetch partner users"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPartnerUser",
+        "summary": "createPartnerUser",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Create a new user in a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The Partner organization ID where the user should be created"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartnerUserPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to create partner user"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/partners/{orgId}/users/{userId}": {
+      "delete": {
+        "operationId": "deletePartnerUser",
+        "summary": "deletePartnerUser",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Delete a user from a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The user ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to delete partner user"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/partners/{orgId}/roles": {
+      "get": {
+        "operationId": "getPartnerRoles",
+        "summary": "getPartnerRoles",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Get all roles for a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of partner roles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PartnerRole"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to fetch partner roles"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPartnerRole",
+        "summary": "createPartnerRole",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Create a role for a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartnerRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerRole"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to create partner role"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/partners/{orgId}/roles/{roleId}": {
+      "put": {
+        "operationId": "updatePartnerRole",
+        "summary": "updatePartnerRole",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Update a role for a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          },
+          {
+            "in": "path",
+            "name": "roleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The role ID to update"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePartnerRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerRole"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to update partner role"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/partners/{orgId}/users/{userId}/roles": {
+      "post": {
+        "operationId": "assignPartnerUserRoles",
+        "summary": "assignPartnerUserRoles",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Assign roles to a user in a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The user ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRolesPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roles assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "roleId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "data": {
+                            "type": "object"
+                          },
+                          "error": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to assign roles"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unassignPartnerUserRoles",
+        "summary": "unassignPartnerUserRoles",
+        "tags": [
+          "partner_users"
+        ],
+        "description": "Unassign roles from a user in a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The user ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRolesPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Roles unassigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "roleId": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          },
+                          "data": {
+                            "type": "object"
+                          },
+                          "error": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to unassign roles"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id when using internal auth"
+      }
+    },
+    "schemas": {
+      "InviteToken": {
+        "type": "string"
+      },
+      "Partner": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/PartnerId"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description",
+            "example": "Description"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Company name"
+          },
+          "invitation_token": {
+            "description": "Invitation token",
+            "type": "string"
+          },
+          "invitation_email": {
+            "deprecated": true,
+            "description": "Email using to receive invitation",
+            "type": "string",
+            "format": "email"
+          },
+          "email": {
+            "description": "Email using to receive invitation",
+            "type": "string",
+            "format": "email"
+          },
+          "owner_email": {
+            "description": "A separate email where the invitation should be sent",
+            "type": "string",
+            "format": "email"
+          },
+          "signed_up_email": {
+            "description": "Email using to sign up",
+            "type": "string",
+            "format": "email"
+          },
+          "partner_org_id": {
+            "description": "Target Organization",
+            "type": "string",
+            "example": 123456
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Request",
+              "Deleted",
+              "Invited",
+              "Rejected"
+            ]
+          }
+        }
+      },
+      "PartnerId": {
+        "type": "string",
+        "example": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc"
+      },
+      "OrganizationId": {
+        "type": "string",
+        "example": "123"
+      },
+      "ActivatePartnerPayload": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "description": "Company name",
+            "example": "Company name"
+          },
+          "signed_up_email": {
+            "description": "Email using to sign up",
+            "type": "string",
+            "format": "email"
+          },
+          "organization_id": {
+            "description": "organization id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "signed_up_email",
+          "organization_id"
+        ]
+      },
+      "PartnerInvitationPayload": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Language for partner invitation email",
+            "enum": [
+              "en",
+              "de"
+            ],
+            "default": "en"
+          }
+        }
+      },
+      "Assignable": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AssignableUser"
+          },
+          {
+            "$ref": "#/components/schemas/AssignablePartnerUser"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableOrganization"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableEcpPlaceholder"
+          },
+          {
+            "$ref": "#/components/schemas/AssignableGroup"
+          }
+        ]
+      },
+      "BaseAssignable": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "user"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Example User"
+          },
+          "image_uri": {
+            "type": "object",
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
+              }
+            },
+            "required": [
+              "original"
+            ]
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
+          },
+          "activated_at": {
+            "type": "string",
+            "example": "2022-02-08T04:44:32.246Z"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Active",
+              "Pending",
+              "Deactivated",
+              "Deleted"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "display_name",
+          "org_id"
+        ]
+      },
+      "AssignableUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user"
+                ],
+                "example": "user"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example User"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "example@example.com"
+              }
+            }
+          }
+        ]
+      },
+      "AssignablePartnerUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_user"
+                ],
+                "example": "partner_user"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Partner User"
+              },
+              "partner_id": {
+                "$ref": "#/components/schemas/PartnerId"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "example@example.com"
+              }
+            }
+          }
+        ]
+      },
+      "AssignableGroup": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "group_id": {
+                "type": "string",
+                "example": "456"
+              }
+            }
+          }
+        ]
+      },
+      "AssignableOrganization": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "partner_organization"
+                ],
+                "example": "partner_organization"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Partner Organization"
+              },
+              "partner_id": {
+                "$ref": "#/components/schemas/PartnerId"
+              },
+              "email": {
+                "type": "string",
+                "example": "Email of Partner Organization"
+              },
+              "geolocations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AddressGeolocation"
+                }
+              },
+              "phone": {
+                "type": "string",
+                "example": "Phone number of Partner"
+              },
+              "activity_radius": {
+                "type": "number",
+                "description": "Activity radius, in km, the partner is operating in",
+                "example": 50
+              }
+            },
+            "required": [
+              "type",
+              "display_name",
+              "partner_id"
+            ]
+          }
+        ]
+      },
+      "AssignableEcpPlaceholder": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAssignable"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ecp"
+                ],
+                "example": "ecp"
+              },
+              "display_name": {
+                "type": "string",
+                "example": "Example Ecp Placeholder"
+              },
+              "user_id": {
+                "type": "string",
+                "example": "456"
+              },
+              "email": {
+                "type": "string",
+                "example": "Email of ECP Placeholder"
+              }
+            },
+            "required": [
+              "type",
+              "display_name",
+              "user_id"
+            ]
+          }
+        ]
+      },
+      "SearchGeolocation": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address text to convert into geolocation coordinates",
+            "example": "Auweg 1, 93055 Regensburg, DE"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      },
+      "Geolocation": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "description": "Latitude",
+            "example": 49.013
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude",
+            "example": 12.101
+          },
+          "addressLabel": {
+            "type": "string",
+            "description": "Full address label as returned by the location service"
+          },
+          "relevance": {
+            "type": "number",
+            "description": "Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "description": "Street",
+            "example": "Auweg"
+          },
+          "street_number": {
+            "type": "string",
+            "description": "Street",
+            "example": "10"
+          },
+          "city": {
+            "type": "string",
+            "description": "City",
+            "example": "Regensburg"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "Postal code",
+            "example": "93055"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country",
+            "example": "DE"
+          }
+        }
+      },
+      "AddressGeolocation": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "$ref": "#/components/schemas/Address"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Geolocation"
+          }
+        ],
+        "required": [
+          "address"
+        ]
+      },
+      "PartnerUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "456"
+          },
+          "name": {
+            "type": "string",
+            "description": "User name",
+            "example": "John Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email",
+            "example": "user@example.com"
+          },
+          "status": {
+            "type": "string",
+            "description": "User status",
+            "example": "Active"
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri",
+                "description": "Original image URI"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri",
+                "description": "Thumbnail image URI (32x32)"
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "description": "List of roles assigned to the user",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Role ID",
+                  "example": "role-123"
+                },
+                "slug": {
+                  "type": "string",
+                  "description": "Role slug",
+                  "example": "admin"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Role name",
+                  "example": "Administrator"
+                }
+              },
+              "required": [
+                "id",
+                "slug",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "status",
+          "roles"
+        ]
+      },
+      "CreatePartnerUserPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email address",
+            "example": "user@example.com"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ],
+            "description": "User language",
+            "example": "en"
+          },
+          "roles": {
+            "type": "array",
+            "description": "Role IDs that should be automatically assigned to this user upon creation",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "role-123",
+              "role-456"
+            ]
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "CreatePartnerRolePayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Role name",
+            "example": "Partner Admin"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Role slug",
+            "example": "partner_admin"
+          },
+          "grants": {
+            "type": "array",
+            "description": "Permission grants for the role",
+            "items": {
+              "$ref": "#/components/schemas/GrantWithDependencies"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "grants"
+        ]
+      },
+      "UpdatePartnerRolePayload": {
+        "allOf": [
+          {
+            "properties": {
+              "grants": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/GrantWithDependencies"
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/BaseRoleForCreate"
+          }
+        ]
+      },
+      "Grant": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "entity-read"
+          },
+          "resource": {
+            "type": "string",
+            "example": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947"
+          },
+          "effect": {
+            "type": "string",
+            "default": "allow",
+            "enum": [
+              "allow",
+              "deny"
+            ]
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrantCondition"
+            }
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "GrantWithDependencies": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Grant"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "dependencies": {
+                "description": "Provided additional dependencies, exploded when storing the role",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Grant"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GrantCondition": {
+        "allOf": [
+          {
+            "description": "An additional condition that must be met for the grant",
+            "type": "object",
+            "required": [
+              "operation"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EqualsCondition"
+              }
+            ]
+          }
+        ]
+      },
+      "EqualsCondition": {
+        "description": "Check if attribute equals to any of the values",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "example": "workflows.primary.task_name"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "example": "Qualification"
+            }
+          }
+        },
+        "required": [
+          "attribute",
+          "operation",
+          "values"
+        ]
+      },
+      "RoleId": {
+        "type": "string",
+        "example": "123:owner",
+        "description": "Format: <organization_id>:<slug>"
+      },
+      "BaseRoleForCreate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RoleId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Owner",
+            "description": "Human-friendly name for the role"
+          },
+          "slug": {
+            "type": "string",
+            "example": "owner",
+            "description": "URL-friendly name for the role"
+          },
+          "grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Grant"
+            },
+            "description": "List of grants (permissions) applied to the role"
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "grants"
+        ]
+      },
+      "PartnerRole": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Role ID",
+            "example": "role-123"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Role slug",
+            "example": "admin"
+          },
+          "name": {
+            "type": "string",
+            "description": "Role name",
+            "example": "Administrator"
+          },
+          "type": {
+            "type": "string",
+            "description": "Role type",
+            "example": "share_role"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ]
+      },
+      "AssignRolesPayload": {
+        "type": "object",
+        "properties": {
+          "roleIds": {
+            "type": "array",
+            "description": "Array of role IDs to assign/unassign",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "role-123",
+              "role-456"
+            ]
+          }
+        },
+        "required": [
+          "roleIds"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "456"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email",
+            "example": "user@example.com"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name",
+            "example": "John Doe"
+          },
+          "status": {
+            "type": "string",
+            "description": "User status",
+            "example": "Active"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://partner-directory-api.sls.epilot.io"
+    }
+  ]
+}

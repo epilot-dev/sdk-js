@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches: ["main"]
-    tags: ["@epilot/sdk@*"]
+    tags: ["@epilot/sdk@*", "@epilot/cli@*"]
   pull_request:
     branches: ["main"]
 
@@ -111,7 +111,7 @@ jobs:
         working-directory: packages/epilot-sdk-v2
 
   publish:
-    name: Publish to npm
+    name: Publish @epilot/sdk to npm
     needs: [lint, test]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/@epilot/sdk@')
@@ -135,3 +135,98 @@ jobs:
       - name: Publish @epilot/sdk
         run: npm publish --ignore-scripts
         working-directory: packages/epilot-sdk-v2
+
+  auto-release-cli:
+    name: Auto-release @epilot/cli
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Check for CLI-related changes
+        id: check
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(packages/cli/|clients/.*/openapi\.json$)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install pnpm
+        if: steps.check.outputs.changed == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977
+
+      - uses: actions/setup-node@v5
+        if: steps.check.outputs.changed == 'true'
+        with:
+          node-version: 22
+          cache: "pnpm"
+          registry-url: https://registry.npmjs.org/
+
+      - name: Build and test CLI
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @epilot/cli build
+          pnpm --filter @epilot/cli test
+
+      - name: Bump version, commit and tag
+        if: steps.check.outputs.changed == 'true'
+        id: version
+        run: |
+          cd packages/cli
+          npm version patch --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+          # Keep wrapper version in sync
+          cd "$GITHUB_WORKSPACE/packages/cli-wrapper"
+          npm version "$NEW_VERSION" --no-git-tag-version
+          node -e "
+            const pkg = require('./package.json');
+            pkg.dependencies['@epilot/cli'] = '^${NEW_VERSION}';
+            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/cli/package.json packages/cli-wrapper/package.json
+          git commit -m "@epilot/cli@${NEW_VERSION}"
+          git tag "@epilot/cli@${NEW_VERSION}"
+          git push origin main --follow-tags
+
+  publish-cli:
+    name: Publish @epilot/cli to npm
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/@epilot/cli@')
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: "pnpm"
+          registry-url: https://registry.npmjs.org/
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @epilot/cli build
+
+      - name: Publish @epilot/cli
+        run: npm publish --ignore-scripts
+        working-directory: packages/cli
+
+      - name: Publish epilot wrapper
+        run: npm publish --ignore-scripts
+        working-directory: packages/cli-wrapper
