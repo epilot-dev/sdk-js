@@ -94,8 +94,8 @@ epilot targeting changeCampaignStatus -p campaign_id=b8c01433-5556-4e2b-aad4-6f5
     "name": "string",
     "goal": "string",
     "status": "draft",
-    "start_date": "string",
-    "end_date": "string",
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01",
     "flow_id": "string",
     "job_id": "string",
     "target": {
@@ -355,8 +355,8 @@ epilot targeting matchCampaigns --jsonata 'results[0]'
         "name": "string",
         "goal": "string",
         "status": "draft",
-        "start_date": "string",
-        "end_date": "string",
+        "start_date": "1970-01-01",
+        "end_date": "1970-01-01",
         "flow_id": "string",
         "job_id": "string",
         "target": {

@@ -38,7 +38,18 @@ export default defineCommand({
 });
 
 const browserLogin = async (profileName?: string): Promise<string | null> => {
+  let settled = false;
+  let timeoutId: ReturnType<typeof setTimeout>;
+
   return new Promise(async (resolve) => {
+    const done = (token: string | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      server.close();
+      resolve(token);
+    };
+
     const server = createServer((req, res) => {
       const url = new URL(req.url!, `http://localhost`);
 
@@ -58,13 +69,11 @@ const browserLogin = async (profileName?: string): Promise<string | null> => {
 
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end('<html><body><h1>Login successful!</h1><p>You can close this tab.</p></body></html>');
-          server.close();
-          resolve(token);
+          done(token);
         } else {
           res.writeHead(400, { 'Content-Type': 'text/html' });
           res.end('<html><body><h1>Login failed</h1><p>No token received.</p></body></html>');
-          server.close();
-          resolve(null);
+          done(null);
         }
       } else {
         res.writeHead(404);
@@ -72,11 +81,13 @@ const browserLogin = async (profileName?: string): Promise<string | null> => {
       }
     });
 
+    // Don't let the server keep the process alive after we're done
+    server.unref();
+
     server.listen(0, async () => {
       const address = server.address();
       if (!address || typeof address === 'string') {
-        server.close();
-        resolve(null);
+        done(null);
         return;
       }
 
@@ -96,14 +107,24 @@ const browserLogin = async (profileName?: string): Promise<string | null> => {
         );
       }
 
-      // Fallback: prompt for manual token
-      process.stdout.write(`\n${DIM}Or paste a token manually (press Enter to wait for browser):${RESET}\n`);
+      // Fallback: allow manual token paste (masked) while waiting for browser
+      if (process.stdin.isTTY) {
+        process.stdout.write(`\n${DIM}Or paste a token manually:${RESET}\n`);
+        try {
+          const { password } = await import('@inquirer/prompts');
+          const token = await password({ message: 'Token:' });
+          if (token?.trim()) {
+            saveCredentials({ token: token.trim() }, profileName);
+            done(token.trim());
+          }
+        } catch {
+          // User cancelled (Ctrl+C) or prompt was force-closed by browser callback
+        }
+      }
 
       // Timeout after 5 minutes
-      setTimeout(() => {
-        server.close();
-        resolve(null);
-      }, 5 * 60 * 1000);
+      timeoutId = setTimeout(() => done(null), 5 * 60 * 1000);
+      timeoutId.unref();
     });
   });
 };

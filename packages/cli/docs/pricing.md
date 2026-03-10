@@ -1562,7 +1562,7 @@ epilot pricing $computePrice \
   "consumption_NT": 0,
   "association_id": "string",
   "billing_period": "monthly",
-  "reference_date": "string",
+  "reference_date": "1970-01-01",
   "type": "power",
   "meter_type": "classic"
 }'

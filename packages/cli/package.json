@@ -27,6 +27,7 @@
     "citty": "^0.2.1",
     "dereference-json-schema": "^0.2.2",
     "jsonata": "^2.0.0",
+    "mock-json-schema": "^1.1.2",
     "open": "^10.0.0",
     "openapi-client-axios": "^7.8.0"
   },

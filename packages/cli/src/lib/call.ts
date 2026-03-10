@@ -86,39 +86,10 @@ const truncateJson = (obj: unknown, depth = 0, maxDepth = 3): unknown => {
   return result;
 };
 
-const mockFromSchema = (schema: OpenAPIV3.SchemaObject): unknown => {
-  if (schema.example !== undefined) return schema.example;
-  if (schema.default !== undefined) return schema.default;
-  if (schema.enum) return schema.enum[0];
+import { mock } from 'mock-json-schema';
 
-  switch (schema.type) {
-    case 'string':
-      if (schema.format === 'uuid') return '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-      if (schema.format === 'date-time') return '2024-01-01T00:00:00.000Z';
-      if (schema.format === 'email') return 'user@example.com';
-      if (schema.format === 'uri') return 'https://example.com';
-      return 'string';
-    case 'integer':
-    case 'number':
-      return schema.minimum ?? 0;
-    case 'boolean':
-      return false;
-    case 'array': {
-      const items = schema.items as OpenAPIV3.SchemaObject | undefined;
-      if (items) return [mockFromSchema(items)];
-      return [];
-    }
-    case 'object':
-    default: {
-      const props = schema.properties as Record<string, OpenAPIV3.SchemaObject> | undefined;
-      if (!props) return {};
-      const result: Record<string, unknown> = {};
-      for (const [key, propSchema] of Object.entries(props)) {
-        result[key] = mockFromSchema(propSchema);
-      }
-      return result;
-    }
-  }
+const mockFromSchema = (schema: OpenAPIV3.SchemaObject): unknown => {
+  return mock(schema);
 };
 
 // @ts-expect-error CJS default import
@@ -126,6 +97,25 @@ import dereferenceJsonSchema from 'dereference-json-schema';
 const { dereferenceSync } = dereferenceJsonSchema as unknown as { dereferenceSync: (schema: unknown) => unknown };
 
 const w = (text: string) => process.stdout.write(text);
+
+/**
+ * Extract the JSON body schema for an operation (if any).
+ */
+const getBodySchema = (spec: OpenAPIV3.Document, operationId: string): OpenAPIV3.SchemaObject | undefined => {
+  const paths = spec.paths ?? {};
+  for (const methods of Object.values(paths)) {
+    if (!methods) continue;
+    for (const method of ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const) {
+      const op = (methods as Record<string, OpenAPIV3.OperationObject>)[method];
+      if (!op || op.operationId !== operationId) continue;
+      const reqBody = op.requestBody as OpenAPIV3.RequestBodyObject | undefined;
+      if (!reqBody) return undefined;
+      const content = reqBody.content?.['application/json'];
+      return content?.schema as OpenAPIV3.SchemaObject | undefined;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Print rich operation help — matching the generated docs quality.
@@ -417,7 +407,25 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // Resolve request body
   const { hasBody, isRequired } = getRequestBodyInfo(spec as Record<string, unknown>, operationId);
-  const body = await resolveBody(args.data, hasBody, isRequired);
+  let bodyTemplate: unknown | undefined;
+  if (hasBody && isInteractive({ interactive: args.interactive })) {
+    const bodySchema = getBodySchema(spec as OpenAPIV3.Document, operationId);
+    if (bodySchema) {
+      try {
+        bodyTemplate = mockFromSchema(bodySchema);
+      } catch {
+        // skip template on error
+      }
+    }
+  }
+  const body = await resolveBody({
+    dataFlag: args.data,
+    hasRequestBody: hasBody,
+    isRequired,
+    interactive: isInteractive({ interactive: args.interactive }),
+    defaultTemplate: bodyTemplate,
+    cacheKey: `${apiName}/${operationId}`,
+  });
 
   // Parse custom headers
   const customHeaders: Record<string, string> = {};

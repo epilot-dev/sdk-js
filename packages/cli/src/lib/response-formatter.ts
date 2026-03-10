@@ -36,8 +36,8 @@ export const formatResponse = async (
     process.stderr.write('\n');
   }
 
-  // Status badge to stderr (unless --json mode)
-  if (!json) {
+  // Status badge to stderr (only when both stdout and stderr are TTY — not piped)
+  if (!json && process.stdout.isTTY && process.stderr.isTTY) {
     const statusColor = response.status >= 200 && response.status < 300 ? GREEN
       : response.status >= 400 ? RED
       : YELLOW;

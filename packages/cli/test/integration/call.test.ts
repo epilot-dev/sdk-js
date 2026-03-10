@@ -22,6 +22,9 @@ let stderrOutput: string;
 let stdoutSpy: ReturnType<typeof vi.spyOn>;
 let stderrSpy: ReturnType<typeof vi.spyOn>;
 
+const originalStdoutIsTTY = process.stdout.isTTY;
+const originalStderrIsTTY = process.stderr.isTTY;
+
 beforeEach(() => {
   stdoutOutput = '';
   stderrOutput = '';
@@ -33,11 +36,16 @@ beforeEach(() => {
     stderrOutput += String(chunk);
     return true;
   });
+  // Simulate TTY so status badge is shown in tests
+  Object.defineProperty(process.stdout, 'isTTY', { value: true, writable: true });
+  Object.defineProperty(process.stderr, 'isTTY', { value: true, writable: true });
 });
 
 afterEach(() => {
   stdoutSpy.mockRestore();
   stderrSpy.mockRestore();
+  Object.defineProperty(process.stdout, 'isTTY', { value: originalStdoutIsTTY, writable: true });
+  Object.defineProperty(process.stderr, 'isTTY', { value: originalStderrIsTTY, writable: true });
 });
 
 // ─── Prevent process.exit from killing the test runner ──────────────────────
@@ -370,16 +378,33 @@ describe('Error handling', () => {
   });
 
   it('exits with code 1 when no token and non-interactive', async () => {
-    await expect(
-      callApi('entity', {
-        operation: 'listSchemas',
-        interactive: false,
-        // no token
-      } as CallArgs),
-    ).rejects.toThrow('process.exit(1)');
+    // Ensure no token is resolved from env or stored credentials
+    const origToken = process.env.EPILOT_TOKEN;
+    const origProfile = process.env.EPILOT_PROFILE;
+    const origXdg = process.env.XDG_CONFIG_HOME;
+    delete process.env.EPILOT_TOKEN;
+    delete process.env.EPILOT_PROFILE;
+    process.env.XDG_CONFIG_HOME = '/tmp/epilot-test-no-creds';
 
-    expect(lastExitCode).toBe(1);
-    expect(stderrOutput).toContain('No authentication token');
+    try {
+      await expect(
+        callApi('entity', {
+          operation: 'listSchemas',
+          interactive: false,
+          // no token
+        } as CallArgs),
+      ).rejects.toThrow('process.exit(1)');
+
+      expect(lastExitCode).toBe(1);
+      expect(stderrOutput).toContain('No authentication token');
+    } finally {
+      if (origToken !== undefined) process.env.EPILOT_TOKEN = origToken;
+      else delete process.env.EPILOT_TOKEN;
+      if (origProfile !== undefined) process.env.EPILOT_PROFILE = origProfile;
+      else delete process.env.EPILOT_PROFILE;
+      if (origXdg !== undefined) process.env.XDG_CONFIG_HOME = origXdg;
+      else delete process.env.XDG_CONFIG_HOME;
+    }
   });
 });
 

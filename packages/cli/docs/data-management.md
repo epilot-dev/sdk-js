@@ -132,7 +132,7 @@ epilot data-management createJob \
   -d '{
   "type": "deletion",
   "config_id": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "started_at": "1970-01-01T00:00:00.000Z"
 }'
@@ -165,7 +165,7 @@ epilot data-management createJob -p entity_schema=example --jsonata 'id'
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -254,7 +254,7 @@ epilot data-management updateJob -p entity_schema=example -p job_id=123e4567-e89
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -316,7 +316,7 @@ epilot data-management getJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --j
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -436,13 +436,13 @@ epilot data-management getConfig -p config_id=123e4567-e89b-12d3-a456-4266141740
   "schedule": {
     "frequency": "interval",
     "interval_days": 1,
-    "start_date": "string",
-    "end_date": "string"
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01"
   },
   "enabled": true,
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
-  "next_run_at": "string",
+  "next_run_at": "1970-01-01",
   "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
@@ -492,7 +492,7 @@ epilot data-management createJobForConfig -p config_id=123e4567-e89b-12d3-a456-4
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -557,8 +557,8 @@ epilot data-management upsertConfig \
   "schedule": {
     "frequency": "interval",
     "interval_days": 1,
-    "start_date": "string",
-    "end_date": "string"
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01"
   },
   "relations_for_deletion": ["contact"],
   "enabled": true
@@ -605,13 +605,13 @@ epilot data-management upsertConfig -p entity_schema=example --jsonata 'id'
   "schedule": {
     "frequency": "interval",
     "interval_days": 1,
-    "start_date": "string",
-    "end_date": "string"
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01"
   },
   "enabled": true,
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
-  "next_run_at": "string",
+  "next_run_at": "1970-01-01",
   "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
@@ -674,13 +674,13 @@ epilot data-management listConfigs --jsonata 'configs'
       "schedule": {
         "frequency": "interval",
         "interval_days": 1,
-        "start_date": "string",
-        "end_date": "string"
+        "start_date": "1970-01-01",
+        "end_date": "1970-01-01"
       },
       "enabled": true,
       "created_at": "1970-01-01T00:00:00.000Z",
       "last_updated_at": "1970-01-01T00:00:00.000Z",
-      "next_run_at": "string",
+      "next_run_at": "1970-01-01",
       "relations_for_deletion": ["contact"],
       "last_run_at": "1970-01-01T00:00:00.000Z"
     }
@@ -733,7 +733,7 @@ epilot data-management listJobs --jsonata 'jobs'
       "type": "deletion",
       "config_id": "string",
       "entity_schema": "string",
-      "scheduled_for": "string",
+      "scheduled_for": "1970-01-01",
       "status": "in_progress",
       "details": {},
       "started_at": "1970-01-01T00:00:00.000Z",

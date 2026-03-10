@@ -17,5 +17,6 @@ export default defineConfig({
     'open',
     'jsonata',
     'dereference-json-schema',
+    'mock-json-schema',
   ],
 });

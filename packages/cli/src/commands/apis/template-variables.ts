@@ -13,6 +13,11 @@ export default defineCommand({
     definition: { type: 'string', description: 'Override OpenAPI spec file/URL' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
     profile: { type: 'string', description: 'Use a named profile' },
+    token: { type: 'string', alias: 't', description: 'Bearer token' },
+    json: { type: 'boolean', description: 'Output raw JSON' },
+    verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
+    interactive: { type: 'boolean', description: 'Interactive mode' },
+    jsonata: { type: 'string', description: 'JSONata expression to transform response' },
     _ophelp: { type: 'boolean', description: 'Show operation help', required: false },
   },
   run: ({ args, rawArgs }) => {
