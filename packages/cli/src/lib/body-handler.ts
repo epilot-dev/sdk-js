@@ -72,9 +72,14 @@ export const resolveBody = async (opts: ResolveBodyOptions): Promise<unknown | n
         return JSON.parse(trimmed);
       }
 
-      // Show parse error and re-open editor with the invalid content so user can fix it
+      // Show parse error and wait for user before re-opening editor
       const parseError = getJsonParseError(trimmed);
       process.stderr.write(`\x1b[31mInvalid JSON: ${parseError}\x1b[0m\n`);
+
+      if (attempt < MAX_RETRIES - 1) {
+        const { input } = await import('@inquirer/prompts');
+        await input({ message: 'Press ENTER to reopen editor...', theme: { prefix: '' } });
+      }
 
       editorDefault = trimmed;
     }

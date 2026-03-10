@@ -36,10 +36,10 @@ if (hasNoSubcommand && (hasHelp || args.length === 0)) {
   process.exit(0);
 }
 
-// Intercept `epilot <api> <operationId> --help` before citty swallows it.
-// citty handles --help itself and never calls our run(), so we strip it from
-// argv and inject a sentinel flag that call.ts recognises.
-if (hasHelp && args.length >= 2) {
+// Intercept `epilot <api> --help` and `epilot <api> <operationId> --help`
+// before citty swallows it. citty handles --help itself and never calls our
+// run(), so we strip it from argv and let our handler take over.
+if (hasHelp) {
   const apiArg = args.find((a) => !a.startsWith('-'));
   const isApi = apiArg && API_LIST.some((api) => api.kebabName === apiArg);
 
@@ -47,13 +47,15 @@ if (hasHelp && args.length >= 2) {
     const positionals = args.filter((a) => !a.startsWith('-'));
     const operationId = positionals[1];
 
+    // Strip --help/-h from argv so citty doesn't intercept it
+    const filteredArgs = args.filter((a) => a !== '--help' && a !== '-h');
+
     if (operationId) {
-      process.argv = [
-        process.argv[0],
-        process.argv[1],
-        ...args.filter((a) => a !== '--help' && a !== '-h'),
-        '--_ophelp',
-      ];
+      // `epilot entity getEntity --help` → inject sentinel for operation-level help
+      process.argv = [process.argv[0], process.argv[1], ...filteredArgs, '--_ophelp'];
+    } else {
+      // `epilot entity --help` → just strip --help so our run() shows the operations table
+      process.argv = [process.argv[0], process.argv[1], ...filteredArgs];
     }
   }
 }

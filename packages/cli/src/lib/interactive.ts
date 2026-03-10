@@ -6,6 +6,7 @@ export type OperationChoice = {
   method: string;
   path: string;
   summary: string;
+  description: string;
 };
 
 /**
@@ -20,15 +21,23 @@ export const isInteractive = (flags?: { interactive?: boolean }): boolean => {
  * Display an interactive operation picker using @inquirer/prompts.
  */
 export const pickOperation = async (operations: OperationChoice[]): Promise<string> => {
-  const { select } = await import('@inquirer/prompts');
+  const { search } = await import('@inquirer/prompts');
 
-  const result = await select({
-    message: 'Select an operation:',
-    choices: operations.map((op) => ({
-      name: `${op.method.padEnd(7)} ${op.path} ${DIM}${op.summary}${RESET}`,
-      value: op.operationId,
-      description: op.operationId,
-    })),
+  const choices = operations.map((op) => ({
+    name: `${op.operationId} ${DIM}${op.method.toUpperCase()} ${op.path}${RESET}`,
+    value: op.operationId,
+    description: op.description,
+  }));
+
+  const result = await search({
+    message: 'Select an operation (type to filter):',
+    source: (input) => {
+      if (!input) return choices;
+      const term = input.toLowerCase();
+      return choices.filter(
+        (c) => c.value.toLowerCase().includes(term) || c.name.toLowerCase().includes(term),
+      );
+    },
     pageSize: 20,
   });
 
@@ -82,11 +91,8 @@ export const promptToken = async (): Promise<string | null> => {
 export const printOperationsTable = (apiName: string, operations: OperationChoice[]): void => {
   // Group by first tag or just list them
   for (const op of operations) {
-    const color = methodColor(op.method);
-    const method = op.method.toUpperCase().padEnd(7);
-    const path = op.path;
-    const summary = op.summary ? `  ${DIM}${op.summary}${RESET}` : '';
-    process.stdout.write(`  ${color}${method}${RESET} ${path.padEnd(50)} ${op.operationId}${summary}\n`);
+    const desc = op.description ? ` – ${op.description}` : '';
+    process.stdout.write(`  ${op.operationId} ${DIM}${op.method.toUpperCase()} ${op.path}${desc}${RESET}\n`);
   }
   process.stdout.write(`\nRun \`epilot ${apiName} <operationId> --help\` for details.\n`);
 };

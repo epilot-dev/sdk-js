@@ -49,7 +49,8 @@ const extractOperations = (spec: OpenAPIV3.Document): OperationChoice[] => {
         operationId: op.operationId,
         method: method.toUpperCase(),
         path,
-        summary: ((op.description || '').split('\n')[0] || '').substring(0, 120),
+        summary: (op.summary || '').substring(0, 120),
+        description: (op.description || '').split('\n')[0].substring(0, 200),
       });
     }
   }
@@ -359,11 +360,8 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   // Validate operation exists
   const opExists = operations.some((op) => op.operationId === operationId);
   if (!opExists) {
-    process.stderr.write(`${RED}Unknown operation "${operationId}" for ${apiName}.${RESET}\n`);
-    process.stderr.write(`\nAvailable operations:\n`);
-    for (const op of operations) {
-      process.stderr.write(`  ${op.operationId}\n`);
-    }
+    process.stderr.write(`${RED}Unknown operation "${operationId}" for ${apiName}.${RESET}\n\n`);
+    process.stderr.write(`Available: ${operations.map((op) => op.operationId).join(', ')}\n`);
     process.exit(1);
   }
 

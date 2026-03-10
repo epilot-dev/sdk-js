@@ -7,19 +7,16 @@ import { RESET, GREEN, DIM, YELLOW, RED } from '../lib/utils.js';
 
 const BASH_SCRIPT = `
 _epilot_completions() {
-  local cur prev words cword
-  _init_completion || return
-
-  # Get all words on the command line
+  local cur="\${COMP_WORDS[COMP_CWORD]}"
   local cmd="\${COMP_WORDS[0]}"
 
-  if [[ \${cword} -eq 1 ]]; then
+  if [[ \${COMP_CWORD} -eq 1 ]]; then
     # First arg: subcommands (APIs + auth + profile + completion)
     COMPREPLY=( $(compgen -W "$(\${cmd} --_completions subcommands 2>/dev/null)" -- "\${cur}") )
     return
   fi
 
-  if [[ \${cword} -eq 2 ]]; then
+  if [[ \${COMP_CWORD} -eq 2 ]]; then
     # Second arg: operationIds for the given API
     local api="\${COMP_WORDS[1]}"
     COMPREPLY=( $(compgen -W "$(\${cmd} --_completions operations \${api} 2>/dev/null)" -- "\${cur}") )
