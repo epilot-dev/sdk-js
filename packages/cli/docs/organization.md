@@ -430,24 +430,6 @@ Returns platform-level configuration metadata including feature flag definitions
 
 `GET /v2/feature-settings`
 
-**Flags**
-
-| Flag | Description |
-| ---- | ----------- |
-| `-p key=value` | Set a named parameter |
-| `-d '{...}'` | Request body JSON |
-| `-H 'Key: Value'` | Custom header |
-| `-t, --token <token>` | Bearer token for authentication |
-| `--profile <name>` | Use a named profile |
-| `-s, --server <url>` | Override server base URL |
-| `-i, --include` | Include response headers in output |
-| `--json` | Output raw JSON (no formatting) |
-| `-v, --verbose` | Verbose output (show request details) |
-| `--jsonata <expr>` | JSONata expression to transform response |
-| `--definition <file>` | Override OpenAPI spec file/URL |
-| `--guided` | Prompt for all parameters interactively |
-| `--no-interactive` | Disable interactive prompts |
-
 **Sample Call**
 
 ```bash

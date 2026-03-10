@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 export const main = defineCommand({
   meta: {
     name: 'epilot',
-    version: '0.1.9',
+    version: '0.1.10',
     description: 'CLI for epilot APIs',
   },
   args: {
