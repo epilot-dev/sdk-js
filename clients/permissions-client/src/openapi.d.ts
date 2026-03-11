@@ -257,6 +257,10 @@ declare namespace Components {
              */
             partner_org_id?: string;
             /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
+            /**
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
@@ -537,6 +541,10 @@ declare namespace Components {
              * Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)
              */
             vendor_enforced_user_limit?: number;
+            /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
         }
         /**
          * A role that is applied to end customers and installers using the Portals
