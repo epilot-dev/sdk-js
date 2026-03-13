@@ -1880,6 +1880,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/pages/interpolate": {
+      "post": {
+        "operationId": "interpolatePortalPages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/pages/default": {
       "get": {
         "operationId": "getDefaultPages",

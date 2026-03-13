@@ -7464,6 +7464,70 @@
         }
       }
     },
+    "/v2/portal/pages/interpolate": {
+      "post": {
+        "operationId": "interpolatePortalPages",
+        "summary": "interpolatePortalPages",
+        "description": "Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "pages"
+                ],
+                "properties": {
+                  "pages": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Page"
+                    },
+                    "description": "The pages to interpolate"
+                  },
+                  "context_entities": {
+                    "$ref": "#/components/schemas/ContextEntities"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The portal pages have been interpolated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Page"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/pages/default": {
       "get": {
         "operationId": "getDefaultPages",
@@ -8544,6 +8608,13 @@
                       "$ref": "#/components/schemas/EntityId",
                       "description": "List of contact IDs representing the contacts / business partners the invited user should be added to.\nWhen omitted, the user is automatically added to all contacts / business partners linked to the account.\n"
                     }
+                  },
+                  "contact_data": {
+                    "type": "object",
+                    "description": "Additional contact entity fields to set when creating the contact for the invited user.\nThese are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).\n",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -9159,6 +9230,7 @@
         "properties": {
           "confirmAccount": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the confirmation email template upon registration"
           },
           "advancedAuth": {
@@ -9190,10 +9262,12 @@
           },
           "forgotPassword": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for forgot password"
           },
           "invitation": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for invitation when the user is just invited to register on the portal."
           },
           "partnerInvitation": {
@@ -9203,26 +9277,32 @@
           },
           "onNewQuote": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for new quote"
           },
           "onMapAPendingUser": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for mapping a pending portal user with a contact"
           },
           "onDocUpload": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for document upload"
           },
           "onWorkflowStepAssigned": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for workflow step assignment"
           },
           "confirmEmailUpdate": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for setting password while updating email"
           },
           "verifyCodeToSetPassword": {
             "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
             "description": "ID of the email template for setting password while verifying code"
           }
         }
@@ -9567,17 +9647,20 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
-          "epilot_domain": {
-            "type": "string",
-            "description": "The URL on which the portal is accessible",
-            "example": "example-portal-12345.ecp.epilot.cloud"
-          },
-          "domain_settings": {
-            "$ref": "#/components/schemas/DomainSettings"
-          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
+          },
+          "allowed_portal_entities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed portal entities for the portal",
+            "example": [
+              "contact",
+              "contract"
+            ]
           },
           "self_registration_setting": {
             "type": "string",
@@ -9680,6 +9763,48 @@
                 "type": "string",
                 "example": "eu-central-1_CUEQRNbUb",
                 "description": "Cognito user pool ID"
+              },
+              "timeouts": {
+                "type": "object",
+                "description": "Timeouts for the cognito tokens",
+                "properties": {
+                  "refresh_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the refresh token"
+                  },
+                  "access_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the access token"
+                  },
+                  "id_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the id token"
+                  }
+                }
+              },
+              "advanced_authentication": {
+                "type": "object",
+                "description": "Advanced authentication settings for the portal",
+                "properties": {
+                  "user_activity_logging": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring."
+                  },
+                  "adaptive_authentication": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time."
+                  },
+                  "compromised_credentials_detection": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials."
+                  }
+                }
               },
               "password_policy": {
                 "type": "object",
@@ -10070,24 +10195,6 @@
           }
         }
       },
-      "DomainSettings": {
-        "type": "object",
-        "description": "Domain settings for the portal",
-        "properties": {
-          "is_custom_domain_enabled": {
-            "type": "boolean",
-            "description": "Whether the custom domain is enabled"
-          },
-          "is_epilot_domain_enabled": {
-            "type": "boolean",
-            "description": "Whether the Epilot domain is enabled"
-          },
-          "is_redirection_enabled": {
-            "type": "boolean",
-            "description": "Whether the redirection is enabled"
-          }
-        }
-      },
       "WidgetBase": {
         "type": "object",
         "required": [
@@ -10110,7 +10217,8 @@
               "PAYMENT_WIDGET",
               "METER_READING_WIDGET",
               "METER_CHART_WIDGET",
-              "CAMPAIGN_WIDGET"
+              "CAMPAIGN_WIDGET",
+              "PRODUCT_RECOMMENDATIONS_WIDGET"
             ]
           },
           "listIndex": {
@@ -10340,6 +10448,22 @@
           }
         ]
       },
+      "ProductRecommendationsWidget": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TeaserWidget"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "campaign_id": {
+                "type": "string",
+                "description": "ID of the campaign"
+              }
+            }
+          }
+        ]
+      },
       "PortalWidget": {
         "anyOf": [
           {
@@ -10368,6 +10492,9 @@
           },
           {
             "$ref": "#/components/schemas/CampaignWidget"
+          },
+          {
+            "$ref": "#/components/schemas/ProductRecommendationsWidget"
           }
         ]
       },
@@ -10735,6 +10862,31 @@
         "type": "string",
         "example": "contact"
       },
+      "EntitySlugConfig": {
+        "description": "Per-slug search configuration with scoped targets and templates",
+        "type": "object",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "templates": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "EntityId": {
         "type": "string",
         "format": "uuid",
@@ -10911,6 +11063,9 @@
             "type": "number",
             "description": "Number of entities returned in this response",
             "example": 10
+          },
+          "includes": {
+            "$ref": "#/components/schemas/SearchIncludes"
           }
         }
       },
@@ -10993,6 +11148,22 @@
             "type": "number",
             "description": "Number of groups returned in this response",
             "example": 5
+          },
+          "includes": {
+            "$ref": "#/components/schemas/SearchIncludes"
+          }
+        }
+      },
+      "SearchIncludes": {
+        "type": "object",
+        "description": "Side-loaded enrichment data requested via the `include` parameter.",
+        "properties": {
+          "active_workflow": {
+            "type": "object",
+            "description": "The active workflow execution for each entity, keyed by entity ID. Only entities with an active workflow are present.",
+            "additionalProperties": {
+              "type": "object"
+            }
           }
         }
       },
@@ -12303,9 +12474,16 @@
                   "$ref": "#/components/schemas/EntitySlug"
                 },
                 "minItems": 1
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntitySlugConfig"
+                },
+                "minItems": 1
               }
             ],
-            "description": "Single entity schema slug or array of slugs"
+            "description": "Entity slug, array of slugs, or array of per-slug configurations"
           },
           "q": {
             "type": "string",
@@ -12468,6 +12646,19 @@
             },
             "example": [
               "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+            ]
+          },
+          "include": {
+            "type": "array",
+            "description": "Optional enrichment data to side-load alongside results under the `includes` response key.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "active_workflow"
+              ]
+            },
+            "example": [
+              "active_workflow"
             ]
           }
         },
@@ -13676,7 +13867,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z"
+            "example": "2022-10-10"
           },
           "source": {
             "$ref": "#/components/schemas/Source",
@@ -14349,6 +14540,11 @@
             "description": "The schema of the detail page",
             "example": "contact"
           },
+          "show_in_navigation": {
+            "type": "boolean",
+            "description": "Whether the detail page should appear in the main navigation",
+            "example": false
+          },
           "is_public": {
             "type": "boolean",
             "description": "Whether the page is public",
@@ -14356,6 +14552,7 @@
           },
           "parentId": {
             "type": "string",
+            "nullable": true,
             "description": "The id of the parent page",
             "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
           },
@@ -14418,17 +14615,20 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
-          "epilot_domain": {
-            "type": "string",
-            "description": "The Epilot domain on which the portal is accessible",
-            "example": "example-portal-1.ecp.epilot.io"
-          },
-          "domain_settings": {
-            "$ref": "#/components/schemas/DomainSettings"
-          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
+          },
+          "allowed_portal_entities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Allowed portal entities for the portal",
+            "example": [
+              "contact",
+              "contract"
+            ]
           },
           "self_registration_setting": {
             "type": "string",
@@ -14531,6 +14731,48 @@
                 "type": "string",
                 "example": "eu-central-1_CUEQRNbUb",
                 "description": "Cognito user pool ID"
+              },
+              "timeouts": {
+                "type": "object",
+                "description": "Timeouts for the cognito tokens",
+                "properties": {
+                  "refresh_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the refresh token"
+                  },
+                  "access_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the access token"
+                  },
+                  "id_token": {
+                    "type": "integer",
+                    "example": 300,
+                    "description": "Timeout for the id token"
+                  }
+                }
+              },
+              "advanced_authentication": {
+                "type": "object",
+                "description": "Advanced authentication settings for the portal",
+                "properties": {
+                  "user_activity_logging": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring."
+                  },
+                  "adaptive_authentication": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time."
+                  },
+                  "compromised_credentials_detection": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials."
+                  }
+                }
               },
               "password_policy": {
                 "type": "object",
@@ -14929,11 +15171,6 @@
           "is_canary": {
             "type": "boolean",
             "description": "Whether the org is in canary mode"
-          },
-          "redirect_to": {
-            "type": "string",
-            "description": "The URL to redirect to",
-            "example": "https://example.com"
           }
         }
       },
