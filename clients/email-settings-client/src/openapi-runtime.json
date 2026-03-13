@@ -9,6 +9,7 @@
       "put": {
         "operationId": "provisionEpilotEmailAddress",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -20,6 +21,7 @@
       "post": {
         "operationId": "setEmailAddressPrimary",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -69,6 +71,7 @@
       "post": {
         "operationId": "addEmailAddress",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -123,6 +126,7 @@
       "post": {
         "operationId": "addSharedInbox",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -182,6 +186,57 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync": {
+      "post": {
+        "operationId": "startMailboxSync",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/status": {
+      "get": {
+        "operationId": "getMailboxSyncStatus",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/retry": {
+      "post": {
+        "operationId": "retryMailboxSync",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -304,6 +359,7 @@
       "post": {
         "operationId": "addSetting",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -313,6 +369,7 @@
       "delete": {
         "operationId": "deleteSetting",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -331,6 +388,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -342,6 +400,7 @@
       "post": {
         "operationId": "addDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -351,6 +410,7 @@
       "delete": {
         "operationId": "deleteDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -362,6 +422,7 @@
       "post": {
         "operationId": "verifyNameServers",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -373,6 +434,7 @@
       "post": {
         "operationId": "verifyDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -460,6 +522,11 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "OutlookErrorResponse": {
         "content": {
           "application/json": {}
         }
