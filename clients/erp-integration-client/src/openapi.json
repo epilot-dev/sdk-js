@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.46.0",
+    "version": "0.49.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -2248,6 +2248,133 @@
           }
         }
       }
+    },
+    "/v1/integrations/secure-proxies": {
+      "get": {
+        "operationId": "listSecureProxies",
+        "summary": "List all secure proxy use cases",
+        "description": "Lists all secure_proxy use cases across all integrations for the authenticated organization.\nReturns minimal data suitable for dropdowns and selection UIs.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved secure proxy use cases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "secure_proxies"
+                  ],
+                  "properties": {
+                    "secure_proxies": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SecureProxySummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/secure-proxy": {
+      "post": {
+        "operationId": "secureProxy",
+        "summary": "Proxy HTTP request through secure VPC",
+        "description": "Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.\nThe VPC mode is determined by the referenced secure_proxy use case configuration.\nFor secure_link mode, the target URL must match the use case's allowed_domains whitelist.\n",
+        "tags": [
+          "proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecureProxyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecureProxyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions or target domain not whitelisted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream error from the proxied target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "VPC proxy not available for the requested mode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Upstream timeout",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3163,13 +3290,21 @@
           },
           {
             "$ref": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/EmbeddedFileProxyUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/EmbeddedSecureProxyUseCaseRequest"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
-            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest"
+            "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest",
+            "file_proxy": "#/components/schemas/EmbeddedFileProxyUseCaseRequest",
+            "secure_proxy": "#/components/schemas/EmbeddedSecureProxyUseCaseRequest"
           }
         }
       },
@@ -3260,6 +3395,56 @@
           }
         ]
       },
+      "EmbeddedFileProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/FileProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "EmbeddedSecureProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "secure_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/SecureProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCaseBase": {
         "type": "object",
         "required": [
@@ -3298,7 +3483,8 @@
             "enum": [
               "inbound",
               "outbound",
-              "file_proxy"
+              "file_proxy",
+              "secure_proxy"
             ],
             "description": "Use case type"
           },
@@ -3397,6 +3583,31 @@
           }
         ]
       },
+      "SecureProxyUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "secure_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/SecureProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCase": {
         "oneOf": [
           {
@@ -3407,6 +3618,9 @@
           },
           {
             "$ref": "#/components/schemas/FileProxyUseCase"
+          },
+          {
+            "$ref": "#/components/schemas/SecureProxyUseCase"
           }
         ],
         "discriminator": {
@@ -3414,7 +3628,8 @@
           "mapping": {
             "inbound": "#/components/schemas/InboundUseCase",
             "outbound": "#/components/schemas/OutboundUseCase",
-            "file_proxy": "#/components/schemas/FileProxyUseCase"
+            "file_proxy": "#/components/schemas/FileProxyUseCase",
+            "secure_proxy": "#/components/schemas/SecureProxyUseCase"
           }
         }
       },
@@ -3428,6 +3643,9 @@
           },
           {
             "$ref": "#/components/schemas/CreateFileProxyUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/CreateSecureProxyUseCaseRequest"
           }
         ],
         "discriminator": {
@@ -3435,7 +3653,8 @@
           "mapping": {
             "inbound": "#/components/schemas/CreateInboundUseCaseRequest",
             "outbound": "#/components/schemas/CreateOutboundUseCaseRequest",
-            "file_proxy": "#/components/schemas/CreateFileProxyUseCaseRequest"
+            "file_proxy": "#/components/schemas/CreateFileProxyUseCaseRequest",
+            "secure_proxy": "#/components/schemas/CreateSecureProxyUseCaseRequest"
           }
         }
       },
@@ -3541,6 +3760,31 @@
           }
         ]
       },
+      "CreateSecureProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "secure_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/SecureProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UpdateUseCaseRequest": {
         "oneOf": [
           {
@@ -3551,6 +3795,9 @@
           },
           {
             "$ref": "#/components/schemas/UpdateFileProxyUseCaseRequest"
+          },
+          {
+            "$ref": "#/components/schemas/UpdateSecureProxyUseCaseRequest"
           }
         ],
         "discriminator": {
@@ -3558,7 +3805,8 @@
           "mapping": {
             "inbound": "#/components/schemas/UpdateInboundUseCaseRequest",
             "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest",
-            "file_proxy": "#/components/schemas/UpdateFileProxyUseCaseRequest"
+            "file_proxy": "#/components/schemas/UpdateFileProxyUseCaseRequest",
+            "secure_proxy": "#/components/schemas/UpdateSecureProxyUseCaseRequest"
           }
         }
       },
@@ -3655,6 +3903,28 @@
           }
         ]
       },
+      "UpdateSecureProxyUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "secure_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/SecureProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
       "UseCaseHistoryEntry": {
         "oneOf": [
           {
@@ -3665,6 +3935,9 @@
           },
           {
             "$ref": "#/components/schemas/FileProxyUseCaseHistoryEntry"
+          },
+          {
+            "$ref": "#/components/schemas/SecureProxyUseCaseHistoryEntry"
           }
         ],
         "discriminator": {
@@ -3672,7 +3945,8 @@
           "mapping": {
             "inbound": "#/components/schemas/InboundUseCaseHistoryEntry",
             "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry",
-            "file_proxy": "#/components/schemas/FileProxyUseCaseHistoryEntry"
+            "file_proxy": "#/components/schemas/FileProxyUseCaseHistoryEntry",
+            "secure_proxy": "#/components/schemas/SecureProxyUseCaseHistoryEntry"
           }
         }
       },
@@ -3813,6 +4087,181 @@
           }
         ]
       },
+      "SecureProxyUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "secure_proxy"
+                ],
+                "description": "Use case type"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/SecureProxyUseCaseConfiguration"
+              }
+            }
+          }
+        ]
+      },
+      "SecureProxyUseCaseConfiguration": {
+        "type": "object",
+        "required": [
+          "vpc_mode"
+        ],
+        "description": "Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.\n",
+        "properties": {
+          "vpc_mode": {
+            "type": "string",
+            "enum": [
+              "static_ip",
+              "secure_link"
+            ],
+            "readOnly": true,
+            "description": "VPC routing mode. Read-only after creation.\n- static_ip: Routes through a VPC with static outbound IP (NAT Gateway) for IP-allowlisted external APIs.\n- secure_link: Routes through a VPN VPC for accessing private customer networks.\n"
+          },
+          "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "description": "Domain whitelist for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.\nSupports exact match (e.g., \"api.wemag.com\") and wildcard prefix (e.g., \"*.wemag.com\").\n"
+          }
+        }
+      },
+      "SecureProxySummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "enabled",
+          "vpc_mode",
+          "integration_id",
+          "integration_name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "vpc_mode": {
+            "type": "string",
+            "enum": [
+              "static_ip",
+              "secure_link"
+            ]
+          },
+          "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "integration_name": {
+            "type": "string"
+          }
+        }
+      },
+      "SecureProxyRequest": {
+        "type": "object",
+        "required": [
+          "url",
+          "method",
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Integration ID that owns the secure_proxy use case"
+          },
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Use case ID (provide either use_case_id or use_case_slug)"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Use case slug (provide either use_case_id or use_case_slug)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target URL to proxy the request to"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ],
+            "description": "HTTP method"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Request headers to forward"
+          },
+          "body": {
+            "description": "Request body (string or JSON)"
+          },
+          "response_type": {
+            "type": "string",
+            "enum": [
+              "json",
+              "binary"
+            ],
+            "default": "json",
+            "description": "Expected response type"
+          }
+        }
+      },
+      "SecureProxyResponse": {
+        "type": "object",
+        "properties": {
+          "status_code": {
+            "type": "integer",
+            "description": "HTTP status code from the upstream response"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Response headers from upstream"
+          },
+          "body": {
+            "description": "Response body from upstream"
+          }
+        }
+      },
       "FileProxyUseCaseConfiguration": {
         "type": "object",
         "required": [
@@ -3821,11 +4270,9 @@
         ],
         "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
         "properties": {
-          "requires_vpc": {
-            "type": "boolean",
-            "readOnly": true,
-            "description": "Whether requests require VPC routing for IP allowlisting. Read-only after creation — can only be modified directly in DynamoDB.",
-            "default": false
+          "secure_proxy": {
+            "$ref": "#/components/schemas/FileProxySecureProxyAttachment",
+            "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n"
           },
           "auth": {
             "$ref": "#/components/schemas/FileProxyAuth"
@@ -3847,6 +4294,19 @@
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
+          }
+        }
+      },
+      "FileProxySecureProxyAttachment": {
+        "type": "object",
+        "required": [
+          "use_case_slug"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of the secure_proxy use case in the same integration."
           }
         }
       },
@@ -4336,7 +4796,6 @@
       "OutboundMapping": {
         "type": "object",
         "required": [
-          "id",
           "name",
           "jsonata_expression",
           "enabled",

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -291,7 +289,31 @@ declare namespace Components {
             type: "outbound";
             configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
-        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest | CreateFileProxyUseCaseRequest;
+        export interface CreateSecureProxyUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Use case type
+             */
+            type: "secure_proxy";
+            configuration?: /**
+             * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+             *
+             */
+            SecureProxyUseCaseConfiguration;
+        }
+        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest | CreateFileProxyUseCaseRequest | CreateSecureProxyUseCaseRequest;
         export interface CreateUseCaseRequestBase {
             /**
              * Use case name
@@ -337,6 +359,46 @@ declare namespace Components {
              * Cached webhook URL for display purposes
              */
             webhook_url?: string;
+        }
+        export interface EmbeddedFileProxyUseCaseRequest {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type: "file_proxy";
+            configuration?: /**
+             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             *
+             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
+             * Additional use-case-specific parameters are declared in the `params` array.
+             *
+             */
+            FileProxyUseCaseConfiguration;
         }
         export interface EmbeddedInboundUseCaseRequest {
             /**
@@ -402,7 +464,43 @@ declare namespace Components {
             type: "outbound";
             configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
-        export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest;
+        export interface EmbeddedSecureProxyUseCaseRequest {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type: "secure_proxy";
+            configuration?: /**
+             * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+             *
+             */
+            SecureProxyUseCaseConfiguration;
+        }
+        export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest | EmbeddedFileProxyUseCaseRequest | EmbeddedSecureProxyUseCaseRequest;
         export interface EmbeddedUseCaseRequestBase {
             /**
              * Optional use case ID for update matching.
@@ -696,6 +794,12 @@ declare namespace Components {
              */
             content_type?: string;
         }
+        export interface FileProxySecureProxyAttachment {
+            /**
+             * Slug of the secure_proxy use case in the same integration.
+             */
+            use_case_slug: string;
+        }
         export interface FileProxyStep {
             /**
              * Handlebars template for the request URL
@@ -789,7 +893,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "file_proxy";
+            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "file_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -823,9 +927,12 @@ declare namespace Components {
          */
         export interface FileProxyUseCaseConfiguration {
             /**
-             * Whether requests require VPC routing for IP allowlisting. Read-only after creation — can only be modified directly in DynamoDB.
+             * Optional secure proxy attachment for routing all outbound file proxy requests.
+             * Only `use_case_slug` is supported and the referenced secure_proxy use case
+             * must belong to the same integration.
+             *
              */
-            requires_vpc?: boolean;
+            secure_proxy?: FileProxySecureProxyAttachment;
             auth?: FileProxyAuth;
             /**
              * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)
@@ -1049,7 +1156,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "inbound";
+            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "inbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -1642,7 +1749,7 @@ declare namespace Components {
             /**
              * Unique identifier for this mapping
              */
-            id: string; // uuid
+            id?: string; // uuid
             /**
              * Human-readable name for this mapping
              * example:
@@ -1755,7 +1862,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "outbound";
+            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "outbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2353,6 +2460,179 @@ declare namespace Components {
                 string?
             ];
         }
+        export interface SecureProxyRequest {
+            /**
+             * Integration ID that owns the secure_proxy use case
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case ID (provide either use_case_id or use_case_slug)
+             */
+            use_case_id?: string; // uuid
+            /**
+             * Use case slug (provide either use_case_id or use_case_slug)
+             */
+            use_case_slug?: string;
+            /**
+             * Target URL to proxy the request to
+             */
+            url: string; // uri
+            /**
+             * HTTP method
+             */
+            method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /**
+             * Request headers to forward
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * Request body (string or JSON)
+             */
+            body?: any;
+            /**
+             * Expected response type
+             */
+            response_type?: "json" | "binary";
+        }
+        export interface SecureProxyResponse {
+            /**
+             * HTTP status code from the upstream response
+             */
+            status_code?: number;
+            /**
+             * Response headers from upstream
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * Response body from upstream
+             */
+            body?: any;
+        }
+        export interface SecureProxySummary {
+            id: string; // uuid
+            name: string;
+            slug?: string;
+            enabled: boolean;
+            vpc_mode: "static_ip" | "secure_link";
+            allowed_domains?: string[];
+            integration_id: string; // uuid
+            integration_name: string;
+        }
+        export interface SecureProxyUseCase {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Use case type
+             */
+            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "secure_proxy";
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
+            configuration?: /**
+             * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+             *
+             */
+            SecureProxyUseCaseConfiguration;
+        }
+        /**
+         * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+         *
+         */
+        export interface SecureProxyUseCaseConfiguration {
+            /**
+             * VPC routing mode. Read-only after creation.
+             * - static_ip: Routes through a VPC with static outbound IP (NAT Gateway) for IP-allowlisted external APIs.
+             * - secure_link: Routes through a VPN VPC for accessing private customer networks.
+             *
+             */
+            vpc_mode: "static_ip" | "secure_link";
+            /**
+             * Domain whitelist for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.
+             * Supports exact match (e.g., "api.wemag.com") and wildcard prefix (e.g., "*.wemag.com").
+             *
+             */
+            allowed_domains?: string[];
+        }
+        export interface SecureProxyUseCaseHistoryEntry {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+            /**
+             * Use case type
+             */
+            type: "secure_proxy";
+            configuration?: /**
+             * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+             *
+             */
+            SecureProxyUseCaseConfiguration;
+        }
         export interface SetIntegrationAppMappingRequest {
             /**
              * UUID of the integration app instance
@@ -2527,7 +2807,35 @@ declare namespace Components {
             type?: "outbound";
             configuration?: /* Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings. */ OutboundIntegrationEventConfiguration;
         }
-        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest | UpdateFileProxyUseCaseRequest;
+        export interface UpdateSecureProxyUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name?: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type
+             */
+            type?: "secure_proxy";
+            configuration?: /**
+             * Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+             *
+             */
+            SecureProxyUseCaseConfiguration;
+        }
+        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest | UpdateFileProxyUseCaseRequest | UpdateSecureProxyUseCaseRequest;
         export interface UpdateUseCaseRequestBase {
             /**
              * Use case name
@@ -2583,7 +2891,7 @@ declare namespace Components {
              */
             use_cases?: EmbeddedUseCaseRequest[];
         }
-        export type UseCase = InboundUseCase | OutboundUseCase | FileProxyUseCase;
+        export type UseCase = InboundUseCase | OutboundUseCase | FileProxyUseCase | SecureProxyUseCase;
         export interface UseCaseBase {
             /**
              * Unique identifier for the use case
@@ -2605,7 +2913,7 @@ declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy";
+            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2620,7 +2928,7 @@ declare namespace Components {
              */
             updated_at: string; // date-time
         }
-        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry;
+        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry | SecureProxyUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
             /**
              * Unique identifier for this history entry
@@ -2924,6 +3232,15 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListSecureProxies {
+        namespace Responses {
+            export interface $200 {
+                secure_proxies: Components.Schemas.SecureProxySummary[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListUseCaseHistory {
         namespace Parameters {
             export type Cursor = string;
@@ -3097,6 +3414,18 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace SecureProxy {
+        export type RequestBody = Components.Schemas.SecureProxyRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SecureProxyResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Schemas.ErrorResponseBase;
+            export type $502 = Components.Schemas.ErrorResponseBase;
+            export type $503 = Components.Schemas.ErrorResponseBase;
+            export type $504 = Components.Schemas.ErrorResponseBase;
         }
     }
     namespace SetIntegrationAppMapping {
@@ -3593,6 +3922,31 @@ export interface OperationMethods {
     data?: Paths.QueryOutboundMonitoringEvents.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
+  /**
+   * listSecureProxies - List all secure proxy use cases
+   * 
+   * Lists all secure_proxy use cases across all integrations for the authenticated organization.
+   * Returns minimal data suitable for dropdowns and selection UIs.
+   * 
+   */
+  'listSecureProxies'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSecureProxies.Responses.$200>
+  /**
+   * secureProxy - Proxy HTTP request through secure VPC
+   * 
+   * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+   * The VPC mode is determined by the referenced secure_proxy use case configuration.
+   * For secure_link mode, the target URL must match the use case's allowed_domains whitelist.
+   * 
+   */
+  'secureProxy'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SecureProxy.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SecureProxy.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4019,6 +4373,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
   }
+  ['/v1/integrations/secure-proxies']: {
+    /**
+     * listSecureProxies - List all secure proxy use cases
+     * 
+     * Lists all secure_proxy use cases across all integrations for the authenticated organization.
+     * Returns minimal data suitable for dropdowns and selection UIs.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSecureProxies.Responses.$200>
+  }
+  ['/v1/secure-proxy']: {
+    /**
+     * secureProxy - Proxy HTTP request through secure VPC
+     * 
+     * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+     * The VPC mode is determined by the referenced secure_proxy use case configuration.
+     * For secure_link mode, the target URL must match the use case's allowed_domains whitelist.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SecureProxy.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SecureProxy.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -4030,12 +4413,15 @@ export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUs
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
 export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseCaseRequest;
+export type CreateSecureProxyUseCaseRequest = Components.Schemas.CreateSecureProxyUseCaseRequest;
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type DeliveryConfig = Components.Schemas.DeliveryConfig;
+export type EmbeddedFileProxyUseCaseRequest = Components.Schemas.EmbeddedFileProxyUseCaseRequest;
 export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
 export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutboundUseCaseRequest;
+export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecureProxyUseCaseRequest;
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
@@ -4048,6 +4434,7 @@ export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
+export type FileProxySecureProxyAttachment = Components.Schemas.FileProxySecureProxyAttachment;
 export type FileProxyStep = Components.Schemas.FileProxyStep;
 export type FileProxyUrlConfig = Components.Schemas.FileProxyUrlConfig;
 export type FileProxyUrlParam = Components.Schemas.FileProxyUrlParam;
@@ -4102,6 +4489,12 @@ export type RelationRefsConfig = Components.Schemas.RelationRefsConfig;
 export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
 export type RepeatableFieldType = Components.Schemas.RepeatableFieldType;
 export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
+export type SecureProxyRequest = Components.Schemas.SecureProxyRequest;
+export type SecureProxyResponse = Components.Schemas.SecureProxyResponse;
+export type SecureProxySummary = Components.Schemas.SecureProxySummary;
+export type SecureProxyUseCase = Components.Schemas.SecureProxyUseCase;
+export type SecureProxyUseCaseConfiguration = Components.Schemas.SecureProxyUseCaseConfiguration;
+export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCaseHistoryEntry;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
@@ -4110,6 +4503,7 @@ export type UpdateFileProxyUseCaseRequest = Components.Schemas.UpdateFileProxyUs
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;
+export type UpdateSecureProxyUseCaseRequest = Components.Schemas.UpdateSecureProxyUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
 export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
