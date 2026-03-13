@@ -53,6 +53,7 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`setIntegrationAppMapping`](#setintegrationappmapping)
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping)
 - [`getOutboundStatus`](#getoutboundstatus)
+- [`listSecureProxies`](#listsecureproxies)
 
 **monitoring**
 - [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents)
@@ -60,6 +61,9 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`getMonitoringTimeSeries`](#getmonitoringtimeseries)
 - [`queryAccessLogs`](#queryaccesslogs)
 - [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents)
+
+**proxy**
+- [`secureProxy`](#secureproxy)
 
 **Schemas**
 - [`ErrorResponseBase`](#errorresponsebase)
@@ -96,27 +100,38 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`EmbeddedUseCaseRequestBase`](#embeddedusecaserequestbase)
 - [`EmbeddedInboundUseCaseRequest`](#embeddedinboundusecaserequest)
 - [`EmbeddedOutboundUseCaseRequest`](#embeddedoutboundusecaserequest)
+- [`EmbeddedFileProxyUseCaseRequest`](#embeddedfileproxyusecaserequest)
+- [`EmbeddedSecureProxyUseCaseRequest`](#embeddedsecureproxyusecaserequest)
 - [`UseCaseBase`](#usecasebase)
 - [`InboundUseCase`](#inboundusecase)
 - [`OutboundUseCase`](#outboundusecase)
 - [`FileProxyUseCase`](#fileproxyusecase)
+- [`SecureProxyUseCase`](#secureproxyusecase)
 - [`UseCase`](#usecase)
 - [`CreateUseCaseRequest`](#createusecaserequest)
 - [`CreateUseCaseRequestBase`](#createusecaserequestbase)
 - [`CreateInboundUseCaseRequest`](#createinboundusecaserequest)
 - [`CreateOutboundUseCaseRequest`](#createoutboundusecaserequest)
 - [`CreateFileProxyUseCaseRequest`](#createfileproxyusecaserequest)
+- [`CreateSecureProxyUseCaseRequest`](#createsecureproxyusecaserequest)
 - [`UpdateUseCaseRequest`](#updateusecaserequest)
 - [`UpdateUseCaseRequestBase`](#updateusecaserequestbase)
 - [`UpdateInboundUseCaseRequest`](#updateinboundusecaserequest)
 - [`UpdateOutboundUseCaseRequest`](#updateoutboundusecaserequest)
 - [`UpdateFileProxyUseCaseRequest`](#updatefileproxyusecaserequest)
+- [`UpdateSecureProxyUseCaseRequest`](#updatesecureproxyusecaserequest)
 - [`UseCaseHistoryEntry`](#usecasehistoryentry)
 - [`UseCaseHistoryEntryBase`](#usecasehistoryentrybase)
 - [`InboundUseCaseHistoryEntry`](#inboundusecasehistoryentry)
 - [`OutboundUseCaseHistoryEntry`](#outboundusecasehistoryentry)
 - [`FileProxyUseCaseHistoryEntry`](#fileproxyusecasehistoryentry)
+- [`SecureProxyUseCaseHistoryEntry`](#secureproxyusecasehistoryentry)
+- [`SecureProxyUseCaseConfiguration`](#secureproxyusecaseconfiguration)
+- [`SecureProxySummary`](#secureproxysummary)
+- [`SecureProxyRequest`](#secureproxyrequest)
+- [`SecureProxyResponse`](#secureproxyresponse)
 - [`FileProxyUseCaseConfiguration`](#fileproxyusecaseconfiguration)
+- [`FileProxySecureProxyAttachment`](#fileproxysecureproxyattachment)
 - [`FileProxyAuth`](#fileproxyauth)
 - [`FileProxyParam`](#fileproxyparam)
 - [`FileProxyStep`](#fileproxystep)
@@ -1728,6 +1743,77 @@ const { data } = await client.queryOutboundMonitoringEvents(
 
 ---
 
+### `listSecureProxies`
+
+List all secure proxy use cases
+
+`GET /v1/integrations/secure-proxies`
+
+```ts
+const { data } = await client.listSecureProxies()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "secure_proxies": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "vpc_mode": "static_ip",
+      "allowed_domains": ["string"],
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integration_name": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `secureProxy`
+
+Proxy HTTP request through secure VPC
+
+`POST /v1/secure-proxy`
+
+```ts
+const { data } = await client.secureProxy(
+  null,
+  {
+    integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    use_case_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    use_case_slug: 'string',
+    url: 'https://example.com/path',
+    method: 'GET',
+    headers: {},
+    body: {},
+    response_type: 'json'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status_code": 0,
+  "headers": {},
+  "body": {}
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `ErrorResponseBase`
@@ -2028,11 +2114,25 @@ type IntegrationWithUseCases = {
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
-      requires_vpc?: { ... }
+      secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
       steps: { ... }
       response: { ... }
+    }
+  } | {
+    id: string // uuid
+    integrationId: string // uuid
+    name: string
+    slug?: string
+    type: "secure_proxy"
+    enabled: boolean
+    change_description?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+    configuration?: {
+      vpc_mode: { ... }
+      allowed_domains?: { ... }
     }
   }>
 }
@@ -2081,6 +2181,31 @@ type UpsertIntegrationWithUseCasesRequest = {
     configuration?: {
       event_catalog_event: { ... }
       mappings: { ... }
+    }
+  } | {
+    id?: string // uuid
+    name: string
+    slug?: string
+    enabled: boolean
+    change_description?: string
+    type: "file_proxy"
+    configuration?: {
+      secure_proxy?: { ... }
+      auth?: { ... }
+      params?: { ... }
+      steps: { ... }
+      response: { ... }
+    }
+  } | {
+    id?: string // uuid
+    name: string
+    slug?: string
+    enabled: boolean
+    change_description?: string
+    type: "secure_proxy"
+    configuration?: {
+      vpc_mode: { ... }
+      allowed_domains?: { ... }
     }
   }>
 }
@@ -2152,7 +2277,7 @@ Configuration for outbound use cases. Defines the event that triggers the flow a
 type OutboundIntegrationEventConfiguration = {
   event_catalog_event: string
   mappings: Array<{
-    id: string // uuid
+    id?: string // uuid
     name: string
     jsonata_expression: string
     enabled: boolean
@@ -2479,7 +2604,7 @@ type EmbeddedUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2488,6 +2613,61 @@ type EmbeddedUseCaseRequest = {
       updated_at?: { ... }
     }>
   }
+} | {
+  id?: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "file_proxy"
+  configuration?: {
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
+} | {
+  id?: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
+  // ...
 }
 ```
 
@@ -2549,7 +2729,7 @@ type EmbeddedOutboundUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2557,6 +2737,73 @@ type EmbeddedOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+  }
+}
+```
+
+### `EmbeddedFileProxyUseCaseRequest`
+
+```ts
+type EmbeddedFileProxyUseCaseRequest = {
+  id?: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "file_proxy"
+  configuration?: {
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
+    auth?: {
+      type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+  }
+}
+```
+
+### `EmbeddedSecureProxyUseCaseRequest`
+
+```ts
+type EmbeddedSecureProxyUseCaseRequest = {
+  id?: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -2569,7 +2816,7 @@ type UseCaseBase = {
   integrationId: string // uuid
   name: string
   slug?: string
-  type: "inbound" | "outbound" | "file_proxy"
+  type: "inbound" | "outbound" | "file_proxy" | "secure_proxy"
   enabled: boolean
   change_description?: string
   created_at: string // date-time
@@ -2629,7 +2876,7 @@ type OutboundUseCase = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2655,7 +2902,9 @@ type FileProxyUseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -2688,6 +2937,26 @@ type FileProxyUseCase = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+}
+```
+
+### `SecureProxyUseCase`
+
+```ts
+type SecureProxyUseCase = {
+  id: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  type: "secure_proxy"
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -2738,7 +3007,7 @@ type UseCase = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2758,7 +3027,9 @@ type UseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -2792,6 +3063,8 @@ type UseCase = {
       content_type?: { ... }
     }
   }
+} | {
+  // ...
 }
 ```
 
@@ -2831,7 +3104,7 @@ type CreateUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2846,7 +3119,9 @@ type CreateUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -2879,6 +3154,15 @@ type CreateUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+} | {
+  name: string
+  slug?: string
+  enabled: boolean
+  type: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -2935,7 +3219,7 @@ type CreateOutboundUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -2956,7 +3240,9 @@ type CreateFileProxyUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -2989,6 +3275,21 @@ type CreateFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+}
+```
+
+### `CreateSecureProxyUseCaseRequest`
+
+```ts
+type CreateSecureProxyUseCaseRequest = {
+  name: string
+  slug?: string
+  enabled: boolean
+  type: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -3031,7 +3332,7 @@ type UpdateUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -3047,7 +3348,9 @@ type UpdateUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -3080,6 +3383,16 @@ type UpdateUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+} | {
+  name?: string
+  slug?: string
+  enabled?: boolean
+  change_description?: string
+  type?: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -3139,7 +3452,7 @@ type UpdateOutboundUseCaseRequest = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -3161,7 +3474,9 @@ type UpdateFileProxyUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -3194,6 +3509,22 @@ type UpdateFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+}
+```
+
+### `UpdateSecureProxyUseCaseRequest`
+
+```ts
+type UpdateSecureProxyUseCaseRequest = {
+  name?: string
+  slug?: string
+  enabled?: boolean
+  change_description?: string
+  type?: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
   }
 }
 ```
@@ -3248,7 +3579,7 @@ type UseCaseHistoryEntry = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -3270,7 +3601,9 @@ type UseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -3299,8 +3632,6 @@ type UseCaseHistoryEntry = {
     }>
     response: {
       body: { ... }
-      encoding: { ... }
-      filename?: { ... }
   // ...
 }
 ```
@@ -3378,7 +3709,7 @@ type OutboundUseCaseHistoryEntry = {
   configuration?: {
     event_catalog_event: string
     mappings: Array<{
-      id: { ... }
+      id?: { ... }
       name: { ... }
       jsonata_expression: { ... }
       enabled: { ... }
@@ -3406,7 +3737,9 @@ type FileProxyUseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
-    requires_vpc?: boolean
+    secure_proxy?: {
+      use_case_slug: { ... }
+    }
     auth?: {
       type: { ... }
       token_url: { ... }
@@ -3443,6 +3776,80 @@ type FileProxyUseCaseHistoryEntry = {
 }
 ```
 
+### `SecureProxyUseCaseHistoryEntry`
+
+```ts
+type SecureProxyUseCaseHistoryEntry = {
+  id: string // uuid
+  useCaseId: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  history_created_at: string // date-time
+  type: "secure_proxy"
+  configuration?: {
+    vpc_mode: "static_ip" | "secure_link"
+    allowed_domains?: string[]
+  }
+}
+```
+
+### `SecureProxyUseCaseConfiguration`
+
+Configuration for secure_proxy use cases. Defines how to route requests through a secure VPC.
+
+
+```ts
+type SecureProxyUseCaseConfiguration = {
+  vpc_mode: "static_ip" | "secure_link"
+  allowed_domains?: string[]
+}
+```
+
+### `SecureProxySummary`
+
+```ts
+type SecureProxySummary = {
+  id: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  vpc_mode: "static_ip" | "secure_link"
+  allowed_domains?: string[]
+  integration_id: string // uuid
+  integration_name: string
+}
+```
+
+### `SecureProxyRequest`
+
+```ts
+type SecureProxyRequest = {
+  integration_id: string // uuid
+  use_case_id?: string // uuid
+  use_case_slug?: string
+  url: string // uri
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+  headers?: Record<string, string>
+  body?: unknown
+  response_type?: "json" | "binary"
+}
+```
+
+### `SecureProxyResponse`
+
+```ts
+type SecureProxyResponse = {
+  status_code?: number
+  headers?: Record<string, string>
+  body?: unknown
+}
+```
+
 ### `FileProxyUseCaseConfiguration`
 
 Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
@@ -3452,7 +3859,9 @@ The `orgId` is included
 
 ```ts
 type FileProxyUseCaseConfiguration = {
-  requires_vpc?: boolean
+  secure_proxy?: {
+    use_case_slug: string
+  }
   auth?: {
     type: "oauth2_client_credentials" | "oauth2_password"
     token_url: string
@@ -3485,6 +3894,14 @@ type FileProxyUseCaseConfiguration = {
     filename?: string
     content_type?: string
   }
+}
+```
+
+### `FileProxySecureProxyAttachment`
+
+```ts
+type FileProxySecureProxyAttachment = {
+  use_case_slug: string
 }
 ```
 
@@ -3713,7 +4130,7 @@ A mapping that transforms an event and delivers it to a webhook
 
 ```ts
 type OutboundMapping = {
-  id: string // uuid
+  id?: string // uuid
   name: string
   jsonata_expression: string
   enabled: boolean
