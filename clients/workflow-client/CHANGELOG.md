@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.22.0
+
+### Minor Changes
+
+- Added on hold assignees
+
 ## 1.21.0
 
 ### Minor Changes
