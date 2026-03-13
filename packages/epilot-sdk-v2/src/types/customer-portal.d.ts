@@ -1,6 +1,4 @@
 /* Auto-copied from customer-portal-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -58,7 +56,7 @@ export declare namespace Components {
         }
         export interface ActionWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -781,7 +779,7 @@ export declare namespace Components {
         }
         export interface CampaignWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -829,13 +827,6 @@ export declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
-             * The URL on which the portal is accessible
-             * example:
-             * example-portal-12345.ecp.epilot.cloud
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
-            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -844,6 +835,15 @@ export declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -926,6 +926,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -1202,13 +1248,6 @@ export declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
-             * The Epilot domain on which the portal is accessible
-             * example:
-             * example-portal-1.ecp.epilot.io
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
-            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -1217,6 +1256,15 @@ export declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -1299,6 +1347,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -1637,7 +1731,7 @@ export declare namespace Components {
         }
         export interface ContentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1978,7 +2072,7 @@ export declare namespace Components {
         export type Direction = "feed-in" | "feed-out";
         export interface DocumentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -1991,23 +2085,6 @@ export declare namespace Components {
                 en?: string;
                 de?: string;
             };
-        }
-        /**
-         * Domain settings for the portal
-         */
-        export interface DomainSettings {
-            /**
-             * Whether the custom domain is enabled
-             */
-            is_custom_domain_enabled?: boolean;
-            /**
-             * Whether the Epilot domain is enabled
-             */
-            is_epilot_domain_enabled?: boolean;
-            /**
-             * Whether the redirection is enabled
-             */
-            is_redirection_enabled?: boolean;
         }
         /**
          * Email templates used for authentication and internal processes
@@ -2474,6 +2551,7 @@ export declare namespace Components {
              * 5
              */
             hits?: number;
+            includes?: /* Side-loaded enrichment data requested via the `include` parameter. */ SearchIncludes;
         }
         /**
          * Response for entity search requests
@@ -2513,12 +2591,13 @@ export declare namespace Components {
              * 10
              */
             hits?: number;
+            includes?: /* Side-loaded enrichment data requested via the `include` parameter. */ SearchIncludes;
         }
         export interface EntitySearchParams {
             /**
-             * Single entity schema slug or array of slugs
+             * Entity slug, array of slugs, or array of per-slug configurations
              */
-            slug: /* Single entity schema slug or array of slugs */ /**
+            slug: /* Entity slug, array of slugs, or array of per-slug configurations */ /**
              * URL-friendly identifier for the entity schema
              * example:
              * contact
@@ -2536,6 +2615,9 @@ export declare namespace Components {
                  * contact
                  */
                 EntitySlug[]
+            ] | [
+                /* Per-slug search configuration with scoped targets and templates */ EntitySlugConfig,
+                .../* Per-slug search configuration with scoped targets and templates */ EntitySlugConfig[]
             ];
             /**
              * Keyword search query
@@ -2664,6 +2746,14 @@ export declare namespace Components {
              * ]
              */
             targets?: string /* uuid */[];
+            /**
+             * Optional enrichment data to side-load alongside results under the `includes` response key.
+             * example:
+             * [
+             *   "active_workflow"
+             * ]
+             */
+            include?: ("active_workflow")[];
         }
         /**
          * URL-friendly identifier for the entity schema
@@ -2671,6 +2761,21 @@ export declare namespace Components {
          * contact
          */
         export type EntitySlug = string;
+        /**
+         * Per-slug search configuration with scoped targets and templates
+         */
+        export interface EntitySlugConfig {
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            targets?: string /* uuid */[];
+            templates?: {
+                [name: string]: string;
+            };
+        }
         export interface EntityTemplates {
             /**
              * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
@@ -2693,7 +2798,7 @@ export declare namespace Components {
         }
         export interface EntityWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3750,12 +3855,6 @@ export declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
-            /**
-             * The URL to redirect to
-             * example:
-             * https://example.com
-             */
-            redirect_to?: string;
         }
         /**
          * The meter entity
@@ -3805,7 +3904,7 @@ export declare namespace Components {
         }
         export interface MeterChartWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -3866,7 +3965,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string;
             /**
@@ -3969,7 +4068,7 @@ export declare namespace Components {
         }
         export interface MeterReadingWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -4362,6 +4461,12 @@ export declare namespace Components {
              */
             detail_schema?: string;
             /**
+             * Whether the detail page should appear in the main navigation
+             * example:
+             * false
+             */
+            show_in_navigation?: boolean;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4372,7 +4477,7 @@ export declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parentId?: string;
+            parentId?: string | null;
             /**
              * Whether the page is the entry route
              * example:
@@ -4459,6 +4564,12 @@ export declare namespace Components {
              */
             detail_schema?: string;
             /**
+             * Whether the detail page should appear in the main navigation
+             * example:
+             * false
+             */
+            show_in_navigation?: boolean;
+            /**
              * Whether the page is public
              * example:
              * true
@@ -4469,7 +4580,7 @@ export declare namespace Components {
              * example:
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
-            parentId?: string;
+            parentId?: string | null;
             /**
              * Whether the page is the entry route
              * example:
@@ -4485,7 +4596,7 @@ export declare namespace Components {
         }
         export interface PaymentWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -4520,19 +4631,21 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * The URL on which the portal is accessible
-             * example:
-             * example-portal-12345.ecp.epilot.cloud
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -4615,6 +4728,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -4976,19 +5135,21 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * The Epilot domain on which the portal is accessible
-             * example:
-             * example-portal-1.ecp.epilot.io
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -5071,6 +5232,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -5416,7 +5623,7 @@ export declare namespace Components {
             _schema: "portal_user";
         }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
-        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget;
+        export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget | ProductRecommendationsWidget;
         /**
          * The product entity
          */
@@ -5462,6 +5669,34 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
             _schema: "product";
+        }
+        export interface ProductRecommendationsWidget {
+            id: string;
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
+            /**
+             * Index of the widget in the list, used for ordering (left or right)
+             */
+            listIndex: number;
+            headline?: {
+                en?: string;
+                de?: string;
+            };
+            subHeadline?: {
+                en?: string;
+                de?: string;
+            };
+            imageUrl?: string;
+            button?: {
+                label?: {
+                    en?: string;
+                    de?: string;
+                };
+                url?: string;
+            };
+            /**
+             * ID of the campaign
+             */
+            campaign_id?: string;
         }
         export interface ProviderConfig {
             slug?: /**
@@ -5875,12 +6110,25 @@ export declare namespace Components {
              */
             slug?: string;
         }
+        /**
+         * Side-loaded enrichment data requested via the `include` parameter.
+         */
+        export interface SearchIncludes {
+            /**
+             * The active workflow execution for each entity, keyed by entity ID. Only entities with an active workflow are present.
+             */
+            active_workflow?: {
+                [name: string]: {
+                    [key: string]: any;
+                };
+            };
+        }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
         export type SwappableConfig = "all" | "domain" | "users" | "email_templates";
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -6030,19 +6278,21 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * The URL on which the portal is accessible
-             * example:
-             * example-portal-12345.ecp.epilot.cloud
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -6125,6 +6375,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -6440,19 +6736,21 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
-            /**
-             * The Epilot domain on which the portal is accessible
-             * example:
-             * example-portal-1.ecp.epilot.io
-             */
-            epilot_domain?: string;
-            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
              * Enable or disable user account self management
@@ -6535,6 +6833,52 @@ export declare namespace Components {
                  * eu-central-1_CUEQRNbUb
                  */
                 cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
                 /**
                  * Password policy for the portal
                  */
@@ -6835,7 +7179,7 @@ export declare namespace Components {
         }
         export interface WidgetBase {
             id: string;
-            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET";
+            type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
             /**
              * Index of the widget in the list, used for ordering (left or right)
              */
@@ -8961,19 +9305,21 @@ export declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
-                /**
-                 * The URL on which the portal is accessible
-                 * example:
-                 * example-portal-12345.ecp.epilot.cloud
-                 */
-                epilot_domain?: string;
-                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Allowed portal entities for the portal
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract"
+                 * ]
+                 */
+                allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
                 /**
                  * Enable or disable user account self management
@@ -9056,6 +9402,52 @@ export declare namespace Paths {
                      * eu-central-1_CUEQRNbUb
                      */
                     cognito_user_pool_id?: string;
+                    /**
+                     * Timeouts for the cognito tokens
+                     */
+                    timeouts?: {
+                        /**
+                         * Timeout for the refresh token
+                         * example:
+                         * 300
+                         */
+                        refresh_token?: number;
+                        /**
+                         * Timeout for the access token
+                         * example:
+                         * 300
+                         */
+                        access_token?: number;
+                        /**
+                         * Timeout for the id token
+                         * example:
+                         * 300
+                         */
+                        id_token?: number;
+                    };
+                    /**
+                     * Advanced authentication settings for the portal
+                     */
+                    advanced_authentication?: {
+                        /**
+                         * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                         * example:
+                         * true
+                         */
+                        user_activity_logging?: boolean;
+                        /**
+                         * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                         * example:
+                         * true
+                         */
+                        adaptive_authentication?: boolean;
+                        /**
+                         * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                         * example:
+                         * true
+                         */
+                        compromised_credentials_detection?: boolean;
+                    };
                     /**
                      * Password policy for the portal
                      */
@@ -9407,19 +9799,21 @@ export declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
-                /**
-                 * The URL on which the portal is accessible
-                 * example:
-                 * example-portal-12345.ecp.epilot.cloud
-                 */
-                epilot_domain?: string;
-                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Allowed portal entities for the portal
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract"
+                 * ]
+                 */
+                allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
                 /**
                  * Enable or disable user account self management
@@ -9502,6 +9896,52 @@ export declare namespace Paths {
                      * eu-central-1_CUEQRNbUb
                      */
                     cognito_user_pool_id?: string;
+                    /**
+                     * Timeouts for the cognito tokens
+                     */
+                    timeouts?: {
+                        /**
+                         * Timeout for the refresh token
+                         * example:
+                         * 300
+                         */
+                        refresh_token?: number;
+                        /**
+                         * Timeout for the access token
+                         * example:
+                         * 300
+                         */
+                        access_token?: number;
+                        /**
+                         * Timeout for the id token
+                         * example:
+                         * 300
+                         */
+                        id_token?: number;
+                    };
+                    /**
+                     * Advanced authentication settings for the portal
+                     */
+                    advanced_authentication?: {
+                        /**
+                         * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                         * example:
+                         * true
+                         */
+                        user_activity_logging?: boolean;
+                        /**
+                         * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                         * example:
+                         * true
+                         */
+                        adaptive_authentication?: boolean;
+                        /**
+                         * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                         * example:
+                         * true
+                         */
+                        compromised_credentials_detection?: boolean;
+                    };
                     /**
                      * Password policy for the portal
                      */
@@ -10778,6 +11218,31 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace InterpolatePortalPages {
+        export interface RequestBody {
+            /**
+             * The pages to interpolate
+             */
+            pages: Components.Schemas.Page[];
+            context_entities?: /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Page[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace InvitePartner {
         export interface RequestBody {
             /**
@@ -10790,6 +11255,14 @@ export declare namespace Paths {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             Components.Schemas.EntityId /* uuid */[];
+            /**
+             * Additional contact entity fields to set when creating the contact for the invited user.
+             * These are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).
+             *
+             */
+            contact_data?: {
+                [name: string]: string;
+            };
         }
         namespace Responses {
             export interface $200 {
@@ -12147,6 +12620,7 @@ export declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * upsertPortal - upsertPortal
@@ -13283,6 +13757,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPages.Responses.$200>
+  /**
+   * interpolatePortalPages - interpolatePortalPages
+   * 
+   * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+   */
+  'interpolatePortalPages'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.InterpolatePortalPages.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.InterpolatePortalPages.Responses.$200>
   /**
    * getDefaultPages - getDefaultPages
    * 
@@ -14845,6 +15329,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicPages.Responses.$200>
   }
+  ['/v2/portal/pages/interpolate']: {
+    /**
+     * interpolatePortalPages - interpolatePortalPages
+     * 
+     * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.InterpolatePortalPages.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.InterpolatePortalPages.Responses.$200>
+  }
   ['/v2/portal/pages/default']: {
     /**
      * getDefaultPages - getDefaultPages
@@ -15115,6 +15611,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
@@ -15154,7 +15651,6 @@ export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
-export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
@@ -15168,6 +15664,7 @@ export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGro
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySlug = Components.Schemas.EntitySlug;
+export type EntitySlugConfig = Components.Schemas.EntitySlugConfig;
 export type EntityTemplates = Components.Schemas.EntityTemplates;
 export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
@@ -15217,6 +15714,7 @@ export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type Product = Components.Schemas.Product;
+export type ProductRecommendationsWidget = Components.Schemas.ProductRecommendationsWidget;
 export type ProviderConfig = Components.Schemas.ProviderConfig;
 export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
@@ -15239,6 +15737,7 @@ export type SSOLoginToken = Components.Schemas.SSOLoginToken;
 export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
+export type SearchIncludes = Components.Schemas.SearchIncludes;
 export type Source = Components.Schemas.Source;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;

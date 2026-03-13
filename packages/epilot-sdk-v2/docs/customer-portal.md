@@ -60,6 +60,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`updatePortalPage`](#updateportalpage)
 - [`deletePortalPage`](#deleteportalpage)
 - [`createPortalPage`](#createportalpage)
+- [`interpolatePortalPages`](#interpolateportalpages)
 - [`getDefaultPages`](#getdefaultpages)
 - [`createPortalPageBlock`](#createportalpageblock)
 - [`updatePortalPageBlock`](#updateportalpageblock)
@@ -184,7 +185,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`UpsertPortalConfig`](#upsertportalconfig)
 - [`PortalConfig`](#portalconfig)
 - [`UpsertPortalWidget`](#upsertportalwidget)
-- [`DomainSettings`](#domainsettings)
 - [`WidgetBase`](#widgetbase)
 - [`EntityWidget`](#entitywidget)
 - [`MeterReadingWidget`](#meterreadingwidget)
@@ -196,6 +196,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`DocumentWidget`](#documentwidget)
 - [`PaymentWidget`](#paymentwidget)
 - [`CampaignWidget`](#campaignwidget)
+- [`ProductRecommendationsWidget`](#productrecommendationswidget)
 - [`PortalWidget`](#portalwidget)
 - [`ContactCountRequest`](#contactcountrequest)
 - [`ContactExistsRequest`](#contactexistsrequest)
@@ -205,6 +206,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`AuthConfig`](#authconfig)
 - [`Exists`](#exists)
 - [`EntitySlug`](#entityslug)
+- [`EntitySlugConfig`](#entityslugconfig)
 - [`EntityId`](#entityid)
 - [`BaseEntity`](#baseentity)
 - [`Schema`](#schema)
@@ -214,6 +216,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`EntityResponse`](#entityresponse)
 - [`EntityResponseWithHits`](#entityresponsewithhits)
 - [`EntityResponseGroupedWithHits`](#entityresponsegroupedwithhits)
+- [`SearchIncludes`](#searchincludes)
 - [`PortalUser`](#portaluser)
 - [`Contact`](#contact)
 - [`WorfklowIdentifier`](#worfklowidentifier)
@@ -345,13 +348,8 @@ const { data } = await client.upsertPortal(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
-    epilot_domain: 'example-portal-12345.ecp.epilot.cloud',
-    domain_settings: {
-      is_custom_domain_enabled: true,
-      is_epilot_domain_enabled: true,
-      is_redirection_enabled: true
-    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     user_account_self_management: false,
     feature_settings: {
@@ -376,6 +374,16 @@ const { data } = await client.upsertPortal(
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
       cognito_user_pool_arn: 'arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341',
       cognito_user_pool_id: 'eu-central-1_CUEQRNbUb',
+      timeouts: {
+        refresh_token: 300,
+        access_token: 300,
+        id_token: 300
+      },
+      advanced_authentication: {
+        user_activity_logging: true,
+        adaptive_authentication: true,
+        compromised_credentials_detection: true
+      },
       password_policy: {
         minimum_length: 8,
         maximum_length: 256,
@@ -498,13 +506,8 @@ const { data } = await client.upsertPortal(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -529,6 +532,16 @@ const { data } = await client.upsertPortal(
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -821,13 +834,8 @@ const { data } = await client.getPortalConfigByDomain({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -852,6 +860,16 @@ const { data } = await client.getPortalConfigByDomain({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -1014,13 +1032,8 @@ const { data } = await client.getPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1045,6 +1058,16 @@ const { data } = await client.getPortalConfig({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -1878,13 +1901,8 @@ const { data } = await client.getPublicPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1909,6 +1927,16 @@ const { data } = await client.getPublicPortalConfig({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2071,13 +2099,8 @@ const { data } = await client.getOrgPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2102,6 +2125,16 @@ const { data } = await client.getOrgPortalConfig({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2269,13 +2302,8 @@ const { data } = await client.getPublicPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2300,6 +2328,16 @@ const { data } = await client.getPublicPortalConfigV3({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2462,13 +2500,8 @@ const { data } = await client.getOrgPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2493,6 +2526,16 @@ const { data } = await client.getOrgPortalConfigV3({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2659,9 +2702,8 @@ const { data } = await client.getAllPortalConfigs()
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
-      "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -3001,7 +3043,7 @@ const { data } = await client.upsertPortalWidget(
         },
         content: 'string'
       },
-      /* ... 7 more */
+      /* ... 8 more */
     ]
   },
 )
@@ -5661,7 +5703,8 @@ const { data } = await client.searchPortalUserEntities(
       },
       /* ... 1 more */
     ],
-    targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a']
+    targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a'],
+    include: ['active_workflow']
   },
 )
 ```
@@ -5697,7 +5740,10 @@ const { data } = await client.searchPortalUserEntities(
     "total": 50,
     "has_more": true
   },
-  "hits": 10
+  "hits": 10,
+  "includes": {
+    "active_workflow": {}
+  }
 }
 ```
 
@@ -5930,7 +5976,7 @@ const { data } = await client.createMeterReading(
     meter_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     counter_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     direction: 'feed-in',
-    timestamp: '2022-10-10T00:00:00.000Z',
+    timestamp: '2022-10-10',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -5955,7 +6001,7 @@ const { data } = await client.createMeterReading(
     "meter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "counter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -6155,6 +6201,7 @@ const { data } = await client.getPortalPage({
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -6191,6 +6238,7 @@ const { data } = await client.updatePortalPage(
     is_system: false,
     is_detail: false,
     detail_schema: 'contact',
+    show_in_navigation: false,
     is_public: true,
     parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
     is_entry_route: false,
@@ -6215,6 +6263,7 @@ const { data } = await client.updatePortalPage(
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -6275,6 +6324,7 @@ const { data } = await client.getPortalPages({
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -6312,6 +6362,7 @@ const { data } = await client.createPortalPage(
     is_system: false,
     is_detail: false,
     detail_schema: 'contact',
+    show_in_navigation: false,
     is_public: true,
     parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
     is_entry_route: false,
@@ -6336,6 +6387,7 @@ const { data } = await client.createPortalPage(
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -6380,6 +6432,81 @@ const { data } = await client.getPublicPages({
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
+    "is_public": true,
+    "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+    "is_entry_route": false,
+    "is_deleted": false,
+    "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+    "last_modified_at": "2021-02-09T12:41:43.662Z"
+  }
+]
+```
+
+</details>
+
+---
+
+### `interpolatePortalPages`
+
+Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+
+`POST /v2/portal/pages/interpolate`
+
+```ts
+const { data } = await client.interpolatePortalPages(
+  null,
+  {
+    pages: [
+      {
+        slug: 'dashboard',
+        path: '/dashboard',
+        schema: ['string'],
+        visibility: {},
+        content: {},
+        design: {},
+        blocks: {},
+        order: 1,
+        is_system: false,
+        is_detail: false,
+        detail_schema: 'contact',
+        show_in_navigation: false,
+        is_public: true,
+        parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
+        is_entry_route: false,
+        is_deleted: false,
+        id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
+        last_modified_at: '2021-02-09T12:41:43.662Z'
+      }
+    ],
+    context_entities: [
+      {
+        entity_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        entity_schema: 'contract'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+[
+  {
+    "slug": "dashboard",
+    "path": "/dashboard",
+    "schema": ["string"],
+    "visibility": {},
+    "content": {},
+    "design": {},
+    "blocks": {},
+    "order": 1,
+    "is_system": false,
+    "is_detail": false,
+    "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -6421,6 +6548,7 @@ const { data } = await client.getDefaultPages()
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -6789,13 +6917,8 @@ const { data } = await client.createPortalConfig(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
-    epilot_domain: 'example-portal-1.ecp.epilot.io',
-    domain_settings: {
-      is_custom_domain_enabled: true,
-      is_epilot_domain_enabled: true,
-      is_redirection_enabled: true
-    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     user_account_self_management: false,
     feature_settings: {
@@ -6820,6 +6943,16 @@ const { data } = await client.createPortalConfig(
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
       cognito_user_pool_arn: 'arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341',
       cognito_user_pool_id: 'eu-central-1_CUEQRNbUb',
+      timeouts: {
+        refresh_token: 300,
+        access_token: 300,
+        id_token: 300
+      },
+      advanced_authentication: {
+        user_activity_logging: true,
+        adaptive_authentication: true,
+        compromised_credentials_detection: true
+      },
       password_policy: {
         minimum_length: 8,
         maximum_length: 256,
@@ -6941,6 +7074,7 @@ const { data } = await client.createPortalConfig(
         is_system: false,
         is_detail: false,
         detail_schema: 'contact',
+        show_in_navigation: false,
         is_public: true,
         parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         is_entry_route: false,
@@ -6980,13 +7114,8 @@ const { data } = await client.createPortalConfig(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7011,6 +7140,16 @@ const { data } = await client.createPortalConfig(
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -7156,6 +7295,7 @@ const { data } = await client.createPortalConfig(
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -7212,13 +7352,8 @@ const { data } = await client.getPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7243,6 +7378,16 @@ const { data } = await client.getPortalConfigV3({
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -7388,6 +7533,7 @@ const { data } = await client.getPortalConfigV3({
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -7439,13 +7585,8 @@ const { data } = await client.putPortalConfig(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
-    epilot_domain: 'example-portal-1.ecp.epilot.io',
-    domain_settings: {
-      is_custom_domain_enabled: true,
-      is_epilot_domain_enabled: true,
-      is_redirection_enabled: true
-    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     user_account_self_management: false,
     feature_settings: {
@@ -7470,6 +7611,16 @@ const { data } = await client.putPortalConfig(
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
       cognito_user_pool_arn: 'arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341',
       cognito_user_pool_id: 'eu-central-1_CUEQRNbUb',
+      timeouts: {
+        refresh_token: 300,
+        access_token: 300,
+        id_token: 300
+      },
+      advanced_authentication: {
+        user_activity_logging: true,
+        adaptive_authentication: true,
+        compromised_credentials_detection: true
+      },
       password_policy: {
         minimum_length: 8,
         maximum_length: 256,
@@ -7616,6 +7767,7 @@ const { data } = await client.putPortalConfig(
         is_system: false,
         is_detail: false,
         detail_schema: 'contact',
+        show_in_navigation: false,
         is_public: true,
         parentId: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         is_entry_route: false,
@@ -7657,13 +7809,8 @@ const { data } = await client.putPortalConfig(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7688,6 +7835,16 @@ const { data } = await client.putPortalConfig(
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -7833,6 +7990,7 @@ const { data } = await client.putPortalConfig(
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -7887,9 +8045,8 @@ const { data } = await client.listAllPortalConfigs()
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
-      "epilot_domain": "example-portal-1.ecp.epilot.io",
-      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -7973,7 +8130,8 @@ const { data } = await client.invitePartner(
   null,
   {
     email: 'string',
-    represents_contact_list: ['5da0a718-c822-403d-9f5d-20d4584e0528']
+    represents_contact_list: ['5da0a718-c822-403d-9f5d-20d4584e0528'],
+    contact_data: {}
   },
 )
 ```
@@ -8315,13 +8473,8 @@ type CommonConfigAttributes = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -8346,6 +8499,16 @@ type CommonConfigAttributes = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -8405,11 +8568,6 @@ type CommonConfigAttributes = {
   entity_edit_rules?: Array<{
     slug?: string
     attribute?: string
-    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
-    cadence_period_type?: "days" | "weeks" | "months"
-    cadence_period?: number
-    changes_allowed?: number
-    grace_period?: number
   // ...
 }
 ```
@@ -8451,13 +8609,8 @@ type UpsertPortalConfig = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -8482,6 +8635,16 @@ type UpsertPortalConfig = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -8512,11 +8675,6 @@ type UpsertPortalConfig = {
     verifyCodeToSetPassword?: string // uuid
   }
   images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
   // ...
 }
 ```
@@ -8529,13 +8687,8 @@ type PortalConfig = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -8560,6 +8713,16 @@ type PortalConfig = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -8619,11 +8782,6 @@ type PortalConfig = {
   entity_edit_rules?: Array<{
     slug?: string
     attribute?: string
-    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
-    cadence_period_type?: "days" | "weeks" | "months"
-    cadence_period?: number
-    changes_allowed?: number
-    grace_period?: number
   // ...
 }
 ```
@@ -8634,7 +8792,7 @@ type PortalConfig = {
 type UpsertPortalWidget = {
   widgets: Array<{
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8647,7 +8805,7 @@ type UpsertPortalWidget = {
     schema?: string
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8660,7 +8818,7 @@ type UpsertPortalWidget = {
     content?: string
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8679,7 +8837,7 @@ type UpsertPortalWidget = {
     }>
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8696,7 +8854,7 @@ type UpsertPortalWidget = {
     }
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8708,7 +8866,7 @@ type UpsertPortalWidget = {
     }
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8720,7 +8878,7 @@ type UpsertPortalWidget = {
     }
   } | {
     id: string
-    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+    type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
     listIndex: number
     headline?: {
       en?: { ... }
@@ -8735,24 +8893,12 @@ type UpsertPortalWidget = {
 }
 ```
 
-### `DomainSettings`
-
-Domain settings for the portal
-
-```ts
-type DomainSettings = {
-  is_custom_domain_enabled?: boolean
-  is_epilot_domain_enabled?: boolean
-  is_redirection_enabled?: boolean
-}
-```
-
 ### `WidgetBase`
 
 ```ts
 type WidgetBase = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8770,7 +8916,7 @@ type WidgetBase = {
 ```ts
 type EntityWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8789,7 +8935,7 @@ type EntityWidget = {
 ```ts
 type MeterReadingWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8808,7 +8954,7 @@ type MeterReadingWidget = {
 ```ts
 type MeterChartWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8846,7 +8992,7 @@ type WidgetAction = {
 ```ts
 type ActionWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8878,7 +9024,7 @@ type ActionWidget = {
 ```ts
 type TeaserWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8904,7 +9050,7 @@ type TeaserWidget = {
 ```ts
 type ContentWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8923,7 +9069,7 @@ type ContentWidget = {
 ```ts
 type DocumentWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8941,7 +9087,7 @@ type DocumentWidget = {
 ```ts
 type PaymentWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8962,12 +9108,20 @@ type CampaignWidget = {
 }
 ```
 
+### `ProductRecommendationsWidget`
+
+```ts
+type ProductRecommendationsWidget = {
+  campaign_id?: string
+}
+```
+
 ### `PortalWidget`
 
 ```ts
 type PortalWidget = {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8980,7 +9134,7 @@ type PortalWidget = {
   schema?: string
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -8993,7 +9147,7 @@ type PortalWidget = {
   content?: string
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -9019,7 +9173,7 @@ type PortalWidget = {
   }>
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -9039,7 +9193,7 @@ type PortalWidget = {
   }
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -9051,7 +9205,7 @@ type PortalWidget = {
   }
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   headline?: {
     en?: string
@@ -9063,7 +9217,7 @@ type PortalWidget = {
   }
 } | {
   id: string
-  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET"
+  type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
   listIndex: number
   // ...
 }
@@ -9206,6 +9360,18 @@ URL-friendly identifier for the entity schema
 type EntitySlug = string
 ```
 
+### `EntitySlugConfig`
+
+Per-slug search configuration with scoped targets and templates
+
+```ts
+type EntitySlugConfig = {
+  slug: string
+  targets?: string // uuid[]
+  templates?: Record<string, string>
+}
+```
+
 ### `EntityId`
 
 Entity ID
@@ -9306,6 +9472,9 @@ type EntityResponseWithHits = {
     has_more?: boolean
   }
   hits?: number
+  includes?: {
+    active_workflow?: Record<string, object>
+  }
 }
 ```
 
@@ -9341,6 +9510,19 @@ type EntityResponseGroupedWithHits = {
     after_key?: Record<string, string>
   }
   hits?: number
+  includes?: {
+    active_workflow?: Record<string, object>
+  }
+}
+```
+
+### `SearchIncludes`
+
+Side-loaded enrichment data requested via the `include` parameter.
+
+```ts
+type SearchIncludes = {
+  active_workflow?: Record<string, object>
 }
 ```
 
@@ -9849,7 +10031,11 @@ type EntityGetParams = {
 
 ```ts
 type EntitySearchParams = {
-  slug: string | string[]
+  slug: string | string[] | Array<{
+    slug: string
+    targets?: string // uuid[]
+    templates?: Record<string, string>
+  }>
   q?: string
   q_fields?: string[]
   group?: string
@@ -9866,6 +10052,7 @@ type EntitySearchParams = {
   filters?: object[]
   filters_context?: Record<string, boolean | string>[]
   targets?: string // uuid[]
+  include?: "active_workflow"[]
 }
 ```
 
@@ -10803,6 +10990,7 @@ type PageRequest = {
   is_system?: boolean
   is_detail?: boolean
   detail_schema?: string
+  show_in_navigation?: boolean
   is_public?: boolean
   parentId?: string
   is_entry_route?: boolean
@@ -10835,6 +11023,7 @@ type Page = {
   is_system?: boolean
   is_detail?: boolean
   detail_schema?: string
+  show_in_navigation?: boolean
   is_public?: boolean
   parentId?: string
   is_entry_route?: boolean
@@ -10852,13 +11041,8 @@ type CommonConfigAttributesV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -10883,6 +11067,16 @@ type CommonConfigAttributesV3 = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -10942,11 +11136,6 @@ type CommonConfigAttributesV3 = {
   entity_edit_rules?: Array<{
     slug?: string
     attribute?: string
-    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments"
-    cadence_period_type?: "days" | "weeks" | "months"
-    cadence_period?: number
-    changes_allowed?: number
-    grace_period?: number
   // ...
 }
 ```
@@ -10996,13 +11185,8 @@ type UpsertPortalConfigV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -11027,6 +11211,16 @@ type UpsertPortalConfigV3 = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -11057,11 +11251,6 @@ type UpsertPortalConfigV3 = {
     verifyCodeToSetPassword?: string // uuid
   }
   images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
   // ...
 }
 ```
@@ -11103,13 +11292,8 @@ type PortalConfigV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
   design_id?: string // uuid
+  allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -11134,6 +11318,16 @@ type PortalConfigV3 = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
+    timeouts?: {
+      refresh_token?: { ... }
+      access_token?: { ... }
+      id_token?: { ... }
+    }
+    advanced_authentication?: {
+      user_activity_logging?: { ... }
+      adaptive_authentication?: { ... }
+      compromised_credentials_detection?: { ... }
+    }
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
@@ -11164,11 +11358,6 @@ type PortalConfigV3 = {
     verifyCodeToSetPassword?: string // uuid
   }
   images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
   // ...
 }
 ```
@@ -11179,7 +11368,6 @@ type PortalConfigV3 = {
 type JuiceSettings = {
   is_dummy?: boolean
   is_canary?: boolean
-  redirect_to?: string
 }
 ```
 
