@@ -1,6 +1,4 @@
 /* Auto-copied from kanban-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -11,6 +9,9 @@ import type {
 
 export declare namespace Components {
     namespace Schemas {
+        /**
+         * Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options.
+         */
         export interface Board {
             id?: string;
             /**
@@ -40,12 +41,12 @@ export declare namespace Components {
                  * workflow_tasks_overview
                  */
                 dataset?: string;
-                swimlanes?: Swimlane[];
+                swimlanes?: /* A vertical column in a Kanban board that groups workflow tasks or entities matching its filter criteria. Each swimlane has an independent filter and a display position. */ Swimlane[];
                 card_config?: {
                     fields?: string[];
                 };
-                board_filter?: BoardFilter;
-                sorting?: Sorting;
+                board_filter?: /* A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR). */ BoardFilter;
+                sorting?: /* Defines how query results should be sorted. Specify a field name and sort direction. */ Sorting;
                 /**
                  * example:
                  * task 1
@@ -53,6 +54,9 @@ export declare namespace Components {
                 search_query?: string;
             };
         }
+        /**
+         * A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR).
+         */
         export interface BoardFilter {
             items: (FilterItem | FilterGroup)[];
             /**
@@ -61,6 +65,9 @@ export declare namespace Components {
              */
             combination: "AND" | "OR";
         }
+        /**
+         * Summary representation of a Kanban board, returned in list responses. Does not include swimlane and filter configuration details.
+         */
         export interface BoardSummary {
             id?: string;
             /**
@@ -88,7 +95,24 @@ export declare namespace Components {
         /**
          * Dynamic date keywords that resolve to actual dates at runtime
          */
-        export type DynamicDateValue = "TODAY" | "TOMORROW" | "YESTERDAY" | "IN_THE_FUTURE" | "IN_THE_PAST" | "THIS_WEEK" | "NEXT_WEEK" | "LAST_WEEK" | "THIS_MONTH" | "NEXT_MONTH" | "LAST_MONTH";
+        export type DynamicDateValue = "TODAY" | "TOMORROW" | "YESTERDAY" | "IN_THE_FUTURE" | "IN_THE_PAST" | "THIS_WEEK" | "NEXT_WEEK" | "LAST_WEEK" | "THIS_MONTH" | "NEXT_MONTH" | "LAST_MONTH" | "TODAY_OR_EARLIER";
+        /**
+         * Standard error response
+         */
+        export interface Error {
+            /**
+             * Human-readable error message
+             * example:
+             * Board not found
+             */
+            message?: string;
+            /**
+             * HTTP status code
+             * example:
+             * 404
+             */
+            status?: number;
+        }
         export interface FilterGroup {
             items: FilterItem[];
             /**
@@ -124,22 +148,70 @@ export declare namespace Components {
          * EQUALS
          */
         export type FilterOperator = "EQUALS" | "NOT_EQUALS" | "EMPTY" | "NOT_EMPTY" | "CONTAINS" | "NOT_CONTAINS" | "IS_ONE_OF" | "IS_NONE_OF" | "GREATER_THAN" | "LESS_THAN" | "GREATER_THAN_OR_EQUAL" | "LESS_THAN_OR_EQUAL";
+        /**
+         * Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination.
+         */
         export interface FlowsQueryRequest {
-            filters?: BoardFilter;
-            sorting?: Sorting;
+            /**
+             * Optional filter conditions to narrow the result set using AND/OR logic.
+             */
+            filters?: /* A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR). */ BoardFilter;
+            /**
+             * Sort the results by a specific field and direction.
+             */
+            sorting?: /* Defines how query results should be sorted. Specify a field name and sort direction. */ Sorting;
+            /**
+             * Zero-based offset for pagination. Use with `size` to paginate through results.
+             * example:
+             * 0
+             */
             from?: number;
+            /**
+             * Number of results to return per page.
+             * example:
+             * 10
+             */
             size?: number;
         }
+        /**
+         * Paginated result set returned from a Flows query. Each item in `results` is a workflow task record with dynamic fields depending on the dataset configuration.
+         */
         export interface FlowsQueryResult {
             [name: string]: any;
+            /**
+             * Array of matching workflow task records. Fields vary based on the dataset and card configuration.
+             */
             results?: {
                 [name: string]: any;
             }[];
+            /**
+             * Total number of records matching the query (across all pages).
+             * example:
+             * 42
+             */
             hits?: number;
+            /**
+             * Current page number (1-based).
+             * example:
+             * 1
+             */
             page_number?: number;
+            /**
+             * Number of results per page (matches the `size` request parameter).
+             * example:
+             * 10
+             */
             page_size?: number;
+            /**
+             * Total number of available pages based on `hits` and `page_size`.
+             * example:
+             * 5
+             */
             total_pages?: number;
         }
+        /**
+         * Defines how query results should be sorted. Specify a field name and sort direction.
+         */
         export interface Sorting {
             /**
              * example:
@@ -148,6 +220,9 @@ export declare namespace Components {
             field: string;
             direction?: "asc" | "desc";
         }
+        /**
+         * A vertical column in a Kanban board that groups workflow tasks or entities matching its filter criteria. Each swimlane has an independent filter and a display position.
+         */
         export interface Swimlane {
             id?: string;
             /**
@@ -160,7 +235,7 @@ export declare namespace Components {
              * 1
              */
             position?: number;
-            filter?: BoardFilter;
+            filter?: /* A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR). */ BoardFilter;
             /**
              * example:
              * success
@@ -180,26 +255,19 @@ export declare namespace Paths {
                 message?: string;
                 default_board_id?: string | null;
             }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $500 {
-            }
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace CreateKanbanBoard {
-        export type RequestBody = Components.Schemas.Board;
+        export type RequestBody = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
         namespace Responses {
-            export type $200 = Components.Schemas.Board;
-            export interface $400 {
-            }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $500 {
-            }
+            export type $200 = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace DeleteKanbanBoard {
@@ -212,20 +280,20 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $404 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace ExecuteFlowsQuery {
-        export type RequestBody = Components.Schemas.FlowsQueryRequest;
+        export type RequestBody = /* Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination. */ Components.Schemas.FlowsQueryRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.FlowsQueryResult;
+            export type $200 = /* Paginated result set returned from a Flows query. Each item in `results` is a workflow task record with dynamic fields depending on the dataset configuration. */ Components.Schemas.FlowsQueryResult;
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace FlowsAutocomplete {
@@ -267,6 +335,10 @@ export declare namespace Paths {
                  */
                 hits: number;
             }
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace GetKanbanBoard {
@@ -277,15 +349,11 @@ export declare namespace Paths {
             boardId: Parameters.BoardId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Board;
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
+            export type $200 = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $404 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace GetKanbanBoards {
@@ -296,13 +364,10 @@ export declare namespace Paths {
             filter?: Parameters.Filter;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.BoardSummary[];
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $500 {
-            }
+            export type $200 = /* Summary representation of a Kanban board, returned in list responses. Does not include swimlane and filter configuration details. */ Components.Schemas.BoardSummary[];
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace PatchKanbanBoard {
@@ -323,7 +388,13 @@ export declare namespace Paths {
              * Board description
              */
             description?: string;
+            /**
+             * Array of user IDs to share the board with
+             */
             shared_with?: string[];
+            /**
+             * Whether the board is shared with the entire organization
+             */
             shared_with_org?: boolean;
             /**
              * Array of user IDs who have full ownership rights for this board (view, edit, delete)
@@ -331,17 +402,12 @@ export declare namespace Paths {
             owners?: string[];
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Board;
-            export interface $400 {
-            }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
+            export type $200 = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $404 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace SetDefaultKanbanBoard {
@@ -356,16 +422,11 @@ export declare namespace Paths {
                 message?: string;
                 default_board_id?: string;
             }
-            export interface $400 {
-            }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $404 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
     namespace UpdateKanbanBoard {
@@ -375,19 +436,14 @@ export declare namespace Paths {
         export interface PathParameters {
             boardId: Parameters.BoardId;
         }
-        export type RequestBody = Components.Schemas.Board;
+        export type RequestBody = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
         namespace Responses {
-            export type $200 = Components.Schemas.Board;
-            export interface $400 {
-            }
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
+            export type $200 = /* Full representation of a Kanban board, including swimlane layout, filter configuration, card display fields, and sorting options. */ Components.Schemas.Board;
+            export type $400 = /* Standard error response */ Components.Schemas.Error;
+            export type $401 = /* Standard error response */ Components.Schemas.Error;
+            export type $403 = /* Standard error response */ Components.Schemas.Error;
+            export type $404 = /* Standard error response */ Components.Schemas.Error;
+            export type $500 = /* Standard error response */ Components.Schemas.Error;
         }
     }
 }
@@ -395,9 +451,12 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * createKanbanBoard - Create a Kanban board
+   * createKanbanBoard - createKanbanBoard
    * 
-   * Create a Kanban board
+   * Creates a new Kanban board with the provided configuration.
+   * 
+   * A board must have a title and a config containing at least one dataset. Swimlanes and filters can be configured to display specific subsets of workflow tasks or entities.
+   * 
    */
   'createKanbanBoard'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -405,9 +464,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateKanbanBoard.Responses.$200>
   /**
-   * getKanbanBoards - Get all Kanban boards
+   * getKanbanBoards - getKanbanBoards
    * 
-   * Get all Kanban boards
+   * Returns a list of all Kanban boards accessible to the authenticated user.
+   * 
+   * Use the `filter` query parameter to narrow results to boards the user owns (`owned`) or boards shared with them (`shared`). When omitted, all accessible boards are returned.
+   * 
    */
   'getKanbanBoards'(
     parameters?: Parameters<Paths.GetKanbanBoards.QueryParameters> | null,
@@ -415,9 +477,11 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetKanbanBoards.Responses.$200>
   /**
-   * getKanbanBoard - Get a Kanban board
+   * getKanbanBoard - getKanbanBoard
    * 
-   * Get a Kanban board by ID. Use "default" as the boardId to get the organization's default board.
+   * Retrieves a Kanban board by ID, including its full configuration (swimlanes, filters, sorting, card fields).
+   * 
+   * Use `"default"` as the `boardId` to retrieve the organization's currently configured default board.
    * 
    */
   'getKanbanBoard'(
@@ -426,9 +490,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetKanbanBoard.Responses.$200>
   /**
-   * updateKanbanBoard - Update a Kanban board
+   * updateKanbanBoard - updateKanbanBoard
    * 
-   * Update a Kanban board
+   * Fully replaces the configuration of an existing Kanban board by ID.
+   * 
+   * All board fields (title, config, swimlanes, filters) must be provided. Use PATCH for partial updates.
+   * 
    */
   'updateKanbanBoard'(
     parameters?: Parameters<Paths.UpdateKanbanBoard.PathParameters> | null,
@@ -436,9 +503,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
   /**
-   * patchKanbanBoard - Patch a Kanban board
+   * patchKanbanBoard - patchKanbanBoard
    * 
-   * Patch a Kanban board
+   * Partially updates fields of an existing Kanban board by ID.
+   * 
+   * Only the fields provided in the request body will be updated. Useful for updating sharing settings, ownership, or title without replacing the full board configuration.
+   * 
    */
   'patchKanbanBoard'(
     parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
@@ -446,9 +516,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
   /**
-   * deleteKanbanBoard - Delete a Kanban board
+   * deleteKanbanBoard - deleteKanbanBoard
    * 
-   * Delete a Kanban board
+   * Permanently deletes a Kanban board by ID. This action is irreversible.
    */
   'deleteKanbanBoard'(
     parameters?: Parameters<Paths.DeleteKanbanBoard.PathParameters> | null,
@@ -456,9 +526,13 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteKanbanBoard.Responses.$200>
   /**
-   * setDefaultKanbanBoard - Set default board for organization
+   * setDefaultKanbanBoard - setDefaultKanbanBoard
    * 
-   * Set a board as the default board for the organization
+   * Sets a Kanban board as the default board for the organization.
+   * 
+   * The default board is shown to users who access the Kanban view without specifying a specific board ID.
+   * Pass `boardId` as a query parameter to identify the board to set as default.
+   * 
    */
   'setDefaultKanbanBoard'(
     parameters?: Parameters<Paths.SetDefaultKanbanBoard.QueryParameters> | null,
@@ -466,9 +540,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SetDefaultKanbanBoard.Responses.$200>
   /**
-   * clearDefaultKanbanBoard - Clear default board for organization
+   * clearDefaultKanbanBoard - clearDefaultKanbanBoard
    * 
-   * Remove the default board setting for the organization
+   * Removes the default board configuration for the organization.
+   * 
+   * After calling this endpoint, `getKanbanBoard` with `boardId=default` will return a 404 until a new default is set.
+   * 
    */
   'clearDefaultKanbanBoard'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -478,7 +555,11 @@ export interface OperationMethods {
   /**
    * flowsAutocomplete - flowsAutocomplete
    * 
-   * Autocomplete flows data
+   * Returns autocomplete suggestions for a given attribute in the Flows dataset.
+   * 
+   * Use this endpoint to power filter dropdowns and search inputs in the Kanban board configuration UI.
+   * The `attribute` parameter specifies which field to autocomplete (e.g. `name`, `assignee`, `status`).
+   * The optional `input` parameter filters results to those matching the typed prefix.
    * 
    */
   'flowsAutocomplete'(
@@ -489,7 +570,11 @@ export interface OperationMethods {
   /**
    * executeFlowsQuery - executeFlowsQuery
    * 
-   * Query Flows Data for Kanban View.
+   * Executes a query against the Flows dataset and returns paginated results for use in Kanban card rendering.
+   * 
+   * Supports filtering with complex AND/OR logic, sorting, and offset-based pagination.
+   * Results are used to populate Kanban swimlane cards with real-time workflow task data.
+   * 
    */
   'executeFlowsQuery'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -501,9 +586,12 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/kanban/board']: {
     /**
-     * createKanbanBoard - Create a Kanban board
+     * createKanbanBoard - createKanbanBoard
      * 
-     * Create a Kanban board
+     * Creates a new Kanban board with the provided configuration.
+     * 
+     * A board must have a title and a config containing at least one dataset. Swimlanes and filters can be configured to display specific subsets of workflow tasks or entities.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -513,9 +601,12 @@ export interface PathsDictionary {
   }
   ['/v1/kanban/boards']: {
     /**
-     * getKanbanBoards - Get all Kanban boards
+     * getKanbanBoards - getKanbanBoards
      * 
-     * Get all Kanban boards
+     * Returns a list of all Kanban boards accessible to the authenticated user.
+     * 
+     * Use the `filter` query parameter to narrow results to boards the user owns (`owned`) or boards shared with them (`shared`). When omitted, all accessible boards are returned.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetKanbanBoards.QueryParameters> | null,
@@ -525,9 +616,11 @@ export interface PathsDictionary {
   }
   ['/v1/kanban/board/{boardId}']: {
     /**
-     * getKanbanBoard - Get a Kanban board
+     * getKanbanBoard - getKanbanBoard
      * 
-     * Get a Kanban board by ID. Use "default" as the boardId to get the organization's default board.
+     * Retrieves a Kanban board by ID, including its full configuration (swimlanes, filters, sorting, card fields).
+     * 
+     * Use `"default"` as the `boardId` to retrieve the organization's currently configured default board.
      * 
      */
     'get'(
@@ -536,9 +629,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetKanbanBoard.Responses.$200>
     /**
-     * updateKanbanBoard - Update a Kanban board
+     * updateKanbanBoard - updateKanbanBoard
      * 
-     * Update a Kanban board
+     * Fully replaces the configuration of an existing Kanban board by ID.
+     * 
+     * All board fields (title, config, swimlanes, filters) must be provided. Use PATCH for partial updates.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdateKanbanBoard.PathParameters> | null,
@@ -546,9 +642,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateKanbanBoard.Responses.$200>
     /**
-     * patchKanbanBoard - Patch a Kanban board
+     * patchKanbanBoard - patchKanbanBoard
      * 
-     * Patch a Kanban board
+     * Partially updates fields of an existing Kanban board by ID.
+     * 
+     * Only the fields provided in the request body will be updated. Useful for updating sharing settings, ownership, or title without replacing the full board configuration.
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.PatchKanbanBoard.PathParameters> | null,
@@ -556,9 +655,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchKanbanBoard.Responses.$200>
     /**
-     * deleteKanbanBoard - Delete a Kanban board
+     * deleteKanbanBoard - deleteKanbanBoard
      * 
-     * Delete a Kanban board
+     * Permanently deletes a Kanban board by ID. This action is irreversible.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteKanbanBoard.PathParameters> | null,
@@ -568,9 +667,13 @@ export interface PathsDictionary {
   }
   ['/v1/kanban/org/default-board']: {
     /**
-     * setDefaultKanbanBoard - Set default board for organization
+     * setDefaultKanbanBoard - setDefaultKanbanBoard
      * 
-     * Set a board as the default board for the organization
+     * Sets a Kanban board as the default board for the organization.
+     * 
+     * The default board is shown to users who access the Kanban view without specifying a specific board ID.
+     * Pass `boardId` as a query parameter to identify the board to set as default.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.SetDefaultKanbanBoard.QueryParameters> | null,
@@ -578,9 +681,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SetDefaultKanbanBoard.Responses.$200>
     /**
-     * clearDefaultKanbanBoard - Clear default board for organization
+     * clearDefaultKanbanBoard - clearDefaultKanbanBoard
      * 
-     * Remove the default board setting for the organization
+     * Removes the default board configuration for the organization.
+     * 
+     * After calling this endpoint, `getKanbanBoard` with `boardId=default` will return a 404 until a new default is set.
+     * 
      */
     'delete'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -592,7 +698,11 @@ export interface PathsDictionary {
     /**
      * flowsAutocomplete - flowsAutocomplete
      * 
-     * Autocomplete flows data
+     * Returns autocomplete suggestions for a given attribute in the Flows dataset.
+     * 
+     * Use this endpoint to power filter dropdowns and search inputs in the Kanban board configuration UI.
+     * The `attribute` parameter specifies which field to autocomplete (e.g. `name`, `assignee`, `status`).
+     * The optional `input` parameter filters results to those matching the typed prefix.
      * 
      */
     'get'(
@@ -605,7 +715,11 @@ export interface PathsDictionary {
     /**
      * executeFlowsQuery - executeFlowsQuery
      * 
-     * Query Flows Data for Kanban View.
+     * Executes a query against the Flows dataset and returns paginated results for use in Kanban card rendering.
+     * 
+     * Supports filtering with complex AND/OR logic, sorting, and offset-based pagination.
+     * Results are used to populate Kanban swimlane cards with real-time workflow task data.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -622,6 +736,7 @@ export type Board = Components.Schemas.Board;
 export type BoardFilter = Components.Schemas.BoardFilter;
 export type BoardSummary = Components.Schemas.BoardSummary;
 export type DynamicDateValue = Components.Schemas.DynamicDateValue;
+export type Error = Components.Schemas.Error;
 export type FilterGroup = Components.Schemas.FilterGroup;
 export type FilterItem = Components.Schemas.FilterItem;
 export type FilterOperator = Components.Schemas.FilterOperator;

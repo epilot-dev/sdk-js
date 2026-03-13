@@ -477,6 +477,7 @@ const { data } = await client.createStep(
   "userIds": [0],
   "assignedTo": ["string"],
   "assignedToInProgress": "string",
+  "assignedToOnHold": "string",
   "status": "UNASSIGNED",
   "created": "string",
   "lastUpdated": "string",
@@ -529,6 +530,7 @@ const { data } = await client.updateStep(
     userIds: [0],
     assignedTo: ['string'],
     assignedToInProgress: 'string',
+    assignedToOnHold: 'string',
     status: 'UNASSIGNED',
     dueDate: 'string',
     dynamicDueDate: {
@@ -608,6 +610,7 @@ const { data } = await client.updateStep(
   "userIds": [0],
   "assignedTo": ["string"],
   "assignedToInProgress": "string",
+  "assignedToOnHold": "string",
   "status": "UNASSIGNED",
   "created": "string",
   "lastUpdated": "string",
@@ -1343,7 +1346,8 @@ const { data } = await client.patchTask(
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1440,7 +1444,8 @@ const { data } = await client.runTaskAutomation({
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1548,7 +1553,8 @@ const { data } = await client.executeTask({
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1643,7 +1649,8 @@ const { data } = await client.patchPhase(
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "taxonomies": ["string"],
   "loop_config": {
@@ -1740,7 +1747,8 @@ const { data } = await client.addTask(
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -2005,6 +2013,7 @@ type WorkflowExecutionSlim = {
       userIds?: { ... }
       assignedTo?: { ... }
       assignedToInProgress?: { ... }
+      assignedToOnHold?: { ... }
       status?: { ... }
       created?: { ... }
       lastUpdated?: { ... }
@@ -2020,7 +2029,6 @@ type WorkflowExecutionSlim = {
     }>
     taxonomies?: string[]
   } | {
-    id: string
   // ...
 }
 ```
@@ -2064,6 +2072,7 @@ type FlowSlim = {
       userIds?: { ... }
       assignedTo?: { ... }
       assignedToInProgress?: { ... }
+      assignedToOnHold?: { ... }
       status?: { ... }
       created?: { ... }
       lastUpdated?: { ... }
@@ -2112,6 +2121,7 @@ type FlowSlim = {
     userIds?: number[]
     assignedTo?: string[]
     assignedToInProgress?: string
+    assignedToOnHold?: string
     status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
     created?: string
     lastUpdated?: string
@@ -2126,8 +2136,6 @@ type FlowSlim = {
       stepId?: { ... }
       phaseId?: { ... }
     }
-    manuallyCreated?: boolean
-    automationConfig?: {
   // ...
 }
 ```
@@ -2171,6 +2179,7 @@ type Flow = {
       userIds?: { ... }
       assignedTo?: { ... }
       assignedToInProgress?: { ... }
+      assignedToOnHold?: { ... }
       status?: { ... }
       created?: { ... }
       lastUpdated?: { ... }
@@ -2219,6 +2228,7 @@ type Flow = {
     userIds?: number[]
     assignedTo?: string[]
     assignedToInProgress?: string
+    assignedToOnHold?: string
     status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
     created?: string
     lastUpdated?: string
@@ -2233,8 +2243,6 @@ type Flow = {
       stepId?: { ... }
       phaseId?: { ... }
     }
-    manuallyCreated?: boolean
-    automationConfig?: {
   // ...
 }
 ```
@@ -2326,6 +2334,7 @@ type WorkflowExecution = {
       userIds?: { ... }
       assignedTo?: { ... }
       assignedToInProgress?: { ... }
+      assignedToOnHold?: { ... }
       status?: { ... }
       created?: { ... }
       lastUpdated?: { ... }
@@ -2341,7 +2350,6 @@ type WorkflowExecution = {
     }>
     taxonomies?: string[]
   } | {
-    id: string
   // ...
 }
 ```
@@ -2453,6 +2461,7 @@ type Section = {
     userIds?: number[]
     assignedTo?: string[]
     assignedToInProgress?: string
+    assignedToOnHold?: string
     status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
     created?: string
     lastUpdated?: string
@@ -2586,6 +2595,7 @@ type Step = {
   userIds?: number[]
   assignedTo?: string[]
   assignedToInProgress?: string
+  assignedToOnHold?: string
   status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
   created?: string
   lastUpdated?: string
@@ -2747,6 +2757,7 @@ type UpdateStepReq = {
   userIds?: number[]
   assignedTo?: string[]
   assignedToInProgress?: string
+  assignedToOnHold?: string
   status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
   dueDate?: string
   dynamicDueDate?: {
@@ -2831,6 +2842,7 @@ type UpdateStepResp = {
   userIds?: number[]
   assignedTo?: string[]
   assignedToInProgress?: string
+  assignedToOnHold?: string
   status?: "UNASSIGNED" | "ASSIGNED" | "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "SCHEDULED" | "PENDING" | "CONDITION_PENDING" | "WAITING_FOR_CONFIRMATION" | "ON_HOLD" | "FAILED"
   created?: string
   lastUpdated?: string
@@ -2976,6 +2988,7 @@ type SearchExecutionsResp = {
       userIds?: { ... }
       assignedTo?: { ... }
       assignedToInProgress?: { ... }
+      assignedToOnHold?: { ... }
       status?: { ... }
       created?: { ... }
       lastUpdated?: { ... }
@@ -3307,6 +3320,7 @@ type FlowExecution = {
       in_progress_by?: { ... }
       completed_by?: { ... }
       skipped_by?: { ... }
+      on_hold_by?: { ... }
     }
     taxonomies?: string[]
     loop_config?: {
@@ -3345,7 +3359,6 @@ type FlowExecution = {
     assigned_to?: Array<string | {
       variable: { ... }
       value?: { ... }
-    }>
   // ...
 }
 ```
@@ -3455,6 +3468,7 @@ type Task = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -3514,7 +3528,6 @@ type Task = {
   }
   requirements?: Array<{
     task_id?: string
-    phase_id?: string
   // ...
 }
 ```
@@ -3568,6 +3581,7 @@ type ManualTask = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -3648,6 +3662,7 @@ type AutomationTask = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -3707,7 +3722,6 @@ type AutomationTask = {
     schedule_id?: string
   }
   loop_config?: {
-    max_iterations: number
   // ...
 }
 ```
@@ -3845,6 +3859,7 @@ type DecisionTask = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -3885,6 +3900,7 @@ type DecisionTask = {
       source: { ... }
       operator: { ... }
       values: { ... }
+      value_type?: { ... }
     }>
     evaluated_at?: string // date-time
     is_met?: boolean
@@ -3903,8 +3919,6 @@ type DecisionTask = {
       id: { ... }
       origin: { ... }
       schema?: { ... }
-      attribute?: { ... }
-    }
   // ...
 }
 ```
@@ -3952,6 +3966,7 @@ type AiAgentTask = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -4063,6 +4078,7 @@ type TaskBase = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -4125,6 +4141,7 @@ type Phase = {
     in_progress_by?: string
     completed_by?: string
     skipped_by?: string
+    on_hold_by?: string
   }
   taxonomies?: string[]
   loop_config?: {
@@ -4168,6 +4185,7 @@ type AnalyticsInfo = {
   in_progress_by?: string
   completed_by?: string
   skipped_by?: string
+  on_hold_by?: string
 }
 ```
 
@@ -4198,9 +4216,11 @@ type Condition = {
       attribute_repeatable?: { ... }
       attribute_operation?: { ... }
       attribute_sub_field?: { ... }
+      date_offset?: { ... }
     }
     operator: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
     values: string[]
+    value_type?: "static" | "relative_date"
   }>
   evaluated_at?: string // date-time
   is_met?: boolean
@@ -4222,9 +4242,14 @@ type Statement = {
     attribute_repeatable?: boolean
     attribute_operation?: "all" | "updated" | "added" | "deleted"
     attribute_sub_field?: string
+    date_offset?: {
+      amount?: { ... }
+      unit?: { ... }
+    }
   }
   operator: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
   values: string[]
+  value_type?: "static" | "relative_date"
 }
 ```
 
@@ -4241,6 +4266,10 @@ type EvaluationSource = {
   attribute_repeatable?: boolean
   attribute_operation?: "all" | "updated" | "added" | "deleted"
   attribute_sub_field?: string
+  date_offset?: {
+    amount?: number
+    unit?: "days" | "months" | "years"
+  }
 }
 ```
 

@@ -5337,8 +5337,8 @@ const { data } = await client.getBillingEvents({
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
       "type": "installment",
-      "due_date": "string",
-      "paid_date": "string"
+      "due_date": "1970-01-01",
+      "paid_date": "1970-01-01"
     }
   ],
   "hits": 50

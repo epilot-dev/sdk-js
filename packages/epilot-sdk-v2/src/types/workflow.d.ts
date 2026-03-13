@@ -1,6 +1,4 @@
 /* Auto-copied from workflow-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -188,6 +186,10 @@ export declare namespace Components {
              * The user which moved the task/phase to SKIPPED state.
              */
             skipped_by?: /* The user id */ UserId;
+            /**
+             * The user which moved the task/phase to ON_HOLD state.
+             */
+            on_hold_by?: /* The user id */ UserId;
         }
         /**
          * The user ids or variable assignments
@@ -585,6 +587,19 @@ export declare namespace Components {
              * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
              */
             attribute_sub_field?: string;
+            /**
+             * Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)
+             */
+            date_offset?: {
+                /**
+                 * Number of units to offset
+                 */
+                amount?: number;
+                /**
+                 * Unit of the offset
+                 */
+                unit?: "days" | "months" | "years";
+            };
         }
         export interface ExecutionPaginationDynamo {
             orgId?: string;
@@ -1033,6 +1048,10 @@ export declare namespace Components {
                  * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
                  */
                 assignedToInProgress?: string;
+                /**
+                 * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+                 */
+                assignedToOnHold?: string;
                 status?: /**
                  * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
                  * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1128,7 +1147,10 @@ export declare namespace Components {
         export interface StartFlowReq {
             flow_template_id: string;
             trigger?: FlowTrigger;
-            contexts: FlowContext[];
+            contexts: [
+                FlowContext,
+                ...FlowContext[]
+            ];
             /**
              * An array of purposes to filter workflow phases.
              */
@@ -1139,6 +1161,10 @@ export declare namespace Components {
             source: EvaluationSource;
             operator: Operator;
             values: string[];
+            /**
+             * How to interpret values. "static" (default) means literal values. "relative_date" means values[0] is a dynamic date token like "today".
+             */
+            value_type?: "static" | "relative_date";
         }
         export interface Step {
             id: string;
@@ -1169,6 +1195,10 @@ export declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1239,6 +1269,10 @@ export declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1439,6 +1473,10 @@ export declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1499,6 +1537,10 @@ export declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)

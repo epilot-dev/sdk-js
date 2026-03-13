@@ -116,8 +116,8 @@ const { data } = await client.changeCampaignStatus({
     "name": "string",
     "goal": "string",
     "status": "draft",
-    "start_date": "string",
-    "end_date": "string",
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01",
     "flow_id": "string",
     "job_id": "string",
     "target": {
@@ -296,8 +296,8 @@ const { data } = await client.matchCampaigns(
         "name": "string",
         "goal": "string",
         "status": "draft",
-        "start_date": "string",
-        "end_date": "string",
+        "start_date": "1970-01-01",
+        "end_date": "1970-01-01",
         "flow_id": "string",
         "job_id": "string",
         "target": {

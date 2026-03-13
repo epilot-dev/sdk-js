@@ -119,7 +119,7 @@ const { data } = await client.createJob(
   {
     type: 'deletion',
     config_id: 'string',
-    scheduled_for: 'string',
+    scheduled_for: '1970-01-01',
     status: 'in_progress',
     started_at: '1970-01-01T00:00:00.000Z'
   },
@@ -135,7 +135,7 @@ const { data } = await client.createJob(
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -192,7 +192,7 @@ const { data } = await client.updateJob(
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -235,7 +235,7 @@ const { data } = await client.getJob({
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -317,13 +317,13 @@ const { data } = await client.getConfig({
   "schedule": {
     "frequency": "interval",
     "interval_days": 1,
-    "start_date": "string",
-    "end_date": "string"
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01"
   },
   "enabled": true,
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
-  "next_run_at": "string",
+  "next_run_at": "1970-01-01",
   "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
@@ -354,7 +354,7 @@ const { data } = await client.createJobForConfig({
   "type": "deletion",
   "config_id": "string",
   "entity_schema": "string",
-  "scheduled_for": "string",
+  "scheduled_for": "1970-01-01",
   "status": "in_progress",
   "details": {},
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -403,8 +403,8 @@ const { data } = await client.upsertConfig(
     schedule: {
       frequency: 'interval',
       interval_days: 1,
-      start_date: 'string',
-      end_date: 'string'
+      start_date: '1970-01-01',
+      end_date: '1970-01-01'
     },
     relations_for_deletion: ['contact'],
     enabled: true
@@ -434,13 +434,13 @@ const { data } = await client.upsertConfig(
   "schedule": {
     "frequency": "interval",
     "interval_days": 1,
-    "start_date": "string",
-    "end_date": "string"
+    "start_date": "1970-01-01",
+    "end_date": "1970-01-01"
   },
   "enabled": true,
   "created_at": "1970-01-01T00:00:00.000Z",
   "last_updated_at": "1970-01-01T00:00:00.000Z",
-  "next_run_at": "string",
+  "next_run_at": "1970-01-01",
   "relations_for_deletion": ["contact"],
   "last_run_at": "1970-01-01T00:00:00.000Z"
 }
@@ -491,13 +491,13 @@ const { data } = await client.listConfigs({
       "schedule": {
         "frequency": "interval",
         "interval_days": 1,
-        "start_date": "string",
-        "end_date": "string"
+        "start_date": "1970-01-01",
+        "end_date": "1970-01-01"
       },
       "enabled": true,
       "created_at": "1970-01-01T00:00:00.000Z",
       "last_updated_at": "1970-01-01T00:00:00.000Z",
-      "next_run_at": "string",
+      "next_run_at": "1970-01-01",
       "relations_for_deletion": ["contact"],
       "last_run_at": "1970-01-01T00:00:00.000Z"
     }
@@ -538,7 +538,7 @@ const { data } = await client.listJobs({
       "type": "deletion",
       "config_id": "string",
       "entity_schema": "string",
-      "scheduled_for": "string",
+      "scheduled_for": "1970-01-01",
       "status": "in_progress",
       "details": {},
       "started_at": "1970-01-01T00:00:00.000Z",
