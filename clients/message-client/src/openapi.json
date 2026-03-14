@@ -536,6 +536,11 @@
                       "type": "number",
                       "description": "Total of unassigned messages",
                       "example": 1
+                    },
+                    "spam": {
+                      "type": "number",
+                      "description": "Total of spam messages",
+                      "example": 3
                     }
                   }
                 }
@@ -1011,6 +1016,158 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{id}/spam": {
+      "post": {
+        "operationId": "spamThread",
+        "summary": "spamThread",
+        "description": "Mark a thread as spam",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{id}/unspam": {
+      "post": {
+        "operationId": "unspamThread",
+        "summary": "unspamThread",
+        "description": "Remove spam marking from a thread",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/message/messages/{id}/unspam": {
+      "post": {
+        "operationId": "unspamMessage",
+        "summary": "unspamMessage",
+        "description": "Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Message ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:move": {
+      "post": {
+        "operationId": "bulkMoveThreads",
+        "summary": "bulkMoveThreads",
+        "description": "Move many threads to a different inbox",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayloadWithScopes"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/bulk:assign": {
+      "post": {
+        "operationId": "bulkAssignThreads",
+        "summary": "bulkAssignThreads",
+        "description": "Assign many threads",
+        "tags": [
+          "Threads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkActionsPayloadWithScopes"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success"
@@ -2598,6 +2755,19 @@
           {
             "type": "object",
             "properties": {
+              "assign_to": {
+                "description": "Assignable IDs to assign the threads to",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "206801"
+                }
+              },
+              "inbox_id": {
+                "description": "Inbox ID to move the threads to",
+                "type": "string",
+                "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+              },
               "scopes": {
                 "description": "The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.",
                 "example": [
