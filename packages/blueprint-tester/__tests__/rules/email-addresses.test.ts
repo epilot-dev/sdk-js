@@ -7,7 +7,7 @@ function runRule(tfContent: string) {
   const file = parseTerraformFile('main.tf', tfContent);
   const files = [file];
   const resourceIndex = buildResourceIndex(files);
-  return emailAddressesRule.validate({ files, resourceIndex, options: {} });
+  return emailAddressesRule.validate({ files, resourceIndex, options: {}, format: 'terraform' });
 }
 
 describe('email-addresses rule', () => {

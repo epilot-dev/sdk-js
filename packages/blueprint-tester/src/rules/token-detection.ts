@@ -28,10 +28,11 @@ export const tokenDetectionRule: ValidationRule = {
 
     for (const file of context.files) {
       for (const resource of file.resources) {
+        const content = resource.rawContent ?? resource.rawHcl;
         for (const pattern of TOKEN_PATTERNS) {
           // Reset regex state
           pattern.regex.lastIndex = 0;
-          const matches = [...resource.rawHcl.matchAll(pattern.regex)];
+          const matches = [...content.matchAll(pattern.regex)];
 
           for (const match of matches) {
             const rawValue = match[0];

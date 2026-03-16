@@ -25,9 +25,10 @@ export const environmentUrlsRule: ValidationRule = {
 
     for (const file of context.files) {
       for (const resource of file.resources) {
+        const content = resource.rawContent ?? resource.rawHcl;
         for (const pattern of ENV_URL_PATTERNS) {
           pattern.regex.lastIndex = 0;
-          const matches = [...resource.rawHcl.matchAll(pattern.regex)];
+          const matches = [...content.matchAll(pattern.regex)];
 
           for (const match of matches) {
             issues.push({

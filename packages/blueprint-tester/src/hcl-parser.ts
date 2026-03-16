@@ -53,6 +53,7 @@ function extractResourceBlocks(content: string, filePath: string): TerraformReso
       attributes,
       dependsOn,
       rawHcl,
+      rawContent: rawHcl,
       file: filePath,
       lineStart,
     });

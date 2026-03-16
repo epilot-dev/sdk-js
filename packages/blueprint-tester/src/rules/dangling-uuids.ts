@@ -5,12 +5,13 @@ import { extractUuids, isLocalUuid } from '../utils/uuid.js';
 export const danglingUuidsRule: ValidationRule = {
   id: 'dangling-uuid',
   name: 'Dangling UUID Detection',
-  description: 'Detects hardcoded UUIDs in attribute values that are not Terraform references and do not match any resource in the blueprint',
+  description: 'Detects hardcoded UUIDs in attribute values that do not match any resource in the blueprint',
   severity: 'error',
 
   validate(context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
-    const { resourceIndex, options } = context;
+    const { resourceIndex, options, format } = context;
+    const isTerraform = format === 'terraform';
     const safeUuids = new Set((options.knownSafeUuids ?? []).map((u) => u.toLowerCase()));
 
     for (const file of context.files) {
@@ -18,11 +19,12 @@ export const danglingUuidsRule: ValidationRule = {
         scanAttributeValues(resource.attributes, '', (path, value) => {
           if (typeof value !== 'string') return;
 
-          // Skip if the entire value is a terraform reference
-          if (isReferenceExpression(value)) return;
-          if (isVariableReference(value)) return;
-          // Skip if value contains terraform interpolations (partially resolved is ok)
-          if (containsTerraformRef(value)) return;
+          // For terraform format, skip properly referenced values
+          if (isTerraform) {
+            if (isReferenceExpression(value)) return;
+            if (isVariableReference(value)) return;
+            if (containsTerraformRef(value)) return;
+          }
 
           const uuids = extractUuids(value);
           for (const uuid of uuids) {
@@ -36,7 +38,7 @@ export const danglingUuidsRule: ValidationRule = {
             issues.push({
               ruleId: 'dangling-uuid',
               severity: 'error',
-              message: `UUID "${uuid}" in attribute "${path}" is not a Terraform reference and does not match any resource in the blueprint. This likely references a resource in the source org that was not exported.`,
+              message: `UUID "${uuid}" in attribute "${path}" does not match any resource in the blueprint. This likely references a resource in the source org that was not exported.`,
               file: resource.file,
               line: resource.lineStart,
               resourceAddress: resource.address,

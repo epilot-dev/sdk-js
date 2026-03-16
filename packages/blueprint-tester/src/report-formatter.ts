@@ -12,6 +12,10 @@ export function formatReport(report: ValidationReport): string {
   lines.push('');
 
   // Summary
+  lines.push(`Format: ${report.metadata.format ?? 'terraform'}`);
+  if (report.metadata.blueprintId) {
+    lines.push(`Blueprint ID: ${report.metadata.blueprintId}`);
+  }
   lines.push(`Files scanned: ${report.summary.filesScanned}`);
   lines.push(`Resources found: ${report.summary.resourcesFound}`);
   lines.push('');

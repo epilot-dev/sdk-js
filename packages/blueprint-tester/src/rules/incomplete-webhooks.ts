@@ -1,4 +1,4 @@
-import type { ValidationContext, ValidationIssue, ValidationRule } from '../types.js';
+import type { TerraformResource, ValidationContext, ValidationIssue, ValidationRule } from '../types.js';
 import { isReferenceExpression, isVariableReference } from '../utils/terraform-refs.js';
 
 const WEBHOOK_TYPES = new Set([
@@ -14,15 +14,13 @@ export const incompleteWebhooksRule: ValidationRule = {
 
   validate(context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
+    const isTerraform = context.format === 'terraform';
 
     for (const file of context.files) {
       for (const resource of file.resources) {
         if (!WEBHOOK_TYPES.has(resource.type)) continue;
 
-        // Check for hardcoded URL
-        checkForHardcodedUrl(resource, issues);
-
-        // Check for embedded auth in raw HCL
+        checkForHardcodedUrl(resource, issues, isTerraform);
         checkForEmbeddedAuth(resource, issues);
       }
     }
@@ -39,12 +37,14 @@ export const incompleteWebhooksRule: ValidationRule = {
   },
 };
 
-function checkForHardcodedUrl(resource: import('../types.js').TerraformResource, issues: ValidationIssue[]): void {
+function checkForHardcodedUrl(resource: TerraformResource, issues: ValidationIssue[], isTerraform: boolean): void {
   for (const [key, value] of Object.entries(resource.attributes)) {
     if (key !== 'url' && key !== 'webhook_url' && key !== 'endpoint') continue;
     if (typeof value !== 'string') continue;
-    if (isReferenceExpression(value)) continue;
-    if (isVariableReference(value)) continue;
+    if (isTerraform) {
+      if (isReferenceExpression(value)) continue;
+      if (isVariableReference(value)) continue;
+    }
 
     if (value.startsWith('http://') || value.startsWith('https://')) {
       issues.push({
@@ -61,7 +61,8 @@ function checkForHardcodedUrl(resource: import('../types.js').TerraformResource,
   }
 }
 
-function checkForEmbeddedAuth(resource: import('../types.js').TerraformResource, issues: ValidationIssue[]): void {
+function checkForEmbeddedAuth(resource: TerraformResource, issues: ValidationIssue[]): void {
+  const rawContent = resource.rawContent ?? resource.rawHcl;
   const authPatterns = [
     /oauth_secret["'\s]*[:=]["'\s]*["'][^"']+["']/i,
     /auth_token["'\s]*[:=]["'\s]*["'][^"']+["']/i,
@@ -69,7 +70,7 @@ function checkForEmbeddedAuth(resource: import('../types.js').TerraformResource,
   ];
 
   for (const pattern of authPatterns) {
-    if (pattern.test(resource.rawHcl)) {
+    if (pattern.test(rawContent)) {
       issues.push({
         ruleId: 'incomplete-webhook',
         severity: 'warning',
@@ -78,14 +79,14 @@ function checkForEmbeddedAuth(resource: import('../types.js').TerraformResource,
         line: resource.lineStart,
         resourceAddress: resource.address,
       });
-      break; // One auth warning per webhook is enough
+      break;
     }
   }
 }
 
-function checkAutomationWebhookActions(resource: import('../types.js').TerraformResource, issues: ValidationIssue[]): void {
-  // Check raw HCL for webhook-related actions with hardcoded URLs
-  const webhookUrlInAction = resource.rawHcl.match(/(?:webhook_url|url)["'\s]*[:=]["'\s]*["'](https?:\/\/[^"']+)["']/g);
+function checkAutomationWebhookActions(resource: TerraformResource, issues: ValidationIssue[]): void {
+  const rawContent = resource.rawContent ?? resource.rawHcl;
+  const webhookUrlInAction = rawContent.match(/(?:webhook_url|url)["'\s]*[:=]["'\s]*["'](https?:\/\/[^"']+)["']/g);
   if (webhookUrlInAction) {
     for (const match of webhookUrlInAction) {
       const urlMatch = match.match(/(https?:\/\/[^"']+)/);

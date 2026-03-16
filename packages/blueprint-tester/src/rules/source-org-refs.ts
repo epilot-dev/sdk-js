@@ -10,19 +10,23 @@ const NUMERIC_ORG_ID_REGEX = /^\d{4,10}$/;
 export const sourceOrgRefsRule: ValidationRule = {
   id: 'source-org-ref',
   name: 'Source Org Reference Detection',
-  description: 'Detects hardcoded organization IDs that should be Terraform variables',
+  description: 'Detects hardcoded organization IDs that should not transfer between orgs',
   severity: 'error',
 
   validate(context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
-    const { options } = context;
+    const { options, format } = context;
+    const isTerraform = format === 'terraform';
 
     for (const file of context.files) {
       for (const resource of file.resources) {
         checkAttributes(resource.attributes, '', (path, key, value) => {
           if (typeof value !== 'string') return;
-          if (isReferenceExpression(value)) return;
-          if (isVariableReference(value)) return;
+          // For terraform format, skip values that are proper references
+          if (isTerraform) {
+            if (isReferenceExpression(value)) return;
+            if (isVariableReference(value)) return;
+          }
 
           // Check if the key is an org_id field with a hardcoded value
           if (ORG_ID_KEYS.has(key) && NUMERIC_ORG_ID_REGEX.test(value)) {
@@ -30,7 +34,7 @@ export const sourceOrgRefsRule: ValidationRule = {
             issues.push({
               ruleId: 'source-org-ref',
               severity: 'error',
-              message: `Hardcoded organization ID "${value}" in "${path}"${isSourceOrg ? ' (matches source org)' : ''}. This should be a Terraform variable reference like var.target_org_id.`,
+              message: `Hardcoded organization ID "${value}" in "${path}"${isSourceOrg ? ' (matches source org)' : ''}. This should not transfer between orgs.`,
               file: resource.file,
               line: resource.lineStart,
               resourceAddress: resource.address,
@@ -40,10 +44,11 @@ export const sourceOrgRefsRule: ValidationRule = {
           }
         });
 
-        // Also scan raw HCL for org_id patterns in jsonencode blocks
-        const orgIdInJson = resource.rawHcl.match(/"org(?:anization)?_id"\s*[:=]\s*"?(\d{4,10})"?/g);
-        if (orgIdInJson) {
-          for (const match of orgIdInJson) {
+        // Also scan raw content for org_id patterns in encoded blocks
+        const rawContent = resource.rawContent ?? resource.rawHcl;
+        const orgIdInContent = rawContent.match(/"org(?:anization)?_id"\s*[:=]\s*"?(\d{4,10})"?/g);
+        if (orgIdInContent) {
+          for (const match of orgIdInContent) {
             const valueMatch = match.match(/(\d{4,10})/);
             if (valueMatch) {
               issues.push({

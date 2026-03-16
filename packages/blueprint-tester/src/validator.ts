@@ -1,7 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { parseTerraformFile } from './hcl-parser.js';
+import { type BlueprintInput, normalizeBlueprintInput } from './adapters/index.js';
 import { allRules } from './rules/index.js';
 import type {
+  BlueprintData,
+  BlueprintFormat,
   ParsedTerraformFile,
   Severity,
   ValidationContext,
@@ -10,14 +11,13 @@ import type {
   ValidationRule,
   ValidatorOptions,
 } from './types.js';
-import { buildResourceIndex } from './utils/resource-index.js';
-import { extractTerraformFiles } from './zip-reader.js';
+import { buildResourceIndexFromData } from './utils/resource-index.js';
 
 const SEVERITY_LEVELS: Record<Severity, number> = { error: 0, warning: 1, info: 2 };
 
-/** Validate a blueprint ZIP file and return a report of issues found */
+/** Validate a blueprint from any supported input format */
 export async function validateBlueprint(
-  input: Buffer | string,
+  input: BlueprintInput,
   options: ValidatorOptions = {},
 ): Promise<ValidationReport> {
   const validator = new BlueprintValidator(options);
@@ -38,29 +38,28 @@ export class BlueprintValidator {
     this.rules.push(rule);
   }
 
-  /** Run validation on a blueprint ZIP */
-  async validate(input: Buffer | string): Promise<ValidationReport> {
-    // Read the ZIP
-    const zipInput = typeof input === 'string' ? readFileSync(input) : input;
-    const extractedFiles = extractTerraformFiles(zipInput);
+  /** Run validation on any supported blueprint input */
+  async validate(input: BlueprintInput): Promise<ValidationReport> {
+    const data = normalizeBlueprintInput(input);
+    return this.validateData(data);
+  }
 
-    if (extractedFiles.length === 0) {
-      return this.emptyReport([]);
+  /** Run validation on already-normalized BlueprintData */
+  async validateData(data: BlueprintData): Promise<ValidationReport> {
+    if (data.resources.length === 0) {
+      return this.emptyReport(data.sourceFiles, data.format);
     }
 
-    // Parse all .tf files
-    const parsedFiles: ParsedTerraformFile[] = extractedFiles.map((f) =>
-      parseTerraformFile(f.path, f.content),
-    );
+    const resourceIndex = buildResourceIndexFromData(data);
 
-    // Build resource index
-    const resourceIndex = buildResourceIndex(parsedFiles);
+    // Wrap resources into ParsedTerraformFile structure for rule compatibility
+    const files = this.buildFiles(data);
 
-    // Create validation context
     const context: ValidationContext = {
-      files: parsedFiles,
+      files,
       resourceIndex,
       options: this.options,
+      format: data.format,
     };
 
     // Run all rules and collect issues
@@ -76,16 +75,13 @@ export class BlueprintValidator {
       }
     }
 
-    // Build report
     const errors = allIssues.filter((i) => i.severity === 'error').length;
     const warnings = allIssues.filter((i) => i.severity === 'warning').length;
     const infos = allIssues.filter((i) => i.severity === 'info').length;
 
     const resourceTypes: Record<string, number> = {};
-    for (const file of parsedFiles) {
-      for (const resource of file.resources) {
-        resourceTypes[resource.type] = (resourceTypes[resource.type] ?? 0) + 1;
-      }
+    for (const resource of data.resources) {
+      resourceTypes[resource.type] = (resourceTypes[resource.type] ?? 0) + 1;
     }
 
     return {
@@ -94,16 +90,46 @@ export class BlueprintValidator {
         errors,
         warnings,
         infos,
-        filesScanned: parsedFiles.length,
-        resourcesFound: parsedFiles.reduce((sum, f) => sum + f.resources.length, 0),
+        filesScanned: data.sourceFiles.length,
+        resourcesFound: data.resources.length,
       },
       issues: allIssues,
       metadata: {
         validatedAt: new Date().toISOString(),
-        blueprintFiles: parsedFiles.map((f) => f.path),
+        blueprintFiles: data.sourceFiles,
         resourceTypes,
+        format: data.format,
+        blueprintId: data.metadata?.blueprintId,
       },
     };
+  }
+
+  private buildFiles(data: BlueprintData): ParsedTerraformFile[] {
+    // Group resources by source file
+    const byFile = new Map<string, typeof data.resources>();
+    for (const resource of data.resources) {
+      const file = resource.source;
+      const existing = byFile.get(file) ?? [];
+      existing.push(resource);
+      byFile.set(file, existing);
+    }
+
+    return Array.from(byFile.entries()).map(([path, resources]) => ({
+      path,
+      resources: resources.map((r) => ({
+        type: r.type,
+        name: r.name,
+        address: r.address,
+        attributes: r.attributes,
+        dependsOn: r.dependsOn,
+        rawHcl: r.rawContent,
+        rawContent: r.rawContent,
+        file: r.source,
+        lineStart: r.lineStart ?? 1,
+      })),
+      variables: data.variables,
+      rawContent: resources.map((r) => r.rawContent).join('\n'),
+    }));
   }
 
   private selectRules(): ValidationRule[] {
@@ -114,12 +140,12 @@ export class BlueprintValidator {
     return allRules.filter((r) => selected.has(r.id));
   }
 
-  private emptyReport(files: string[]): ValidationReport {
+  private emptyReport(files: string[], format: BlueprintFormat): ValidationReport {
     return {
       valid: true,
       summary: { errors: 0, warnings: 0, infos: 0, filesScanned: 0, resourcesFound: 0 },
       issues: [],
-      metadata: { validatedAt: new Date().toISOString(), blueprintFiles: files, resourceTypes: {} },
+      metadata: { validatedAt: new Date().toISOString(), blueprintFiles: files, resourceTypes: {}, format },
     };
   }
 }

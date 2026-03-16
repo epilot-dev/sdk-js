@@ -1,4 +1,4 @@
-import type { ValidationContext, ValidationIssue, ValidationRule } from '../types.js';
+import type { TerraformResource, ValidationContext, ValidationIssue, ValidationRule } from '../types.js';
 import { isReferenceExpression, isVariableReference } from '../utils/terraform-refs.js';
 import { extractUuids } from '../utils/uuid.js';
 
@@ -7,7 +7,7 @@ const JOURNEY_TYPES = new Set([
   'epilot-journey_journey',
 ]);
 
-/** Attribute keys in journey resources that reference other resources and must be terraform refs */
+/** Attribute keys in journey resources that reference other resources */
 const CRITICAL_REF_KEYS = new Set([
   'mappings_automation_id',
   'design_id',
@@ -17,24 +17,23 @@ const CRITICAL_REF_KEYS = new Set([
 export const publicJourneySafetyRule: ValidationRule = {
   id: 'public-journey-safety',
   name: 'Public Journey Safety',
-  description: 'Checks that public journeys have all critical references properly terraformed to prevent wrong-org submissions',
+  description: 'Checks that public journeys have all critical references properly handled to prevent wrong-org submissions',
   severity: 'warning',
 
   validate(context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
+    const isTerraform = context.format === 'terraform';
 
     for (const file of context.files) {
       for (const resource of file.resources) {
         if (!JOURNEY_TYPES.has(resource.type)) continue;
 
-        const isPublic = isPublicJourney(resource.attributes, resource.rawHcl);
+        const rawContent = resource.rawContent ?? resource.rawHcl;
+        const isPublic = isPublicJourney(resource.attributes, rawContent);
         if (!isPublic) continue;
 
-        // Check critical reference attributes
-        checkCriticalRefs(resource, issues);
-
-        // Check for hardcoded organization_id in the journey body
-        checkOrgIdInJourney(resource, issues);
+        checkCriticalRefs(resource, issues, isTerraform);
+        checkOrgIdInJourney(resource, rawContent, issues);
       }
     }
 
@@ -42,26 +41,29 @@ export const publicJourneySafetyRule: ValidationRule = {
   },
 };
 
-function isPublicJourney(attrs: Record<string, unknown>, rawHcl: string): boolean {
+function isPublicJourney(attrs: Record<string, unknown>, rawContent: string): boolean {
   if (attrs.access_mode === 'PUBLIC') return true;
-  // Also check in raw HCL for nested access_mode within jsonencode
-  if (/access_mode["'\s]*[:=]["'\s]*["']?PUBLIC/i.test(rawHcl)) return true;
+  if (attrs.accessMode === 'PUBLIC') return true;
+  if (/access_?[Mm]ode["'\s]*[:=]["'\s]*["']?PUBLIC/i.test(rawContent)) return true;
   return false;
 }
 
-function checkCriticalRefs(resource: import('../types.js').TerraformResource, issues: ValidationIssue[]): void {
+function checkCriticalRefs(resource: TerraformResource, issues: ValidationIssue[], isTerraform: boolean): void {
   for (const [key, value] of Object.entries(resource.attributes)) {
     if (!CRITICAL_REF_KEYS.has(key)) continue;
     if (typeof value !== 'string') continue;
-    if (isReferenceExpression(value)) continue;
-    if (isVariableReference(value)) continue;
+    // For terraform, skip proper references
+    if (isTerraform) {
+      if (isReferenceExpression(value)) continue;
+      if (isVariableReference(value)) continue;
+    }
 
     const uuids = extractUuids(value);
     if (uuids.length > 0) {
       issues.push({
         ruleId: 'public-journey-safety',
         severity: 'warning',
-        message: `Public journey has hardcoded "${key}" = "${value}". This should be a Terraform reference to prevent submissions routing to the source org.`,
+        message: `Public journey has hardcoded "${key}" = "${value}". This reference should be properly managed to prevent submissions routing to the source org.`,
         file: resource.file,
         line: resource.lineStart,
         resourceAddress: resource.address,
@@ -72,8 +74,8 @@ function checkCriticalRefs(resource: import('../types.js').TerraformResource, is
   }
 }
 
-function checkOrgIdInJourney(resource: import('../types.js').TerraformResource, issues: ValidationIssue[]): void {
-  const orgIdMatch = resource.rawHcl.match(/organization_id["'\s]*[:=]["'\s]*["']?(\d{4,10})/);
+function checkOrgIdInJourney(resource: TerraformResource, rawContent: string, issues: ValidationIssue[]): void {
+  const orgIdMatch = rawContent.match(/organization_id["'\s]*[:=]["'\s]*["']?(\d{4,10})/);
   if (orgIdMatch) {
     issues.push({
       ruleId: 'public-journey-safety',

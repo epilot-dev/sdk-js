@@ -5,12 +5,12 @@ import { resolve } from 'node:path';
 export default defineCommand({
   meta: {
     name: 'blueprint-test',
-    description: 'Validate an exported blueprint ZIP file for common issues',
+    description: 'Validate a blueprint for common issues (ZIP file, JSON file, or blueprint manifest)',
   },
   args: {
     file: {
       type: 'positional',
-      description: 'Path to blueprint .zip file',
+      description: 'Path to blueprint .zip or .json file',
       required: true,
     },
     rules: {
@@ -40,9 +40,17 @@ export default defineCommand({
     );
 
     const filePath = resolve(args.file as string);
-    const zipBuffer = readFileSync(filePath);
+    let input: Buffer | string;
 
-    const report = await validateBlueprint(zipBuffer, {
+    if (filePath.endsWith('.json')) {
+      // Pass the file path — the adapter handles JSON parsing
+      input = filePath;
+    } else {
+      // ZIP file — read as buffer
+      input = readFileSync(filePath);
+    }
+
+    const report = await validateBlueprint(input, {
       rules: args.rules ? (args.rules as string).split(',') : undefined,
       severity: args.severity as 'error' | 'warning' | 'info' | undefined,
       sourceOrgId: args['source-org-id'] as string | undefined,

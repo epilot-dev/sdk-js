@@ -9,7 +9,7 @@ export const crossRefIntegrityRule: ValidationRule = {
 
   validate(context: ValidationContext): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
-    const { resourceIndex } = context;
+    const { resourceIndex, format } = context;
 
     for (const file of context.files) {
       for (const resource of file.resources) {
@@ -29,31 +29,31 @@ export const crossRefIntegrityRule: ValidationRule = {
           }
         }
 
-        // Check terraform references in attribute values
-        scanForReferences(resource.attributes, '', (path, value) => {
-          if (typeof value !== 'string') return;
+        // Terraform reference checking only applies to terraform format
+        if (format === 'terraform') {
+          scanForReferences(resource.attributes, '', (path, value) => {
+            if (typeof value !== 'string') return;
 
-          const addresses = extractReferencedAddresses(value);
-          for (const addr of addresses) {
-            // Skip variable references (var.xxx)
-            if (addr.startsWith('var.')) continue;
-            // Skip data source references (data.xxx)
-            if (addr.startsWith('data.')) continue;
+            const addresses = extractReferencedAddresses(value);
+            for (const addr of addresses) {
+              if (addr.startsWith('var.')) continue;
+              if (addr.startsWith('data.')) continue;
 
-            if (!resourceIndex.allAddresses.has(addr)) {
-              issues.push({
-                ruleId: 'cross-ref-integrity',
-                severity: 'error',
-                message: `References resource "${addr}" which does not exist in the blueprint. The referenced resource was likely not exported.`,
-                file: resource.file,
-                line: resource.lineStart,
-                resourceAddress: resource.address,
-                attributePath: path,
-                value: addr,
-              });
+              if (!resourceIndex.allAddresses.has(addr)) {
+                issues.push({
+                  ruleId: 'cross-ref-integrity',
+                  severity: 'error',
+                  message: `References resource "${addr}" which does not exist in the blueprint. The referenced resource was likely not exported.`,
+                  file: resource.file,
+                  line: resource.lineStart,
+                  resourceAddress: resource.address,
+                  attributePath: path,
+                  value: addr,
+                });
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
 

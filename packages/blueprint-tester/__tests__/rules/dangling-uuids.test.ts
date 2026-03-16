@@ -8,7 +8,7 @@ function runRule(tfContent: string, options: ValidatorOptions = {}) {
   const file = parseTerraformFile('main.tf', tfContent);
   const files = [file];
   const resourceIndex = buildResourceIndex(files);
-  return danglingUuidsRule.validate({ files, resourceIndex, options });
+  return danglingUuidsRule.validate({ files, resourceIndex, options, format: 'terraform' });
 }
 
 describe('dangling-uuids rule', () => {

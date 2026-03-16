@@ -22,8 +22,9 @@ export const emailAddressesRule: ValidationRule = {
 
     for (const file of context.files) {
       for (const resource of file.resources) {
+        const content = resource.rawContent ?? resource.rawHcl;
         EMAIL_REGEX.lastIndex = 0;
-        const matches = [...resource.rawHcl.matchAll(EMAIL_REGEX)];
+        const matches = [...content.matchAll(EMAIL_REGEX)];
 
         for (const match of matches) {
           const email = match[0];

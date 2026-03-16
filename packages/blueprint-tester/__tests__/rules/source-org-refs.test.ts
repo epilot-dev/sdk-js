@@ -7,7 +7,7 @@ function runRule(tfContent: string, sourceOrgId?: string) {
   const file = parseTerraformFile('main.tf', tfContent);
   const files = [file];
   const resourceIndex = buildResourceIndex(files);
-  return sourceOrgRefsRule.validate({ files, resourceIndex, options: { sourceOrgId } });
+  return sourceOrgRefsRule.validate({ files, resourceIndex, options: { sourceOrgId }, format: 'terraform' });
 }
 
 describe('source-org-refs rule', () => {
