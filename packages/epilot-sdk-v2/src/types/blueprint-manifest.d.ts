@@ -1,6 +1,4 @@
 /* Auto-copied from blueprint-manifest-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -2382,6 +2380,34 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ListMarketplaceSlugs {
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    /**
+                     * example:
+                     * wallbox_b2c
+                     */
+                    slug?: string;
+                    /**
+                     * example:
+                     * v1.0.0
+                     */
+                    version?: string;
+                    /**
+                     * example:
+                     * Wallbox B2C
+                     */
+                    name?: string;
+                    /**
+                     * example:
+                     * https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip
+                     */
+                    installation_link?: string;
+                }[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -2396,6 +2422,38 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+        }
+    }
+    namespace PublishBlueprint {
+        export interface RequestBody {
+            blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * The marketplace installation slug for the Webflow CMS item
+             */
+            slug: string;
+            /**
+             * The version string to set on the marketplace CMS item (e.g. "1.0.0")
+             */
+            version?: string;
+            /**
+             * The display name for the blueprint on the marketplace CMS item
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
         }
     }
     namespace SyncDependencies {
@@ -2750,6 +2808,29 @@ export interface OperationMethods {
     data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  /**
+   * listMarketplaceSlugs - listMarketplaceSlugs
+   * 
+   * List all available marketplace blueprint slugs from Webflow CMS.
+   * Returns cached results when available.
+   * 
+   */
+  'listMarketplaceSlugs'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
+  /**
+   * publishBlueprint - publishBlueprint
+   * 
+   * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
+   * 
+   */
+  'publishBlueprint'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PublishBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
   /**
    * formatBlueprintDescription - formatBlueprintDescription
    * 
@@ -3132,6 +3213,33 @@ export interface PathsDictionary {
       data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/marketplace/slugs']: {
+    /**
+     * listMarketplaceSlugs - listMarketplaceSlugs
+     * 
+     * List all available marketplace blueprint slugs from Webflow CMS.
+     * Returns cached results when available.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints:publish']: {
+    /**
+     * publishBlueprint - publishBlueprint
+     * 
+     * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PublishBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description']: {
     /**

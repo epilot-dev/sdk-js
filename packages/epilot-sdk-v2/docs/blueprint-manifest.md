@@ -39,6 +39,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`deleteBlueprint`](#deleteblueprint)
 - [`validateBlueprint`](#validateblueprint)
 - [`exportBlueprint`](#exportblueprint)
+- [`listMarketplaceSlugs`](#listmarketplaceslugs)
+- [`publishBlueprint`](#publishblueprint)
 - [`formatBlueprintDescription`](#formatblueprintdescription)
 - [`addBlueprintResource`](#addblueprintresource)
 - [`syncDependencies`](#syncdependencies)
@@ -933,6 +935,57 @@ const { data } = await client.exportBlueprint(
     destination_org_id: 'string',
     destination_blueprint_id: 'string',
     validate: true
+  },
+)
+```
+
+---
+
+### `listMarketplaceSlugs`
+
+List all available marketplace blueprint slugs from Webflow CMS.
+Returns cached results when available.
+
+`GET /v2/blueprint-manifest/marketplace/slugs`
+
+```ts
+const { data } = await client.listMarketplaceSlugs()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "slug": "wallbox_b2c",
+      "version": "v1.0.0",
+      "name": "Wallbox B2C",
+      "installation_link": "https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `publishBlueprint`
+
+Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
+
+`POST /v2/blueprint-manifest/blueprints:publish`
+
+```ts
+const { data } = await client.publishBlueprint(
+  null,
+  {
+    blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    slug: 'string',
+    version: 'string',
+    name: 'string'
   },
 )
 ```
