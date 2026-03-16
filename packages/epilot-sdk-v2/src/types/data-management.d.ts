@@ -1,6 +1,4 @@
 /* Auto-copied from data-management-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -116,6 +114,7 @@ export declare namespace Components {
             type: QueryFilterType;
             related_entity_schemas?: string[];
             lookback_period_days?: number;
+            message_type?: ("SENT" | "RECEIVED")[];
         }
         export type QueryFilterType = "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_workflows_only_in_closed_or_cancelled_status" | "no_email_communication_since";
         export interface UpdateJobRequest {

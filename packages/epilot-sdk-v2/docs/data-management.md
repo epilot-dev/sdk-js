@@ -78,7 +78,8 @@ const { data } = await client.queryEntities(
       {
         type: 'entity_workflows_only_in_closed_or_cancelled_status',
         related_entity_schemas: ['string'],
-        lookback_period_days: 0
+        lookback_period_days: 0,
+        message_type: ['SENT']
       }
     ],
     from: 0,
@@ -310,7 +311,8 @@ const { data } = await client.getConfig({
       {
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
-        "lookback_period_days": 0
+        "lookback_period_days": 0,
+        "message_type": ["SENT"]
       }
     ]
   },
@@ -396,7 +398,8 @@ const { data } = await client.upsertConfig(
         {
           type: 'entity_workflows_only_in_closed_or_cancelled_status',
           related_entity_schemas: ['string'],
-          lookback_period_days: 0
+          lookback_period_days: 0,
+          message_type: ['SENT']
         }
       ]
     },
@@ -427,7 +430,8 @@ const { data } = await client.upsertConfig(
       {
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
-        "lookback_period_days": 0
+        "lookback_period_days": 0,
+        "message_type": ["SENT"]
       }
     ]
   },
@@ -484,7 +488,8 @@ const { data } = await client.listConfigs({
           {
             "type": "entity_workflows_only_in_closed_or_cancelled_status",
             "related_entity_schemas": ["string"],
-            "lookback_period_days": 0
+            "lookback_period_days": 0,
+            "message_type": ["SENT"]
           }
         ]
       },
@@ -714,6 +719,7 @@ type QueryFilter = {
   type: "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_workflows_only_in_closed_or_cancelled_status" | "no_email_communication_since"
   related_entity_schemas?: string[]
   lookback_period_days?: number
+  message_type?: "SENT" | "RECEIVED"[]
 }
 ```
 
@@ -727,6 +733,7 @@ type QueryConfig = {
     type: "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_workflows_only_in_closed_or_cancelled_status" | "no_email_communication_since"
     related_entity_schemas?: string[]
     lookback_period_days?: number
+    message_type?: "SENT" | "RECEIVED"[]
   }>
 }
 ```
@@ -741,6 +748,7 @@ type QueryEntitiesRequest = {
     type: "entity_workflows_only_in_closed_or_cancelled_status" | "no_related_entities" | "related_entities_all_in_closed_or_cancelled_status" | "related_entities_workflows_only_in_closed_or_cancelled_status" | "no_email_communication_since"
     related_entity_schemas?: string[]
     lookback_period_days?: number
+    message_type?: "SENT" | "RECEIVED"[]
   }>
   from?: number
   size?: number
@@ -792,6 +800,7 @@ type UpsertConfigRequest = {
       type: { ... }
       related_entity_schemas?: { ... }
       lookback_period_days?: { ... }
+      message_type?: { ... }
     }>
   }
   schedule: {
@@ -819,6 +828,7 @@ type Config = {
       type: { ... }
       related_entity_schemas?: { ... }
       lookback_period_days?: { ... }
+      message_type?: { ... }
     }>
   }
   schedule?: {

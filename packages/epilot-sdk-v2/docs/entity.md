@@ -26,6 +26,7 @@ const { data } = await entityClient.listSchemas(...)
 
 **Schemas**
 - [`listSchemas`](#listschemas)
+- [`listSchemasV2`](#listschemasv2)
 - [`getSchema`](#getschema)
 - [`putSchema`](#putschema)
 - [`deleteSchema`](#deleteschema)
@@ -165,6 +166,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`TagsAttribute`](#tagsattribute)
 - [`MessageEmailAddressAttribute`](#messageemailaddressattribute)
 - [`NumberAttribute`](#numberattribute)
+- [`TableAttribute`](#tableattribute)
 - [`ConsentAttribute`](#consentattribute)
 - [`OrderedListAttribute`](#orderedlistattribute)
 - [`EmailAttribute`](#emailattribute)
@@ -262,6 +264,7 @@ Get the latest versions of all schemas
 const { data } = await client.listSchemas({
   unpublished: true,
   exclude: ['...'],
+  include: ['...'],
 })
 ```
 
@@ -277,6 +280,69 @@ const { data } = await client.listSchemas({
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
+      "slug": "contact",
+      "version": 1,
+      "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "feature_flag": "FF_MY_FEATURE_FLAG",
+      "enable_setting": ["360_features"],
+      "name": "Contact",
+      "plural": "Contacts",
+      "description": "Example description",
+      "docs_url": "https://docs.epilot.io/docs/pricing/entities",
+      "category": "customer_relations",
+      "published": false,
+      "draft": false,
+      "icon": "person",
+      "title_template": "{{first_name}} {{last_name}}",
+      "ui_config": {},
+      "capabilities": [],
+      "group_settings": [],
+      "layout_settings": {},
+      "dialog_config": {},
+      "attributes": [],
+      "_purpose": ["string"],
+      "explicit_search_mappings": {},
+      "group_headlines": []
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listSchemasV2`
+
+Get the latest versions of all schemas.
+Returns summary schemas by default (only summary attributes, no capabilities).
+Use ?full=true for complete schemas.
+
+`GET /v2/entity/schemas`
+
+```ts
+const { data } = await client.listSchemasV2({
+  full: true,
+  unpublished: true,
+  exclude: ['...'],
+  include: ['...'],
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "created_at": "string",
+      "updated_at": "string",
+      "comment": "string",
+      "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -335,6 +401,7 @@ const { data } = await client.getSchema({
     "id": "string",
     "type": "string"
   },
+  "_summary": true,
   "slug": "contact",
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -392,7 +459,8 @@ const { data } = await client.getSchema({
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ],
   "group_settings": [
@@ -527,7 +595,8 @@ const { data } = await client.putSchema(
         ui_config: { /* ... */ },
         ui_hooks: [ /* ... */ ],
         feature_flag: 'FF_MY_FEATURE_FLAG',
-        settings_flag: [ /* ... */ ]
+        settings_flag: [ /* ... */ ],
+        schemas: [ /* ... */ ]
       }
     ],
     group_settings: [
@@ -603,6 +672,7 @@ const { data } = await client.putSchema(
     "id": "string",
     "type": "string"
   },
+  "_summary": true,
   "slug": "contact",
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -660,7 +730,8 @@ const { data } = await client.putSchema(
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ],
   "group_settings": [
@@ -919,6 +990,7 @@ const { data } = await client.getSchemaVersions({
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -951,6 +1023,7 @@ const { data } = await client.getSchemaVersions({
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1014,7 +1087,8 @@ const { data } = await client.listAvailableCapabilities({
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ]
 }
@@ -1046,6 +1120,7 @@ const { data } = await client.listSchemaBlueprints()
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -2144,7 +2219,8 @@ const { data } = await client.getActivity({
       "operation": "createEntity",
       "params": {},
       "payload": {},
-      "diff": {}
+      "diff": {},
+      "_workflow_origin": {}
     }
   ]
 }
@@ -3370,7 +3446,7 @@ const { data } = await client.updateClassificationsForTaxonomy(
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
-  "deleted": {}
+  "deleted": ["taxonomy-slug:classification-slug"]
 }
 ```
 
@@ -4360,7 +4436,7 @@ const { data } = await client.createSchemaCapability(
         has_primary: true,
         type: 'link'
       },
-      /* ... 32 more */
+      /* ... 33 more */
     ],
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
@@ -4389,6 +4465,11 @@ const { data } = await client.createSchemaCapability(
       {
         name: 'string',
         enabled: true
+      }
+    ],
+    schemas: [
+      {
+        schema: 'contact'
       }
     ],
     composite_id: 'contact:97644baa-083f-4e49-9188-fcff2ecaad7d',
@@ -4505,6 +4586,11 @@ const { data } = await client.createSchemaCapability(
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
@@ -4638,6 +4724,11 @@ const { data } = await client.getSchemaCapability({
       "enabled": true
     }
   ],
+  "schemas": [
+    {
+      "schema": "contact"
+    }
+  ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -4734,7 +4825,7 @@ const { data } = await client.putSchemaCapability(
         has_primary: true,
         type: 'link'
       },
-      /* ... 32 more */
+      /* ... 33 more */
     ],
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
@@ -4763,6 +4854,11 @@ const { data } = await client.putSchemaCapability(
       {
         name: 'string',
         enabled: true
+      }
+    ],
+    schemas: [
+      {
+        schema: 'contact'
       }
     ],
     composite_id: 'contact:97644baa-083f-4e49-9188-fcff2ecaad7d',
@@ -4879,6 +4975,11 @@ const { data } = await client.putSchemaCapability(
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
@@ -5010,6 +5111,11 @@ const { data } = await client.deleteSchemaCapability({
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
@@ -5578,6 +5684,7 @@ type EntitySchemaItem = {
     id?: string
     type?: string
   }
+  _summary?: boolean
   slug: string
   version?: number
   blueprint?: string // uuid
@@ -5668,7 +5775,6 @@ type EntitySchemaItem = {
       _purpose?: { ... }
       _manifest?: { ... }
       constraints?: { ... }
-      feature_flag?: { ... }
   // ...
 }
 ```
@@ -7347,6 +7453,62 @@ type NumberAttribute = {
   data_type?: "number" | "string"
   format?: string
   show_separator?: boolean
+}
+```
+
+### `TableAttribute`
+
+```ts
+type TableAttribute = {
+  id?: string
+  name: string
+  label: string
+  placeholder?: string
+  hidden?: boolean
+  show_in_table?: boolean
+  sortable?: boolean
+  required?: boolean
+  readonly?: boolean
+  deprecated?: boolean
+  default_value?: unknown
+  group?: string
+  order?: number
+  layout?: string
+  hide_label?: boolean
+  icon?: string
+  render_condition?: string
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  constraints?: object
+  feature_flag?: string
+  settings_flag?: Array<{
+    name?: string
+    enabled?: boolean
+  }>
+  value_formatter?: string
+  preview_value_formatter?: string
+  entity_builder_disable_edit?: boolean
+  protected?: boolean
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  type: "table"
+  columns?: Array<{
+    name: string
+    label: string
+    type?: "string" | "number" | "date" | "boolean"
+    width?: string
+    required?: boolean
+  }>
+  min_rows?: number
+  max_rows?: number
 }
 ```
 
@@ -9078,6 +9240,10 @@ type EntityOperation = {
       _manifest?: { ... }
     }
   }
+  _workflow_origin?: {
+    workflow_exec_id?: string
+    flow_template_id?: string
+  }
 }
 ```
 
@@ -9134,6 +9300,10 @@ type ActivityItem = {
       added?: { ... }
       updated?: { ... }
       deleted?: { ... }
+    }
+    _workflow_origin?: {
+      workflow_exec_id?: { ... }
+      flow_template_id?: { ... }
     }
   }>
 }
