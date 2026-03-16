@@ -27,7 +27,9 @@
       "Bash(pnpm:*)",
       "Bash(npx ts-node:*)",
       "Bash(du:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(cp:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

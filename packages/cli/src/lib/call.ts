@@ -152,7 +152,7 @@ const formatOperationHelp = (apiName: string, operationId: string, spec: OpenAPI
       }
 
       // ── Parameters ──
-      const params = getOperationParams(spec, operationId);
+      const { params } = getOperationParams(spec, operationId);
       if (params.length > 0) {
         w(`${BOLD}PARAMETERS${RESET}\n\n`);
 

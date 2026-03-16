@@ -62,7 +62,7 @@ export const expand = (c: CompactDefinition): Record<string, unknown> => {
     openapi: c.v || '3.0.2',
     info: { title: '', version: '' },
     paths,
-    servers: [{ url: c.s }],
+    servers: c.s ? [{ url: c.s }] : [],
   };
 
   if (c.cp) {

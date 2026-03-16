@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
@@ -20,6 +18,13 @@ Examples:
   npx epilot-sdk override myNewApi ./specs/my-new-api.yaml
   npx epilot-sdk typegen
 `);
+};
+
+const isYamlFile = (filePath: string) => filePath.endsWith('.yaml') || filePath.endsWith('.yml');
+
+const parseYaml = async (content: string): Promise<unknown> => {
+  const { load } = await import('js-yaml');
+  return load(content);
 };
 
 const readOverrides = (): Record<string, string> => {
@@ -46,6 +51,107 @@ const fetchSpec = async (specPath: string): Promise<string> => {
   return readFileSync(absolutePath, 'utf-8');
 };
 
+const parseSpec = async (content: string, specPath: string): Promise<Record<string, unknown>> => {
+  if (isYamlFile(specPath)) {
+    return (await parseYaml(content)) as Record<string, unknown>;
+  }
+  return JSON.parse(content);
+};
+
+/** Convert an API name like "accessToken" to kebab-case "access-token" */
+const toKebabCase = (name: string) => name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+
+type CompactParam = [string, string, ...unknown[]];
+type CompactRefParam = [string];
+type CompactOp = (string | (CompactParam | CompactRefParam)[] | undefined | 0 | 1)[];
+
+const compactifyParam = (p: Record<string, unknown>): unknown[] => {
+  if (p.$ref) {
+    return [(p.$ref as string).split('/').pop()!];
+  }
+  const loc = ({ path: 'p', query: 'q', header: 'h', cookie: 'c' } as Record<string, string>)[p.in as string] || 'q';
+  const cp: unknown[] = [p.name as string, loc];
+  if (p.required) cp.push(true);
+  if (p.style) {
+    if (!p.required) cp.push(false);
+    cp.push(p.style as string);
+  }
+  if (p.explode !== undefined) {
+    cp.push(p.explode as boolean);
+  }
+  return cp;
+};
+
+const compactifySpec = (spec: Record<string, unknown>): Record<string, unknown> => {
+  const server: string = (spec.servers as { url: string }[])?.[0]?.url || '';
+  const openapiVersion: string = (spec.openapi as string) || '3.0.2';
+  const paths = (spec.paths || {}) as Record<string, Record<string, unknown>>;
+
+  const ops: CompactOp[] = [];
+  const pathParams: Record<string, unknown[][]> = {};
+
+  for (const [path, methods] of Object.entries(paths)) {
+    if (methods.parameters) {
+      pathParams[path] = (methods.parameters as Record<string, unknown>[]).map(compactifyParam);
+    }
+
+    for (const [method, rawOp] of Object.entries(methods)) {
+      if (method === 'parameters') continue;
+      const op = rawOp as Record<string, unknown>;
+      if (typeof op !== 'object' || !op.operationId) continue;
+
+      const params = (op.parameters || []) as Record<string, unknown>[];
+      const compactParams = params.map(compactifyParam);
+
+      const hasBody = op.requestBody ? 1 : 0;
+      const entry: CompactOp = [op.operationId as string, method, path];
+      if (compactParams.length > 0 || hasBody) entry.push(compactParams.length > 0 ? compactParams : undefined);
+      if (hasBody) entry.push(1);
+
+      ops.push(entry);
+    }
+  }
+
+  const componentParams = (spec.components as Record<string, unknown>)?.parameters as
+    | Record<string, Record<string, unknown>>
+    | undefined;
+
+  const result: Record<string, unknown> = { s: server, o: ops };
+  if (openapiVersion !== '3.0.2') result.v = openapiVersion;
+
+  if (componentParams && Object.keys(componentParams).length > 0) {
+    const cpObj: Record<string, unknown[]> = {};
+    for (const [refName, p] of Object.entries(componentParams)) {
+      cpObj[refName] = compactifyParam(p);
+    }
+    result.cp = cpObj;
+  }
+
+  if (Object.keys(pathParams).length > 0) {
+    result.pp = pathParams;
+  }
+
+  return result;
+};
+
+/** Find the @epilot/sdk package root in node_modules */
+const findSdkRoot = (): string | null => {
+  try {
+    // Walk up from cwd looking for node_modules/@epilot/sdk
+    let dir = process.cwd();
+    while (true) {
+      const candidate = resolve(dir, 'node_modules/@epilot/sdk');
+      if (existsSync(candidate)) return candidate;
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+};
+
 const overrideCmd = async (args: string[]) => {
   if (args.length === 2) {
     // Single API override: override <name> <path>
@@ -54,7 +160,7 @@ const overrideCmd = async (args: string[]) => {
     overrides[apiName] = specPath;
     writeOverrides(overrides);
     console.log(`Added override: ${apiName} -> ${specPath}`);
-    console.log(`Run 'npx epilot-sdk typegen' to regenerate types.`);
+    console.log(`Run 'npx epilot-sdk override' to apply, then 'npx epilot-sdk typegen' to regenerate types.`);
     return;
   }
 
@@ -68,26 +174,34 @@ const overrideCmd = async (args: string[]) => {
     return;
   }
 
+  const sdkRoot = findSdkRoot();
+  if (!sdkRoot) {
+    console.error('Could not find @epilot/sdk in node_modules. Is it installed?');
+    process.exit(1);
+  }
+
+  const defsDir = resolve(sdkRoot, 'definitions');
+
   console.log(`Applying ${entries.length} override(s)...`);
 
   for (const [apiName, specPath] of entries) {
     try {
-      console.log(`  ${apiName}: ${specPath}`);
-      const spec = await fetchSpec(specPath);
+      const kebabName = toKebabCase(apiName);
+      console.log(`  ${apiName} (${kebabName}): ${specPath}`);
 
-      // Write spec to local overrides directory
-      const overridesDir = resolve(process.cwd(), '.epilot/specs');
-      mkdirSync(overridesDir, { recursive: true });
+      const rawContent = await fetchSpec(specPath);
+      const spec = await parseSpec(rawContent, specPath);
 
-      const destPath = resolve(overridesDir, `${apiName}.json`);
+      // Write full spec JSON to definitions/
+      const fullSpecDest = resolve(defsDir, `${kebabName}.json`);
+      writeFileSync(fullSpecDest, `${JSON.stringify(spec, null, 2)}\n`);
+      console.log(`    -> definitions/${kebabName}.json`);
 
-      // Convert YAML to JSON if needed (basic check)
-      if (specPath.endsWith('.yaml') || specPath.endsWith('.yml')) {
-        console.log(`    Note: YAML specs should be converted to JSON. Saving as-is.`);
-      }
-
-      writeFileSync(destPath, spec);
-      console.log(`    -> .epilot/specs/${apiName}.json`);
+      // Write compact runtime spec to definitions/
+      const compactSpec = compactifySpec(spec);
+      const runtimeDest = resolve(defsDir, `${kebabName}-runtime.json`);
+      writeFileSync(runtimeDest, JSON.stringify(compactSpec));
+      console.log(`    -> definitions/${kebabName}-runtime.json`);
     } catch (err) {
       console.error(`    Error: ${(err as Error).message}`);
     }
@@ -100,33 +214,49 @@ const typegenCmd = async () => {
   try {
     const { execSync } = await import('node:child_process');
 
-    const specsDir = resolve(process.cwd(), '.epilot/specs');
-    if (!existsSync(specsDir)) {
-      console.log('No override specs found. Run "npx epilot-sdk override" first.');
+    const sdkRoot = findSdkRoot();
+    if (!sdkRoot) {
+      console.error('Could not find @epilot/sdk in node_modules. Is it installed?');
+      process.exit(1);
+    }
+
+    const overrides = readOverrides();
+    const entries = Object.entries(overrides);
+
+    if (entries.length === 0) {
+      console.log('No overrides found. Run "npx epilot-sdk override" first.');
       return;
     }
 
-    const { readdirSync } = await import('node:fs');
-    const specs = readdirSync(specsDir).filter((f) => f.endsWith('.json'));
+    const defsDir = resolve(sdkRoot, 'definitions');
+    const distDir = resolve(sdkRoot, 'dist');
 
-    const typesDir = resolve(process.cwd(), '.epilot/types');
-    mkdirSync(typesDir, { recursive: true });
+    for (const [apiName] of entries) {
+      const kebabName = toKebabCase(apiName);
+      const specPath = resolve(defsDir, `${kebabName}.json`);
 
-    for (const spec of specs) {
-      const apiName = spec.replace('.json', '');
-      const specPath = resolve(specsDir, spec);
-      const typesPath = resolve(typesDir, `${apiName}.d.ts`);
+      if (!existsSync(specPath)) {
+        console.error(`  No spec found for ${apiName}. Run "npx epilot-sdk override" first.`);
+        continue;
+      }
 
       console.log(`Generating types for ${apiName}...`);
       try {
+        // Generate types and write to the SDK dist directory
+        const typesPath = resolve(distDir, `apis/${kebabName}.d.ts`);
         execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${typesPath}`, { stdio: 'pipe' });
-        console.log(`  -> .epilot/types/${apiName}.d.ts`);
+        console.log(`  -> dist/apis/${kebabName}.d.ts`);
+
+        // Also generate .d.cts for CommonJS
+        const ctypesPath = resolve(distDir, `apis/${kebabName}.d.cts`);
+        execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${ctypesPath}`, { stdio: 'pipe' });
+        console.log(`  -> dist/apis/${kebabName}.d.cts`);
       } catch (err) {
         console.error(`  Error generating types for ${apiName}: ${(err as Error).message}`);
       }
     }
 
-    console.log('\nDone. Types generated in .epilot/types/');
+    console.log('\nDone.');
   } catch (err) {
     console.error(`Error: ${(err as Error).message}`);
   }

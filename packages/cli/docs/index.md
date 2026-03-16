@@ -22,7 +22,7 @@ npx epilot auth login
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
 | Blueprint Manifest API | `epilot blueprint-manifest` | 33 | [blueprint-manifest.md](./blueprint-manifest.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
-| Portal API | `epilot customer-portal` | 134 | [customer-portal.md](./customer-portal.md) |
+| Portal API | `epilot customer-portal` | 135 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
 | Data Management API | `epilot data-management` | 10 | [data-management.md](./data-management.md) |
 | Deduplication API | `epilot deduplication` | 1 | [deduplication.md](./deduplication.md) |
@@ -33,7 +33,7 @@ npx epilot auth login
 | Entity API | `epilot entity` | 81 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
 | Environments API | `epilot environments` | 5 | [environments.md](./environments.md) |
-| ERP Integration API | `epilot erp-integration` | 33 | [erp-integration.md](./erp-integration.md) |
+| ERP Integration API | `epilot erp-integration` | 35 | [erp-integration.md](./erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | 7 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 27 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |

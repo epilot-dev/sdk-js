@@ -208,7 +208,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'customer-portal',
     title: 'Portal API',
     serverUrl: 'https://customer-portal-api.sls.epilot.io',
-    operationCount: 134,
+    operationCount: 135,
     operationIds: [
       'upsertPortal',
       'createUser',
@@ -321,6 +321,7 @@ export const API_LIST: ApiInfo[] = [
       'getPortalPages',
       'createPortalPage',
       'getPublicPages',
+      'interpolatePortalPages',
       'getDefaultPages',
       'getPortalPageBlocks',
       'createPortalPageBlock',
@@ -366,7 +367,7 @@ export const API_LIST: ApiInfo[] = [
     apiName: 'dataManagement',
     kebabName: 'data-management',
     title: 'Data Management API',
-    serverUrl: 'https://data-management.sls.epilot.io',
+    serverUrl: '',
     operationCount: 10,
     operationIds: [
       'queryEntities',
@@ -605,7 +606,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'erp-integration',
     title: 'ERP Integration API',
     serverUrl: 'https://erp-integration-api.sls.epilot.io',
-    operationCount: 33,
+    operationCount: 35,
     operationIds: [
       'acknowledgeTracking',
       'triggerErp',
@@ -640,6 +641,8 @@ export const API_LIST: ApiInfo[] = [
       'getOutboundStatus',
       'queryAccessLogs',
       'queryOutboundMonitoringEvents',
+      'listSecureProxies',
+      'secureProxy',
     ],
   },
   {

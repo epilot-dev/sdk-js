@@ -739,6 +739,16 @@
           },
           "lookback_period_days": {
             "type": "integer"
+          },
+          "message_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SENT",
+                "RECEIVED"
+              ]
+            }
           }
         }
       },

@@ -71,6 +71,7 @@ epilot customer-portal upsertPortal -p origin=example
 - [`updatePortalPage`](#updateportalpage) — Update a portal page by id
 - [`deletePortalPage`](#deleteportalpage) — Delete a portal page by id
 - [`createPortalPage`](#createportalpage) — Create a new portal page
+- [`interpolatePortalPages`](#interpolateportalpages) — Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and 
 - [`getDefaultPages`](#getdefaultpages) — Fetch all default portal pages
 - [`createPortalPageBlock`](#createportalpageblock) — Create a new portal page block
 - [`updatePortalPageBlock`](#updateportalpageblock) — Update a portal page block by id
@@ -230,13 +231,8 @@ epilot customer-portal upsertPortal \
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -261,6 +257,16 @@ epilot customer-portal upsertPortal \
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -393,13 +399,8 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -424,6 +425,16 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -809,13 +820,8 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -840,6 +846,16 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -1014,13 +1030,8 @@ epilot customer-portal getPortalConfig --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1045,6 +1056,16 @@ epilot customer-portal getPortalConfig --jsonata '$'
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -1926,13 +1947,8 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1957,6 +1973,16 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2132,13 +2158,8 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2163,6 +2184,16 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2344,13 +2375,8 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2375,6 +2401,16 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2550,13 +2586,8 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2581,6 +2612,16 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -2755,9 +2796,8 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
-      "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
-      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -6804,7 +6844,8 @@ epilot customer-portal searchPortalUserEntities \
       "contact": true
     }
   ],
-  "targets": ["3ec28ab5-8598-41ef-9486-b57fca1d5e2a"]
+  "targets": ["3ec28ab5-8598-41ef-9486-b57fca1d5e2a"],
+  "include": ["active_workflow"]
 }'
 ```
 
@@ -6851,7 +6892,10 @@ epilot customer-portal searchPortalUserEntities --jsonata '$'
     "total": 50,
     "has_more": true
   },
-  "hits": 10
+  "hits": 10,
+  "includes": {
+    "active_workflow": {}
+  }
 }
 ```
 
@@ -7197,7 +7241,7 @@ epilot customer-portal createMeterReading \
   "meter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "counter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "direction": "feed-in",
-  "timestamp": "2022-10-10T00:00:00.000Z",
+  "timestamp": "2022-10-10",
   "source": "ECP",
   "status": "valid",
   "external_id": "string",
@@ -7233,7 +7277,7 @@ epilot customer-portal createMeterReading --jsonata 'data'
     "meter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "counter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -7544,6 +7588,7 @@ epilot customer-portal getPortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e0528 
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -7595,6 +7640,7 @@ epilot customer-portal updatePortalPage \
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -7636,6 +7682,7 @@ epilot customer-portal updatePortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e05
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -7728,6 +7775,7 @@ epilot customer-portal getPortalPages -p domain=customer-portal.epilot.io --json
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -7780,6 +7828,7 @@ epilot customer-portal createPortalPage \
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -7815,6 +7864,7 @@ epilot customer-portal createPortalPage -p domain=customer-portal.epilot.io --js
   "is_system": false,
   "is_detail": false,
   "detail_schema": "contact",
+  "show_in_navigation": false,
   "is_public": true,
   "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "is_entry_route": false,
@@ -7872,6 +7922,101 @@ epilot customer-portal getPublicPages -p domain=customer-portal.epilot.io --json
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
+    "is_public": true,
+    "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+    "is_entry_route": false,
+    "is_deleted": false,
+    "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+    "last_modified_at": "2021-02-09T12:41:43.662Z"
+  }
+]
+```
+
+</details>
+
+---
+
+### `interpolatePortalPages`
+
+Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and 
+
+`POST /v2/portal/pages/interpolate`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal interpolatePortalPages
+```
+
+With request body:
+
+```bash
+epilot customer-portal interpolatePortalPages \
+  -d '{
+  "pages": [
+    {
+      "slug": "dashboard",
+      "path": "/dashboard",
+      "schema": ["string"],
+      "visibility": {},
+      "content": {},
+      "design": {},
+      "blocks": {},
+      "order": 1,
+      "is_system": false,
+      "is_detail": false,
+      "detail_schema": "contact",
+      "show_in_navigation": false,
+      "is_public": true,
+      "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "is_entry_route": false,
+      "is_deleted": false,
+      "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "last_modified_at": "2021-02-09T12:41:43.662Z"
+    }
+  ],
+  "context_entities": [
+    {
+      "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "entity_schema": "contract"
+    }
+  ]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal interpolatePortalPages
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal interpolatePortalPages --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+[
+  {
+    "slug": "dashboard",
+    "path": "/dashboard",
+    "schema": ["string"],
+    "visibility": {},
+    "content": {},
+    "design": {},
+    "blocks": {},
+    "order": 1,
+    "is_system": false,
+    "is_detail": false,
+    "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -7921,6 +8066,7 @@ epilot customer-portal getDefaultPages --jsonata '$'
     "is_system": false,
     "is_detail": false,
     "detail_schema": "contact",
+    "show_in_navigation": false,
     "is_public": true,
     "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "is_entry_route": false,
@@ -8515,13 +8661,8 @@ epilot customer-portal createPortalConfig \
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8546,6 +8687,16 @@ epilot customer-portal createPortalConfig \
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -8666,6 +8817,7 @@ epilot customer-portal createPortalConfig \
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -8716,13 +8868,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8747,6 +8894,16 @@ epilot customer-portal createPortalConfig --jsonata '$'
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -8892,6 +9049,7 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -8967,13 +9125,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8998,6 +9151,16 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -9143,6 +9306,7 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -9209,13 +9373,8 @@ epilot customer-portal putPortalConfig \
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -9240,6 +9399,16 @@ epilot customer-portal putPortalConfig \
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -9385,6 +9554,7 @@ epilot customer-portal putPortalConfig \
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -9443,13 +9613,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
-  "epilot_domain": "example-portal-1.ecp.epilot.io",
-  "domain_settings": {
-    "is_custom_domain_enabled": true,
-    "is_epilot_domain_enabled": true,
-    "is_redirection_enabled": true
-  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "user_account_self_management": false,
   "feature_settings": {
@@ -9474,6 +9639,16 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
     "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
     "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
     "password_policy": {
       "minimum_length": 8,
       "maximum_length": 256,
@@ -9619,6 +9794,7 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "is_system": false,
       "is_detail": false,
       "detail_schema": "contact",
+      "show_in_navigation": false,
       "is_public": true,
       "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "is_entry_route": false,
@@ -9700,9 +9876,8 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
-      "epilot_domain": "example-portal-1.ecp.epilot.io",
-      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -9807,7 +9982,7 @@ Invites a partner to a portal
 
 ```bash
 epilot customer-portal invitePartner \
-  -d '{"email":"string","represents_contact_list":["5da0a718-c822-403d-9f5d-20d4584e0528"]}'
+  -d '{"email":"string","represents_contact_list":["5da0a718-c822-403d-9f5d-20d4584e0528"],"contact_data":{}}'
 ```
 
 Using stdin pipe:

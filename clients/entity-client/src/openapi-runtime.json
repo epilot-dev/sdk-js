@@ -18,6 +18,40 @@
             "name": "exclude",
             "style": "form",
             "explode": false
+          },
+          {
+            "in": "query",
+            "name": "include",
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/entity/schemas": {
+      "get": {
+        "operationId": "listSchemasV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "full"
+          },
+          {
+            "in": "query",
+            "name": "unpublished"
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "style": "form",
+            "explode": false
+          },
+          {
+            "in": "query",
+            "name": "include",
+            "style": "form",
+            "explode": false
           }
         ],
         "responses": {}

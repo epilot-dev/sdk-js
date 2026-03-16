@@ -529,6 +529,7 @@ epilot workflow createStep -p executionId=wd56125gah --jsonata '$'
   "userIds": [0],
   "assignedTo": ["string"],
   "assignedToInProgress": "string",
+  "assignedToOnHold": "string",
   "status": "UNASSIGNED",
   "created": "string",
   "lastUpdated": "string",
@@ -598,6 +599,7 @@ epilot workflow updateStep \
   "userIds": [0],
   "assignedTo": ["string"],
   "assignedToInProgress": "string",
+  "assignedToOnHold": "string",
   "status": "UNASSIGNED",
   "dueDate": "string",
   "dynamicDueDate": {
@@ -694,6 +696,7 @@ epilot workflow updateStep -p executionId=wd56125gah -p stepId=7hj28a --jsonata 
   "userIds": [0],
   "assignedTo": ["string"],
   "assignedToInProgress": "string",
+  "assignedToOnHold": "string",
   "status": "UNASSIGNED",
   "created": "string",
   "lastUpdated": "string",
@@ -1601,7 +1604,8 @@ epilot workflow patchTask -p execution_id=wd561 -p task_id=7hj28a --jsonata '$'
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1718,7 +1722,8 @@ epilot workflow runTaskAutomation -p execution_id=wd561 -p task_id=7hj28a --json
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1846,7 +1851,8 @@ epilot workflow executeTask -p execution_id=wd561 -p task_id=7hj28a --jsonata '$
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1975,7 +1981,8 @@ epilot workflow patchPhase -p execution_id=wd561 -p phase_id=9gjs2952j --jsonata
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "taxonomies": ["string"],
   "loop_config": {
@@ -2104,7 +2111,8 @@ epilot workflow addTask -p execution_id=wd561 --jsonata '$'
     "status_updated_at": "1970-01-01T00:00:00.000Z",
     "in_progress_by": "string",
     "completed_by": "string",
-    "skipped_by": "string"
+    "skipped_by": "string",
+    "on_hold_by": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",

@@ -2030,6 +2030,10 @@
                 "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
                 "type": "string"
               },
+              "assignedToOnHold": {
+                "description": "The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task",
+                "type": "string"
+              },
               "status": {
                 "$ref": "#/components/schemas/StepStatus"
               },
@@ -2304,6 +2308,10 @@
           },
           "assignedToInProgress": {
             "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+            "type": "string"
+          },
+          "assignedToOnHold": {
+            "description": "The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task",
             "type": "string"
           },
           "status": {
@@ -2860,6 +2868,7 @@
           },
           "contexts": {
             "type": "array",
+            "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/FlowContext"
             }
@@ -3694,6 +3703,10 @@
           "skipped_by": {
             "$ref": "#/components/schemas/UserId",
             "description": "The user which moved the task/phase to SKIPPED state."
+          },
+          "on_hold_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to ON_HOLD state."
           }
         }
       },
@@ -3761,6 +3774,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "static",
+              "relative_date"
+            ],
+            "description": "How to interpret values. \"static\" (default) means literal values. \"relative_date\" means values[0] is a dynamic date token like \"today\"."
           }
         },
         "required": [
@@ -3838,6 +3859,25 @@
           "attribute_sub_field": {
             "type": "string",
             "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
+          },
+          "date_offset": {
+            "type": "object",
+            "description": "Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)",
+            "properties": {
+              "amount": {
+                "type": "integer",
+                "description": "Number of units to offset"
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "months",
+                  "years"
+                ],
+                "description": "Unit of the offset"
+              }
+            }
           }
         }
       },

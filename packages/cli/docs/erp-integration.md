@@ -64,6 +64,7 @@ epilot erp-integration acknowledgeTracking
 - [`setIntegrationAppMapping`](#setintegrationappmapping) — Creates or updates a mapping from an app/component to an integration.
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping) — Removes a mapping from an app/component to an integration.
 - [`getOutboundStatus`](#getoutboundstatus) — Get the status of all outbound use cases for a specific integration.
+- [`listSecureProxies`](#listsecureproxies) — Lists all secure_proxy use cases across all integrations for the authenticated organization.
 
 **monitoring**
 - [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents) — Query inbound monitoring events for a specific integration.
@@ -71,6 +72,9 @@ epilot erp-integration acknowledgeTracking
 - [`getMonitoringTimeSeries`](#getmonitoringtimeseries) — Get time-series aggregated event counts for monitoring charts.
 - [`queryAccessLogs`](#queryaccesslogs) — Query API access logs for a specific integration's organization.
 - [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents) — Query outbound monitoring events for a specific integration.
+
+**proxy**
+- [`secureProxy`](#secureproxy) — Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
 
 ### `acknowledgeTracking`
 
@@ -2306,6 +2310,105 @@ epilot erp-integration queryOutboundMonitoringEvents -p integrationId=123e4567-e
     "event_id": "string"
   },
   "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `listSecureProxies`
+
+Lists all secure_proxy use cases across all integrations for the authenticated organization.
+
+`GET /v1/integrations/secure-proxies`
+
+**Sample Call**
+
+```bash
+epilot erp-integration listSecureProxies
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration listSecureProxies --jsonata 'secure_proxies'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "secure_proxies": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "vpc_mode": "static_ip",
+      "allowed_domains": ["string"],
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integration_name": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `secureProxy`
+
+Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+
+`POST /v1/secure-proxy`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration secureProxy
+```
+
+With request body:
+
+```bash
+epilot erp-integration secureProxy \
+  -d '{
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "use_case_slug": "string",
+  "url": "https://example.com/path",
+  "method": "GET",
+  "headers": {},
+  "body": {},
+  "response_type": "json"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration secureProxy
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration secureProxy --jsonata 'status_code'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status_code": 0,
+  "headers": {},
+  "body": {}
 }
 ```
 
