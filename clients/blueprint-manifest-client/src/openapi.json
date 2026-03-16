@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.5.0",
+    "version": "4.6.1",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -1167,6 +1167,120 @@
         "responses": {
           "202": {
             "description": "Blueprint export job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/marketplace/slugs": {
+      "get": {
+        "operationId": "listMarketplaceSlugs",
+        "summary": "listMarketplaceSlugs",
+        "description": "List all available marketplace blueprint slugs from Webflow CMS.\nReturns cached results when available.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of marketplace slugs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string",
+                            "example": "wallbox_b2c"
+                          },
+                          "version": {
+                            "type": "string",
+                            "example": "v1.0.0"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Wallbox B2C"
+                          },
+                          "installation_link": {
+                            "type": "string",
+                            "example": "https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:publish": {
+      "post": {
+        "operationId": "publishBlueprint",
+        "summary": "publishBlueprint",
+        "description": "Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "blueprint_id",
+                  "slug"
+                ],
+                "properties": {
+                  "blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "The marketplace installation slug for the Webflow CMS item"
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "The version string to set on the marketplace CMS item (e.g. \"1.0.0\")"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The display name for the blueprint on the marketplace CMS item"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Blueprint publish job started",
             "headers": {
               "Location": {
                 "description": "URL to poll the job",

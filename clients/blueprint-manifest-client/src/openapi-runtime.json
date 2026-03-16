@@ -277,6 +277,24 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/marketplace/slugs": {
+      "get": {
+        "operationId": "listMarketplaceSlugs",
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:publish": {
+      "post": {
+        "operationId": "publishBlueprint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
       "post": {
         "operationId": "formatBlueprintDescription",
