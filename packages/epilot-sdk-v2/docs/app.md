@@ -97,6 +97,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`PortalExtensionHookCostDataRetrieval`](#portalextensionhookcostdataretrieval)
 - [`PortalExtensionSeamlessLink`](#portalextensionseamlesslink)
 - [`PortalExtensionAuthBlock`](#portalextensionauthblock)
+- [`PortalExtensionSecureProxy`](#portalextensionsecureproxy)
 - [`ExternalProductCatalogAuthBlock`](#externalproductcatalogauthblock)
 - [`OverrideDevMode`](#overridedevmode)
 - [`JourneyBlockConfig`](#journeyblockconfig)
@@ -2145,6 +2146,7 @@ type PortalExtensionComponent = {
       auth?: { ... }
       call: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     } | {
       id: { ... }
       name?: { ... }
@@ -2155,6 +2157,7 @@ type PortalExtensionComponent = {
       contact_relation_attribute?: { ... }
       explanation?: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     } | {
       id: { ... }
       name?: { ... }
@@ -2164,6 +2167,7 @@ type PortalExtensionComponent = {
       call: { ... }
       resolved?: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     } | {
       id: { ... }
       name?: { ... }
@@ -2173,6 +2177,7 @@ type PortalExtensionComponent = {
       call: { ... }
       resolved?: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     } | {
       id: { ... }
       name?: { ... }
@@ -2182,6 +2187,7 @@ type PortalExtensionComponent = {
       call: { ... }
       resolved?: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     } | {
       id: { ... }
       name?: { ... }
@@ -2191,6 +2197,7 @@ type PortalExtensionComponent = {
       call: { ... }
       resolved: { ... }
       use_static_ips?: { ... }
+      secure_proxy?: { ... }
     }>
     links?: Array<{
       id: { ... }
@@ -2233,6 +2240,10 @@ type PortalExtensionConfig = {
       result: { ... }
     }
     use_static_ips?: boolean
+    secure_proxy?: {
+      integration_id: { ... }
+      use_case_slug: { ... }
+    }
   } | {
     id: string
     name?: {
@@ -2262,6 +2273,10 @@ type PortalExtensionConfig = {
       en: { ... }
     }
     use_static_ips?: boolean
+    secure_proxy?: {
+      integration_id: { ... }
+      use_case_slug: { ... }
+    }
   } | {
     id: string
     name?: {
@@ -2289,6 +2304,10 @@ type PortalExtensionConfig = {
       dataPath?: { ... }
     }
     use_static_ips?: boolean
+    secure_proxy?: {
+      integration_id: { ... }
+      use_case_slug: { ... }
+    }
   } | {
     id: string
     name?: {
@@ -2296,18 +2315,6 @@ type PortalExtensionConfig = {
       de: { ... }
     }
     type: "consumptionDataRetrieval"
-    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
-    auth?: {
-      method?: { ... }
-      url: { ... }
-      params?: { ... }
-      headers?: { ... }
-      body?: { ... }
-      cache?: { ... }
-    }
-    call: {
-      method?: { ... }
-      url: { ... }
   // ...
 }
 ```
@@ -2346,6 +2353,10 @@ type PortalExtensionHookRegistrationIdentifiersCheck = {
     result: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2391,6 +2402,10 @@ type PortalExtensionHookContractIdentification = {
     en: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2435,6 +2450,10 @@ type PortalExtensionHookMeterReadingPlausibilityCheck = {
     lower_limit?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2475,6 +2494,10 @@ type PortalExtensionHookPriceDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2515,6 +2538,10 @@ type PortalExtensionHookConsumptionDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2555,6 +2582,10 @@ type PortalExtensionHookCostDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -2604,6 +2635,17 @@ type PortalExtensionAuthBlock = {
     key: string
     ttl: string
   }
+}
+```
+
+### `PortalExtensionSecureProxy`
+
+If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
+
+```ts
+type PortalExtensionSecureProxy = {
+  integration_id: string // uuid
+  use_case_slug: string
 }
 ```
 

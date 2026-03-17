@@ -1,6 +1,4 @@
 /* Auto-copied from app-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -1542,6 +1540,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
@@ -1623,6 +1622,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1679,6 +1679,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -1772,6 +1773,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1828,6 +1830,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1879,6 +1882,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         export interface PortalExtensionSeamlessLink {
             /**
@@ -1907,6 +1911,19 @@ export declare namespace Components {
                     [name: string]: string;
                 };
             };
+        }
+        /**
+         * If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
+         */
+        export interface PortalExtensionSecureProxy {
+            /**
+             * Integration ID that owns the secure_proxy use case.
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case slug for the secure proxy use case.
+             */
+            use_case_slug: string;
         }
         export interface Pricing {
             pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
@@ -3360,6 +3377,7 @@ export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schema
 export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
 export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;
 export type PortalExtensionSeamlessLink = Components.Schemas.PortalExtensionSeamlessLink;
+export type PortalExtensionSecureProxy = Components.Schemas.PortalExtensionSecureProxy;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
 export type RawEvents = Components.Schemas.RawEvents;
