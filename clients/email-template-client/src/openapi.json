@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Email template API",
-    "version": "1.0.0-RFC",
+    "version": "1.1.0",
     "description": "Email template API service\n"
   },
   "tags": [
@@ -598,6 +598,10 @@
             "description": "Updated by",
             "type": "string",
             "example": 1234
+          },
+          "json_template": {
+            "type": "string",
+            "description": "This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON."
           }
         }
       },
@@ -687,6 +691,10 @@
                 "description": "Updated by",
                 "type": "string",
                 "example": 1234
+              },
+              "json_template": {
+                "type": "string",
+                "description": "This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON."
               },
               "system_template": {
                 "description": "If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...\nRemember to add default content of template to system_template enum for revert to original feature\n",
@@ -1085,6 +1093,11 @@
         "type": "boolean",
         "description": "When true, it lets to send only the email by skip creating the thread & message entities."
       },
+      "CompleteThread": {
+        "type": "boolean",
+        "description": "Whether the thread is marked as Done immediately after sending the message",
+        "default": false
+      },
       "BulkSendMessageRequest": {
         "type": "object",
         "description": "It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.\nFor e.g; if there some opportunityIds are provided, then each opportunityId is treated as a separate mainEntity to construct individual messages.\n",
@@ -1096,6 +1109,9 @@
           "skip_creating_entities": {
             "$ref": "#/components/schemas/SkipCreatingEntities"
           },
+          "complete_thread": {
+            "$ref": "#/components/schemas/CompleteThread"
+          },
           "email_template_id": {
             "type": "string",
             "description": "ID of email template to use for sending bulk emails",
@@ -1104,7 +1120,7 @@
           "must_include_unsubscribe_link": {
             "type": "boolean",
             "description": "If true then include unsubscribe link in the email body\n",
-            "default": true
+            "default": false
           },
           "recipient_ids": {
             "type": "array",
@@ -1134,6 +1150,9 @@
           "skip_creating_entities": {
             "$ref": "#/components/schemas/SkipCreatingEntities"
           },
+          "complete_thread": {
+            "$ref": "#/components/schemas/CompleteThread"
+          },
           "email_template_id": {
             "type": "string",
             "description": "ID of email template to use for sending bulk emails",
@@ -1142,7 +1161,7 @@
           "must_include_unsubscribe_link": {
             "type": "boolean",
             "description": "If true then include unsubscribe link in the email body\n",
-            "default": true
+            "default": false
           },
           "recipient_query": {
             "type": "string",
@@ -1191,6 +1210,9 @@
           },
           "skip_creating_entities": {
             "$ref": "#/components/schemas/SkipCreatingEntities"
+          },
+          "complete_thread": {
+            "$ref": "#/components/schemas/CompleteThread"
           },
           "status": {
             "type": "string",

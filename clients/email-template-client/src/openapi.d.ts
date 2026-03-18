@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -241,6 +239,7 @@ declare namespace Components {
              */
             job_id: string;
             skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
+            complete_thread?: /* Whether the thread is marked as Done immediately after sending the message */ CompleteThread;
             /**
              * Status of the bulk message action
              * * PROCESSING: Bulk message action is processing the request
@@ -353,6 +352,7 @@ declare namespace Components {
          */
         export interface BulkSendMessageRequest {
             skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
+            complete_thread?: /* Whether the thread is marked as Done immediately after sending the message */ CompleteThread;
             /**
              * ID of email template to use for sending bulk emails
              * example:
@@ -384,6 +384,7 @@ declare namespace Components {
          */
         export interface BulkSendMessageRequestWithQuery {
             skip_creating_entities?: /* When true, it lets to send only the email by skip creating the thread & message entities. */ SkipCreatingEntities;
+            complete_thread?: /* Whether the thread is marked as Done immediately after sending the message */ CompleteThread;
             /**
              * ID of email template to use for sending bulk emails
              * example:
@@ -403,6 +404,10 @@ declare namespace Components {
             recipient_query: string;
             custom_variables?: /* Custom variables to be replaced in the email template */ CustomVariables;
         }
+        /**
+         * Whether the thread is marked as Done immediately after sending the message
+         */
+        export type CompleteThread = boolean;
         export interface CreateSystemTemplatesReq {
             /**
              * example:
@@ -560,6 +565,10 @@ declare namespace Components {
              */
             updated_by?: string;
             /**
+             * This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON.
+             */
+            json_template?: string;
+            /**
              * If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...
              * Remember to add default content of template to system_template enum for revert to original feature
              *
@@ -667,6 +676,10 @@ declare namespace Components {
              * 1234
              */
             updated_by?: string;
+            /**
+             * This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON.
+             */
+            json_template?: string;
         }
         export interface EmailTemplateResponse {
             entity?: EmailTemplateEntity;
@@ -1154,6 +1167,7 @@ export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkSendMessageJob = Components.Schemas.BulkSendMessageJob;
 export type BulkSendMessageRequest = Components.Schemas.BulkSendMessageRequest;
 export type BulkSendMessageRequestWithQuery = Components.Schemas.BulkSendMessageRequestWithQuery;
+export type CompleteThread = Components.Schemas.CompleteThread;
 export type CreateSystemTemplatesReq = Components.Schemas.CreateSystemTemplatesReq;
 export type CreateSystemTemplatesResp = Components.Schemas.CreateSystemTemplatesResp;
 export type CreatedAt = Components.Schemas.CreatedAt;
