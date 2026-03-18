@@ -50,6 +50,7 @@ const { data } = await emailTemplateClient.saveTemplate(...)
 - [`EmailTemplateResponse`](#emailtemplateresponse)
 - [`AsyncEmailTemplateResponse`](#asyncemailtemplateresponse)
 - [`SkipCreatingEntities`](#skipcreatingentities)
+- [`CompleteThread`](#completethread)
 - [`BulkSendMessageRequest`](#bulksendmessagerequest)
 - [`BulkSendMessageRequestWithQuery`](#bulksendmessagerequestwithquery)
 - [`CustomVariables`](#customvariables)
@@ -126,7 +127,8 @@ const { data } = await client.saveTemplate(
     },
     system_template: false,
     created_by: 1234,
-    updated_by: 1234
+    updated_by: 1234,
+    json_template: 'string'
   },
 )
 ```
@@ -193,6 +195,7 @@ const { data } = await client.saveTemplate(
   },
   "created_by": 1234,
   "updated_by": 1234,
+  "json_template": "string",
   "system_template": false
 }
 ```
@@ -276,6 +279,7 @@ const { data } = await client.getTemplateDetail({
     },
     "created_by": 1234,
     "updated_by": 1234,
+    "json_template": "string",
     "system_template": false
   },
   "relations": [
@@ -352,7 +356,8 @@ const { data } = await client.updateTemplateDetail(
     },
     system_template: false,
     created_by: 1234,
-    updated_by: 1234
+    updated_by: 1234,
+    json_template: 'string'
   },
 )
 ```
@@ -419,6 +424,7 @@ const { data } = await client.updateTemplateDetail(
   },
   "created_by": 1234,
   "updated_by": 1234,
+  "json_template": "string",
   "system_template": false
 }
 ```
@@ -530,6 +536,7 @@ const { data } = await client.replaceVariablesAsync(
       },
       "created_by": 1234,
       "updated_by": 1234,
+      "json_template": "string",
       "system_template": false
     },
     "relations": [
@@ -554,8 +561,9 @@ const { data } = await client.bulkSendMessage(
   null,
   {
     skip_creating_entities: true,
+    complete_thread: false,
     email_template_id: '511ceb90-f738-47aa-8b1e-915ace0ae13c',
-    must_include_unsubscribe_link: true,
+    must_include_unsubscribe_link: false,
     recipient_query: '_schema:contact AND consent_email_marketing:active',
     custom_variables: [
       {
@@ -575,11 +583,13 @@ const { data } = await client.bulkSendMessage(
   "org_id": "206801",
   "job_id": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
   "skip_creating_entities": true,
+  "complete_thread": false,
   "status": "PROCESSING",
   "request": {
     "skip_creating_entities": true,
+    "complete_thread": false,
     "email_template_id": "511ceb90-f738-47aa-8b1e-915ace0ae13c",
-    "must_include_unsubscribe_link": true,
+    "must_include_unsubscribe_link": false,
     "recipient_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6", "3fa85f64-5717-4562-b3fc-2c963f66afa7", "3fa85f64-5717-4562-b3fc-2c963f66afa8"],
     "custom_variables": [
       {
@@ -705,6 +715,7 @@ type EmailTemplateRequest = {
   system_template?: boolean
   created_by?: string
   updated_by?: string
+  json_template?: string
 }
 ```
 
@@ -759,6 +770,7 @@ type EmailTemplateEntity = {
   }
   created_by?: string
   updated_by?: string
+  json_template?: string
   system_template?: boolean
 }
 ```
@@ -930,6 +942,7 @@ type EmailTemplateResponse = {
     }
     created_by?: string
     updated_by?: string
+    json_template?: string
     system_template?: boolean
   }
   relations?: object[]
@@ -970,6 +983,7 @@ type AsyncEmailTemplateResponse = {
       file?: { ... }
       created_by?: { ... }
       updated_by?: { ... }
+      json_template?: { ... }
       system_template?: { ... }
     }
     relations?: object[]
@@ -985,6 +999,14 @@ When true, it lets to send only the email by skip creating the thread & message 
 type SkipCreatingEntities = boolean
 ```
 
+### `CompleteThread`
+
+Whether the thread is marked as Done immediately after sending the message
+
+```ts
+type CompleteThread = boolean
+```
+
 ### `BulkSendMessageRequest`
 
 It takes a list of entity ids, treating each as a separate mainEntity to construct individual messages.
@@ -994,6 +1016,7 @@ For e.g; if there some opportunityIds are provided, then each opportunityId is t
 ```ts
 type BulkSendMessageRequest = {
   skip_creating_entities?: boolean
+  complete_thread?: boolean
   email_template_id: string
   must_include_unsubscribe_link?: boolean
   recipient_ids: string[]
@@ -1013,6 +1036,7 @@ For e.g; if the query is provided as `_schema:opportunity AND status:PENDING`,
 ```ts
 type BulkSendMessageRequestWithQuery = {
   skip_creating_entities?: boolean
+  complete_thread?: boolean
   email_template_id: string
   must_include_unsubscribe_link?: boolean
   recipient_query: string
@@ -1041,9 +1065,11 @@ type BulkSendMessageJob = {
   org_id?: string
   job_id: string
   skip_creating_entities?: boolean
+  complete_thread?: boolean
   status: "PROCESSING" | "QUEUEING" | "APPROVAL" | "SENDING" | "SUCCESS" | "FAILED" | "CANCELLED"
   request: {
     skip_creating_entities?: boolean
+    complete_thread?: boolean
     email_template_id: string
     must_include_unsubscribe_link?: boolean
     recipient_ids: string[]
@@ -1053,6 +1079,7 @@ type BulkSendMessageJob = {
     }>
   } | {
     skip_creating_entities?: boolean
+    complete_thread?: boolean
     email_template_id: string
     must_include_unsubscribe_link?: boolean
     recipient_query: string
