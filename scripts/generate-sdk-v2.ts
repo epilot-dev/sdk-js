@@ -348,14 +348,15 @@ const generateApiFile = (client: ClientInfo): string => {
     `const resolve = (): ${clientType} => {`,
     `  if (!_instance) {`,
     `    const def = loadDefinition()`,
-    `    _instance = createApiClient<${clientType}>({ definition: def })`,
+    `    _instance = createApiClient<${clientType}>({ definition: def, apiName: '${client.apiName}' })`,
     `  }`,
     `  return _instance`,
     `}`,
     ``,
     `const _handle: ApiHandle<${clientType}> = createApiHandle({`,
     `  resolveClient: resolve,`,
-    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition() }),`,
+    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}' }),`,
+    `  apiName: '${client.apiName}',`,
     `})`,
     ``,
     `/** Get the cached singleton client (lazy-initialized on first call) */`,
@@ -386,12 +387,8 @@ const generateRegistry = (clients: ClientInfo[]): string => {
     `import type { ApiEntry } from '../types'`,
     ``,
     `/* eslint-disable @typescript-eslint/no-require-imports */`,
-    `const base = '../definitions/'`,
-    `const loadDef = (name: string): Document => {`,
-    `  // biome-ignore lint/style/useTemplate: dynamic concatenation prevents tsup from inlining definitions`,
-    `  const mod = require(base + name + '-runtime.json')`,
-    `  return expand((mod.default ?? mod) as CompactDefinition) as Document`,
-    `}`,
+    `const expandDef = (mod: { default?: unknown }): Document =>`,
+    `  expand((mod.default ?? mod) as CompactDefinition) as Document`,
     ``,
     `export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {`,
   ];
@@ -401,7 +398,7 @@ const generateRegistry = (clients: ClientInfo[]): string => {
       `  registerApi({`,
       `    registry,`,
       `    name: '${client.apiName}',`,
-      `    loader: () => loadDef('${client.kebabName}'),`,
+      `    loader: () => expandDef(require('../definitions/${client.kebabName}-runtime.json')),`,
       `  })`,
     );
   }
@@ -971,6 +968,34 @@ const updateApiReferenceTables = (clients: ClientInfo[]) => {
   }
 };
 
+const generateDocsJson = (clients: ClientInfo[]) => {
+  const docsDir = resolve(V2_DIR, 'docs');
+  const jsonDocsDir = resolve(V2_DIR, 'src/docs');
+  mkdirSync(jsonDocsDir, { recursive: true });
+
+  // Convert each markdown doc to a JSON string file for lazy import()
+  for (const client of clients) {
+    const mdPath = resolve(docsDir, `${client.kebabName}.md`);
+    if (!existsSync(mdPath)) continue;
+    const content = readFileSync(mdPath, 'utf-8');
+    writeFileSync(resolve(jsonDocsDir, `${client.kebabName}.json`), JSON.stringify(content));
+  }
+
+  // Also convert the README
+  const readmePath = resolve(V2_DIR, 'README.md');
+  if (existsSync(readmePath)) {
+    const content = readFileSync(readmePath, 'utf-8');
+    writeFileSync(resolve(jsonDocsDir, 'README.json'), JSON.stringify(content));
+  }
+
+  // Generate an index mapping api names to kebab-case file names
+  const index: Record<string, string> = {};
+  for (const client of clients) {
+    index[client.apiName] = client.kebabName;
+  }
+  writeFileSync(resolve(jsonDocsDir, '_index.json'), JSON.stringify(index));
+};
+
 const main = () => {
   console.log('Discovering clients...');
   const clients = discoverClients();
@@ -1014,6 +1039,9 @@ const main = () => {
 
   console.log('Generating docs...');
   const docCount = generateDocs(clients);
+
+  console.log('Generating docs JSON for help()...');
+  generateDocsJson(validClients);
 
   console.log('Updating API reference tables in READMEs...');
   updateApiReferenceTables(validClients);

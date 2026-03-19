@@ -1,5 +1,7 @@
 export type { TokenArg } from './authorize';
 export { authorize } from './authorize';
+export { help } from './help';
+export { openapi } from './openapi';
 export type { LargeResponseConfig } from './large-response';
 export { applyLargeResponseInterceptor } from './large-response';
 export type { RetryConfig } from './retry';

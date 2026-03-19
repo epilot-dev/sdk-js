@@ -848,6 +848,13 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetOrganizationFeatureSettings {
+        namespace Responses {
+            export type $200 = /* Feature settings metadata served to frontend applications. */ Components.Schemas.FeatureSettings;
+            export interface $401 {
+            }
+        }
+    }
     namespace GetSettings {
         namespace Parameters {
             export type OrgId = /**
@@ -1077,14 +1084,23 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSettingsValue.Responses.$200>
   /**
-   * getFeatureSettings - Get platform configuration metadata
+   * getOrganizationFeatureSettings - Get organization feature settings
    * 
-   * Returns platform-level configuration metadata including feature flag definitions,
-   * resource type mappings, and error code severities.
+   * Returns feature flag metadata for the organization UI.
    * 
    * This data is static (identical for all organizations) and changes infrequently.
    * Clients should cache responses using the Cache-Control header.
    * 
+   */
+  'getOrganizationFeatureSettings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrganizationFeatureSettings.Responses.$200>
+  /**
+   * getFeatureSettings - Get platform configuration metadata
+   * 
+   * Deprecated: use /v2/organization/feature-settings instead.
    */
   'getFeatureSettings'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1204,16 +1220,27 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSettingsValue.Responses.$200>
   }
-  ['/v2/feature-settings']: {
+  ['/v2/organization/feature-settings']: {
     /**
-     * getFeatureSettings - Get platform configuration metadata
+     * getOrganizationFeatureSettings - Get organization feature settings
      * 
-     * Returns platform-level configuration metadata including feature flag definitions,
-     * resource type mappings, and error code severities.
+     * Returns feature flag metadata for the organization UI.
      * 
      * This data is static (identical for all organizations) and changes infrequently.
      * Clients should cache responses using the Cache-Control header.
      * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrganizationFeatureSettings.Responses.$200>
+  }
+  ['/v2/feature-settings']: {
+    /**
+     * getFeatureSettings - Get platform configuration metadata
+     * 
+     * Deprecated: use /v2/organization/feature-settings instead.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,

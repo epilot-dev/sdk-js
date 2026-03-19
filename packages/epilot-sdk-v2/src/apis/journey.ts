@@ -22,14 +22,15 @@ let _instance: Client | null = null;
 const resolve = (): Client => {
   if (!_instance) {
     const def = loadDefinition();
-    _instance = createApiClient<Client>({ definition: def });
+    _instance = createApiClient<Client>({ definition: def, apiName: 'journey' });
   }
   return _instance;
 };
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  createClient: () => createApiClient<Client>({ definition: loadDefinition() }),
+  createClient: () => createApiClient<Client>({ definition: loadDefinition(), apiName: 'journey' }),
+  apiName: 'journey',
 });
 
 /** Get the cached singleton client (lazy-initialized on first call) */

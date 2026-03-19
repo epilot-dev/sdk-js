@@ -35,7 +35,7 @@ const { data } = await organizationClient.getCurrentOrganization(...)
 - [`deleteSettingsValue`](#deletesettingsvalue)
 
 **Feature Settings**
-- [`getFeatureSettings`](#getfeaturesettings)
+- [`getOrganizationFeatureSettings`](#getorganizationfeaturesettings)
 
 **Schemas**
 - [`OrganizationId`](#organizationid)
@@ -309,14 +309,14 @@ const { data } = await client.deleteSettingsValue({
 
 ---
 
-### `getFeatureSettings`
+### `getOrganizationFeatureSettings`
 
-Get platform configuration metadata
+Get organization feature settings
 
-`GET /v2/feature-settings`
+`GET /v2/organization/feature-settings`
 
 ```ts
-const { data } = await client.getFeatureSettings()
+const { data } = await client.getOrganizationFeatureSettings()
 ```
 
 ---

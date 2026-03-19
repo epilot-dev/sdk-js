@@ -1,5 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { loadOverrides, _resetOverrides } from '../src/overrides';
 import { createRegistry, registerApi } from '../src/registry';
@@ -19,10 +21,9 @@ vi.mock('openapi-client-axios', () => {
   };
 });
 
-vi.mock('node:fs');
-
 describe('loadOverrides', () => {
   let registry: Map<string, ApiEntry>;
+  let tmpDir: string;
 
   const mockLoader = () => ({
     openapi: '3.0.0' as const,
@@ -33,72 +34,61 @@ describe('loadOverrides', () => {
   beforeEach(() => {
     _resetOverrides();
     registry = createRegistry();
-    vi.restoreAllMocks();
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sdk-overrides-test-'));
   });
 
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  const writeOverrides = (overrides: Record<string, string>) => {
+    const epilotDir = path.join(tmpDir, '.epilot');
+    fs.mkdirSync(epilotDir, { recursive: true });
+    fs.writeFileSync(path.join(epilotDir, 'sdk-overrides.json'), JSON.stringify(overrides));
+  };
+
+  const writeSpec = (filename: string, spec: Record<string, unknown>) => {
+    const epilotDir = path.join(tmpDir, '.epilot');
+    fs.mkdirSync(epilotDir, { recursive: true });
+    fs.writeFileSync(path.join(epilotDir, filename), JSON.stringify(spec));
+  };
+
   it('should register a new client from overrides file', () => {
-    const overridesJson = JSON.stringify({ 'custom-api': './custom-spec.json' });
-    const specJson = JSON.stringify({
-      openapi: '3.0.0',
-      info: { title: 'Custom API', version: '1.0.0' },
-      paths: {},
-    });
+    const spec = { openapi: '3.0.0', info: { title: 'Custom API', version: '1.0.0' }, paths: {} };
+    writeSpec('custom-spec.json', spec);
+    writeOverrides({ 'custom-api': './custom-spec.json' });
 
-    vi.mocked(fs.existsSync).mockImplementation((p) => String(p).includes('sdk-overrides.json'));
-    vi.mocked(fs.readFileSync).mockImplementation(((p: string) => {
-      if (p.includes('sdk-overrides.json')) return overridesJson;
-      if (p.includes('custom-spec.json')) return specJson;
-      throw new Error(`Unexpected read: ${p}`);
-    }) as typeof fs.readFileSync);
-
-    loadOverrides(registry);
+    loadOverrides(registry, tmpDir);
 
     expect(registry.has('custom-api')).toBe(true);
 
     const entry = registry.get('custom-api')!;
-    const spec = entry.loader();
-    expect(spec.info.title).toBe('Custom API');
+    expect(entry.loader().info.title).toBe('Custom API');
   });
 
   it('should override an existing loader', () => {
     registerApi({ registry, name: 'entity', loader: mockLoader });
 
-    const overridesJson = JSON.stringify({ entity: './custom-entity-spec.json' });
-    const specJson = JSON.stringify({
-      openapi: '3.0.0',
-      info: { title: 'Custom Entity', version: '2.0.0' },
-      paths: {},
-    });
+    const spec = { openapi: '3.0.0', info: { title: 'Custom Entity', version: '2.0.0' }, paths: {} };
+    writeSpec('custom-entity-spec.json', spec);
+    writeOverrides({ entity: './custom-entity-spec.json' });
 
-    vi.mocked(fs.existsSync).mockImplementation((p) => String(p).includes('sdk-overrides.json'));
-    vi.mocked(fs.readFileSync).mockImplementation(((p: string) => {
-      if (p.includes('sdk-overrides.json')) return overridesJson;
-      if (p.includes('custom-entity-spec.json')) return specJson;
-      throw new Error(`Unexpected read: ${p}`);
-    }) as typeof fs.readFileSync);
-
-    loadOverrides(registry);
+    loadOverrides(registry, tmpDir);
 
     const entry = registry.get('entity')!;
     expect(entry.instance).toBeNull();
-
-    const spec = entry.loader();
-    expect(spec.info.title).toBe('Custom Entity');
+    expect(entry.loader().info.title).toBe('Custom Entity');
   });
 
   it('should silently skip when no overrides file exists', () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
-
-    loadOverrides(registry);
+    loadOverrides(registry, tmpDir);
 
     expect(registry.size).toBe(0);
   });
 
   it('should only load once (idempotent)', () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
-
-    loadOverrides(registry);
-    loadOverrides(registry);
+    loadOverrides(registry, tmpDir);
+    loadOverrides(registry, tmpDir);
     // No error — second call is a no-op
   });
 });
