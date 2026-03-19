@@ -164,6 +164,24 @@
         "responses": {}
       }
     },
+    "/v2/channels/msteams/connect": {
+      "post": {
+        "operationId": "connectMsTeams",
+        "responses": {}
+      }
+    },
+    "/v2/channels/msteams/disconnect": {
+      "post": {
+        "operationId": "disconnectMsTeams",
+        "responses": {}
+      }
+    },
+    "/v2/channels/msteams/status": {
+      "get": {
+        "operationId": "getMsTeamsStatus",
+        "responses": {}
+      }
+    },
     "/v2/outlook/mailbox/connect": {
       "post": {
         "operationId": "connectOutlookMailbox",
