@@ -811,13 +811,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace GetOrganizationFeatureSettings {
-        namespace Responses {
-            export type $200 = /* Feature settings metadata served to frontend applications. */ Components.Schemas.FeatureSettings;
-            export interface $401 {
-            }
-        }
-    }
     namespace GetFeatureSettings {
         namespace Responses {
             export type $200 = /* Feature settings metadata served to frontend applications. */ Components.Schemas.FeatureSettings;
@@ -851,6 +844,13 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace GetOrganizationFeatureSettings {
+        namespace Responses {
+            export type $200 = /* Feature settings metadata served to frontend applications. */ Components.Schemas.FeatureSettings;
+            export interface $401 {
             }
         }
     }
@@ -1084,28 +1084,27 @@ export interface OperationMethods {
   ): OperationResponse<Paths.DeleteSettingsValue.Responses.$200>
   /**
    * getOrganizationFeatureSettings - Get organization feature settings
-   *
+   * 
    * Returns feature flag metadata for the organization UI.
-   *
+   * 
    * This data is static (identical for all organizations) and changes infrequently.
    * Clients should cache responses using the Cache-Control header.
-   *
+   * 
    */
   'getOrganizationFeatureSettings'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOrganizationFeatureSettings.Responses.$200>
   /**
    * getFeatureSettings - Get platform configuration metadata
-   *
-   * @deprecated Use getOrganizationFeatureSettings instead.
-   *
+   * 
+   * Deprecated: use /v2/organization/feature-settings instead.
    */
   'getFeatureSettings'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFeatureSettings.Responses.$200>
 }
 
@@ -1223,27 +1222,29 @@ export interface PathsDictionary {
   ['/v2/organization/feature-settings']: {
     /**
      * getOrganizationFeatureSettings - Get organization feature settings
-     *
+     * 
      * Returns feature flag metadata for the organization UI.
-     *
+     * 
+     * This data is static (identical for all organizations) and changes infrequently.
+     * Clients should cache responses using the Cache-Control header.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOrganizationFeatureSettings.Responses.$200>
   }
   ['/v2/feature-settings']: {
     /**
      * getFeatureSettings - Get platform configuration metadata
-     *
-     * @deprecated Use /v2/organization/feature-settings instead.
-     *
+     * 
+     * Deprecated: use /v2/organization/feature-settings instead.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFeatureSettings.Responses.$200>
   }
 }

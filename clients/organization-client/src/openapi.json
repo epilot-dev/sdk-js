@@ -415,6 +415,14 @@
         "responses": {
           "200": {
             "description": "Feature settings",
+            "headers": {
+              "cache-control": {
+                "schema": {
+                  "type": "string",
+                  "example": "public, max-age=3600"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
