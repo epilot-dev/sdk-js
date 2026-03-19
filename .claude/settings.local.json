@@ -29,7 +29,10 @@
       "Bash(du:*)",
       "Bash(wc:*)",
       "Bash(cp:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "WebFetch(domain:docs.npmjs.com)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }
