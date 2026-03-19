@@ -1,4 +1,4 @@
-# Partner API
+# Partner Directory API
 
 - **Base URL:** `https://partner-directory-api.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/partner-directory](https://docs.epilot.io/api/partner-directory)
@@ -24,7 +24,7 @@ const { data } = await partnerDirectoryClient.approvePartner(...)
 
 ## Operations
 
-**partners**
+**Partners**
 - [`approvePartner`](#approvepartner)
 - [`rejectPartner`](#rejectpartner)
 - [`searchAssignable`](#searchassignable)
@@ -34,13 +34,14 @@ const { data } = await partnerDirectoryClient.approvePartner(...)
 - [`searchGeolocationForText`](#searchgeolocationfortext)
 - [`invitePartnerV2`](#invitepartnerv2)
 
-**partner_users**
+**Partner Users**
 - [`getPartnerUsers`](#getpartnerusers)
 - [`createPartnerUser`](#createpartneruser)
 - [`deletePartnerUser`](#deletepartneruser)
 - [`getPartnerRoles`](#getpartnerroles)
 - [`createPartnerRole`](#createpartnerrole)
 - [`updatePartnerRole`](#updatepartnerrole)
+- [`deletePartnerRole`](#deletepartnerrole)
 - [`assignPartnerUserRoles`](#assignpartneruserroles)
 - [`unassignPartnerUserRoles`](#unassignpartneruserroles)
 
@@ -78,7 +79,7 @@ const { data } = await partnerDirectoryClient.approvePartner(...)
 
 ### `approvePartner`
 
-Approve partner request
+Approves a pending partner request, allowing the partner to begin collaboration.
 
 `POST /v1/partners/{id}/approve`
 
@@ -96,14 +97,14 @@ const { data } = await client.approvePartner({
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -114,7 +115,7 @@ const { data } = await client.approvePartner({
 
 ### `rejectPartner`
 
-Reject partner request
+Rejects a pending partner request, declining the partnership.
 
 `POST /v1/partners/{id}/reject`
 
@@ -132,14 +133,14 @@ const { data } = await client.rejectPartner({
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -150,7 +151,7 @@ const { data } = await client.rejectPartner({
 
 ### `searchAssignable`
 
-searchAssignables
+Search for users and organizations that can be assigned to tasks, workflows, or entities.
 
 `POST /v1/partners/assignables:search`
 
@@ -158,11 +159,11 @@ searchAssignables
 const { data } = await client.searchAssignable(
   null,
   {
-    q: '',
+    q: 'john',
     from: 0,
     size: 25,
-    org_ids: ['123'],
-    portalUsersEntityIdScope: '',
+    org_ids: ['123', '456'],
+    portalUsersEntityIdScope: 'f7c22299-ca72-4bca-8538-0a88eeefc947',
     types: ['user', 'partner_user', 'partner_organization', 'ecp', 'group']
   },
 )
@@ -173,11 +174,11 @@ const { data } = await client.searchAssignable(
 
 ```json
 {
-  "hits": 25,
+  "hits": 42,
   "results": [
     {
       "type": "user",
-      "display_name": "Example User",
+      "display_name": "John Smith",
       "image_uri": {
         "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
         "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
@@ -187,7 +188,7 @@ const { data } = await client.searchAssignable(
       "activated_at": "2022-02-08T04:44:32.246Z",
       "status": "Active",
       "user_id": "456",
-      "email": "example@example.com"
+      "email": "john.smith@example.com"
     }
   ]
 }
@@ -199,7 +200,7 @@ const { data } = await client.searchAssignable(
 
 ### `batchGetAssignable`
 
-batchGet
+Retrieve multiple assignable users or groups by their IDs in a single request.
 
 `POST /v1/partners/assignables:batchGet`
 
@@ -208,9 +209,9 @@ const { data } = await client.batchGetAssignable(
   null,
   [
     {
-      user_id: 'string',
-      org_id: 'string',
-      group_id: 'string'
+      user_id: '456',
+      org_id: '123',
+      group_id: 'group-789'
     }
   ],
 )
@@ -221,11 +222,11 @@ const { data } = await client.batchGetAssignable(
 
 ```json
 {
-  "hits": 25,
+  "hits": 3,
   "results": [
     {
       "type": "user",
-      "display_name": "Example User",
+      "display_name": "John Smith",
       "image_uri": {
         "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
         "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
@@ -235,7 +236,7 @@ const { data } = await client.batchGetAssignable(
       "activated_at": "2022-02-08T04:44:32.246Z",
       "status": "Active",
       "user_id": "456",
-      "email": "example@example.com"
+      "email": "john.smith@example.com"
     }
   ]
 }
@@ -247,7 +248,7 @@ const { data } = await client.batchGetAssignable(
 
 ### `getPartnerByToken`
 
-Get partner by token
+Retrieves partner information using an invitation token.
 
 `GET /v1/partner-directory/public/getPartnerByToken`
 
@@ -265,14 +266,14 @@ const { data } = await client.getPartnerByToken({
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -283,7 +284,7 @@ const { data } = await client.getPartnerByToken({
 
 ### `activatePartner`
 
-Activate partner using an invite token
+Activates a partner account using an invitation token.
 
 `POST /v1/partner-directory/public/activate`
 
@@ -293,9 +294,9 @@ const { data } = await client.activatePartner(
     token: 'example',
   },
   {
-    company_name: 'Company name',
-    signed_up_email: 'user@example.com',
-    organization_id: 'string'
+    company_name: 'Acme Solar GmbH',
+    signed_up_email: 'admin@acme-solar.de',
+    organization_id: '456'
   },
 )
 ```
@@ -304,7 +305,7 @@ const { data } = await client.activatePartner(
 
 ### `searchGeolocationForText`
 
-Converts a given string, in the format of an address, to geo-location latitude and longitude
+Converts an address string to geographic coordinates (latitude and longitude).
 
 `POST /v1/geolocation/text:search`
 
@@ -324,8 +325,8 @@ const { data } = await client.searchGeolocationForText(
 {
   "lat": 49.013,
   "lng": 12.101,
-  "addressLabel": "string",
-  "relevance": 0
+  "addressLabel": "Auweg 1, 93055 Regensburg, Germany",
+  "relevance": 0.95
 }
 ```
 
@@ -335,7 +336,7 @@ const { data } = await client.searchGeolocationForText(
 
 ### `invitePartnerV2`
 
-Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration
+Sends an invitation email to a partner organization to begin collaboration.
 
 `POST /v2/partners/{id}/invite`
 
@@ -345,7 +346,7 @@ const { data } = await client.invitePartnerV2(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    language: 'en'
+    language: 'de'
   },
 )
 ```
@@ -358,14 +359,14 @@ const { data } = await client.invitePartnerV2(
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -376,7 +377,7 @@ const { data } = await client.invitePartnerV2(
 
 ### `getPartnerUsers`
 
-Get all users for a partner organization with their roles
+Retrieves all users belonging to a partner organization along with their assigned roles.
 
 `GET /v2/partners/{orgId}/users`
 
@@ -395,7 +396,7 @@ const { data } = await client.getPartnerUsers({
     {
       "id": "456",
       "name": "John Doe",
-      "email": "user@example.com",
+      "email": "user@partner.com",
       "status": "Active",
       "image": {
         "original": "https://example.com/path",
@@ -403,9 +404,9 @@ const { data } = await client.getPartnerUsers({
       },
       "roles": [
         {
-          "id": "role-123",
-          "slug": "admin",
-          "name": "Administrator"
+          "id": "123:partner_admin",
+          "slug": "partner_admin",
+          "name": "Partner Administrator"
         }
       ]
     }
@@ -419,7 +420,7 @@ const { data } = await client.getPartnerUsers({
 
 ### `createPartnerUser`
 
-Create a new user in a partner organization
+Creates a new user in a partner organization.
 
 `POST /v2/partners/{orgId}/users`
 
@@ -429,9 +430,9 @@ const { data } = await client.createPartnerUser(
     orgId: 'example',
   },
   {
-    email: 'user@example.com',
-    language: 'en',
-    roles: ['role-123', 'role-456']
+    email: 'newuser@partner.com',
+    language: 'de',
+    roles: ['123:partner_viewer']
   },
 )
 ```
@@ -454,7 +455,7 @@ const { data } = await client.createPartnerUser(
 
 ### `deletePartnerUser`
 
-Delete a user from a partner organization
+Removes a user from a partner organization.
 
 `DELETE /v2/partners/{orgId}/users/{userId}`
 
@@ -478,7 +479,7 @@ const { data } = await client.deletePartnerUser({
 
 ### `getPartnerRoles`
 
-Get all roles for a partner organization
+Retrieves all roles defined for a partner organization.
 
 `GET /v2/partners/{orgId}/roles`
 
@@ -495,10 +496,24 @@ const { data } = await client.getPartnerRoles({
 {
   "results": [
     {
-      "id": "role-123",
-      "slug": "admin",
-      "name": "Administrator",
-      "type": "share_role"
+      "id": "123:partner_admin",
+      "slug": "partner_admin",
+      "name": "Partner Administrator",
+      "type": "share_role",
+      "grants": [
+        {
+          "action": "entity-read",
+          "resource": "entity:123:contact:*",
+          "effect": "allow",
+          "conditions": [
+            {
+              "attribute": "workflows.primary.task_name",
+              "operation": "equals",
+              "values": ["Qualification"]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
@@ -510,7 +525,7 @@ const { data } = await client.getPartnerRoles({
 
 ### `createPartnerRole`
 
-Create a role for a partner organization
+Creates a new role for a partner organization.
 
 `POST /v2/partners/{orgId}/roles`
 
@@ -520,12 +535,12 @@ const { data } = await client.createPartnerRole(
     orgId: 'example',
   },
   {
-    name: 'Partner Admin',
+    name: 'Partner Administrator',
     slug: 'partner_admin',
     grants: [
       {
         action: 'entity-read',
-        resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+        resource: 'entity:123:contact:*',
         effect: 'allow',
         conditions: [
           {
@@ -537,7 +552,7 @@ const { data } = await client.createPartnerRole(
         dependencies: [
           {
             action: 'entity-read',
-            resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+            resource: 'entity:123:contact:*',
             effect: 'allow',
             conditions: [
               {
@@ -559,10 +574,24 @@ const { data } = await client.createPartnerRole(
 
 ```json
 {
-  "id": "role-123",
-  "slug": "admin",
-  "name": "Administrator",
-  "type": "share_role"
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -572,7 +601,7 @@ const { data } = await client.createPartnerRole(
 
 ### `updatePartnerRole`
 
-Update a role for a partner organization
+Updates an existing role in a partner organization.
 
 `PUT /v2/partners/{orgId}/roles/{roleId}`
 
@@ -586,7 +615,7 @@ const { data } = await client.updatePartnerRole(
     grants: [
       {
         action: 'entity-read',
-        resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+        resource: 'entity:123:contact:*',
         effect: 'allow',
         conditions: [
           {
@@ -598,7 +627,7 @@ const { data } = await client.updatePartnerRole(
         dependencies: [
           {
             action: 'entity-read',
-            resource: 'entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947',
+            resource: 'entity:123:contact:*',
             effect: 'allow',
             conditions: [
               {
@@ -623,10 +652,67 @@ const { data } = await client.updatePartnerRole(
 
 ```json
 {
-  "id": "role-123",
-  "slug": "admin",
-  "name": "Administrator",
-  "type": "share_role"
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deletePartnerRole`
+
+Delete a role from a partner organization
+
+`DELETE /v2/partners/{orgId}/roles/{roleId}`
+
+```ts
+const { data } = await client.deletePartnerRole({
+  orgId: 'example',
+  roleId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -636,7 +722,7 @@ const { data } = await client.updatePartnerRole(
 
 ### `assignPartnerUserRoles`
 
-Assign roles to a user in a partner organization
+Assigns one or more roles to a user in a partner organization.
 
 `POST /v2/partners/{orgId}/users/{userId}/roles`
 
@@ -647,7 +733,7 @@ const { data } = await client.assignPartnerUserRoles(
     userId: 'example',
   },
   {
-    roleIds: ['role-123', 'role-456']
+    roleIds: ['123:partner_admin', '123:partner_viewer']
   },
 )
 ```
@@ -674,7 +760,7 @@ const { data } = await client.assignPartnerUserRoles(
 
 ### `unassignPartnerUserRoles`
 
-Unassign roles from a user in a partner organization
+Removes one or more roles from a user in a partner organization.
 
 `DELETE /v2/partners/{orgId}/users/{userId}/roles`
 
@@ -685,7 +771,7 @@ const { data } = await client.unassignPartnerUserRoles(
     userId: 'example',
   },
   {
-    roleIds: ['role-123', 'role-456']
+    roleIds: ['123:partner_admin', '123:partner_viewer']
   },
 )
 ```
@@ -714,17 +800,26 @@ const { data } = await client.unassignPartnerUserRoles(
 
 ### `InviteToken`
 
+A secure token used for partner invitation and activation. Sent via email to the invited partner.
+
 ```ts
 type InviteToken = string
 ```
 
 ### `Partner`
 
+Represents a partner organization in the partner directory.
+
+Partners go through a lifecycle from invitation to active collaboration:
+- **Pending**: Initial state when partner record is created
+- **Invited**: Invitation email has been sent to the partner
+- **Request**: Partner has requested to join 
+
 ```ts
 type Partner = {
   id?: string
   organization_id?: string
-  created_at?: string
+  created_at?: string // date-time
   description?: string
   company_name?: string
   invitation_token?: string
@@ -739,17 +834,23 @@ type Partner = {
 
 ### `PartnerId`
 
+Unique identifier for a partner record (UUID format)
+
 ```ts
 type PartnerId = string
 ```
 
 ### `OrganizationId`
 
+Unique identifier for an organization in the epilot platform
+
 ```ts
 type OrganizationId = string
 ```
 
 ### `ActivatePartnerPayload`
+
+Payload for activating a partner account using an invitation token
 
 ```ts
 type ActivatePartnerPayload = {
@@ -761,6 +862,8 @@ type ActivatePartnerPayload = {
 
 ### `PartnerInvitationPayload`
 
+Configuration options for sending a partner invitation
+
 ```ts
 type PartnerInvitationPayload = {
   language?: "en" | "de"
@@ -768,6 +871,10 @@ type PartnerInvitationPayload = {
 ```
 
 ### `Assignable`
+
+A user, organization, or group that can be assigned to tasks, workflows, or entities.
+The `type` field discriminates between different assignable types.
+
 
 ```ts
 type Assignable = {
@@ -778,11 +885,11 @@ type Assignable = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   user_id?: string
-  email?: string
+  email?: string // email
 } | {
   type: "partner_user"
   display_name: string
@@ -791,12 +898,12 @@ type Assignable = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   partner_id?: string
   user_id?: string
-  email?: string
+  email?: string // email
 } | {
   type: "partner_organization"
   display_name: string
@@ -805,11 +912,11 @@ type Assignable = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   partner_id: string
-  email?: string
+  email?: string // email
   geolocations?: Array<{
     address?: {
       street?: { ... }
@@ -833,27 +940,29 @@ type Assignable = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   user_id: string
-  email?: string
+  email?: string // email
 } | {
-  type: string
+  type: "group"
   display_name: string
   image_uri?: {
     original: string // uri
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   group_id?: string
 }
 ```
 
 ### `BaseAssignable`
+
+Common properties shared by all assignable types
 
 ```ts
 type BaseAssignable = {
@@ -864,13 +973,15 @@ type BaseAssignable = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
 }
 ```
 
 ### `AssignableUser`
+
+A user within the caller's organization that can be assigned to tasks or entities
 
 ```ts
 type AssignableUser = {
@@ -881,15 +992,17 @@ type AssignableUser = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   user_id?: string
-  email?: string
+  email?: string // email
 }
 ```
 
 ### `AssignablePartnerUser`
+
+A user from a partner organization that can be assigned to shared tasks or entities
 
 ```ts
 type AssignablePartnerUser = {
@@ -900,34 +1013,40 @@ type AssignablePartnerUser = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   partner_id?: string
   user_id?: string
-  email?: string
+  email?: string // email
 }
 ```
 
 ### `AssignableGroup`
 
+A user group that can be assigned to tasks or entities. All members of the group will be notified/assigned.
+
 ```ts
 type AssignableGroup = {
-  type: string
+  type: "group"
   display_name: string
   image_uri?: {
     original: string // uri
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   group_id?: string
 }
 ```
 
 ### `AssignableOrganization`
+
+A partner organization that can be assigned to tasks or entities at the organization level.
+Useful when you want to assign work to a partner company rather than a specific individual.
+
 
 ```ts
 type AssignableOrganization = {
@@ -938,11 +1057,11 @@ type AssignableOrganization = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   partner_id: string
-  email?: string
+  email?: string // email
   geolocations?: Array<{
     address?: {
       street?: { ... }
@@ -963,6 +1082,10 @@ type AssignableOrganization = {
 
 ### `AssignableEcpPlaceholder`
 
+An End Customer Portal (ECP) user that can be assigned to tasks or entities.
+These are external users who access the system through the customer portal.
+
+
 ```ts
 type AssignableEcpPlaceholder = {
   type: "ecp"
@@ -972,15 +1095,17 @@ type AssignableEcpPlaceholder = {
     thumbnail_32?: string // uri
   }
   org_id: string
-  created_at?: string
-  activated_at?: string
+  created_at?: string // date-time
+  activated_at?: string // date-time
   status?: "Active" | "Pending" | "Deactivated" | "Deleted"
   user_id: string
-  email?: string
+  email?: string // email
 }
 ```
 
 ### `SearchGeolocation`
+
+Request payload for geocoding an address to coordinates
 
 ```ts
 type SearchGeolocation = {
@@ -989,6 +1114,8 @@ type SearchGeolocation = {
 ```
 
 ### `Geolocation`
+
+Geographic coordinates with optional metadata
 
 ```ts
 type Geolocation = {
@@ -1001,6 +1128,8 @@ type Geolocation = {
 
 ### `Address`
 
+Structured postal address
+
 ```ts
 type Address = {
   street?: string
@@ -1012,6 +1141,8 @@ type Address = {
 ```
 
 ### `AddressGeolocation`
+
+Combined address and geographic coordinates for a location
 
 ```ts
 type AddressGeolocation = {
@@ -1030,6 +1161,8 @@ type AddressGeolocation = {
 ```
 
 ### `PartnerUser`
+
+A user within a partner organization, including their assigned roles
 
 ```ts
 type PartnerUser = {
@@ -1051,6 +1184,8 @@ type PartnerUser = {
 
 ### `CreatePartnerUserPayload`
 
+Request payload for creating a new user in a partner organization
+
 ```ts
 type CreatePartnerUserPayload = {
   email: string // email
@@ -1060,6 +1195,8 @@ type CreatePartnerUserPayload = {
 ```
 
 ### `CreatePartnerRolePayload`
+
+Request payload for creating a new role in a partner organization
 
 ```ts
 type CreatePartnerRolePayload = {
@@ -1082,6 +1219,8 @@ type CreatePartnerRolePayload = {
 
 ### `UpdatePartnerRolePayload`
 
+Request payload for updating an existing role in a partner organization
+
 ```ts
 type UpdatePartnerRolePayload = {
   grants: Array<{
@@ -1098,6 +1237,11 @@ type UpdatePartnerRolePayload = {
 
 ### `Grant`
 
+A permission grant that allows or denies a specific action on a resource.
+
+Grants are the building blocks of roles and define what users can do within the system.
+
+
 ```ts
 type Grant = {
   action: string
@@ -1108,6 +1252,8 @@ type Grant = {
 ```
 
 ### `GrantWithDependencies`
+
+A grant with optional dependent grants that are automatically included when this grant is assigned
 
 ```ts
 type GrantWithDependencies = {
@@ -1126,31 +1272,41 @@ type GrantWithDependencies = {
 
 ### `GrantCondition`
 
+An additional condition that must be met for a grant to apply.
+Conditions allow fine-grained control over when permissions are active.
+
+
 ```ts
 type GrantCondition = object
 ```
 
 ### `EqualsCondition`
 
-Check if attribute equals to any of the values
+A condition that checks if an attribute equals one of the specified values.
+The grant only applies when the condition is satisfied.
+
 
 ```ts
 type EqualsCondition = {
   attribute: string
   operation: "equals"
-  values: unknown[]
+  values: string[]
 }
 ```
 
 ### `RoleId`
 
+Unique identifier for a role, combining organization ID and role slug.
 Format: `<organization_id>`:`<slug>`
+
 
 ```ts
 type RoleId = string
 ```
 
 ### `BaseRoleForCreate`
+
+Base schema for creating or updating a role
 
 ```ts
 type BaseRoleForCreate = {
@@ -1168,16 +1324,26 @@ type BaseRoleForCreate = {
 
 ### `PartnerRole`
 
+A role definition for users in a partner organization
+
 ```ts
 type PartnerRole = {
   id: string
   slug: string
   name: string
   type?: string
+  grants: Array<{
+    action: string
+    resource?: string
+    effect?: "allow" | "deny"
+    conditions?: object[]
+  }>
 }
 ```
 
 ### `AssignRolesPayload`
+
+Request payload for assigning or unassigning roles to/from a user
 
 ```ts
 type AssignRolesPayload = {
@@ -1187,11 +1353,13 @@ type AssignRolesPayload = {
 
 ### `User`
 
+A user account in the epilot platform
+
 ```ts
 type User = {
   id?: string
   email?: string // email
   display_name?: string
-  status?: string
+  status?: "Active" | "Pending" | "Deactivated"
 }
 ```
