@@ -1,6 +1,4 @@
 /* Auto-copied from email-settings-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -780,6 +778,18 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ConnectMsTeams {
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+                connected_at?: string; // date-time
+            }
+            export interface $400 {
+                error?: string;
+                message?: string;
+            }
+        }
+    }
     namespace ConnectOutlook {
         namespace Responses {
             export interface $200 {
@@ -900,6 +910,13 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DisconnectMsTeams {
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+            }
+        }
+    }
     namespace DisconnectOutlook {
         export interface RequestBody {
             /**
@@ -997,6 +1014,24 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetMsTeamsStatus {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the Teams channel is connected
+                 */
+                connected?: boolean;
+                /**
+                 * When the Teams channel was connected
+                 */
+                connected_at?: string; // date-time
+                /**
+                 * User ID who connected the Teams channel
+                 */
+                connected_by_user_id?: string;
+            }
+        }
+    }
     namespace GetOutlookConnectionStatus {
         namespace Responses {
             export interface $200 {
@@ -1008,6 +1043,10 @@ export declare namespace Paths {
                  * Whether any connections exist
                  */
                 has_connections: boolean;
+                /**
+                 * Whether Microsoft Teams features are enabled for this organization
+                 */
+                teams_enabled?: boolean;
             }
             export interface $400 {
             }
@@ -1523,6 +1562,40 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
   /**
+   * connectMsTeams - connectMsTeams
+   * 
+   * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+   * Requires an active Microsoft 365 / Outlook connection.
+   * 
+   */
+  'connectMsTeams'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectMsTeams.Responses.$200>
+  /**
+   * disconnectMsTeams - disconnectMsTeams
+   * 
+   * Disconnects Microsoft Teams channel for the organization.
+   * 
+   */
+  'disconnectMsTeams'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectMsTeams.Responses.$200>
+  /**
+   * getMsTeamsStatus - getMsTeamsStatus
+   * 
+   * Returns the connection status of the Microsoft Teams channel for the organization.
+   * 
+   */
+  'getMsTeamsStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMsTeamsStatus.Responses.$200>
+  /**
    * connectOutlookMailbox - connectOutlookMailbox
    * 
    * Connects an Outlook mailbox:
@@ -1998,6 +2071,46 @@ export interface PathsDictionary {
       data?: Paths.DisconnectOutlook.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
+  }
+  ['/v2/channels/msteams/connect']: {
+    /**
+     * connectMsTeams - connectMsTeams
+     * 
+     * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+     * Requires an active Microsoft 365 / Outlook connection.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectMsTeams.Responses.$200>
+  }
+  ['/v2/channels/msteams/disconnect']: {
+    /**
+     * disconnectMsTeams - disconnectMsTeams
+     * 
+     * Disconnects Microsoft Teams channel for the organization.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectMsTeams.Responses.$200>
+  }
+  ['/v2/channels/msteams/status']: {
+    /**
+     * getMsTeamsStatus - getMsTeamsStatus
+     * 
+     * Returns the connection status of the Microsoft Teams channel for the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMsTeamsStatus.Responses.$200>
   }
   ['/v2/outlook/mailbox/connect']: {
     /**

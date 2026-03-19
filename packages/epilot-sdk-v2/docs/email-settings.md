@@ -55,6 +55,11 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`getConnectedOutlookEmails`](#getconnectedoutlookemails)
 - [`outlookOAuthCallback`](#outlookoauthcallback)
 
+**Channels**
+- [`connectMsTeams`](#connectmsteams)
+- [`disconnectMsTeams`](#disconnectmsteams)
+- [`getMsTeamsStatus`](#getmsteamsstatus)
+
 **Settings**
 - [`getSettings`](#getsettings)
 - [`addSetting`](#addsetting)
@@ -608,7 +613,8 @@ const { data } = await client.getOutlookConnectionStatus()
       "is_token_valid": true
     }
   ],
-  "has_connections": true
+  "has_connections": true,
+  "teams_enabled": true
 }
 ```
 
@@ -640,6 +646,79 @@ const { data } = await client.disconnectOutlook(
   "success": true,
   "tenant_id": "string",
   "affected_shared_inboxes": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `connectMsTeams`
+
+Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+Requires an active Microsoft 365 / Outlook connection.
+
+`POST /v2/channels/msteams/connect`
+
+```ts
+const { data } = await client.connectMsTeams()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "connected": true,
+  "connected_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `disconnectMsTeams`
+
+Disconnects Microsoft Teams channel for the organization.
+
+`POST /v2/channels/msteams/disconnect`
+
+```ts
+const { data } = await client.disconnectMsTeams()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "connected": true
+}
+```
+
+</details>
+
+---
+
+### `getMsTeamsStatus`
+
+Returns the connection status of the Microsoft Teams channel for the organization.
+
+`GET /v2/channels/msteams/status`
+
+```ts
+const { data } = await client.getMsTeamsStatus()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "connected": true,
+  "connected_at": "1970-01-01T00:00:00.000Z",
+  "connected_by_user_id": "string"
 }
 ```
 
