@@ -5,6 +5,7 @@ import type { TokenArg } from './authorize';
 import type { SDKClientMap } from './client-map';
 import { createApiClient } from './client-factory';
 import { help } from './help';
+import { openapi } from './openapi';
 import { loadOverrides } from './overrides';
 import { createApiHandle } from './proxy';
 import { createRegistry, resetAllClients, resolveClient } from './registry';
@@ -36,6 +37,8 @@ export type EpilotSDK = {
   largeResponse: (config: LargeResponseConfig) => void;
   /** Get markdown docs. No args = general SDK help, with API name = API-specific docs */
   help: (apiName?: string) => Promise<string>;
+  /** Get the full OpenAPI specification for an API (lazy-loaded) */
+  openapi: (apiName: string) => Promise<import('openapi-client-axios').Document>;
 } & {
   [K in keyof SDKClientMap]: ApiHandle<SDKClientMap[K]>;
 } & Record<string, ApiHandle<AxiosInstance>>;
@@ -63,7 +66,7 @@ export const createSDK = (): EpilotSDK => {
 
     return createApiHandle({
       resolveClient: () => resolveClient({ registry, name, state }),
-      createClient: () => createApiClient({ definition: entry.loader() }),
+      createClient: () => createApiClient({ definition: entry.loader(), apiName: name }),
       apiName: name,
     });
   };
@@ -119,6 +122,9 @@ export const createSDK = (): EpilotSDK => {
 
         case 'help':
           return (apiName?: string) => help(apiName);
+
+        case 'openapi':
+          return (apiName: string) => openapi(apiName);
 
         case 'then':
         case 'catch':

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -293,12 +293,13 @@
     "./workflow-definition/openapi.json": "./definitions/workflow-definition.json"
   },
   "scripts": {
-    "generate": "tsx ../../scripts/generate-sdk-v2.ts",
+    "generate": "tsx ../../scripts/generate-sdk-v2.ts && pnpm lint:fix",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check src",
+    "lint:fix": "biome check src --fix",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

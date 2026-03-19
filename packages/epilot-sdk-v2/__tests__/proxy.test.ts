@@ -12,12 +12,20 @@ vi.mock('../src/client-factory', () => ({
 }));
 
 describe('createApiHandle', () => {
-  const createMockClient = () =>
+  const createMockClient = (opts?: { withMeta?: boolean }) =>
     ({
       defaults: { headers: { common: {} } },
       interceptors: { request: { use: vi.fn() } },
       getEntity: vi.fn().mockResolvedValue({ data: { id: '123' } }),
       listItems: vi.fn().mockReturnValue({ data: [1, 2, 3] }),
+      ...(opts?.withMeta && {
+        help: vi.fn().mockResolvedValue('# Entity API'),
+        openapi: vi.fn().mockResolvedValue({
+          openapi: '3.0.3',
+          info: { title: 'entity API', version: '1.0.0' },
+          paths: { '/test': {} },
+        }),
+      }),
     }) as unknown as AxiosInstance;
 
   it('should expose getClient() that returns the singleton', () => {
@@ -72,6 +80,23 @@ describe('createApiHandle', () => {
     handle.getClient();
     // Each call invokes resolveClient — the registry is responsible for caching
     expect(callCount).toBe(3);
+  });
+
+  it('should forward help() and openapi() from the client instance', async () => {
+    const mockClient = createMockClient({ withMeta: true });
+    const handle = createApiHandle({
+      resolveClient: () => mockClient,
+      createClient: () => mockClient,
+      apiName: 'entity',
+    });
+
+    const spec = await handle.openapi();
+    expect(spec).toBeDefined();
+    expect(spec.openapi).toBe('3.0.3');
+    expect(spec.info.title).toBe('entity API');
+
+    const helpText = await handle.help();
+    expect(helpText).toBe('# Entity API');
   });
 
   it('should NOT be thenable (no accidental await)', () => {

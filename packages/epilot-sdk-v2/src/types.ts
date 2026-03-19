@@ -46,6 +46,8 @@ export type ApiHandle<T extends AxiosInstance = AxiosInstance> = {
   getClient: () => T;
   /** Create a fresh client instance (not cached) */
   createClient: () => T;
+  /** Get the full OpenAPI specification document (lazy-loaded) */
+  openapi: () => Promise<Document>;
 } & {
   /** Operation methods forwarded to the lazy singleton */
   [K in keyof T]: T[K];

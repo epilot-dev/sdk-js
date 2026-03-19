@@ -33,6 +33,7 @@ export const resolveClient = (params: {
       definition,
       token: state.token,
       headers: state.globalHeaders,
+      apiName: name,
     });
 
     // Apply large response interceptor for S3-backed payloads

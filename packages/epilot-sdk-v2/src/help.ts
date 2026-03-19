@@ -3,20 +3,12 @@
  * Each doc is loaded via dynamic import() so only the requested doc affects bundle size.
  */
 
-const docsCache = new Map<string, string>();
-
 const kebabCase = (str: string) => str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 
 const resolveDoc = async (filename: string): Promise<string> => {
-  if (docsCache.has(filename)) {
-    return docsCache.get(filename)!;
-  }
-
   try {
     const mod = await import(`./docs/${filename}`);
-    const content = (mod.default ?? mod) as string;
-    docsCache.set(filename, content);
-    return content;
+    return (mod.default ?? mod) as string;
   } catch {
     return `No documentation found for "${filename}". Run help() to see available APIs.`;
   }

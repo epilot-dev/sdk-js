@@ -88,6 +88,30 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.workflowDefinition` | `@epilot/sdk/workflow-definition` | [docs](./docs/workflow-definition.md) |
 <!-- /api-reference-table -->
 
+## OpenAPI Spec
+
+Retrieve the full OpenAPI specification for any API at runtime. The spec is lazy-loaded on first call and cached.
+
+```ts
+import { epilot } from '@epilot/sdk'
+
+// Via API handle
+const entitySpec = await epilot.entity.openapi()
+console.log(entitySpec.info.title) // "Entity API"
+console.log(entitySpec.paths)       // all paths with full schemas
+
+// Via top-level method
+const spec = await epilot.openapi('entity')
+```
+
+For tree-shakeable imports:
+
+```ts
+import { openapi } from '@epilot/sdk/entity'
+
+const spec = await openapi()
+```
+
 ## Explicit Client Access
 
 ```ts

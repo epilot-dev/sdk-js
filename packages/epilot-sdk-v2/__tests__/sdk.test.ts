@@ -128,4 +128,13 @@ describe('createSDK', () => {
   it('should return undefined for unregistered API names', () => {
     expect((sdk as any).nonexistent).toBeUndefined();
   });
+
+  it('should expose openapi() at top level', () => {
+    expect(sdk.openapi).toBeTypeOf('function');
+  });
+
+  it('should expose openapi() on api handles', () => {
+    const handle = sdk.entity;
+    expect(handle.openapi).toBeTypeOf('function');
+  });
 });
