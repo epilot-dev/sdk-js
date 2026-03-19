@@ -1,33 +1,28 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Partner API",
-    "description": "Management of Partners in epilot",
-    "version": "1.5.0"
+    "title": "Partner Directory API",
+    "description": "The Partner Directory API enables organizations to manage partnerships within the epilot platform.\n\n- **Partner Directory Management**: Maintain a directory of partner organizations that collaborate with your business\n- **Partner Invitations**: Invite external organizations to become partners through a secure token-based invitation flow\n- **Assignable Search**: Find users and organizations that can be assigned to tasks, workflows, or entities across your organization and partners\n- **Partner User Management**: Manage users within partner organizations, including creating users and assigning roles\n- **Geolocation Services**: Convert addresses to geographic coordinates for partner location-based features\n",
+    "version": "1.7.0"
   },
   "tags": [
     {
-      "name": "partners",
+      "name": "Partners",
       "x-displayName": "Partners",
-      "description": "Partner operations"
+      "description": "Operations for managing the partner directory including:\n- Inviting new partners to collaborate\n- Approving or rejecting partner requests\n- Searching for assignable users and organizations across partners\n- Looking up partners by invitation token\n- Converting addresses to geolocation coordinates for partner location features\n"
     },
     {
-      "name": "partner_users",
+      "name": "Partner Users",
       "x-displayName": "Partner Users",
-      "description": "Partner user management operations"
-    },
-    {
-      "name": "partner_schema",
-      "x-displayName": "Partner",
-      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Partner\" />\n"
+      "description": "Operations for managing users within partner organizations:\n- Listing users in a partner organization\n- Creating new users in partner organizations\n- Deleting users from partner organizations\n- Managing roles and role assignments for partner users\n\nThese operations allow Vendor organizations to control access and permissions for users in their partner network.\n"
     }
   ],
   "x-tagGroups": [
     {
       "name": "APIs",
       "tags": [
-        "partners",
-        "partner_users"
+        "Partners",
+        "Partner Users"
       ]
     },
     {
@@ -51,9 +46,9 @@
         "operationId": "approvePartner",
         "summary": "approvePartner",
         "tags": [
-          "partners"
+          "Partners"
         ],
-        "description": "Approve partner request",
+        "description": "Approves a pending partner request, allowing the partner to begin collaboration.\n\nWhen a partner requests to join your organization's partner network, this endpoint\nis used to approve the request and activate the partnership.\n",
         "parameters": [
           {
             "in": "path",
@@ -62,22 +57,33 @@
               "$ref": "#/components/schemas/PartnerId"
             },
             "required": true,
-            "description": "The Id of partner"
+            "description": "The unique identifier of the partner to approve"
           }
         ],
         "responses": {
           "201": {
-            "description": "Approve successfully",
+            "description": "Partner approved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Partner"
+                },
+                "example": {
+                  "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
+                  "organization_id": "123",
+                  "company_name": "Acme Solar GmbH",
+                  "email": "partner@acme-solar.de",
+                  "status": "Invited",
+                  "created_at": "2024-01-15T10:30:00.000Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to approve"
+            "description": "Unable to approve partner - partner may already be approved or in an invalid state"
+          },
+          "404": {
+            "description": "Partner not found"
           }
         }
       }
@@ -87,9 +93,9 @@
         "operationId": "rejectPartner",
         "summary": "rejectPartner",
         "tags": [
-          "partners"
+          "Partners"
         ],
-        "description": "Reject partner request",
+        "description": "Rejects a pending partner request, declining the partnership.\n\nWhen a partner requests to join your organization's partner network, this endpoint\nis used to reject the request if the partnership is not desired.\n",
         "parameters": [
           {
             "in": "path",
@@ -98,22 +104,33 @@
               "$ref": "#/components/schemas/PartnerId"
             },
             "required": true,
-            "description": "The Id of partner"
+            "description": "The unique identifier of the partner to reject"
           }
         ],
         "responses": {
           "200": {
-            "description": "Invited successfully",
+            "description": "Partner rejected successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Partner"
+                },
+                "example": {
+                  "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
+                  "organization_id": "123",
+                  "company_name": "Declined Partner Co",
+                  "email": "partner@declined.de",
+                  "status": "Rejected",
+                  "created_at": "2024-01-15T10:30:00.000Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to reject"
+            "description": "Unable to reject partner - partner may already be rejected or in an invalid state"
+          },
+          "404": {
+            "description": "Partner not found"
           }
         }
       }
@@ -121,10 +138,10 @@
     "/v1/partners/assignables:search": {
       "post": {
         "operationId": "searchAssignable",
-        "summary": "searchAssignables",
-        "description": "Search for assignable users/organizations from this organization and Partners\n\nResults can include:\n - Users in your organization\n - Users in partner organizations\n - Partner organizations\n",
+        "summary": "searchAssignable",
+        "description": "Search for users and organizations that can be assigned to tasks, workflows, or entities.\n\nThis endpoint searches across your organization and all connected partner organizations\nto find assignable resources. Use this when you need to assign someone to a task,\nworkflow step, or entity and want to include partners in the search.\n\n**Results can include:**\n- `user`: Users in your organization\n- `partner_user`: Users in partner organizations\n- `partner_organization`: Partner organizations themselves (for organization-level assignments)\n- `ecp`: End Customer Portal users\n- `group`: User groups\n- `parent_organization_user`: Users from parent organization (for sub-organizations)\n\n**Pagination:** Use `from` and `size` parameters for paginated results.\n",
         "tags": [
-          "partners"
+          "Partners"
         ],
         "requestBody": {
           "content": {
@@ -133,37 +150,45 @@
                 "type": "object",
                 "properties": {
                   "q": {
-                    "description": "search query to filter results",
+                    "description": "Search query string to filter results by name or email",
                     "type": "string",
-                    "default": ""
+                    "default": "",
+                    "example": "john"
                   },
                   "from": {
-                    "description": "start results from an offset for pagination",
+                    "description": "Starting offset for pagination (zero-based index)",
                     "type": "integer",
                     "minimum": 0,
-                    "default": 0
+                    "default": 0,
+                    "example": 0
                   },
                   "size": {
-                    "description": "limit number of results to return",
+                    "description": "Maximum number of results to return per page",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 1000,
-                    "default": 25
+                    "default": 25,
+                    "example": 25
                   },
                   "org_ids": {
-                    "description": "filter results to specific organizations. defaults to all orgs",
+                    "description": "Filter results to specific organization IDs. If not provided, searches all accessible organizations including partners.",
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/OrganizationId"
-                    }
+                    },
+                    "example": [
+                      "123",
+                      "456"
+                    ]
                   },
                   "portalUsersEntityIdScope": {
-                    "description": "Optional parameter if 'types' contains 'ecp' type user. Portal Users will only be fetched in the context of an entity, fetching the related ones through relations and not returning placeholders anymore.",
+                    "description": "Entity ID to scope portal user search. Required when `types` includes `ecp`.\nWhen provided, only portal users related to the specified entity are returned\ninstead of placeholder users.\n",
                     "type": "string",
-                    "default": ""
+                    "default": "",
+                    "example": "f7c22299-ca72-4bca-8538-0a88eeefc947"
                   },
                   "types": {
-                    "description": "filter results to specific types of assignables. defaults to all types",
+                    "description": "Filter results to specific types of assignables.\nIf not provided, defaults to all types except `parent_organization_user`.\n",
                     "type": "array",
                     "default": [
                       "user",
@@ -188,22 +213,31 @@
                 "required": [
                   "q"
                 ]
+              },
+              "example": {
+                "q": "john",
+                "from": 0,
+                "size": 25,
+                "types": [
+                  "user",
+                  "partner_user"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "List of assignable results",
+            "description": "List of assignable results matching the search criteria",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "hits": {
-                      "description": "total number of search results",
+                      "description": "Total number of matching results (may exceed returned results for pagination)",
                       "type": "integer",
-                      "example": 25
+                      "example": 42
                     },
                     "results": {
                       "type": "array",
@@ -212,9 +246,34 @@
                       }
                     }
                   }
+                },
+                "example": {
+                  "hits": 2,
+                  "results": [
+                    {
+                      "type": "user",
+                      "display_name": "John Smith",
+                      "user_id": "456",
+                      "email": "john.smith@example.com",
+                      "org_id": "123",
+                      "status": "Active"
+                    },
+                    {
+                      "type": "partner_user",
+                      "display_name": "John Doe",
+                      "user_id": "789",
+                      "email": "john.doe@partner.com",
+                      "org_id": "321",
+                      "partner_id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
+                      "status": "Active"
+                    }
+                  ]
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request parameters"
           }
         }
       }
@@ -222,50 +281,66 @@
     "/v1/partners/assignables:batchGet": {
       "post": {
         "operationId": "batchGetAssignable",
-        "summary": "batchGet",
-        "description": "Search for assignable users from this organization by its ids\n",
+        "summary": "batchGetAssignable",
+        "description": "Retrieve multiple assignable users or groups by their IDs in a single request.\n\nUse this endpoint when you have a list of user or group IDs and need to fetch\ntheir full assignable information. This is more efficient than making multiple\nindividual requests.\n\nEach item in the request array should specify either a `user_id` or `group_id`.\n",
         "tags": [
-          "partners"
+          "Partners"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
-                  "minItems": 1,
                   "type": "object",
                   "properties": {
                     "user_id": {
-                      "description": "user id of assignable",
-                      "type": "string"
+                      "description": "User ID of the assignable to retrieve",
+                      "type": "string",
+                      "example": "456"
                     },
                     "org_id": {
-                      "description": "organization id of assignable (optional, defaults to caller org)",
-                      "type": "string"
+                      "description": "Organization ID of the assignable. If not provided, defaults to the caller's organization.",
+                      "type": "string",
+                      "example": "123"
                     },
                     "group_id": {
-                      "description": "group id of assignable (optional)",
-                      "type": "string"
+                      "description": "Group ID of the assignable to retrieve (mutually exclusive with user_id)",
+                      "type": "string",
+                      "example": "group-789"
                     }
                   }
                 }
-              }
+              },
+              "example": [
+                {
+                  "user_id": "456",
+                  "org_id": "123"
+                },
+                {
+                  "user_id": "789",
+                  "org_id": "321"
+                },
+                {
+                  "group_id": "group-123"
+                }
+              ]
             }
           }
         },
         "responses": {
           "200": {
-            "description": "List of assignable results",
+            "description": "List of assignable results for the requested IDs",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "hits": {
-                      "description": "total number of search results",
+                      "description": "Total number of assignables found",
                       "type": "integer",
-                      "example": 25
+                      "example": 3
                     },
                     "results": {
                       "type": "array",
@@ -274,9 +349,33 @@
                       }
                     }
                   }
+                },
+                "example": {
+                  "hits": 2,
+                  "results": [
+                    {
+                      "type": "user",
+                      "display_name": "John Smith",
+                      "user_id": "456",
+                      "email": "john.smith@example.com",
+                      "org_id": "123",
+                      "status": "Active"
+                    },
+                    {
+                      "type": "user",
+                      "display_name": "Jane Doe",
+                      "user_id": "789",
+                      "email": "jane.doe@partner.com",
+                      "org_id": "321",
+                      "status": "Active"
+                    }
+                  ]
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request - empty array or malformed request body"
           }
         }
       }
@@ -285,10 +384,10 @@
       "get": {
         "operationId": "getPartnerByToken",
         "summary": "getPartnerByToken",
-        "description": "Get partner by token",
+        "description": "Retrieves partner information using an invitation token.\n\nThis is a **public endpoint** that does not require authentication.\nIt is used during the partner onboarding flow to display partner information\nbefore the invited organization completes their registration.\n\nThe token is sent to the partner via email when they are invited.\n",
         "security": [],
         "tags": [
-          "partners"
+          "Partners"
         ],
         "parameters": [
           {
@@ -298,22 +397,34 @@
               "$ref": "#/components/schemas/InviteToken"
             },
             "required": true,
-            "description": "Invite Token"
+            "description": "The invitation token received via email",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         ],
         "responses": {
           "200": {
-            "description": "Partner",
+            "description": "Partner information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Partner"
+                },
+                "example": {
+                  "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
+                  "organization_id": "123",
+                  "company_name": "Inviting Company GmbH",
+                  "email": "partner@invited.de",
+                  "status": "Invited",
+                  "created_at": "2024-01-15T10:30:00.000Z"
                 }
               }
             }
           },
+          "400": {
+            "description": "Invalid or malformed token"
+          },
           "404": {
-            "description": "Token not found for the partner"
+            "description": "Token not found or expired - the invitation may have already been used or is no longer valid"
           }
         }
       }
@@ -322,20 +433,21 @@
       "post": {
         "operationId": "activatePartner",
         "summary": "activatePartner",
-        "description": "Activate partner using an invite token",
+        "description": "Activates a partner account using an invitation token.\n\nThis is a **public endpoint** that does not require authentication.\nIt is called when an invited partner completes their registration to establish\nthe partnership between the two organizations.\n\n**Activation Flow:**\n1. Partner receives invitation email with token\n2. Partner clicks link and views invitation details (via `getPartnerByToken`)\n3. Partner completes registration form\n4. This endpoint is called to activate the partnership\n\nAfter activation, the partner organization can begin collaborating with\nthe inviting organization through shared entities and assignments.\n",
         "security": [],
         "tags": [
-          "partners"
+          "Partners"
         ],
         "parameters": [
           {
             "name": "token",
-            "description": "Invite Token",
+            "description": "The invitation token received via email",
             "in": "query",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/InviteToken"
-            }
+            },
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           }
         ],
         "requestBody": {
@@ -343,16 +455,27 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ActivatePartnerPayload"
+              },
+              "example": {
+                "company_name": "New Partner GmbH",
+                "signed_up_email": "admin@newpartner.de",
+                "organization_id": "456"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Activated successfully"
+            "description": "Partner activated successfully - the partnership is now active"
+          },
+          "400": {
+            "description": "Invalid request - missing required fields or invalid data"
           },
           "404": {
-            "description": "Token not found for the partner"
+            "description": "Token not found or expired - the invitation may have already been used or is no longer valid"
+          },
+          "409": {
+            "description": "Partner already activated - this token has already been used"
           }
         }
       }
@@ -362,34 +485,43 @@
         "operationId": "searchGeolocationForText",
         "summary": "searchGeolocationForText",
         "tags": [
-          "partners"
+          "Partners"
         ],
-        "description": "Converts a given string, in the format of an address, to geo-location latitude and longitude",
+        "description": "Converts an address string to geographic coordinates (latitude and longitude).\n\nThis endpoint is used to geocode partner addresses for location-based features such as:\n- Partner search by proximity\n- Displaying partners on a map\n- Calculating activity radius coverage\n\nThe address should be provided as a complete, well-formatted string for best results.\n",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SearchGeolocation"
+              },
+              "example": {
+                "address": "Auweg 1, 93055 Regensburg, DE"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Geo-location converted from text",
+            "description": "Geolocation successfully retrieved",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Geolocation"
+                },
+                "example": {
+                  "lat": 49.013,
+                  "lng": 12.101,
+                  "addressLabel": "Auweg 1, 93055 Regensburg, Germany",
+                  "relevance": 0.95
                 }
               }
             }
           },
           "400": {
-            "description": "No text provided"
+            "description": "Invalid request - address field is missing or empty"
           },
           "404": {
-            "description": "No geo-location found for text"
+            "description": "Address could not be geocoded - no matching location found for the provided address"
           }
         }
       }
@@ -399,9 +531,9 @@
         "operationId": "invitePartnerV2",
         "summary": "invitePartnerV2",
         "tags": [
-          "partners"
+          "Partners"
         ],
-        "description": "Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration",
+        "description": "Sends an invitation email to a partner organization to begin collaboration.\n\nThis endpoint generates an invitation token and sends an email to the partner\nwith a link to complete their registration. The partner can then accept the\ninvitation to establish a B2B partnership.\n\n**Invitation Flow:**\n1. Create a partner record (via entity API)\n2. Call this endpoint to send the invitation email\n3. Partner receives email with unique invitation link\n4. Partner activates their account via the public activation endpoint\n\nThe invitation email language can be customized via the request body.\n",
         "parameters": [
           {
             "in": "path",
@@ -410,7 +542,7 @@
               "$ref": "#/components/schemas/PartnerId"
             },
             "required": true,
-            "description": "The Id of partner"
+            "description": "The unique identifier of the partner to invite"
           }
         ],
         "requestBody": {
@@ -418,23 +550,38 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PartnerInvitationPayload"
+              },
+              "example": {
+                "language": "de"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Invited successfully",
+            "description": "Invitation sent successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Partner"
+                },
+                "example": {
+                  "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
+                  "organization_id": "123",
+                  "company_name": "Invited Partner GmbH",
+                  "email": "contact@invited-partner.de",
+                  "status": "Invited",
+                  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "created_at": "2024-01-15T10:30:00.000Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to invite"
+            "description": "Unable to send invitation - partner may already be invited or email configuration is invalid"
+          },
+          "404": {
+            "description": "Partner not found"
           }
         }
       }
@@ -444,9 +591,9 @@
         "operationId": "getPartnerUsers",
         "summary": "getPartnerUsers",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Get all users for a partner organization with their roles",
+        "description": "Retrieves all users belonging to a partner organization along with their assigned roles.\n\nThis endpoint allows parent organizations to view and manage the users within\ntheir partner organizations. The response includes user details and their\nrole assignments within the partner organization.\n",
         "parameters": [
           {
             "in": "path",
@@ -455,12 +602,12 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The organization ID of the partner"
+            "description": "The organization ID of the partner whose users to retrieve"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of partner users with roles",
+            "description": "List of partner users with their roles",
             "content": {
               "application/json": {
                 "schema": {
@@ -473,12 +620,35 @@
                       }
                     }
                   }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "id": "456",
+                      "name": "John Smith",
+                      "email": "john.smith@partner.com",
+                      "status": "Active",
+                      "roles": [
+                        {
+                          "id": "role-123",
+                          "slug": "partner_admin",
+                          "name": "Partner Administrator"
+                        }
+                      ]
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to fetch partner users"
+            "description": "Invalid request - organization ID may be invalid or not a partner organization"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to view users in this partner organization"
+          },
+          "404": {
+            "description": "Partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -489,9 +659,9 @@
         "operationId": "createPartnerUser",
         "summary": "createPartnerUser",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Create a new user in a partner organization",
+        "description": "Creates a new user in a partner organization.\n\nThis endpoint allows parent organizations to create users directly within\ntheir partner organizations. The new user will receive an invitation email\nto set up their account.\n\nOptionally, roles can be assigned to the user at creation time.\n",
         "parameters": [
           {
             "in": "path",
@@ -500,7 +670,7 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The Partner organization ID where the user should be created"
+            "description": "The partner organization ID where the user will be created"
           }
         ],
         "requestBody": {
@@ -508,23 +678,43 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePartnerUserPayload"
+              },
+              "example": {
+                "email": "newuser@partner.com",
+                "language": "de",
+                "roles": [
+                  "role-123",
+                  "role-456"
+                ]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "User created successfully",
+            "description": "User created successfully - an invitation email has been sent",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": "789",
+                  "email": "newuser@partner.com",
+                  "display_name": "newuser@partner.com",
+                  "status": "Pending"
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to create partner user"
+            "description": "Invalid request - email may be invalid or user already exists in the organization"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to create users in this partner organization"
+          },
+          "404": {
+            "description": "Partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -537,9 +727,9 @@
         "operationId": "deletePartnerUser",
         "summary": "deletePartnerUser",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Delete a user from a partner organization",
+        "description": "Removes a user from a partner organization.\n\nThis endpoint allows parent organizations to delete users from their partner\norganizations. The user will lose access to the partner organization immediately.\n\n**Note:** This action is permanent and cannot be undone.\n",
         "parameters": [
           {
             "in": "path",
@@ -557,7 +747,8 @@
               "type": "string"
             },
             "required": true,
-            "description": "The user ID to delete"
+            "description": "The unique identifier of the user to delete",
+            "example": "456"
           }
         ],
         "responses": {
@@ -567,15 +758,19 @@
               "application/json": {
                 "schema": {
                   "type": "object"
-                }
+                },
+                "example": {}
               }
             }
           },
           "400": {
-            "description": "Unable to delete partner user"
+            "description": "Invalid request - user ID may be invalid"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to delete users in this partner organization"
           },
           "404": {
-            "description": "User not found"
+            "description": "User or partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -588,9 +783,9 @@
         "operationId": "getPartnerRoles",
         "summary": "getPartnerRoles",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Get all roles for a partner organization",
+        "description": "Retrieves all roles defined for a partner organization.\n\nRoles define the permissions that users in the partner organization have.\nParent organizations can use this endpoint to view available roles before\nassigning them to partner users.\n",
         "parameters": [
           {
             "in": "path",
@@ -599,12 +794,12 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The organization ID of the partner"
+            "description": "The organization ID of the partner whose roles to retrieve"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of partner roles",
+            "description": "List of roles available in the partner organization",
             "content": {
               "application/json": {
                 "schema": {
@@ -617,12 +812,48 @@
                       }
                     }
                   }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "id": "role-123",
+                      "slug": "partner_admin",
+                      "name": "Partner Administrator",
+                      "type": "share_role",
+                      "grants": [
+                        {
+                          "action": "entity-read",
+                          "resource": "entity:*:opportunity:*",
+                          "effect": "allow"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "role-456",
+                      "slug": "partner_viewer",
+                      "name": "Partner Viewer",
+                      "type": "share_role",
+                      "grants": [
+                        {
+                          "action": "entity-read",
+                          "resource": "entity:*:*:*",
+                          "effect": "allow"
+                        }
+                      ]
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to fetch partner roles"
+            "description": "Invalid request - organization ID may be invalid"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to view roles in this partner organization"
+          },
+          "404": {
+            "description": "Partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -633,9 +864,9 @@
         "operationId": "createPartnerRole",
         "summary": "createPartnerRole",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Create a role for a partner organization",
+        "description": "Creates a new role for a partner organization.\n\nRoles define permissions for partner users. The parent organization can create\ncustom roles with specific permission grants to control what partner users\ncan access and modify.\n\n**Permission Grants:**\nEach role contains a list of grants that define allowed (or denied) actions\non specific resources. See the Grant schema for details on defining permissions.\n",
         "parameters": [
           {
             "in": "path",
@@ -644,7 +875,7 @@
               "$ref": "#/components/schemas/OrganizationId"
             },
             "required": true,
-            "description": "The organization ID of the partner"
+            "description": "The organization ID of the partner where the role will be created"
           }
         ],
         "requestBody": {
@@ -652,6 +883,22 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreatePartnerRolePayload"
+              },
+              "example": {
+                "name": "Partner Sales",
+                "slug": "partner_sales",
+                "grants": [
+                  {
+                    "action": "entity-read",
+                    "resource": "entity:*:opportunity:*",
+                    "effect": "allow"
+                  },
+                  {
+                    "action": "entity-update",
+                    "resource": "entity:*:opportunity:*",
+                    "effect": "allow"
+                  }
+                ]
               }
             }
           }
@@ -663,12 +910,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PartnerRole"
+                },
+                "example": {
+                  "id": "123:partner_sales",
+                  "slug": "partner_sales",
+                  "name": "Partner Sales",
+                  "type": "share_role",
+                  "grants": [
+                    {
+                      "action": "entity-read",
+                      "resource": "entity:*:opportunity:*",
+                      "effect": "allow"
+                    },
+                    {
+                      "action": "entity-update",
+                      "resource": "entity:*:opportunity:*",
+                      "effect": "allow"
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to create partner role"
+            "description": "Invalid request - role name or slug may be invalid or already exists"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to create roles in this partner organization"
+          },
+          "404": {
+            "description": "Partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -681,9 +952,9 @@
         "operationId": "updatePartnerRole",
         "summary": "updatePartnerRole",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Update a role for a partner organization",
+        "description": "Updates an existing role in a partner organization.\n\nUse this endpoint to modify the permissions (grants) or metadata of an existing\nrole. All users with this role will immediately have the updated permissions.\n\n**Note:** Changing role permissions affects all users currently assigned to the role.\n",
         "parameters": [
           {
             "in": "path",
@@ -701,7 +972,8 @@
               "type": "string"
             },
             "required": true,
-            "description": "The role ID to update"
+            "description": "The unique identifier of the role to update",
+            "example": "123:partner_sales"
           }
         ],
         "requestBody": {
@@ -709,6 +981,27 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdatePartnerRolePayload"
+              },
+              "example": {
+                "name": "Partner Sales Updated",
+                "slug": "partner_sales",
+                "grants": [
+                  {
+                    "action": "entity-read",
+                    "resource": "entity:*:opportunity:*",
+                    "effect": "allow"
+                  },
+                  {
+                    "action": "entity-update",
+                    "resource": "entity:*:opportunity:*",
+                    "effect": "allow"
+                  },
+                  {
+                    "action": "entity-create",
+                    "resource": "entity:*:opportunity:*",
+                    "effect": "allow"
+                  }
+                ]
               }
             }
           }
@@ -720,12 +1013,96 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PartnerRole"
+                },
+                "example": {
+                  "id": "123:partner_sales",
+                  "slug": "partner_sales",
+                  "name": "Partner Sales Updated",
+                  "type": "share_role",
+                  "grants": [
+                    {
+                      "action": "entity-read",
+                      "resource": "entity:*:opportunity:*",
+                      "effect": "allow"
+                    },
+                    {
+                      "action": "entity-update",
+                      "resource": "entity:*:opportunity:*",
+                      "effect": "allow"
+                    },
+                    {
+                      "action": "entity-create",
+                      "resource": "entity:*:opportunity:*",
+                      "effect": "allow"
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to update partner role"
+            "description": "Invalid request - role data may be invalid"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to update roles in this partner organization"
+          },
+          "404": {
+            "description": "Role or partner organization not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePartnerRole",
+        "summary": "deletePartnerRole",
+        "tags": [
+          "Partner Users"
+        ],
+        "description": "Delete a role from a partner organization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "schema": {
+              "$ref": "#/components/schemas/OrganizationId"
+            },
+            "required": true,
+            "description": "The organization ID of the partner"
+          },
+          {
+            "in": "path",
+            "name": "roleId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The role ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerRole"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to delete partner role"
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions or role cannot be deleted"
+          },
+          "404": {
+            "description": "Role not found"
+          },
+          "409": {
+            "description": "Role is currently assigned to users and cannot be deleted"
           },
           "500": {
             "description": "Internal server error"
@@ -738,9 +1115,9 @@
         "operationId": "assignPartnerUserRoles",
         "summary": "assignPartnerUserRoles",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Assign roles to a user in a partner organization",
+        "description": "Assigns one or more roles to a user in a partner organization.\n\nRoles define the permissions that the user has within the partner organization.\nMultiple roles can be assigned in a single request. The response indicates\nthe success or failure of each role assignment.\n",
         "parameters": [
           {
             "in": "path",
@@ -758,7 +1135,8 @@
               "type": "string"
             },
             "required": true,
-            "description": "The user ID"
+            "description": "The unique identifier of the user to assign roles to",
+            "example": "456"
           }
         ],
         "requestBody": {
@@ -766,13 +1144,19 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AssignRolesPayload"
+              },
+              "example": {
+                "roleIds": [
+                  "role-123",
+                  "role-456"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Roles assigned successfully",
+            "description": "Role assignment results - each role assignment is processed individually",
             "content": {
               "application/json": {
                 "schema": {
@@ -780,31 +1164,56 @@
                   "properties": {
                     "results": {
                       "type": "array",
+                      "description": "Results for each role assignment attempt",
                       "items": {
                         "type": "object",
                         "properties": {
                           "roleId": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "The role ID that was processed"
                           },
                           "success": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Whether the assignment was successful"
                           },
                           "data": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Additional data on success"
                           },
                           "error": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Error details on failure"
                           }
                         }
                       }
                     }
                   }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "roleId": "role-123",
+                      "success": true,
+                      "data": {}
+                    },
+                    {
+                      "roleId": "role-456",
+                      "success": true,
+                      "data": {}
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to assign roles"
+            "description": "Invalid request - role IDs may be invalid"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to assign roles in this partner organization"
+          },
+          "404": {
+            "description": "User or partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -815,9 +1224,9 @@
         "operationId": "unassignPartnerUserRoles",
         "summary": "unassignPartnerUserRoles",
         "tags": [
-          "partner_users"
+          "Partner Users"
         ],
-        "description": "Unassign roles from a user in a partner organization",
+        "description": "Removes one or more roles from a user in a partner organization.\n\nThis endpoint removes the specified roles from the user, reducing their permissions\nwithin the partner organization. The response indicates the success or failure\nof each role removal.\n\n**Note:** Removing all roles from a user may result in the user having no access\nto the partner organization.\n",
         "parameters": [
           {
             "in": "path",
@@ -835,7 +1244,8 @@
               "type": "string"
             },
             "required": true,
-            "description": "The user ID"
+            "description": "The unique identifier of the user to remove roles from",
+            "example": "456"
           }
         ],
         "requestBody": {
@@ -843,13 +1253,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AssignRolesPayload"
+              },
+              "example": {
+                "roleIds": [
+                  "role-456"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Roles unassigned successfully",
+            "description": "Role unassignment results - each role removal is processed individually",
             "content": {
               "application/json": {
                 "schema": {
@@ -857,31 +1272,51 @@
                   "properties": {
                     "results": {
                       "type": "array",
+                      "description": "Results for each role removal attempt",
                       "items": {
                         "type": "object",
                         "properties": {
                           "roleId": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "The role ID that was processed"
                           },
                           "success": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Whether the removal was successful"
                           },
                           "data": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Additional data on success"
                           },
                           "error": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Error details on failure"
                           }
                         }
                       }
                     }
                   }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "roleId": "role-456",
+                      "success": true,
+                      "data": {}
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Unable to unassign roles"
+            "description": "Invalid request - role IDs may be invalid"
+          },
+          "403": {
+            "description": "Access denied - caller does not have permission to unassign roles in this partner organization"
+          },
+          "404": {
+            "description": "User, role, or partner organization not found"
           },
           "500": {
             "description": "Internal server error"
@@ -907,63 +1342,78 @@
     },
     "schemas": {
       "InviteToken": {
-        "type": "string"
+        "type": "string",
+        "description": "A secure token used for partner invitation and activation. Sent via email to the invited partner.",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXJ0bmVySWQiOiIxMjM0NSJ9.abcdef"
       },
       "Partner": {
         "type": "object",
+        "description": "Represents a partner organization in the partner directory.\n\nPartners go through a lifecycle from invitation to active collaboration:\n- **Pending**: Initial state when partner record is created\n- **Invited**: Invitation email has been sent to the partner\n- **Request**: Partner has requested to join (self-registration)\n- **Rejected**: Partnership request was declined\n- **Deleted**: Partner relationship has been terminated\n",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/PartnerId"
           },
           "organization_id": {
-            "$ref": "#/components/schemas/OrganizationId"
+            "description": "The organization ID of the parent organization that invited this partner",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrganizationId"
+              }
+            ]
           },
           "created_at": {
             "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the partner record was created",
             "example": "2022-02-08T04:44:32.246Z"
           },
           "description": {
             "type": "string",
-            "description": "Description",
-            "example": "Description"
+            "description": "Optional description of the partner or partnership",
+            "example": "Regional solar installation partner for Bavaria"
           },
           "company_name": {
             "type": "string",
-            "description": "Company name",
-            "example": "Company name"
+            "description": "The legal or trading name of the partner organization",
+            "example": "Acme Solar GmbH"
           },
           "invitation_token": {
-            "description": "Invitation token",
-            "type": "string"
+            "description": "Secure token for partner activation (only present for invited partners)",
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           },
           "invitation_email": {
             "deprecated": true,
-            "description": "Email using to receive invitation",
+            "description": "Deprecated: Use 'email' instead. Email address used for the invitation.",
             "type": "string",
             "format": "email"
           },
           "email": {
-            "description": "Email using to receive invitation",
+            "description": "Primary email address of the partner, used for invitation delivery",
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "example": "contact@acme-solar.de"
           },
           "owner_email": {
-            "description": "A separate email where the invitation should be sent",
+            "description": "Alternative email address where invitations should be sent (e.g., owner or admin email)",
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "example": "owner@acme-solar.de"
           },
           "signed_up_email": {
-            "description": "Email using to sign up",
+            "description": "Email address used by the partner when completing registration",
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "example": "admin@acme-solar.de"
           },
           "partner_org_id": {
-            "description": "Target Organization",
+            "description": "Organization ID of the partner organization (populated after activation)",
             "type": "string",
-            "example": 123456
+            "example": "456789"
           },
           "status": {
             "type": "string",
+            "description": "Current status of the partner in the invitation/collaboration lifecycle",
             "enum": [
               "Pending",
               "Request",
@@ -976,28 +1426,33 @@
       },
       "PartnerId": {
         "type": "string",
+        "description": "Unique identifier for a partner record (UUID format)",
         "example": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc"
       },
       "OrganizationId": {
         "type": "string",
+        "description": "Unique identifier for an organization in the epilot platform",
         "example": "123"
       },
       "ActivatePartnerPayload": {
         "type": "object",
+        "description": "Payload for activating a partner account using an invitation token",
         "properties": {
           "company_name": {
             "type": "string",
-            "description": "Company name",
-            "example": "Company name"
+            "description": "The official name of the partner's company",
+            "example": "Acme Solar GmbH"
           },
           "signed_up_email": {
-            "description": "Email using to sign up",
+            "description": "Email address of the user completing the partner registration",
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "example": "admin@acme-solar.de"
           },
           "organization_id": {
-            "description": "organization id",
-            "type": "string"
+            "description": "The organization ID of the partner's existing epilot organization (if they already have one)",
+            "type": "string",
+            "example": "456"
           }
         },
         "required": [
@@ -1007,19 +1462,22 @@
       },
       "PartnerInvitationPayload": {
         "type": "object",
+        "description": "Configuration options for sending a partner invitation",
         "properties": {
           "language": {
             "type": "string",
-            "description": "Language for partner invitation email",
+            "description": "Language for the partner invitation email. Determines the email template language.",
             "enum": [
               "en",
               "de"
             ],
-            "default": "en"
+            "default": "en",
+            "example": "de"
           }
         }
       },
       "Assignable": {
+        "description": "A user, organization, or group that can be assigned to tasks, workflows, or entities.\nThe `type` field discriminates between different assignable types.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/AssignableUser"
@@ -1036,30 +1494,46 @@
           {
             "$ref": "#/components/schemas/AssignableGroup"
           }
-        ]
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "user": "#/components/schemas/AssignableUser",
+            "partner_user": "#/components/schemas/AssignablePartnerUser",
+            "partner_organization": "#/components/schemas/AssignableOrganization",
+            "ecp": "#/components/schemas/AssignableEcpPlaceholder",
+            "group": "#/components/schemas/AssignableGroup"
+          }
+        }
       },
       "BaseAssignable": {
         "type": "object",
+        "description": "Common properties shared by all assignable types",
         "properties": {
           "type": {
             "type": "string",
+            "description": "Discriminator field indicating the type of assignable",
             "example": "user"
           },
           "display_name": {
             "type": "string",
-            "example": "Example User"
+            "description": "Human-readable name for display in UI (user name, organization name, or group name)",
+            "example": "John Smith"
           },
           "image_uri": {
             "type": "object",
+            "description": "Profile image URLs for the assignable",
             "properties": {
               "original": {
                 "type": "string",
                 "format": "uri",
+                "description": "Full-resolution profile image URL",
                 "example": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
               },
               "thumbnail_32": {
                 "type": "string",
                 "format": "uri",
+                "description": "32x32 pixel thumbnail image URL for compact displays",
                 "example": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
               }
             },
@@ -1068,18 +1542,28 @@
             ]
           },
           "org_id": {
-            "$ref": "#/components/schemas/OrganizationId"
+            "description": "Organization ID the assignable belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OrganizationId"
+              }
+            ]
           },
           "created_at": {
             "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the assignable was created",
             "example": "2022-02-08T04:44:32.246Z"
           },
           "activated_at": {
             "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the assignable was activated (for users, when they accepted their invitation)",
             "example": "2022-02-08T04:44:32.246Z"
           },
           "status": {
             "type": "string",
+            "description": "Current status of the assignable",
             "enum": [
               "Active",
               "Pending",
@@ -1095,6 +1579,7 @@
         ]
       },
       "AssignableUser": {
+        "description": "A user within the caller's organization that can be assigned to tasks or entities",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAssignable"
@@ -1111,21 +1596,26 @@
               },
               "display_name": {
                 "type": "string",
-                "example": "Example User"
+                "description": "Full name of the user",
+                "example": "John Smith"
               },
               "user_id": {
                 "type": "string",
+                "description": "Unique identifier of the user",
                 "example": "456"
               },
               "email": {
                 "type": "string",
-                "example": "example@example.com"
+                "format": "email",
+                "description": "Email address of the user",
+                "example": "john.smith@example.com"
               }
             }
           }
         ]
       },
       "AssignablePartnerUser": {
+        "description": "A user from a partner organization that can be assigned to shared tasks or entities",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAssignable"
@@ -1142,24 +1632,34 @@
               },
               "display_name": {
                 "type": "string",
-                "example": "Example Partner User"
+                "description": "Full name of the partner user",
+                "example": "Jane Doe (Partner)"
               },
               "partner_id": {
-                "$ref": "#/components/schemas/PartnerId"
+                "description": "ID of the partner relationship through which this user is accessible",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PartnerId"
+                  }
+                ]
               },
               "user_id": {
                 "type": "string",
-                "example": "456"
+                "description": "Unique identifier of the partner user",
+                "example": "789"
               },
               "email": {
                 "type": "string",
-                "example": "example@example.com"
+                "format": "email",
+                "description": "Email address of the partner user",
+                "example": "jane.doe@partner.com"
               }
             }
           }
         ]
       },
       "AssignableGroup": {
+        "description": "A user group that can be assigned to tasks or entities. All members of the group will be notified/assigned.",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAssignable"
@@ -1167,15 +1667,24 @@
           {
             "type": "object",
             "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "group"
+                ],
+                "example": "group"
+              },
               "group_id": {
                 "type": "string",
-                "example": "456"
+                "description": "Unique identifier of the user group",
+                "example": "group-456"
               }
             }
           }
         ]
       },
       "AssignableOrganization": {
+        "description": "A partner organization that can be assigned to tasks or entities at the organization level.\nUseful when you want to assign work to a partner company rather than a specific individual.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAssignable"
@@ -1192,28 +1701,38 @@
               },
               "display_name": {
                 "type": "string",
-                "example": "Example Partner Organization"
+                "description": "Name of the partner organization",
+                "example": "Acme Solar GmbH"
               },
               "partner_id": {
-                "$ref": "#/components/schemas/PartnerId"
+                "description": "ID of the partner relationship",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PartnerId"
+                  }
+                ]
               },
               "email": {
                 "type": "string",
-                "example": "Email of Partner Organization"
+                "format": "email",
+                "description": "Primary contact email for the partner organization",
+                "example": "contact@acme-solar.de"
               },
               "geolocations": {
                 "type": "array",
+                "description": "Physical locations of the partner organization with addresses and coordinates",
                 "items": {
                   "$ref": "#/components/schemas/AddressGeolocation"
                 }
               },
               "phone": {
                 "type": "string",
-                "example": "Phone number of Partner"
+                "description": "Primary contact phone number for the partner organization",
+                "example": "+49 941 123456"
               },
               "activity_radius": {
                 "type": "number",
-                "description": "Activity radius, in km, the partner is operating in",
+                "description": "Geographic service radius in kilometers - the area within which the partner operates",
                 "example": 50
               }
             },
@@ -1226,6 +1745,7 @@
         ]
       },
       "AssignableEcpPlaceholder": {
+        "description": "An End Customer Portal (ECP) user that can be assigned to tasks or entities.\nThese are external users who access the system through the customer portal.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseAssignable"
@@ -1242,15 +1762,19 @@
               },
               "display_name": {
                 "type": "string",
-                "example": "Example Ecp Placeholder"
+                "description": "Name of the portal user",
+                "example": "Max Mustermann"
               },
               "user_id": {
                 "type": "string",
-                "example": "456"
+                "description": "Unique identifier of the portal user",
+                "example": "ecp-456"
               },
               "email": {
                 "type": "string",
-                "example": "Email of ECP Placeholder"
+                "format": "email",
+                "description": "Email address of the portal user",
+                "example": "max.mustermann@customer.de"
               }
             },
             "required": [
@@ -1263,10 +1787,11 @@
       },
       "SearchGeolocation": {
         "type": "object",
+        "description": "Request payload for geocoding an address to coordinates",
         "properties": {
           "address": {
             "type": "string",
-            "description": "Address text to convert into geolocation coordinates",
+            "description": "Full address string to convert to geographic coordinates.\nFor best results, include street, city, postal code, and country.\n",
             "example": "Auweg 1, 93055 Regensburg, DE"
           }
         },
@@ -1276,24 +1801,29 @@
       },
       "Geolocation": {
         "type": "object",
+        "description": "Geographic coordinates with optional metadata",
         "properties": {
           "lat": {
             "type": "number",
-            "description": "Latitude",
+            "description": "Latitude coordinate (WGS84)",
             "example": 49.013
           },
           "lng": {
             "type": "number",
-            "description": "Longitude",
+            "description": "Longitude coordinate (WGS84)",
             "example": 12.101
           },
           "addressLabel": {
             "type": "string",
-            "description": "Full address label as returned by the location service"
+            "description": "Normalized full address as returned by the geocoding service",
+            "example": "Auweg 1, 93055 Regensburg, Germany"
           },
           "relevance": {
             "type": "number",
-            "description": "Relevance of the result. A number between 0 and 1. Closer to 1 means more relevant"
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score for the geocoding result (0-1).\nValues closer to 1 indicate higher confidence that the coordinates match the input address.\n",
+            "example": 0.95
           }
         },
         "required": [
@@ -1303,36 +1833,38 @@
       },
       "Address": {
         "type": "object",
+        "description": "Structured postal address",
         "properties": {
           "street": {
             "type": "string",
-            "description": "Street",
+            "description": "Street name without house number",
             "example": "Auweg"
           },
           "street_number": {
             "type": "string",
-            "description": "Street",
+            "description": "House or building number",
             "example": "10"
           },
           "city": {
             "type": "string",
-            "description": "City",
+            "description": "City or locality name",
             "example": "Regensburg"
           },
           "postal_code": {
             "type": "string",
-            "description": "Postal code",
+            "description": "Postal or ZIP code",
             "example": "93055"
           },
           "country": {
             "type": "string",
-            "description": "Country",
+            "description": "Country code (ISO 3166-1 alpha-2)",
             "example": "DE"
           }
         }
       },
       "AddressGeolocation": {
         "type": "object",
+        "description": "Combined address and geographic coordinates for a location",
         "allOf": [
           {
             "type": "object",
@@ -1352,63 +1884,65 @@
       },
       "PartnerUser": {
         "type": "object",
+        "description": "A user within a partner organization, including their assigned roles",
         "properties": {
           "id": {
             "type": "string",
-            "description": "User ID",
+            "description": "Unique identifier for the user",
             "example": "456"
           },
           "name": {
             "type": "string",
-            "description": "User name",
+            "description": "Full name of the user",
             "example": "John Doe"
           },
           "email": {
             "type": "string",
             "format": "email",
-            "description": "User email",
-            "example": "user@example.com"
+            "description": "Email address of the user",
+            "example": "user@partner.com"
           },
           "status": {
             "type": "string",
-            "description": "User status",
+            "description": "Current status of the user account:\n- Active: User has completed registration and can access the system\n- Pending: User has been invited but not yet completed registration\n- Deactivated: User account has been disabled\n",
             "example": "Active"
           },
           "image": {
             "type": "object",
+            "description": "Profile image URLs for the user",
             "properties": {
               "original": {
                 "type": "string",
                 "format": "uri",
-                "description": "Original image URI"
+                "description": "Full-resolution profile image URL"
               },
               "thumbnail_32": {
                 "type": "string",
                 "format": "uri",
-                "description": "Thumbnail image URI (32x32)"
+                "description": "32x32 pixel thumbnail image URL"
               }
             }
           },
           "roles": {
             "type": "array",
-            "description": "List of roles assigned to the user",
+            "description": "List of roles assigned to the user within the partner organization",
             "items": {
               "type": "object",
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "Role ID",
-                  "example": "role-123"
+                  "description": "Unique identifier for the role",
+                  "example": "123:partner_admin"
                 },
                 "slug": {
                   "type": "string",
-                  "description": "Role slug",
-                  "example": "admin"
+                  "description": "URL-friendly role identifier",
+                  "example": "partner_admin"
                 },
                 "name": {
                   "type": "string",
-                  "description": "Role name",
-                  "example": "Administrator"
+                  "description": "Human-readable role name",
+                  "example": "Partner Administrator"
                 }
               },
               "required": [
@@ -1428,12 +1962,13 @@
       },
       "CreatePartnerUserPayload": {
         "type": "object",
+        "description": "Request payload for creating a new user in a partner organization",
         "properties": {
           "email": {
             "type": "string",
             "format": "email",
-            "description": "User email address",
-            "example": "user@example.com"
+            "description": "Email address for the new user. An invitation will be sent to this address.",
+            "example": "newuser@partner.com"
           },
           "language": {
             "type": "string",
@@ -1441,18 +1976,17 @@
               "en",
               "de"
             ],
-            "description": "User language",
-            "example": "en"
+            "description": "Preferred language for the user. Determines the language of the invitation email and default UI language.",
+            "example": "de"
           },
           "roles": {
             "type": "array",
-            "description": "Role IDs that should be automatically assigned to this user upon creation",
+            "description": "Role IDs to automatically assign to the user upon creation.\nIf not provided, the user will have no roles until manually assigned.\n",
             "items": {
               "type": "string"
             },
             "example": [
-              "role-123",
-              "role-456"
+              "123:partner_viewer"
             ]
           }
         },
@@ -1462,20 +1996,22 @@
       },
       "CreatePartnerRolePayload": {
         "type": "object",
+        "description": "Request payload for creating a new role in a partner organization",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Role name",
-            "example": "Partner Admin"
+            "description": "Human-readable display name for the role",
+            "example": "Partner Administrator"
           },
           "slug": {
             "type": "string",
-            "description": "Role slug",
-            "example": "partner_admin"
+            "description": "URL-friendly identifier for the role (lowercase, underscores allowed)",
+            "example": "partner_admin",
+            "pattern": "^[a-z][a-z0-9_]*$"
           },
           "grants": {
             "type": "array",
-            "description": "Permission grants for the role",
+            "description": "Permission grants that define what users with this role can do.\nEach grant specifies an action and resource pattern.\n",
             "items": {
               "$ref": "#/components/schemas/GrantWithDependencies"
             }
@@ -1488,11 +2024,13 @@
         ]
       },
       "UpdatePartnerRolePayload": {
+        "description": "Request payload for updating an existing role in a partner organization",
         "allOf": [
           {
             "properties": {
               "grants": {
                 "type": "array",
+                "description": "Updated list of permission grants for the role",
                 "items": {
                   "$ref": "#/components/schemas/GrantWithDependencies"
                 }
@@ -1506,18 +2044,22 @@
       },
       "Grant": {
         "type": "object",
+        "description": "A permission grant that allows or denies a specific action on a resource.\n\nGrants are the building blocks of roles and define what users can do within the system.\n",
         "properties": {
           "action": {
             "type": "string",
+            "description": "The action being granted or denied.\nCommon actions include: entity-read, entity-create, entity-update, entity-delete\n",
             "example": "entity-read"
           },
           "resource": {
             "type": "string",
-            "example": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947"
+            "description": "The resource pattern this grant applies to.\nFormat: entity:<org_id>:<schema>:<entity_id>\nUse wildcards (*) to match multiple resources.\n",
+            "example": "entity:123:contact:*"
           },
           "effect": {
             "type": "string",
             "default": "allow",
+            "description": "Whether this grant allows or denies the action",
             "enum": [
               "allow",
               "deny"
@@ -1525,6 +2067,7 @@
           },
           "conditions": {
             "type": "array",
+            "description": "Additional conditions that must be met for this grant to apply",
             "items": {
               "$ref": "#/components/schemas/GrantCondition"
             }
@@ -1535,6 +2078,7 @@
         ]
       },
       "GrantWithDependencies": {
+        "description": "A grant with optional dependent grants that are automatically included when this grant is assigned",
         "allOf": [
           {
             "$ref": "#/components/schemas/Grant"
@@ -1543,7 +2087,7 @@
             "type": "object",
             "properties": {
               "dependencies": {
-                "description": "Provided additional dependencies, exploded when storing the role",
+                "description": "Additional grants that are automatically included when this grant is assigned.\nDependencies are expanded and stored with the role to ensure users have all\nnecessary permissions for the primary action.\n",
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/Grant"
@@ -1554,9 +2098,9 @@
         ]
       },
       "GrantCondition": {
+        "description": "An additional condition that must be met for a grant to apply.\nConditions allow fine-grained control over when permissions are active.\n",
         "allOf": [
           {
-            "description": "An additional condition that must be met for the grant",
             "type": "object",
             "required": [
               "operation"
@@ -1572,22 +2116,26 @@
         ]
       },
       "EqualsCondition": {
-        "description": "Check if attribute equals to any of the values",
         "type": "object",
+        "description": "A condition that checks if an attribute equals one of the specified values.\nThe grant only applies when the condition is satisfied.\n",
         "properties": {
           "attribute": {
             "type": "string",
+            "description": "The attribute path to check (dot notation for nested attributes).\nExample: workflows.primary.task_name checks the task name in the primary workflow.\n",
             "example": "workflows.primary.task_name"
           },
           "operation": {
             "type": "string",
+            "description": "The comparison operation to perform",
             "enum": [
               "equals"
             ]
           },
           "values": {
             "type": "array",
+            "description": "List of values to match against - the condition is true if the attribute equals any of these values",
             "items": {
+              "type": "string",
               "example": "Qualification"
             }
           }
@@ -1600,31 +2148,33 @@
       },
       "RoleId": {
         "type": "string",
-        "example": "123:owner",
-        "description": "Format: <organization_id>:<slug>"
+        "description": "Unique identifier for a role, combining organization ID and role slug.\nFormat: <organization_id>:<slug>\n",
+        "example": "123:owner"
       },
       "BaseRoleForCreate": {
         "type": "object",
+        "description": "Base schema for creating or updating a role",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/RoleId"
           },
           "name": {
             "type": "string",
-            "example": "Owner",
-            "description": "Human-friendly name for the role"
+            "description": "Human-readable display name for the role",
+            "example": "Owner"
           },
           "slug": {
             "type": "string",
+            "description": "URL-friendly identifier for the role (lowercase, no spaces)",
             "example": "owner",
-            "description": "URL-friendly name for the role"
+            "pattern": "^[a-z][a-z0-9_]*$"
           },
           "grants": {
             "type": "array",
+            "description": "List of permission grants that define what users with this role can do",
             "items": {
               "$ref": "#/components/schemas/Grant"
-            },
-            "description": "List of grants (permissions) applied to the role"
+            }
           }
         },
         "required": [
@@ -1635,46 +2185,56 @@
       },
       "PartnerRole": {
         "type": "object",
+        "description": "A role definition for users in a partner organization",
         "properties": {
           "id": {
             "type": "string",
-            "description": "Role ID",
-            "example": "role-123"
+            "description": "Unique identifier for the role (format: org_id:slug)",
+            "example": "123:partner_admin"
           },
           "slug": {
             "type": "string",
-            "description": "Role slug",
-            "example": "admin"
+            "description": "URL-friendly identifier for the role",
+            "example": "partner_admin"
           },
           "name": {
             "type": "string",
-            "description": "Role name",
-            "example": "Administrator"
+            "description": "Human-readable display name for the role",
+            "example": "Partner Administrator"
           },
           "type": {
             "type": "string",
-            "description": "Role type",
+            "description": "Type of role. Partner roles are typically 'share_role' indicating\nthey are designed for cross-organization sharing scenarios.\n",
             "example": "share_role"
+          },
+          "grants": {
+            "type": "array",
+            "description": "List of permission grants that define what users with this role can do",
+            "items": {
+              "$ref": "#/components/schemas/Grant"
+            }
           }
         },
         "required": [
           "id",
           "slug",
-          "name"
+          "name",
+          "grants"
         ]
       },
       "AssignRolesPayload": {
         "type": "object",
+        "description": "Request payload for assigning or unassigning roles to/from a user",
         "properties": {
           "roleIds": {
             "type": "array",
-            "description": "Array of role IDs to assign/unassign",
+            "description": "Array of role IDs to assign or unassign",
             "items": {
               "type": "string"
             },
             "example": [
-              "role-123",
-              "role-456"
+              "123:partner_admin",
+              "123:partner_viewer"
             ]
           }
         },
@@ -1684,27 +2244,33 @@
       },
       "User": {
         "type": "object",
+        "description": "A user account in the epilot platform",
         "properties": {
           "id": {
             "type": "string",
-            "description": "User ID",
+            "description": "Unique identifier for the user",
             "example": "456"
           },
           "email": {
             "type": "string",
             "format": "email",
-            "description": "User email",
+            "description": "Email address of the user",
             "example": "user@example.com"
           },
           "display_name": {
             "type": "string",
-            "description": "User display name",
+            "description": "Full name of the user for display purposes",
             "example": "John Doe"
           },
           "status": {
             "type": "string",
-            "description": "User status",
-            "example": "Active"
+            "description": "Current status of the user account:\n- Active: User has completed registration and can access the system\n- Pending: User has been invited but not yet completed registration\n- Deactivated: User account has been disabled\n",
+            "example": "Active",
+            "enum": [
+              "Active",
+              "Pending",
+              "Deactivated"
+            ]
           }
         }
       }
