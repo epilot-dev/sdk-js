@@ -1,5 +1,6 @@
 import type { AxiosInstance } from 'axios';
 
+import { help as helpFn } from './help';
 import type { ApiHandle } from './types';
 
 /**
@@ -9,19 +10,37 @@ import type { ApiHandle } from './types';
 export const createApiHandle = <T extends AxiosInstance>(params: {
   resolveClient: () => T;
   createClient: () => T;
+  apiName?: string;
 }): ApiHandle<T> => {
-  const { resolveClient, createClient } = params;
+  const { resolveClient, createClient, apiName } = params;
 
   return new Proxy({} as ApiHandle<T>, {
     get(_, prop) {
       // Explicit singleton access
       if (prop === 'getClient') {
-        return () => resolveClient();
+        return () => {
+          const client = resolveClient();
+          if (apiName && !('help' in client)) {
+            (client as Record<string, unknown>).help = () => helpFn(apiName);
+          }
+          return client;
+        };
       }
 
       // Fresh (non-singleton) instance
       if (prop === 'createClient') {
-        return () => createClient();
+        return () => {
+          const client = createClient();
+          if (apiName) {
+            (client as Record<string, unknown>).help = () => helpFn(apiName);
+          }
+          return client;
+        };
+      }
+
+      // API-specific help
+      if (prop === 'help') {
+        return () => (apiName ? helpFn(apiName) : 'No API name available. Use epilot.help(apiName) instead.');
       }
 
       // Prevent accidental `await epilot.entity` — it's not thenable

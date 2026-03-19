@@ -29,7 +29,7 @@ export default defineConfig([
     splitting: true,
     clean: true,
     outDir: 'dist',
-    external: ['openapi-client-axios', 'axios', /\.\/definitions\/.*-runtime\.json$/],
+    external: ['openapi-client-axios', 'axios'],
     skipNodeModulesBundle: true,
   },
   // CLI binary

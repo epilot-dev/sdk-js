@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.1.0-rc.1",
+  "version": "2.1.0",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -319,7 +319,8 @@
   "homepage": "https://github.com/epilot-dev/sdk-js#readme",
   "files": [
     "dist",
-    "definitions"
+    "definitions",
+    "docs"
   ],
   "peerDependencies": {
     "axios": "^1.0.0",
