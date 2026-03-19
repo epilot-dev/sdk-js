@@ -94,9 +94,16 @@
         "responses": {}
       }
     },
+    "/v2/organization/feature-settings": {
+      "get": {
+        "operationId": "getOrganizationFeatureSettings",
+        "responses": {}
+      }
+    },
     "/v2/feature-settings": {
       "get": {
         "operationId": "getFeatureSettings",
+        "deprecated": true,
         "responses": {}
       }
     }
