@@ -53,6 +53,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -75,6 +79,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "app";
             resources?: BlueprintResource[];
         }
@@ -161,7 +194,7 @@ declare namespace Components {
              */
             resources_to_ignore?: string[];
         }
-        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob;
+        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob | BlueprintValidateJob | BlueprintVerificationJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
             message?: string;
@@ -214,7 +247,7 @@ declare namespace Components {
             blueprint_file_s3_key: string;
             is_verified: boolean;
             docs_url?: string;
-            compatible_apps?: string[];
+            recommended_apps?: string[];
             created_at: string; // date-time
             created_by: CallerIdentity;
             /**
@@ -275,6 +308,64 @@ declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintResourceID = string;
+        export interface BlueprintValidateJob {
+            id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            events?: BlueprintJobEvent[];
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            /**
+             * Present when status is SUCCESS or FAILED.
+             */
+            valid?: boolean;
+            /**
+             * Present when valid is false.
+             */
+            errors?: FormattedError[];
+        }
+        export interface BlueprintVerificationJob {
+            id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            events?: BlueprintJobEvent[];
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            source_org_id?: string;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            summary?: VerificationSummary;
+            resource_results?: ResourceVerificationResult[];
+            /**
+             * S3 key for detailed results when too large for inline storage.
+             */
+            resource_results_s3_key?: string;
+        }
         export interface CallerIdentity {
             /**
              * a human readable name of the caller (e.g. user name, token name or email address)
@@ -333,6 +424,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -358,6 +453,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
         }
         export interface CommonBlueprintJobFields {
             id?: /**
@@ -577,6 +701,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -599,6 +727,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             resources?: BlueprintResource[];
             source_type: "custom";
         }
@@ -634,6 +791,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -656,8 +817,46 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "deploy";
             resources?: BlueprintResource[];
+        }
+        export interface FieldDiff {
+            /**
+             * JSON path to the differing field (e.g. "steps[2].name")
+             */
+            path?: string;
+            source_value?: any;
+            destination_value?: any;
+            diff_type?: "value_changed" | "field_missing_in_destination" | "field_missing_in_source" | "type_mismatch";
         }
         export interface FileBlueprint {
             id?: /**
@@ -691,6 +890,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -713,6 +916,35 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
+             * URL to the blueprint documentation
+             */
+            docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "file";
             resources?: BlueprintResource[];
         }
@@ -726,9 +958,11 @@ declare namespace Components {
                 resource?: string;
                 resourceDependency?: string;
                 resources?: string[];
+                addresses?: string[];
+                originalError?: string;
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -1315,6 +1549,10 @@ declare namespace Components {
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * User-provided note about this synchronization
+                 */
+                note?: string;
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -1338,15 +1576,36 @@ declare namespace Components {
              */
             BlueprintID;
             /**
+             * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
+             */
+            archived?: boolean;
+            /**
              * URL to the blueprint documentation
              */
             docs_url?: string;
+            /**
+             * List of recommended app IDs for the blueprint
+             */
+            recommended_apps?: string[];
+            /**
+             * Feature constraints for blueprint installation
+             */
+            required_features?: {
+                /**
+                 * Features that must be enabled in the target org
+                 */
+                enabled?: string[];
+                /**
+                 * Features that must be disabled in the target org
+                 */
+                disabled?: string[];
+            };
+            /**
+             * Custom name for the exported zip file
+             */
+            zip_file_name?: string;
             source_type: "marketplace";
             resources?: BlueprintResource[];
-            /**
-             * List of compatible app IDs for the blueprint
-             */
-            compatible_apps?: string[];
             /**
              * Whether a newer version is available in the marketplace.
              */
@@ -1438,7 +1697,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -1452,6 +1711,15 @@ declare namespace Components {
              * Name of the resource that will replace the original
              */
             replacementName?: string;
+        }
+        export interface ResourceVerificationResult {
+            resource_type?: /* Type of the resource */ ResourceNodeType;
+            resource_name?: string;
+            source_resource_id?: string;
+            destination_resource_id?: string;
+            status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error";
+            field_diffs?: FieldDiff[];
+            error?: string;
         }
         export interface RootResourceNode {
             /**
@@ -1518,6 +1786,14 @@ declare namespace Components {
              * example.manifest.zip
              */
             filename: string;
+        }
+        export interface VerificationSummary {
+            total_resources?: number;
+            matched?: number;
+            mismatched?: number;
+            missing_in_destination?: number;
+            missing_in_source?: number;
+            fetch_errors?: number;
         }
         export interface VirtualResourceNodeGroup {
             /**
@@ -1914,6 +2190,10 @@ declare namespace Paths {
         export interface RequestBody {
             destination_org_id?: string;
             destination_blueprint_id?: string;
+            /**
+             * When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors.
+             */
+            validate?: boolean;
         }
         namespace Responses {
             export interface $202 {
@@ -1974,6 +2254,33 @@ declare namespace Paths {
                  * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
                  */
                 Components.Schemas.JobID;
+            }
+        }
+    }
+    namespace FormatBlueprintDescription {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Plain text to format as markdown
+             */
+            text: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * AI-formatted markdown content
+                 */
+                markdown?: string;
             }
         }
     }
@@ -2115,6 +2422,12 @@ declare namespace Paths {
         }
     }
     namespace ListBlueprints {
+        namespace Parameters {
+            export type Archived = boolean;
+        }
+        export interface QueryParameters {
+            archived?: Parameters.Archived;
+        }
         namespace Responses {
             export interface $200 {
                 /**
@@ -2150,6 +2463,34 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListMarketplaceSlugs {
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    /**
+                     * example:
+                     * wallbox_b2c
+                     */
+                    slug?: string;
+                    /**
+                     * example:
+                     * v1.0.0
+                     */
+                    version?: string;
+                    /**
+                     * example:
+                     * Wallbox B2C
+                     */
+                    name?: string;
+                    /**
+                     * example:
+                     * https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip
+                     */
+                    installation_link?: string;
+                }[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -2164,6 +2505,38 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+        }
+    }
+    namespace PublishBlueprint {
+        export interface RequestBody {
+            blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * The marketplace installation slug for the Webflow CMS item
+             */
+            slug: string;
+            /**
+             * The version string to set on the marketplace CMS item (e.g. "1.0.0")
+             */
+            version?: string;
+            /**
+             * The display name for the blueprint on the marketplace CMS item
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
         }
     }
     namespace SyncDependencies {
@@ -2259,6 +2632,78 @@ declare namespace Paths {
                  * https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf
                  */
                 upload_url?: string; // url
+            }
+        }
+    }
+    namespace ValidateBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace VerifyBlueprint {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Organization ID of the source org
+             */
+            source_org_id: string;
+            source_blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * Organization ID of the destination org
+             */
+            destination_org_id: string;
+            destination_blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
             }
         }
     }
@@ -2383,7 +2828,7 @@ export interface OperationMethods {
    * List Custom and Installed Blueprints
    */
   'listBlueprints'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprints.Responses.$200>
@@ -2471,6 +2916,31 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   /**
+   * validateBlueprint - validateBlueprint
+   * 
+   * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+   * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
+   * 
+   */
+  'validateBlueprint'(
+    parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
+  /**
+   * verifyBlueprint - verifyBlueprint
+   * 
+   * Start a blueprint verification job. Compares resource configurations between a source org
+   * and a destination org to verify that a sync/install was successful.
+   * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.
+   * 
+   */
+  'verifyBlueprint'(
+    parameters?: Parameters<Paths.VerifyBlueprint.PathParameters> | null,
+    data?: Paths.VerifyBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
+  /**
    * exportBlueprint - exportBlueprint
    * 
    * Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
@@ -2481,6 +2951,40 @@ export interface OperationMethods {
     data?: Paths.ExportBlueprint.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  /**
+   * listMarketplaceSlugs - listMarketplaceSlugs
+   * 
+   * List all available marketplace blueprint slugs from Webflow CMS.
+   * Returns cached results when available.
+   * 
+   */
+  'listMarketplaceSlugs'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
+  /**
+   * publishBlueprint - publishBlueprint
+   * 
+   * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
+   * 
+   */
+  'publishBlueprint'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PublishBlueprint.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
+  /**
+   * formatBlueprintDescription - formatBlueprintDescription
+   * 
+   * Format a blueprint description as markdown using AI.
+   * 
+   */
+  'formatBlueprintDescription'(
+    parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
+    data?: Paths.FormatBlueprintDescription.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   /**
    * addBlueprintResource - addBlueprintResource
    * 
@@ -2728,7 +3232,7 @@ export interface PathsDictionary {
      * List Custom and Installed Blueprints
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprints.Responses.$200>
@@ -2826,6 +3330,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/validate']: {
+    /**
+     * validateBlueprint - validateBlueprint
+     * 
+     * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+     * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}:verify']: {
+    /**
+     * verifyBlueprint - verifyBlueprint
+     * 
+     * Start a blueprint verification job. Compares resource configurations between a source org
+     * and a destination org to verify that a sync/install was successful.
+     * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.VerifyBlueprint.PathParameters> | null,
+      data?: Paths.VerifyBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
+  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
     /**
      * exportBlueprint - exportBlueprint
@@ -2838,6 +3371,46 @@ export interface PathsDictionary {
       data?: Paths.ExportBlueprint.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/marketplace/slugs']: {
+    /**
+     * listMarketplaceSlugs - listMarketplaceSlugs
+     * 
+     * List all available marketplace blueprint slugs from Webflow CMS.
+     * Returns cached results when available.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints:publish']: {
+    /**
+     * publishBlueprint - publishBlueprint
+     * 
+     * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PublishBlueprint.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description']: {
+    /**
+     * formatBlueprintDescription - formatBlueprintDescription
+     * 
+     * Format a blueprint description as markdown using AI.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
+      data?: Paths.FormatBlueprintDescription.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources']: {
     /**
@@ -2984,6 +3557,8 @@ export type BlueprintJobID = Components.Schemas.BlueprintJobID;
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
+export type BlueprintValidateJob = Components.Schemas.BlueprintValidateJob;
+export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonBlueprintFields = Components.Schemas.CommonBlueprintFields;
 export type CommonBlueprintJobFields = Components.Schemas.CommonBlueprintJobFields;
@@ -2993,6 +3568,7 @@ export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
+export type FieldDiff = Components.Schemas.FieldDiff;
 export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
@@ -3013,8 +3589,10 @@ export type PutManifestPayload = Components.Schemas.PutManifestPayload;
 export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type ResourceReplacement = Components.Schemas.ResourceReplacement;
+export type ResourceVerificationResult = Components.Schemas.ResourceVerificationResult;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
+export type VerificationSummary = Components.Schemas.VerificationSummary;
 export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;
