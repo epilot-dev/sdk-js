@@ -579,6 +579,7 @@
     "/v2/portal/public-widgets": {
       "get": {
         "operationId": "getPublicPortalWidgets",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -597,6 +598,7 @@
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -614,6 +616,7 @@
       },
       "get": {
         "operationId": "getPortalWidgets",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -718,6 +721,7 @@
       },
       "patch": {
         "operationId": "updateContact",
+        "deprecated": true,
         "requestBody": {
           "content": {
             "application/json": {}
@@ -972,6 +976,7 @@
     "/v2/portal/order": {
       "get": {
         "operationId": "getAllOrders",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1008,6 +1013,7 @@
     "/v2/portal/order/{id}": {
       "get": {
         "operationId": "getOrder",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1019,6 +1025,7 @@
       },
       "patch": {
         "operationId": "updateOrder",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1037,6 +1044,7 @@
     "/v2/portal/opportunity": {
       "get": {
         "operationId": "getAllOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1055,6 +1063,7 @@
     "/v2/portal/opportunities/searchable-attributes": {
       "get": {
         "operationId": "getSearchableAttributesForOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1073,6 +1082,7 @@
     "/v2/portal/opportunities/search": {
       "post": {
         "operationId": "getSearchResultsForOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1097,6 +1107,7 @@
     "/v2/portal/opportunities/{id}": {
       "get": {
         "operationId": "getOpportunity",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1108,6 +1119,7 @@
       },
       "patch": {
         "operationId": "updateOpportunity",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1127,6 +1139,7 @@
     "/v2/portal/request": {
       "get": {
         "operationId": "getAllRequests",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1145,6 +1158,7 @@
     "/v2/portal/contract": {
       "get": {
         "operationId": "getAllContracts",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1163,6 +1177,7 @@
     "/v2/portal/contract/{id}": {
       "get": {
         "operationId": "getContract",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1174,6 +1189,7 @@
       },
       "patch": {
         "operationId": "updateContract",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1381,6 +1397,7 @@
     "/v2/portal/user/file/{id}": {
       "get": {
         "operationId": "getFileById",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",

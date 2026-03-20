@@ -2110,7 +2110,8 @@
       "get": {
         "operationId": "getPublicPortalWidgets",
         "summary": "getPublicPortalWidgets",
-        "description": "Retrieves the public widgets of a portal",
+        "description": "Retrieves the public widgets of a portal.",
+        "deprecated": true,
         "tags": [
           "Public"
         ],
@@ -2164,6 +2165,7 @@
         "operationId": "upsertPortalWidget",
         "summary": "upsertPortalWidget",
         "description": "Upsert widget for a portal of an organization.",
+        "deprecated": true,
         "security": [
           {
             "EpilotAuth": []
@@ -2222,7 +2224,8 @@
       "get": {
         "operationId": "getPortalWidgets",
         "summary": "getPortalWidgets",
-        "description": "Retrieves the widgets of a portal",
+        "description": "Retrieves the widgets of a portal.",
+        "deprecated": true,
         "tags": [
           "ECP Admin",
           "ECP"
@@ -2826,6 +2829,7 @@
         "operationId": "updateContact",
         "summary": "updateContact",
         "description": "Updates the contact details.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -3881,7 +3885,8 @@
       "get": {
         "operationId": "getAllOrders",
         "summary": "getAllOrders",
-        "description": "Get all orders for the portal user",
+        "description": "Get all orders for the portal user. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4028,7 +4033,8 @@
       "get": {
         "operationId": "getOrder",
         "summary": "getOrder",
-        "description": "Get an order by id",
+        "description": "Get an order by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4122,7 +4128,8 @@
       "patch": {
         "operationId": "updateOrder",
         "summary": "updateOrder",
-        "description": "Update an order by id",
+        "description": "Update an order by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4186,7 +4193,8 @@
       "get": {
         "operationId": "getAllOpportunities",
         "summary": "getAllOpportunities",
-        "description": "Get all opportunities of a portal user",
+        "description": "Get all opportunities of a portal user. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4269,7 +4277,8 @@
       "get": {
         "operationId": "getSearchableAttributesForOpportunities",
         "summary": "getSearchableAttributesForOpportunities",
-        "description": "Get all opportunity searchable attributes for a portal user",
+        "description": "Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4340,7 +4349,8 @@
       "post": {
         "operationId": "getSearchResultsForOpportunities",
         "summary": "getSearchResultsForOpportunities",
-        "description": "Get all opportunity with the given serached attributes",
+        "description": "Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4449,7 +4459,8 @@
       "get": {
         "operationId": "getOpportunity",
         "summary": "getOpportunity",
-        "description": "Get an opportunity by id",
+        "description": "Get an opportunity by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4536,7 +4547,8 @@
       "patch": {
         "operationId": "updateOpportunity",
         "summary": "updateOpportunity",
-        "description": "Update an opportunity by id",
+        "description": "Update an opportunity by id.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4602,7 +4614,8 @@
       "get": {
         "operationId": "getAllRequests",
         "summary": "getAllRequests",
-        "description": "Get all opportunities & orders of a portal user",
+        "description": "Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4698,7 +4711,8 @@
       "get": {
         "operationId": "getAllContracts",
         "summary": "getAllContracts",
-        "description": "Get all contracts for a portal user",
+        "description": "Get all contracts for a portal user. Use searchPortalUserEntities instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4778,7 +4792,8 @@
       "get": {
         "operationId": "getContract",
         "summary": "getContract",
-        "description": "Get a contract by id",
+        "description": "Get a contract by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -4871,7 +4886,8 @@
       "patch": {
         "operationId": "updateContract",
         "summary": "updateContract",
-        "description": "Update a contract by id",
+        "description": "Update a contract by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -5730,7 +5746,8 @@
       "get": {
         "operationId": "getFileById",
         "summary": "getFileById",
-        "description": "Fetch a document with ID",
+        "description": "Fetch a document with ID. Use getPortalUserEntity instead.",
+        "deprecated": true,
         "tags": [
           "ECP"
         ],
@@ -6126,6 +6143,10 @@
                   },
                   "origin": {
                     "$ref": "#/components/schemas/Origin"
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "The portal ID to look up the portal config. When provided, takes precedence over origin."
                   }
                 }
               }
@@ -7496,6 +7517,10 @@
                   },
                   "context_entities": {
                     "$ref": "#/components/schemas/ContextEntities"
+                  },
+                  "evaluate_targeting": {
+                    "type": "boolean",
+                    "description": "When true, evaluates targeting conditions and annotates each page/block visibility with _targeting_status ('visible' | 'hidden' | 'no_targeting'). Blocks and pages are never removed — for preview/builder use only."
                   }
                 }
               }
@@ -8611,9 +8636,36 @@
                   },
                   "contact_data": {
                     "type": "object",
-                    "description": "Additional contact entity fields to set when creating the contact for the invited user.\nThese are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).\n",
+                    "description": "Additional contact entity fields to set when creating the contact for the invited user.\nThese are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).\nValues can be strings or arrays of strings (for multiselect attributes).\n",
                     "additionalProperties": {
-                      "type": "string"
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "portal_user_data": {
+                    "type": "object",
+                    "description": "Additional portal user entity fields to set when creating the portal user for the invited user.\nThese are mapped directly to portal_user entity attributes.\nValues can be strings or arrays of strings (for multiselect attributes).\n",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -13281,6 +13333,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
@@ -13380,6 +13435,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
@@ -13487,6 +13545,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
@@ -13562,6 +13623,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
@@ -13636,6 +13700,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
@@ -13710,11 +13777,33 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
           }
         },
         "required": [
           "type",
           "call"
+        ]
+      },
+      "SecureProxyConfig": {
+        "type": "object",
+        "description": "Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.",
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Integration ID that owns the secure_proxy use case."
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Use case slug for the secure proxy use case."
+          }
+        },
+        "required": [
+          "integration_id",
+          "use_case_slug"
         ]
       },
       "ExtensionAuthBlock": {
@@ -14403,7 +14492,65 @@
           "visibility": {
             "type": "object",
             "description": "The conditions that need to be met for the block to be shown",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "properties": {
+              "is_hidden": {
+                "type": "boolean",
+                "description": "Block is fully hidden from portal users"
+              },
+              "hidden_on_mobile": {
+                "type": "boolean",
+                "description": "Block is hidden on mobile viewports"
+              },
+              "hidden_on_desktop": {
+                "type": "boolean",
+                "description": "Block is hidden on desktop viewports"
+              },
+              "hidden_in_app": {
+                "type": "boolean",
+                "description": "Block is hidden in the mobile app"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule visibility start date. If only start_date is set, block is visible from this date onwards."
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule visibility end date. If only end_date is set, block is visible until this date."
+              },
+              "visible_for_targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Target IDs that must match for the block to be visible"
+              },
+              "visible_for_operator": {
+                "type": "string",
+                "enum": [
+                  "and",
+                  "or"
+                ],
+                "description": "Operator for visible_for_targets matching"
+              },
+              "hidden_for_targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Target IDs that if matched will hide the block"
+              },
+              "hidden_for_operator": {
+                "type": "string",
+                "enum": [
+                  "and",
+                  "or"
+                ],
+                "description": "Operator for hidden_for_targets matching"
+              }
+            }
           },
           "content": {
             "type": "object",
@@ -14502,7 +14649,57 @@
           "visibility": {
             "type": "object",
             "description": "The conditions that need to be met for the page to be shown",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "properties": {
+              "is_hidden": {
+                "type": "boolean",
+                "description": "Page is fully hidden from portal users"
+              },
+              "hidden_in_app": {
+                "type": "boolean",
+                "description": "Page is hidden in the mobile app"
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule visibility start date. If only start_date is set, page is visible from this date onwards."
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Schedule visibility end date. If only end_date is set, page is visible until this date."
+              },
+              "visible_for_targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Target IDs that must match for the page to be visible"
+              },
+              "visible_for_operator": {
+                "type": "string",
+                "enum": [
+                  "and",
+                  "or"
+                ],
+                "description": "Operator for visible_for_targets matching"
+              },
+              "hidden_for_targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Target IDs that if matched will hide the page"
+              },
+              "hidden_for_operator": {
+                "type": "string",
+                "enum": [
+                  "and",
+                  "or"
+                ],
+                "description": "Operator for hidden_for_targets matching"
+              }
+            }
           },
           "content": {
             "type": "object",
