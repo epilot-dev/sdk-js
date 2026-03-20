@@ -39,8 +39,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getEmailTemplates`](#getemailtemplates)
 - [`upsertEmailTemplatesByPortalId`](#upsertemailtemplatesbyportalid)
 - [`getEmailTemplatesByPortalId`](#getemailtemplatesbyportalid)
-- [`upsertPortalWidget`](#upsertportalwidget)
-- [`getPortalWidgets`](#getportalwidgets)
 - [`replaceECPTemplateVariables`](#replaceecptemplatevariables)
 - [`extraPermissionAttributes`](#extrapermissionattributes)
 - [`validateCaaRecords`](#validatecaarecords)
@@ -80,7 +78,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getPublicPortalExtensionDetailsV3`](#getpublicportalextensiondetailsv3)
 - [`getPublicPortalConfig`](#getpublicportalconfig)
 - [`getPublicPortalConfigV3`](#getpublicportalconfigv3)
-- [`getPublicPortalWidgets`](#getpublicportalwidgets)
 - [`getSchemasByDomain`](#getschemasbydomain)
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain)
 - [`checkContactExists`](#checkcontactexists)
@@ -105,31 +102,17 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getResolvedSeamlessLink`](#getresolvedseamlesslink)
 - [`getSchemas`](#getschemas)
 - [`getContact`](#getcontact)
-- [`updateContact`](#updatecontact)
 - [`getPortalUser`](#getportaluser)
 - [`updatePortalUser`](#updateportaluser)
 - [`deletePortalUser`](#deleteportaluser)
 - [`updatePortalUserEmail`](#updateportaluseremail)
-- [`getAllOrders`](#getallorders)
 - [`postOrderAcceptance`](#postorderacceptance)
-- [`getOrder`](#getorder)
-- [`updateOrder`](#updateorder)
-- [`getAllOpportunities`](#getallopportunities)
-- [`getSearchableAttributesForOpportunities`](#getsearchableattributesforopportunities)
-- [`getSearchResultsForOpportunities`](#getsearchresultsforopportunities)
-- [`getOpportunity`](#getopportunity)
-- [`updateOpportunity`](#updateopportunity)
-- [`getAllRequests`](#getallrequests)
-- [`getAllContracts`](#getallcontracts)
-- [`getContract`](#getcontract)
-- [`updateContract`](#updatecontract)
 - [`addContractByIdentifiers`](#addcontractbyidentifiers)
 - [`validateCadenceEntityEditRules`](#validatecadenceentityeditrules)
 - [`searchPaymentRelationsInEntities`](#searchpaymentrelationsinentities)
 - [`createCustomEntityActivity`](#createcustomentityactivity)
 - [`saveEntityFile`](#saveentityfile)
 - [`deleteEntityFile`](#deleteentityfile)
-- [`getFileById`](#getfilebyid)
 - [`trackFileDownloaded`](#trackfiledownloaded)
 - [`getBillingEvents`](#getbillingevents)
 - [`triggerEntityAccessEvent`](#triggerentityaccessevent)
@@ -272,6 +255,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookPriceDataRetrieval`](#extensionhookpricedataretrieval)
 - [`ExtensionHookConsumptionDataRetrieval`](#extensionhookconsumptiondataretrieval)
 - [`ExtensionHookCostDataRetrieval`](#extensionhookcostdataretrieval)
+- [`SecureProxyConfig`](#secureproxyconfig)
 - [`ExtensionAuthBlock`](#extensionauthblock)
 - [`Direction`](#direction)
 - [`TariffType`](#tarifftype)
@@ -1315,7 +1299,11 @@ const { data } = await client.getPortalExtensions({
           "body": {},
           "result": "string"
         },
-        "use_static_ips": false
+        "use_static_ips": false,
+        "secure_proxy": {
+          "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "use_case_slug": "string"
+        }
       }
     ]
   }
@@ -1518,7 +1506,11 @@ const { data } = await client.getPortalExtensionsV3({
           "body": {},
           "result": "string"
         },
-        "use_static_ips": false
+        "use_static_ips": false,
+        "secure_proxy": {
+          "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "use_case_slug": "string"
+        }
       }
     ]
   }
@@ -2947,205 +2939,6 @@ const { data } = await client.getEmailTemplatesByPortalId({
 
 ---
 
-### `getPublicPortalWidgets`
-
-Retrieves the public widgets of a portal
-
-`GET /v2/portal/public-widgets`
-
-```ts
-const { data } = await client.getPublicPortalWidgets({
-  org_id: 'example',
-  origin: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "widgets": [
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "content": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `upsertPortalWidget`
-
-Upsert widget for a portal of an organization.
-
-`POST /v2/portal/widgets`
-
-```ts
-const { data } = await client.upsertPortalWidget(
-  {
-    origin: 'example',
-  },
-  {
-    widgets: [
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: {
-          en: 'string',
-          de: 'string'
-        },
-        subHeadline: {
-          en: 'string',
-          de: 'string'
-        },
-        schema: 'string'
-      },
-      {
-        id: 'string',
-        type: 'ACTION_WIDGET',
-        listIndex: 0,
-        headline: {
-          en: 'string',
-          de: 'string'
-        },
-        subHeadline: {
-          en: 'string',
-          de: 'string'
-        },
-        content: 'string'
-      },
-      /* ... 8 more */
-    ]
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "widgets": [
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "content": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getPortalWidgets`
-
-Retrieves the widgets of a portal
-
-`GET /v2/portal/widgets`
-
-```ts
-const { data } = await client.getPortalWidgets({
-  origin: 'example',
-  contract_id: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "widgets": [
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "content": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
 ### `replaceECPTemplateVariables`
 
 Replaces the template variables of a portal
@@ -3523,40 +3316,6 @@ const { data } = await client.getContact()
       ]
     }
   ]
-}
-```
-
-</details>
-
----
-
-### `updateContact`
-
-Updates the contact details.
-
-`PATCH /v2/portal/contact`
-
-```ts
-const { data } = await client.updateContact(
-  null,
-  {},
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "contact"
-  }
 }
 ```
 
@@ -4065,57 +3824,6 @@ const { data } = await client.configureDistributionV3({
 
 ---
 
-### `getAllOrders`
-
-Get all orders for the portal user
-
-`GET /v2/portal/order`
-
-```ts
-const { data } = await client.getAllOrders({
-  from: 1,
-  size: 1,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
 ### `postOrderAcceptance`
 
 Accept/decline an offer by id
@@ -4146,684 +3854,6 @@ const { data } = await client.postOrderAcceptance(
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "order"
-  }
-}
-```
-
-</details>
-
----
-
-### `getOrder`
-
-Get an order by id
-
-`GET /v2/portal/order/{id}`
-
-```ts
-const { data } = await client.getOrder({
-  id: '123e4567-e89b-12d3-a456-426614174000',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "order"
-  },
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "products": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "product"
-    }
-  ],
-  "crossSellableProducts": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "product"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateOrder`
-
-Update an order by id
-
-`PATCH /v2/portal/order/{id}`
-
-```ts
-const { data } = await client.updateOrder(
-  {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-  },
-  {},
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "order"
-  }
-}
-```
-
-</details>
-
----
-
-### `getAllOpportunities`
-
-Get all opportunities of a portal user
-
-`GET /v2/portal/opportunity`
-
-```ts
-const { data } = await client.getAllOpportunities({
-  from: 1,
-  size: 1,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getSearchableAttributesForOpportunities`
-
-Get all opportunity searchable attributes for a portal user
-
-`GET /v2/portal/opportunities/searchable-attributes`
-
-```ts
-const { data } = await client.getSearchableAttributesForOpportunities({
-  from: 1,
-  size: 1,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getSearchResultsForOpportunities`
-
-Get all opportunity with the given serached attributes
-
-`POST /v2/portal/opportunities/search`
-
-```ts
-const { data } = await client.getSearchResultsForOpportunities(
-  {
-    from: 1,
-    size: 1,
-  },
-  {
-    addresses: ['string'],
-    customers: ['string'],
-    purposes: ['5da0a718-c822-403d-9f5d-20d4584e0528'],
-    workflows: [
-      {}
-    ]
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getOpportunity`
-
-Get an opportunity by id
-
-`GET /v2/portal/opportunities/{id}`
-
-```ts
-const { data } = await client.getOpportunity({
-  id: '123e4567-e89b-12d3-a456-426614174000',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "opportunity"
-  },
-  "orders": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order"
-    }
-  ],
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateOpportunity`
-
-Update an opportunity by id
-
-`PATCH /v2/portal/opportunities/{id}`
-
-```ts
-const { data } = await client.updateOpportunity(
-  {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-  },
-  {},
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "opportunity"
-  }
-}
-```
-
-</details>
-
----
-
-### `getAllRequests`
-
-Get all opportunities & orders of a portal user
-
-`GET /v2/portal/request`
-
-```ts
-const { data } = await client.getAllRequests({
-  from: 1,
-  size: 1,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "hits": 1,
-  "results": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getAllContracts`
-
-Get all contracts for a portal user
-
-`GET /v2/portal/contract`
-
-```ts
-const { data } = await client.getAllContracts({
-  from: 1,
-  size: 1,
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "contract_name": "Grid Contract",
-      "contract_number": "12345",
-      "status": "approved",
-      "description": "This contract is for the supply of widgets.",
-      "account_number": "67890",
-      "branch": "power",
-      "billing_address": "123 Main St, Anytown",
-      "delivery_address": "456 Elm St, Anytown",
-      "additional_addresses": "789 Oak St, Anytown",
-      "termination_date": "2022-01-01",
-      "termination_reason": "Non-payment",
-      "billing_period": "monthly",
-      "billing_duration_amount": 30,
-      "renewal_duration_amount": 365,
-      "renewal_duration_unit": "years",
-      "notice_time_amount": 30,
-      "notice_time_unit": "months",
-      "start_date": "2021-01-01",
-      "billing_due_day": 2,
-      "installment_amount": 10050,
-      "balance": 8990,
-      "balance_currency": "EUR",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getContract`
-
-Get a contract by id
-
-`GET /v2/portal/contract/{id}`
-
-```ts
-const { data } = await client.getContract({
-  id: '123e4567-e89b-12d3-a456-426614174000',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "contract_name": "Grid Contract",
-    "contract_number": "12345",
-    "status": "approved",
-    "description": "This contract is for the supply of widgets.",
-    "account_number": "67890",
-    "branch": "power",
-    "billing_address": "123 Main St, Anytown",
-    "delivery_address": "456 Elm St, Anytown",
-    "additional_addresses": "789 Oak St, Anytown",
-    "termination_date": "2022-01-01",
-    "termination_reason": "Non-payment",
-    "billing_period": "monthly",
-    "billing_duration_amount": 30,
-    "renewal_duration_amount": 365,
-    "renewal_duration_unit": "years",
-    "notice_time_amount": 30,
-    "notice_time_unit": "months",
-    "start_date": "2021-01-01",
-    "billing_due_day": 2,
-    "installment_amount": 10050,
-    "balance": 8990,
-    "balance_currency": "EUR"
-  },
-  "orders": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order"
-    }
-  ],
-  "meters": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "meter"
-    }
-  ],
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateContract`
-
-Update a contract by id
-
-`PATCH /v2/portal/contract/{id}`
-
-```ts
-const { data } = await client.updateContract(
-  {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-  },
-  {},
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "contract_name": "Grid Contract",
-    "contract_number": "12345",
-    "status": "approved",
-    "description": "This contract is for the supply of widgets.",
-    "account_number": "67890",
-    "branch": "power",
-    "billing_address": "123 Main St, Anytown",
-    "delivery_address": "456 Elm St, Anytown",
-    "additional_addresses": "789 Oak St, Anytown",
-    "termination_date": "2022-01-01",
-    "termination_reason": "Non-payment",
-    "billing_period": "monthly",
-    "billing_duration_amount": 30,
-    "renewal_duration_amount": 365,
-    "renewal_duration_unit": "years",
-    "notice_time_amount": 30,
-    "notice_time_unit": "months",
-    "start_date": "2021-01-01",
-    "billing_due_day": 2,
-    "installment_amount": 10050,
-    "balance": 8990,
-    "balance_currency": "EUR"
   }
 }
 ```
@@ -5241,53 +4271,6 @@ const { data } = await client.getRegistrationIdentifiers()
 
 ---
 
-### `getFileById`
-
-Fetch a document with ID
-
-`GET /v2/portal/user/file/{id}`
-
-```ts
-const { data } = await client.getFileById({
-  id: '123e4567-e89b-12d3-a456-426614174000',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "file": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "file",
-    "filename": "document.pdf",
-    "access_control": "private",
-    "file_date": "2021-02-09T12:41:43.662Z",
-    "public_url": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
-    "type": "document",
-    "mime_type": "application/pdf",
-    "_relations": [
-      {
-        "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-        "_schema": "contact",
-        "_title": "Opportunity ABC"
-      }
-    ],
-    "is_new": true
-  }
-}
-```
-
-</details>
-
----
-
 ### `trackFileDownloaded`
 
 Track that user has downloaded a file
@@ -5499,7 +4482,8 @@ const { data } = await client.loginToPortalAsUser(
   null,
   {
     email: 'portal-customer@email.com',
-    origin: 'string'
+    origin: 'string',
+    portal_id: 'string'
   },
 )
 ```
@@ -6193,7 +5177,16 @@ const { data } = await client.getPortalPage({
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -6230,7 +5223,16 @@ const { data } = await client.updatePortalPage(
     slug: 'dashboard',
     path: '/dashboard',
     schema: ['string'],
-    visibility: {},
+    visibility: {
+      is_hidden: true,
+      hidden_in_app: true,
+      start_date: '1970-01-01T00:00:00.000Z',
+      end_date: '1970-01-01T00:00:00.000Z',
+      visible_for_targets: ['string'],
+      visible_for_operator: 'and',
+      hidden_for_targets: ['string'],
+      hidden_for_operator: 'and'
+    },
     content: {},
     design: {},
     blocks: {},
@@ -6255,7 +5257,16 @@ const { data } = await client.updatePortalPage(
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -6316,7 +5327,16 @@ const { data } = await client.getPortalPages({
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -6354,7 +5374,16 @@ const { data } = await client.createPortalPage(
     slug: 'dashboard',
     path: '/dashboard',
     schema: ['string'],
-    visibility: {},
+    visibility: {
+      is_hidden: true,
+      hidden_in_app: true,
+      start_date: '1970-01-01T00:00:00.000Z',
+      end_date: '1970-01-01T00:00:00.000Z',
+      visible_for_targets: ['string'],
+      visible_for_operator: 'and',
+      hidden_for_targets: ['string'],
+      hidden_for_operator: 'and'
+    },
     content: {},
     design: {},
     blocks: {},
@@ -6379,7 +5408,16 @@ const { data } = await client.createPortalPage(
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -6424,7 +5462,16 @@ const { data } = await client.getPublicPages({
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -6462,7 +5509,16 @@ const { data } = await client.interpolatePortalPages(
         slug: 'dashboard',
         path: '/dashboard',
         schema: ['string'],
-        visibility: {},
+        visibility: {
+          is_hidden: true,
+          hidden_in_app: true,
+          start_date: '1970-01-01T00:00:00.000Z',
+          end_date: '1970-01-01T00:00:00.000Z',
+          visible_for_targets: ['string'],
+          visible_for_operator: 'and',
+          hidden_for_targets: ['string'],
+          hidden_for_operator: 'and'
+        },
         content: {},
         design: {},
         blocks: {},
@@ -6484,7 +5540,8 @@ const { data } = await client.interpolatePortalPages(
         entity_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
         entity_schema: 'contract'
       }
-    ]
+    ],
+    evaluate_targeting: true
   },
 )
 ```
@@ -6498,7 +5555,16 @@ const { data } = await client.interpolatePortalPages(
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -6540,7 +5606,16 @@ const { data } = await client.getDefaultPages()
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -6576,7 +5651,18 @@ const { data } = await client.createPortalPageBlock(
   },
   {
     props: {
-      visibility: {},
+      visibility: {
+        is_hidden: true,
+        hidden_on_mobile: true,
+        hidden_on_desktop: true,
+        hidden_in_app: true,
+        start_date: '1970-01-01T00:00:00.000Z',
+        end_date: '1970-01-01T00:00:00.000Z',
+        visible_for_targets: ['string'],
+        visible_for_operator: 'and',
+        hidden_for_targets: ['string'],
+        hidden_for_operator: 'and'
+      },
       content: {},
       design: {}
     },
@@ -6593,7 +5679,18 @@ const { data } = await client.createPortalPageBlock(
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -6627,7 +5724,18 @@ const { data } = await client.getPortalPageBlocks({
 [
   {
     "props": {
-      "visibility": {},
+      "visibility": {
+        "is_hidden": true,
+        "hidden_on_mobile": true,
+        "hidden_on_desktop": true,
+        "hidden_in_app": true,
+        "start_date": "1970-01-01T00:00:00.000Z",
+        "end_date": "1970-01-01T00:00:00.000Z",
+        "visible_for_targets": ["string"],
+        "visible_for_operator": "and",
+        "hidden_for_targets": ["string"],
+        "hidden_for_operator": "and"
+      },
       "content": {},
       "design": {}
     },
@@ -6662,7 +5770,18 @@ const { data } = await client.getPortalPageBlock({
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -6691,7 +5810,18 @@ const { data } = await client.updatePortalPageBlock(
   },
   {
     props: {
-      visibility: {},
+      visibility: {
+        is_hidden: true,
+        hidden_on_mobile: true,
+        hidden_on_desktop: true,
+        hidden_in_app: true,
+        start_date: '1970-01-01T00:00:00.000Z',
+        end_date: '1970-01-01T00:00:00.000Z',
+        visible_for_targets: ['string'],
+        visible_for_operator: 'and',
+        hidden_for_targets: ['string'],
+        hidden_for_operator: 'and'
+      },
       content: {},
       design: {}
     },
@@ -6708,7 +5838,18 @@ const { data } = await client.updatePortalPageBlock(
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -7066,7 +6207,7 @@ const { data } = await client.createPortalConfig(
         slug: 'dashboard',
         path: '/dashboard',
         schema: ['string'],
-        visibility: {},
+        visibility: { /* ... */ },
         content: {},
         design: {},
         blocks: {},
@@ -7759,7 +6900,7 @@ const { data } = await client.putPortalConfig(
         slug: 'dashboard',
         path: '/dashboard',
         schema: ['string'],
-        visibility: {},
+        visibility: { /* ... */ },
         content: {},
         design: {},
         blocks: {},
@@ -8131,7 +7272,8 @@ const { data } = await client.invitePartner(
   {
     email: 'string',
     represents_contact_list: ['5da0a718-c822-403d-9f5d-20d4584e0528'],
-    contact_data: {}
+    contact_data: {},
+    portal_user_data: {}
   },
 )
 ```
@@ -10368,6 +9510,10 @@ type ExtensionHookRegistrationIdentifiersCheck = {
     result?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -10408,6 +9554,10 @@ type ExtensionHookContractIdentification = {
     en: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -10447,6 +9597,10 @@ type ExtensionHookMeterReadingPlausibilityCheck = {
     lower_limit?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -10481,6 +9635,10 @@ type ExtensionHookPriceDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -10515,6 +9673,10 @@ type ExtensionHookConsumptionDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
 }
 ```
 
@@ -10549,6 +9711,21 @@ type ExtensionHookCostDataRetrieval = {
     dataPath?: string
   }
   use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `SecureProxyConfig`
+
+Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
+
+```ts
+type SecureProxyConfig = {
+  integration_id: string // uuid
+  use_case_slug: string
 }
 ```
 
@@ -10912,7 +10089,18 @@ type SSOCallbackResponse = {
 
 ```ts
 type BlockProps = {
-  visibility?: Record<string, unknown>
+  visibility?: {
+    is_hidden?: boolean
+    hidden_on_mobile?: boolean
+    hidden_on_desktop?: boolean
+    hidden_in_app?: boolean
+    start_date?: string // date-time
+    end_date?: string // date-time
+    visible_for_targets?: string[]
+    visible_for_operator?: "and" | "or"
+    hidden_for_targets?: string[]
+    hidden_for_operator?: "and" | "or"
+  }
   content?: Record<string, unknown>
   design?: Record<string, unknown>
 }
@@ -10931,7 +10119,18 @@ type BlockType = string
 ```ts
 type BlockRequest = {
   props?: {
-    visibility?: Record<string, unknown>
+    visibility?: {
+      is_hidden?: { ... }
+      hidden_on_mobile?: { ... }
+      hidden_on_desktop?: { ... }
+      hidden_in_app?: { ... }
+      start_date?: { ... }
+      end_date?: { ... }
+      visible_for_targets?: { ... }
+      visible_for_operator?: { ... }
+      hidden_for_targets?: { ... }
+      hidden_for_operator?: { ... }
+    }
     content?: Record<string, unknown>
     design?: Record<string, unknown>
   }
@@ -10954,7 +10153,18 @@ type BlockId = string // uuid
 ```ts
 type Block = {
   props?: {
-    visibility?: Record<string, unknown>
+    visibility?: {
+      is_hidden?: { ... }
+      hidden_on_mobile?: { ... }
+      hidden_on_desktop?: { ... }
+      hidden_in_app?: { ... }
+      start_date?: { ... }
+      end_date?: { ... }
+      visible_for_targets?: { ... }
+      visible_for_operator?: { ... }
+      hidden_for_targets?: { ... }
+      hidden_for_operator?: { ... }
+    }
     content?: Record<string, unknown>
     design?: Record<string, unknown>
   }
@@ -10972,7 +10182,16 @@ type PageRequest = {
   slug: string
   path?: string
   schema?: string[]
-  visibility?: Record<string, unknown>
+  visibility?: {
+    is_hidden?: boolean
+    hidden_in_app?: boolean
+    start_date?: string // date-time
+    end_date?: string // date-time
+    visible_for_targets?: string[]
+    visible_for_operator?: "and" | "or"
+    hidden_for_targets?: string[]
+    hidden_for_operator?: "and" | "or"
+  }
   content?: Record<string, unknown>
   design?: Record<string, unknown>
   blocks?: Record<string, {
@@ -11005,7 +10224,16 @@ type Page = {
   slug: string
   path?: string
   schema?: string[]
-  visibility?: Record<string, unknown>
+  visibility?: {
+    is_hidden?: boolean
+    hidden_in_app?: boolean
+    start_date?: string // date-time
+    end_date?: string // date-time
+    visible_for_targets?: string[]
+    visible_for_operator?: "and" | "or"
+    hidden_for_targets?: string[]
+    hidden_for_operator?: "and" | "or"
+  }
   content?: Record<string, unknown>
   design?: Record<string, unknown>
   blocks?: Record<string, {

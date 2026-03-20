@@ -696,6 +696,46 @@ export declare namespace Components {
              */
             visibility?: {
                 [name: string]: any;
+                /**
+                 * Block is fully hidden from portal users
+                 */
+                is_hidden?: boolean;
+                /**
+                 * Block is hidden on mobile viewports
+                 */
+                hidden_on_mobile?: boolean;
+                /**
+                 * Block is hidden on desktop viewports
+                 */
+                hidden_on_desktop?: boolean;
+                /**
+                 * Block is hidden in the mobile app
+                 */
+                hidden_in_app?: boolean;
+                /**
+                 * Schedule visibility start date. If only start_date is set, block is visible from this date onwards.
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Schedule visibility end date. If only end_date is set, block is visible until this date.
+                 */
+                end_date?: string; // date-time
+                /**
+                 * Target IDs that must match for the block to be visible
+                 */
+                visible_for_targets?: string[];
+                /**
+                 * Operator for visible_for_targets matching
+                 */
+                visible_for_operator?: "and" | "or";
+                /**
+                 * Target IDs that if matched will hide the block
+                 */
+                hidden_for_targets?: string[];
+                /**
+                 * Operator for hidden_for_targets matching
+                 */
+                hidden_for_operator?: "and" | "or";
             };
             /**
              * The content of the block
@@ -3127,6 +3167,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
@@ -3203,6 +3244,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -3250,6 +3292,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -3341,6 +3384,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -3388,6 +3432,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -3434,6 +3479,7 @@ export declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         export type ExtensionHookSelection = {
             /**
@@ -4420,6 +4466,38 @@ export declare namespace Components {
              */
             visibility?: {
                 [name: string]: any;
+                /**
+                 * Page is fully hidden from portal users
+                 */
+                is_hidden?: boolean;
+                /**
+                 * Page is hidden in the mobile app
+                 */
+                hidden_in_app?: boolean;
+                /**
+                 * Schedule visibility start date. If only start_date is set, page is visible from this date onwards.
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Schedule visibility end date. If only end_date is set, page is visible until this date.
+                 */
+                end_date?: string; // date-time
+                /**
+                 * Target IDs that must match for the page to be visible
+                 */
+                visible_for_targets?: string[];
+                /**
+                 * Operator for visible_for_targets matching
+                 */
+                visible_for_operator?: "and" | "or";
+                /**
+                 * Target IDs that if matched will hide the page
+                 */
+                hidden_for_targets?: string[];
+                /**
+                 * Operator for hidden_for_targets matching
+                 */
+                hidden_for_operator?: "and" | "or";
             };
             /**
              * The content of the page
@@ -4523,6 +4601,38 @@ export declare namespace Components {
              */
             visibility?: {
                 [name: string]: any;
+                /**
+                 * Page is fully hidden from portal users
+                 */
+                is_hidden?: boolean;
+                /**
+                 * Page is hidden in the mobile app
+                 */
+                hidden_in_app?: boolean;
+                /**
+                 * Schedule visibility start date. If only start_date is set, page is visible from this date onwards.
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Schedule visibility end date. If only end_date is set, page is visible until this date.
+                 */
+                end_date?: string; // date-time
+                /**
+                 * Target IDs that must match for the page to be visible
+                 */
+                visible_for_targets?: string[];
+                /**
+                 * Operator for visible_for_targets matching
+                 */
+                visible_for_operator?: "and" | "or";
+                /**
+                 * Target IDs that if matched will hide the page
+                 */
+                hidden_for_targets?: string[];
+                /**
+                 * Operator for hidden_for_targets matching
+                 */
+                hidden_for_operator?: "and" | "or";
             };
             /**
              * The content of the page
@@ -6122,6 +6232,19 @@ export declare namespace Components {
                     [key: string]: any;
                 };
             };
+        }
+        /**
+         * Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
+         */
+        export interface SecureProxyConfig {
+            /**
+             * Integration ID that owns the secure_proxy use case.
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case slug for the secure proxy use case.
+             */
+            use_case_slug: string;
         }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
         export type SwappableConfig = "all" | "domain" | "users" | "email_templates";
@@ -11235,6 +11358,10 @@ export declare namespace Paths {
              * ]
              */
             Components.Schemas.ContextEntities;
+            /**
+             * When true, evaluates targeting conditions and annotates each page/block visibility with _targeting_status ('visible' | 'hidden' | 'no_targeting'). Blocks and pages are never removed — for preview/builder use only.
+             */
+            evaluate_targeting?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.Page[];
@@ -11258,10 +11385,20 @@ export declare namespace Paths {
             /**
              * Additional contact entity fields to set when creating the contact for the invited user.
              * These are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).
+             * Values can be strings or arrays of strings (for multiselect attributes).
              *
              */
             contact_data?: {
-                [name: string]: string;
+                [name: string]: string | string[];
+            };
+            /**
+             * Additional portal user entity fields to set when creating the portal user for the invited user.
+             * These are mapped directly to portal_user entity attributes.
+             * Values can be strings or arrays of strings (for multiselect attributes).
+             *
+             */
+            portal_user_data?: {
+                [name: string]: string | string[];
             };
         }
         namespace Responses {
@@ -11308,6 +11445,10 @@ export declare namespace Paths {
              */
             email?: string;
             origin?: /* Origin of the portal */ Components.Schemas.Origin;
+            /**
+             * The portal ID to look up the portal config. When provided, takes precedence over origin.
+             */
+            portal_id?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -12919,7 +13060,7 @@ export interface OperationMethods {
   /**
    * getPublicPortalWidgets - getPublicPortalWidgets
    * 
-   * Retrieves the public widgets of a portal
+   * Retrieves the public widgets of a portal.
    */
   'getPublicPortalWidgets'(
     parameters?: Parameters<Paths.GetPublicPortalWidgets.QueryParameters> | null,
@@ -12929,7 +13070,7 @@ export interface OperationMethods {
   /**
    * getPortalWidgets - getPortalWidgets
    * 
-   * Retrieves the widgets of a portal
+   * Retrieves the widgets of a portal.
    */
   'getPortalWidgets'(
     parameters?: Parameters<Paths.GetPortalWidgets.QueryParameters> | null,
@@ -13219,7 +13360,7 @@ export interface OperationMethods {
   /**
    * getAllOrders - getAllOrders
    * 
-   * Get all orders for the portal user
+   * Get all orders for the portal user. Use searchPortalUserEntities instead.
    */
   'getAllOrders'(
     parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
@@ -13239,7 +13380,7 @@ export interface OperationMethods {
   /**
    * getOrder - getOrder
    * 
-   * Get an order by id
+   * Get an order by id. Use getPortalUserEntity instead.
    */
   'getOrder'(
     parameters?: Parameters<Paths.GetOrder.PathParameters> | null,
@@ -13249,7 +13390,7 @@ export interface OperationMethods {
   /**
    * updateOrder - updateOrder
    * 
-   * Update an order by id
+   * Update an order by id. Use getPortalUserEntity instead.
    */
   'updateOrder'(
     parameters?: Parameters<Paths.UpdateOrder.PathParameters> | null,
@@ -13259,7 +13400,7 @@ export interface OperationMethods {
   /**
    * getAllOpportunities - getAllOpportunities
    * 
-   * Get all opportunities of a portal user
+   * Get all opportunities of a portal user. Use searchPortalUserEntities instead.
    */
   'getAllOpportunities'(
     parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
@@ -13269,7 +13410,7 @@ export interface OperationMethods {
   /**
    * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
    * 
-   * Get all opportunity searchable attributes for a portal user
+   * Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.
    */
   'getSearchableAttributesForOpportunities'(
     parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
@@ -13279,7 +13420,7 @@ export interface OperationMethods {
   /**
    * getSearchResultsForOpportunities - getSearchResultsForOpportunities
    * 
-   * Get all opportunity with the given serached attributes
+   * Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.
    */
   'getSearchResultsForOpportunities'(
     parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
@@ -13289,7 +13430,7 @@ export interface OperationMethods {
   /**
    * getOpportunity - getOpportunity
    * 
-   * Get an opportunity by id
+   * Get an opportunity by id. Use getPortalUserEntity instead.
    */
   'getOpportunity'(
     parameters?: Parameters<Paths.GetOpportunity.PathParameters> | null,
@@ -13299,7 +13440,7 @@ export interface OperationMethods {
   /**
    * updateOpportunity - updateOpportunity
    * 
-   * Update an opportunity by id
+   * Update an opportunity by id.
    */
   'updateOpportunity'(
     parameters?: Parameters<Paths.UpdateOpportunity.PathParameters> | null,
@@ -13309,7 +13450,7 @@ export interface OperationMethods {
   /**
    * getAllRequests - getAllRequests
    * 
-   * Get all opportunities & orders of a portal user
+   * Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.
    */
   'getAllRequests'(
     parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
@@ -13319,7 +13460,7 @@ export interface OperationMethods {
   /**
    * getAllContracts - getAllContracts
    * 
-   * Get all contracts for a portal user
+   * Get all contracts for a portal user. Use searchPortalUserEntities instead.
    */
   'getAllContracts'(
     parameters?: Parameters<Paths.GetAllContracts.QueryParameters> | null,
@@ -13329,7 +13470,7 @@ export interface OperationMethods {
   /**
    * getContract - getContract
    * 
-   * Get a contract by id
+   * Get a contract by id. Use getPortalUserEntity instead.
    */
   'getContract'(
     parameters?: Parameters<Paths.GetContract.PathParameters> | null,
@@ -13339,7 +13480,7 @@ export interface OperationMethods {
   /**
    * updateContract - updateContract
    * 
-   * Update a contract by id
+   * Update a contract by id. Use getPortalUserEntity instead.
    */
   'updateContract'(
     parameters?: Parameters<Paths.UpdateContract.PathParameters> | null,
@@ -13462,7 +13603,7 @@ export interface OperationMethods {
   /**
    * getFileById - getFileById
    * 
-   * Fetch a document with ID
+   * Fetch a document with ID. Use getPortalUserEntity instead.
    */
   'getFileById'(
     parameters?: Parameters<Paths.GetFileById.PathParameters> | null,
@@ -14350,7 +14491,7 @@ export interface PathsDictionary {
     /**
      * getPublicPortalWidgets - getPublicPortalWidgets
      * 
-     * Retrieves the public widgets of a portal
+     * Retrieves the public widgets of a portal.
      */
     'get'(
       parameters?: Parameters<Paths.GetPublicPortalWidgets.QueryParameters> | null,
@@ -14372,7 +14513,7 @@ export interface PathsDictionary {
     /**
      * getPortalWidgets - getPortalWidgets
      * 
-     * Retrieves the widgets of a portal
+     * Retrieves the widgets of a portal.
      */
     'get'(
       parameters?: Parameters<Paths.GetPortalWidgets.QueryParameters> | null,
@@ -14702,7 +14843,7 @@ export interface PathsDictionary {
     /**
      * getAllOrders - getAllOrders
      * 
-     * Get all orders for the portal user
+     * Get all orders for the portal user. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllOrders.QueryParameters> | null,
@@ -14726,7 +14867,7 @@ export interface PathsDictionary {
     /**
      * getOrder - getOrder
      * 
-     * Get an order by id
+     * Get an order by id. Use getPortalUserEntity instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetOrder.PathParameters> | null,
@@ -14736,7 +14877,7 @@ export interface PathsDictionary {
     /**
      * updateOrder - updateOrder
      * 
-     * Update an order by id
+     * Update an order by id. Use getPortalUserEntity instead.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateOrder.PathParameters> | null,
@@ -14748,7 +14889,7 @@ export interface PathsDictionary {
     /**
      * getAllOpportunities - getAllOpportunities
      * 
-     * Get all opportunities of a portal user
+     * Get all opportunities of a portal user. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllOpportunities.QueryParameters> | null,
@@ -14760,7 +14901,7 @@ export interface PathsDictionary {
     /**
      * getSearchableAttributesForOpportunities - getSearchableAttributesForOpportunities
      * 
-     * Get all opportunity searchable attributes for a portal user
+     * Get all opportunity searchable attributes for a portal user. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetSearchableAttributesForOpportunities.QueryParameters> | null,
@@ -14772,7 +14913,7 @@ export interface PathsDictionary {
     /**
      * getSearchResultsForOpportunities - getSearchResultsForOpportunities
      * 
-     * Get all opportunity with the given serached attributes
+     * Get all opportunity with the given searched attributes. Use searchPortalUserEntities instead.
      */
     'post'(
       parameters?: Parameters<Paths.GetSearchResultsForOpportunities.QueryParameters> | null,
@@ -14784,7 +14925,7 @@ export interface PathsDictionary {
     /**
      * getOpportunity - getOpportunity
      * 
-     * Get an opportunity by id
+     * Get an opportunity by id. Use getPortalUserEntity instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetOpportunity.PathParameters> | null,
@@ -14794,7 +14935,7 @@ export interface PathsDictionary {
     /**
      * updateOpportunity - updateOpportunity
      * 
-     * Update an opportunity by id
+     * Update an opportunity by id.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateOpportunity.PathParameters> | null,
@@ -14806,7 +14947,7 @@ export interface PathsDictionary {
     /**
      * getAllRequests - getAllRequests
      * 
-     * Get all opportunities & orders of a portal user
+     * Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllRequests.QueryParameters> | null,
@@ -14818,7 +14959,7 @@ export interface PathsDictionary {
     /**
      * getAllContracts - getAllContracts
      * 
-     * Get all contracts for a portal user
+     * Get all contracts for a portal user. Use searchPortalUserEntities instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetAllContracts.QueryParameters> | null,
@@ -14830,7 +14971,7 @@ export interface PathsDictionary {
     /**
      * getContract - getContract
      * 
-     * Get a contract by id
+     * Get a contract by id. Use getPortalUserEntity instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetContract.PathParameters> | null,
@@ -14840,7 +14981,7 @@ export interface PathsDictionary {
     /**
      * updateContract - updateContract
      * 
-     * Update a contract by id
+     * Update a contract by id. Use getPortalUserEntity instead.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateContract.PathParameters> | null,
@@ -14985,7 +15126,7 @@ export interface PathsDictionary {
     /**
      * getFileById - getFileById
      * 
-     * Fetch a document with ID
+     * Fetch a document with ID. Use getPortalUserEntity instead.
      */
     'get'(
       parameters?: Parameters<Paths.GetFileById.PathParameters> | null,
@@ -15738,6 +15879,7 @@ export type SaveEntityFile = Components.Schemas.SaveEntityFile;
 export type SavePortalFile = Components.Schemas.SavePortalFile;
 export type Schema = Components.Schemas.Schema;
 export type SearchIncludes = Components.Schemas.SearchIncludes;
+export type SecureProxyConfig = Components.Schemas.SecureProxyConfig;
 export type Source = Components.Schemas.Source;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
