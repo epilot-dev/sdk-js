@@ -48,6 +48,8 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`HttpMethod`](#httpmethod)
 - [`AuthType`](#authtype)
 - [`Filter`](#filter)
+- [`WebhookCondition`](#webhookcondition)
+- [`WebhookConditionGroup`](#webhookconditiongroup)
 - [`Auth`](#auth)
 - [`BasicAuthConfig`](#basicauthconfig)
 - [`OAuthConfig`](#oauthconfig)
@@ -614,7 +616,7 @@ type SearchOptions = {
     to?: string // date-time
   }
   event_id?: string
-  status?: "succeeded" | "failed"
+  status?: "succeeded" | "failed" | "skipped"
 }
 ```
 
@@ -648,7 +650,7 @@ type EventListResponse = {
       execution_id?: { ... }
       action_id?: { ... }
     }
-    status?: "succeeded" | "failed" | "in_progress"
+    status?: "succeeded" | "failed" | "in_progress" | "skipped"
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
   }>
@@ -678,6 +680,39 @@ type AuthType = "BASIC" | "OAUTH_CLIENT_CREDENTIALS" | "API_KEY" | "NONE"
 type Filter = {
   keyToFilter: string
   supportedValues: string[]
+}
+```
+
+### `WebhookCondition`
+
+A condition that must be met for the webhook to fire.
+
+```ts
+type WebhookCondition = {
+  field: string
+  operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
+  values?: string[]
+  field_type?: "string" | "number" | "boolean" | "date" | "datetime"
+  is_array_field?: boolean
+  repeatable_item_op?: boolean
+}
+```
+
+### `WebhookConditionGroup`
+
+A group of conditions with a logical operator. Multiple conditions are AND-ed by default.
+
+```ts
+type WebhookConditionGroup = {
+  conditions?: Array<{
+    field: string
+    operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
+    values?: string[]
+    field_type?: "string" | "number" | "boolean" | "date" | "datetime"
+    is_array_field?: boolean
+    repeatable_item_op?: boolean
+  }>
+  logical_operator?: "AND" | "OR"
 }
 ```
 
@@ -798,8 +833,24 @@ type WebhookConfig = {
     custom_headers?: Record<string, string>
   }
   enableStaticIP?: boolean
+  protected?: boolean
+  secureProxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
   status?: "active" | "inactive" | "incomplete"
   jsonataExpression?: string
+  filterConditions?: {
+    conditions?: Array<{
+      field: { ... }
+      operation: { ... }
+      values?: { ... }
+      field_type?: { ... }
+      is_array_field?: { ... }
+      repeatable_item_op?: { ... }
+    }>
+    logical_operator?: "AND" | "OR"
+  }
   _manifest?: string // uuid[]
   signingSecret?: string
 }
@@ -951,7 +1002,7 @@ type WebhookEvent = {
     execution_id?: string
     action_id?: string
   }
-  status?: "succeeded" | "failed" | "in_progress"
+  status?: "succeeded" | "failed" | "in_progress" | "skipped"
   http_method?: "GET" | "POST" | "PUT"
   payload?: string
 }
