@@ -46,6 +46,7 @@ declare namespace Components {
                 };
                 board_filter?: /* A filter group containing one or more filter items or nested filter groups. Items are combined using the specified logical operator (AND/OR). */ BoardFilter;
                 sorting?: /* Defines how query results should be sorted. Specify a field name and sort direction. */ Sorting;
+                group_by?: /* Defines how tasks should be grouped within each swimlane. Tasks with the same group value are returned adjacently in the result set. */ GroupBy;
                 /**
                  * example:
                  * task 1
@@ -148,7 +149,7 @@ declare namespace Components {
          */
         export type FilterOperator = "EQUALS" | "NOT_EQUALS" | "EMPTY" | "NOT_EMPTY" | "CONTAINS" | "NOT_CONTAINS" | "IS_ONE_OF" | "IS_NONE_OF" | "GREATER_THAN" | "LESS_THAN" | "GREATER_THAN_OR_EQUAL" | "LESS_THAN_OR_EQUAL";
         /**
-         * Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination.
+         * Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, grouping, and offset-based pagination.
          */
         export interface FlowsQueryRequest {
             /**
@@ -159,6 +160,10 @@ declare namespace Components {
              * Sort the results by a specific field and direction.
              */
             sorting?: /* Defines how query results should be sorted. Specify a field name and sort direction. */ Sorting;
+            /**
+             * Group tasks by a shared property within each swimlane. Grouped tasks are returned adjacently in the result set.
+             */
+            group_by?: /* Defines how tasks should be grouped within each swimlane. Tasks with the same group value are returned adjacently in the result set. */ GroupBy;
             /**
              * Zero-based offset for pagination. Use with `size` to paginate through results.
              * example:
@@ -207,6 +212,15 @@ declare namespace Components {
              * 5
              */
             total_pages?: number;
+        }
+        /**
+         * Defines how tasks should be grouped within each swimlane. Tasks with the same group value are returned adjacently in the result set.
+         */
+        export interface GroupBy {
+            /**
+             * Property to group tasks by within each swimlane
+             */
+            field: "context_entity" | "phase";
         }
         /**
          * Defines how query results should be sorted. Specify a field name and sort direction.
@@ -286,7 +300,7 @@ declare namespace Paths {
         }
     }
     namespace ExecuteFlowsQuery {
-        export type RequestBody = /* Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination. */ Components.Schemas.FlowsQueryRequest;
+        export type RequestBody = /* Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, grouping, and offset-based pagination. */ Components.Schemas.FlowsQueryRequest;
         namespace Responses {
             export type $200 = /* Paginated result set returned from a Flows query. Each item in `results` is a workflow task record with dynamic fields depending on the dataset configuration. */ Components.Schemas.FlowsQueryResult;
             export type $400 = /* Standard error response */ Components.Schemas.Error;
@@ -741,6 +755,7 @@ export type FilterItem = Components.Schemas.FilterItem;
 export type FilterOperator = Components.Schemas.FilterOperator;
 export type FlowsQueryRequest = Components.Schemas.FlowsQueryRequest;
 export type FlowsQueryResult = Components.Schemas.FlowsQueryResult;
+export type GroupBy = Components.Schemas.GroupBy;
 export type Sorting = Components.Schemas.Sorting;
 export type Swimlane = Components.Schemas.Swimlane;
 export type ValueType = Components.Schemas.ValueType;
