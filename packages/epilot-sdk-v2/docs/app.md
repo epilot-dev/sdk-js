@@ -399,7 +399,8 @@ const { data } = await client.getPublicConfiguration({
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "latest_version": "string",
   "public": true,
@@ -519,7 +520,8 @@ const { data } = await client.getConfiguration({
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "version_audit": {
     "created_at": "string",
@@ -877,7 +879,8 @@ const { data } = await client.listVersions({
       },
       "blueprint_ref": {
         "manifest_id": "string",
-        "job_id": "string"
+        "job_id": "string",
+        "source_blueprint_file": "string"
       },
       "version_audit": {
         "created_at": "string",
@@ -992,7 +995,8 @@ const { data } = await client.getVersion({
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "version_audit": {
     "created_at": "string",
@@ -1328,7 +1332,8 @@ const { data } = await client.listInstallations({
       "role": "string",
       "blueprint_ref": {
         "manifest_id": "string",
-        "job_id": "string"
+        "job_id": "string",
+        "source_blueprint_file": "string"
       },
       "installation_audit": {
         "created_at": "string",
@@ -1407,7 +1412,8 @@ const { data } = await client.getInstallation({
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",
@@ -1496,7 +1502,8 @@ const { data } = await client.install(
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",
@@ -1614,7 +1621,8 @@ const { data } = await client.promoteVersion({
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",
@@ -1888,7 +1896,7 @@ type PortalBlockComponent = {
       app_url?: { ... }
       zip_url?: { ... }
       override_url?: { ... }
-      section?: { ... }
+      supported_surfaces?: { ... }
     }
   }
 }
@@ -2721,7 +2729,7 @@ type PortalBlockSurfaceConfig = {
   app_url?: string
   zip_url?: string
   override_url?: string
-  section?: "main" | "footer"
+  supported_surfaces?: "main" | "footer_inline" | "footer_left_absolute" | "footer_right_absolute"[]
 }
 ```
 
@@ -2907,6 +2915,7 @@ type ConfigurationVersion = {
   blueprint_ref?: {
     manifest_id?: string
     job_id?: string
+    source_blueprint_file?: string
   }
   version_audit: {
     created_at?: string
@@ -2936,6 +2945,7 @@ type Grants = Array<{
 type BlueprintRef = {
   manifest_id?: string
   job_id?: string
+  source_blueprint_file?: string
 }
 ```
 
@@ -2982,6 +2992,7 @@ type Installation = {
   blueprint_ref?: {
     manifest_id?: string
     job_id?: string
+    source_blueprint_file?: string
   }
   installation_audit?: {
     created_at?: string
@@ -3053,6 +3064,7 @@ type PublicConfiguration = {
   blueprint_ref?: {
     manifest_id?: string
     job_id?: string
+    source_blueprint_file?: string
   }
   latest_version?: string
   public?: boolean
@@ -3081,6 +3093,7 @@ type PublicConfiguration = {
     blueprint_ref?: {
       manifest_id?: { ... }
       job_id?: { ... }
+      source_blueprint_file?: { ... }
     }
     version_audit: {
       created_at?: { ... }
@@ -3173,6 +3186,7 @@ type Configuration = {
   blueprint_ref?: {
     manifest_id?: string
     job_id?: string
+    source_blueprint_file?: string
   }
   version_audit: {
     created_at?: string

@@ -417,6 +417,10 @@ export declare namespace Components {
              * ID of the job that created the blueprint
              */
             job_id?: string;
+            /**
+             * S3 key of a pre-exported blueprint zip used for cross-org installs
+             */
+            source_blueprint_file?: string;
         }
         export interface BooleanArg {
             type?: "boolean";
@@ -1360,9 +1364,9 @@ export declare namespace Components {
              */
             override_url?: string;
             /**
-             * Define which section of the portal this block can be placed in
+             * Define which surfaces of the portal this block can be placed in
              */
-            section?: "main" | "footer";
+            supported_surfaces?: ("main" | "footer_inline" | "footer_left_absolute" | "footer_right_absolute")[];
         }
         export interface PortalExtensionAuthBlock {
             /**
