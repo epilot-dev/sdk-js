@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -127,6 +125,10 @@ declare namespace Components {
              * 123:owner
              */
             parent_role?: string;
+            /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
             /**
              * List of grants (permissions) applied to the role
              */
@@ -257,6 +259,10 @@ declare namespace Components {
              */
             partner_org_id?: string;
             /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
+            /**
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
@@ -343,6 +349,18 @@ declare namespace Components {
             values: any[];
         }
         /**
+         * Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.
+         */
+        export interface EqualsCurrentUserCondition {
+            /**
+             * Optional JSON path to a specific user attribute. When omitted, all relation_user attributes on the entity are scanned.
+             * example:
+             * assignee.*.user_id
+             */
+            attribute?: string;
+            operation: "equals_current_user";
+        }
+        /**
          * Error response
          */
         export interface Error {
@@ -370,7 +388,7 @@ declare namespace Components {
         /**
          * An additional condition that must be met for the grant
          */
-        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition;
+        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition | /* Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. */ EqualsCurrentUserCondition;
         export interface GrantWithDependencies {
             /**
              * example:
@@ -537,6 +555,10 @@ declare namespace Components {
              * Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)
              */
             vendor_enforced_user_limit?: number;
+            /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
         }
         /**
          * A role that is applied to end customers and installers using the Portals
@@ -756,6 +778,10 @@ declare namespace Components {
              * 123:owner
              */
             parent_role?: string;
+            /**
+             * Indicates whether this role was created by a vendor organization on behalf of the partner organization.
+             */
+            vendor_created?: boolean;
         }
     }
 }
@@ -1232,6 +1258,7 @@ export type BaseRole = Components.Schemas.BaseRole;
 export type BaseRoleForCreate = Components.Schemas.BaseRoleForCreate;
 export type CreateRolePayload = Components.Schemas.CreateRolePayload;
 export type EqualsCondition = Components.Schemas.EqualsCondition;
+export type EqualsCurrentUserCondition = Components.Schemas.EqualsCurrentUserCondition;
 export type Error = Components.Schemas.Error;
 export type Grant = Components.Schemas.Grant;
 export type GrantCondition = Components.Schemas.GrantCondition;
