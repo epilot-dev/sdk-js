@@ -1,6 +1,5 @@
 # Permissions API
 
-- **Base URL:** `https://permissions.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/permissions](https://docs.epilot.io/api/permissions)
 
 ## Usage
@@ -45,6 +44,7 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 - [`Grant`](#grant)
 - [`GrantWithDependencies`](#grantwithdependencies)
 - [`GrantCondition`](#grantcondition)
+- [`EqualsCurrentUserCondition`](#equalscurrentusercondition)
 - [`EqualsCondition`](#equalscondition)
 - [`RoleId`](#roleid)
 - [`BaseRole`](#baserole)
@@ -105,7 +105,8 @@ const { data } = await client.listCurrentRoles()
           ]
         }
       ],
-      "parent_role": "123:owner"
+      "parent_role": "123:owner",
+      "vendor_created": true
     }
   ]
 }
@@ -152,7 +153,8 @@ const { data } = await client.listAllRoles()
           ]
         }
       ],
-      "parent_role": "123:owner"
+      "parent_role": "123:owner",
+      "vendor_created": true
     }
   ]
 }
@@ -200,7 +202,8 @@ const { data } = await client.createRole(
       ]
     }
   ],
-  "parent_role": "123:owner"
+  "parent_role": "123:owner",
+  "vendor_created": true
 }
 ```
 
@@ -256,7 +259,8 @@ const { data } = await client.searchRoles(
           ]
         }
       ],
-      "parent_role": "123:owner"
+      "parent_role": "123:owner",
+      "vendor_created": true
     }
   ]
 }
@@ -303,7 +307,8 @@ const { data } = await client.getRole({
       ]
     }
   ],
-  "parent_role": "123:owner"
+  "parent_role": "123:owner",
+  "vendor_created": true
 }
 ```
 
@@ -343,7 +348,8 @@ const { data } = await client.putRole(
         ]
       }
     ],
-    parent_role: '123:owner'
+    parent_role: '123:owner',
+    vendor_created: true
   },
 )
 ```
@@ -373,7 +379,8 @@ const { data } = await client.putRole(
       ]
     }
   ],
-  "parent_role": "123:owner"
+  "parent_role": "123:owner",
+  "vendor_created": true
 }
 ```
 
@@ -418,7 +425,8 @@ const { data } = await client.deleteRole({
       ]
     }
   ],
-  "parent_role": "123:owner"
+  "parent_role": "123:owner",
+  "vendor_created": true
 }
 ```
 
@@ -605,6 +613,17 @@ type GrantWithDependencies = {
 type GrantCondition = object
 ```
 
+### `EqualsCurrentUserCondition`
+
+Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.
+
+```ts
+type EqualsCurrentUserCondition = {
+  attribute?: string
+  operation: "equals_current_user"
+}
+```
+
 ### `EqualsCondition`
 
 Check if attribute equals to any of the values
@@ -680,6 +699,7 @@ type UserRole = {
     conditions?: object[]
   }>
   parent_role?: object
+  vendor_created?: boolean
 }
 ```
 
@@ -740,6 +760,7 @@ type PartnerRole = {
   }>
   partner_org_id?: object
   vendor_enforced_user_limit?: number
+  vendor_created?: boolean
 }
 ```
 
@@ -779,6 +800,7 @@ type Role = {
     conditions?: object[]
   }>
   parent_role?: object
+  vendor_created?: boolean
 } | {
   id: string
   name: string
@@ -821,6 +843,7 @@ type Role = {
   }>
   partner_org_id?: object
   vendor_enforced_user_limit?: number
+  vendor_created?: boolean
 } | {
   id: string
   name: string
@@ -913,6 +936,7 @@ type OrgRoles = {
       conditions?: { ... }
     }>
     parent_role?: object
+    vendor_created?: boolean
   } | {
     id: string
     name: string
@@ -955,6 +979,7 @@ type OrgRoles = {
     }>
     partner_org_id?: object
     vendor_enforced_user_limit?: number
+    vendor_created?: boolean
   } | {
     id: string
     name: string
