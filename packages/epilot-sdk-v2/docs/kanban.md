@@ -44,6 +44,7 @@ const { data } = await kanbanClient.createKanbanBoard(...)
 - [`Board`](#board)
 - [`Swimlane`](#swimlane)
 - [`Sorting`](#sorting)
+- [`GroupBy`](#groupby)
 - [`BoardFilter`](#boardfilter)
 - [`FilterGroup`](#filtergroup)
 - [`FilterOperator`](#filteroperator)
@@ -113,6 +114,9 @@ const { data } = await client.createKanbanBoard(
         field: 'created_at',
         direction: 'asc'
       },
+      group_by: {
+        field: 'context_entity'
+      },
       search_query: 'task 1'
     }
   },
@@ -173,6 +177,9 @@ const { data } = await client.createKanbanBoard(
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -287,6 +294,9 @@ const { data } = await client.getKanbanBoard({
       "field": "created_at",
       "direction": "asc"
     },
+    "group_by": {
+      "field": "context_entity"
+    },
     "search_query": "task 1"
   }
 }
@@ -358,6 +368,9 @@ const { data } = await client.updateKanbanBoard(
         field: 'created_at',
         direction: 'asc'
       },
+      group_by: {
+        field: 'context_entity'
+      },
       search_query: 'task 1'
     }
   },
@@ -418,6 +431,9 @@ const { data } = await client.updateKanbanBoard(
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -503,6 +519,9 @@ const { data } = await client.patchKanbanBoard(
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -631,6 +650,9 @@ const { data } = await client.executeFlowsQuery(
       field: 'created_at',
       direction: 'asc'
     },
+    group_by: {
+      field: 'context_entity'
+    },
     from: 0,
     size: 10
   },
@@ -726,6 +748,9 @@ type Board = {
       field: { ... }
       direction?: { ... }
     }
+    group_by?: {
+      field: { ... }
+    }
     search_query?: string
   }
 }
@@ -764,6 +789,16 @@ Defines how query results should be sorted. Specify a field name and sort direct
 type Sorting = {
   field: string
   direction?: "asc" | "desc"
+}
+```
+
+### `GroupBy`
+
+Defines how tasks should be grouped within each swimlane. Tasks with the same group value are returned adjacently in the result set.
+
+```ts
+type GroupBy = {
+  field: "context_entity" | "phase"
 }
 ```
 
@@ -831,7 +866,7 @@ type ValueType = string | "TODAY" | "TOMORROW" | "YESTERDAY" | "IN_THE_FUTURE" |
 
 ### `FlowsQueryRequest`
 
-Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination.
+Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, grouping, and offset-based pagination.
 
 ```ts
 type FlowsQueryRequest = {
@@ -850,6 +885,9 @@ type FlowsQueryRequest = {
   sorting?: {
     field: string
     direction?: "asc" | "desc"
+  }
+  group_by?: {
+    field: "context_entity" | "phase"
   }
   from?: number
   size?: number
