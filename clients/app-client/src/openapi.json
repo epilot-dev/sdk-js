@@ -3391,12 +3391,20 @@
           {
             "type": "object",
             "properties": {
-              "section": {
-                "description": "Define which section of the portal this block can be placed in",
-                "type": "string",
-                "enum": [
-                  "main",
-                  "footer"
+              "supported_surfaces": {
+                "description": "Define which surfaces of the portal this block can be placed in",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "footer_inline",
+                    "footer_left_absolute",
+                    "footer_right_absolute"
+                  ]
+                },
+                "default": [
+                  "main"
                 ]
               }
             }
@@ -3898,6 +3906,10 @@
           "job_id": {
             "type": "string",
             "description": "ID of the job that created the blueprint"
+          },
+          "source_blueprint_file": {
+            "type": "string",
+            "description": "S3 key of a pre-exported blueprint zip used for cross-org installs"
           }
         }
       },
