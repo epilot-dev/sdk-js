@@ -83,6 +83,95 @@
             },
             "style": "form",
             "explode": false
+          },
+          {
+            "in": "query",
+            "name": "include",
+            "description": "List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "tags": [
+          "Schemas"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntitySchemaItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/entity/schemas": {
+      "get": {
+        "operationId": "listSchemasV2",
+        "summary": "listSchemasV2",
+        "description": "Get the latest versions of all schemas.\nReturns summary schemas by default (only summary attributes, no capabilities).\nUse ?full=true for complete schemas.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "full",
+            "description": "Return full schemas including all attributes and capabilities",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "unpublished",
+            "description": "Return unpublished draft schemas",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "exclude",
+            "description": "List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "in": "query",
+            "name": "include",
+            "description": "List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
           }
         ],
         "tags": [
@@ -3074,7 +3163,7 @@
                       }
                     },
                     "deleted": {
-                      "type": "object",
+                      "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/ClassificationId"
                       }
@@ -3468,7 +3557,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -4743,6 +4832,10 @@
                     "type": "string"
                   }
                 }
+              },
+              "_summary": {
+                "description": "Indicates this is a truncated summary schema (attributes trimmed to summary_attributes only, no capabilities or group_settings)",
+                "type": "boolean"
               }
             }
           },
@@ -5003,6 +5096,9 @@
           },
           {
             "$ref": "#/components/schemas/NumberAttribute"
+          },
+          {
+            "$ref": "#/components/schemas/TableAttribute"
           },
           {
             "$ref": "#/components/schemas/ConsentAttribute"
@@ -6244,6 +6340,77 @@
           }
         ]
       },
+      "TableAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "table"
+                ]
+              },
+              "columns": {
+                "type": "array",
+                "description": "Column definitions for the table",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The column identifier (used as object key in row data)"
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Display label for the column header"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "The data type for cells in this column",
+                      "enum": [
+                        "string",
+                        "number",
+                        "date",
+                        "boolean"
+                      ],
+                      "default": "string"
+                    },
+                    "width": {
+                      "type": "string",
+                      "description": "Optional column width (e.g., \"100px\", \"20%\")"
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether this column is required for each row",
+                      "default": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "label"
+                  ]
+                }
+              },
+              "min_rows": {
+                "type": "integer",
+                "description": "Minimum number of rows required",
+                "minimum": 0,
+                "default": 0
+              },
+              "max_rows": {
+                "type": "integer",
+                "description": "Maximum number of rows allowed",
+                "minimum": 1
+              }
+            }
+          }
+        ]
+      },
       "ConsentAttribute": {
         "allOf": [
           {
@@ -6746,6 +6913,24 @@
             "items": {
               "$ref": "#/components/schemas/SettingFlag"
             }
+          },
+          "schemas": {
+            "type": "array",
+            "description": "Schema-specific configuration for the capability",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "schema"
+              ],
+              "properties": {
+                "schema": {
+                  "type": "string",
+                  "description": "Entity schema slug",
+                  "example": "contact"
+                }
+              }
+            }
           }
         },
         "required": [
@@ -7070,10 +7255,13 @@
         }
       },
       "NullableEntity": {
-        "nullable": true,
         "allOf": [
           {
             "$ref": "#/components/schemas/Entity"
+          },
+          {
+            "type": "object",
+            "nullable": true
           }
         ]
       },
@@ -8465,6 +8653,20 @@
                     "$ref": "#/components/schemas/Entity"
                   }
                 ]
+              }
+            }
+          },
+          "_workflow_origin": {
+            "type": "object",
+            "description": "Internal property for workflow origin tracking and infinite loop prevention.\nPopulated when an entity update originates from a workflow execution.\nThis allows downstream automation services to prevent circular triggering.\n",
+            "properties": {
+              "workflow_exec_id": {
+                "type": "string",
+                "description": "The ID of the workflow execution that triggered this entity update"
+              },
+              "flow_template_id": {
+                "type": "string",
+                "description": "The flow template ID - used to detect and prevent circular triggering"
               }
             }
           }

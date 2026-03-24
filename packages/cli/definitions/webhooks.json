@@ -928,7 +928,8 @@
             "description": "Filter by event outcome",
             "enum": [
               "succeeded",
-              "failed"
+              "failed",
+              "skipped"
             ],
             "example": "succeeded"
           }
@@ -1005,6 +1006,89 @@
           "keyToFilter",
           "supportedValues"
         ]
+      },
+      "WebhookCondition": {
+        "type": "object",
+        "description": "A condition that must be met for the webhook to fire.",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dot-notation path to the field in the event payload (e.g. \"entity.status\", \"entity.line_items\")"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "any_of",
+              "none_of",
+              "contains",
+              "not_contains",
+              "starts_with",
+              "ends_with",
+              "greater_than",
+              "less_than",
+              "greater_than_or_equals",
+              "less_than_or_equals",
+              "is_empty",
+              "is_not_empty"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "description": "Values to compare against (not required for is_empty/is_not_empty)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "field_type": {
+            "type": "string",
+            "description": "Type hint for the field (affects comparison logic)",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "datetime"
+            ],
+            "default": "string"
+          },
+          "is_array_field": {
+            "type": "boolean",
+            "description": "Whether the target field is an array (repeatable)",
+            "default": false
+          },
+          "repeatable_item_op": {
+            "type": "boolean",
+            "description": "When true, evaluates conditions per-item in repeatable array fields",
+            "default": false
+          }
+        },
+        "required": [
+          "field",
+          "operation"
+        ]
+      },
+      "WebhookConditionGroup": {
+        "type": "object",
+        "description": "A group of conditions with a logical operator. Multiple conditions are AND-ed by default.",
+        "properties": {
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookCondition"
+            },
+            "maxItems": 10
+          },
+          "logical_operator": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ],
+            "default": "AND"
+          }
+        }
       },
       "Auth": {
         "type": "object",
@@ -1137,6 +1221,27 @@
           "enableStaticIP": {
             "type": "boolean"
           },
+          "protected": {
+            "type": "boolean",
+            "description": "When true, indicates this webhook configuration is protected and should not be modified without explicit intent."
+          },
+          "secureProxy": {
+            "type": "object",
+            "description": "Routes webhook requests through a secure VPC proxy (ERP integration service). When set, takes precedence over enableStaticIP.",
+            "properties": {
+              "integration_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "use_case_slug": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "integration_id",
+              "use_case_slug"
+            ]
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1148,6 +1253,9 @@
           "jsonataExpression": {
             "type": "string",
             "description": "JSONata expression to transform the payload"
+          },
+          "filterConditions": {
+            "$ref": "#/components/schemas/WebhookConditionGroup"
           },
           "_manifest": {
             "type": "array",
@@ -1427,7 +1535,8 @@
             "enum": [
               "succeeded",
               "failed",
-              "in_progress"
+              "in_progress",
+              "skipped"
             ]
           },
           "http_method": {

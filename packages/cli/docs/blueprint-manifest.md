@@ -50,6 +50,8 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`deleteBlueprint`](#deleteblueprint) — Delete a Blueprint
 - [`validateBlueprint`](#validateblueprint) — Start a blueprint validation job. Validates Terraform for the blueprint (all types).
 - [`exportBlueprint`](#exportblueprint) — Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
+- [`listMarketplaceSlugs`](#listmarketplaceslugs) — List all available marketplace blueprint slugs from Webflow CMS.
+- [`publishBlueprint`](#publishblueprint) — Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates th
 - [`formatBlueprintDescription`](#formatblueprintdescription) — Format a blueprint description as markdown using AI.
 - [`addBlueprintResource`](#addblueprintresource) — Add a resource to a Blueprint
 - [`syncDependencies`](#syncdependencies) — Sync dependencies of all root resources in a Blueprint
@@ -1100,6 +1102,73 @@ With JSONata filter:
 
 ```bash
 epilot blueprint-manifest exportBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+```
+
+---
+
+### `listMarketplaceSlugs`
+
+List all available marketplace blueprint slugs from Webflow CMS.
+
+`GET /v2/blueprint-manifest/marketplace/slugs`
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest listMarketplaceSlugs
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest listMarketplaceSlugs --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "slug": "wallbox_b2c",
+      "version": "v1.0.0",
+      "name": "Wallbox B2C",
+      "installation_link": "https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `publishBlueprint`
+
+Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates th
+
+`POST /v2/blueprint-manifest/blueprints:publish`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest publishBlueprint \
+  -d '{"blueprint_id":"c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341","slug":"string","version":"string","name":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest publishBlueprint
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest publishBlueprint --jsonata '$'
 ```
 
 ---

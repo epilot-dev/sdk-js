@@ -410,7 +410,8 @@ epilot app getPublicConfiguration -p appId=123e4567-e89b-12d3-a456-426614174000 
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "latest_version": "string",
   "public": true,
@@ -533,7 +534,8 @@ epilot app getConfiguration -p appId=123e4567-e89b-12d3-a456-426614174000 --json
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "version_audit": {
     "created_at": "string",
@@ -1077,7 +1079,8 @@ epilot app listVersions -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 
       },
       "blueprint_ref": {
         "manifest_id": "string",
-        "job_id": "string"
+        "job_id": "string",
+        "source_blueprint_file": "string"
       },
       "version_audit": {
         "created_at": "string",
@@ -1196,7 +1199,8 @@ epilot app getVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p version=e
   },
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "version_audit": {
     "created_at": "string",
@@ -1735,7 +1739,8 @@ epilot app listInstallations --jsonata 'apps'
       "role": "string",
       "blueprint_ref": {
         "manifest_id": "string",
-        "job_id": "string"
+        "job_id": "string",
+        "source_blueprint_file": "string"
       },
       "installation_audit": {
         "created_at": "string",
@@ -1833,7 +1838,8 @@ epilot app getInstallation -p appId=123e4567-e89b-12d3-a456-426614174000 --jsona
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",
@@ -1954,7 +1960,8 @@ epilot app install -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'app_
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",
@@ -2143,7 +2150,8 @@ epilot app promoteVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p versi
   "role": "string",
   "blueprint_ref": {
     "manifest_id": "string",
-    "job_id": "string"
+    "job_id": "string",
+    "source_blueprint_file": "string"
   },
   "installation_audit": {
     "created_at": "string",

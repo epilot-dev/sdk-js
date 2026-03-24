@@ -50,8 +50,9 @@ epilot customer-portal upsertPortal -p origin=example
 - [`upsertEmailTemplates`](#upsertemailtemplates) — Upserts the email templates of a portal
 - [`getEmailTemplatesByPortalId`](#getemailtemplatesbyportalid) — Retrieves the email templates of a portal by portal ID
 - [`upsertEmailTemplatesByPortalId`](#upsertemailtemplatesbyportalid) — Upserts the email templates of a portal by portal ID
-- [`getPortalWidgets`](#getportalwidgets) — Retrieves the widgets of a portal
-- [`upsertPortalWidget`](#upsertportalwidget) — Upsert widget for a portal of an organization.
+- [`getPortalWidgetsV3`](#getportalwidgetsv3) — Retrieves the widgets of a portal by portal_id.
+- [`upsertPortalWidgetV3`](#upsertportalwidgetv3) — Upsert widget for a portal by portal_id.
+- [`savePortalFilesV3`](#saveportalfilesv3) — Add files to portal by portal_id
 - [`replaceECPTemplateVariables`](#replaceecptemplatevariables) — Replaces the template variables of a portal
 - [`extraPermissionAttributes`](#extrapermissionattributes) — Retrieves the extra permission attributes.
 - [`validateCaaRecords`](#validatecaarecords) — Validates the CAA records of a portal
@@ -85,13 +86,12 @@ epilot customer-portal upsertPortal -p origin=example
 
 **Public**
 - [`createUser`](#createuser) — Registers a portal user
-- [`createUserV3`](#createuserv3) — Registers a portal user with portal id
+- [`createUserV3`](#createuserv3) — Registers a portal user.
 - [`getPortalConfigByDomain`](#getportalconfigbydomain) — Retrieves the portal configuration by domain.
 - [`getPublicPortalExtensionDetails`](#getpublicportalextensiondetails) — Get public extension details shown to end customers and configuring users.
 - [`getPublicPortalExtensionDetailsV3`](#getpublicportalextensiondetailsv3) — Get public extension details shown to end customers and configuring users.
 - [`getPublicPortalConfig`](#getpublicportalconfig) — Retrieves the public portal configuration.
 - [`getPublicPortalConfigV3`](#getpublicportalconfigv3) — Retrieves the public portal configuration.
-- [`getPublicPortalWidgets`](#getpublicportalwidgets) — Retrieves the public widgets of a portal
 - [`getSchemasByDomain`](#getschemasbydomain) — Retrieves schemas by domain. Only schemas and attributes used on public pages are returned.
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain) — Retrieves organization settings by domain. Only public organization settings are returned.
 - [`checkContactExists`](#checkcontactexists) — True if contact with given identifiers exists.
@@ -99,7 +99,7 @@ epilot customer-portal upsertPortal -p origin=example
 - [`confirmUser`](#confirmuser) — Confirm a portal user
 - [`confirmUserWithUserId`](#confirmuserwithuserid) — Confirm a portal user
 - [`userExists`](#userexists) — Checks whether a user exists in the portal
-- [`userExistsV3`](#userexistsv3) — Checks whether a user exists in the portal
+- [`userExistsV3`](#userexistsv3) — Checks whether a user exists in the portal.
 - [`ssoRedirect`](#ssoredirect) — Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the pr
 - [`ssoCallback`](#ssocallback) — Handles the callback from the external SSO provider, validates the authorization `code`
 - [`getPublicPages`](#getpublicpages) — Fetch all public portal pages
@@ -116,35 +116,21 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getResolvedSeamlessLink`](#getresolvedseamlesslink) — Retrieves a resolved seamless portal link.
 - [`getSchemas`](#getschemas) — Retrieves the schemas. Only schemas usable in the private part of the portal are returned.
 - [`getContact`](#getcontact) — Retrieves the contact of the logged in user.
-- [`updateContact`](#updatecontact) — Updates the contact details.
 - [`getPortalUser`](#getportaluser) — Get the portal user details
 - [`updatePortalUser`](#updateportaluser) — Update the portal user details
 - [`deletePortalUser`](#deleteportaluser) — Delete the portal user
 - [`updatePortalUserEmail`](#updateportaluseremail) — Update portal user email
-- [`getAllOrders`](#getallorders) — Get all orders for the portal user
 - [`postOrderAcceptance`](#postorderacceptance) — Accept/decline an offer by id
-- [`getOrder`](#getorder) — Get an order by id
-- [`updateOrder`](#updateorder) — Update an order by id
-- [`getAllOpportunities`](#getallopportunities) — Get all opportunities of a portal user
-- [`getSearchableAttributesForOpportunities`](#getsearchableattributesforopportunities) — Get all opportunity searchable attributes for a portal user
-- [`getSearchResultsForOpportunities`](#getsearchresultsforopportunities) — Get all opportunity with the given serached attributes
-- [`getOpportunity`](#getopportunity) — Get an opportunity by id
-- [`updateOpportunity`](#updateopportunity) — Update an opportunity by id
-- [`getAllRequests`](#getallrequests) — Get all opportunities & orders of a portal user
-- [`getAllContracts`](#getallcontracts) — Get all contracts for a portal user
-- [`getContract`](#getcontract) — Get a contract by id
-- [`updateContract`](#updatecontract) — Update a contract by id
 - [`addContractByIdentifiers`](#addcontractbyidentifiers) — Self-assign contract(s) by pre-configured identifiers.
 - [`validateCadenceEntityEditRules`](#validatecadenceentityeditrules) — Validate if cadence rule is valid for an entity
 - [`searchPaymentRelationsInEntities`](#searchpaymentrelationsinentities) — Search for entities that have the payment relation with the given payment id
 - [`createCustomEntityActivity`](#createcustomentityactivity) — Create a custom activity that can be displayed in activity feed of an entity.
 - [`saveEntityFile`](#saveentityfile) — Add files to an entity
 - [`deleteEntityFile`](#deleteentityfile) — Delete files from an entity
-- [`getFileById`](#getfilebyid) — Fetch a document with ID
 - [`trackFileDownloaded`](#trackfiledownloaded) — Track that user has downloaded a file
 - [`getBillingEvents`](#getbillingevents) — Fetch billing events for a portal user
 - [`triggerEntityAccessEvent`](#triggerentityaccessevent) — Trigger entity access event for a portal user
-- [`triggerEntityAccessEventV3`](#triggerentityaccesseventv3) — Trigger entity access event for a portal user
+- [`triggerEntityAccessEventV3`](#triggerentityaccesseventv3) — Trigger entity access event for a portal user.
 - [`getPortalUserEntity`](#getportaluserentity) — Get a single entity for a portal user
 - [`searchPortalUserEntities`](#searchportaluserentities) — Search all entities of a portal user
 - [`getAutomationContext`](#getautomationcontext) — Retrieves the automation context.
@@ -649,7 +635,7 @@ epilot customer-portal createUser -p origin=example --jsonata 'message'
 
 ### `createUserV3`
 
-Registers a portal user with portal id
+Registers a portal user.
 
 `POST /v3/portal/public/user`
 
@@ -657,22 +643,21 @@ Registers a portal user with portal id
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `portal_id` | query | string | Yes | Origin of the portal |
+| `portal_id` | query | string | No | Portal ID (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to portal_id) |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot customer-portal createUserV3 \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+epilot customer-portal createUserV3
 ```
 
 With request body:
 
 ```bash
 epilot customer-portal createUserV3 \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
   -d '{
   "email": "testemail921@yopmail.com",
   "first_name": "John",
@@ -696,13 +681,13 @@ epilot customer-portal createUserV3 \
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot customer-portal createUserV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+cat body.json | epilot customer-portal createUserV3
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal createUserV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'message'
+epilot customer-portal createUserV3 --jsonata 'message'
 ```
 
 <details>
@@ -3131,98 +3116,30 @@ epilot customer-portal upsertEmailTemplatesByPortalId -p portal_id=123e4567-e89b
 
 ---
 
-### `getPublicPortalWidgets`
+### `getPortalWidgetsV3`
 
-Retrieves the public widgets of a portal
+Retrieves the widgets of a portal by portal_id.
 
-`GET /v2/portal/public-widgets`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `org_id` | query | string | Yes |  |
-| `origin` | query | string | Yes | Origin of the portal |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getPublicPortalWidgets \
-  -p org_id=123 \
-  -p origin=example
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getPublicPortalWidgets -p org_id=123 -p origin=example --jsonata 'widgets'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "widgets": [
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "schema": "string"
-    },
-    {
-      "id": "string",
-      "type": "ACTION_WIDGET",
-      "listIndex": 0,
-      "headline": {
-        "en": "string",
-        "de": "string"
-      },
-      "subHeadline": {
-        "en": "string",
-        "de": "string"
-      },
-      "content": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getPortalWidgets`
-
-Retrieves the widgets of a portal
-
-`GET /v2/portal/widgets`
+`GET /v3/portal/widgets`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `origin` | query | string | No | Origin of the portal |
+| `portal_id` | query | string | Yes | PortalId of the portal |
 | `contract_id` | query | string (uuid) | No | Contract context for widgets |
 
 **Sample Call**
 
 ```bash
-epilot customer-portal getPortalWidgets
+epilot customer-portal getPortalWidgetsV3 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal getPortalWidgets --jsonata 'widgets'
+epilot customer-portal getPortalWidgetsV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'widgets'
 ```
 
 <details>
@@ -3267,32 +3184,32 @@ epilot customer-portal getPortalWidgets --jsonata 'widgets'
 
 ---
 
-### `upsertPortalWidget`
+### `upsertPortalWidgetV3`
 
-Upsert widget for a portal of an organization.
+Upsert widget for a portal by portal_id.
 
-`POST /v2/portal/widgets`
+`POST /v3/portal/widgets`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `origin` | query | string | Yes | Origin of the portal |
+| `portal_id` | query | string | Yes | PortalId of the portal |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot customer-portal upsertPortalWidget \
-  -p origin=example
+epilot customer-portal upsertPortalWidgetV3 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
 ```
 
 With request body:
 
 ```bash
-epilot customer-portal upsertPortalWidget \
-  -p origin=example \
+epilot customer-portal upsertPortalWidgetV3 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
   -d '{
   "widgets": [
     {
@@ -3330,13 +3247,13 @@ epilot customer-portal upsertPortalWidget \
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot customer-portal upsertPortalWidget -p origin=example
+cat body.json | epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal upsertPortalWidget -p origin=example --jsonata 'widgets'
+epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'widgets'
 ```
 
 <details>
@@ -3372,6 +3289,83 @@ epilot customer-portal upsertPortalWidget -p origin=example --jsonata 'widgets'
         "de": "string"
       },
       "content": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `savePortalFilesV3`
+
+Add files to portal by portal_id
+
+`POST /v3/portal/portal/files`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | Yes | PortalId of the portal |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal savePortalFilesV3 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+```
+
+With request body:
+
+```bash
+epilot customer-portal savePortalFilesV3 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
+  -d '{
+  "origin": "string",
+  "files": [
+    {
+      "filename": 12345,
+      "file_type": "orderRightTeaser",
+      "_tags": 12345,
+      "s3ref": {
+        "bucket": 12345,
+        "key": 12345
+      }
+    }
+  ]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal savePortalFilesV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal savePortalFilesV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'createdFiles'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "createdFiles": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "_schema": "file"
     }
   ]
 }
@@ -3852,54 +3846,6 @@ epilot customer-portal getContact --jsonata 'entity._title'
 
 ---
 
-### `updateContact`
-
-Updates the contact details.
-
-`PATCH /v2/portal/contact`
-
-**Request Body**
-
-**Sample Call**
-
-```bash
-epilot customer-portal updateContact \
-  -d '{}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal updateContact
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal updateContact --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "contact"
-  }
-}
-```
-
-</details>
-
----
-
 ### `getECPContact`
 
 Get the Contact by id
@@ -4021,22 +3967,21 @@ True if contact with given identifiers exists.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `portal_id` | query | string | Yes | PortalId of the portal |
+| `portal_id` | query | string | No | PortalId of the portal (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to portal_id) |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot customer-portal checkContactExistsV3 \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+epilot customer-portal checkContactExistsV3
 ```
 
 With request body:
 
 ```bash
 epilot customer-portal checkContactExistsV3 \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
   -d '{
   "org_id": 728,
   "registration_identifiers": {
@@ -4053,13 +3998,13 @@ epilot customer-portal checkContactExistsV3 \
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot customer-portal checkContactExistsV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+cat body.json | epilot customer-portal checkContactExistsV3
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal checkContactExistsV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'exists'
+epilot customer-portal checkContactExistsV3 --jsonata 'exists'
 ```
 
 <details>
@@ -4485,7 +4430,7 @@ epilot customer-portal userExists -p email=user@example.com -p org_id=123 --json
 
 ### `userExistsV3`
 
-Checks whether a user exists in the portal
+Checks whether a user exists in the portal.
 
 `GET /v3/portal/public/user/exists`
 
@@ -4494,21 +4439,21 @@ Checks whether a user exists in the portal
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `email` | query | string | Yes |  |
-| `org_id` | query | string | Yes |  |
-| `portal_id` | query | string | No | Checkes if user exists in the given portal ID. If not provided, checks in all portals. |
+| `org_id` | query | string | No |  |
+| `portal_id` | query | string | No | Checks if user exists in the given portal ID. If not provided, checks in all portals. |
+| `domain` | query | string | No | Portal domain for identification (alternative to org_id + portal_id) |
 
 **Sample Call**
 
 ```bash
 epilot customer-portal userExistsV3 \
-  -p email=user@example.com \
-  -p org_id=123
+  -p email=user@example.com
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal userExistsV3 -p email=user@example.com -p org_id=123 --jsonata 'exists'
+epilot customer-portal userExistsV3 -p email=user@example.com --jsonata 'exists'
 ```
 
 <details>
@@ -4656,69 +4601,6 @@ epilot customer-portal configureDistributionV3 -p portal_id=453ad7bf-86d5-46c8-8
 
 ---
 
-### `getAllOrders`
-
-Get all orders for the portal user
-
-`GET /v2/portal/order`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getAllOrders
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getAllOrders --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
 ### `postOrderAcceptance`
 
 Accept/decline an offer by id
@@ -4772,875 +4654,6 @@ epilot customer-portal postOrderAcceptance -p id=5da0a718-c822-403d-9f5d-20d4584
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
     "_schema": "order"
-  }
-}
-```
-
-</details>
-
----
-
-### `getOrder`
-
-Get an order by id
-
-`GET /v2/portal/order/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of order |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getOrder \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal getOrder 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getOrder -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'entity._title'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "order"
-  },
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "products": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "product"
-    }
-  ],
-  "crossSellableProducts": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "product"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateOrder`
-
-Update an order by id
-
-`PATCH /v2/portal/order/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of order |
-
-**Request Body**
-
-**Sample Call**
-
-```bash
-epilot customer-portal updateOrder \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528 \
-  -d '{}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal updateOrder 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal updateOrder -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal updateOrder -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "order"
-  }
-}
-```
-
-</details>
-
----
-
-### `getAllOpportunities`
-
-Get all opportunities of a portal user
-
-`GET /v2/portal/opportunity`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getAllOpportunities
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getAllOpportunities --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getSearchableAttributesForOpportunities`
-
-Get all opportunity searchable attributes for a portal user
-
-`GET /v2/portal/opportunities/searchable-attributes`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getSearchableAttributesForOpportunities
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getSearchableAttributesForOpportunities --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getSearchResultsForOpportunities`
-
-Get all opportunity with the given serached attributes
-
-`POST /v2/portal/opportunities/search`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot customer-portal getSearchResultsForOpportunities \
-  -d '{"addresses":["string"],"customers":["string"],"purposes":["5da0a718-c822-403d-9f5d-20d4584e0528"],"workflows":[{}]}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal getSearchResultsForOpportunities
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getSearchResultsForOpportunities --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getOpportunity`
-
-Get an opportunity by id
-
-`GET /v2/portal/opportunities/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of opportunity |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getOpportunity \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal getOpportunity 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getOpportunity -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'entity._title'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "opportunity"
-  },
-  "orders": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order"
-    }
-  ],
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateOpportunity`
-
-Update an opportunity by id
-
-`PATCH /v2/portal/opportunities/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of opportunity |
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot customer-portal updateOpportunity \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528 \
-  -d '{}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal updateOpportunity 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal updateOpportunity -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal updateOpportunity -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "opportunity"
-  }
-}
-```
-
-</details>
-
----
-
-### `getAllRequests`
-
-Get all opportunities & orders of a portal user
-
-`GET /v2/portal/request`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getAllRequests
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getAllRequests --jsonata 'results[0]'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "hits": 1,
-  "results": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "opportunity"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getAllContracts`
-
-Get all contracts for a portal user
-
-`GET /v2/portal/contract`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `from` | query | number | No |  |
-| `size` | query | number | No |  |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getAllContracts
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getAllContracts --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "contract_name": "Grid Contract",
-      "contract_number": "12345",
-      "status": "approved",
-      "description": "This contract is for the supply of widgets.",
-      "account_number": "67890",
-      "branch": "power",
-      "billing_address": "123 Main St, Anytown",
-      "delivery_address": "456 Elm St, Anytown",
-      "additional_addresses": "789 Oak St, Anytown",
-      "termination_date": "2022-01-01",
-      "termination_reason": "Non-payment",
-      "billing_period": "monthly",
-      "billing_duration_amount": 30,
-      "renewal_duration_amount": 365,
-      "renewal_duration_unit": "years",
-      "notice_time_amount": 30,
-      "notice_time_unit": "months",
-      "start_date": "2021-01-01",
-      "billing_due_day": 2,
-      "installment_amount": 10050,
-      "balance": 8990,
-      "balance_currency": "EUR",
-      "journey_actions": {
-        "journey_id": "string",
-        "action_label": {
-          "en": "string",
-          "de": "string"
-        },
-        "slug": "string",
-        "rules": [
-          {
-            "entity": "string",
-            "attribute": "string",
-            "attribute_value": "string"
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getContract`
-
-Get a contract by id
-
-`GET /v2/portal/contract/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of the contract |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getContract \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal getContract 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getContract -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'entity._title'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "entity": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "contract_name": "Grid Contract",
-    "contract_number": "12345",
-    "status": "approved",
-    "description": "This contract is for the supply of widgets.",
-    "account_number": "67890",
-    "branch": "power",
-    "billing_address": "123 Main St, Anytown",
-    "delivery_address": "456 Elm St, Anytown",
-    "additional_addresses": "789 Oak St, Anytown",
-    "termination_date": "2022-01-01",
-    "termination_reason": "Non-payment",
-    "billing_period": "monthly",
-    "billing_duration_amount": 30,
-    "renewal_duration_amount": 365,
-    "renewal_duration_unit": "years",
-    "notice_time_amount": 30,
-    "notice_time_unit": "months",
-    "start_date": "2021-01-01",
-    "billing_due_day": 2,
-    "installment_amount": 10050,
-    "balance": 8990,
-    "balance_currency": "EUR"
-  },
-  "orders": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "order"
-    }
-  ],
-  "meters": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "meter"
-    }
-  ],
-  "files": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "_schema": "file"
-    }
-  ],
-  "relations": [
-    {
-      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-      "_title": "Example Entity",
-      "_org": "123",
-      "_tags": ["example", "mock"],
-      "_created_at": "2021-02-09T12:41:43.662Z",
-      "_updated_at": "2021-02-09T12:41:43.662Z",
-      "templates_output": {},
-      "_schema": "contact"
-    }
-  ],
-  "workflow": [
-    {
-      "id": "8gja72h6kas6h",
-      "name": "Lead Qualification",
-      "trigger": "MANUAL",
-      "status": "STARTED",
-      "creationTime": "2021-04-27T12:01:13.000Z",
-      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
-      "dueDate": "2021-04-27T12:01:13.000Z",
-      "assignedTo": ["252", "29052"],
-      "flow": []
-    }
-  ],
-  "journey_actions": [
-    {
-      "journey_id": "string",
-      "action_label": {},
-      "slug": "string",
-      "rules": []
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `updateContract`
-
-Update a contract by id
-
-`PATCH /v2/portal/contract/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The ID of the contract |
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot customer-portal updateContract \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528 \
-  -d '{}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal updateContract 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal updateContract -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal updateContract -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'data'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "data": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "contract_name": "Grid Contract",
-    "contract_number": "12345",
-    "status": "approved",
-    "description": "This contract is for the supply of widgets.",
-    "account_number": "67890",
-    "branch": "power",
-    "billing_address": "123 Main St, Anytown",
-    "delivery_address": "456 Elm St, Anytown",
-    "additional_addresses": "789 Oak St, Anytown",
-    "termination_date": "2022-01-01",
-    "termination_reason": "Non-payment",
-    "billing_period": "monthly",
-    "billing_duration_amount": 30,
-    "renewal_duration_amount": 365,
-    "renewal_duration_unit": "years",
-    "notice_time_amount": 30,
-    "notice_time_unit": "months",
-    "start_date": "2021-01-01",
-    "billing_due_day": 2,
-    "installment_amount": 10050,
-    "balance": 8990,
-    "balance_currency": "EUR"
   }
 }
 ```
@@ -6227,72 +5240,6 @@ epilot customer-portal getRegistrationIdentifiers --jsonata 'data'
 
 ---
 
-### `getFileById`
-
-Fetch a document with ID
-
-`GET /v2/portal/user/file/{id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string (uuid) | Yes | The Id of a file |
-
-**Sample Call**
-
-```bash
-epilot customer-portal getFileById \
-  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot customer-portal getFileById 5da0a718-c822-403d-9f5d-20d4584e0528
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal getFileById -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'file'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "file": {
-    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "_title": "Example Entity",
-    "_org": "123",
-    "_tags": ["example", "mock"],
-    "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z",
-    "_schema": "file",
-    "filename": "document.pdf",
-    "access_control": "private",
-    "file_date": "2021-02-09T12:41:43.662Z",
-    "public_url": "https://epilot-files-prod.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
-    "type": "document",
-    "mime_type": "application/pdf",
-    "_relations": [
-      {
-        "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-        "_schema": "contact",
-        "_title": "Opportunity ABC"
-      }
-    ],
-    "is_new": true
-  }
-}
-```
-
-</details>
-
----
-
 ### `trackFileDownloaded`
 
 Track that user has downloaded a file
@@ -6563,7 +5510,7 @@ Generate a token to log in to a portal impersonating a users.
 
 ```bash
 epilot customer-portal loginToPortalAsUser \
-  -d '{"email":"portal-customer@email.com","origin":"string"}'
+  -d '{"email":"portal-customer@email.com","origin":"string","portal_id":"string","domain":"string"}'
 ```
 
 Using stdin pipe:
@@ -6640,7 +5587,7 @@ epilot customer-portal triggerEntityAccessEvent -p schema=contract -p origin=exa
 
 ### `triggerEntityAccessEventV3`
 
-Trigger entity access event for a portal user
+Trigger entity access event for a portal user.
 
 `POST /v3/portal/entity/{schema}/access`
 
@@ -6650,14 +5597,14 @@ Trigger entity access event for a portal user
 | ---- | -- | ---- | -------- | ----------- |
 | `schema` | path | string | Yes | Entity schema |
 | `entity_id` | query | string (uuid) | No | Entity ID |
-| `portal_id` | query | string | Yes | Portal ID |
+| `portal_id` | query | string | No | Portal ID (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to portal_id) |
 
 **Sample Call**
 
 ```bash
 epilot customer-portal triggerEntityAccessEventV3 \
-  -p schema=contract \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+  -p schema=contract
 ```
 
 Using positional args for path parameters:
@@ -6669,7 +5616,7 @@ epilot customer-portal triggerEntityAccessEventV3 contract
 With JSONata filter:
 
 ```bash
-epilot customer-portal triggerEntityAccessEventV3 -p schema=contract -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'eventId'
+epilot customer-portal triggerEntityAccessEventV3 -p schema=contract --jsonata 'eventId'
 ```
 
 <details>
@@ -7408,8 +6355,9 @@ Initiate login using external SSO identity.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `portal_id` | query | string | Yes | ID of the Portal |
-| `org_id` | query | string | Yes | epilot organization id |
+| `portal_id` | query | string | No | ID of the Portal (required if domain is not provided) |
+| `org_id` | query | string | No | epilot organization id (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to org_id + portal_id) |
 | `contact_id` | query | string (uuid) | No | contact id in the epilot system |
 
 **Request Body**
@@ -7418,21 +6366,19 @@ Initiate login using external SSO identity.
 
 ```bash
 epilot customer-portal ssoLoginV3 \
-  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
-  -p org_id=123 \
   -d '{"provider_slug":"office-365-login"}'
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot customer-portal ssoLoginV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c -p org_id=123
+cat body.json | epilot customer-portal ssoLoginV3
 ```
 
 With JSONata filter:
 
 ```bash
-epilot customer-portal ssoLoginV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c -p org_id=123 --jsonata 'email'
+epilot customer-portal ssoLoginV3 --jsonata 'email'
 ```
 
 <details>
@@ -7580,7 +6526,16 @@ epilot customer-portal getPortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e0528 
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -7594,7 +6549,8 @@ epilot customer-portal getPortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e0528 
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -7632,7 +6588,16 @@ epilot customer-portal updatePortalPage \
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -7674,7 +6639,16 @@ epilot customer-portal updatePortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e05
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -7688,7 +6662,8 @@ epilot customer-portal updatePortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e05
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -7767,7 +6742,16 @@ epilot customer-portal getPortalPages -p domain=customer-portal.epilot.io --json
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -7781,7 +6765,8 @@ epilot customer-portal getPortalPages -p domain=customer-portal.epilot.io --json
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -7820,7 +6805,16 @@ epilot customer-portal createPortalPage \
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -7856,7 +6850,16 @@ epilot customer-portal createPortalPage -p domain=customer-portal.epilot.io --js
   "slug": "dashboard",
   "path": "/dashboard",
   "schema": ["string"],
-  "visibility": {},
+  "visibility": {
+    "is_hidden": true,
+    "hidden_in_app": true,
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
+    "visible_for_targets": ["string"],
+    "visible_for_operator": "and",
+    "hidden_for_targets": ["string"],
+    "hidden_for_operator": "and"
+  },
   "content": {},
   "design": {},
   "blocks": {},
@@ -7870,7 +6873,8 @@ epilot customer-portal createPortalPage -p domain=customer-portal.epilot.io --js
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -7914,7 +6918,16 @@ epilot customer-portal getPublicPages -p domain=customer-portal.epilot.io --json
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -7928,7 +6941,8 @@ epilot customer-portal getPublicPages -p domain=customer-portal.epilot.io --json
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -7961,7 +6975,16 @@ epilot customer-portal interpolatePortalPages \
       "slug": "dashboard",
       "path": "/dashboard",
       "schema": ["string"],
-      "visibility": {},
+      "visibility": {
+        "is_hidden": true,
+        "hidden_in_app": true,
+        "start_date": "1970-01-01T00:00:00.000Z",
+        "end_date": "1970-01-01T00:00:00.000Z",
+        "visible_for_targets": ["string"],
+        "visible_for_operator": "and",
+        "hidden_for_targets": ["string"],
+        "hidden_for_operator": "and"
+      },
       "content": {},
       "design": {},
       "blocks": {},
@@ -7975,7 +6998,8 @@ epilot customer-portal interpolatePortalPages \
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ],
   "context_entities": [
@@ -7983,7 +7007,8 @@ epilot customer-portal interpolatePortalPages \
       "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "entity_schema": "contract"
     }
-  ]
+  ],
+  "evaluate_targeting": true
 }'
 ```
 
@@ -8008,7 +7033,16 @@ epilot customer-portal interpolatePortalPages --jsonata '$'
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -8022,7 +7056,8 @@ epilot customer-portal interpolatePortalPages --jsonata '$'
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -8058,7 +7093,16 @@ epilot customer-portal getDefaultPages --jsonata '$'
     "slug": "dashboard",
     "path": "/dashboard",
     "schema": ["string"],
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {},
     "blocks": {},
@@ -8072,7 +7116,8 @@ epilot customer-portal getDefaultPages --jsonata '$'
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -8119,7 +7164,18 @@ epilot customer-portal getPortalPageBlocks -p id=5da0a718-c822-403d-9f5d-20d4584
 [
   {
     "props": {
-      "visibility": {},
+      "visibility": {
+        "is_hidden": true,
+        "hidden_on_mobile": true,
+        "hidden_on_desktop": true,
+        "hidden_in_app": true,
+        "start_date": "1970-01-01T00:00:00.000Z",
+        "end_date": "1970-01-01T00:00:00.000Z",
+        "visible_for_targets": ["string"],
+        "visible_for_operator": "and",
+        "hidden_for_targets": ["string"],
+        "hidden_for_operator": "and"
+      },
       "content": {},
       "design": {}
     },
@@ -8163,7 +7219,18 @@ epilot customer-portal createPortalPageBlock \
   -p id=5da0a718-c822-403d-9f5d-20d4584e0528 \
   -d '{
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -8197,7 +7264,18 @@ epilot customer-portal createPortalPageBlock -p id=5da0a718-c822-403d-9f5d-20d45
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -8251,7 +7329,18 @@ epilot customer-portal getPortalPageBlock -p id=5da0a718-c822-403d-9f5d-20d4584e
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -8297,7 +7386,18 @@ epilot customer-portal updatePortalPageBlock \
   -p block_id=5da0a718-c822-403d-9f5d-20d4584e0528 \
   -d '{
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -8331,7 +7431,18 @@ epilot customer-portal updatePortalPageBlock -p id=5da0a718-c822-403d-9f5d-20d45
 ```json
 {
   "props": {
-    "visibility": {},
+    "visibility": {
+      "is_hidden": true,
+      "hidden_on_mobile": true,
+      "hidden_on_desktop": true,
+      "hidden_in_app": true,
+      "start_date": "1970-01-01T00:00:00.000Z",
+      "end_date": "1970-01-01T00:00:00.000Z",
+      "visible_for_targets": ["string"],
+      "visible_for_operator": "and",
+      "hidden_for_targets": ["string"],
+      "hidden_for_operator": "and"
+    },
     "content": {},
     "design": {}
   },
@@ -9055,7 +8166,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -9312,7 +8424,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -9560,7 +8673,8 @@ epilot customer-portal putPortalConfig \
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }'
@@ -9800,7 +8914,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -9981,8 +9096,19 @@ Invites a partner to a portal
 **Sample Call**
 
 ```bash
+epilot customer-portal invitePartner
+```
+
+With request body:
+
+```bash
 epilot customer-portal invitePartner \
-  -d '{"email":"string","represents_contact_list":["5da0a718-c822-403d-9f5d-20d4584e0528"],"contact_data":{}}'
+  -d '{
+  "email": "string",
+  "represents_contact_list": ["5da0a718-c822-403d-9f5d-20d4584e0528"],
+  "contact_data": {},
+  "portal_user_data": {}
+}'
 ```
 
 Using stdin pipe:

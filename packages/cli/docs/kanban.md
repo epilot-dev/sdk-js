@@ -118,6 +118,9 @@ epilot kanban createKanbanBoard \
       "field": "created_at",
       "direction": "asc"
     },
+    "group_by": {
+      "field": "context_entity"
+    },
     "search_query": "task 1"
   }
 }'
@@ -189,6 +192,9 @@ epilot kanban createKanbanBoard --jsonata '$'
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -335,6 +341,9 @@ epilot kanban getKanbanBoard -p boardId=board-123 --jsonata '$'
       "field": "created_at",
       "direction": "asc"
     },
+    "group_by": {
+      "field": "context_entity"
+    },
     "search_query": "task 1"
   }
 }
@@ -421,6 +430,9 @@ epilot kanban updateKanbanBoard \
       "field": "created_at",
       "direction": "asc"
     },
+    "group_by": {
+      "field": "context_entity"
+    },
     "search_query": "task 1"
   }
 }'
@@ -498,6 +510,9 @@ epilot kanban updateKanbanBoard -p boardId=123e4567-e89b-12d3-a456-426614174000 
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -615,6 +630,9 @@ epilot kanban patchKanbanBoard -p boardId=123e4567-e89b-12d3-a456-426614174000 -
     "sorting": {
       "field": "created_at",
       "direction": "asc"
+    },
+    "group_by": {
+      "field": "context_entity"
     },
     "search_query": "task 1"
   }
@@ -804,6 +822,9 @@ epilot kanban executeFlowsQuery \
   "sorting": {
     "field": "created_at",
     "direction": "asc"
+  },
+  "group_by": {
+    "field": "context_entity"
   },
   "from": 0,
   "size": 10

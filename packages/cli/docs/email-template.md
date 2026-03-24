@@ -116,7 +116,8 @@ epilot email-template saveTemplate \
   },
   "system_template": false,
   "created_by": 1234,
-  "updated_by": 1234
+  "updated_by": 1234,
+  "json_template": "string"
 }'
 ```
 
@@ -194,6 +195,7 @@ epilot email-template saveTemplate --jsonata '$'
   },
   "created_by": 1234,
   "updated_by": 1234,
+  "json_template": "string",
   "system_template": false
 }
 ```
@@ -296,6 +298,7 @@ epilot email-template getTemplateDetail -p id=123e4567-e89b-12d3-a456-4266141740
     },
     "created_by": 1234,
     "updated_by": 1234,
+    "json_template": "string",
     "system_template": false
   },
   "relations": [
@@ -387,7 +390,8 @@ epilot email-template updateTemplateDetail \
   },
   "system_template": false,
   "created_by": 1234,
-  "updated_by": 1234
+  "updated_by": 1234,
+  "json_template": "string"
 }'
 ```
 
@@ -471,6 +475,7 @@ epilot email-template updateTemplateDetail -p id=123e4567-e89b-12d3-a456-4266141
   },
   "created_by": 1234,
   "updated_by": 1234,
+  "json_template": "string",
   "system_template": false
 }
 ```
@@ -605,6 +610,7 @@ epilot email-template replaceVariablesAsync --jsonata 'job_id'
       },
       "created_by": 1234,
       "updated_by": 1234,
+      "json_template": "string",
       "system_template": false
     },
     "relations": [
@@ -638,8 +644,9 @@ With request body:
 epilot email-template bulkSendMessage \
   -d '{
   "skip_creating_entities": true,
+  "complete_thread": false,
   "email_template_id": "511ceb90-f738-47aa-8b1e-915ace0ae13c",
-  "must_include_unsubscribe_link": true,
+  "must_include_unsubscribe_link": false,
   "recipient_query": "_schema:contact AND consent_email_marketing:active",
   "custom_variables": [
     {
@@ -670,11 +677,13 @@ epilot email-template bulkSendMessage --jsonata 'org_id'
   "org_id": "206801",
   "job_id": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
   "skip_creating_entities": true,
+  "complete_thread": false,
   "status": "PROCESSING",
   "request": {
     "skip_creating_entities": true,
+    "complete_thread": false,
     "email_template_id": "511ceb90-f738-47aa-8b1e-915ace0ae13c",
-    "must_include_unsubscribe_link": true,
+    "must_include_unsubscribe_link": false,
     "recipient_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6", "3fa85f64-5717-4562-b3fc-2c963f66afa7", "3fa85f64-5717-4562-b3fc-2c963f66afa8"],
     "custom_variables": [
       {

@@ -404,11 +404,45 @@
         }
       }
     },
+    "/v2/organization/feature-settings": {
+      "get": {
+        "operationId": "getOrganizationFeatureSettings",
+        "summary": "Get organization feature settings",
+        "description": "Returns feature flag metadata for the organization UI.\n\nThis data is static (identical for all organizations) and changes infrequently.\nClients should cache responses using the Cache-Control header.\n",
+        "tags": [
+          "Feature Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature settings",
+            "headers": {
+              "cache-control": {
+                "schema": {
+                  "type": "string",
+                  "example": "public, max-age=3600"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication token"
+          }
+        }
+      }
+    },
     "/v2/feature-settings": {
       "get": {
         "operationId": "getFeatureSettings",
+        "deprecated": true,
         "summary": "Get platform configuration metadata",
-        "description": "Returns platform-level configuration metadata including feature flag definitions,\nresource type mappings, and error code severities.\n\nThis data is static (identical for all organizations) and changes infrequently.\nClients should cache responses using the Cache-Control header.\n",
+        "description": "Deprecated: use /v2/organization/feature-settings instead.",
         "tags": [
           "Feature Settings"
         ],

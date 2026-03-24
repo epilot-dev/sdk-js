@@ -1,5 +1,6 @@
 # Data Management API
 
+- **Base URL:** `https://data-management.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
 
 ## Quick Start

@@ -27,6 +27,10 @@
       "description": "Microsoft Office 365 Outlook integration endpoints. These endpoints enable organizations to:\n- Initiate OAuth connections with Microsoft 365\n- Connect Outlook shared mailboxes\n- Manage connection status and tokens\n- Disconnect integrations when needed\n\nThe integration supports multiple Azure AD tenants and handles token refresh automatically.\n"
     },
     {
+      "name": "Channels",
+      "description": "Channel integration endpoints. Channels represent external communication providers\n(e.g., Microsoft Teams, WhatsApp) that can be connected to an epilot organization.\n\nAll channel endpoints live under `/v2/channels/{channel}`.\n"
+    },
+    {
       "name": "Settings",
       "description": "Generic settings management for various email configuration types:\n- **signature**: HTML email signatures\n- **email_domain**: Custom email domains\n- **email_address**: Sender email addresses\n- **whitelist_email_address**: Addresses exempt from duplicate detection\n- **restrict_duplicates_within**: Time window for duplicate email detection\n"
     },
@@ -571,6 +575,10 @@
                     "has_connections": {
                       "type": "boolean",
                       "description": "Whether any connections exist"
+                    },
+                    "teams_enabled": {
+                      "type": "boolean",
+                      "description": "Whether Microsoft Teams features are enabled for this organization"
                     }
                   }
                 }
@@ -648,6 +656,119 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/channels/msteams/connect": {
+      "post": {
+        "operationId": "connectMsTeams",
+        "summary": "connectMsTeams",
+        "description": "Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.\nRequires an active Microsoft 365 / Outlook connection.\n",
+        "tags": [
+          "Channels"
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams channel connected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connected": {
+                      "type": "boolean"
+                    },
+                    "connected_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No active Outlook connection found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/channels/msteams/disconnect": {
+      "post": {
+        "operationId": "disconnectMsTeams",
+        "summary": "disconnectMsTeams",
+        "description": "Disconnects Microsoft Teams channel for the organization.\n",
+        "tags": [
+          "Channels"
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams channel disconnected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connected": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/channels/msteams/status": {
+      "get": {
+        "operationId": "getMsTeamsStatus",
+        "summary": "getMsTeamsStatus",
+        "description": "Returns the connection status of the Microsoft Teams channel for the organization.\n",
+        "tags": [
+          "Channels"
+        ],
+        "responses": {
+          "200": {
+            "description": "Teams channel status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connected": {
+                      "type": "boolean",
+                      "description": "Whether the Teams channel is connected"
+                    },
+                    "connected_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "When the Teams channel was connected"
+                    },
+                    "connected_by_user_id": {
+                      "type": "string",
+                      "description": "User ID who connected the Teams channel"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

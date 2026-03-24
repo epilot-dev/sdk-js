@@ -1184,6 +1184,9 @@
                   "sorting": {
                     "$ref": "#/components/schemas/Sorting"
                   },
+                  "group_by": {
+                    "$ref": "#/components/schemas/GroupBy"
+                  },
                   "search_query": {
                     "type": "string",
                     "example": "task 1"
@@ -1242,6 +1245,23 @@
         "required": [
           "field"
         ]
+      },
+      "GroupBy": {
+        "type": "object",
+        "description": "Defines how tasks should be grouped within each swimlane. Tasks with the same group value are returned adjacently in the result set.",
+        "required": [
+          "field"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "context_entity",
+              "phase"
+            ],
+            "description": "Property to group tasks by within each swimlane"
+          }
+        }
       },
       "BoardFilter": {
         "type": "object",
@@ -1381,7 +1401,7 @@
       },
       "FlowsQueryRequest": {
         "type": "object",
-        "description": "Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, and offset-based pagination.",
+        "description": "Request payload for executing a query against the Flows dataset. Supports filter conditions, sorting, grouping, and offset-based pagination.",
         "properties": {
           "filters": {
             "$ref": "#/components/schemas/BoardFilter",
@@ -1390,6 +1410,10 @@
           "sorting": {
             "$ref": "#/components/schemas/Sorting",
             "description": "Sort the results by a specific field and direction."
+          },
+          "group_by": {
+            "$ref": "#/components/schemas/GroupBy",
+            "description": "Group tasks by a shared property within each swimlane. Grouped tasks are returned adjacently in the result set."
           },
           "from": {
             "type": "number",

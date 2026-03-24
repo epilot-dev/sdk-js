@@ -2596,6 +2596,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -2706,6 +2709,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -2814,6 +2820,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -2911,6 +2920,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -3007,6 +3019,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -3103,6 +3118,9 @@
             "type": "boolean",
             "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
         "required": [
@@ -3223,6 +3241,26 @@
         },
         "required": [
           "url"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionSecureProxy": {
+        "type": "object",
+        "description": "If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.",
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Integration ID that owns the secure_proxy use case."
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Use case slug for the secure proxy use case."
+          }
+        },
+        "required": [
+          "integration_id",
+          "use_case_slug"
         ],
         "additionalProperties": false
       },
@@ -3353,12 +3391,20 @@
           {
             "type": "object",
             "properties": {
-              "section": {
-                "description": "Define which section of the portal this block can be placed in",
-                "type": "string",
-                "enum": [
-                  "main",
-                  "footer"
+              "supported_surfaces": {
+                "description": "Define which surfaces of the portal this block can be placed in",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "footer_inline",
+                    "footer_left_absolute",
+                    "footer_right_absolute"
+                  ]
+                },
+                "default": [
+                  "main"
                 ]
               }
             }
@@ -3860,6 +3906,10 @@
           "job_id": {
             "type": "string",
             "description": "ID of the job that created the blueprint"
+          },
+          "source_blueprint_file": {
+            "type": "string",
+            "description": "S3 key of a pre-exported blueprint zip used for cross-org installs"
           }
         }
       },

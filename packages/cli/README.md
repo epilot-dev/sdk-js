@@ -93,7 +93,7 @@ APIs
   notes                Notes API
   notification         Notification API
   organization         Organization API
-  partner-directory    Partner API
+  partner-directory    Partner Directory API
   permissions          Permissions API
   pricing              Pricing API
   pricing-tier         Pricing Tier API
@@ -350,7 +350,7 @@ Full documentation with sample calls and responses for all APIs:
 | Notes API | `epilot notes` | [docs](./docs/notes.md) |
 | Notification API | `epilot notification` | [docs](./docs/notification.md) |
 | Organization API | `epilot organization` | [docs](./docs/organization.md) |
-| Partner API | `epilot partner-directory` | [docs](./docs/partner-directory.md) |
+| Partner Directory API | `epilot partner-directory` | [docs](./docs/partner-directory.md) |
 | Permissions API | `epilot permissions` | [docs](./docs/permissions.md) |
 | Pricing API | `epilot pricing` | [docs](./docs/pricing.md) |
 | Pricing Tier API | `epilot pricing-tier` | [docs](./docs/pricing-tier.md) |

@@ -66,6 +66,11 @@ epilot email-settings provisionEpilotEmailAddress
 - [`getConnectedOutlookEmails`](#getconnectedoutlookemails) — Returns all Outlook email addresses connected to the organization.
 - [`outlookOAuthCallback`](#outlookoauthcallback) — Exchanges authorization code for tokens and stores them.
 
+**Channels**
+- [`connectMsTeams`](#connectmsteams) — Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+- [`disconnectMsTeams`](#disconnectmsteams) — Disconnects Microsoft Teams channel for the organization.
+- [`getMsTeamsStatus`](#getmsteamsstatus) — Returns the connection status of the Microsoft Teams channel for the organization.
+
 **Settings**
 - [`getSettings`](#getsettings) — Retrieves settings of a specific type for the organization.
 - [`addSetting`](#addsetting) — Creates a new setting of the specified type.
@@ -847,7 +852,8 @@ epilot email-settings getOutlookConnectionStatus --jsonata 'connections'
       "is_token_valid": true
     }
   ],
-  "has_connections": true
+  "has_connections": true,
+  "teams_enabled": true
 }
 ```
 
@@ -890,6 +896,102 @@ epilot email-settings disconnectOutlook --jsonata 'success'
   "success": true,
   "tenant_id": "string",
   "affected_shared_inboxes": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `connectMsTeams`
+
+Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+
+`POST /v2/channels/msteams/connect`
+
+**Sample Call**
+
+```bash
+epilot email-settings connectMsTeams
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings connectMsTeams --jsonata 'connected'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "connected": true,
+  "connected_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `disconnectMsTeams`
+
+Disconnects Microsoft Teams channel for the organization.
+
+`POST /v2/channels/msteams/disconnect`
+
+**Sample Call**
+
+```bash
+epilot email-settings disconnectMsTeams
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings disconnectMsTeams --jsonata 'connected'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "connected": true
+}
+```
+
+</details>
+
+---
+
+### `getMsTeamsStatus`
+
+Returns the connection status of the Microsoft Teams channel for the organization.
+
+`GET /v2/channels/msteams/status`
+
+**Sample Call**
+
+```bash
+epilot email-settings getMsTeamsStatus
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings getMsTeamsStatus --jsonata 'connected'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "connected": true,
+  "connected_at": "1970-01-01T00:00:00.000Z",
+  "connected_by_user_id": "string"
 }
 ```
 

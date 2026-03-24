@@ -1,9 +1,9 @@
-# Partner API
+# Partner Directory API
 
 - **Base URL:** `https://partner-directory-api.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/partner-directory](https://docs.epilot.io/api/partner-directory)
 
-Management of Partners in epilot
+The Partner Directory API enables organizations to manage partnerships within the epilot platform.
 
 ## Quick Start
 
@@ -35,29 +35,30 @@ epilot partner-directory approvePartner -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310
 
 ## Operations
 
-**partners**
-- [`approvePartner`](#approvepartner) — Approve partner request
-- [`rejectPartner`](#rejectpartner) — Reject partner request
-- [`searchAssignable`](#searchassignable) — Search for assignable users/organizations from this organization and Partners
-- [`batchGetAssignable`](#batchgetassignable) — Search for assignable users from this organization by its ids
-- [`getPartnerByToken`](#getpartnerbytoken) — Get partner by token
-- [`activatePartner`](#activatepartner) — Activate partner using an invite token
-- [`searchGeolocationForText`](#searchgeolocationfortext) — Converts a given string, in the format of an address, to geo-location latitude and longitude
-- [`invitePartnerV2`](#invitepartnerv2) — Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration
+**Partners**
+- [`approvePartner`](#approvepartner) — Approves a pending partner request, allowing the partner to begin collaboration.
+- [`rejectPartner`](#rejectpartner) — Rejects a pending partner request, declining the partnership.
+- [`searchAssignable`](#searchassignable) — Search for users and organizations that can be assigned to tasks, workflows, or entities.
+- [`batchGetAssignable`](#batchgetassignable) — Retrieve multiple assignable users or groups by their IDs in a single request.
+- [`getPartnerByToken`](#getpartnerbytoken) — Retrieves partner information using an invitation token.
+- [`activatePartner`](#activatepartner) — Activates a partner account using an invitation token.
+- [`searchGeolocationForText`](#searchgeolocationfortext) — Converts an address string to geographic coordinates (latitude and longitude).
+- [`invitePartnerV2`](#invitepartnerv2) — Sends an invitation email to a partner organization to begin collaboration.
 
-**partner_users**
-- [`getPartnerUsers`](#getpartnerusers) — Get all users for a partner organization with their roles
-- [`createPartnerUser`](#createpartneruser) — Create a new user in a partner organization
-- [`deletePartnerUser`](#deletepartneruser) — Delete a user from a partner organization
-- [`getPartnerRoles`](#getpartnerroles) — Get all roles for a partner organization
-- [`createPartnerRole`](#createpartnerrole) — Create a role for a partner organization
-- [`updatePartnerRole`](#updatepartnerrole) — Update a role for a partner organization
-- [`assignPartnerUserRoles`](#assignpartneruserroles) — Assign roles to a user in a partner organization
-- [`unassignPartnerUserRoles`](#unassignpartneruserroles) — Unassign roles from a user in a partner organization
+**Partner Users**
+- [`getPartnerUsers`](#getpartnerusers) — Retrieves all users belonging to a partner organization along with their assigned roles.
+- [`createPartnerUser`](#createpartneruser) — Creates a new user in a partner organization.
+- [`deletePartnerUser`](#deletepartneruser) — Removes a user from a partner organization.
+- [`getPartnerRoles`](#getpartnerroles) — Retrieves all roles defined for a partner organization.
+- [`createPartnerRole`](#createpartnerrole) — Creates a new role for a partner organization.
+- [`updatePartnerRole`](#updatepartnerrole) — Updates an existing role in a partner organization.
+- [`deletePartnerRole`](#deletepartnerrole) — Delete a role from a partner organization
+- [`assignPartnerUserRoles`](#assignpartneruserroles) — Assigns one or more roles to a user in a partner organization.
+- [`unassignPartnerUserRoles`](#unassignpartneruserroles) — Removes one or more roles from a user in a partner organization.
 
 ### `approvePartner`
 
-Approve partner request
+Approves a pending partner request, allowing the partner to begin collaboration.
 
 `POST /v1/partners/{id}/approve`
 
@@ -65,7 +66,7 @@ Approve partner request
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string | Yes | The Id of partner |
+| `id` | path | string | Yes | The unique identifier of the partner to approve |
 
 **Sample Call**
 
@@ -94,14 +95,14 @@ epilot partner-directory approvePartner -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -112,7 +113,7 @@ epilot partner-directory approvePartner -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310
 
 ### `rejectPartner`
 
-Reject partner request
+Rejects a pending partner request, declining the partnership.
 
 `POST /v1/partners/{id}/reject`
 
@@ -120,7 +121,7 @@ Reject partner request
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string | Yes | The Id of partner |
+| `id` | path | string | Yes | The unique identifier of the partner to reject |
 
 **Sample Call**
 
@@ -149,14 +150,14 @@ epilot partner-directory rejectPartner -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310f
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -167,7 +168,7 @@ epilot partner-directory rejectPartner -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310f
 
 ### `searchAssignable`
 
-Search for assignable users/organizations from this organization and Partners
+Search for users and organizations that can be assigned to tasks, workflows, or entities.
 
 `POST /v1/partners/assignables:search`
 
@@ -184,11 +185,11 @@ With request body:
 ```bash
 epilot partner-directory searchAssignable \
   -d '{
-  "q": "",
+  "q": "john",
   "from": 0,
   "size": 25,
-  "org_ids": ["123"],
-  "portalUsersEntityIdScope": "",
+  "org_ids": ["123", "456"],
+  "portalUsersEntityIdScope": "f7c22299-ca72-4bca-8538-0a88eeefc947",
   "types": ["user", "partner_user", "partner_organization", "ecp", "group"]
 }'
 ```
@@ -210,11 +211,11 @@ epilot partner-directory searchAssignable --jsonata 'results[0]'
 
 ```json
 {
-  "hits": 25,
+  "hits": 42,
   "results": [
     {
       "type": "user",
-      "display_name": "Example User",
+      "display_name": "John Smith",
       "image_uri": {
         "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
         "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
@@ -224,7 +225,7 @@ epilot partner-directory searchAssignable --jsonata 'results[0]'
       "activated_at": "2022-02-08T04:44:32.246Z",
       "status": "Active",
       "user_id": "456",
-      "email": "example@example.com"
+      "email": "john.smith@example.com"
     }
   ]
 }
@@ -236,7 +237,7 @@ epilot partner-directory searchAssignable --jsonata 'results[0]'
 
 ### `batchGetAssignable`
 
-Search for assignable users from this organization by its ids
+Retrieve multiple assignable users or groups by their IDs in a single request.
 
 `POST /v1/partners/assignables:batchGet`
 
@@ -246,7 +247,7 @@ Search for assignable users from this organization by its ids
 
 ```bash
 epilot partner-directory batchGetAssignable \
-  -d '[{"user_id":"string","org_id":"string","group_id":"string"}]'
+  -d '[{"user_id":"456","org_id":"123","group_id":"group-789"}]'
 ```
 
 Using stdin pipe:
@@ -266,11 +267,11 @@ epilot partner-directory batchGetAssignable --jsonata 'results[0]'
 
 ```json
 {
-  "hits": 25,
+  "hits": 3,
   "results": [
     {
       "type": "user",
-      "display_name": "Example User",
+      "display_name": "John Smith",
       "image_uri": {
         "original": "https://epilot-staging-user-content.s3.eu-central-1.amazonaws.com/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png",
         "thumbnail_32": "https://file.sls.epilot.io/v1/files/public/preview?w=32&h=32&key=/728/8043d909-71fc-4838-a363-1b15dc1d585c/epilot.png"
@@ -280,7 +281,7 @@ epilot partner-directory batchGetAssignable --jsonata 'results[0]'
       "activated_at": "2022-02-08T04:44:32.246Z",
       "status": "Active",
       "user_id": "456",
-      "email": "example@example.com"
+      "email": "john.smith@example.com"
     }
   ]
 }
@@ -292,7 +293,7 @@ epilot partner-directory batchGetAssignable --jsonata 'results[0]'
 
 ### `getPartnerByToken`
 
-Get partner by token
+Retrieves partner information using an invitation token.
 
 `GET /v1/partner-directory/public/getPartnerByToken`
 
@@ -300,19 +301,19 @@ Get partner by token
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `token` | query | string | Yes | Invite Token |
+| `token` | query | string | Yes | The invitation token received via email |
 
 **Sample Call**
 
 ```bash
 epilot partner-directory getPartnerByToken \
-  -p token=example
+  -p token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory getPartnerByToken -p token=example --jsonata 'id'
+epilot partner-directory getPartnerByToken -p token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... --jsonata 'id'
 ```
 
 <details>
@@ -323,14 +324,14 @@ epilot partner-directory getPartnerByToken -p token=example --jsonata 'id'
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -341,7 +342,7 @@ epilot partner-directory getPartnerByToken -p token=example --jsonata 'id'
 
 ### `activatePartner`
 
-Activate partner using an invite token
+Activates a partner account using an invitation token.
 
 `POST /v1/partner-directory/public/activate`
 
@@ -349,7 +350,7 @@ Activate partner using an invite token
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `token` | query | string | Yes | Invite Token |
+| `token` | query | string | Yes | The invitation token received via email |
 
 **Request Body**
 
@@ -357,27 +358,27 @@ Activate partner using an invite token
 
 ```bash
 epilot partner-directory activatePartner \
-  -p token=example \
-  -d '{"company_name":"Company name","signed_up_email":"user@example.com","organization_id":"string"}'
+  -p token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... \
+  -d '{"company_name":"Acme Solar GmbH","signed_up_email":"admin@acme-solar.de","organization_id":"456"}'
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot partner-directory activatePartner -p token=example
+cat body.json | epilot partner-directory activatePartner -p token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory activatePartner -p token=example --jsonata '$'
+epilot partner-directory activatePartner -p token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... --jsonata '$'
 ```
 
 ---
 
 ### `searchGeolocationForText`
 
-Converts a given string, in the format of an address, to geo-location latitude and longitude
+Converts an address string to geographic coordinates (latitude and longitude).
 
 `POST /v1/geolocation/text:search`
 
@@ -409,8 +410,8 @@ epilot partner-directory searchGeolocationForText --jsonata 'lat'
 {
   "lat": 49.013,
   "lng": 12.101,
-  "addressLabel": "string",
-  "relevance": 0
+  "addressLabel": "Auweg 1, 93055 Regensburg, Germany",
+  "relevance": 0.95
 }
 ```
 
@@ -420,7 +421,7 @@ epilot partner-directory searchGeolocationForText --jsonata 'lat'
 
 ### `invitePartnerV2`
 
-Invite a partner into collaboration. It will send an email to partner and ask to join into collaboration
+Sends an invitation email to a partner organization to begin collaboration.
 
 `POST /v2/partners/{id}/invite`
 
@@ -428,7 +429,7 @@ Invite a partner into collaboration. It will send an email to partner and ask to
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string | Yes | The Id of partner |
+| `id` | path | string | Yes | The unique identifier of the partner to invite |
 
 **Request Body**
 
@@ -437,7 +438,7 @@ Invite a partner into collaboration. It will send an email to partner and ask to
 ```bash
 epilot partner-directory invitePartnerV2 \
   -p id=e45a6dc2-3795-43a3-ae0f-6b6760f310fc \
-  -d '{"language":"en"}'
+  -d '{"language":"de"}'
 ```
 
 Using positional args for path parameters:
@@ -466,14 +467,14 @@ epilot partner-directory invitePartnerV2 -p id=e45a6dc2-3795-43a3-ae0f-6b6760f31
   "id": "e45a6dc2-3795-43a3-ae0f-6b6760f310fc",
   "organization_id": "123",
   "created_at": "2022-02-08T04:44:32.246Z",
-  "description": "Description",
-  "company_name": "Company name",
-  "invitation_token": "string",
+  "description": "Regional solar installation partner for Bavaria",
+  "company_name": "Acme Solar GmbH",
+  "invitation_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "invitation_email": "user@example.com",
-  "email": "user@example.com",
-  "owner_email": "user@example.com",
-  "signed_up_email": "user@example.com",
-  "partner_org_id": 123456,
+  "email": "contact@acme-solar.de",
+  "owner_email": "owner@acme-solar.de",
+  "signed_up_email": "admin@acme-solar.de",
+  "partner_org_id": "456789",
   "status": "Pending"
 }
 ```
@@ -484,7 +485,7 @@ epilot partner-directory invitePartnerV2 -p id=e45a6dc2-3795-43a3-ae0f-6b6760f31
 
 ### `getPartnerUsers`
 
-Get all users for a partner organization with their roles
+Retrieves all users belonging to a partner organization along with their assigned roles.
 
 `GET /v2/partners/{orgId}/users`
 
@@ -492,7 +493,7 @@ Get all users for a partner organization with their roles
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `orgId` | path | string | Yes | The organization ID of the partner |
+| `orgId` | path | string | Yes | The organization ID of the partner whose users to retrieve |
 
 **Sample Call**
 
@@ -522,7 +523,7 @@ epilot partner-directory getPartnerUsers -p orgId=123 --jsonata 'results[0]'
     {
       "id": "456",
       "name": "John Doe",
-      "email": "user@example.com",
+      "email": "user@partner.com",
       "status": "Active",
       "image": {
         "original": "https://example.com/path",
@@ -530,9 +531,9 @@ epilot partner-directory getPartnerUsers -p orgId=123 --jsonata 'results[0]'
       },
       "roles": [
         {
-          "id": "role-123",
-          "slug": "admin",
-          "name": "Administrator"
+          "id": "123:partner_admin",
+          "slug": "partner_admin",
+          "name": "Partner Administrator"
         }
       ]
     }
@@ -546,7 +547,7 @@ epilot partner-directory getPartnerUsers -p orgId=123 --jsonata 'results[0]'
 
 ### `createPartnerUser`
 
-Create a new user in a partner organization
+Creates a new user in a partner organization.
 
 `POST /v2/partners/{orgId}/users`
 
@@ -554,7 +555,7 @@ Create a new user in a partner organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `orgId` | path | string | Yes | The Partner organization ID where the user should be created |
+| `orgId` | path | string | Yes | The partner organization ID where the user will be created |
 
 **Request Body**
 
@@ -563,7 +564,7 @@ Create a new user in a partner organization
 ```bash
 epilot partner-directory createPartnerUser \
   -p orgId=123 \
-  -d '{"email":"user@example.com","language":"en","roles":["role-123","role-456"]}'
+  -d '{"email":"newuser@partner.com","language":"de","roles":["123:partner_viewer"]}'
 ```
 
 Using positional args for path parameters:
@@ -602,7 +603,7 @@ epilot partner-directory createPartnerUser -p orgId=123 --jsonata 'id'
 
 ### `deletePartnerUser`
 
-Delete a user from a partner organization
+Removes a user from a partner organization.
 
 `DELETE /v2/partners/{orgId}/users/{userId}`
 
@@ -611,26 +612,26 @@ Delete a user from a partner organization
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `orgId` | path | string | Yes | The organization ID of the partner |
-| `userId` | path | string | Yes | The user ID to delete |
+| `userId` | path | string | Yes | The unique identifier of the user to delete |
 
 **Sample Call**
 
 ```bash
 epilot partner-directory deletePartnerUser \
   -p orgId=123 \
-  -p userId=123e4567-e89b-12d3-a456-426614174000
+  -p userId=456
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot partner-directory deletePartnerUser 123 123e4567-e89b-12d3-a456-426614174000
+epilot partner-directory deletePartnerUser 123 456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory deletePartnerUser -p orgId=123 -p userId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+epilot partner-directory deletePartnerUser -p orgId=123 -p userId=456 --jsonata '$'
 ```
 
 <details>
@@ -646,7 +647,7 @@ epilot partner-directory deletePartnerUser -p orgId=123 -p userId=123e4567-e89b-
 
 ### `getPartnerRoles`
 
-Get all roles for a partner organization
+Retrieves all roles defined for a partner organization.
 
 `GET /v2/partners/{orgId}/roles`
 
@@ -654,7 +655,7 @@ Get all roles for a partner organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `orgId` | path | string | Yes | The organization ID of the partner |
+| `orgId` | path | string | Yes | The organization ID of the partner whose roles to retrieve |
 
 **Sample Call**
 
@@ -682,10 +683,24 @@ epilot partner-directory getPartnerRoles -p orgId=123 --jsonata 'results[0]'
 {
   "results": [
     {
-      "id": "role-123",
-      "slug": "admin",
-      "name": "Administrator",
-      "type": "share_role"
+      "id": "123:partner_admin",
+      "slug": "partner_admin",
+      "name": "Partner Administrator",
+      "type": "share_role",
+      "grants": [
+        {
+          "action": "entity-read",
+          "resource": "entity:123:contact:*",
+          "effect": "allow",
+          "conditions": [
+            {
+              "attribute": "workflows.primary.task_name",
+              "operation": "equals",
+              "values": ["Qualification"]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
@@ -697,7 +712,7 @@ epilot partner-directory getPartnerRoles -p orgId=123 --jsonata 'results[0]'
 
 ### `createPartnerRole`
 
-Create a role for a partner organization
+Creates a new role for a partner organization.
 
 `POST /v2/partners/{orgId}/roles`
 
@@ -705,7 +720,7 @@ Create a role for a partner organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `orgId` | path | string | Yes | The organization ID of the partner |
+| `orgId` | path | string | Yes | The organization ID of the partner where the role will be created |
 
 **Request Body**
 
@@ -722,12 +737,12 @@ With request body:
 epilot partner-directory createPartnerRole \
   -p orgId=123 \
   -d '{
-  "name": "Partner Admin",
+  "name": "Partner Administrator",
   "slug": "partner_admin",
   "grants": [
     {
       "action": "entity-read",
-      "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+      "resource": "entity:123:contact:*",
       "effect": "allow",
       "conditions": [
         {
@@ -739,7 +754,7 @@ epilot partner-directory createPartnerRole \
       "dependencies": [
         {
           "action": "entity-read",
-          "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+          "resource": "entity:123:contact:*",
           "effect": "allow",
           "conditions": [
             {
@@ -778,10 +793,24 @@ epilot partner-directory createPartnerRole -p orgId=123 --jsonata 'id'
 
 ```json
 {
-  "id": "role-123",
-  "slug": "admin",
-  "name": "Administrator",
-  "type": "share_role"
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -791,7 +820,7 @@ epilot partner-directory createPartnerRole -p orgId=123 --jsonata 'id'
 
 ### `updatePartnerRole`
 
-Update a role for a partner organization
+Updates an existing role in a partner organization.
 
 `PUT /v2/partners/{orgId}/roles/{roleId}`
 
@@ -800,7 +829,7 @@ Update a role for a partner organization
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `orgId` | path | string | Yes | The organization ID of the partner |
-| `roleId` | path | string | Yes | The role ID to update |
+| `roleId` | path | string | Yes | The unique identifier of the role to update |
 
 **Request Body**
 
@@ -809,7 +838,7 @@ Update a role for a partner organization
 ```bash
 epilot partner-directory updatePartnerRole \
   -p orgId=123 \
-  -p roleId=123e4567-e89b-12d3-a456-426614174000
+  -p roleId=123:partner_sales
 ```
 
 With request body:
@@ -817,12 +846,12 @@ With request body:
 ```bash
 epilot partner-directory updatePartnerRole \
   -p orgId=123 \
-  -p roleId=123e4567-e89b-12d3-a456-426614174000 \
+  -p roleId=123:partner_sales \
   -d '{
   "grants": [
     {
       "action": "entity-read",
-      "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+      "resource": "entity:123:contact:*",
       "effect": "allow",
       "conditions": [
         {
@@ -834,7 +863,7 @@ epilot partner-directory updatePartnerRole \
       "dependencies": [
         {
           "action": "entity-read",
-          "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+          "resource": "entity:123:contact:*",
           "effect": "allow",
           "conditions": [
             {
@@ -856,19 +885,19 @@ epilot partner-directory updatePartnerRole \
 Using positional args for path parameters:
 
 ```bash
-epilot partner-directory updatePartnerRole 123 123e4567-e89b-12d3-a456-426614174000
+epilot partner-directory updatePartnerRole 123 123:partner_sales
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123:partner_sales
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123:partner_sales --jsonata 'id'
 ```
 
 <details>
@@ -876,10 +905,87 @@ epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123e4567-e89b-
 
 ```json
 {
-  "id": "role-123",
-  "slug": "admin",
-  "name": "Administrator",
-  "type": "share_role"
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deletePartnerRole`
+
+Delete a role from a partner organization
+
+`DELETE /v2/partners/{orgId}/roles/{roleId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `orgId` | path | string | Yes | The organization ID of the partner |
+| `roleId` | path | string | Yes | The role ID to delete |
+
+**Sample Call**
+
+```bash
+epilot partner-directory deletePartnerRole \
+  -p orgId=123 \
+  -p roleId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot partner-directory deletePartnerRole 123 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot partner-directory deletePartnerRole -p orgId=123 -p roleId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "123:partner_admin",
+  "slug": "partner_admin",
+  "name": "Partner Administrator",
+  "type": "share_role",
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:*",
+      "effect": "allow",
+      "conditions": [
+        {
+          "attribute": "workflows.primary.task_name",
+          "operation": "equals",
+          "values": ["Qualification"]
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -889,7 +995,7 @@ epilot partner-directory updatePartnerRole -p orgId=123 -p roleId=123e4567-e89b-
 
 ### `assignPartnerUserRoles`
 
-Assign roles to a user in a partner organization
+Assigns one or more roles to a user in a partner organization.
 
 `POST /v2/partners/{orgId}/users/{userId}/roles`
 
@@ -898,7 +1004,7 @@ Assign roles to a user in a partner organization
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `orgId` | path | string | Yes | The organization ID of the partner |
-| `userId` | path | string | Yes | The user ID |
+| `userId` | path | string | Yes | The unique identifier of the user to assign roles to |
 
 **Request Body**
 
@@ -907,26 +1013,26 @@ Assign roles to a user in a partner organization
 ```bash
 epilot partner-directory assignPartnerUserRoles \
   -p orgId=123 \
-  -p userId=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"roleIds":["role-123","role-456"]}'
+  -p userId=456 \
+  -d '{"roleIds":["123:partner_admin","123:partner_viewer"]}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot partner-directory assignPartnerUserRoles 123 123e4567-e89b-12d3-a456-426614174000
+epilot partner-directory assignPartnerUserRoles 123 456
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot partner-directory assignPartnerUserRoles -p orgId=123 -p userId=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot partner-directory assignPartnerUserRoles -p orgId=123 -p userId=456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory assignPartnerUserRoles -p orgId=123 -p userId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'results[0]'
+epilot partner-directory assignPartnerUserRoles -p orgId=123 -p userId=456 --jsonata 'results[0]'
 ```
 
 <details>
@@ -951,7 +1057,7 @@ epilot partner-directory assignPartnerUserRoles -p orgId=123 -p userId=123e4567-
 
 ### `unassignPartnerUserRoles`
 
-Unassign roles from a user in a partner organization
+Removes one or more roles from a user in a partner organization.
 
 `DELETE /v2/partners/{orgId}/users/{userId}/roles`
 
@@ -960,7 +1066,7 @@ Unassign roles from a user in a partner organization
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `orgId` | path | string | Yes | The organization ID of the partner |
-| `userId` | path | string | Yes | The user ID |
+| `userId` | path | string | Yes | The unique identifier of the user to remove roles from |
 
 **Request Body**
 
@@ -969,26 +1075,26 @@ Unassign roles from a user in a partner organization
 ```bash
 epilot partner-directory unassignPartnerUserRoles \
   -p orgId=123 \
-  -p userId=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"roleIds":["role-123","role-456"]}'
+  -p userId=456 \
+  -d '{"roleIds":["123:partner_admin","123:partner_viewer"]}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot partner-directory unassignPartnerUserRoles 123 123e4567-e89b-12d3-a456-426614174000
+epilot partner-directory unassignPartnerUserRoles 123 456
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot partner-directory unassignPartnerUserRoles -p orgId=123 -p userId=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot partner-directory unassignPartnerUserRoles -p orgId=123 -p userId=456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot partner-directory unassignPartnerUserRoles -p orgId=123 -p userId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'results[0]'
+epilot partner-directory unassignPartnerUserRoles -p orgId=123 -p userId=456 --jsonata 'results[0]'
 ```
 
 <details>

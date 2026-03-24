@@ -37,6 +37,7 @@ epilot entity listSchemas
 
 **Schemas**
 - [`listSchemas`](#listschemas) — Get the latest versions of all schemas
+- [`listSchemasV2`](#listschemasv2) — Get the latest versions of all schemas.
 - [`getSchema`](#getschema) — By default gets the latest version of the Schema and to get the specific version of schema pass the id.
 - [`putSchema`](#putschema) — Create or update a schema with a new version
 - [`deleteSchema`](#deleteschema) — Delete a schema, or a specific version of a schema
@@ -142,6 +143,7 @@ Get the latest versions of all schemas
 | ---- | -- | ---- | -------- | ----------- |
 | `unpublished` | query | boolean | No | Return unpublished draft schemas |
 | `exclude` | query | string[] | No | List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results. |
+| `include` | query | string[] | No | List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs. |
 
 **Sample Call**
 
@@ -167,6 +169,79 @@ epilot entity listSchemas --jsonata 'results[0]'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
+      "slug": "contact",
+      "version": 1,
+      "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "feature_flag": "FF_MY_FEATURE_FLAG",
+      "enable_setting": ["360_features"],
+      "name": "Contact",
+      "plural": "Contacts",
+      "description": "Example description",
+      "docs_url": "https://docs.epilot.io/docs/pricing/entities",
+      "category": "customer_relations",
+      "published": false,
+      "draft": false,
+      "icon": "person",
+      "title_template": "{{first_name}} {{last_name}}",
+      "ui_config": {},
+      "capabilities": [],
+      "group_settings": [],
+      "layout_settings": {},
+      "dialog_config": {},
+      "attributes": [],
+      "_purpose": ["string"],
+      "explicit_search_mappings": {},
+      "group_headlines": []
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listSchemasV2`
+
+Get the latest versions of all schemas.
+
+`GET /v2/entity/schemas`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `full` | query | boolean | No | Return full schemas including all attributes and capabilities |
+| `unpublished` | query | boolean | No | Return unpublished draft schemas |
+| `exclude` | query | string[] | No | List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results. |
+| `include` | query | string[] | No | List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs. |
+
+**Sample Call**
+
+```bash
+epilot entity listSchemasV2
+```
+
+With JSONata filter:
+
+```bash
+epilot entity listSchemasV2 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "created_at": "string",
+      "updated_at": "string",
+      "comment": "string",
+      "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -244,6 +319,7 @@ epilot entity getSchema -p slug=contact --jsonata '$'
     "id": "string",
     "type": "string"
   },
+  "_summary": true,
   "slug": "contact",
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -301,7 +377,8 @@ epilot entity getSchema -p slug=contact --jsonata '$'
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ],
   "group_settings": [
@@ -451,7 +528,8 @@ epilot entity putSchema \
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ],
   "group_settings": [
@@ -543,6 +621,7 @@ epilot entity putSchema -p slug=contact --jsonata '$'
     "id": "string",
     "type": "string"
   },
+  "_summary": true,
   "slug": "contact",
   "version": 1,
   "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -600,7 +679,8 @@ epilot entity putSchema -p slug=contact --jsonata '$'
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ],
   "group_settings": [
@@ -935,6 +1015,7 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -967,6 +1048,7 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1049,7 +1131,8 @@ epilot entity listAvailableCapabilities -p slug=contact --jsonata 'results[0]'
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": []
+      "settings_flag": [],
+      "schemas": []
     }
   ]
 }
@@ -1089,6 +1172,7 @@ epilot entity listSchemaBlueprints --jsonata 'results[0]'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "_summary": true,
       "slug": "contact",
       "version": 1,
       "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -2632,7 +2716,8 @@ epilot entity getActivity -p id=01F130Q52Q6MWSNS8N2AVXV4JN --jsonata '$'
       "operation": "createEntity",
       "params": {},
       "payload": {},
-      "diff": {}
+      "diff": {},
+      "_workflow_origin": {}
     }
   ]
 }
@@ -4412,7 +4497,7 @@ epilot entity updateClassificationsForTaxonomy -p taxonomySlug=example --jsonata
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
-  "deleted": {}
+  "deleted": ["taxonomy-slug:classification-slug"]
 }
 ```
 
@@ -5744,6 +5829,11 @@ epilot entity createSchemaCapability \
       "enabled": true
     }
   ],
+  "schemas": [
+    {
+      "schema": "contact"
+    }
+  ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }'
@@ -5869,6 +5959,11 @@ epilot entity createSchemaCapability --jsonata '$'
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
@@ -6021,6 +6116,11 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "enabled": true
     }
   ],
+  "schemas": [
+    {
+      "schema": "contact"
+    }
+  ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }
@@ -6162,6 +6262,11 @@ epilot entity putSchemaCapability \
       "enabled": true
     }
   ],
+  "schemas": [
+    {
+      "schema": "contact"
+    }
+  ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
   "schema": "contact"
 }'
@@ -6293,6 +6398,11 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",
@@ -6443,6 +6553,11 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
     {
       "name": "string",
       "enabled": true
+    }
+  ],
+  "schemas": [
+    {
+      "schema": "contact"
     }
   ],
   "composite_id": "contact:97644baa-083f-4e49-9188-fcff2ecaad7d",

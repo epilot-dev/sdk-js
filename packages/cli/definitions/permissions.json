@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Permissions API",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Flexible Role-based Access Control for epilot"
   },
   "tags": [
@@ -927,9 +927,32 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/EqualsCondition"
+              },
+              {
+                "$ref": "#/components/schemas/EqualsCurrentUserCondition"
               }
             ]
           }
+        ]
+      },
+      "EqualsCurrentUserCondition": {
+        "description": "Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Optional JSON path to a specific user attribute. When omitted, all relation_user attributes on the entity are scanned.",
+            "example": "assignee.*.user_id"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "equals_current_user"
+            ]
+          }
+        },
+        "required": [
+          "operation"
         ]
       },
       "EqualsCondition": {
@@ -1076,6 +1099,10 @@
                     "description": "Optional parent role that this role inherits from. Must be an `org_role` or `share_role`."
                   }
                 ]
+              },
+              "vendor_created": {
+                "type": "boolean",
+                "description": "Indicates whether this role was created by a vendor organization on behalf of the partner organization."
               }
             }
           }
@@ -1147,6 +1174,10 @@
                 "type": "integer",
                 "readOnly": true,
                 "description": "Maximum number of users that can be assigned this role (vendor-enforced limit, can only be set via internal auth)"
+              },
+              "vendor_created": {
+                "type": "boolean",
+                "description": "Indicates whether this role was created by a vendor organization on behalf of the partner organization."
               }
             }
           }
@@ -1394,6 +1425,10 @@
                         "description": "Optional parent role that this role inherits from. Must be an `org_role` or a sharing role of type `share_role` or `partner_role`."
                       }
                     ]
+                  },
+                  "vendor_created": {
+                    "type": "boolean",
+                    "description": "Indicates whether this role was created by a vendor organization on behalf of the partner organization."
                   }
                 }
               },
@@ -1439,6 +1474,10 @@
                         "$ref": "#/components/schemas/OrganizationId"
                       }
                     ]
+                  },
+                  "vendor_created": {
+                    "type": "boolean",
+                    "description": "Indicates whether this role was created by a vendor organization on behalf of the partner organization."
                   }
                 }
               },
@@ -1472,9 +1511,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://permissions.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

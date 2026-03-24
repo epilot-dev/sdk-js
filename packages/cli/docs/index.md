@@ -20,17 +20,17 @@ npx epilot auth login
 | Audit Log | `epilot audit-logs` | 2 | [audit-logs.md](./audit-logs.md) |
 | Automation API | `epilot automation` | 16 | [automation.md](./automation.md) |
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
-| Blueprint Manifest API | `epilot blueprint-manifest` | 33 | [blueprint-manifest.md](./blueprint-manifest.md) |
+| Blueprint Manifest API | `epilot blueprint-manifest` | 35 | [blueprint-manifest.md](./blueprint-manifest.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
-| Portal API | `epilot customer-portal` | 135 | [customer-portal.md](./customer-portal.md) |
+| Portal API | `epilot customer-portal` | 138 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
 | Data Management API | `epilot data-management` | 10 | [data-management.md](./data-management.md) |
 | Deduplication API | `epilot deduplication` | 1 | [deduplication.md](./deduplication.md) |
 | Design Builder API v2 | `epilot design` | 13 | [design.md](./design.md) |
 | Document API | `epilot document` | 3 | [document.md](./document.md) |
-| Messaging Settings API | `epilot email-settings` | 31 | [email-settings.md](./email-settings.md) |
+| Messaging Settings API | `epilot email-settings` | 34 | [email-settings.md](./email-settings.md) |
 | Email template API | `epilot email-template` | 7 | [email-template.md](./email-template.md) |
-| Entity API | `epilot entity` | 81 | [entity.md](./entity.md) |
+| Entity API | `epilot entity` | 82 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
 | Environments API | `epilot environments` | 5 | [environments.md](./environments.md) |
 | ERP Integration API | `epilot erp-integration` | 35 | [erp-integration.md](./erp-integration.md) |
@@ -43,8 +43,8 @@ npx epilot auth login
 | Metering API | `epilot metering` | 16 | [metering.md](./metering.md) |
 | Notes API | `epilot notes` | 12 | [notes.md](./notes.md) |
 | Notification API | `epilot notification` | 14 | [notification.md](./notification.md) |
-| Organization API | `epilot organization` | 7 | [organization.md](./organization.md) |
-| Partner API | `epilot partner-directory` | 16 | [partner-directory.md](./partner-directory.md) |
+| Organization API | `epilot organization` | 8 | [organization.md](./organization.md) |
+| Partner Directory API | `epilot partner-directory` | 17 | [partner-directory.md](./partner-directory.md) |
 | Permissions API | `epilot permissions` | 13 | [permissions.md](./permissions.md) |
 | Pricing API | `epilot pricing` | 22 | [pricing.md](./pricing.md) |
 | Pricing Tier API | `epilot pricing-tier` | 1 | [pricing-tier.md](./pricing-tier.md) |

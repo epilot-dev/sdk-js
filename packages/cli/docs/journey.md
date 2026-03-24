@@ -187,6 +187,7 @@ epilot journey getJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -235,6 +236,7 @@ epilot journey getJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -429,6 +431,7 @@ epilot journey createJourney \
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -477,6 +480,7 @@ epilot journey createJourney \
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string"
@@ -551,6 +555,7 @@ epilot journey createJourney --jsonata '$'
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -599,6 +604,7 @@ epilot journey createJourney --jsonata '$'
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -685,6 +691,7 @@ epilot journey updateJourney \
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -733,6 +740,7 @@ epilot journey updateJourney \
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string"
@@ -809,6 +817,7 @@ epilot journey patchUpdateJourney --jsonata 'createdJourney'
       {}
     ],
     "journey_type": "Sales template (Premium)",
+    "protected": true,
     "settings": {
       "embedOptions": {},
       "safeModeAutomation": true,
@@ -844,6 +853,7 @@ epilot journey patchUpdateJourney --jsonata 'createdJourney'
       "block1": "rule123",
       "block2": {}
     },
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",
@@ -1077,6 +1087,7 @@ epilot journey createJourneyV2 \
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1186,6 +1197,7 @@ epilot journey createJourneyV2 --jsonata 'journeyId'
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1301,6 +1313,7 @@ epilot journey updateJourneyV2 \
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1410,6 +1423,7 @@ epilot journey updateJourneyV2 --jsonata 'journeyId'
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1538,6 +1552,7 @@ epilot journey patchUpdateJourneyV2 --jsonata 'journeyId'
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1670,6 +1685,7 @@ epilot journey getJourneyV2 -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",

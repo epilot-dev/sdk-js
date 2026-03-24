@@ -46,7 +46,7 @@ epilot organization getCurrentOrganization
 - [`deleteSettingsValue`](#deletesettingsvalue) — Removes a specific organization setting identified by its key.
 
 **Feature Settings**
-- [`getFeatureSettings`](#getfeaturesettings) — Returns platform-level configuration metadata including feature flag definitions,
+- [`getOrganizationFeatureSettings`](#getorganizationfeaturesettings) — Returns feature flag metadata for the organization UI.
 
 ### `getCurrentOrganization`
 
@@ -424,22 +424,22 @@ epilot organization deleteSettingsValue -p org_id=739224 -p key=double_opt_in --
 
 ---
 
-### `getFeatureSettings`
+### `getOrganizationFeatureSettings`
 
-Returns platform-level configuration metadata including feature flag definitions,
+Returns feature flag metadata for the organization UI.
 
-`GET /v2/feature-settings`
+`GET /v2/organization/feature-settings`
 
 **Sample Call**
 
 ```bash
-epilot organization getFeatureSettings
+epilot organization getOrganizationFeatureSettings
 ```
 
 With JSONata filter:
 
 ```bash
-epilot organization getFeatureSettings --jsonata 'version'
+epilot organization getOrganizationFeatureSettings --jsonata 'version'
 ```
 
 ---
