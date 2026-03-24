@@ -3886,6 +3886,14 @@ export declare namespace Components {
                 type?: string;
             };
             /**
+             * Indicates this schema is currently frozen. Present when the returned version is the frozen version.
+             */
+            frozen?: boolean;
+            /**
+             * Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.
+             */
+            latest?: boolean;
+            /**
              * Indicates this is a truncated summary schema (attributes trimmed to summary_attributes only, no capabilities or group_settings)
              */
             _summary?: boolean;
@@ -11225,6 +11233,37 @@ export declare namespace Paths {
             Components.Responses.TooManyRequestsError;
         }
     }
+    namespace FreezeSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface RequestBody {
+            /**
+             * Freeze to a specific version ID. Defaults to the current version.
+             */
+            version_id?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace GetActivity {
         namespace Parameters {
             export type Id = /**
@@ -12135,6 +12174,7 @@ export declare namespace Paths {
     namespace GetSchema {
         namespace Parameters {
             export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            export type Latest = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -12147,6 +12187,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             id?: Parameters.Id;
+            latest?: Parameters.Latest;
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
@@ -12351,6 +12392,10 @@ export declare namespace Paths {
                  * Pagination: Whether more drafts are available
                  */
                 drafts_more?: boolean;
+                /**
+                 * The version ID that is currently frozen, if any
+                 */
+                frozen_version?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
             }
         }
     }
@@ -12589,10 +12634,12 @@ export declare namespace Paths {
         namespace Parameters {
             export type Exclude = string[];
             export type Include = string[];
+            export type Latest = boolean;
             export type Unpublished = boolean;
         }
         export interface QueryParameters {
             unpublished?: Parameters.Unpublished;
+            latest?: Parameters.Latest;
             exclude?: Parameters.Exclude;
             include?: Parameters.Include;
         }
@@ -12607,11 +12654,13 @@ export declare namespace Paths {
             export type Exclude = string[];
             export type Full = boolean;
             export type Include = string[];
+            export type Latest = boolean;
             export type Unpublished = boolean;
         }
         export interface QueryParameters {
             full?: Parameters.Full;
             unpublished?: Parameters.Unpublished;
+            latest?: Parameters.Latest;
             exclude?: Parameters.Exclude;
             include?: Parameters.Include;
         }
@@ -13245,6 +13294,31 @@ export declare namespace Paths {
             }
         }
     }
+    namespace UnfreezeSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace UpdateClassificationsForTaxonomy {
         namespace Parameters {
             export type TaxonomySlug = string;
@@ -13847,7 +13921,10 @@ export interface OperationMethods {
   /**
    * getSchema - getSchema
    * 
-   * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
+   * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
+   * Pass ?latest=true to get the latest version when the schema is frozen.
+   * Pass ?id= to get a specific version by ID.
+   * 
    */
   'getSchema'(
     parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
@@ -13857,7 +13934,9 @@ export interface OperationMethods {
   /**
    * putSchema - putSchema
    * 
-   * Create or update a schema with a new version
+   * Create or update a schema with a new version.
+   * When the schema is frozen, writes update the latest version without affecting the frozen version.
+   * 
    */
   'putSchema'(
     parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
@@ -13904,6 +13983,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  /**
+   * freezeSchema - freezeSchema
+   * 
+   * Freeze a schema at its current version, or at a specific version.
+   * When frozen, getSchema returns the frozen version by default.
+   * New edits via putSchema update the latest version without affecting the frozen version.
+   * 
+   */
+  'freezeSchema'(
+    parameters?: Parameters<Paths.FreezeSchema.PathParameters> | null,
+    data?: Paths.FreezeSchema.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FreezeSchema.Responses.$200>
+  /**
+   * unfreezeSchema - unfreezeSchema
+   * 
+   * Unfreeze a schema. Promotes the latest version to the current version for all users.
+   * 
+   */
+  'unfreezeSchema'(
+    parameters?: Parameters<Paths.UnfreezeSchema.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnfreezeSchema.Responses.$200>
   /**
    * listAvailableCapabilities - listAvailableCapabilities
    * 
@@ -14966,7 +15069,10 @@ export interface PathsDictionary {
     /**
      * getSchema - getSchema
      * 
-     * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
+     * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
+     * Pass ?latest=true to get the latest version when the schema is frozen.
+     * Pass ?id= to get a specific version by ID.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
@@ -14976,7 +15082,9 @@ export interface PathsDictionary {
     /**
      * putSchema - putSchema
      * 
-     * Create or update a schema with a new version
+     * Create or update a schema with a new version.
+     * When the schema is frozen, writes update the latest version without affecting the frozen version.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
@@ -15029,6 +15137,34 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/freeze']: {
+    /**
+     * freezeSchema - freezeSchema
+     * 
+     * Freeze a schema at its current version, or at a specific version.
+     * When frozen, getSchema returns the frozen version by default.
+     * New edits via putSchema update the latest version without affecting the frozen version.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.FreezeSchema.PathParameters> | null,
+      data?: Paths.FreezeSchema.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FreezeSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/unfreeze']: {
+    /**
+     * unfreezeSchema - unfreezeSchema
+     * 
+     * Unfreeze a schema. Promotes the latest version to the current version for all users.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnfreezeSchema.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnfreezeSchema.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/capabilities/available']: {
     /**
