@@ -48,6 +48,8 @@ export default defineCommand({
     } else {
       const config = await client.getConfiguration(appId!);
       targetVersion = config.latest_version as string;
+      const publicVersions = new Set((config.public_versions ?? []) as string[]);
+      const latestIsPublic = publicVersions.has(targetVersion);
 
       if (!dryRun) {
         // Patch metadata
@@ -64,16 +66,19 @@ export default defineCommand({
       } else {
         log.info('[dry-run] Would update metadata');
       }
-    }
 
-    // Step 2: New version if requested
-    if (args['new-version'] && appId && !isNew) {
-      if (dryRun) {
-        log.info('[dry-run] Would create new version');
-      } else {
-        const result = await client.cloneVersion(appId, targetVersion);
-        targetVersion = result.version;
-        log.success(`Created version ${targetVersion}`);
+      // Auto-create new version if latest is public (locked)
+      if (latestIsPublic || args['new-version']) {
+        if (latestIsPublic && !args['new-version']) {
+          log.warn(`Version ${targetVersion} is public and locked. Creating a new version automatically.`);
+        }
+        if (dryRun) {
+          log.info(`[dry-run] Would create new version (cloned from ${targetVersion})`);
+        } else {
+          const result = await client.cloneVersion(appId!, targetVersion);
+          targetVersion = result.version;
+          log.success(`Created version ${targetVersion}`);
+        }
       }
     }
 
