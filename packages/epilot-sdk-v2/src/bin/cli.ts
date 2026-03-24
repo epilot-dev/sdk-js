@@ -155,13 +155,12 @@ const findSdkRoot = (): string | null => {
 const overrideCmd = async (args: string[]) => {
   if (args.length === 2) {
     // Single API override: override <name> <path>
+    // Saves, applies, and regenerates types in one step
     const [apiName, specPath] = args;
     const overrides = readOverrides();
     overrides[apiName] = specPath;
     writeOverrides(overrides);
-    console.log(`Added override: ${apiName} -> ${specPath}`);
-    console.log(`Run 'npx epilot-sdk override' to apply, then 'npx epilot-sdk typegen' to regenerate types.`);
-    return;
+    console.log(`Saved override: ${apiName} -> ${specPath}`);
   }
 
   // Apply all overrides
@@ -170,7 +169,7 @@ const overrideCmd = async (args: string[]) => {
 
   if (entries.length === 0) {
     console.log(`No overrides found in ${OVERRIDES_PATH}`);
-    console.log(`Create one with: npx epilot-sdk override <api-name> <spec-path>`);
+    console.log(`Usage: npx epilot-sdk override <api-name> <spec-path>`);
     return;
   }
 
@@ -207,7 +206,9 @@ const overrideCmd = async (args: string[]) => {
     }
   }
 
-  console.log(`\nDone. Run 'npx epilot-sdk typegen' to regenerate types.`);
+  // Auto-run typegen after applying overrides
+  console.log('');
+  await typegenCmd();
 };
 
 /**
@@ -298,32 +299,40 @@ const typegenCmd = async () => {
         const dtsPath = resolve(distDir, `apis/${kebabName}.d.ts`);
         const dctsPath = resolve(distDir, `apis/${kebabName}.d.cts`);
 
-        // Read existing files to preserve module-level exports
-        const existingDts = existsSync(dtsPath) ? readFileSync(dtsPath, 'utf-8') : null;
-        const existingDcts = existsSync(dctsPath) ? readFileSync(dctsPath, 'utf-8') : null;
-
-        const dtsTail = existingDts ? extractModuleExportsTail(existingDts) : null;
-        const dctsTail = existingDcts ? extractModuleExportsTail(existingDcts) : null;
-
         // Generate new OpenAPI types
         const generatedTypes = execSync(`npx openapi-client-axios-typegen ${specPath} --client`, {
           stdio: 'pipe',
           encoding: 'utf-8',
         });
 
-        // Write .d.ts: new OpenAPI types + preserved module exports
-        const dtsContent = dtsTail ? `${generatedTypes.trimEnd()}\n\n${dtsTail}` : generatedTypes;
-        writeFileSync(dtsPath, dtsContent);
-        console.log(
-          `  -> dist/apis/${kebabName}.d.ts${dtsTail ? ' (module exports preserved)' : ' (warning: no module exports found to preserve)'}`,
-        );
+        // Standard module-level exports that every API entry point needs
+        const moduleExports = [
+          '',
+          `import type { ApiHandle } from '../types';`,
+          `export { authorize } from '../authorize';`,
+          `export type { TokenArg } from '../authorize';`,
+          `export type { OpenAPIClient } from 'openapi-client-axios';`,
+          '',
+          '/** Get the cached singleton client (lazy-initialized on first call) */',
+          'declare const getClient: () => Client;',
+          '/** Create a fresh client instance (not cached) */',
+          'declare const createClient: () => Client;',
+          '/**',
+          ' * API handle — also exposes operations directly:',
+          ` * \`${apiName}.getEntity(...)\` calls forwarded to lazy singleton`,
+          ' */',
+          `declare const ${apiName}: ApiHandle<Client>;`,
+          '',
+          `export { getClient, createClient, ${apiName} };`,
+        ].join('\n');
 
-        // Write .d.cts: new OpenAPI types + preserved module exports
-        const dctsContent = dctsTail ? `${generatedTypes.trimEnd()}\n\n${dctsTail}` : generatedTypes;
-        writeFileSync(dctsPath, dctsContent);
-        console.log(
-          `  -> dist/apis/${kebabName}.d.cts${dctsTail ? ' (module exports preserved)' : ' (warning: no module exports found to preserve)'}`,
-        );
+        const fullContent = `${generatedTypes.trimEnd()}\n${moduleExports}\n`;
+
+        writeFileSync(dtsPath, fullContent);
+        console.log(`  -> dist/apis/${kebabName}.d.ts`);
+
+        writeFileSync(dctsPath, fullContent);
+        console.log(`  -> dist/apis/${kebabName}.d.cts`);
       } catch (err) {
         console.error(`  Error generating types for ${apiName}: ${(err as Error).message}`);
       }
