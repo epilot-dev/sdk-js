@@ -46,7 +46,7 @@ jobs:
       - run: pnpm test
 
   auto-release:
-    name: Auto-release @epilot/sdk
+    name: Auto-release @epilot/sdk and @epilot/cli
     needs: [test]
     runs-on: ubuntu-latest
     concurrency:
@@ -58,62 +58,128 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Check for openapi.json changes
+      - name: Check for changes
         id: check
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q '^clients/.*/openapi\.json$'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          if echo "$CHANGED_FILES" | grep -q '^clients/.*/openapi\.json$'; then
+            echo "sdk=true" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "sdk=false" >> "$GITHUB_OUTPUT"
+          fi
+          if echo "$CHANGED_FILES" | grep -qE '^(packages/cli/|clients/.*/openapi\.json$)'; then
+            echo "cli=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cli=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install pnpm
-        if: steps.check.outputs.changed == 'true'
+        if: steps.check.outputs.sdk == 'true' || steps.check.outputs.cli == 'true'
         uses: pnpm/action-setup@v4
         with:
           version: 10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977
 
       - uses: actions/setup-node@v5
-        if: steps.check.outputs.changed == 'true'
+        if: steps.check.outputs.sdk == 'true' || steps.check.outputs.cli == 'true'
         with:
           node-version-file: package.json
           cache: "pnpm"
           registry-url: https://registry.npmjs.org/
 
-      - name: Generate, build and test
-        if: steps.check.outputs.changed == 'true'
+      - name: Install dependencies
+        if: steps.check.outputs.sdk == 'true' || steps.check.outputs.cli == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and test SDK
+        if: steps.check.outputs.sdk == 'true'
         run: |
-          pnpm install --frozen-lockfile
           pnpm build
           pnpm run lint:fix
           pnpm --filter @epilot/sdk generate
           pnpm --filter @epilot/sdk build
           pnpm --filter @epilot/sdk test
 
-      - name: Bump version, commit and tag
-        if: steps.check.outputs.changed == 'true'
+      - name: Build and test CLI
+        if: steps.check.outputs.cli == 'true'
+        run: |
+          pnpm --filter @epilot/cli build
+          pnpm --filter @epilot/cli test
+
+      - name: Bump versions, commit, tag and push
+        if: steps.check.outputs.sdk == 'true' || steps.check.outputs.cli == 'true'
         id: version
         run: |
-          cd packages/epilot-sdk-v2
-          npm version patch --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
-
-          cd "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          pnpm lint:fix
-          git add packages/epilot-sdk-v2/ README.md
-          git commit -m "@epilot/sdk@${NEW_VERSION}"
-          git tag "@epilot/sdk@${NEW_VERSION}"
+
+          TAGS=""
+          FILES_TO_ADD=""
+
+          # Bump SDK version
+          if [ "${{ steps.check.outputs.sdk }}" = "true" ]; then
+            cd packages/epilot-sdk-v2
+            npm version patch --no-git-tag-version
+            SDK_VERSION=$(node -p "require('./package.json').version")
+            echo "sdk_version=${SDK_VERSION}" >> "$GITHUB_OUTPUT"
+            cd "$GITHUB_WORKSPACE"
+            pnpm lint:fix
+            FILES_TO_ADD="packages/epilot-sdk-v2/ README.md"
+            TAGS="$TAGS @epilot/sdk@${SDK_VERSION}"
+          fi
+
+          # Bump CLI version
+          if [ "${{ steps.check.outputs.cli }}" = "true" ]; then
+            cd packages/cli
+            npm version patch --no-git-tag-version
+            CLI_VERSION=$(node -p "require('./package.json').version")
+            echo "cli_version=${CLI_VERSION}" >> "$GITHUB_OUTPUT"
+
+            cd "$GITHUB_WORKSPACE/packages/cli-wrapper"
+            npm version "$CLI_VERSION" --no-git-tag-version
+            node -e "
+              const pkg = require('./package.json');
+              pkg.dependencies['@epilot/cli'] = '^${CLI_VERSION}';
+              require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            "
+            cd "$GITHUB_WORKSPACE"
+            FILES_TO_ADD="$FILES_TO_ADD packages/cli/package.json packages/cli-wrapper/package.json"
+            TAGS="$TAGS @epilot/cli@${CLI_VERSION}"
+          fi
+
+          # Single commit and push
+          git add $FILES_TO_ADD
+          COMMIT_MSG=""
+          if [ "${{ steps.check.outputs.sdk }}" = "true" ]; then
+            COMMIT_MSG="@epilot/sdk@${SDK_VERSION}"
+          fi
+          if [ "${{ steps.check.outputs.cli }}" = "true" ]; then
+            [ -n "$COMMIT_MSG" ] && COMMIT_MSG="$COMMIT_MSG, "
+            COMMIT_MSG="${COMMIT_MSG}@epilot/cli@${CLI_VERSION}"
+          fi
+          git commit -m "$COMMIT_MSG"
+
+          for TAG in $TAGS; do
+            git tag "$TAG"
+          done
+
           git push origin main --follow-tags
 
       - name: Publish @epilot/sdk
-        if: steps.check.outputs.changed == 'true'
+        if: steps.check.outputs.sdk == 'true'
         run: npm publish --ignore-scripts
         working-directory: packages/epilot-sdk-v2
 
-  publish:
+      - name: Publish @epilot/cli
+        if: steps.check.outputs.cli == 'true'
+        run: npm publish --ignore-scripts
+        working-directory: packages/cli
+
+      - name: Publish epilot wrapper
+        if: steps.check.outputs.cli == 'true'
+        run: npm publish --ignore-scripts
+        working-directory: packages/cli-wrapper
+
+  publish-sdk:
     name: Publish @epilot/sdk to npm
     needs: [lint, test]
     runs-on: ubuntu-latest
@@ -138,74 +204,6 @@ jobs:
       - name: Publish @epilot/sdk
         run: npm publish --ignore-scripts
         working-directory: packages/epilot-sdk-v2
-
-  auto-release-cli:
-    name: Auto-release @epilot/cli
-    needs: [test]
-    runs-on: ubuntu-latest
-    concurrency:
-      group: auto-release
-      cancel-in-progress: false
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 2
-
-      - name: Check for CLI-related changes
-        id: check
-        run: |
-          if git diff --name-only HEAD~1 HEAD | grep -qE '^(packages/cli/|clients/.*/openapi\.json$)'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Install pnpm
-        if: steps.check.outputs.changed == 'true'
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977
-
-      - uses: actions/setup-node@v5
-        if: steps.check.outputs.changed == 'true'
-        with:
-          node-version-file: package.json
-          cache: "pnpm"
-          registry-url: https://registry.npmjs.org/
-
-      - name: Build and test CLI
-        if: steps.check.outputs.changed == 'true'
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm --filter @epilot/cli build
-          pnpm --filter @epilot/cli test
-
-      - name: Bump version, commit and tag
-        if: steps.check.outputs.changed == 'true'
-        id: version
-        run: |
-          cd packages/cli
-          npm version patch --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
-
-          # Keep wrapper version in sync
-          cd "$GITHUB_WORKSPACE/packages/cli-wrapper"
-          npm version "$NEW_VERSION" --no-git-tag-version
-          node -e "
-            const pkg = require('./package.json');
-            pkg.dependencies['@epilot/cli'] = '^${NEW_VERSION}';
-            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-
-          cd "$GITHUB_WORKSPACE"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add packages/cli/package.json packages/cli-wrapper/package.json
-          git commit -m "@epilot/cli@${NEW_VERSION}"
-          git tag "@epilot/cli@${NEW_VERSION}"
-          git push origin main --follow-tags
 
   publish-cli:
     name: Publish @epilot/cli to npm
