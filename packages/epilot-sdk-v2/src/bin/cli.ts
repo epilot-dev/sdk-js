@@ -210,6 +210,59 @@ const overrideCmd = async (args: string[]) => {
   console.log(`\nDone. Run 'npx epilot-sdk typegen' to regenerate types.`);
 };
 
+/**
+ * Extract module-level export declarations from an existing .d.ts / .d.cts file.
+ *
+ * The built declaration files contain two sections:
+ *   1. OpenAPI-generated types (imports, namespace re-exports, Components, Paths, etc.)
+ *   2. Module-level exports (declare const getClient, createClient, <apiHandle>, and the
+ *      final `export { ... }` line, plus `authorize`/`TokenArg`/`OpenAPIClient` re-exports)
+ *
+ * When `openapi typegen` regenerates the OpenAPI types (section 1), it overwrites
+ * section 2. This function extracts section 2 so it can be appended after regeneration.
+ *
+ * We identify the boundary as the first `declare const` line that is NOT inside a
+ * namespace block — this marks where the module-level declarations begin.
+ */
+const extractModuleExportsTail = (content: string): string | null => {
+  const lines = content.split('\n');
+
+  // Find the first top-level `declare const` line (not indented, not in a namespace)
+  let tailStartIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Match lines like: "declare const getClient: ..." or "/** ... */" comment blocks
+    // that precede a `declare const`. We look for the first JSDoc comment or `declare const`
+    // that follows the OpenAPI types section.
+    if (/^declare\s+const\s+/.test(line)) {
+      // Walk backwards to include any preceding JSDoc comment
+      let start = i;
+      while (
+        start > 0 &&
+        (lines[start - 1].trimStart().startsWith('*') ||
+          lines[start - 1].trimStart().startsWith('/**') ||
+          lines[start - 1].trim() === '')
+      ) {
+        // Only include blank lines and JSDoc comment lines
+        if (lines[start - 1].trim() === '') {
+          // Check if there's a JSDoc comment starting before this blank line — include the blank
+          start--;
+        } else if (lines[start - 1].trimStart().startsWith('/**') || lines[start - 1].trimStart().startsWith('*')) {
+          start--;
+        } else {
+          break;
+        }
+      }
+      tailStartIndex = start;
+      break;
+    }
+  }
+
+  if (tailStartIndex === -1) return null;
+
+  return lines.slice(tailStartIndex).join('\n');
+};
+
 const typegenCmd = async () => {
   try {
     const { execSync } = await import('node:child_process');
@@ -242,15 +295,35 @@ const typegenCmd = async () => {
 
       console.log(`Generating types for ${apiName}...`);
       try {
-        // Generate types and write to the SDK dist directory
-        const typesPath = resolve(distDir, `apis/${kebabName}.d.ts`);
-        execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${typesPath}`, { stdio: 'pipe' });
-        console.log(`  -> dist/apis/${kebabName}.d.ts`);
+        const dtsPath = resolve(distDir, `apis/${kebabName}.d.ts`);
+        const dctsPath = resolve(distDir, `apis/${kebabName}.d.cts`);
 
-        // Also generate .d.cts for CommonJS
-        const ctypesPath = resolve(distDir, `apis/${kebabName}.d.cts`);
-        execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${ctypesPath}`, { stdio: 'pipe' });
-        console.log(`  -> dist/apis/${kebabName}.d.cts`);
+        // Read existing files to preserve module-level exports
+        const existingDts = existsSync(dtsPath) ? readFileSync(dtsPath, 'utf-8') : null;
+        const existingDcts = existsSync(dctsPath) ? readFileSync(dctsPath, 'utf-8') : null;
+
+        const dtsTail = existingDts ? extractModuleExportsTail(existingDts) : null;
+        const dctsTail = existingDcts ? extractModuleExportsTail(existingDcts) : null;
+
+        // Generate new OpenAPI types
+        const generatedTypes = execSync(`npx openapi-client-axios-typegen ${specPath} --client`, {
+          stdio: 'pipe',
+          encoding: 'utf-8',
+        });
+
+        // Write .d.ts: new OpenAPI types + preserved module exports
+        const dtsContent = dtsTail ? `${generatedTypes.trimEnd()}\n\n${dtsTail}` : generatedTypes;
+        writeFileSync(dtsPath, dtsContent);
+        console.log(
+          `  -> dist/apis/${kebabName}.d.ts${dtsTail ? ' (module exports preserved)' : ' (warning: no module exports found to preserve)'}`,
+        );
+
+        // Write .d.cts: new OpenAPI types + preserved module exports
+        const dctsContent = dctsTail ? `${generatedTypes.trimEnd()}\n\n${dctsTail}` : generatedTypes;
+        writeFileSync(dctsPath, dctsContent);
+        console.log(
+          `  -> dist/apis/${kebabName}.d.cts${dctsTail ? ' (module exports preserved)' : ' (warning: no module exports found to preserve)'}`,
+        );
       } catch (err) {
         console.error(`  Error generating types for ${apiName}: ${(err as Error).message}`);
       }
