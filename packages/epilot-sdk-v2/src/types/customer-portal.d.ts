@@ -4580,6 +4580,12 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             last_modified_at?: string; // date-time
+            /**
+             * The id of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_id?: string;
         }
         export interface PageRequest {
             [name: string]: any;
@@ -7500,6 +7506,7 @@ export declare namespace Paths {
     }
     namespace CheckContactExistsV3 {
         namespace Parameters {
+            export type Domain = string;
             export type PortalId = /**
              * ID of the portal
              * example:
@@ -7508,7 +7515,8 @@ export declare namespace Paths {
             Components.Schemas.PortalId;
         }
         export interface QueryParameters {
-            portal_id: Parameters.PortalId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         export type RequestBody = Components.Schemas.ContactExistsRequest;
         namespace Responses {
@@ -7749,6 +7757,7 @@ export declare namespace Paths {
     }
     namespace CreateUserV3 {
         namespace Parameters {
+            export type Domain = string;
             export type PortalId = /**
              * ID of the portal
              * example:
@@ -7757,7 +7766,8 @@ export declare namespace Paths {
             Components.Schemas.PortalId;
         }
         export interface QueryParameters {
-            portal_id: Parameters.PortalId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         export type RequestBody = Components.Schemas.CreateUserRequest;
         namespace Responses {
@@ -10625,6 +10635,32 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalWidgetsV3 {
+        namespace Parameters {
+            export type ContractId = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+            contract_id?: Parameters.ContractId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UpsertPortalWidget;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPrices {
         namespace Parameters {
             export type AppId = string;
@@ -11449,6 +11485,10 @@ export declare namespace Paths {
              * The portal ID to look up the portal config. When provided, takes precedence over origin.
              */
             portal_id?: string;
+            /**
+             * Portal domain for identification. Alternative to portal_id or origin.
+             */
+            domain?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -11785,6 +11825,30 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SavePortalFilesV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        export type RequestBody = Components.Schemas.SavePortalFile;
+        namespace Responses {
+            export interface $201 {
+                createdFiles?: /* The file entity */ Components.Schemas.File[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SearchPaymentRelationsInEntities {
         namespace Parameters {
             export type Id = /**
@@ -11896,6 +11960,7 @@ export declare namespace Paths {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             export type ContactId = string; // uuid
+            export type Domain = string;
             /**
              * example:
              * 123
@@ -11909,12 +11974,13 @@ export declare namespace Paths {
             Components.Schemas.PortalId;
         }
         export interface QueryParameters {
-            portal_id: Parameters.PortalId;
-            org_id: /**
+            portal_id?: Parameters.PortalId;
+            org_id?: /**
              * example:
              * 123
              */
             Parameters.OrgId;
+            domain?: Parameters.Domain;
             contact_id?: /**
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -12073,6 +12139,7 @@ export declare namespace Paths {
     }
     namespace TriggerEntityAccessEventV3 {
         namespace Parameters {
+            export type Domain = string;
             export type EntityId = /**
              * Entity ID
              * example:
@@ -12100,7 +12167,8 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             entity_id?: Parameters.EntityId;
-            portal_id: Parameters.PortalId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         namespace Responses {
             export interface $200 {
@@ -12477,6 +12545,27 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpsertPortalWidgetV3 {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        export type RequestBody = Components.Schemas.UpsertPortalWidget;
+        namespace Responses {
+            export type $201 = Components.Schemas.UpsertPortalWidget;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace UserExists {
         namespace Parameters {
             /**
@@ -12522,6 +12611,7 @@ export declare namespace Paths {
     }
     namespace UserExistsV3 {
         namespace Parameters {
+            export type Domain = string;
             /**
              * Email Address of the portal user
              * example:
@@ -12529,7 +12619,7 @@ export declare namespace Paths {
              */
             export type Email = string;
             /**
-             * Organization ID
+             * Organization ID (required if domain is not provided)
              * example:
              * 123
              */
@@ -12548,13 +12638,14 @@ export declare namespace Paths {
              * user@example.com
              */
             Parameters.Email;
-            org_id: /**
-             * Organization ID
+            org_id?: /**
+             * Organization ID (required if domain is not provided)
              * example:
              * 123
              */
             Parameters.OrgId;
             portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
         }
         namespace Responses {
             export interface $200 {
@@ -12786,7 +12877,11 @@ export interface OperationMethods {
   /**
    * createUserV3 - createUserV3
    * 
-   * Registers a portal user with portal id
+   * Registers a portal user.
+   * Supports two identification methods:
+   * 1. Using portal_id
+   * 2. Using domain
+   * 
    */
   'createUserV3'(
     parameters?: Parameters<Paths.CreateUserV3.QueryParameters> | null,
@@ -13088,6 +13183,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertPortalWidget.Responses.$201>
   /**
+   * getPortalWidgetsV3 - getPortalWidgetsV3
+   * 
+   * Retrieves the widgets of a portal by portal_id.
+   */
+  'getPortalWidgetsV3'(
+    parameters?: Parameters<Paths.GetPortalWidgetsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalWidgetsV3.Responses.$200>
+  /**
+   * upsertPortalWidgetV3 - upsertPortalWidgetV3
+   * 
+   * Upsert widget for a portal by portal_id.
+   */
+  'upsertPortalWidgetV3'(
+    parameters?: Parameters<Paths.UpsertPortalWidgetV3.QueryParameters> | null,
+    data?: Paths.UpsertPortalWidgetV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpsertPortalWidgetV3.Responses.$201>
+  /**
+   * savePortalFilesV3 - savePortalFilesV3
+   * 
+   * Add files to portal by portal_id
+   */
+  'savePortalFilesV3'(
+    parameters?: Parameters<Paths.SavePortalFilesV3.QueryParameters> | null,
+    data?: Paths.SavePortalFilesV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SavePortalFilesV3.Responses.$201>
+  /**
    * replaceECPTemplateVariables - replaceECPTemplateVariables
    * 
    * Replaces the template variables of a portal
@@ -13211,6 +13336,10 @@ export interface OperationMethods {
    * checkContactExistsV3 - checkContactExistsV3
    * 
    * True if contact with given identifiers exists.
+   * Supports two identification methods:
+   * 1. Using portal_id
+   * 2. Using domain
+   * 
    */
   'checkContactExistsV3'(
     parameters?: Parameters<Paths.CheckContactExistsV3.QueryParameters> | null,
@@ -13320,7 +13449,11 @@ export interface OperationMethods {
   /**
    * userExistsV3 - userExistsV3
    * 
-   * Checks whether a user exists in the portal
+   * Checks whether a user exists in the portal.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
    */
   'userExistsV3'(
     parameters?: Parameters<Paths.UserExistsV3.QueryParameters> | null,
@@ -13667,6 +13800,11 @@ export interface OperationMethods {
    * 
    * Token is valid for 5 minutes.
    * 
+   * Supports three identification methods (at least one required):
+   * 1. Using portal_id (takes precedence)
+   * 2. Using domain
+   * 3. Using origin (legacy)
+   * 
    */
   'loginToPortalAsUser'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -13686,7 +13824,11 @@ export interface OperationMethods {
   /**
    * triggerEntityAccessEventV3 - triggerEntityAccessEventV3
    * 
-   * Trigger entity access event for a portal user
+   * Trigger entity access event for a portal user.
+   * Supports two identification methods:
+   * 1. Using portal_id
+   * 2. Using domain
+   * 
    */
   'triggerEntityAccessEventV3'(
     parameters?: Parameters<Paths.TriggerEntityAccessEventV3.QueryParameters & Paths.TriggerEntityAccessEventV3.PathParameters> | null,
@@ -13806,7 +13948,11 @@ export interface OperationMethods {
    * 
    * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
    * 
-   * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+   * Returns parameters to be used with CUSTOM_AUTH flow against Cognito.
+   * 
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
    * 
    */
   'ssoLoginV3'(
@@ -14169,7 +14315,11 @@ export interface PathsDictionary {
     /**
      * createUserV3 - createUserV3
      * 
-     * Registers a portal user with portal id
+     * Registers a portal user.
+     * Supports two identification methods:
+     * 1. Using portal_id
+     * 2. Using domain
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CreateUserV3.QueryParameters> | null,
@@ -14521,6 +14671,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalWidgets.Responses.$200>
   }
+  ['/v3/portal/widgets']: {
+    /**
+     * getPortalWidgetsV3 - getPortalWidgetsV3
+     * 
+     * Retrieves the widgets of a portal by portal_id.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPortalWidgetsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalWidgetsV3.Responses.$200>
+    /**
+     * upsertPortalWidgetV3 - upsertPortalWidgetV3
+     * 
+     * Upsert widget for a portal by portal_id.
+     */
+    'post'(
+      parameters?: Parameters<Paths.UpsertPortalWidgetV3.QueryParameters> | null,
+      data?: Paths.UpsertPortalWidgetV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpsertPortalWidgetV3.Responses.$201>
+  }
+  ['/v3/portal/portal/files']: {
+    /**
+     * savePortalFilesV3 - savePortalFilesV3
+     * 
+     * Add files to portal by portal_id
+     */
+    'post'(
+      parameters?: Parameters<Paths.SavePortalFilesV3.QueryParameters> | null,
+      data?: Paths.SavePortalFilesV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SavePortalFilesV3.Responses.$201>
+  }
   ['/v2/portal/replace-ecp-template-variables']: {
     /**
      * replaceECPTemplateVariables - replaceECPTemplateVariables
@@ -14668,6 +14852,10 @@ export interface PathsDictionary {
      * checkContactExistsV3 - checkContactExistsV3
      * 
      * True if contact with given identifiers exists.
+     * Supports two identification methods:
+     * 1. Using portal_id
+     * 2. Using domain
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CheckContactExistsV3.QueryParameters> | null,
@@ -14795,7 +14983,11 @@ export interface PathsDictionary {
     /**
      * userExistsV3 - userExistsV3
      * 
-     * Checks whether a user exists in the portal
+     * Checks whether a user exists in the portal.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.UserExistsV3.QueryParameters> | null,
@@ -15202,6 +15394,11 @@ export interface PathsDictionary {
      * 
      * Token is valid for 5 minutes.
      * 
+     * Supports three identification methods (at least one required):
+     * 1. Using portal_id (takes precedence)
+     * 2. Using domain
+     * 3. Using origin (legacy)
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -15225,7 +15422,11 @@ export interface PathsDictionary {
     /**
      * triggerEntityAccessEventV3 - triggerEntityAccessEventV3
      * 
-     * Trigger entity access event for a portal user
+     * Trigger entity access event for a portal user.
+     * Supports two identification methods:
+     * 1. Using portal_id
+     * 2. Using domain
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.TriggerEntityAccessEventV3.QueryParameters & Paths.TriggerEntityAccessEventV3.PathParameters> | null,
@@ -15367,7 +15568,11 @@ export interface PathsDictionary {
      * 
      * Verifies the user with the issuer and matches the identity to an epilot user (or creates a new user).
      * 
-     * Returns parameters to be used with CUSTOM_AUTH flow against Cognito
+     * Returns parameters to be used with CUSTOM_AUTH flow against Cognito.
+     * 
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
      * 
      */
     'post'(

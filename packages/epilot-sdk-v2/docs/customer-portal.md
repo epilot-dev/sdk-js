@@ -39,6 +39,9 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getEmailTemplates`](#getemailtemplates)
 - [`upsertEmailTemplatesByPortalId`](#upsertemailtemplatesbyportalid)
 - [`getEmailTemplatesByPortalId`](#getemailtemplatesbyportalid)
+- [`getPortalWidgetsV3`](#getportalwidgetsv3)
+- [`upsertPortalWidgetV3`](#upsertportalwidgetv3)
+- [`savePortalFilesV3`](#saveportalfilesv3)
 - [`replaceECPTemplateVariables`](#replaceecptemplatevariables)
 - [`extraPermissionAttributes`](#extrapermissionattributes)
 - [`validateCaaRecords`](#validatecaarecords)
@@ -714,7 +717,10 @@ const { data } = await client.createUser(
 
 ### `createUserV3`
 
-Registers a portal user with portal id
+Registers a portal user.
+Supports two identification methods:
+1. Using portal_id
+2. Using domain
 
 `POST /v3/portal/public/user`
 
@@ -722,6 +728,7 @@ Registers a portal user with portal id
 const { data } = await client.createUserV3(
   {
     portal_id: 'example',
+    domain: 'example',
   },
   {
     email: 'testemail921@yopmail.com',
@@ -2939,6 +2946,201 @@ const { data } = await client.getEmailTemplatesByPortalId({
 
 ---
 
+### `getPortalWidgetsV3`
+
+Retrieves the widgets of a portal by portal_id.
+
+`GET /v3/portal/widgets`
+
+```ts
+const { data } = await client.getPortalWidgetsV3({
+  portal_id: 'example',
+  contract_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "widgets": [
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "schema": "string"
+    },
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "content": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `upsertPortalWidgetV3`
+
+Upsert widget for a portal by portal_id.
+
+`POST /v3/portal/widgets`
+
+```ts
+const { data } = await client.upsertPortalWidgetV3(
+  {
+    portal_id: 'example',
+  },
+  {
+    widgets: [
+      {
+        id: 'string',
+        type: 'ACTION_WIDGET',
+        listIndex: 0,
+        headline: {
+          en: 'string',
+          de: 'string'
+        },
+        subHeadline: {
+          en: 'string',
+          de: 'string'
+        },
+        schema: 'string'
+      },
+      {
+        id: 'string',
+        type: 'ACTION_WIDGET',
+        listIndex: 0,
+        headline: {
+          en: 'string',
+          de: 'string'
+        },
+        subHeadline: {
+          en: 'string',
+          de: 'string'
+        },
+        content: 'string'
+      },
+      /* ... 8 more */
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "widgets": [
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "schema": "string"
+    },
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "content": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `savePortalFilesV3`
+
+Add files to portal by portal_id
+
+`POST /v3/portal/portal/files`
+
+```ts
+const { data } = await client.savePortalFilesV3(
+  {
+    portal_id: 'example',
+  },
+  {
+    origin: 'string',
+    files: [
+      {
+        filename: 12345,
+        file_type: 'orderRightTeaser',
+        _tags: 12345,
+        s3ref: {
+          bucket: 12345,
+          key: 12345
+        }
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "createdFiles": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "_schema": "file"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `replaceECPTemplateVariables`
 
 Replaces the template variables of a portal
@@ -3398,6 +3600,9 @@ const { data } = await client.checkContactExists(
 ### `checkContactExistsV3`
 
 True if contact with given identifiers exists.
+Supports two identification methods:
+1. Using portal_id
+2. Using domain
 
 `POST /v3/portal/public/contact/exists`
 
@@ -3405,6 +3610,7 @@ True if contact with given identifiers exists.
 const { data } = await client.checkContactExistsV3(
   {
     portal_id: 'example',
+    domain: 'example',
   },
   {
     org_id: 728,
@@ -3713,7 +3919,10 @@ const { data } = await client.userExists({
 
 ### `userExistsV3`
 
-Checks whether a user exists in the portal
+Checks whether a user exists in the portal.
+Supports two identification methods:
+1. Using org_id + portal_id
+2. Using domain
 
 `GET /v3/portal/public/user/exists`
 
@@ -3722,6 +3931,7 @@ const { data } = await client.userExistsV3({
   email: 'example',
   org_id: 'example',
   portal_id: 'example',
+  domain: 'example',
 })
 ```
 
@@ -4483,7 +4693,8 @@ const { data } = await client.loginToPortalAsUser(
   {
     email: 'portal-customer@email.com',
     origin: 'string',
-    portal_id: 'string'
+    portal_id: 'string',
+    domain: 'string'
   },
 )
 ```
@@ -4530,7 +4741,10 @@ const { data } = await client.triggerEntityAccessEvent({
 
 ### `triggerEntityAccessEventV3`
 
-Trigger entity access event for a portal user
+Trigger entity access event for a portal user.
+Supports two identification methods:
+1. Using portal_id
+2. Using domain
 
 `POST /v3/portal/entity/{schema}/access`
 
@@ -4539,6 +4753,7 @@ const { data } = await client.triggerEntityAccessEventV3({
   schema: 'example',
   entity_id: 'example',
   portal_id: 'example',
+  domain: 'example',
 })
 ```
 
@@ -5078,6 +5293,7 @@ const { data } = await client.ssoLoginV3(
   {
     portal_id: 'example',
     org_id: 'example',
+    domain: 'example',
     contact_id: 'example',
   },
   {
@@ -5200,7 +5416,8 @@ const { data } = await client.getPortalPage({
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -5280,7 +5497,8 @@ const { data } = await client.updatePortalPage(
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -5350,7 +5568,8 @@ const { data } = await client.getPortalPages({
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -5431,7 +5650,8 @@ const { data } = await client.createPortalPage(
   "is_entry_route": false,
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-  "last_modified_at": "2021-02-09T12:41:43.662Z"
+  "last_modified_at": "2021-02-09T12:41:43.662Z",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
 }
 ```
 
@@ -5485,7 +5705,8 @@ const { data } = await client.getPublicPages({
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -5532,7 +5753,8 @@ const { data } = await client.interpolatePortalPages(
         is_entry_route: false,
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
-        last_modified_at: '2021-02-09T12:41:43.662Z'
+        last_modified_at: '2021-02-09T12:41:43.662Z',
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
       }
     ],
     context_entities: [
@@ -5578,7 +5800,8 @@ const { data } = await client.interpolatePortalPages(
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -5629,7 +5852,8 @@ const { data } = await client.getDefaultPages()
     "is_entry_route": false,
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-    "last_modified_at": "2021-02-09T12:41:43.662Z"
+    "last_modified_at": "2021-02-09T12:41:43.662Z",
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
   }
 ]
 ```
@@ -6442,7 +6666,8 @@ const { data } = await client.createPortalConfig(
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -6680,7 +6905,8 @@ const { data } = await client.getPortalConfigV3({
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -6914,7 +7140,8 @@ const { data } = await client.putPortalConfig(
         is_entry_route: false,
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
-        last_modified_at: '2021-02-09T12:41:43.662Z'
+        last_modified_at: '2021-02-09T12:41:43.662Z',
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
       }
     ]
   },
@@ -7137,7 +7364,8 @@ const { data } = await client.putPortalConfig(
       "is_entry_route": false,
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
-      "last_modified_at": "2021-02-09T12:41:43.662Z"
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
     }
   ]
 }
@@ -10258,6 +10486,7 @@ type Page = {
   is_deleted?: boolean
   id?: string // uuid
   last_modified_at?: string // date-time
+  portal_id?: string
 }
 ```
 
