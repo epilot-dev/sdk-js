@@ -210,7 +210,6 @@ const { data } = await client.getJourney({
       "field2": "rule789"
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -403,7 +402,6 @@ const { data } = await client.createJourney(
         field2: 'rule789'
       }
     },
-    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -516,7 +514,6 @@ const { data } = await client.createJourney(
       "field2": "rule789"
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -643,7 +640,6 @@ const { data } = await client.updateJourney(
         field2: 'rule789'
       }
     },
-    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -734,7 +730,6 @@ const { data } = await client.patchUpdateJourney(
       "block1": "rule123",
       "block2": {}
     },
-    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",
@@ -1705,7 +1700,6 @@ type JourneyResponse = {
       thirdPartyCookies?: { ... }
     }
     validationRules?: Record<string, string | Record<string, string>>
-    _manifest?: string // uuid[]
     createdBy?: string
     updatedBy?: string
     __lastModifiedAt?: string
