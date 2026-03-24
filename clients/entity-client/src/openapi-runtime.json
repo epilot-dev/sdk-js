@@ -11,7 +11,12 @@
         "parameters": [
           {
             "in": "query",
-            "name": "unpublished"
+            "name": "unpublished",
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "latest"
           },
           {
             "in": "query",
@@ -39,7 +44,12 @@
           },
           {
             "in": "query",
-            "name": "unpublished"
+            "name": "unpublished",
+            "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "latest"
           },
           {
             "in": "query",
@@ -67,6 +77,10 @@
           {
             "in": "query",
             "name": "id"
+          },
+          {
+            "in": "query",
+            "name": "latest"
           }
         ],
         "responses": {}
@@ -79,7 +93,8 @@
           },
           {
             "in": "query",
-            "name": "draft"
+            "name": "draft",
+            "deprecated": true
           }
         ],
         "requestBody": {
@@ -154,6 +169,33 @@
             "required": false,
             "style": "form",
             "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/freeze": {
+      "post": {
+        "operationId": "freezeSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/unfreeze": {
+      "post": {
+        "operationId": "unfreezeSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
           }
         ],
         "responses": {}
@@ -1610,9 +1652,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://entity.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
