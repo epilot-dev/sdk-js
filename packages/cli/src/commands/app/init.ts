@@ -34,121 +34,138 @@ export default defineCommand({
     writeManifest(join(rootDir, 'manifest.json'), manifest);
 
     // package.json (monorepo root)
-    writeFileSync(join(rootDir, 'package.json'), JSON.stringify({
-      name,
-      version: '0.0.1',
-      private: true,
-      packageManager: 'npm@10.9.2',
-      workspaces: ['components/*'],
-      scripts: {
-        build: 'turbo build',
-        dev: 'turbo dev',
-        lint: 'turbo lint',
-        deploy: 'epilot app deploy',
-      },
-      devDependencies: {
-        turbo: '^2',
-      },
-    }, null, 2) + '\n');
+    writeFileSync(
+      join(rootDir, 'package.json'),
+      `${JSON.stringify(
+        {
+          name,
+          version: '0.0.1',
+          private: true,
+          packageManager: 'npm@10.9.2',
+          workspaces: ['components/*'],
+          scripts: {
+            build: 'turbo build',
+            dev: 'turbo dev',
+            lint: 'turbo lint',
+            deploy: 'epilot app deploy',
+          },
+          devDependencies: {
+            turbo: '^2',
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    );
 
     // turbo.json
-    writeFileSync(join(rootDir, 'turbo.json'), JSON.stringify({
-      $schema: 'https://turbo.build/schema.json',
-      tasks: {
-        build: {
-          dependsOn: ['^build'],
-          outputs: ['dist/**'],
+    writeFileSync(
+      join(rootDir, 'turbo.json'),
+      `${JSON.stringify(
+        {
+          $schema: 'https://turbo.build/schema.json',
+          tasks: {
+            build: {
+              dependsOn: ['^build'],
+              outputs: ['dist/**'],
+            },
+            dev: {
+              cache: false,
+              persistent: true,
+            },
+            lint: {},
+          },
         },
-        dev: {
-          cache: false,
-          persistent: true,
-        },
-        lint: {},
-      },
-    }, null, 2) + '\n');
+        null,
+        2,
+      )}\n`,
+    );
 
     // .gitignore
-    writeFileSync(join(rootDir, '.gitignore'), [
-      'node_modules',
-      'dist',
-      '.turbo',
-      '',
-    ].join('\n'));
+    writeFileSync(join(rootDir, '.gitignore'), ['node_modules', 'dist', '.turbo', ''].join('\n'));
 
     // components/README.md
-    writeFileSync(join(rootDir, 'components', 'README.md'), [
-      '# Components',
-      '',
-      'Each subdirectory is a component package in the monorepo.',
-      '',
-      'Add a new component with:',
-      '',
-      '```bash',
-      'epilot app add-component <name> --type CUSTOM_CAPABILITY',
-      '```',
-      '',
-      'Available component types:',
-      '',
-      'Code-based (have src/ and build step):',
-      '- `CUSTOM_FLOW_ACTION_SANDBOX` — Sandboxed flow action (JS runs in epilot)',
-      '- `CUSTOM_CAPABILITY` — Custom entity tab or group',
-      '- `CUSTOM_JOURNEY_BLOCK` — Custom journey builder block',
-      '- `CUSTOM_PAGE` — Custom navigation page',
-      '- `CUSTOM_PORTAL_BLOCK` — Custom portal widget',
-      '',
-      'Config-only (configuration.json):',
-      '- `CUSTOM_FLOW_ACTION_EXTERNAL` — External integration webhook',
-      '- `PORTAL_EXTENSION` — Portal extension hooks',
-      '- `EXTERNAL_PRODUCT_CATALOG` — External product catalog hooks',
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(rootDir, 'components', 'README.md'),
+      [
+        '# Components',
+        '',
+        'Each subdirectory is a component package in the monorepo.',
+        '',
+        'Add a new component with:',
+        '',
+        '```bash',
+        'epilot app add-component <name> --type CUSTOM_CAPABILITY',
+        '```',
+        '',
+        'Available component types:',
+        '',
+        'Code-based (have src/ and build step):',
+        '- `CUSTOM_FLOW_ACTION_SANDBOX` — Sandboxed flow action (JS runs in epilot)',
+        '- `CUSTOM_CAPABILITY` — Custom entity tab or group',
+        '- `CUSTOM_JOURNEY_BLOCK` — Custom journey builder block',
+        '- `CUSTOM_PAGE` — Custom navigation page',
+        '- `CUSTOM_PORTAL_BLOCK` — Custom portal widget',
+        '',
+        'Config-only (configuration.json):',
+        '- `CUSTOM_FLOW_ACTION_EXTERNAL` — External integration webhook',
+        '- `PORTAL_EXTENSION` — Portal extension hooks',
+        '- `EXTERNAL_PRODUCT_CATALOG` — External product catalog hooks',
+        '',
+      ].join('\n'),
+    );
 
     // README.md
-    writeFileSync(join(rootDir, 'README.md'), [
-      `# ${name}`,
-      '',
-      'An [epilot](https://epilot.cloud) app.',
-      '',
-      '## Getting started',
-      '',
-      '```bash',
-      '# Install dependencies',
-      'npm install',
-      '',
-      '# Add a component',
-      'epilot app add-component my-action --type CUSTOM_FLOW_ACTION',
-      '',
-      '# Build all components',
-      'npm run build',
-      '',
-      '# Validate the manifest',
-      'epilot app validate',
-      '',
-      '# Deploy (dry run)',
-      'epilot app deploy --dry-run',
-      '',
-      '# Deploy for real',
-      'epilot app deploy',
-      '```',
-      '',
-      '## Project structure',
-      '',
-      '```',
-      `${name}/`,
-      '├── manifest.json          # App manifest (source of truth)',
-      '├── package.json           # Monorepo root',
-      '├── turbo.json             # Turborepo config',
-      '└── components/',
-      '    └── <component-name>/  # Each component is a package',
-      '        ├── package.json',
-      '        ├── src/',
-      '        └── dist/',
-      '```',
-      '',
-    ].join('\n'));
+    writeFileSync(
+      join(rootDir, 'README.md'),
+      [
+        `# ${name}`,
+        '',
+        'An [epilot](https://epilot.cloud) app.',
+        '',
+        '## Getting started',
+        '',
+        '```bash',
+        '# Install dependencies',
+        'npm install',
+        '',
+        '# Add a component',
+        'epilot app add-component my-action --type CUSTOM_FLOW_ACTION',
+        '',
+        '# Build all components',
+        'npm run build',
+        '',
+        '# Validate the manifest',
+        'epilot app validate',
+        '',
+        '# Deploy (dry run)',
+        'epilot app deploy --dry-run',
+        '',
+        '# Deploy for real',
+        'epilot app deploy',
+        '```',
+        '',
+        '## Project structure',
+        '',
+        '```',
+        `${name}/`,
+        '├── manifest.json          # App manifest (source of truth)',
+        '├── package.json           # Monorepo root',
+        '├── turbo.json             # Turborepo config',
+        '└── components/',
+        '    └── <component-name>/  # Each component is a package',
+        '        ├── package.json',
+        '        ├── src/',
+        '        └── dist/',
+        '```',
+        '',
+      ].join('\n'),
+    );
 
     // SKILL.md — AI agent instructions for building epilot apps
-    writeFileSync(join(rootDir, 'SKILL.md'), `---
+    writeFileSync(
+      join(rootDir, 'SKILL.md'),
+      `---
 name: epilot App Builder
 description: Build, deploy, and manage epilot Apps using the declarative manifest system and CLI. Covers all component types, project structure, and deployment workflow.
 ---
@@ -498,7 +515,8 @@ Use \`@epilot/volt-ui\` for UI components in App Bridge surfaces (capabilities, 
 
 ### Concorde Elements
 Use \`@epilot/concorde-elements\` for UI components in Journey Blocks. It provides buttons, cards, inputs — consistent with epilot's journey design system.
-`);
+`,
+    );
 
     log.success(`Created ${name}/`);
     log.info('');

@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty';
 import { existsSync, rmSync, readdirSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { resolve } from 'node:path';
 import { log, readManifest, writeManifest } from './manifest.js';
 
 export default defineCommand({
@@ -31,7 +31,7 @@ export default defineCommand({
       const { select } = await import('@inquirer/prompts');
       componentName = await select({
         message: 'Select component to remove',
-        choices: manifest.components.map(c => ({
+        choices: manifest.components.map((c) => ({
           value: c._dir ?? c.id,
           name: `${c._dir ?? c.id} (${c.component_type})`,
         })),
@@ -39,7 +39,7 @@ export default defineCommand({
     }
 
     // Find component by _dir or by id
-    const idx = manifest.components.findIndex(c => c._dir === componentName || c.id === componentName);
+    const idx = manifest.components.findIndex((c) => c._dir === componentName || c.id === componentName);
     if (idx === -1) {
       log.error(`Component "${componentName}" not found in manifest.`);
       log.info('');
@@ -59,23 +59,22 @@ export default defineCommand({
     // Remove directory unless --keep-files
     if (!args['keep-files']) {
       // Try _dir first, then componentName, then scan components/ for matching directory
-      const candidates = [
-        removed._dir,
-        componentName,
-      ].filter(Boolean) as string[];
+      const candidates = [removed._dir, componentName].filter(Boolean) as string[];
 
       // Also scan components/ to find any dir that might match this component
       const componentsRoot = resolve('components');
       if (existsSync(componentsRoot)) {
         try {
           const dirs = readdirSync(componentsRoot, { withFileTypes: true })
-            .filter(d => d.isDirectory())
-            .map(d => d.name);
+            .filter((d) => d.isDirectory())
+            .map((d) => d.name);
           // Check if componentName matches a directory
           for (const dir of dirs) {
             if (!candidates.includes(dir)) candidates.push(dir);
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       let deleted = false;

@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs';
-import { resolve, dirname, extname, join, relative } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { resolve, extname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { resolveToken } from '../../lib/auth-store.js';
 import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from '../../lib/utils.js';
@@ -51,9 +51,13 @@ export const log = {
 // ─── Validation ────────────────────────────────────────────────────────────────
 
 const COMPONENT_TYPES = [
-  'CUSTOM_JOURNEY_BLOCK', 'CUSTOM_PORTAL_BLOCK', 'PORTAL_EXTENSION',
-  'CUSTOM_FLOW_ACTION', 'CUSTOM_CAPABILITY',
-  'EXTERNAL_PRODUCT_CATALOG', 'CUSTOM_PAGE',
+  'CUSTOM_JOURNEY_BLOCK',
+  'CUSTOM_PORTAL_BLOCK',
+  'PORTAL_EXTENSION',
+  'CUSTOM_FLOW_ACTION',
+  'CUSTOM_CAPABILITY',
+  'EXTERNAL_PRODUCT_CATALOG',
+  'CUSTOM_PAGE',
 ];
 
 export interface ValidationError {
@@ -86,7 +90,10 @@ export function validateManifest(data: unknown): { valid: boolean; errors: Valid
       const comp = obj.components[i] as Record<string, unknown>;
       if (!comp.id) errors.push({ path: `/components/${i}/id`, message: 'Required' });
       if (!comp.component_type || !COMPONENT_TYPES.includes(comp.component_type as string)) {
-        errors.push({ path: `/components/${i}/component_type`, message: `Must be one of: ${COMPONENT_TYPES.join(', ')}` });
+        errors.push({
+          path: `/components/${i}/component_type`,
+          message: `Must be one of: ${COMPONENT_TYPES.join(', ')}`,
+        });
       }
       if (!comp.configuration || typeof comp.configuration !== 'object') {
         errors.push({ path: `/components/${i}/configuration`, message: 'Required object' });
@@ -109,14 +116,14 @@ export function readManifest(path: string): AppManifest {
   const data = JSON.parse(content);
   const result = validateManifest(data);
   if (!result.valid) {
-    const msgs = result.errors.map(e => `  ${e.path}: ${e.message}`).join('\n');
+    const msgs = result.errors.map((e) => `  ${e.path}: ${e.message}`).join('\n');
     throw new Error(`Invalid manifest:\n${msgs}`);
   }
   return result.manifest!;
 }
 
 export function writeManifest(path: string, manifest: AppManifest): void {
-  writeFileSync(resolve(path), JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
+  writeFileSync(resolve(path), `${JSON.stringify(manifest, null, 2)}\n`, 'utf-8');
 }
 
 // ─── API Client ────────────────────────────────────────────────────────────────
@@ -132,7 +139,7 @@ export interface ApiClientOptions {
 async function request(baseUrl: string, token: string, method: string, path: string, body?: unknown): Promise<unknown> {
   const url = `${baseUrl}${path}`;
   const headers: Record<string, string> = {
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
 
@@ -173,8 +180,15 @@ export function createAppApiClient(opts: ApiClientOptions) {
   };
 
   return {
-    async createConfiguration(payload: { name: string; description: { en?: string | null; de: string }; category?: string }) {
-      return request(baseUrl, getToken(), 'POST', '/v1/app-configurations', payload) as Promise<{ app_id: string; version: string }>;
+    async createConfiguration(payload: {
+      name: string;
+      description: { en?: string | null; de: string };
+      category?: string;
+    }) {
+      return request(baseUrl, getToken(), 'POST', '/v1/app-configurations', payload) as Promise<{
+        app_id: string;
+        version: string;
+      }>;
     },
     async getConfiguration(appId: string) {
       return request(baseUrl, getToken(), 'GET', `/v1/app-configurations/${appId}`) as Promise<Record<string, unknown>>;
@@ -183,49 +197,100 @@ export function createAppApiClient(opts: ApiClientOptions) {
       await request(baseUrl, getToken(), 'PATCH', `/v1/app-configurations/${appId}`, payload);
     },
     async getVersion(appId: string, version: string) {
-      return request(baseUrl, getToken(), 'GET', `/v1/app-configurations/${appId}/versions/${version}`) as Promise<Record<string, unknown>>;
+      return request(baseUrl, getToken(), 'GET', `/v1/app-configurations/${appId}/versions/${version}`) as Promise<
+        Record<string, unknown>
+      >;
     },
     async listVersions(appId: string) {
-      return request(baseUrl, getToken(), 'GET', `/v1/app-configurations/${appId}/versions`) as Promise<Record<string, unknown>>;
+      return request(baseUrl, getToken(), 'GET', `/v1/app-configurations/${appId}/versions`) as Promise<
+        Record<string, unknown>
+      >;
     },
     async patchVersion(appId: string, version: string, payload: Record<string, unknown>) {
       await request(baseUrl, getToken(), 'PATCH', `/v1/app-configurations/${appId}/versions/${version}`, payload);
     },
     async cloneVersion(appId: string, version: string) {
-      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/versions/${version}/clone`) as Promise<{ version: string }>;
+      return request(
+        baseUrl,
+        getToken(),
+        'POST',
+        `/v1/app-configurations/${appId}/versions/${version}/clone`,
+      ) as Promise<{ version: string }>;
     },
     async upsertComponent(appId: string, version: string, component: Record<string, unknown>) {
       const componentId = component.id as string | undefined;
       if (componentId) {
         try {
           // Try update first
-          await request(baseUrl, getToken(), 'PATCH', `/v1/app-configurations/${appId}/versions/${version}/components/${componentId}`, component);
+          await request(
+            baseUrl,
+            getToken(),
+            'PATCH',
+            `/v1/app-configurations/${appId}/versions/${version}/components/${componentId}`,
+            component,
+          );
         } catch (err) {
           // If 404, component doesn't exist yet — create it
           if (err instanceof Error && err.message.includes('404')) {
-            await request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/versions/${version}/components`, component);
+            await request(
+              baseUrl,
+              getToken(),
+              'POST',
+              `/v1/app-configurations/${appId}/versions/${version}/components`,
+              component,
+            );
           } else {
             throw err;
           }
         }
       } else {
-        await request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/versions/${version}/components`, component);
+        await request(
+          baseUrl,
+          getToken(),
+          'POST',
+          `/v1/app-configurations/${appId}/versions/${version}/components`,
+          component,
+        );
       }
     },
     async deleteComponent(appId: string, version: string, componentId: string) {
-      await request(baseUrl, getToken(), 'DELETE', `/v1/app-configurations/${appId}/versions/${version}/components/${componentId}`);
+      await request(
+        baseUrl,
+        getToken(),
+        'DELETE',
+        `/v1/app-configurations/${appId}/versions/${version}/components/${componentId}`,
+      );
     },
     async createLogoUploadUrl(appId: string, filename: string, mimeType: string) {
-      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/logo`, { filename, mime_type: mimeType }) as Promise<{ upload_url: string; s3_key: string }>;
+      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/logo`, {
+        filename,
+        mime_type: mimeType,
+      }) as Promise<{ upload_url: string; s3_key: string }>;
     },
     async createBundleUploadUrl(appId: string, version: string, componentId: string) {
-      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/bundle`, { version, component_id: componentId }) as Promise<{ upload_url: string; component_url: string }>;
+      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/bundle`, {
+        version,
+        component_id: componentId,
+      }) as Promise<{ upload_url: string; component_url: string }>;
     },
     async createZipUploadUrl(appId: string, version: string, componentId: string) {
-      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/zip`, { version, component_id: componentId }) as Promise<{ upload_url: string; artifact_url: string }>;
+      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/zip`, {
+        version,
+        component_id: componentId,
+      }) as Promise<{ upload_url: string; artifact_url: string }>;
     },
-    async createReview(appId: string, version: string, payload: { technical_contact: string; marketing_contact: string; demo_url?: string }) {
-      return request(baseUrl, getToken(), 'POST', `/v1/app-configurations/${appId}/versions/${version}/review`, payload) as Promise<{ review?: Record<string, unknown> }>;
+    async createReview(
+      appId: string,
+      version: string,
+      payload: { technical_contact: string; marketing_contact: string; demo_url?: string },
+    ) {
+      return request(
+        baseUrl,
+        getToken(),
+        'POST',
+        `/v1/app-configurations/${appId}/versions/${version}/review`,
+        payload,
+      ) as Promise<{ review?: Record<string, unknown> }>;
     },
   };
 }
@@ -235,10 +300,16 @@ export async function uploadFileToPresignedUrl(uploadUrl: string, filePath: stri
   const fileBuffer = readFileSync(absolutePath);
   const ext = extname(filePath).toLowerCase();
   const mimeTypes: Record<string, string> = {
-    '.js': 'application/javascript', '.mjs': 'application/javascript',
-    '.json': 'application/json', '.html': 'text/html', '.css': 'text/css',
-    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-    '.svg': 'image/svg+xml', '.zip': 'application/zip',
+    '.js': 'application/javascript',
+    '.mjs': 'application/javascript',
+    '.json': 'application/json',
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.zip': 'application/zip',
   };
   const mimeType = mimeTypes[ext] ?? 'application/octet-stream';
 
@@ -283,7 +354,11 @@ export async function uploadDirectoryAsZip(uploadUrl: string, dirPath: string): 
     return zipBuffer.length;
   } finally {
     // Clean up temp zip
-    try { execSync(`rm -f ${JSON.stringify(tmpZip)}`, { stdio: 'pipe' }); } catch { /* ignore */ }
+    try {
+      execSync(`rm -f ${JSON.stringify(tmpZip)}`, { stdio: 'pipe' });
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -312,7 +387,7 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
 
   const role = version.role as { grants?: { action: string; resource?: string }[] } | undefined;
   if (role?.grants?.length) {
-    manifest.permissions = role.grants.map(g => ({
+    manifest.permissions = role.grants.map((g) => ({
       action: g.action,
       ...(g.resource ? { resource: g.resource } : {}),
     }));
@@ -359,7 +434,12 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
     }
     if (comp.surfaces && typeof comp.surfaces === 'object') {
       for (const surface of Object.values(comp.surfaces as Record<string, unknown>)) {
-        if (surface && typeof surface === 'object' && 'zip_url' in surface && (surface as Record<string, unknown>).zip_url) {
+        if (
+          surface &&
+          typeof surface === 'object' &&
+          'zip_url' in surface &&
+          (surface as Record<string, unknown>).zip_url
+        ) {
           assets.zip = `./dist/${comp.id}/`;
         }
       }

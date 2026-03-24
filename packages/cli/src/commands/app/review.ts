@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { log, createAppApiClient, readManifest } from './manifest.js';
 

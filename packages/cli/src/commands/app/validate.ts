@@ -37,13 +37,13 @@ export default defineCommand({
     log.success(`${manifestPath} is valid`);
     log.info(`${manifest.components.length} component(s) defined`);
 
-    const secretOptions = manifest.components.flatMap(c => (c.options ?? []).filter(o => o.type === 'secret'));
+    const secretOptions = manifest.components.flatMap((c) => (c.options ?? []).filter((o) => o.type === 'secret'));
     if (secretOptions.length > 0) log.info(`${secretOptions.length} secret option(s) (set per-installation)`);
 
     if (manifest.assets?.logo) log.info(`Logo: ${manifest.assets.logo}`);
 
-    const bundleCount = manifest.components.filter(c => c.assets?.bundle).length;
-    const zipCount = manifest.components.filter(c => c.assets?.zip).length;
+    const bundleCount = manifest.components.filter((c) => c.assets?.bundle).length;
+    const zipCount = manifest.components.filter((c) => c.assets?.zip).length;
     if (bundleCount > 0 || zipCount > 0) log.info(`Assets: ${bundleCount} bundle(s), ${zipCount} zip(s)`);
   },
 });

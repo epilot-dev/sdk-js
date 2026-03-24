@@ -1,7 +1,15 @@
 import { defineCommand } from 'citty';
-import { resolve, dirname, extname, join } from 'node:path';
+import { resolve, dirname, extname } from 'node:path';
 import { existsSync, statSync, readFileSync } from 'node:fs';
-import { readManifest, writeManifest, log, createAppApiClient, toManifest, uploadFileToPresignedUrl, uploadDirectoryAsZip, formatFileSize } from './manifest.js';
+import {
+  readManifest,
+  writeManifest,
+  log,
+  createAppApiClient,
+  uploadFileToPresignedUrl,
+  uploadDirectoryAsZip,
+  formatFileSize,
+} from './manifest.js';
 
 export default defineCommand({
   meta: { name: 'deploy', description: 'Deploy an app from manifest.json' },
@@ -173,7 +181,9 @@ export default defineCommand({
 
             // Inject the artifact URL into surfaces (for app bridge components)
             if (componentPayload.surfaces && typeof componentPayload.surfaces === 'object') {
-              for (const surface of Object.values(componentPayload.surfaces as Record<string, Record<string, unknown>>)) {
+              for (const surface of Object.values(
+                componentPayload.surfaces as Record<string, Record<string, unknown>>,
+              )) {
                 if (surface && typeof surface === 'object') {
                   if ('app_url' in surface) {
                     surface.app_url = artifact_url;
@@ -204,7 +214,7 @@ export default defineCommand({
     if (!isNew) {
       const remoteVersion = await client.getVersion(appId!, targetVersion);
       const remoteComponents = (remoteVersion.components ?? []) as { id: string; component_type?: string }[];
-      const localIds = new Set(manifest.components.map(c => c.id));
+      const localIds = new Set(manifest.components.map((c) => c.id));
 
       for (const remote of remoteComponents) {
         if (!localIds.has(remote.id)) {

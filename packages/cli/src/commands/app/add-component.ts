@@ -47,7 +47,9 @@ const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
       type: 'external_integration',
       external_integration_settings: { url: 'https://api.example.com/webhook' },
     }),
-    options: [{ key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for authentication' }],
+    options: [
+      { key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for authentication' },
+    ],
   },
   CUSTOM_CAPABILITY: {
     configOnly: false,
@@ -94,12 +96,20 @@ const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
     templateDir: 'portal-extension',
     description: 'Portal extension hooks (config-only)',
     configuration: () => ({
-      hooks: [{
-        type: 'registration_identifiers_check',
-        call: { method: 'POST', url: 'https://api.example.com/portal/register', headers: { 'x-api-key': '{{api_key}}' } },
-      }],
+      hooks: [
+        {
+          type: 'registration_identifiers_check',
+          call: {
+            method: 'POST',
+            url: 'https://api.example.com/portal/register',
+            headers: { 'x-api-key': '{{api_key}}' },
+          },
+        },
+      ],
     }),
-    options: [{ key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for your backend' }],
+    options: [
+      { key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for your backend' },
+    ],
   },
   EXTERNAL_PRODUCT_CATALOG: {
     configOnly: true,
@@ -107,14 +117,22 @@ const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
     templateDir: 'external-product-catalog',
     description: 'External product catalog hooks (config-only)',
     configuration: () => ({
-      hooks: [{
-        id: 'get-products',
-        name: { de: 'Produkte abrufen', en: 'Get Products' },
-        type: 'products',
-        call: { method: 'POST', url: 'https://api.example.com/products', headers: { 'Content-Type': 'application/json', 'x-api-key': '{{api_key}}' } },
-      }],
+      hooks: [
+        {
+          id: 'get-products',
+          name: { de: 'Produkte abrufen', en: 'Get Products' },
+          type: 'products',
+          call: {
+            method: 'POST',
+            url: 'https://api.example.com/products',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': '{{api_key}}' },
+          },
+        },
+      ],
     }),
-    options: [{ key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for product catalog' }],
+    options: [
+      { key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for product catalog' },
+    ],
   },
 };
 
@@ -177,7 +195,7 @@ export default defineCommand({
       const { select } = await import('@inquirer/prompts');
       componentType = await select({
         message: 'Select component type',
-        choices: AVAILABLE_TYPES.map(type => ({
+        choices: AVAILABLE_TYPES.map((type) => ({
           value: type,
           name: `${type} — ${TEMPLATE_REGISTRY[type].description}`,
         })),
@@ -217,7 +235,7 @@ export default defineCommand({
     const manifest = readManifest(manifestPath);
 
     // Check for duplicate _dir
-    if (manifest.components.some(c => c._dir === componentName)) {
+    if (manifest.components.some((c) => c._dir === componentName)) {
       log.error(`Component "${componentName}" already exists in manifest.`);
       process.exit(1);
     }

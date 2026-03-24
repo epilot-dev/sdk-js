@@ -23,7 +23,9 @@ export default defineCommand({
         try {
           const manifest = readManifest(manifestPath);
           appId = manifest.app_id;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
     }
 
@@ -32,11 +34,11 @@ export default defineCommand({
       process.exit(1);
     }
 
-    const config = await client.getConfiguration(appId) as Record<string, unknown>;
+    const config = (await client.getConfiguration(appId)) as Record<string, unknown>;
     const latestVersion = config.latest_version as string;
     const publicVersions = new Set((config.public_versions ?? []) as string[]);
 
-    const data = await client.listVersions(appId) as { versions?: Record<string, unknown>[] };
+    const data = (await client.listVersions(appId)) as { versions?: Record<string, unknown>[] };
     const versions = data.versions ?? [];
 
     if (versions.length === 0) {
@@ -49,14 +51,16 @@ export default defineCommand({
     w(`\n${BOLD}${config.name}${RESET} ${DIM}(${appId})${RESET}\n\n`);
 
     // Header
-    w(`  ${BOLD}${'VERSION'.padEnd(10)}${'VISIBILITY'.padEnd(14)}${'STATUS'.padEnd(12)}${'COMPONENTS'.padEnd(12)}${'CREATED'.padEnd(24)}${RESET}\n`);
+    w(
+      `  ${BOLD}${'VERSION'.padEnd(10)}${'VISIBILITY'.padEnd(14)}${'STATUS'.padEnd(12)}${'COMPONENTS'.padEnd(12)}${'CREATED'.padEnd(24)}${RESET}\n`,
+    );
     w(`  ${'─'.repeat(70)}\n`);
 
     for (const v of versions) {
       const ver = v.version as string;
-      const visibility = publicVersions.has(ver) ? 'public' : (v.visibility as string ?? 'private');
+      const visibility = publicVersions.has(ver) ? 'public' : ((v.visibility as string) ?? 'private');
       const reviewStatus = v.review_status as string | undefined;
-      const components = (v.components as unknown[] ?? []).length;
+      const components = ((v.components as unknown[]) ?? []).length;
       const deprecatedAt = v.deprecated_at as string | undefined;
       const audit = v.version_audit as Record<string, unknown> | undefined;
       const createdAt = audit?.versioned_at ?? audit?.created_at;
@@ -85,7 +89,9 @@ export default defineCommand({
       // Date
       const date = createdAt ? new Date(createdAt as string).toISOString().replace('T', ' ').slice(0, 19) : '';
 
-      w(`  ${CYAN}${versionStr.padEnd(10)}${RESET}${visColor}${visibility.padEnd(14)}${RESET}${status}${' '.repeat(Math.max(0, 12 - stripAnsi(status).length))}${String(components).padEnd(12)}${DIM}${date}${RESET}\n`);
+      w(
+        `  ${CYAN}${versionStr.padEnd(10)}${RESET}${visColor}${visibility.padEnd(14)}${RESET}${status}${' '.repeat(Math.max(0, 12 - stripAnsi(status).length))}${String(components).padEnd(12)}${DIM}${date}${RESET}\n`,
+      );
     }
 
     w(`\n  ${DIM}* latest version${RESET}\n\n`);
@@ -93,5 +99,6 @@ export default defineCommand({
 });
 
 function stripAnsi(str: string): string {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: stripping ANSI escape sequences requires matching control characters
   return str.replace(/\x1b\[[0-9;]*m/g, '');
 }
