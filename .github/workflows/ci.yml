@@ -117,9 +117,15 @@ jobs:
 
           # Bump SDK version
           if [ "${{ steps.check.outputs.sdk }}" = "true" ]; then
-            cd packages/epilot-sdk-v2
-            npm version patch --no-git-tag-version
-            SDK_VERSION=$(node -p "require('./package.json').version")
+            SDK_VERSION=$(node -e "
+              const fs = require('fs');
+              const path = 'packages/epilot-sdk-v2/package.json';
+              const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+              const [major, minor, patch] = pkg.version.split('.').map(Number);
+              pkg.version = major + '.' + minor + '.' + (patch + 1);
+              fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+              process.stdout.write(pkg.version);
+            ")
             echo "sdk_version=${SDK_VERSION}" >> "$GITHUB_OUTPUT"
             cd "$GITHUB_WORKSPACE"
             pnpm lint:fix
@@ -129,19 +135,25 @@ jobs:
 
           # Bump CLI version
           if [ "${{ steps.check.outputs.cli }}" = "true" ]; then
-            cd packages/cli
-            npm version patch --no-git-tag-version
-            CLI_VERSION=$(node -p "require('./package.json').version")
+            CLI_VERSION=$(node -e "
+              const fs = require('fs');
+              const path = 'packages/cli/package.json';
+              const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+              const [major, minor, patch] = pkg.version.split('.').map(Number);
+              pkg.version = major + '.' + minor + '.' + (patch + 1);
+              fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+              process.stdout.write(pkg.version);
+            ")
             echo "cli_version=${CLI_VERSION}" >> "$GITHUB_OUTPUT"
 
-            cd "$GITHUB_WORKSPACE/packages/cli-wrapper"
-            npm version "$CLI_VERSION" --no-git-tag-version
             node -e "
-              const pkg = require('./package.json');
+              const fs = require('fs');
+              const path = 'packages/cli-wrapper/package.json';
+              const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+              pkg.version = '${CLI_VERSION}';
               pkg.dependencies['@epilot/cli'] = '^${CLI_VERSION}';
-              require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+              fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
             "
-            cd "$GITHUB_WORKSPACE"
             FILES_TO_ADD="$FILES_TO_ADD packages/cli/package.json packages/cli-wrapper/package.json"
             TAGS="$TAGS @epilot/cli@${CLI_VERSION}"
           fi
