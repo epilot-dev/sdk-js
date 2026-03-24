@@ -269,6 +269,10 @@ declare namespace Components {
              * Sales template (Premium)
              */
             journey_type?: string;
+            /**
+             * If true, journey is displayed in read-only mode
+             */
+            protected?: boolean;
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
@@ -359,6 +363,10 @@ declare namespace Components {
              * }
              */
             ValidationRuleRef;
+            /**
+             * Manifest/Blueprint ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -513,6 +521,10 @@ declare namespace Components {
              * Sales template (Premium)
              */
             journey_type?: string;
+            /**
+             * If true, journey is displayed in read-only mode
+             */
+            protected?: boolean;
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
@@ -603,6 +615,10 @@ declare namespace Components {
              * }
              */
             ValidationRuleRef;
+            /**
+             * Manifest/Blueprint ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -740,6 +756,10 @@ declare namespace Components {
              * Sales template (Premium)
              */
             journey_type?: string;
+            /**
+             * If true, journey is displayed in read-only mode
+             */
+            protected?: boolean;
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
