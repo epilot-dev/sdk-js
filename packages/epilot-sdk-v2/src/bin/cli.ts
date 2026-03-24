@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const OVERRIDES_PATH = '.epilot/sdk-overrides.json';
@@ -152,6 +152,49 @@ const findSdkRoot = (): string | null => {
   return null;
 };
 
+/**
+ * Patch the bundled runtime chunk in dist/ so webpack/bundlers pick up the overridden spec.
+ *
+ * The published SDK bundles each API's compact runtime spec into chunk files.
+ * We find the chunk that contains `require_<apiName>_runtime` and replace the
+ * `module.exports = {...}` line with the new compact spec.
+ */
+const patchRuntimeChunk = (distDir: string, kebabName: string, compactSpec: unknown) => {
+  if (!existsSync(distDir)) return;
+
+  // The chunk contains a function named require_<name>_runtime
+  const runtimeFnName = `require_${kebabName.replace(/-/g, '_')}_runtime`;
+
+  const files = readdirSync(distDir);
+  let patched = false;
+
+  for (const file of files) {
+    if (!file.endsWith('.js') && !file.endsWith('.cjs')) continue;
+    if (file.startsWith('apis/')) continue;
+
+    const filePath = resolve(distDir, file);
+    const content = readFileSync(filePath, 'utf-8');
+
+    if (!content.includes(runtimeFnName)) continue;
+
+    // Replace module.exports = {...}; on the line containing the spec
+    const newContent = content.replace(
+      /module\.exports\s*=\s*\{.*\};/,
+      `module.exports = ${JSON.stringify(compactSpec)};`,
+    );
+
+    if (newContent !== content) {
+      writeFileSync(filePath, newContent);
+      console.log(`    -> patched ${file} (runtime chunk)`);
+      patched = true;
+    }
+  }
+
+  if (!patched) {
+    console.log(`    (no runtime chunk found to patch for ${kebabName})`);
+  }
+};
+
 const overrideCmd = async (args: string[]) => {
   if (args.length === 2) {
     // Single API override: override <name> <path>
@@ -180,6 +223,12 @@ const overrideCmd = async (args: string[]) => {
   }
 
   const defsDir = resolve(sdkRoot, 'definitions');
+  const distDir = resolve(sdkRoot, 'dist');
+
+  // Ensure definitions directory exists
+  if (!existsSync(defsDir)) {
+    mkdirSync(defsDir, { recursive: true });
+  }
 
   console.log(`Applying ${entries.length} override(s)...`);
 
@@ -201,6 +250,9 @@ const overrideCmd = async (args: string[]) => {
       const runtimeDest = resolve(defsDir, `${kebabName}-runtime.json`);
       writeFileSync(runtimeDest, JSON.stringify(compactSpec));
       console.log(`    -> definitions/${kebabName}-runtime.json`);
+
+      // Patch the bundled runtime chunk so webpack picks up the override
+      patchRuntimeChunk(distDir, kebabName, compactSpec);
     } catch (err) {
       console.error(`    Error: ${(err as Error).message}`);
     }
