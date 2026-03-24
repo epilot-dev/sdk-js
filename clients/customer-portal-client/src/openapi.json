@@ -199,7 +199,7 @@
       "post": {
         "operationId": "createUserV3",
         "summary": "createUserV3",
-        "description": "Registers a portal user with portal id",
+        "description": "Registers a portal user.\nSupports two identification methods:\n1. Using portal_id\n2. Using domain\n",
         "security": [],
         "tags": [
           "Public"
@@ -208,11 +208,20 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true,
+            "required": false,
             "schema": {
               "$ref": "#/components/schemas/PortalId"
             },
-            "description": "Origin of the portal"
+            "description": "Portal ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to portal_id)"
           }
         ],
         "requestBody": {
@@ -2278,6 +2287,194 @@
         }
       }
     },
+    "/v3/portal/widgets": {
+      "get": {
+        "operationId": "getPortalWidgetsV3",
+        "summary": "getPortalWidgetsV3",
+        "description": "Retrieves the widgets of a portal by portal_id.",
+        "tags": [
+          "ECP Admin",
+          "ECP"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal"
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "description": "Contract context for widgets"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the portal widgets successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "upsertPortalWidgetV3",
+        "summary": "upsertPortalWidgetV3",
+        "description": "Upsert widget for a portal by portal_id.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "Portal widgets payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPortalWidget"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Portal widget configuration upserted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/portal/files": {
+      "post": {
+        "operationId": "savePortalFilesV3",
+        "summary": "savePortalFilesV3",
+        "description": "Add files to portal by portal_id",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal"
+          }
+        ],
+        "requestBody": {
+          "description": "portal files request",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavePortalFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The files have been saved to the portal successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "createdFiles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/replace-ecp-template-variables": {
       "post": {
         "operationId": "replaceECPTemplateVariables",
@@ -3001,7 +3198,7 @@
       "post": {
         "operationId": "checkContactExistsV3",
         "summary": "checkContactExistsV3",
-        "description": "True if contact with given identifiers exists.",
+        "description": "True if contact with given identifiers exists.\nSupports two identification methods:\n1. Using portal_id\n2. Using domain\n",
         "security": [],
         "tags": [
           "Public"
@@ -3010,11 +3207,20 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true,
+            "required": false,
             "schema": {
               "$ref": "#/components/schemas/PortalId"
             },
-            "description": "PortalId of the portal"
+            "description": "PortalId of the portal (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to portal_id)"
           }
         ],
         "requestBody": {
@@ -3617,7 +3823,7 @@
       "get": {
         "operationId": "userExistsV3",
         "summary": "userExistsV3",
-        "description": "Checks whether a user exists in the portal",
+        "description": "Checks whether a user exists in the portal.\nSupports two identification methods:\n1. Using org_id + portal_id\n2. Using domain\n",
         "tags": [
           "Public"
         ],
@@ -3636,10 +3842,10 @@
           {
             "in": "query",
             "name": "org_id",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string",
-              "description": "Organization ID",
+              "description": "Organization ID (required if domain is not provided)",
               "example": 123
             }
           },
@@ -3647,10 +3853,19 @@
             "in": "query",
             "name": "portal_id",
             "required": false,
-            "description": "Checkes if user exists in the given portal ID. If not provided, checks in all portals.",
+            "description": "Checks if user exists in the given portal ID. If not provided, checks in all portals.",
             "schema": {
               "$ref": "#/components/schemas/PortalId"
             }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to org_id + portal_id)"
           }
         ],
         "responses": {
@@ -6119,7 +6334,7 @@
       "post": {
         "operationId": "loginToPortalAsUser",
         "summary": "loginToPortalAsUser",
-        "description": "Generate a token to log in to a portal impersonating a users.\n\nToken is valid for 5 minutes.\n",
+        "description": "Generate a token to log in to a portal impersonating a users.\n\nToken is valid for 5 minutes.\n\nSupports three identification methods (at least one required):\n1. Using portal_id (takes precedence)\n2. Using domain\n3. Using origin (legacy)\n",
         "tags": [
           "ECP Admin"
         ],
@@ -6147,6 +6362,10 @@
                   "portal_id": {
                     "type": "string",
                     "description": "The portal ID to look up the portal config. When provided, takes precedence over origin."
+                  },
+                  "domain": {
+                    "type": "string",
+                    "description": "Portal domain for identification. Alternative to portal_id or origin."
                   }
                 }
               }
@@ -6241,7 +6460,7 @@
       "post": {
         "operationId": "triggerEntityAccessEventV3",
         "summary": "triggerEntityAccessEventV3",
-        "description": "Trigger entity access event for a portal user",
+        "description": "Trigger entity access event for a portal user.\nSupports two identification methods:\n1. Using portal_id\n2. Using domain\n",
         "tags": [
           "ECP"
         ],
@@ -6273,10 +6492,19 @@
           {
             "name": "portal_id",
             "in": "query",
-            "required": true,
-            "description": "Portal ID",
+            "required": false,
+            "description": "Portal ID (required if domain is not provided)",
             "schema": {
               "$ref": "#/components/schemas/PortalId"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "description": "Portal domain for identification (alternative to portal_id)",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -6957,7 +7185,7 @@
       "post": {
         "operationId": "ssoLoginV3",
         "summary": "ssoLoginV3",
-        "description": "Initiate login using external SSO identity.\n\nVerifies the user with the issuer and matches the identity to an epilot user (or creates a new user).\n\nReturns parameters to be used with CUSTOM_AUTH flow against Cognito\n",
+        "description": "Initiate login using external SSO identity.\n\nVerifies the user with the issuer and matches the identity to an epilot user (or creates a new user).\n\nReturns parameters to be used with CUSTOM_AUTH flow against Cognito.\n\nSupports two identification methods:\n1. Using org_id + portal_id\n2. Using domain\n",
         "security": [
           {
             "ExternalOIDCAuth": []
@@ -6967,8 +7195,8 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true,
-            "description": "ID of the Portal",
+            "required": false,
+            "description": "ID of the Portal (required if domain is not provided)",
             "schema": {
               "$ref": "#/components/schemas/PortalId"
             }
@@ -6976,11 +7204,20 @@
           {
             "in": "query",
             "name": "org_id",
-            "description": "epilot organization id",
-            "required": true,
+            "description": "epilot organization id (required if domain is not provided)",
+            "required": false,
             "schema": {
               "type": "string",
               "example": 123
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "description": "Portal domain for identification (alternative to org_id + portal_id)",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -14786,6 +15023,11 @@
                 "format": "date-time",
                 "description": "Last modified timestamp of the Page",
                 "example": "2021-02-09T12:41:43.662Z"
+              },
+              "portal_id": {
+                "type": "string",
+                "description": "The id of the portal",
+                "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
               }
             }
           }

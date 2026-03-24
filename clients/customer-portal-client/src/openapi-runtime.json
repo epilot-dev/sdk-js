@@ -55,7 +55,12 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           }
         ],
         "requestBody": {
@@ -632,6 +637,60 @@
         "responses": {}
       }
     },
+    "/v3/portal/widgets": {
+      "get": {
+        "operationId": "getPortalWidgetsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "upsertPortalWidgetV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/portal/files": {
+      "post": {
+        "operationId": "savePortalFilesV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/replace-ecp-template-variables": {
       "post": {
         "operationId": "replaceECPTemplateVariables",
@@ -769,7 +828,12 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           }
         ],
         "requestBody": {
@@ -925,11 +989,16 @@
           {
             "in": "query",
             "name": "org_id",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
             "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
             "required": false
           }
         ],
@@ -1542,7 +1611,12 @@
           {
             "name": "portal_id",
             "in": "query",
-            "required": true
+            "required": false
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -1743,12 +1817,17 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
             "name": "org_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           },
           {
             "in": "query",
