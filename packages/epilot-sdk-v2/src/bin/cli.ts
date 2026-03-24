@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const OVERRIDES_PATH = '.epilot/sdk-overrides.json';
@@ -152,16 +152,58 @@ const findSdkRoot = (): string | null => {
   return null;
 };
 
+/**
+ * Patch the bundled runtime chunk in dist/ so webpack/bundlers pick up the overridden spec.
+ *
+ * The published SDK bundles each API's compact runtime spec into chunk files.
+ * We find the chunk that contains `require_<apiName>_runtime` and replace the
+ * `module.exports = {...}` line with the new compact spec.
+ */
+const patchRuntimeChunk = (distDir: string, kebabName: string, compactSpec: unknown) => {
+  if (!existsSync(distDir)) return;
+
+  // The chunk contains a function named require_<name>_runtime
+  const runtimeFnName = `require_${kebabName.replace(/-/g, '_')}_runtime`;
+
+  const files = readdirSync(distDir);
+  let patched = false;
+
+  for (const file of files) {
+    if (!file.endsWith('.js') && !file.endsWith('.cjs')) continue;
+    if (file.startsWith('apis/')) continue;
+
+    const filePath = resolve(distDir, file);
+    const content = readFileSync(filePath, 'utf-8');
+
+    if (!content.includes(runtimeFnName)) continue;
+
+    // Replace module.exports = {...}; on the line containing the spec
+    const newContent = content.replace(
+      /module\.exports\s*=\s*\{.*\};/,
+      `module.exports = ${JSON.stringify(compactSpec)};`,
+    );
+
+    if (newContent !== content) {
+      writeFileSync(filePath, newContent);
+      console.log(`    -> patched ${file} (runtime chunk)`);
+      patched = true;
+    }
+  }
+
+  if (!patched) {
+    console.log(`    (no runtime chunk found to patch for ${kebabName})`);
+  }
+};
+
 const overrideCmd = async (args: string[]) => {
   if (args.length === 2) {
     // Single API override: override <name> <path>
+    // Saves, applies, and regenerates types in one step
     const [apiName, specPath] = args;
     const overrides = readOverrides();
     overrides[apiName] = specPath;
     writeOverrides(overrides);
-    console.log(`Added override: ${apiName} -> ${specPath}`);
-    console.log(`Run 'npx epilot-sdk override' to apply, then 'npx epilot-sdk typegen' to regenerate types.`);
-    return;
+    console.log(`Saved override: ${apiName} -> ${specPath}`);
   }
 
   // Apply all overrides
@@ -170,7 +212,7 @@ const overrideCmd = async (args: string[]) => {
 
   if (entries.length === 0) {
     console.log(`No overrides found in ${OVERRIDES_PATH}`);
-    console.log(`Create one with: npx epilot-sdk override <api-name> <spec-path>`);
+    console.log(`Usage: npx epilot-sdk override <api-name> <spec-path>`);
     return;
   }
 
@@ -181,6 +223,12 @@ const overrideCmd = async (args: string[]) => {
   }
 
   const defsDir = resolve(sdkRoot, 'definitions');
+  const distDir = resolve(sdkRoot, 'dist');
+
+  // Ensure definitions directory exists
+  if (!existsSync(defsDir)) {
+    mkdirSync(defsDir, { recursive: true });
+  }
 
   console.log(`Applying ${entries.length} override(s)...`);
 
@@ -202,12 +250,70 @@ const overrideCmd = async (args: string[]) => {
       const runtimeDest = resolve(defsDir, `${kebabName}-runtime.json`);
       writeFileSync(runtimeDest, JSON.stringify(compactSpec));
       console.log(`    -> definitions/${kebabName}-runtime.json`);
+
+      // Patch the bundled runtime chunk so webpack picks up the override
+      patchRuntimeChunk(distDir, kebabName, compactSpec);
     } catch (err) {
       console.error(`    Error: ${(err as Error).message}`);
     }
   }
 
-  console.log(`\nDone. Run 'npx epilot-sdk typegen' to regenerate types.`);
+  // Auto-run typegen after applying overrides
+  console.log('');
+  await typegenCmd();
+};
+
+/**
+ * Extract module-level export declarations from an existing .d.ts / .d.cts file.
+ *
+ * The built declaration files contain two sections:
+ *   1. OpenAPI-generated types (imports, namespace re-exports, Components, Paths, etc.)
+ *   2. Module-level exports (declare const getClient, createClient, <apiHandle>, and the
+ *      final `export { ... }` line, plus `authorize`/`TokenArg`/`OpenAPIClient` re-exports)
+ *
+ * When `openapi typegen` regenerates the OpenAPI types (section 1), it overwrites
+ * section 2. This function extracts section 2 so it can be appended after regeneration.
+ *
+ * We identify the boundary as the first `declare const` line that is NOT inside a
+ * namespace block — this marks where the module-level declarations begin.
+ */
+const extractModuleExportsTail = (content: string): string | null => {
+  const lines = content.split('\n');
+
+  // Find the first top-level `declare const` line (not indented, not in a namespace)
+  let tailStartIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Match lines like: "declare const getClient: ..." or "/** ... */" comment blocks
+    // that precede a `declare const`. We look for the first JSDoc comment or `declare const`
+    // that follows the OpenAPI types section.
+    if (/^declare\s+const\s+/.test(line)) {
+      // Walk backwards to include any preceding JSDoc comment
+      let start = i;
+      while (
+        start > 0 &&
+        (lines[start - 1].trimStart().startsWith('*') ||
+          lines[start - 1].trimStart().startsWith('/**') ||
+          lines[start - 1].trim() === '')
+      ) {
+        // Only include blank lines and JSDoc comment lines
+        if (lines[start - 1].trim() === '') {
+          // Check if there's a JSDoc comment starting before this blank line — include the blank
+          start--;
+        } else if (lines[start - 1].trimStart().startsWith('/**') || lines[start - 1].trimStart().startsWith('*')) {
+          start--;
+        } else {
+          break;
+        }
+      }
+      tailStartIndex = start;
+      break;
+    }
+  }
+
+  if (tailStartIndex === -1) return null;
+
+  return lines.slice(tailStartIndex).join('\n');
 };
 
 const typegenCmd = async () => {
@@ -242,14 +348,42 @@ const typegenCmd = async () => {
 
       console.log(`Generating types for ${apiName}...`);
       try {
-        // Generate types and write to the SDK dist directory
-        const typesPath = resolve(distDir, `apis/${kebabName}.d.ts`);
-        execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${typesPath}`, { stdio: 'pipe' });
+        const dtsPath = resolve(distDir, `apis/${kebabName}.d.ts`);
+        const dctsPath = resolve(distDir, `apis/${kebabName}.d.cts`);
+
+        // Generate new OpenAPI types
+        const generatedTypes = execSync(`npx openapi-client-axios-typegen ${specPath} --client`, {
+          stdio: 'pipe',
+          encoding: 'utf-8',
+        });
+
+        // Standard module-level exports that every API entry point needs
+        const moduleExports = [
+          '',
+          `import type { ApiHandle } from '../types';`,
+          `export { authorize } from '../authorize';`,
+          `export type { TokenArg } from '../authorize';`,
+          `export type { OpenAPIClient } from 'openapi-client-axios';`,
+          '',
+          '/** Get the cached singleton client (lazy-initialized on first call) */',
+          'declare const getClient: () => Client;',
+          '/** Create a fresh client instance (not cached) */',
+          'declare const createClient: () => Client;',
+          '/**',
+          ' * API handle — also exposes operations directly:',
+          ` * \`${apiName}.getEntity(...)\` calls forwarded to lazy singleton`,
+          ' */',
+          `declare const ${apiName}: ApiHandle<Client>;`,
+          '',
+          `export { getClient, createClient, ${apiName} };`,
+        ].join('\n');
+
+        const fullContent = `${generatedTypes.trimEnd()}\n${moduleExports}\n`;
+
+        writeFileSync(dtsPath, fullContent);
         console.log(`  -> dist/apis/${kebabName}.d.ts`);
 
-        // Also generate .d.cts for CommonJS
-        const ctypesPath = resolve(distDir, `apis/${kebabName}.d.cts`);
-        execSync(`npx openapi-client-axios-typegen ${specPath} --client > ${ctypesPath}`, { stdio: 'pipe' });
+        writeFileSync(dctsPath, fullContent);
         console.log(`  -> dist/apis/${kebabName}.d.cts`);
       } catch (err) {
         console.error(`  Error generating types for ${apiName}: ${(err as Error).message}`);
