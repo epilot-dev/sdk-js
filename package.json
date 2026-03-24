@@ -50,8 +50,5 @@
   "volta": {
     "node": "24.14.0",
     "npm": "11.12.0"
-  },
-  "dependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.0"
   }
 }
