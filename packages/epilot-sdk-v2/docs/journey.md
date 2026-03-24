@@ -161,6 +161,7 @@ const { data } = await client.getJourney({
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -209,6 +210,7 @@ const { data } = await client.getJourney({
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -352,6 +354,7 @@ const { data } = await client.createJourney(
       }
     ],
     journey_type: 'Sales template (Premium)',
+    protected: true,
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -400,6 +403,7 @@ const { data } = await client.createJourney(
         field2: 'rule789'
       }
     },
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -463,6 +467,7 @@ const { data } = await client.createJourney(
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -511,6 +516,7 @@ const { data } = await client.createJourney(
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -588,6 +594,7 @@ const { data } = await client.updateJourney(
       }
     ],
     journey_type: 'Sales template (Premium)',
+    protected: true,
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -636,6 +643,7 @@ const { data } = await client.updateJourney(
         field2: 'rule789'
       }
     },
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -690,6 +698,7 @@ const { data } = await client.patchUpdateJourney(
       {}
     ],
     "journey_type": "Sales template (Premium)",
+    "protected": true,
     "settings": {
       "embedOptions": {},
       "safeModeAutomation": true,
@@ -725,6 +734,7 @@ const { data } = await client.patchUpdateJourney(
       "block1": "rule123",
       "block2": {}
     },
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",
@@ -928,6 +938,7 @@ const { data } = await client.createJourneyV2(
       }
     ],
     journey_type: 'Sales template (Premium)',
+    protected: true,
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -1029,6 +1040,7 @@ const { data } = await client.createJourneyV2(
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1138,6 +1150,7 @@ const { data } = await client.updateJourneyV2(
       }
     ],
     journey_type: 'Sales template (Premium)',
+    protected: true,
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -1239,6 +1252,7 @@ const { data } = await client.updateJourneyV2(
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1359,6 +1373,7 @@ const { data } = await client.patchUpdateJourneyV2(
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1475,6 +1490,7 @@ const { data } = await client.getJourneyV2({
     }
   ],
   "journey_type": "Sales template (Premium)",
+  "protected": true,
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1656,6 +1672,7 @@ type JourneyResponse = {
       shouldLoadEntity?: { ... }
     }>
     journey_type?: string
+    protected?: boolean
     settings?: {
       embedOptions?: { ... }
       safeModeAutomation?: { ... }
@@ -1688,6 +1705,7 @@ type JourneyResponse = {
       thirdPartyCookies?: { ... }
     }
     validationRules?: Record<string, string | Record<string, string>>
+    _manifest?: string // uuid[]
     createdBy?: string
     updatedBy?: string
     __lastModifiedAt?: string
@@ -1793,6 +1811,7 @@ type JourneyCreationRequest = {
     shouldLoadEntity?: boolean
   }>
   journey_type?: string
+  protected?: boolean
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -1835,7 +1854,6 @@ type JourneyCreationRequest = {
     thirdPartyCookies?: boolean
   }
   validationRules?: Record<string, string | Record<string, string>>
-  createdBy?: string
   // ...
 }
 ```
@@ -1899,6 +1917,7 @@ type JourneyCreationRequestV2 = {
     shouldLoadEntity?: boolean
   }>
   journey_type?: string
+  protected?: boolean
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -2032,6 +2051,7 @@ type Journey = {
     shouldLoadEntity?: boolean
   }>
   journey_type?: string
+  protected?: boolean
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -2074,7 +2094,6 @@ type Journey = {
     thirdPartyCookies?: boolean
   }
   validationRules?: Record<string, string | Record<string, string>>
-  createdBy?: string
   // ...
 }
 ```
