@@ -399,10 +399,17 @@ export default defineCommand({
 `;
 };
 
+const MANUAL_COMMAND_IMPORTS: Record<string, string> = {
+  app: `    app: () => import('./commands/app/index.js').then((m) => m.default),`,
+};
+
 const generateIndexFile = (clients: ClientInfo[]): string => {
   const validClients = clients.filter((c) => c.hasDefinition);
 
   const subCommandEntries = validClients.map((c) => {
+    if (MANUAL_COMMAND_IMPORTS[c.kebabName]) {
+      return MANUAL_COMMAND_IMPORTS[c.kebabName];
+    }
     const key = c.kebabName.includes('-') ? `'${c.kebabName}'` : c.kebabName;
     return `    ${key}: () => import('./commands/apis/${c.kebabName}.js').then((m) => m.default),`;
   });
@@ -859,9 +866,16 @@ const main = () => {
   mkdirSync(GENERATED_DIR, { recursive: true });
   writeFileSync(resolve(GENERATED_DIR, 'api-list.ts'), generateApiList(clients));
 
+  // APIs with manual command implementations (not auto-generated)
+  const MANUAL_COMMANDS = new Set(['app']);
+
   console.log('Generating per-API command files...');
   mkdirSync(APIS_CMD_DIR, { recursive: true });
   for (const client of validClients) {
+    if (MANUAL_COMMANDS.has(client.kebabName)) {
+      console.log(`  Skipping ${client.kebabName} (manual command)`);
+      continue;
+    }
     writeFileSync(resolve(APIS_CMD_DIR, `${client.kebabName}.ts`), generateApiCommand(client));
   }
 

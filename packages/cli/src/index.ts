@@ -25,7 +25,7 @@ export const main = defineCommand({
     address: () => import('./commands/apis/address.js').then((m) => m.default),
     'address-suggestions': () => import('./commands/apis/address-suggestions.js').then((m) => m.default),
     'ai-agents': () => import('./commands/apis/ai-agents.js').then((m) => m.default),
-    app: () => import('./commands/apis/app.js').then((m) => m.default),
+    app: () => import('./commands/app/index.js').then((m) => m.default),
     'audit-logs': () => import('./commands/apis/audit-logs.js').then((m) => m.default),
     automation: () => import('./commands/apis/automation.js').then((m) => m.default),
     billing: () => import('./commands/apis/billing.js').then((m) => m.default),
