@@ -93,7 +93,7 @@ async function proxyRequest<T>(params: {
   const { method = 'GET', params: queryParams, body, headers = {} } = options;
 
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
-  let url = `${baseUrl}/v1/public/apps/${appId}/proxy/${proxyName}/${normalizedPath}`;
+  let url = `${baseUrl}/v1/public/app/${appId}/proxy/${proxyName}/${normalizedPath}`;
 
   if (queryParams && Object.keys(queryParams).length > 0) {
     const searchParams = new URLSearchParams(queryParams);
