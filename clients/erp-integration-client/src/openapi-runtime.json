@@ -514,6 +514,25 @@
         },
         "responses": {}
       }
+    },
+    "/v1/managed-call/{slug}/execute": {
+      "post": {
+        "operationId": "managedCallExecute",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -529,6 +548,11 @@
         }
       },
       "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
         "content": {
           "application/json": {}
         }

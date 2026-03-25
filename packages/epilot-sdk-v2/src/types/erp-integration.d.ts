@@ -23,6 +23,7 @@ export declare namespace Components {
                 message?: string;
             }[];
         }
+        export type Forbidden = Schemas.ErrorResponseBase;
         export type GetMonitoringStatsResponse = Schemas.MonitoringStats;
         export interface GetMonitoringTimeSeriesResponse {
             /**
@@ -199,6 +200,16 @@ export declare namespace Components {
              */
             freshnessThresholdMinutes?: number;
         }
+        /**
+         * Shared configuration for connector-type integrations
+         */
+        export interface ConnectorConfig {
+            /**
+             * Base URL for the partner API
+             */
+            base_url?: string;
+            auth?: /* Authentication configuration for managed call requests */ ManagedCallAuth;
+        }
         export interface CreateFileProxyUseCaseRequest {
             /**
              * Use case name
@@ -269,6 +280,36 @@ export declare namespace Components {
              */
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
+            /**
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             *
+             */
+            integration_type?: "erp" | "connector";
+            connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
+            /**
+             * If true, integration is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
+        }
+        export interface CreateManagedCallUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Use case type for managed API calls
+             */
+            type: "managed_call";
+            configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
         }
         export interface CreateOutboundUseCaseRequest {
             /**
@@ -314,7 +355,7 @@ export declare namespace Components {
              */
             SecureProxyUseCaseConfiguration;
         }
-        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest | CreateFileProxyUseCaseRequest | CreateSecureProxyUseCaseRequest;
+        export type CreateUseCaseRequest = CreateInboundUseCaseRequest | CreateOutboundUseCaseRequest | CreateFileProxyUseCaseRequest | CreateManagedCallUseCaseRequest | CreateSecureProxyUseCaseRequest;
         export interface CreateUseCaseRequestBase {
             /**
              * Use case name
@@ -433,6 +474,38 @@ export declare namespace Components {
             type: "inbound";
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
         }
+        export interface EmbeddedManagedCallUseCaseRequest {
+            /**
+             * Optional use case ID for update matching.
+             * - If provided and matches an existing use case, that use case is updated
+             * - If provided but no match, a new use case with this ID is created
+             * - If omitted, a new use case with auto-generated ID is created
+             *
+             */
+            id?: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type for managed API calls
+             */
+            type: "managed_call";
+            configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+        }
         export interface EmbeddedOutboundUseCaseRequest {
             /**
              * Optional use case ID for update matching.
@@ -501,7 +574,7 @@ export declare namespace Components {
              */
             SecureProxyUseCaseConfiguration;
         }
-        export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest | EmbeddedFileProxyUseCaseRequest | EmbeddedSecureProxyUseCaseRequest;
+        export type EmbeddedUseCaseRequest = EmbeddedInboundUseCaseRequest | EmbeddedOutboundUseCaseRequest | EmbeddedFileProxyUseCaseRequest | EmbeddedManagedCallUseCaseRequest | EmbeddedSecureProxyUseCaseRequest;
         export interface EmbeddedUseCaseRequestBase {
             /**
              * Optional use case ID for update matching.
@@ -608,25 +681,40 @@ export declare namespace Components {
             /**
              * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
              *
+             * example:
+             * business_partner
              */
             event_name: string;
             /**
              * Timestamp when the event occurred
+             * example:
+             * 2025-05-01T08:30:00Z
              */
             timestamp: string; // date-time
             /**
              * Format of the payload data
+             * example:
+             * json
              */
             format: "json" | "xml";
             /**
              * The object data payload - can be either a serialized string or a direct JSON object
+             * example:
+             * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
-            payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
+            payload: /**
+             * The object data payload - can be either a serialized string or a direct JSON object
+             * example:
+             * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
+             */
+            string | {
                 [name: string]: any;
             };
             /**
              * Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.
              *
+             * example:
+             * business_partner
              */
             use_case_slug?: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
@@ -640,25 +728,40 @@ export declare namespace Components {
             /**
              * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
              *
+             * example:
+             * business_partner
              */
             event_name?: string;
             /**
              * Timestamp when the event occurred
+             * example:
+             * 2025-05-01T08:30:00Z
              */
             timestamp: string; // date-time
             /**
              * Format of the payload data
+             * example:
+             * json
              */
             format: "json" | "xml";
             /**
              * The object data payload - can be either a serialized string or a direct JSON object
+             * example:
+             * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
-            payload: /* The object data payload - can be either a serialized string or a direct JSON object */ string | {
+            payload: /**
+             * The object data payload - can be either a serialized string or a direct JSON object
+             * example:
+             * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
+             */
+            string | {
                 [name: string]: any;
             };
             /**
              * Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.
              *
+             * example:
+             * business_partner
              */
             use_case_slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
@@ -894,7 +997,7 @@ export declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "file_proxy";
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "file_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -933,7 +1036,12 @@ export declare namespace Components {
              * must belong to the same integration.
              *
              */
-            secure_proxy?: FileProxySecureProxyAttachment;
+            secure_proxy?: {
+                /**
+                 * Slug of the secure_proxy use case in the same integration.
+                 */
+                use_case_slug: string;
+            };
             auth?: FileProxyAuth;
             /**
              * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)
@@ -1157,7 +1265,7 @@ export declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "inbound";
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "inbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -1258,6 +1366,16 @@ export declare namespace Components {
              */
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
+            /**
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             *
+             */
+            integration_type?: "erp" | "connector";
+            connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
+            /**
+             * If true, integration is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
         }
         export interface IntegrationAppMapping {
             /**
@@ -1315,6 +1433,16 @@ export declare namespace Components {
              */
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
+            /**
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             *
+             */
+            integration_type?: "erp" | "connector";
+            connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
+            /**
+             * If true, integration is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
         }
         export interface IntegrationEntity {
             /**
@@ -1516,9 +1644,248 @@ export declare namespace Components {
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             *
+             */
+            integration_type?: "erp" | "connector";
+            connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
+            /**
+             * If true, integration is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
+            /**
              * All use cases belonging to this integration
              */
             use_cases: UseCase[];
+        }
+        /**
+         * Authentication configuration for managed call requests
+         */
+        export interface ManagedCallAuth {
+            /**
+             * Authentication type
+             */
+            type?: "oauth2_client_credentials" | "api_key" | "bearer";
+            /**
+             * OAuth2 token URL. Can be plain text or {{env.key}} reference.
+             */
+            token_url?: string;
+            /**
+             * OAuth2 client ID. Can be plain text or {{env.key}} reference.
+             */
+            client_id?: string;
+            /**
+             * OAuth2 client secret. Must be an {{env.key}} reference (secret).
+             */
+            client_secret?: string;
+            /**
+             * OAuth2 scope
+             */
+            scope?: string;
+            /**
+             * OAuth2 audience parameter (e.g. for Auth0, Azure AD). Can be plain text or {{env.key}} reference.
+             */
+            audience?: string;
+            /**
+             * OAuth2 resource parameter (e.g. for Azure AD). Can be plain text or {{env.key}} reference.
+             */
+            resource?: string;
+            /**
+             * Additional key-value pairs for the OAuth2 token request body. Values can be {{env.key}} references.
+             */
+            body_params?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional headers for the OAuth2 token request. Values can be {{env.key}} references.
+             */
+            headers?: {
+                [name: string]: string;
+            };
+            /**
+             * Additional query parameters for the OAuth2 token URL. Values can be {{env.key}} references.
+             */
+            query_params?: {
+                [name: string]: string;
+            };
+            /**
+             * Header name for API key auth (default X-API-Key)
+             */
+            api_key_header?: string;
+            /**
+             * API key value. Must be an {{env.key}} reference (secret).
+             */
+            api_key?: string;
+            /**
+             * Bearer token value. Must be an {{env.key}} reference (secret).
+             */
+            token?: string;
+        }
+        export interface ManagedCallErrorResponse {
+            error: {
+                /**
+                 * Error code (e.g., EXTERNAL_API_ERROR, SSRF_BLOCKED, MANAGED_CALL_EXECUTION_ERROR)
+                 */
+                code: string;
+                /**
+                 * Human-readable error message
+                 */
+                message: string;
+                /**
+                 * Additional error details (e.g., status code and body for external API errors)
+                 */
+                details?: {
+                    [name: string]: any;
+                };
+            };
+        }
+        export interface ManagedCallExecuteRequest {
+            /**
+             * Integration ID
+             */
+            integration_id: string; // uuid
+            /**
+             * Request payload for the managed call operation
+             */
+            payload?: {
+                [name: string]: any;
+            };
+            /**
+             * Correlation ID for tracing related events (auto-generated if not provided)
+             */
+            correlation_id?: string;
+        }
+        /**
+         * The response from a managed call execution.
+         * On success, returns the JSONata-mapped response data directly (no wrapper).
+         * The shape is entirely defined by your response_mapping JSONata expression.
+         * If no response_mapping is configured, returns the raw external API response.
+         * Check the X-Inbound-Event-Id header for inbound pipeline tracking when inbound routing is configured.
+         *
+         */
+        export interface ManagedCallExecuteResponse {
+            [name: string]: any;
+        }
+        /**
+         * HTTP operation configuration for managed calls
+         */
+        export interface ManagedCallOperation {
+            method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /**
+             * URL path template with {{variable}} interpolation
+             */
+            path: string;
+            headers?: {
+                [name: string]: string;
+            };
+            query_params?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * Configuration for managed_call use cases. Defines a single API operation with JSONata mapping.
+         */
+        export interface ManagedCallOperationConfig {
+            operation: /* HTTP operation configuration for managed calls */ ManagedCallOperation;
+            /**
+             * JSONata expression for outbound body transformation
+             */
+            request_mapping?: string;
+            /**
+             * JSONata expression for inbound response transformation
+             */
+            response_mapping?: string;
+            /**
+             * Slug of the inbound use case to route responses to for async entity processing.
+             * When set, the managed call response is queued to the inbound pipeline and processed
+             * using the referenced inbound use case's mapping configuration.
+             *
+             */
+            inbound_use_case_slug?: string;
+        }
+        export interface ManagedCallUseCase {
+            /**
+             * Unique identifier for the use case
+             */
+            id: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name
+             */
+            name: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Use case type for managed API calls
+             */
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "managed_call";
+            enabled: boolean;
+            /**
+             * Description of the last change made to this use case
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when the use case was last updated
+             */
+            updated_at: string; // date-time
+            configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+        }
+        export interface ManagedCallUseCaseHistoryEntry {
+            /**
+             * Unique identifier for this history entry
+             */
+            id: string; // uuid
+            /**
+             * Reference to the parent use case
+             */
+            useCaseId: string; // uuid
+            /**
+             * Parent integration ID
+             */
+            integrationId: string; // uuid
+            /**
+             * Use case name at this point in history
+             */
+            name: string;
+            /**
+             * Use case slug at this point in history
+             */
+            slug?: string;
+            /**
+             * Whether the use case was enabled at this point in history
+             */
+            enabled: boolean;
+            /**
+             * Description of the change that was made at this point in history
+             */
+            change_description?: string;
+            /**
+             * ISO-8601 timestamp when the use case was originally created
+             */
+            created_at: string; // date-time
+            /**
+             * ISO-8601 timestamp of this historical snapshot (before the update)
+             */
+            updated_at: string; // date-time
+            /**
+             * ISO-8601 timestamp when this history entry was created
+             */
+            history_created_at: string; // date-time
+            /**
+             * Use case type for managed API calls
+             */
+            type: "managed_call";
+            configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
         }
         export interface MappingSimulationRequest {
             mapping_configuration: IntegrationConfigurationV1 | IntegrationConfigurationV2;
@@ -1863,7 +2230,7 @@ export declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "outbound";
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "outbound";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2544,7 +2911,7 @@ export declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy" | "secure_proxy";
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "secure_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2784,6 +3151,30 @@ export declare namespace Components {
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
         }
         export type UpdateIntegrationRequest = IntegrationEditableFields;
+        export interface UpdateManagedCallUseCaseRequest {
+            /**
+             * Use case name
+             */
+            name?: string;
+            /**
+             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Can only be set once on use cases that don't have a slug yet. Immutable after being set.
+             *
+             */
+            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * Whether the use case is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Optional description of this change (like a commit message)
+             */
+            change_description?: string;
+            /**
+             * Use case type for managed API calls
+             */
+            type?: "managed_call";
+            configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+        }
         export interface UpdateOutboundUseCaseRequest {
             /**
              * Use case name
@@ -2836,7 +3227,7 @@ export declare namespace Components {
              */
             SecureProxyUseCaseConfiguration;
         }
-        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest | UpdateFileProxyUseCaseRequest | UpdateSecureProxyUseCaseRequest;
+        export type UpdateUseCaseRequest = UpdateInboundUseCaseRequest | UpdateOutboundUseCaseRequest | UpdateFileProxyUseCaseRequest | UpdateManagedCallUseCaseRequest | UpdateSecureProxyUseCaseRequest;
         export interface UpdateUseCaseRequestBase {
             /**
              * Use case name
@@ -2884,6 +3275,16 @@ export declare namespace Components {
             environment_config?: EnvironmentFieldConfig[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             *
+             */
+            integration_type?: "erp" | "connector";
+            connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
+            /**
+             * If true, integration is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
+            /**
              * Full list of use cases (declarative). This replaces ALL existing use cases.
              * - Use cases with an `id` field matching an existing use case will be updated
              * - Use cases without an `id` or with a non-matching `id` will be created
@@ -2892,7 +3293,7 @@ export declare namespace Components {
              */
             use_cases?: EmbeddedUseCaseRequest[];
         }
-        export type UseCase = InboundUseCase | OutboundUseCase | FileProxyUseCase | SecureProxyUseCase;
+        export type UseCase = InboundUseCase | OutboundUseCase | FileProxyUseCase | ManagedCallUseCase | SecureProxyUseCase;
         export interface UseCaseBase {
             /**
              * Unique identifier for the use case
@@ -2914,7 +3315,7 @@ export declare namespace Components {
             /**
              * Use case type
              */
-            type: "inbound" | "outbound" | "file_proxy" | "secure_proxy";
+            type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
             enabled: boolean;
             /**
              * Description of the last change made to this use case
@@ -2929,7 +3330,7 @@ export declare namespace Components {
              */
             updated_at: string; // date-time
         }
-        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry | SecureProxyUseCaseHistoryEntry;
+        export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry | ManagedCallUseCaseHistoryEntry | SecureProxyUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
             /**
              * Unique identifier for this history entry
@@ -3285,6 +3686,32 @@ export declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ManagedCallExecute {
+        namespace Parameters {
+            export type Slug = string; // ^[a-z0-9][a-z0-9_-]*$
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug /* ^[a-z0-9][a-z0-9_-]*$ */;
+        }
+        export type RequestBody = Components.Schemas.ManagedCallExecuteRequest;
+        namespace Responses {
+            export type $200 = /**
+             * The response from a managed call execution.
+             * On success, returns the JSONata-mapped response data directly (no wrapper).
+             * The shape is entirely defined by your response_mapping JSONata expression.
+             * If no response_mapping is configured, returns the raw external API response.
+             * Check the X-Inbound-Event-Id header for inbound pipeline tracking when inbound routing is configured.
+             *
+             */
+            Components.Schemas.ManagedCallExecuteResponse;
+            export type $400 = Components.Schemas.ManagedCallErrorResponse;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+            export type $502 = Components.Schemas.ManagedCallErrorResponse;
         }
     }
     namespace ProcessErpUpdatesEvents {
@@ -3948,6 +4375,18 @@ export interface OperationMethods {
     data?: Paths.SecureProxy.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SecureProxy.Responses.$200>
+  /**
+   * managedCallExecute - Execute a managed call operation
+   * 
+   * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+   * Calls an external partner API with JSONata mapping on both request and response.
+   * 
+   */
+  'managedCallExecute'(
+    parameters?: Parameters<Paths.ManagedCallExecute.PathParameters> | null,
+    data?: Paths.ManagedCallExecute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4403,6 +4842,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SecureProxy.Responses.$200>
   }
+  ['/v1/managed-call/{slug}/execute']: {
+    /**
+     * managedCallExecute - Execute a managed call operation
+     * 
+     * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+     * Calls an external partner API with JSONata mapping on both request and response.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ManagedCallExecute.PathParameters> | null,
+      data?: Paths.ManagedCallExecute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -4410,9 +4863,11 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AccessLogEntry = Components.Schemas.AccessLogEntry;
 export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
+export type ConnectorConfig = Components.Schemas.ConnectorConfig;
 export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUseCaseRequest;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
+export type CreateManagedCallUseCaseRequest = Components.Schemas.CreateManagedCallUseCaseRequest;
 export type CreateOutboundUseCaseRequest = Components.Schemas.CreateOutboundUseCaseRequest;
 export type CreateSecureProxyUseCaseRequest = Components.Schemas.CreateSecureProxyUseCaseRequest;
 export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
@@ -4421,6 +4876,7 @@ export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegr
 export type DeliveryConfig = Components.Schemas.DeliveryConfig;
 export type EmbeddedFileProxyUseCaseRequest = Components.Schemas.EmbeddedFileProxyUseCaseRequest;
 export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
+export type EmbeddedManagedCallUseCaseRequest = Components.Schemas.EmbeddedManagedCallUseCaseRequest;
 export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutboundUseCaseRequest;
 export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecureProxyUseCaseRequest;
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
@@ -4461,6 +4917,14 @@ export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
 export type IntegrationSettings = Components.Schemas.IntegrationSettings;
 export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases;
+export type ManagedCallAuth = Components.Schemas.ManagedCallAuth;
+export type ManagedCallErrorResponse = Components.Schemas.ManagedCallErrorResponse;
+export type ManagedCallExecuteRequest = Components.Schemas.ManagedCallExecuteRequest;
+export type ManagedCallExecuteResponse = Components.Schemas.ManagedCallExecuteResponse;
+export type ManagedCallOperation = Components.Schemas.ManagedCallOperation;
+export type ManagedCallOperationConfig = Components.Schemas.ManagedCallOperationConfig;
+export type ManagedCallUseCase = Components.Schemas.ManagedCallUseCase;
+export type ManagedCallUseCaseHistoryEntry = Components.Schemas.ManagedCallUseCaseHistoryEntry;
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
@@ -4503,6 +4967,7 @@ export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type UpdateFileProxyUseCaseRequest = Components.Schemas.UpdateFileProxyUseCaseRequest;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
+export type UpdateManagedCallUseCaseRequest = Components.Schemas.UpdateManagedCallUseCaseRequest;
 export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseCaseRequest;
 export type UpdateSecureProxyUseCaseRequest = Components.Schemas.UpdateSecureProxyUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;

@@ -263,59 +263,6 @@ const overrideCmd = async (args: string[]) => {
   await typegenCmd();
 };
 
-/**
- * Extract module-level export declarations from an existing .d.ts / .d.cts file.
- *
- * The built declaration files contain two sections:
- *   1. OpenAPI-generated types (imports, namespace re-exports, Components, Paths, etc.)
- *   2. Module-level exports (declare const getClient, createClient, <apiHandle>, and the
- *      final `export { ... }` line, plus `authorize`/`TokenArg`/`OpenAPIClient` re-exports)
- *
- * When `openapi typegen` regenerates the OpenAPI types (section 1), it overwrites
- * section 2. This function extracts section 2 so it can be appended after regeneration.
- *
- * We identify the boundary as the first `declare const` line that is NOT inside a
- * namespace block — this marks where the module-level declarations begin.
- */
-const extractModuleExportsTail = (content: string): string | null => {
-  const lines = content.split('\n');
-
-  // Find the first top-level `declare const` line (not indented, not in a namespace)
-  let tailStartIndex = -1;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    // Match lines like: "declare const getClient: ..." or "/** ... */" comment blocks
-    // that precede a `declare const`. We look for the first JSDoc comment or `declare const`
-    // that follows the OpenAPI types section.
-    if (/^declare\s+const\s+/.test(line)) {
-      // Walk backwards to include any preceding JSDoc comment
-      let start = i;
-      while (
-        start > 0 &&
-        (lines[start - 1].trimStart().startsWith('*') ||
-          lines[start - 1].trimStart().startsWith('/**') ||
-          lines[start - 1].trim() === '')
-      ) {
-        // Only include blank lines and JSDoc comment lines
-        if (lines[start - 1].trim() === '') {
-          // Check if there's a JSDoc comment starting before this blank line — include the blank
-          start--;
-        } else if (lines[start - 1].trimStart().startsWith('/**') || lines[start - 1].trimStart().startsWith('*')) {
-          start--;
-        } else {
-          break;
-        }
-      }
-      tailStartIndex = start;
-      break;
-    }
-  }
-
-  if (tailStartIndex === -1) return null;
-
-  return lines.slice(tailStartIndex).join('\n');
-};
-
 const typegenCmd = async () => {
   try {
     const { execSync } = await import('node:child_process');

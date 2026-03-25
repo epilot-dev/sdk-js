@@ -65,6 +65,9 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 **proxy**
 - [`secureProxy`](#secureproxy)
 
+**managed-call**
+- [`managedCallExecute`](#managedcallexecute)
+
 **Schemas**
 - [`ErrorResponseBase`](#errorresponsebase)
 - [`ErpEvent`](#erpevent)
@@ -74,6 +77,8 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`TriggerErpActionRequest`](#triggererpactionrequest)
 - [`TriggerWebhookResp`](#triggerwebhookresp)
 - [`IntegrationEditableFields`](#integrationeditablefields)
+- [`ConnectorConfig`](#connectorconfig)
+- [`ManagedCallAuth`](#managedcallauth)
 - [`Integration`](#integration)
 - [`CreateIntegrationRequest`](#createintegrationrequest)
 - [`UpdateIntegrationRequest`](#updateintegrationrequest)
@@ -101,11 +106,13 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`EmbeddedInboundUseCaseRequest`](#embeddedinboundusecaserequest)
 - [`EmbeddedOutboundUseCaseRequest`](#embeddedoutboundusecaserequest)
 - [`EmbeddedFileProxyUseCaseRequest`](#embeddedfileproxyusecaserequest)
+- [`EmbeddedManagedCallUseCaseRequest`](#embeddedmanagedcallusecaserequest)
 - [`EmbeddedSecureProxyUseCaseRequest`](#embeddedsecureproxyusecaserequest)
 - [`UseCaseBase`](#usecasebase)
 - [`InboundUseCase`](#inboundusecase)
 - [`OutboundUseCase`](#outboundusecase)
 - [`FileProxyUseCase`](#fileproxyusecase)
+- [`ManagedCallUseCase`](#managedcallusecase)
 - [`SecureProxyUseCase`](#secureproxyusecase)
 - [`UseCase`](#usecase)
 - [`CreateUseCaseRequest`](#createusecaserequest)
@@ -113,23 +120,31 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`CreateInboundUseCaseRequest`](#createinboundusecaserequest)
 - [`CreateOutboundUseCaseRequest`](#createoutboundusecaserequest)
 - [`CreateFileProxyUseCaseRequest`](#createfileproxyusecaserequest)
+- [`CreateManagedCallUseCaseRequest`](#createmanagedcallusecaserequest)
 - [`CreateSecureProxyUseCaseRequest`](#createsecureproxyusecaserequest)
 - [`UpdateUseCaseRequest`](#updateusecaserequest)
 - [`UpdateUseCaseRequestBase`](#updateusecaserequestbase)
 - [`UpdateInboundUseCaseRequest`](#updateinboundusecaserequest)
 - [`UpdateOutboundUseCaseRequest`](#updateoutboundusecaserequest)
 - [`UpdateFileProxyUseCaseRequest`](#updatefileproxyusecaserequest)
+- [`UpdateManagedCallUseCaseRequest`](#updatemanagedcallusecaserequest)
 - [`UpdateSecureProxyUseCaseRequest`](#updatesecureproxyusecaserequest)
 - [`UseCaseHistoryEntry`](#usecasehistoryentry)
 - [`UseCaseHistoryEntryBase`](#usecasehistoryentrybase)
 - [`InboundUseCaseHistoryEntry`](#inboundusecasehistoryentry)
 - [`OutboundUseCaseHistoryEntry`](#outboundusecasehistoryentry)
 - [`FileProxyUseCaseHistoryEntry`](#fileproxyusecasehistoryentry)
+- [`ManagedCallUseCaseHistoryEntry`](#managedcallusecasehistoryentry)
 - [`SecureProxyUseCaseHistoryEntry`](#secureproxyusecasehistoryentry)
 - [`SecureProxyUseCaseConfiguration`](#secureproxyusecaseconfiguration)
 - [`SecureProxySummary`](#secureproxysummary)
 - [`SecureProxyRequest`](#secureproxyrequest)
 - [`SecureProxyResponse`](#secureproxyresponse)
+- [`ManagedCallOperationConfig`](#managedcalloperationconfig)
+- [`ManagedCallOperation`](#managedcalloperation)
+- [`ManagedCallExecuteRequest`](#managedcallexecuterequest)
+- [`ManagedCallExecuteResponse`](#managedcallexecuteresponse)
+- [`ManagedCallErrorResponse`](#managedcallerrorresponse)
 - [`FileProxyUseCaseConfiguration`](#fileproxyusecaseconfiguration)
 - [`FileProxySecureProxyAttachment`](#fileproxysecureproxyattachment)
 - [`FileProxyAuth`](#fileproxyauth)
@@ -446,7 +461,27 @@ const { data } = await client.listIntegrations()
           "enabled": false,
           "freshnessThresholdMinutes": 1
         }
-      }
+      },
+      "integration_type": "erp",
+      "connector_config": {
+        "base_url": "string",
+        "auth": {
+          "type": "oauth2_client_credentials",
+          "token_url": "string",
+          "client_id": "string",
+          "client_secret": "string",
+          "scope": "string",
+          "audience": "string",
+          "resource": "string",
+          "body_params": {},
+          "headers": {},
+          "query_params": {},
+          "api_key_header": "string",
+          "api_key": "string",
+          "token": "string"
+        }
+      },
+      "protected": true
     }
   ]
 }
@@ -485,7 +520,27 @@ const { data } = await client.createIntegration(
         enabled: false,
         freshnessThresholdMinutes: 1
       }
-    }
+    },
+    integration_type: 'erp',
+    connector_config: {
+      base_url: 'string',
+      auth: {
+        type: 'oauth2_client_credentials',
+        token_url: 'string',
+        client_id: 'string',
+        client_secret: 'string',
+        scope: 'string',
+        audience: 'string',
+        resource: 'string',
+        body_params: {},
+        headers: {},
+        query_params: {},
+        api_key_header: 'string',
+        api_key: 'string',
+        token: 'string'
+      }
+    },
+    protected: true
   },
 )
 ```
@@ -518,7 +573,27 @@ const { data } = await client.createIntegration(
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -566,7 +641,27 @@ const { data } = await client.getIntegration({
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -617,7 +712,27 @@ const { data } = await client.updateIntegration(
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -1027,6 +1142,9 @@ const { data } = await client.listIntegrationsV2()
       "app_ids": ["string"],
       "environment_config": [],
       "settings": {},
+      "integration_type": "erp",
+      "connector_config": {},
+      "protected": true,
       "use_cases": []
     }
   ]
@@ -1067,6 +1185,26 @@ const { data } = await client.createIntegrationV2(
         freshnessThresholdMinutes: 1
       }
     },
+    integration_type: 'erp',
+    connector_config: {
+      base_url: 'string',
+      auth: {
+        type: 'oauth2_client_credentials',
+        token_url: 'string',
+        client_id: 'string',
+        client_secret: 'string',
+        scope: 'string',
+        audience: 'string',
+        resource: 'string',
+        body_params: {},
+        headers: {},
+        query_params: {},
+        api_key_header: 'string',
+        api_key: 'string',
+        token: 'string'
+      }
+    },
+    protected: true,
     use_cases: [
       {
         id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -1111,6 +1249,26 @@ const { data } = await client.createIntegrationV2(
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1173,6 +1331,26 @@ const { data } = await client.getIntegrationV2({
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1230,6 +1408,26 @@ const { data } = await client.updateIntegrationV2(
         freshnessThresholdMinutes: 1
       }
     },
+    integration_type: 'erp',
+    connector_config: {
+      base_url: 'string',
+      auth: {
+        type: 'oauth2_client_credentials',
+        token_url: 'string',
+        client_id: 'string',
+        client_secret: 'string',
+        scope: 'string',
+        audience: 'string',
+        resource: 'string',
+        body_params: {},
+        headers: {},
+        query_params: {},
+        api_key_header: 'string',
+        api_key: 'string',
+        token: 'string'
+      }
+    },
+    protected: true,
     use_cases: [
       {
         id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -1274,6 +1472,26 @@ const { data } = await client.updateIntegrationV2(
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1814,6 +2032,36 @@ const { data } = await client.secureProxy(
 
 ---
 
+### `managedCallExecute`
+
+Execute a managed call operation
+
+`POST /v1/managed-call/{slug}/execute`
+
+```ts
+const { data } = await client.managedCallExecute(
+  {
+    slug: 'example',
+  },
+  {
+    integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    payload: {},
+    correlation_id: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `ErrorResponseBase`
@@ -1925,6 +2173,73 @@ type IntegrationEditableFields = {
       freshnessThresholdMinutes?: { ... }
     }
   }
+  integration_type?: "erp" | "connector"
+  connector_config?: {
+    base_url?: string
+    auth?: {
+      type?: { ... }
+      token_url?: { ... }
+      client_id?: { ... }
+      client_secret?: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+      api_key_header?: { ... }
+      api_key?: { ... }
+      token?: { ... }
+    }
+  }
+  protected?: boolean
+}
+```
+
+### `ConnectorConfig`
+
+Shared configuration for connector-type integrations
+
+```ts
+type ConnectorConfig = {
+  base_url?: string
+  auth?: {
+    type?: "oauth2_client_credentials" | "api_key" | "bearer"
+    token_url?: string
+    client_id?: string
+    client_secret?: string
+    scope?: string
+    audience?: string
+    resource?: string
+    body_params?: Record<string, string>
+    headers?: Record<string, string>
+    query_params?: Record<string, string>
+    api_key_header?: string
+    api_key?: string
+    token?: string
+  }
+}
+```
+
+### `ManagedCallAuth`
+
+Authentication configuration for managed call requests
+
+```ts
+type ManagedCallAuth = {
+  type?: "oauth2_client_credentials" | "api_key" | "bearer"
+  token_url?: string
+  client_id?: string
+  client_secret?: string
+  scope?: string
+  audience?: string
+  resource?: string
+  body_params?: Record<string, string>
+  headers?: Record<string, string>
+  query_params?: Record<string, string>
+  api_key_header?: string
+  api_key?: string
+  token?: string
 }
 ```
 
@@ -1954,6 +2269,26 @@ type Integration = {
       freshnessThresholdMinutes?: { ... }
     }
   }
+  integration_type?: "erp" | "connector"
+  connector_config?: {
+    base_url?: string
+    auth?: {
+      type?: { ... }
+      token_url?: { ... }
+      client_id?: { ... }
+      client_secret?: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+      api_key_header?: { ... }
+      api_key?: { ... }
+      token?: { ... }
+    }
+  }
+  protected?: boolean
 }
 ```
 
@@ -1979,6 +2314,26 @@ type CreateIntegrationRequest = {
       freshnessThresholdMinutes?: { ... }
     }
   }
+  integration_type?: "erp" | "connector"
+  connector_config?: {
+    base_url?: string
+    auth?: {
+      type?: { ... }
+      token_url?: { ... }
+      client_id?: { ... }
+      client_secret?: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+      api_key_header?: { ... }
+      api_key?: { ... }
+      token?: { ... }
+    }
+  }
+  protected?: boolean
 }
 ```
 
@@ -2004,6 +2359,26 @@ type UpdateIntegrationRequest = {
       freshnessThresholdMinutes?: { ... }
     }
   }
+  integration_type?: "erp" | "connector"
+  connector_config?: {
+    base_url?: string
+    auth?: {
+      type?: { ... }
+      token_url?: { ... }
+      client_id?: { ... }
+      client_secret?: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+      api_key_header?: { ... }
+      api_key?: { ... }
+      token?: { ... }
+    }
+  }
+  protected?: boolean
 }
 ```
 
@@ -2125,6 +2500,22 @@ type IntegrationWithUseCases = {
     integrationId: string // uuid
     name: string
     slug?: string
+    type: "managed_call"
+    enabled: boolean
+    change_description?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+    configuration?: {
+      operation: { ... }
+      request_mapping?: { ... }
+      response_mapping?: { ... }
+      inbound_use_case_slug?: { ... }
+    }
+  } | {
+    id: string // uuid
+    integrationId: string // uuid
+    name: string
+    slug?: string
     type: "secure_proxy"
     enabled: boolean
     change_description?: string
@@ -2160,6 +2551,26 @@ type UpsertIntegrationWithUseCasesRequest = {
       freshnessThresholdMinutes?: { ... }
     }
   }
+  integration_type?: "erp" | "connector"
+  connector_config?: {
+    base_url?: string
+    auth?: {
+      type?: { ... }
+      token_url?: { ... }
+      client_id?: { ... }
+      client_secret?: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+      api_key_header?: { ... }
+      api_key?: { ... }
+      token?: { ... }
+    }
+  }
+  protected?: boolean
   use_cases?: Array<{
     id?: string // uuid
     name: string
@@ -2202,12 +2613,26 @@ type UpsertIntegrationWithUseCasesRequest = {
     slug?: string
     enabled: boolean
     change_description?: string
+    type: "managed_call"
+    configuration?: {
+      operation: { ... }
+      request_mapping?: { ... }
+      response_mapping?: { ... }
+      inbound_use_case_slug?: { ... }
+    }
+  } | {
+    id?: string // uuid
+    name: string
+    slug?: string
+    enabled: boolean
+    change_description?: string
     type: "secure_proxy"
     configuration?: {
       vpc_mode: { ... }
       allowed_domains?: { ... }
     }
   }>
+  // ...
 }
 ```
 
@@ -2663,10 +3088,10 @@ type EmbeddedUseCaseRequest = {
   slug?: string
   enabled: boolean
   change_description?: string
-  type: "secure_proxy"
+  type: "managed_call"
   configuration?: {
-    vpc_mode: "static_ip" | "secure_link"
-    allowed_domains?: string[]
+    operation: {
+      method: { ... }
   // ...
 }
 ```
@@ -2791,6 +3216,30 @@ type EmbeddedFileProxyUseCaseRequest = {
 }
 ```
 
+### `EmbeddedManagedCallUseCaseRequest`
+
+```ts
+type EmbeddedManagedCallUseCaseRequest = {
+  id?: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  type: "managed_call"
+  configuration?: {
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
+  }
+}
+```
+
 ### `EmbeddedSecureProxyUseCaseRequest`
 
 ```ts
@@ -2816,7 +3265,7 @@ type UseCaseBase = {
   integrationId: string // uuid
   name: string
   slug?: string
-  type: "inbound" | "outbound" | "file_proxy" | "secure_proxy"
+  type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   enabled: boolean
   change_description?: string
   created_at: string // date-time
@@ -2937,6 +3386,33 @@ type FileProxyUseCase = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+}
+```
+
+### `ManagedCallUseCase`
+
+```ts
+type ManagedCallUseCase = {
+  id: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  type: "managed_call"
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  configuration?: {
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
   }
 }
 ```
@@ -3159,11 +3635,19 @@ type CreateUseCaseRequest = {
   name: string
   slug?: string
   enabled: boolean
-  type: "secure_proxy"
+  type: "managed_call"
   configuration?: {
-    vpc_mode: "static_ip" | "secure_link"
-    allowed_domains?: string[]
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
   }
+  // ...
 }
 ```
 
@@ -3279,6 +3763,28 @@ type CreateFileProxyUseCaseRequest = {
 }
 ```
 
+### `CreateManagedCallUseCaseRequest`
+
+```ts
+type CreateManagedCallUseCaseRequest = {
+  name: string
+  slug?: string
+  enabled: boolean
+  type: "managed_call"
+  configuration?: {
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
+  }
+}
+```
+
 ### `CreateSecureProxyUseCaseRequest`
 
 ```ts
@@ -3389,11 +3895,15 @@ type UpdateUseCaseRequest = {
   slug?: string
   enabled?: boolean
   change_description?: string
-  type?: "secure_proxy"
+  type?: "managed_call"
   configuration?: {
-    vpc_mode: "static_ip" | "secure_link"
-    allowed_domains?: string[]
-  }
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+  // ...
 }
 ```
 
@@ -3509,6 +4019,29 @@ type UpdateFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+  }
+}
+```
+
+### `UpdateManagedCallUseCaseRequest`
+
+```ts
+type UpdateManagedCallUseCaseRequest = {
+  name?: string
+  slug?: string
+  enabled?: boolean
+  change_description?: string
+  type?: "managed_call"
+  configuration?: {
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
   }
 }
 ```
@@ -3776,6 +4309,35 @@ type FileProxyUseCaseHistoryEntry = {
 }
 ```
 
+### `ManagedCallUseCaseHistoryEntry`
+
+```ts
+type ManagedCallUseCaseHistoryEntry = {
+  id: string // uuid
+  useCaseId: string // uuid
+  integrationId: string // uuid
+  name: string
+  slug?: string
+  enabled: boolean
+  change_description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+  history_created_at: string // date-time
+  type: "managed_call"
+  configuration?: {
+    operation: {
+      method: { ... }
+      path: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    request_mapping?: string
+    response_mapping?: string
+    inbound_use_case_slug?: string
+  }
+}
+```
+
 ### `SecureProxyUseCaseHistoryEntry`
 
 ```ts
@@ -3847,6 +4409,71 @@ type SecureProxyResponse = {
   status_code?: number
   headers?: Record<string, string>
   body?: unknown
+}
+```
+
+### `ManagedCallOperationConfig`
+
+Configuration for managed_call use cases. Defines a single API operation with JSONata mapping.
+
+```ts
+type ManagedCallOperationConfig = {
+  operation: {
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+    path: string
+    headers?: Record<string, string>
+    query_params?: Record<string, string>
+  }
+  request_mapping?: string
+  response_mapping?: string
+  inbound_use_case_slug?: string
+}
+```
+
+### `ManagedCallOperation`
+
+HTTP operation configuration for managed calls
+
+```ts
+type ManagedCallOperation = {
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+  path: string
+  headers?: Record<string, string>
+  query_params?: Record<string, string>
+}
+```
+
+### `ManagedCallExecuteRequest`
+
+```ts
+type ManagedCallExecuteRequest = {
+  integration_id: string // uuid
+  payload?: Record<string, unknown>
+  correlation_id?: string
+}
+```
+
+### `ManagedCallExecuteResponse`
+
+The response from a managed call execution.
+On success, returns the JSONata-mapped response data directly (no wrapper).
+The shape is entirely defined by your response_mapping JSONata expression.
+If no response_mapping is configured, returns the raw external API response.
+Check the X-Inbound-Event-Id
+
+```ts
+type ManagedCallExecuteResponse = unknown
+```
+
+### `ManagedCallErrorResponse`
+
+```ts
+type ManagedCallErrorResponse = {
+  error: {
+    code: string
+    message: string
+    details?: Record<string, unknown>
+  }
 }
 ```
 

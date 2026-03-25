@@ -1652,5 +1652,9 @@
       }
     }
   },
-  "servers": [{"url": "https://entity.sls.epilot.io"}]
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }

@@ -793,7 +793,11 @@
                     },
                     "frozen_version": {
                       "description": "The version ID that is currently frozen, if any",
-                      "$ref": "#/components/schemas/SchemaId"
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/SchemaId"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -828,7 +832,11 @@
                 "properties": {
                   "version_id": {
                     "description": "Freeze to a specific version ID. Defaults to the current version.",
-                    "$ref": "#/components/schemas/SchemaId"
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SchemaId"
+                      }
+                    ]
                   }
                 }
               }
@@ -10388,5 +10396,9 @@
       }
     }
   },
-  "servers": [{"url": "https://entity.sls.epilot.io"}]
+  "servers": [
+    {
+      "url": "https://entity.sls.epilot.io"
+    }
+  ]
 }

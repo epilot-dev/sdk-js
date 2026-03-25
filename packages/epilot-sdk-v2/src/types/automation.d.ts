@@ -1007,6 +1007,10 @@ export declare namespace Components {
              * Source blueprint/manifest ID used when automation is created via blueprints.
              */
             _manifest?: string /* uuid */[] | null;
+            /**
+             * If true, automation is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
         }
         /**
          * ID of the Automation Flow
