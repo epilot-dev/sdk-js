@@ -1,6 +1,5 @@
 # Data Management API
 
-- **Base URL:** `https://data-management.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
 
 ## Usage
@@ -79,7 +78,8 @@ const { data } = await client.queryEntities(
         type: 'entity_workflows_only_in_closed_or_cancelled_status',
         related_entity_schemas: ['string'],
         lookback_period_days: 0,
-        message_type: ['SENT']
+        message_type: ['SENT'],
+        workflow_status: ['CLOSED']
       }
     ],
     from: 0,
@@ -312,7 +312,8 @@ const { data } = await client.getConfig({
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
         "lookback_period_days": 0,
-        "message_type": ["SENT"]
+        "message_type": ["SENT"],
+        "workflow_status": ["CLOSED"]
       }
     ]
   },
@@ -399,7 +400,8 @@ const { data } = await client.upsertConfig(
           type: 'entity_workflows_only_in_closed_or_cancelled_status',
           related_entity_schemas: ['string'],
           lookback_period_days: 0,
-          message_type: ['SENT']
+          message_type: ['SENT'],
+          workflow_status: ['CLOSED']
         }
       ]
     },
@@ -431,7 +433,8 @@ const { data } = await client.upsertConfig(
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
         "lookback_period_days": 0,
-        "message_type": ["SENT"]
+        "message_type": ["SENT"],
+        "workflow_status": ["CLOSED"]
       }
     ]
   },
@@ -489,7 +492,8 @@ const { data } = await client.listConfigs({
             "type": "entity_workflows_only_in_closed_or_cancelled_status",
             "related_entity_schemas": ["string"],
             "lookback_period_days": 0,
-            "message_type": ["SENT"]
+            "message_type": ["SENT"],
+            "workflow_status": ["CLOSED"]
           }
         ]
       },
@@ -720,6 +724,7 @@ type QueryFilter = {
   related_entity_schemas?: string[]
   lookback_period_days?: number
   message_type?: "SENT" | "RECEIVED"[]
+  workflow_status?: "CLOSED" | "DONE"[]
 }
 ```
 
@@ -734,6 +739,7 @@ type QueryConfig = {
     related_entity_schemas?: string[]
     lookback_period_days?: number
     message_type?: "SENT" | "RECEIVED"[]
+    workflow_status?: "CLOSED" | "DONE"[]
   }>
 }
 ```
@@ -749,6 +755,7 @@ type QueryEntitiesRequest = {
     related_entity_schemas?: string[]
     lookback_period_days?: number
     message_type?: "SENT" | "RECEIVED"[]
+    workflow_status?: "CLOSED" | "DONE"[]
   }>
   from?: number
   size?: number
@@ -801,6 +808,7 @@ type UpsertConfigRequest = {
       related_entity_schemas?: { ... }
       lookback_period_days?: { ... }
       message_type?: { ... }
+      workflow_status?: { ... }
     }>
   }
   schedule: {
@@ -829,6 +837,7 @@ type Config = {
       related_entity_schemas?: { ... }
       lookback_period_days?: { ... }
       message_type?: { ... }
+      workflow_status?: { ... }
     }>
   }
   schedule?: {
