@@ -11249,7 +11249,7 @@ export declare namespace Paths {
             /**
              * Freeze to a specific version ID. Defaults to the current version.
              */
-            version_id?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            version_id?: string; // uuid
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
@@ -12395,7 +12395,7 @@ export declare namespace Paths {
                 /**
                  * The version ID that is currently frozen, if any
                  */
-                frozen_version?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+                frozen_version?: string; // uuid
             }
         }
     }
@@ -12447,7 +12447,7 @@ export declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -12473,7 +12473,7 @@ export declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -13221,6 +13221,7 @@ export declare namespace Paths {
              * false
              */
             export type Archived = boolean;
+            export type ExcludeTypes = ("relation" | "schema" | "system") | ("relation" | "schema" | "system")[];
             export type IncludeArchived = /**
              * Whether to include archived labels in the search results
              * - `true`: include archived labels
@@ -13251,6 +13252,7 @@ export declare namespace Paths {
              */
             Parameters.Archived;
             include_archived?: Parameters.IncludeArchived;
+            exclude_types?: Parameters.ExcludeTypes;
         }
         export interface RequestBody {
             classificationIds?: Components.Schemas.ClassificationIdOrPattern[];
@@ -13892,7 +13894,6 @@ export declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -16301,7 +16302,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
