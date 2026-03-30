@@ -323,6 +323,9 @@
     "definitions",
     "docs"
   ],
+  "optionalDependencies": {
+    "@epilot/epilot-journey-sdk": ">=2.0.0-alpha.0"
+  },
   "peerDependencies": {
     "axios": "^1.0.0",
     "openapi-client-axios": "^7.0.0"

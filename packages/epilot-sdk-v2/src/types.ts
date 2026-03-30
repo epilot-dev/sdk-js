@@ -36,6 +36,15 @@ export type HeadersConfig = Record<string, string>;
 export type OverridesConfig = Record<string, string>;
 
 /**
+ * A non-API extension mounted on the SDK.
+ * Unlike ApiEntry (OpenAPI-based), extensions are plain objects
+ * with arbitrary methods and properties (e.g. factory functions, utilities).
+ */
+export type ExtensionEntry = {
+  value: unknown;
+};
+
+/**
  * An API handle that provides:
  * - `getClient()` — cached singleton
  * - `createClient()` — fresh instance
