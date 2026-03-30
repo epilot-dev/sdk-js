@@ -750,131 +750,6 @@
         }
       }
     },
-    "/v2/flows/templates/{flowId}/export": {
-      "get": {
-        "operationId": "exportFlowTemplate",
-        "summary": "exportFlowTemplate",
-        "description": "Export a Flow Template with all referenced automations resolved and bundled alongside.",
-        "tags": [
-          "Flows V2"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "flowId",
-            "schema": {
-              "$ref": "#/components/schemas/FlowTemplateId"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Exported flow template with resolved automations",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowTemplateExport"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Flow template not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/flows/templates/import": {
-      "post": {
-        "operationId": "importFlowTemplate",
-        "summary": "importFlowTemplate",
-        "description": "Import a Flow Template from an export payload. Creates all automations and the flow in the caller's organization.",
-        "tags": [
-          "Flows V2"
-        ],
-        "requestBody": {
-          "description": "Export payload containing the flow template and resolved automations",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FlowTemplateExport"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Flow template imported successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FlowTemplateImportResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication Errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/workflows/definitions/{definitionId}": {
       "get": {
         "operationId": "getDefinition",
@@ -1851,7 +1726,7 @@
           "v2",
           "v3"
         ],
-        "description": "Version of the workflow schema.\n\n- `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.  \n- `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.  \n- `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.\n",
+        "description": "Version of the workflow schema.\n\n- `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.\n- `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.\n- `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.\n",
         "example": 2
       },
       "Trigger": {
@@ -2267,14 +2142,15 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "The id of the entity / workflow / task, based on the origin of the schedule"
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value \"all_preceding_tasks_completed\"."
               },
               "origin": {
                 "type": "string",
                 "enum": [
                   "flow_started",
                   "task_completed",
-                  "trigger_entity_attribute"
+                  "trigger_entity_attribute",
+                  "all_preceding_tasks_completed"
                 ]
               },
               "schema": {
@@ -2339,7 +2215,7 @@
                     "description": "Maximum number of iterations for the loop branch",
                     "default": 3,
                     "minimum": 1,
-                    "maximum": 10
+                    "maximum": 100
                   }
                 },
                 "required": [
@@ -2403,6 +2279,10 @@
           },
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "partner": {
+            "$ref": "#/components/schemas/PartnerDetails",
+            "description": "Partner-specific task details shown to partner org users viewing shared resources"
           },
           "taxonomies": {
             "type": "array",
@@ -2476,9 +2356,14 @@
             "example": "{{entity.owner}}"
           },
           "value": {
-            "type": "string",
-            "description": "The resolved value after variable evaluation (populated during execution)",
-            "example": "user_12345"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The resolved values after variable evaluation (populated during execution)",
+            "example": [
+              "user_12345"
+            ]
           }
         },
         "required": [
@@ -2504,7 +2389,8 @@
             "type": "string"
           },
           "to_id": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "condition_id": {
             "type": "string"
@@ -2516,8 +2402,7 @@
         },
         "required": [
           "id",
-          "from_id",
-          "to_id"
+          "from_id"
         ]
       },
       "Condition": {
@@ -2541,6 +2426,7 @@
           },
           "statements": {
             "type": "array",
+            "nullable": true,
             "items": {
               "$ref": "#/components/schemas/Statement"
             }
@@ -2570,6 +2456,14 @@
             "items": {
               "type": "string"
             }
+          },
+          "value_type": {
+            "type": "string",
+            "enum": [
+              "static",
+              "relative_date"
+            ],
+            "description": "How to interpret values. \"static\" (default) means literal values. \"relative_date\" means values[0] is a dynamic date token like \"today\"."
           }
         },
         "required": [
@@ -2646,7 +2540,26 @@
           },
           "attribute_sub_field": {
             "type": "string",
-            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., \"address\", \"name\", \"email_type\")"
+          },
+          "date_offset": {
+            "type": "object",
+            "description": "Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)",
+            "properties": {
+              "amount": {
+                "type": "integer",
+                "description": "Number of units to offset"
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "months",
+                  "years"
+                ],
+                "description": "Unit of the offset"
+              }
+            }
           }
         }
       },
@@ -2684,7 +2597,9 @@
             "enum": [
               "WORKFLOW_STARTED",
               "TASK_FINISHED",
-              "PHASE_FINISHED"
+              "PHASE_FINISHED",
+              "A_PRECEDING_TASK_COMPLETED",
+              "ALL_PRECEDING_TASKS_COMPLETED"
             ]
           },
           "task_id": {
@@ -2899,6 +2814,10 @@
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
           },
+          "partner": {
+            "$ref": "#/components/schemas/PartnerDetails",
+            "description": "Partner-specific task details shown to partner org users viewing shared resources"
+          },
           "taxonomies": {
             "type": "array",
             "items": {
@@ -3021,6 +2940,21 @@
           }
         }
       },
+      "PartnerDetails": {
+        "type": "object",
+        "description": "Details regarding partner for the workflow step",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
       "StepDescription": {
         "type": "object",
         "description": "Longer information regarding Task",
@@ -3088,14 +3022,9 @@
       "ClosingReason": {
         "type": "object",
         "description": "One Closing reason for a workflow",
-        "required": [
-          "title",
-          "status"
-        ],
         "properties": {
           "id": {
-            "type": "string",
-            "readOnly": true
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -3353,64 +3282,6 @@
           "type",
           "condition"
         ]
-      },
-      "FlowTemplateExport": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/FlowTemplate"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "_resolved_automations": {
-                "type": "object",
-                "description": "Map of automation_id to full AutomationFlow object. Null values indicate automations that could not be resolved.",
-                "additionalProperties": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "FlowTemplateImportResult": {
-        "type": "object",
-        "properties": {
-          "flow": {
-            "$ref": "#/components/schemas/FlowTemplate"
-          },
-          "_id_mappings": {
-            "type": "object",
-            "description": "Maps old IDs to new IDs for cross-referencing by callers (e.g. blueprint service)",
-            "properties": {
-              "flow_id": {
-                "type": "object",
-                "properties": {
-                  "old": {
-                    "type": "string"
-                  },
-                  "new": {
-                    "type": "string"
-                  }
-                }
-              },
-              "task_ids": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "description": "Map of old_task_id to new_task_id"
-              },
-              "automation_ids": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "description": "Map of old_automation_id to new_automation_id"
-              }
-            }
-          }
-        }
       }
     }
   }

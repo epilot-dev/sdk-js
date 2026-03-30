@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -39,6 +37,7 @@ declare namespace Components {
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -91,6 +90,7 @@ declare namespace Components {
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -138,8 +138,8 @@ declare namespace Components {
          */
         export interface ClosingReason {
             id?: string;
-            title: string;
-            status: ClosingReasonsStatus;
+            title?: string;
+            status?: ClosingReasonsStatus;
             lastUpdateTime?: string;
             creationTime?: string;
         }
@@ -172,7 +172,7 @@ declare namespace Components {
              */
             branch_name: string;
             logical_operator: "AND" | "OR";
-            statements: Statement[];
+            statements: Statement[] | null;
         }
         export interface CreateFlowTemplate {
             id?: string;
@@ -283,6 +283,7 @@ declare namespace Components {
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -324,7 +325,7 @@ declare namespace Components {
         export interface DueDateConfig {
             duration: number;
             unit: TimeUnit;
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED";
             task_id?: string;
             phase_id?: string;
         }
@@ -350,7 +351,7 @@ declare namespace Components {
         export interface Edge {
             id: string;
             from_id: string;
-            to_id: string;
+            to_id?: string | null;
             condition_id?: string;
             /**
              * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
@@ -450,9 +451,22 @@ declare namespace Components {
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
             /**
-             * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
+             * For complex attribute types, specifies which sub-field to extract (e.g., "address", "name", "email_type")
              */
             attribute_sub_field?: string;
+            /**
+             * Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)
+             */
+            date_offset?: {
+                /**
+                 * Number of units to offset
+                 */
+                amount?: number;
+                /**
+                 * Unit of the offset
+                 */
+                unit?: "days" | "months" | "years";
+            };
         }
         export interface FlowTemplate {
             id?: string;
@@ -636,135 +650,12 @@ declare namespace Components {
              */
             singleClosingReasonSelection?: boolean;
         }
-        export interface FlowTemplateExport {
-            id?: string;
-            org_id?: string;
-            name: string;
-            description?: string;
-            trigger?: /**
-             * example:
-             * {
-             *   "type": "automation",
-             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
-             * }
-             */
-            Trigger;
-            /**
-             * Whether the workflow is enabled or not
-             */
-            enabled?: boolean;
-            version?: /**
-             * Version of the workflow schema.
-             *
-             * - `v1` – *Deprecated*. The initial version of workflows with limited structure and automation capabilities.
-             * - `v2` – Linear workflows. Supports sequential task execution with basic automation triggers.
-             * - `v3` – Advanced workflows. Adds support for branching logic (conditions), parallel paths, and enhanced automation features such as dynamic triggers and flow control.
-             *
-             * example:
-             * 2
-             */
-            Version;
-            /**
-             * ISO String Date & Time
-             * example:
-             * 2021-04-27T12:01:13.000Z
-             */
-            created_at?: string;
-            /**
-             * ISO String Date & Time
-             * example:
-             * 2021-04-27T12:01:13.000Z
-             */
-            updated_at?: string;
-            /**
-             * example:
-             * 2021-04-27T12:00:00.000Z
-             */
-            due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
-            /**
-             * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
-             */
-            available_in_ecp?: boolean;
-            /**
-             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
-             */
-            additional_triggers?: /**
-             * example:
-             * {
-             *   "type": "automation",
-             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
-             * }
-             */
-            Trigger[];
-            phases?: Phase[];
-            tasks: Task[];
-            edges: Edge[];
-            closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
-            entity_sync?: /**
-             * example:
-             * {
-             *   "trigger": {
-             *     "event": "FlowStarted"
-             *   },
-             *   "target": {
-             *     "entitySchema": "opportunity",
-             *     "entityAttribute": "title"
-             *   },
-             *   "value": {
-             *     "source": "workflow_name"
-             *   }
-             * }
-             */
-            EntitySync[];
-            /**
-             * Taxonomy ids that are associated with this workflow and used for filtering
-             */
-            taxonomies?: string[];
-            /**
-             * Whether only a single closing reason can be selected
-             */
-            singleClosingReasonSelection?: boolean;
-            /**
-             * Map of automation_id to full AutomationFlow object. Null values indicate automations that could not be resolved.
-             */
-            _resolved_automations?: {
-                [name: string]: {
-                    [key: string]: any;
-                };
-            };
-        }
         /**
          * Short unique id (length 8) to identify the Flow Template.
          * example:
          * 7hj28akg
          */
         export type FlowTemplateId = string;
-        export interface FlowTemplateImportResult {
-            flow?: FlowTemplate;
-            /**
-             * Maps old IDs to new IDs for cross-referencing by callers (e.g. blueprint service)
-             */
-            _id_mappings?: {
-                flow_id?: {
-                    old?: string;
-                    new?: string;
-                };
-                /**
-                 * Map of old_task_id to new_task_id
-                 */
-                task_ids?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Map of old_automation_id to new_automation_id
-                 */
-                automation_ids?: {
-                    [name: string]: string;
-                };
-            };
-        }
         export interface FlowTemplatesList {
             results: FlowTemplate[];
         }
@@ -811,6 +702,7 @@ declare namespace Components {
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -828,6 +720,14 @@ declare namespace Components {
             maxAllowed?: number;
         }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        /**
+         * Details regarding partner for the workflow step
+         */
+        export interface PartnerDetails {
+            enabled?: boolean;
+            label?: string;
+            description?: string;
+        }
         export interface Phase {
             id: string;
             name: string;
@@ -850,10 +750,10 @@ declare namespace Components {
             unit: TimeUnit;
             reference: {
                 /**
-                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 * The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value "all_preceding_tasks_completed".
                  */
                 id: string;
-                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed";
                 /**
                  * The schema of the entity
                  */
@@ -900,6 +800,10 @@ declare namespace Components {
             source: EvaluationSource;
             operator: Operator;
             values: string[];
+            /**
+             * How to interpret values. "static" (default) means literal values. "relative_date" means values[0] is a dynamic date token like "today".
+             */
+            value_type?: "static" | "relative_date";
         }
         /**
          * Action that needs to be done in a Workflow
@@ -935,6 +839,10 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -984,6 +892,10 @@ declare namespace Components {
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -1036,11 +948,13 @@ declare namespace Components {
              */
             variable: string;
             /**
-             * The resolved value after variable evaluation (populated during execution)
+             * The resolved values after variable evaluation (populated during execution)
              * example:
-             * user_12345
+             * [
+             *   "user_12345"
+             * ]
              */
-            value?: string;
+            value?: string[];
         }
         /**
          * Version of the workflow schema.
@@ -1218,25 +1132,6 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
-    namespace ExportFlowTemplate {
-        namespace Parameters {
-            export type FlowId = /**
-             * Short unique id (length 8) to identify the Flow Template.
-             * example:
-             * 7hj28akg
-             */
-            Components.Schemas.FlowTemplateId;
-        }
-        export interface PathParameters {
-            flowId: Parameters.FlowId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.FlowTemplateExport;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $404 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
     namespace GetAllClosingReasons {
         namespace Parameters {
             export type IncludeInactive = boolean;
@@ -1341,15 +1236,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ClosingReasonsIds;
-        }
-    }
-    namespace ImportFlowTemplate {
-        export type RequestBody = Components.Schemas.FlowTemplateExport;
-        namespace Responses {
-            export type $201 = Components.Schemas.FlowTemplateImportResult;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
         }
     }
     namespace ListFlowTemplates {
@@ -1553,26 +1439,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DuplicateFlowTemplate.Responses.$201>
-  /**
-   * exportFlowTemplate - exportFlowTemplate
-   * 
-   * Export a Flow Template with all referenced automations resolved and bundled alongside.
-   */
-  'exportFlowTemplate'(
-    parameters?: Parameters<Paths.ExportFlowTemplate.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExportFlowTemplate.Responses.$200>
-  /**
-   * importFlowTemplate - importFlowTemplate
-   * 
-   * Import a Flow Template from an export payload. Creates all automations and the flow in the caller's organization.
-   */
-  'importFlowTemplate'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.ImportFlowTemplate.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ImportFlowTemplate.Responses.$201>
   /**
    * getDefinition - getDefinition
    * 
@@ -1808,30 +1674,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DuplicateFlowTemplate.Responses.$201>
   }
-  ['/v2/flows/templates/{flowId}/export']: {
-    /**
-     * exportFlowTemplate - exportFlowTemplate
-     * 
-     * Export a Flow Template with all referenced automations resolved and bundled alongside.
-     */
-    'get'(
-      parameters?: Parameters<Paths.ExportFlowTemplate.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExportFlowTemplate.Responses.$200>
-  }
-  ['/v2/flows/templates/import']: {
-    /**
-     * importFlowTemplate - importFlowTemplate
-     * 
-     * Import a Flow Template from an export payload. Creates all automations and the flow in the caller's organization.
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.ImportFlowTemplate.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ImportFlowTemplate.Responses.$201>
-  }
   ['/v1/workflows/definitions/{definitionId}']: {
     /**
      * getDefinition - getDefinition
@@ -1995,9 +1837,7 @@ export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
 export type FlowTemplateBase = Components.Schemas.FlowTemplateBase;
-export type FlowTemplateExport = Components.Schemas.FlowTemplateExport;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
-export type FlowTemplateImportResult = Components.Schemas.FlowTemplateImportResult;
 export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
@@ -2007,6 +1847,7 @@ export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
 export type Operator = Components.Schemas.Operator;
+export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type Phase = Components.Schemas.Phase;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;
