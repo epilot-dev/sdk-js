@@ -4015,6 +4015,7 @@ const { data } = await client.taxonomiesClassificationsSearch(
     query: 'example',
     archived: true,
     include_archived: 'example',
+    exclude_types: ['...'],
   },
   {
     classificationIds: [

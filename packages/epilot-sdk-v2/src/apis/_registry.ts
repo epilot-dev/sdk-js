@@ -245,56 +245,21 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
 /**
  * Register non-API extensions (plain objects, not OpenAPI clients).
  * These are mounted on the SDK alongside API handles.
+ * Extensions are lazy-loaded — the module is only imported on first access.
  */
 export const registerBuiltinExtensions = (extensions: Map<string, ExtensionEntry>) => {
-  // Journey Toolkit – factory functions, block utilities, export
-  try {
-    const journeySDK = require('@epilot/epilot-journey-sdk');
-    extensions.set('journeyToolkit', {
-      value: {
-        // Factories
-        createBlock: journeySDK.createBlock,
-        createJourney: journeySDK.createJourney,
-        createStep: journeySDK.createStep,
-        createTextInput: journeySDK.createTextInput,
-        createNumberInput: journeySDK.createNumberInput,
-        createBinaryInput: journeySDK.createBinaryInput,
-        createDatePicker: journeySDK.createDatePicker,
-        createSingleChoice: journeySDK.createSingleChoice,
-        createMultipleChoice: journeySDK.createMultipleChoice,
-        createPersonalInformation: journeySDK.createPersonalInformation,
-        createContact: journeySDK.createContact,
-        createAddress: journeySDK.createAddress,
-        createProductSelection: journeySDK.createProductSelection,
-        createShoppingCart: journeySDK.createShoppingCart,
-        createAvailabilityCheck: journeySDK.createAvailabilityCheck,
-        createPVRoofPlanner: journeySDK.createPVRoofPlanner,
-        createFileUpload: journeySDK.createFileUpload,
-        createPaymentMethod: journeySDK.createPaymentMethod,
-        createConsents: journeySDK.createConsents,
-        createParagraph: journeySDK.createParagraph,
-        createImage: journeySDK.createImage,
-        createActionBar: journeySDK.createActionBar,
-        createSuccessMessage: journeySDK.createSuccessMessage,
-        createSummary: journeySDK.createSummary,
-        // Block types
-        ControlName: journeySDK.ControlName,
-        BLOCK_CATALOG: journeySDK.BLOCK_CATALOG,
-        // Utilities
-        findBlock: journeySDK.findBlock,
-        getStepBlocks: journeySDK.getStepBlocks,
-        getAllBlocks: journeySDK.getAllBlocks,
-        updateBlock: journeySDK.updateBlock,
-        addBlock: journeySDK.addBlock,
-        removeBlock: journeySDK.removeBlock,
-        exportJourneyCode: journeySDK.exportJourneyCode,
-        parseBlockValue: journeySDK.parseBlockValue,
-        mergeBlockValue: journeySDK.mergeBlockValue,
-        // Client constructor
-        JourneyClient: journeySDK.JourneyClient,
-      },
-    });
-  } catch {
-    // @epilot/epilot-journey-sdk not installed — journeyToolkit won't be available
-  }
+  let cached: unknown = null;
+  extensions.set('journeyToolkit', {
+    get value() {
+      if (cached) return cached;
+      try {
+        // lazy-load journey toolkit
+        cached = require('@epilot/epilot-journey-sdk');
+      } catch {
+        // journey toolkit not installed
+        cached = undefined;
+      }
+      return cached;
+    },
+  });
 };

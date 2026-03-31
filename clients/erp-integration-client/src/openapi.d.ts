@@ -23,7 +23,20 @@ declare namespace Components {
             }[];
         }
         export type Forbidden = Schemas.ErrorResponseBase;
+        export interface GetAssociatedMonitoringEventsResponse {
+            /**
+             * All monitoring events sharing this event_id, ordered by created_at ASC
+             */
+            monitoring_events?: Schemas.MonitoringEventV2[];
+            /**
+             * The original inbound event payload from erp_incoming_events, if available
+             */
+            inbound_event?: {
+                [name: string]: any;
+            } | null;
+        }
         export type GetMonitoringStatsResponse = Schemas.MonitoringStats;
+        export type GetMonitoringStatsV2Response = Schemas.MonitoringStatsV2;
         export interface GetMonitoringTimeSeriesResponse {
             /**
              * The time bucket interval used for aggregation
@@ -41,6 +54,15 @@ declare namespace Components {
              * List of time-series buckets with event counts
              */
             buckets: Schemas.TimeSeriesBucket[];
+        }
+        export interface GetMonitoringTimeSeriesV2Response {
+            /**
+             * The bucket interval
+             */
+            interval?: "5m" | "10m" | "30m" | "1h" | "3h" | "1d";
+            from_date?: string; // date-time
+            to_date?: string; // date-time
+            buckets?: Schemas.TimeSeriesBucketV2[];
         }
         export type InternalServerError = Schemas.ErrorResponseBase;
         export type NotFound = Schemas.ErrorResponseBase;
@@ -99,6 +121,23 @@ declare namespace Components {
             next_cursor?: {
                 completed_at?: string; // date-time
                 event_id?: string;
+            } | null;
+            /**
+             * Indicates if more results are available
+             */
+            has_more?: boolean;
+        }
+        export interface QueryMonitoringEventsV2Response {
+            /**
+             * List of monitoring events
+             */
+            data?: Schemas.MonitoringEventV2[];
+            /**
+             * Cursor to fetch the next page. Null if no more results.
+             */
+            next_cursor?: {
+                created_at?: string; // date-time
+                id?: string; // uuid
             } | null;
             /**
              * Indicates if more results are available
@@ -199,6 +238,30 @@ declare namespace Components {
              */
             freshnessThresholdMinutes?: number;
         }
+        export interface CommitTypesRequest {
+            /**
+             * npm package name
+             * example:
+             * @epilot/hems-cleverpv
+             */
+            package_name: string;
+            /**
+             * Package version
+             * example:
+             * 1.0.0
+             */
+            version: string;
+            /**
+             * Type annotations per use case slug
+             */
+            annotations?: {
+                [name: string]: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+            };
+        }
+        export interface CommitTypesResponse {
+            committed: boolean;
+            warnings?: string[];
+        }
         /**
          * Shared configuration for connector-type integrations
          */
@@ -208,6 +271,24 @@ declare namespace Components {
              */
             base_url?: string;
             auth?: /* Authentication configuration for managed call requests */ ManagedCallAuth;
+            /**
+             * History of generated type package versions
+             */
+            types_versions?: {
+                version: string;
+                package_name: string;
+                generated_at: string; // date-time
+                generated_by: string;
+                status: "active" | "deprecated";
+            }[];
+            /**
+             * Latest active types package version
+             */
+            latest_types_version?: string;
+            /**
+             * Latest active types package name
+             */
+            latest_types_package_name?: string;
         }
         export interface CreateFileProxyUseCaseRequest {
             /**
@@ -1110,6 +1191,69 @@ declare namespace Components {
              */
             FileProxyUseCaseConfiguration;
         }
+        export interface GenerateTypesPreviewResponse {
+            integration_name?: string;
+            use_cases: /* Scaffolded type descriptors for a single use case */ UseCaseTypePreview[];
+            /**
+             * Previously generated version, if any
+             */
+            previous_version?: string;
+            /**
+             * Suggested next version based on detected changes
+             */
+            suggested_version?: string;
+            suggested_bump?: "major" | "minor";
+            detected_changes?: {
+                slug: string;
+                field: string;
+                type: "breaking" | "non-breaking";
+                description: string;
+            }[];
+        }
+        export interface GenerateTypesRequest {
+            /**
+             * npm package name
+             * example:
+             * @epilot/hems-cleverpv
+             */
+            package_name: string;
+            /**
+             * Package version
+             * example:
+             * 1.0.0
+             */
+            version: string;
+            description?: string;
+            /**
+             * Domain standard package to extend
+             * example:
+             * @epilot/hems
+             */
+            domain_package?: string;
+            /**
+             * Name of the domain UseCaseMap to extend
+             * example:
+             * HemsUseCaseMap
+             */
+            domain_map_name?: string;
+            /**
+             * Type annotations per use case slug
+             */
+            annotations?: {
+                [name: string]: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+            };
+        }
+        export interface GenerateTypesResponse {
+            package_name: string;
+            version: string;
+            /**
+             * Generated file contents keyed by file path
+             */
+            files: {
+                [name: string]: string;
+            };
+            warnings?: string[];
+        }
         export interface GetMonitoringStatsRequest {
             /**
              * Start date for statistics period (inclusive)
@@ -1142,6 +1286,28 @@ declare namespace Components {
              */
             outbound_group_by?: ("event_name" | "status" | "webhook_config_id" | "date")[];
         }
+        export interface GetMonitoringStatsV2Request {
+            /**
+             * Start of the time range
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * End of the time range
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Filter stats by use case type
+             */
+            use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Field to group the breakdown by
+             */
+            group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date";
+        }
         export interface GetMonitoringTimeSeriesRequest {
             /**
              * Start date for the time series (inclusive)
@@ -1167,6 +1333,28 @@ declare namespace Components {
              * both
              */
             direction?: "inbound" | "outbound" | "both";
+        }
+        export interface GetMonitoringTimeSeriesV2Request {
+            /**
+             * Start of the time range (required)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date: string; // date-time
+            /**
+             * End of the time range (defaults to now)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Time bucket interval
+             */
+            interval: "5m" | "10m" | "30m" | "1h" | "3h" | "1d";
+            /**
+             * Filter by use case type
+             */
+            use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
         }
         /**
          * Configuration for inbound use cases (ERP to epilot)
@@ -1838,6 +2026,11 @@ declare namespace Components {
              */
             updated_at: string; // date-time
             configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+            type_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+            /**
+             * Whether types have been generated for this use case
+             */
+            types_locked?: boolean;
         }
         export interface ManagedCallUseCaseHistoryEntry {
             /**
@@ -1885,6 +2078,11 @@ declare namespace Components {
              */
             type: "managed_call";
             configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+            type_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+            /**
+             * Whether types have been generated for this use case
+             */
+            types_locked?: boolean;
         }
         export interface MappingSimulationRequest {
             mapping_configuration: IntegrationConfigurationV1 | IntegrationConfigurationV2;
@@ -1992,6 +2190,58 @@ declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
+        export interface MonitoringEventV2 {
+            /**
+             * Unique monitoring event ID
+             */
+            id: string; // uuid
+            /**
+             * Organization ID
+             */
+            org_id: string;
+            /**
+             * Integration ID
+             */
+            integration_id: string;
+            /**
+             * Trigger/inbound event ID (groups related monitoring events)
+             */
+            event_id: string;
+            /**
+             * Correlation ID for tracing. Empty when unavailable.
+             */
+            correlation_id?: string;
+            /**
+             * Use case ID. Empty for system-level events ("General").
+             */
+            use_case_id?: string;
+            /**
+             * Use case type. Empty for system-level events.
+             */
+            use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "";
+            /**
+             * Event outcome level
+             */
+            level: "success" | "error" | "skipped" | "warning";
+            /**
+             * Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success.
+             */
+            code?: string;
+            /**
+             * Human-readable message. Empty when not applicable.
+             */
+            message?: string;
+            /**
+             * Event-specific JSON data. Structure determined by `code`.
+             */
+            detail?: {
+                [name: string]: any;
+            } | null;
+            /**
+             * When the monitoring event was created
+             */
+            created_at: string; // date-time
+        }
         export interface MonitoringStats {
             /**
              * Statistics for inbound (ERP sync) events
@@ -2071,6 +2321,46 @@ declare namespace Components {
                     [name: string]: any;
                 }[];
             };
+        }
+        export interface MonitoringStatsV2 {
+            /**
+             * Total number of events in the period
+             */
+            total_events: number;
+            /**
+             * Number of successful events
+             */
+            success_count: number;
+            /**
+             * Number of error events
+             */
+            error_count: number;
+            /**
+             * Number of warning events
+             */
+            warning_count: number;
+            /**
+             * Number of skipped events
+             */
+            skipped_count: number;
+            /**
+             * Number of ACK_TIMEOUT events (acknowledgement timed out)
+             */
+            ack_timeout_count?: number;
+            /**
+             * Success rate as percentage (0-100)
+             */
+            success_rate?: number; // float
+            /**
+             * Timestamp of the most recent error
+             */
+            last_error_at?: string | null; // date-time
+            /**
+             * Statistics breakdown by requested group_by field
+             */
+            breakdown?: {
+                [name: string]: any;
+            }[];
         }
         export interface OutboundConflict {
             /**
@@ -2540,6 +2830,57 @@ declare namespace Components {
                 event_id?: string;
             };
         }
+        export interface QueryMonitoringEventsV2Request {
+            /**
+             * Filter by use case ID (UUID). Empty string matches "General" events.
+             */
+            use_case_id?: string;
+            /**
+             * Filter by use case type (replaces direction)
+             */
+            use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Filter by event level
+             */
+            level?: "success" | "error" | "skipped" | "warning";
+            /**
+             * Filter by taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502)
+             */
+            code?: string;
+            /**
+             * Filter by trigger/inbound event ID
+             */
+            event_id?: string;
+            /**
+             * Filter by correlation ID for tracing
+             */
+            correlation_id?: string;
+            /**
+             * Filter events from this date (inclusive)
+             * example:
+             * 2025-01-01T00:00:00Z
+             */
+            from_date?: string; // date-time
+            /**
+             * Filter events until this date (inclusive)
+             * example:
+             * 2025-01-31T23:59:59Z
+             */
+            to_date?: string; // date-time
+            /**
+             * Maximum number of results to return
+             * example:
+             * 50
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination (from previous response's next_cursor)
+             */
+            cursor?: {
+                created_at?: string; // date-time
+                id?: string; // uuid
+            };
+        }
         export interface QueryOutboundMonitoringEventsRequest {
             /**
              * Filter by event name (event_catalog_event). If not specified, returns events for all linked event names in the integration's outbound use cases.
@@ -2886,6 +3227,7 @@ declare namespace Components {
             enabled: boolean;
             vpc_mode: "static_ip" | "secure_link";
             allowed_domains?: string[];
+            allowed_ips?: string[];
             integration_id: string; // uuid
             integration_name: string;
         }
@@ -2948,6 +3290,13 @@ declare namespace Components {
              *
              */
             allowed_domains?: string[];
+            /**
+             * IP allowlist (CIDR notation) for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.
+             * Required for secure_link mode. All DNS-resolved IPs must match at least one range.
+             * Example: ["10.0.1.0/24", "192.168.1.0/24"]
+             *
+             */
+            allowed_ips?: string[];
         }
         export interface SecureProxyUseCaseHistoryEntry {
             /**
@@ -3039,6 +3388,32 @@ declare namespace Components {
                 total_count?: number;
             } | null;
         }
+        export interface TimeSeriesBucketV2 {
+            /**
+             * Bucket start timestamp
+             */
+            timestamp: string; // date-time
+            /**
+             * Number of successful events in the bucket
+             */
+            success_count?: number;
+            /**
+             * Number of error events in the bucket
+             */
+            error_count?: number;
+            /**
+             * Number of warning events in the bucket
+             */
+            warning_count?: number;
+            /**
+             * Number of skipped events in the bucket
+             */
+            skipped_count?: number;
+            /**
+             * Total events in the bucket
+             */
+            total_count: number;
+        }
         export interface TriggerErpActionRequest {
             /**
              * Unique identifier of the current automation execution
@@ -3092,6 +3467,67 @@ declare namespace Components {
             start_date?: string;
             end_date?: string;
             event_id?: string;
+        }
+        /**
+         * Developer-provided type annotations for a use case's request and response fields
+         */
+        export interface TypeAnnotations {
+            /**
+             * Type annotations for request fields, keyed by dot-path (e.g., "vendors[].id" -> "string")
+             */
+            request?: {
+                [name: string]: string;
+            };
+            /**
+             * Type annotations for response fields
+             */
+            response?: {
+                [name: string]: string;
+            };
+        }
+        /**
+         * Describes the inferred type shape of a JSONata expression
+         */
+        export interface TypeDescriptor {
+            kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union";
+            /**
+             * For kind=object, the properties and their type descriptors
+             */
+            properties?: {
+                [name: string]: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
+            };
+            /**
+             * For kind=array, the type of array items
+             */
+            items?: {
+                kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union";
+                /**
+                 * For kind=object, the properties and their type descriptors
+                 */
+                properties?: {
+                    [name: string]: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
+                };
+                /**
+                 * For kind=array, the type of array items
+                 */
+                items?: any;
+                /**
+                 * For kind=unknown, the JSONata path that produced this value
+                 */
+                source?: string;
+                /**
+                 * For kind=union, the variant types
+                 */
+                variants?: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor[];
+            };
+            /**
+             * For kind=unknown, the JSONata path that produced this value
+             */
+            source?: string;
+            /**
+             * For kind=union, the variant types
+             */
+            variants?: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor[];
         }
         export interface UpdateFileProxyUseCaseRequest {
             /**
@@ -3173,6 +3609,7 @@ declare namespace Components {
              */
             type?: "managed_call";
             configuration?: /* Configuration for managed_call use cases. Defines a single API operation with JSONata mapping. */ ManagedCallOperationConfig;
+            type_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
         }
         export interface UpdateOutboundUseCaseRequest {
             /**
@@ -3372,6 +3809,16 @@ declare namespace Components {
              */
             history_created_at: string; // date-time
         }
+        /**
+         * Scaffolded type descriptors for a single use case
+         */
+        export interface UseCaseTypePreview {
+            slug: string;
+            name?: string;
+            request_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
+            response_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
+            existing_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+        }
         export interface WebhookStatus {
             /**
              * Unique identifier for the webhook
@@ -3408,6 +3855,22 @@ declare namespace Paths {
             }
             export interface $500 {
             }
+        }
+    }
+    namespace CommitTypes {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.CommitTypesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.CommitTypesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace CreateIntegration {
@@ -3522,6 +3985,53 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GenerateTypes {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GenerateTypesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GenerateTypesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GenerateTypesPreview {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GenerateTypesPreviewResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetAssociatedMonitoringEvents {
+        namespace Parameters {
+            export type EventId = string;
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            eventId: Parameters.EventId;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.GetAssociatedMonitoringEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetIntegration {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -3568,6 +4078,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMonitoringStatsV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GetMonitoringStatsV2Request;
+        namespace Responses {
+            export type $200 = Components.Responses.GetMonitoringStatsV2Response;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetMonitoringTimeSeries {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -3578,6 +4104,22 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.GetMonitoringTimeSeriesRequest;
         namespace Responses {
             export type $200 = Components.Responses.GetMonitoringTimeSeriesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMonitoringTimeSeriesV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GetMonitoringTimeSeriesV2Request;
+        namespace Responses {
+            export type $200 = Components.Responses.GetMonitoringTimeSeriesV2Response;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
@@ -3805,6 +4347,22 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.QueryInboundMonitoringEventsRequest;
         namespace Responses {
             export type $200 = Components.Responses.QueryInboundMonitoringEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace QueryMonitoringEventsV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.QueryMonitoringEventsV2Request;
+        namespace Responses {
+            export type $200 = Components.Responses.QueryMonitoringEventsV2Response;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
@@ -4350,6 +4908,56 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
   /**
+   * queryMonitoringEventsV2 - queryMonitoringEventsV2
+   * 
+   * Query monitoring events from the unified erp_monitoring_v2 table.
+   * Returns all event types (inbound, outbound, file_proxy, etc.) in a single list.
+   * Replaces the separate v1 inbound-events and outbound-events endpoints.
+   * 
+   */
+  'queryMonitoringEventsV2'(
+    parameters?: Parameters<Paths.QueryMonitoringEventsV2.PathParameters> | null,
+    data?: Paths.QueryMonitoringEventsV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryMonitoringEventsV2.Responses.$200>
+  /**
+   * getMonitoringStatsV2 - getMonitoringStatsV2
+   * 
+   * Get aggregated statistics from the unified erp_monitoring_v2 table.
+   * Returns combined metrics for all event types with optional breakdowns.
+   * 
+   */
+  'getMonitoringStatsV2'(
+    parameters?: Parameters<Paths.GetMonitoringStatsV2.PathParameters> | null,
+    data?: Paths.GetMonitoringStatsV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringStatsV2.Responses.$200>
+  /**
+   * getMonitoringTimeSeriesV2 - getMonitoringTimeSeriesV2
+   * 
+   * Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+   * Returns bucketed counts for chart rendering.
+   * 
+   */
+  'getMonitoringTimeSeriesV2'(
+    parameters?: Parameters<Paths.GetMonitoringTimeSeriesV2.PathParameters> | null,
+    data?: Paths.GetMonitoringTimeSeriesV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringTimeSeriesV2.Responses.$200>
+  /**
+   * getAssociatedMonitoringEvents - getAssociatedMonitoringEvents
+   * 
+   * Returns all monitoring events sharing the same event_id, ordered chronologically.
+   * Also includes the original inbound event payload from erp_incoming_events if available.
+   * Used to display a full event trace/timeline.
+   * 
+   */
+  'getAssociatedMonitoringEvents'(
+    parameters?: Parameters<Paths.GetAssociatedMonitoringEvents.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAssociatedMonitoringEvents.Responses.$200>
+  /**
    * listSecureProxies - List all secure proxy use cases
    * 
    * Lists all secure_proxy use cases across all integrations for the authenticated organization.
@@ -4386,6 +4994,39 @@ export interface OperationMethods {
     data?: Paths.ManagedCallExecute.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
+  /**
+   * generateTypesPreview - Preview scaffolded types for a connector integration
+   * 
+   * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
+   * 
+   */
+  'generateTypesPreview'(
+    parameters?: Parameters<Paths.GenerateTypesPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GenerateTypesPreview.Responses.$200>
+  /**
+   * generateTypes - Generate a TypeScript npm package for a connector integration
+   * 
+   * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
+   * 
+   */
+  'generateTypes'(
+    parameters?: Parameters<Paths.GenerateTypes.PathParameters> | null,
+    data?: Paths.GenerateTypes.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GenerateTypes.Responses.$200>
+  /**
+   * commitTypes - Commit generated types and lock use case configurations
+   * 
+   * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
+   * 
+   */
+  'commitTypes'(
+    parameters?: Parameters<Paths.CommitTypes.PathParameters> | null,
+    data?: Paths.CommitTypes.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CommitTypes.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -4812,6 +5453,64 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.QueryOutboundMonitoringEvents.Responses.$200>
   }
+  ['/v2/integrations/{integrationId}/monitoring/events']: {
+    /**
+     * queryMonitoringEventsV2 - queryMonitoringEventsV2
+     * 
+     * Query monitoring events from the unified erp_monitoring_v2 table.
+     * Returns all event types (inbound, outbound, file_proxy, etc.) in a single list.
+     * Replaces the separate v1 inbound-events and outbound-events endpoints.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryMonitoringEventsV2.PathParameters> | null,
+      data?: Paths.QueryMonitoringEventsV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryMonitoringEventsV2.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/monitoring/stats']: {
+    /**
+     * getMonitoringStatsV2 - getMonitoringStatsV2
+     * 
+     * Get aggregated statistics from the unified erp_monitoring_v2 table.
+     * Returns combined metrics for all event types with optional breakdowns.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetMonitoringStatsV2.PathParameters> | null,
+      data?: Paths.GetMonitoringStatsV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringStatsV2.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/monitoring/time-series']: {
+    /**
+     * getMonitoringTimeSeriesV2 - getMonitoringTimeSeriesV2
+     * 
+     * Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+     * Returns bucketed counts for chart rendering.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetMonitoringTimeSeriesV2.PathParameters> | null,
+      data?: Paths.GetMonitoringTimeSeriesV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringTimeSeriesV2.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/monitoring/events/{eventId}/associated']: {
+    /**
+     * getAssociatedMonitoringEvents - getAssociatedMonitoringEvents
+     * 
+     * Returns all monitoring events sharing the same event_id, ordered chronologically.
+     * Also includes the original inbound event payload from erp_incoming_events if available.
+     * Used to display a full event trace/timeline.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAssociatedMonitoringEvents.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAssociatedMonitoringEvents.Responses.$200>
+  }
   ['/v1/integrations/secure-proxies']: {
     /**
      * listSecureProxies - List all secure proxy use cases
@@ -4855,6 +5554,45 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/generate-types-preview']: {
+    /**
+     * generateTypesPreview - Preview scaffolded types for a connector integration
+     * 
+     * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GenerateTypesPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GenerateTypesPreview.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/generate-types']: {
+    /**
+     * generateTypes - Generate a TypeScript npm package for a connector integration
+     * 
+     * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GenerateTypes.PathParameters> | null,
+      data?: Paths.GenerateTypes.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GenerateTypes.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/commit-types']: {
+    /**
+     * commitTypes - Commit generated types and lock use case configurations
+     * 
+     * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CommitTypes.PathParameters> | null,
+      data?: Paths.CommitTypes.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CommitTypes.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -4862,6 +5600,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type AccessLogEntry = Components.Schemas.AccessLogEntry;
 export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
+export type CommitTypesRequest = Components.Schemas.CommitTypesRequest;
+export type CommitTypesResponse = Components.Schemas.CommitTypesResponse;
 export type ConnectorConfig = Components.Schemas.ConnectorConfig;
 export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUseCaseRequest;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
@@ -4898,8 +5638,13 @@ export type FileProxyUrlParams = Components.Schemas.FileProxyUrlParams;
 export type FileProxyUseCase = Components.Schemas.FileProxyUseCase;
 export type FileProxyUseCaseConfiguration = Components.Schemas.FileProxyUseCaseConfiguration;
 export type FileProxyUseCaseHistoryEntry = Components.Schemas.FileProxyUseCaseHistoryEntry;
+export type GenerateTypesPreviewResponse = Components.Schemas.GenerateTypesPreviewResponse;
+export type GenerateTypesRequest = Components.Schemas.GenerateTypesRequest;
+export type GenerateTypesResponse = Components.Schemas.GenerateTypesResponse;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
+export type GetMonitoringStatsV2Request = Components.Schemas.GetMonitoringStatsV2Request;
 export type GetMonitoringTimeSeriesRequest = Components.Schemas.GetMonitoringTimeSeriesRequest;
+export type GetMonitoringTimeSeriesV2Request = Components.Schemas.GetMonitoringTimeSeriesV2Request;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundMonitoringEvent = Components.Schemas.InboundMonitoringEvent;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
@@ -4931,7 +5676,9 @@ export type MappingSimulationWarning = Components.Schemas.MappingSimulationWarni
 export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneScopeConfig;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
+export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
+export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
@@ -4944,6 +5691,7 @@ export type PruneScopeConfig = Components.Schemas.PruneScopeConfig;
 export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type QueryInboundMonitoringEventsRequest = Components.Schemas.QueryInboundMonitoringEventsRequest;
+export type QueryMonitoringEventsV2Request = Components.Schemas.QueryMonitoringEventsV2Request;
 export type QueryOutboundMonitoringEventsRequest = Components.Schemas.QueryOutboundMonitoringEventsRequest;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
@@ -4961,8 +5709,11 @@ export type SecureProxyUseCaseConfiguration = Components.Schemas.SecureProxyUseC
 export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCaseHistoryEntry;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
+export type TimeSeriesBucketV2 = Components.Schemas.TimeSeriesBucketV2;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
+export type TypeAnnotations = Components.Schemas.TypeAnnotations;
+export type TypeDescriptor = Components.Schemas.TypeDescriptor;
 export type UpdateFileProxyUseCaseRequest = Components.Schemas.UpdateFileProxyUseCaseRequest;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
@@ -4976,4 +5727,5 @@ export type UseCase = Components.Schemas.UseCase;
 export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
+export type UseCaseTypePreview = Components.Schemas.UseCaseTypePreview;
 export type WebhookStatus = Components.Schemas.WebhookStatus;

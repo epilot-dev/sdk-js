@@ -65,6 +65,9 @@ epilot erp-integration acknowledgeTracking
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping) — Removes a mapping from an app/component to an integration.
 - [`getOutboundStatus`](#getoutboundstatus) — Get the status of all outbound use cases for a specific integration.
 - [`listSecureProxies`](#listsecureproxies) — Lists all secure_proxy use cases across all integrations for the authenticated organization.
+- [`generateTypesPreview`](#generatetypespreview) — Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. 
+- [`generateTypes`](#generatetypes) — Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless op
+- [`commitTypes`](#committypes) — Commits the generated types by locking use case configurations and updating version tracking. Should be called after the
 
 **monitoring**
 - [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents) — Query inbound monitoring events for a specific integration.
@@ -72,6 +75,10 @@ epilot erp-integration acknowledgeTracking
 - [`getMonitoringTimeSeries`](#getmonitoringtimeseries) — Get time-series aggregated event counts for monitoring charts.
 - [`queryAccessLogs`](#queryaccesslogs) — Query API access logs for a specific integration's organization.
 - [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents) — Query outbound monitoring events for a specific integration.
+- [`queryMonitoringEventsV2`](#querymonitoringeventsv2) — Query monitoring events from the unified erp_monitoring_v2 table.
+- [`getMonitoringStatsV2`](#getmonitoringstatsv2) — Get aggregated statistics from the unified erp_monitoring_v2 table.
+- [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2) — Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+- [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents) — Returns all monitoring events sharing the same event_id, ordered chronologically.
 
 **proxy**
 - [`secureProxy`](#secureproxy) — Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
@@ -456,7 +463,18 @@ epilot erp-integration listIntegrations --jsonata 'integrations'
           "api_key_header": "string",
           "api_key": "string",
           "token": "string"
-        }
+        },
+        "types_versions": [
+          {
+            "version": "string",
+            "package_name": "string",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "generated_by": "string",
+            "status": "active"
+          }
+        ],
+        "latest_types_version": "string",
+        "latest_types_package_name": "string"
       },
       "protected": true
     }
@@ -524,7 +542,18 @@ epilot erp-integration createIntegration \
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }'
@@ -588,7 +617,18 @@ epilot erp-integration createIntegration --jsonata '$'
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -675,7 +715,18 @@ epilot erp-integration getIntegration -p integrationId=123e4567-e89b-12d3-a456-4
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -771,7 +822,18 @@ epilot erp-integration updateIntegration -p integrationId=123e4567-e89b-12d3-a45
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -1479,7 +1541,12 @@ epilot erp-integration createIntegrationV2 \
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1554,7 +1621,12 @@ epilot erp-integration createIntegrationV2 --jsonata '$'
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1655,7 +1727,12 @@ epilot erp-integration getIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1743,7 +1820,12 @@ epilot erp-integration updateIntegrationV2 \
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1824,7 +1906,12 @@ epilot erp-integration updateIntegrationV2 -p integrationId=123e4567-e89b-12d3-a
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -2523,6 +2610,290 @@ epilot erp-integration queryOutboundMonitoringEvents -p integrationId=123e4567-e
 
 ---
 
+### `queryMonitoringEventsV2`
+
+Query monitoring events from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/events`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration queryMonitoringEventsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot erp-integration queryMonitoringEventsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "use_case_id": "string",
+  "use_case_type": "inbound",
+  "level": "success",
+  "code": "string",
+  "event_id": "string",
+  "correlation_id": "string",
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "limit": 50,
+  "cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration queryMonitoringEventsV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration queryMonitoringEventsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration queryMonitoringEventsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringStatsV2`
+
+Get aggregated statistics from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/stats`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration getMonitoringStatsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"from_date":"2025-01-01T00:00:00Z","to_date":"2025-01-31T23:59:59Z","use_case_type":"inbound","group_by":"use_case_id"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration getMonitoringStatsV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration getMonitoringStatsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration getMonitoringStatsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'total_events'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "total_events": 0,
+  "success_count": 0,
+  "error_count": 0,
+  "warning_count": 0,
+  "skipped_count": 0,
+  "ack_timeout_count": 0,
+  "success_rate": 0,
+  "last_error_at": "1970-01-01T00:00:00.000Z",
+  "breakdown": [
+    {}
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringTimeSeriesV2`
+
+Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/time-series`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration getMonitoringTimeSeriesV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"from_date":"2025-01-01T00:00:00Z","to_date":"2025-01-31T23:59:59Z","interval":"5m","use_case_type":"inbound"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration getMonitoringTimeSeriesV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration getMonitoringTimeSeriesV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration getMonitoringTimeSeriesV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'interval'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "interval": "5m",
+  "from_date": "1970-01-01T00:00:00.000Z",
+  "to_date": "1970-01-01T00:00:00.000Z",
+  "buckets": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "success_count": 0,
+      "error_count": 0,
+      "warning_count": 0,
+      "skipped_count": 0,
+      "total_count": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAssociatedMonitoringEvents`
+
+Returns all monitoring events sharing the same event_id, ordered chronologically.
+
+`GET /v2/integrations/{integrationId}/monitoring/events/{eventId}/associated`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `eventId` | path | string | Yes | The event ID to get associated events for |
+
+**Sample Call**
+
+```bash
+epilot erp-integration getAssociatedMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p eventId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration getAssociatedMonitoringEvents 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration getAssociatedMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p eventId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'monitoring_events'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "monitoring_events": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "inbound_event": {}
+}
+```
+
+</details>
+
+---
+
 ### `listSecureProxies`
 
 Lists all secure_proxy use cases across all integrations for the authenticated organization.
@@ -2554,6 +2925,7 @@ epilot erp-integration listSecureProxies --jsonata 'secure_proxies'
       "enabled": true,
       "vpc_mode": "static_ip",
       "allowed_domains": ["string"],
+      "allowed_ips": ["string"],
       "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "integration_name": "string"
     }
@@ -2667,6 +3039,163 @@ epilot erp-integration managedCallExecute -p slug=contact --jsonata '$'
 
 ```json
 {}
+```
+
+</details>
+
+---
+
+### `generateTypesPreview`
+
+Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. 
+
+`POST /v1/integrations/{integrationId}/generate-types-preview`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot erp-integration generateTypesPreview \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration generateTypesPreview 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration generateTypesPreview -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'integration_name'
+```
+
+---
+
+### `generateTypes`
+
+Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless op
+
+`POST /v1/integrations/{integrationId}/generate-types`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration generateTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot erp-integration generateTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "package_name": "@epilot/hems-cleverpv",
+  "version": "1.0.0",
+  "description": "string",
+  "domain_package": "@epilot/hems",
+  "domain_map_name": "HemsUseCaseMap",
+  "annotations": {}
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration generateTypes 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration generateTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration generateTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'package_name'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "package_name": "string",
+  "version": "string",
+  "files": {},
+  "warnings": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `commitTypes`
+
+Commits the generated types by locking use case configurations and updating version tracking. Should be called after the
+
+`POST /v1/integrations/{integrationId}/commit-types`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration commitTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"package_name":"@epilot/hems-cleverpv","version":"1.0.0","annotations":{}}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration commitTypes 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration commitTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration commitTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'committed'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "committed": true,
+  "warnings": ["string"]
+}
 ```
 
 </details>

@@ -5214,6 +5214,8 @@ List taxonomy classifications in an organization based on taxonomy slug
 | `query` | query | string | No | The label names to search for (lowercase insensitive) |
 | `archived` | query | boolean | No | Filter by archived status. Deprecated. Use `include_archived` instead. |
 | `include_archived` | query | "true" \| "false" \| "only" | No |  |
+| `exclude_types` | query | "relation" \| "schema" \| "system" \| "relation" \| "schema" \| "system"[] | No | Taxonomy type(s) to exclude from the results. Useful to filter out relation labels, schema labels, and system labels.
+ |
 
 **Request Body**
 
