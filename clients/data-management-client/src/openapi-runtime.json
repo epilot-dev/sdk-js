@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://data-management.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/data-management/v1/{entity_schema}/query": {
       "post": {
@@ -215,6 +220,5 @@
       }
     }
   },
-  "components": {},
-  "servers": []
+  "components": {}
 }
