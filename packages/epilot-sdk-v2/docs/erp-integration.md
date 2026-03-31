@@ -54,6 +54,9 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping)
 - [`getOutboundStatus`](#getoutboundstatus)
 - [`listSecureProxies`](#listsecureproxies)
+- [`generateTypesPreview`](#generatetypespreview)
+- [`generateTypes`](#generatetypes)
+- [`commitTypes`](#committypes)
 
 **monitoring**
 - [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents)
@@ -61,6 +64,10 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`getMonitoringTimeSeries`](#getmonitoringtimeseries)
 - [`queryAccessLogs`](#queryaccesslogs)
 - [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents)
+- [`queryMonitoringEventsV2`](#querymonitoringeventsv2)
+- [`getMonitoringStatsV2`](#getmonitoringstatsv2)
+- [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2)
+- [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents)
 
 **proxy**
 - [`secureProxy`](#secureproxy)
@@ -145,6 +152,14 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`ManagedCallExecuteRequest`](#managedcallexecuterequest)
 - [`ManagedCallExecuteResponse`](#managedcallexecuteresponse)
 - [`ManagedCallErrorResponse`](#managedcallerrorresponse)
+- [`TypeAnnotations`](#typeannotations)
+- [`TypeDescriptor`](#typedescriptor)
+- [`UseCaseTypePreview`](#usecasetypepreview)
+- [`GenerateTypesPreviewResponse`](#generatetypespreviewresponse)
+- [`GenerateTypesRequest`](#generatetypesrequest)
+- [`GenerateTypesResponse`](#generatetypesresponse)
+- [`CommitTypesRequest`](#committypesrequest)
+- [`CommitTypesResponse`](#committypesresponse)
 - [`FileProxyUseCaseConfiguration`](#fileproxyusecaseconfiguration)
 - [`FileProxySecureProxyAttachment`](#fileproxysecureproxyattachment)
 - [`FileProxyAuth`](#fileproxyauth)
@@ -186,6 +201,12 @@ const { data } = await erpIntegrationClient.acknowledgeTracking(...)
 - [`OutboundMonitoringEvent`](#outboundmonitoringevent)
 - [`MonitoringStats`](#monitoringstats)
 - [`InboundMonitoringEvent`](#inboundmonitoringevent)
+- [`QueryMonitoringEventsV2Request`](#querymonitoringeventsv2request)
+- [`MonitoringEventV2`](#monitoringeventv2)
+- [`GetMonitoringStatsV2Request`](#getmonitoringstatsv2request)
+- [`MonitoringStatsV2`](#monitoringstatsv2)
+- [`GetMonitoringTimeSeriesV2Request`](#getmonitoringtimeseriesv2request)
+- [`TimeSeriesBucketV2`](#timeseriesbucketv2)
 
 ### `acknowledgeTracking`
 
@@ -479,7 +500,18 @@ const { data } = await client.listIntegrations()
           "api_key_header": "string",
           "api_key": "string",
           "token": "string"
-        }
+        },
+        "types_versions": [
+          {
+            "version": "string",
+            "package_name": "string",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "generated_by": "string",
+            "status": "active"
+          }
+        ],
+        "latest_types_version": "string",
+        "latest_types_package_name": "string"
       },
       "protected": true
     }
@@ -538,7 +570,18 @@ const { data } = await client.createIntegration(
         api_key_header: 'string',
         api_key: 'string',
         token: 'string'
-      }
+      },
+      types_versions: [
+        {
+          version: 'string',
+          package_name: 'string',
+          generated_at: '1970-01-01T00:00:00.000Z',
+          generated_by: 'string',
+          status: 'active'
+        }
+      ],
+      latest_types_version: 'string',
+      latest_types_package_name: 'string'
     },
     protected: true
   },
@@ -591,7 +634,18 @@ const { data } = await client.createIntegration(
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -659,7 +713,18 @@ const { data } = await client.getIntegration({
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -730,7 +795,18 @@ const { data } = await client.updateIntegration(
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true
 }
@@ -1202,7 +1278,12 @@ const { data } = await client.createIntegrationV2(
         api_key_header: 'string',
         api_key: 'string',
         token: 'string'
-      }
+      },
+      types_versions: [
+        { /* ... */ }
+      ],
+      latest_types_version: 'string',
+      latest_types_package_name: 'string'
     },
     protected: true,
     use_cases: [
@@ -1266,7 +1347,12 @@ const { data } = await client.createIntegrationV2(
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1348,7 +1434,12 @@ const { data } = await client.getIntegrationV2({
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1425,7 +1516,12 @@ const { data } = await client.updateIntegrationV2(
         api_key_header: 'string',
         api_key: 'string',
         token: 'string'
-      }
+      },
+      types_versions: [
+        { /* ... */ }
+      ],
+      latest_types_version: 'string',
+      latest_types_package_name: 'string'
     },
     protected: true,
     use_cases: [
@@ -1489,7 +1585,12 @@ const { data } = await client.updateIntegrationV2(
       "api_key_header": "string",
       "api_key": "string",
       "token": "string"
-    }
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
   },
   "protected": true,
   "use_cases": [
@@ -1961,6 +2062,204 @@ const { data } = await client.queryOutboundMonitoringEvents(
 
 ---
 
+### `queryMonitoringEventsV2`
+
+Query monitoring events from the unified erp_monitoring_v2 table.
+Returns all event types (inbound, outbound, file_proxy, etc.) in a single list.
+Replaces the separate v1 inbound-events and outbound-e
+
+`POST /v2/integrations/{integrationId}/monitoring/events`
+
+```ts
+const { data } = await client.queryMonitoringEventsV2(
+  {
+    integrationId: 'example',
+  },
+  {
+    use_case_id: 'string',
+    use_case_type: 'inbound',
+    level: 'success',
+    code: 'string',
+    event_id: 'string',
+    correlation_id: 'string',
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    limit: 50,
+    cursor: {
+      created_at: '1970-01-01T00:00:00.000Z',
+      id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringStatsV2`
+
+Get aggregated statistics from the unified erp_monitoring_v2 table.
+Returns combined metrics for all event types with optional breakdowns.
+
+`POST /v2/integrations/{integrationId}/monitoring/stats`
+
+```ts
+const { data } = await client.getMonitoringStatsV2(
+  {
+    integrationId: 'example',
+  },
+  {
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    use_case_type: 'inbound',
+    group_by: 'use_case_id'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "total_events": 0,
+  "success_count": 0,
+  "error_count": 0,
+  "warning_count": 0,
+  "skipped_count": 0,
+  "ack_timeout_count": 0,
+  "success_rate": 0,
+  "last_error_at": "1970-01-01T00:00:00.000Z",
+  "breakdown": [
+    {}
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringTimeSeriesV2`
+
+Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+Returns bucketed counts for chart rendering.
+
+`POST /v2/integrations/{integrationId}/monitoring/time-series`
+
+```ts
+const { data } = await client.getMonitoringTimeSeriesV2(
+  {
+    integrationId: 'example',
+  },
+  {
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    interval: '5m',
+    use_case_type: 'inbound'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "interval": "5m",
+  "from_date": "1970-01-01T00:00:00.000Z",
+  "to_date": "1970-01-01T00:00:00.000Z",
+  "buckets": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "success_count": 0,
+      "error_count": 0,
+      "warning_count": 0,
+      "skipped_count": 0,
+      "total_count": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAssociatedMonitoringEvents`
+
+Returns all monitoring events sharing the same event_id, ordered chronologically.
+Also includes the original inbound event payload from erp_incoming_events if available.
+Used to display a full event t
+
+`GET /v2/integrations/{integrationId}/monitoring/events/{eventId}/associated`
+
+```ts
+const { data } = await client.getAssociatedMonitoringEvents({
+  integrationId: 'example',
+  eventId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "monitoring_events": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "inbound_event": {}
+}
+```
+
+</details>
+
+---
+
 ### `listSecureProxies`
 
 List all secure proxy use cases
@@ -1984,6 +2283,7 @@ const { data } = await client.listSecureProxies()
       "enabled": true,
       "vpc_mode": "static_ip",
       "allowed_domains": ["string"],
+      "allowed_ips": ["string"],
       "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "integration_name": "string"
     }
@@ -2056,6 +2356,91 @@ const { data } = await client.managedCallExecute(
 
 ```json
 {}
+```
+
+</details>
+
+---
+
+### `generateTypesPreview`
+
+Preview scaffolded types for a connector integration
+
+`POST /v1/integrations/{integrationId}/generate-types-preview`
+
+```ts
+const { data } = await client.generateTypesPreview({
+  integrationId: 'example',
+})
+```
+
+---
+
+### `generateTypes`
+
+Generate a TypeScript npm package for a connector integration
+
+`POST /v1/integrations/{integrationId}/generate-types`
+
+```ts
+const { data } = await client.generateTypes(
+  {
+    integrationId: 'example',
+  },
+  {
+    package_name: '@epilot/hems-cleverpv',
+    version: '1.0.0',
+    description: 'string',
+    domain_package: '@epilot/hems',
+    domain_map_name: 'HemsUseCaseMap',
+    annotations: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "package_name": "string",
+  "version": "string",
+  "files": {},
+  "warnings": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `commitTypes`
+
+Commit generated types and lock use case configurations
+
+`POST /v1/integrations/{integrationId}/commit-types`
+
+```ts
+const { data } = await client.commitTypes(
+  {
+    integrationId: 'example',
+  },
+  {
+    package_name: '@epilot/hems-cleverpv',
+    version: '1.0.0',
+    annotations: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "committed": true,
+  "warnings": ["string"]
+}
 ```
 
 </details>
@@ -2191,6 +2576,15 @@ type IntegrationEditableFields = {
       api_key?: { ... }
       token?: { ... }
     }
+    types_versions?: Array<{
+      version: { ... }
+      package_name: { ... }
+      generated_at: { ... }
+      generated_by: { ... }
+      status: { ... }
+    }>
+    latest_types_version?: string
+    latest_types_package_name?: string
   }
   protected?: boolean
 }
@@ -2218,6 +2612,15 @@ type ConnectorConfig = {
     api_key?: string
     token?: string
   }
+  types_versions?: Array<{
+    version: string
+    package_name: string
+    generated_at: string // date-time
+    generated_by: string
+    status: "active" | "deprecated"
+  }>
+  latest_types_version?: string
+  latest_types_package_name?: string
 }
 ```
 
@@ -2287,6 +2690,15 @@ type Integration = {
       api_key?: { ... }
       token?: { ... }
     }
+    types_versions?: Array<{
+      version: { ... }
+      package_name: { ... }
+      generated_at: { ... }
+      generated_by: { ... }
+      status: { ... }
+    }>
+    latest_types_version?: string
+    latest_types_package_name?: string
   }
   protected?: boolean
 }
@@ -2332,6 +2744,15 @@ type CreateIntegrationRequest = {
       api_key?: { ... }
       token?: { ... }
     }
+    types_versions?: Array<{
+      version: { ... }
+      package_name: { ... }
+      generated_at: { ... }
+      generated_by: { ... }
+      status: { ... }
+    }>
+    latest_types_version?: string
+    latest_types_package_name?: string
   }
   protected?: boolean
 }
@@ -2377,6 +2798,15 @@ type UpdateIntegrationRequest = {
       api_key?: { ... }
       token?: { ... }
     }
+    types_versions?: Array<{
+      version: { ... }
+      package_name: { ... }
+      generated_at: { ... }
+      generated_by: { ... }
+      status: { ... }
+    }>
+    latest_types_version?: string
+    latest_types_package_name?: string
   }
   protected?: boolean
 }
@@ -2511,6 +2941,11 @@ type IntegrationWithUseCases = {
       response_mapping?: { ... }
       inbound_use_case_slug?: { ... }
     }
+    type_annotations?: {
+      request?: { ... }
+      response?: { ... }
+    }
+    types_locked?: boolean
   } | {
     id: string // uuid
     integrationId: string // uuid
@@ -2524,6 +2959,7 @@ type IntegrationWithUseCases = {
     configuration?: {
       vpc_mode: { ... }
       allowed_domains?: { ... }
+      allowed_ips?: { ... }
     }
   }>
 }
@@ -2569,6 +3005,15 @@ type UpsertIntegrationWithUseCasesRequest = {
       api_key?: { ... }
       token?: { ... }
     }
+    types_versions?: Array<{
+      version: { ... }
+      package_name: { ... }
+      generated_at: { ... }
+      generated_by: { ... }
+      status: { ... }
+    }>
+    latest_types_version?: string
+    latest_types_package_name?: string
   }
   protected?: boolean
   use_cases?: Array<{
@@ -2623,15 +3068,6 @@ type UpsertIntegrationWithUseCasesRequest = {
   } | {
     id?: string // uuid
     name: string
-    slug?: string
-    enabled: boolean
-    change_description?: string
-    type: "secure_proxy"
-    configuration?: {
-      vpc_mode: { ... }
-      allowed_domains?: { ... }
-    }
-  }>
   // ...
 }
 ```
@@ -3253,6 +3689,7 @@ type EmbeddedSecureProxyUseCaseRequest = {
   configuration?: {
     vpc_mode: "static_ip" | "secure_link"
     allowed_domains?: string[]
+    allowed_ips?: string[]
   }
 }
 ```
@@ -3414,6 +3851,11 @@ type ManagedCallUseCase = {
     response_mapping?: string
     inbound_use_case_slug?: string
   }
+  type_annotations?: {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }
+  types_locked?: boolean
 }
 ```
 
@@ -3433,6 +3875,7 @@ type SecureProxyUseCase = {
   configuration?: {
     vpc_mode: "static_ip" | "secure_link"
     allowed_domains?: string[]
+    allowed_ips?: string[]
   }
 }
 ```
@@ -3796,6 +4239,7 @@ type CreateSecureProxyUseCaseRequest = {
   configuration?: {
     vpc_mode: "static_ip" | "secure_link"
     allowed_domains?: string[]
+    allowed_ips?: string[]
   }
 }
 ```
@@ -4043,6 +4487,10 @@ type UpdateManagedCallUseCaseRequest = {
     response_mapping?: string
     inbound_use_case_slug?: string
   }
+  type_annotations?: {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }
 }
 ```
 
@@ -4058,6 +4506,7 @@ type UpdateSecureProxyUseCaseRequest = {
   configuration?: {
     vpc_mode: "static_ip" | "secure_link"
     allowed_domains?: string[]
+    allowed_ips?: string[]
   }
 }
 ```
@@ -4335,6 +4784,11 @@ type ManagedCallUseCaseHistoryEntry = {
     response_mapping?: string
     inbound_use_case_slug?: string
   }
+  type_annotations?: {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }
+  types_locked?: boolean
 }
 ```
 
@@ -4356,6 +4810,7 @@ type SecureProxyUseCaseHistoryEntry = {
   configuration?: {
     vpc_mode: "static_ip" | "secure_link"
     allowed_domains?: string[]
+    allowed_ips?: string[]
   }
 }
 ```
@@ -4369,6 +4824,7 @@ Configuration for secure_proxy use cases. Defines how to route requests through 
 type SecureProxyUseCaseConfiguration = {
   vpc_mode: "static_ip" | "secure_link"
   allowed_domains?: string[]
+  allowed_ips?: string[]
 }
 ```
 
@@ -4382,6 +4838,7 @@ type SecureProxySummary = {
   enabled: boolean
   vpc_mode: "static_ip" | "secure_link"
   allowed_domains?: string[]
+  allowed_ips?: string[]
   integration_id: string // uuid
   integration_name: string
 }
@@ -4474,6 +4931,256 @@ type ManagedCallErrorResponse = {
     message: string
     details?: Record<string, unknown>
   }
+}
+```
+
+### `TypeAnnotations`
+
+Developer-provided type annotations for a use case's request and response fields
+
+```ts
+type TypeAnnotations = {
+  request?: Record<string, string>
+  response?: Record<string, string>
+}
+```
+
+### `TypeDescriptor`
+
+Describes the inferred type shape of a JSONata expression
+
+```ts
+type TypeDescriptor = {
+  kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+  properties?: Record<string, {
+    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+    properties?: Record<string, {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+    items?: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    source?: string
+    variants?: Array<{
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+  }>
+  items?: {
+    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+    properties?: Record<string, {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+    items?: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    source?: string
+    variants?: Array<{
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+  }
+  source?: string
+  variants?: Array<{
+    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+    properties?: Record<string, {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+    items?: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    source?: string
+    variants?: Array<{
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+  }>
+}
+```
+
+### `UseCaseTypePreview`
+
+Scaffolded type descriptors for a single use case
+
+```ts
+type UseCaseTypePreview = {
+  slug: string
+  name?: string
+  request_shape: {
+    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+    properties?: Record<string, {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+    items?: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    source?: string
+    variants?: Array<{
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+  }
+  response_shape: {
+    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
+    properties?: Record<string, {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+    items?: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    source?: string
+    variants?: Array<{
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }>
+  }
+  existing_annotations?: {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }
+}
+```
+
+### `GenerateTypesPreviewResponse`
+
+```ts
+type GenerateTypesPreviewResponse = {
+  integration_name?: string
+  use_cases: Array<{
+    slug: string
+    name?: string
+    request_shape: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    response_shape: {
+      kind: { ... }
+      properties?: { ... }
+      items?: { ... }
+      source?: { ... }
+      variants?: { ... }
+    }
+    existing_annotations?: {
+      request?: { ... }
+      response?: { ... }
+    }
+  }>
+  previous_version?: string
+  suggested_version?: string
+  suggested_bump?: "major" | "minor"
+  detected_changes?: Array<{
+    slug: string
+    field: string
+    type: "breaking" | "non-breaking"
+    description: string
+  }>
+}
+```
+
+### `GenerateTypesRequest`
+
+```ts
+type GenerateTypesRequest = {
+  package_name: string
+  version: string
+  description?: string
+  domain_package?: string
+  domain_map_name?: string
+  annotations?: Record<string, {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }>
+}
+```
+
+### `GenerateTypesResponse`
+
+```ts
+type GenerateTypesResponse = {
+  package_name: string
+  version: string
+  files: Record<string, string>
+  warnings?: string[]
+}
+```
+
+### `CommitTypesRequest`
+
+```ts
+type CommitTypesRequest = {
+  package_name: string
+  version: string
+  annotations?: Record<string, {
+    request?: Record<string, string>
+    response?: Record<string, string>
+  }>
+}
+```
+
+### `CommitTypesResponse`
+
+```ts
+type CommitTypesResponse = {
+  committed: boolean
+  warnings?: string[]
 }
 ```
 
@@ -5195,5 +5902,95 @@ type InboundMonitoringEvent = {
   processing_duration_ms?: number
   received_at: string // date-time
   completed_at: string // date-time
+}
+```
+
+### `QueryMonitoringEventsV2Request`
+
+```ts
+type QueryMonitoringEventsV2Request = {
+  use_case_id?: string
+  use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
+  level?: "success" | "error" | "skipped" | "warning"
+  code?: string
+  event_id?: string
+  correlation_id?: string
+  from_date?: string // date-time
+  to_date?: string // date-time
+  limit?: number
+  cursor?: {
+    created_at?: string // date-time
+    id?: string // uuid
+  }
+}
+```
+
+### `MonitoringEventV2`
+
+```ts
+type MonitoringEventV2 = {
+  id: string // uuid
+  org_id: string
+  integration_id: string
+  event_id: string
+  correlation_id?: string
+  use_case_id?: string
+  use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
+  level: "success" | "error" | "skipped" | "warning"
+  code?: string
+  message?: string
+  detail?: Record<string, unknown>
+  created_at: string // date-time
+}
+```
+
+### `GetMonitoringStatsV2Request`
+
+```ts
+type GetMonitoringStatsV2Request = {
+  from_date?: string // date-time
+  to_date?: string // date-time
+  use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
+  group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date"
+}
+```
+
+### `MonitoringStatsV2`
+
+```ts
+type MonitoringStatsV2 = {
+  total_events: number
+  success_count: number
+  error_count: number
+  warning_count: number
+  skipped_count: number
+  ack_timeout_count?: number
+  success_rate?: number
+  last_error_at?: string // date-time
+  breakdown?: Record<string, unknown>[]
+}
+```
+
+### `GetMonitoringTimeSeriesV2Request`
+
+```ts
+type GetMonitoringTimeSeriesV2Request = {
+  from_date: string // date-time
+  to_date?: string // date-time
+  interval: "5m" | "10m" | "30m" | "1h" | "3h" | "1d"
+  use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
+}
+```
+
+### `TimeSeriesBucketV2`
+
+```ts
+type TimeSeriesBucketV2 = {
+  timestamp: string // date-time
+  success_count?: number
+  error_count?: number
+  warning_count?: number
+  skipped_count?: number
+  total_count: number
 }
 ```
