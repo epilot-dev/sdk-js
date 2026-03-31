@@ -497,6 +497,81 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/events": {
+      "post": {
+        "operationId": "queryMonitoringEventsV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/stats": {
+      "post": {
+        "operationId": "getMonitoringStatsV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/time-series": {
+      "post": {
+        "operationId": "getMonitoringTimeSeriesV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/events/{eventId}/associated": {
+      "get": {
+        "operationId": "getAssociatedMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
@@ -521,6 +596,57 @@
         "parameters": [
           {
             "name": "slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/generate-types-preview": {
+      "post": {
+        "operationId": "generateTypesPreview",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/generate-types": {
+      "post": {
+        "operationId": "generateTypes",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/commit-types": {
+      "post": {
+        "operationId": "commitTypes",
+        "parameters": [
+          {
+            "name": "integrationId",
             "in": "path",
             "required": true
           }
@@ -603,6 +729,26 @@
         }
       },
       "QueryEventsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "QueryMonitoringEventsV2Response": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringStatsV2Response": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetMonitoringTimeSeriesV2Response": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GetAssociatedMonitoringEventsResponse": {
         "content": {
           "application/json": {}
         }
