@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.2.7",
+  "version": "2.3.0",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -323,6 +323,9 @@
     "definitions",
     "docs"
   ],
+  "optionalDependencies": {
+    "@epilot/epilot-journey-sdk": ">=2.0.0-alpha.1"
+  },
   "peerDependencies": {
     "axios": "^1.0.0",
     "openapi-client-axios": "^7.0.0"

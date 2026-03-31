@@ -749,6 +749,16 @@
                 "RECEIVED"
               ]
             }
+          },
+          "workflow_status": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLOSED",
+                "DONE"
+              ]
+            }
           }
         }
       },
@@ -964,9 +974,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://data-management.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

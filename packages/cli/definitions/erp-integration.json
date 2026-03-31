@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.49.0",
+    "version": "0.56.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -21,6 +21,14 @@
     {
       "name": "monitoring",
       "description": "Monitoring and analytics endpoints"
+    },
+    {
+      "name": "managed-call",
+      "description": "Managed call endpoints for synchronous external API calls"
+    },
+    {
+      "name": "proxy",
+      "description": "Secure proxy endpoints"
     }
   ],
   "servers": [
@@ -2249,6 +2257,202 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/events": {
+      "post": {
+        "operationId": "queryMonitoringEventsV2",
+        "summary": "queryMonitoringEventsV2",
+        "description": "Query monitoring events from the unified erp_monitoring_v2 table.\nReturns all event types (inbound, outbound, file_proxy, etc.) in a single list.\nReplaces the separate v1 inbound-events and outbound-events endpoints.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryMonitoringEventsV2Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueryMonitoringEventsV2Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/stats": {
+      "post": {
+        "operationId": "getMonitoringStatsV2",
+        "summary": "getMonitoringStatsV2",
+        "description": "Get aggregated statistics from the unified erp_monitoring_v2 table.\nReturns combined metrics for all event types with optional breakdowns.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringStatsV2Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringStatsV2Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/time-series": {
+      "post": {
+        "operationId": "getMonitoringTimeSeriesV2",
+        "summary": "getMonitoringTimeSeriesV2",
+        "description": "Get time-series aggregated event counts from the unified erp_monitoring_v2 table.\nReturns bucketed counts for chart rendering.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringTimeSeriesV2Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetMonitoringTimeSeriesV2Response"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/events/{eventId}/associated": {
+      "get": {
+        "operationId": "getAssociatedMonitoringEvents",
+        "summary": "getAssociatedMonitoringEvents",
+        "description": "Returns all monitoring events sharing the same event_id, ordered chronologically.\nAlso includes the original inbound event payload from erp_incoming_events if available.\nUsed to display a full event trace/timeline.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "description": "The event ID to get associated events for",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GetAssociatedMonitoringEventsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
@@ -2372,6 +2576,265 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/managed-call/{slug}/execute": {
+      "post": {
+        "operationId": "managedCallExecute",
+        "summary": "Execute a managed call operation",
+        "description": "Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.\nCalls an external partner API with JSONata mapping on both request and response.\n",
+        "tags": [
+          "managed-call"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_-]*$"
+            },
+            "description": "Use case slug (acts as the RPC method name)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManagedCallExecuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Managed call executed successfully.\nThe response body is the JSONata-mapped result (or raw external API response if no mapping).\nIf inbound routing is configured, check X-Inbound-Event-Id header for tracking.\n",
+            "headers": {
+              "X-Inbound-Event-Id": {
+                "description": "Event ID for tracking inbound pipeline processing (only present when inbound routing is configured)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedCallExecuteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid URL blocked by SSRF protection)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedCallErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "502": {
+            "description": "External API error (upstream service returned an error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedCallErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/generate-types-preview": {
+      "post": {
+        "operationId": "generateTypesPreview",
+        "summary": "Preview scaffolded types for a connector integration",
+        "description": "Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scaffolded type preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateTypesPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/generate-types": {
+      "post": {
+        "operationId": "generateTypes",
+        "summary": "Generate a TypeScript npm package for a connector integration",
+        "description": "Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateTypesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated package",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateTypesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/commit-types": {
+      "post": {
+        "operationId": "commitTypes",
+        "summary": "Commit generated types and lock use case configurations",
+        "description": "Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommitTypesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Types committed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitTypesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -2510,12 +2973,14 @@
         "properties": {
           "event_name": {
             "type": "string",
-            "description": "Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.\n"
+            "description": "Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.\n",
+            "example": "business_partner"
           },
           "timestamp": {
             "type": "string",
             "format": "date-time",
-            "description": "Timestamp when the event occurred"
+            "description": "Timestamp when the event occurred",
+            "example": "2025-05-01T08:30:00Z"
           },
           "format": {
             "type": "string",
@@ -2524,7 +2989,8 @@
               "xml"
             ],
             "default": "json",
-            "description": "Format of the payload data"
+            "description": "Format of the payload data",
+            "example": "json"
           },
           "payload": {
             "oneOf": [
@@ -2540,14 +3006,16 @@
                 "additionalProperties": true
               }
             ],
-            "description": "The object data payload - can be either a serialized string or a direct JSON object"
+            "description": "The object data payload - can be either a serialized string or a direct JSON object",
+            "example": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}"
           },
           "use_case_slug": {
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9_-]*$",
             "minLength": 1,
             "maxLength": 255,
-            "description": "Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.\n"
+            "description": "Recommended. Use case slug for routing this event to the correct use case configuration. If provided, takes precedence over event_name for use case lookup. Preferred over event_name-based routing as slugs are portable across environments.\n",
+            "example": "business_partner"
           },
           "deduplication_id": {
             "type": "string",
@@ -2712,6 +3180,151 @@
           },
           "settings": {
             "$ref": "#/components/schemas/IntegrationSettings"
+          },
+          "integration_type": {
+            "type": "string",
+            "enum": [
+              "erp",
+              "connector"
+            ],
+            "default": "erp",
+            "description": "Type of integration. \"erp\" is the ERP integration with inbound/outbound use cases. \"connector\" is for complex proxy integrations with external APIs.\n"
+          },
+          "connector_config": {
+            "$ref": "#/components/schemas/ConnectorConfig"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "If true, integration is displayed in read-only mode in the UI to discourage changes"
+          }
+        }
+      },
+      "ConnectorConfig": {
+        "type": "object",
+        "description": "Shared configuration for connector-type integrations",
+        "properties": {
+          "base_url": {
+            "type": "string",
+            "description": "Base URL for the partner API"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ManagedCallAuth"
+          },
+          "types_versions": {
+            "type": "array",
+            "description": "History of generated type package versions",
+            "items": {
+              "type": "object",
+              "required": [
+                "version",
+                "package_name",
+                "generated_at",
+                "generated_by",
+                "status"
+              ],
+              "properties": {
+                "version": {
+                  "type": "string"
+                },
+                "package_name": {
+                  "type": "string"
+                },
+                "generated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "generated_by": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "active",
+                    "deprecated"
+                  ]
+                }
+              }
+            }
+          },
+          "latest_types_version": {
+            "type": "string",
+            "description": "Latest active types package version"
+          },
+          "latest_types_package_name": {
+            "type": "string",
+            "description": "Latest active types package name"
+          }
+        }
+      },
+      "ManagedCallAuth": {
+        "type": "object",
+        "description": "Authentication configuration for managed call requests",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "oauth2_client_credentials",
+              "api_key",
+              "bearer"
+            ],
+            "description": "Authentication type"
+          },
+          "token_url": {
+            "type": "string",
+            "description": "OAuth2 token URL. Can be plain text or {{env.key}} reference."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "OAuth2 client ID. Can be plain text or {{env.key}} reference."
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "OAuth2 client secret. Must be an {{env.key}} reference (secret)."
+          },
+          "scope": {
+            "type": "string",
+            "description": "OAuth2 scope"
+          },
+          "audience": {
+            "type": "string",
+            "description": "OAuth2 audience parameter (e.g. for Auth0, Azure AD). Can be plain text or {{env.key}} reference."
+          },
+          "resource": {
+            "type": "string",
+            "description": "OAuth2 resource parameter (e.g. for Azure AD). Can be plain text or {{env.key}} reference."
+          },
+          "body_params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional key-value pairs for the OAuth2 token request body. Values can be {{env.key}} references."
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional headers for the OAuth2 token request. Values can be {{env.key}} references."
+          },
+          "query_params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional query parameters for the OAuth2 token URL. Values can be {{env.key}} references."
+          },
+          "api_key_header": {
+            "type": "string",
+            "description": "Header name for API key auth (default X-API-Key)"
+          },
+          "api_key": {
+            "type": "string",
+            "description": "API key value. Must be an {{env.key}} reference (secret)."
+          },
+          "token": {
+            "type": "string",
+            "description": "Bearer token value. Must be an {{env.key}} reference (secret)."
           }
         }
       },
@@ -3295,6 +3908,9 @@
             "$ref": "#/components/schemas/EmbeddedFileProxyUseCaseRequest"
           },
           {
+            "$ref": "#/components/schemas/EmbeddedManagedCallUseCaseRequest"
+          },
+          {
             "$ref": "#/components/schemas/EmbeddedSecureProxyUseCaseRequest"
           }
         ],
@@ -3304,6 +3920,7 @@
             "inbound": "#/components/schemas/EmbeddedInboundUseCaseRequest",
             "outbound": "#/components/schemas/EmbeddedOutboundUseCaseRequest",
             "file_proxy": "#/components/schemas/EmbeddedFileProxyUseCaseRequest",
+            "managed_call": "#/components/schemas/EmbeddedManagedCallUseCaseRequest",
             "secure_proxy": "#/components/schemas/EmbeddedSecureProxyUseCaseRequest"
           }
         }
@@ -3420,6 +4037,31 @@
           }
         ]
       },
+      "EmbeddedManagedCallUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmbeddedUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "managed_call"
+                ],
+                "description": "Use case type for managed API calls"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/ManagedCallOperationConfig"
+              }
+            }
+          }
+        ]
+      },
       "EmbeddedSecureProxyUseCaseRequest": {
         "allOf": [
           {
@@ -3484,6 +4126,7 @@
               "inbound",
               "outbound",
               "file_proxy",
+              "managed_call",
               "secure_proxy"
             ],
             "description": "Use case type"
@@ -3583,6 +4226,38 @@
           }
         ]
       },
+      "ManagedCallUseCase": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "managed_call"
+                ],
+                "description": "Use case type for managed API calls"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/ManagedCallOperationConfig"
+              },
+              "type_annotations": {
+                "$ref": "#/components/schemas/TypeAnnotations"
+              },
+              "types_locked": {
+                "type": "boolean",
+                "description": "Whether types have been generated for this use case"
+              }
+            }
+          }
+        ]
+      },
       "SecureProxyUseCase": {
         "allOf": [
           {
@@ -3620,6 +4295,9 @@
             "$ref": "#/components/schemas/FileProxyUseCase"
           },
           {
+            "$ref": "#/components/schemas/ManagedCallUseCase"
+          },
+          {
             "$ref": "#/components/schemas/SecureProxyUseCase"
           }
         ],
@@ -3629,6 +4307,7 @@
             "inbound": "#/components/schemas/InboundUseCase",
             "outbound": "#/components/schemas/OutboundUseCase",
             "file_proxy": "#/components/schemas/FileProxyUseCase",
+            "managed_call": "#/components/schemas/ManagedCallUseCase",
             "secure_proxy": "#/components/schemas/SecureProxyUseCase"
           }
         }
@@ -3645,6 +4324,9 @@
             "$ref": "#/components/schemas/CreateFileProxyUseCaseRequest"
           },
           {
+            "$ref": "#/components/schemas/CreateManagedCallUseCaseRequest"
+          },
+          {
             "$ref": "#/components/schemas/CreateSecureProxyUseCaseRequest"
           }
         ],
@@ -3654,6 +4336,7 @@
             "inbound": "#/components/schemas/CreateInboundUseCaseRequest",
             "outbound": "#/components/schemas/CreateOutboundUseCaseRequest",
             "file_proxy": "#/components/schemas/CreateFileProxyUseCaseRequest",
+            "managed_call": "#/components/schemas/CreateManagedCallUseCaseRequest",
             "secure_proxy": "#/components/schemas/CreateSecureProxyUseCaseRequest"
           }
         }
@@ -3760,6 +4443,31 @@
           }
         ]
       },
+      "CreateManagedCallUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "managed_call"
+                ],
+                "description": "Use case type for managed API calls"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/ManagedCallOperationConfig"
+              }
+            }
+          }
+        ]
+      },
       "CreateSecureProxyUseCaseRequest": {
         "allOf": [
           {
@@ -3797,6 +4505,9 @@
             "$ref": "#/components/schemas/UpdateFileProxyUseCaseRequest"
           },
           {
+            "$ref": "#/components/schemas/UpdateManagedCallUseCaseRequest"
+          },
+          {
             "$ref": "#/components/schemas/UpdateSecureProxyUseCaseRequest"
           }
         ],
@@ -3806,6 +4517,7 @@
             "inbound": "#/components/schemas/UpdateInboundUseCaseRequest",
             "outbound": "#/components/schemas/UpdateOutboundUseCaseRequest",
             "file_proxy": "#/components/schemas/UpdateFileProxyUseCaseRequest",
+            "managed_call": "#/components/schemas/UpdateManagedCallUseCaseRequest",
             "secure_proxy": "#/components/schemas/UpdateSecureProxyUseCaseRequest"
           }
         }
@@ -3903,6 +4615,31 @@
           }
         ]
       },
+      "UpdateManagedCallUseCaseRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateUseCaseRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "managed_call"
+                ],
+                "description": "Use case type for managed API calls"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/ManagedCallOperationConfig"
+              },
+              "type_annotations": {
+                "$ref": "#/components/schemas/TypeAnnotations"
+              }
+            }
+          }
+        ]
+      },
       "UpdateSecureProxyUseCaseRequest": {
         "allOf": [
           {
@@ -3937,6 +4674,9 @@
             "$ref": "#/components/schemas/FileProxyUseCaseHistoryEntry"
           },
           {
+            "$ref": "#/components/schemas/ManagedCallUseCaseHistoryEntry"
+          },
+          {
             "$ref": "#/components/schemas/SecureProxyUseCaseHistoryEntry"
           }
         ],
@@ -3946,6 +4686,7 @@
             "inbound": "#/components/schemas/InboundUseCaseHistoryEntry",
             "outbound": "#/components/schemas/OutboundUseCaseHistoryEntry",
             "file_proxy": "#/components/schemas/FileProxyUseCaseHistoryEntry",
+            "managed_call": "#/components/schemas/ManagedCallUseCaseHistoryEntry",
             "secure_proxy": "#/components/schemas/SecureProxyUseCaseHistoryEntry"
           }
         }
@@ -4087,6 +4828,38 @@
           }
         ]
       },
+      "ManagedCallUseCaseHistoryEntry": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UseCaseHistoryEntryBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "managed_call"
+                ],
+                "description": "Use case type for managed API calls"
+              },
+              "configuration": {
+                "$ref": "#/components/schemas/ManagedCallOperationConfig"
+              },
+              "type_annotations": {
+                "$ref": "#/components/schemas/TypeAnnotations"
+              },
+              "types_locked": {
+                "type": "boolean",
+                "description": "Whether types have been generated for this use case"
+              }
+            }
+          }
+        ]
+      },
       "SecureProxyUseCaseHistoryEntry": {
         "allOf": [
           {
@@ -4135,6 +4908,14 @@
             },
             "readOnly": true,
             "description": "Domain whitelist for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.\nSupports exact match (e.g., \"api.wemag.com\") and wildcard prefix (e.g., \"*.wemag.com\").\n"
+          },
+          "allowed_ips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "description": "IP allowlist (CIDR notation) for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.\nRequired for secure_link mode. All DNS-resolved IPs must match at least one range.\nExample: [\"10.0.1.0/24\", \"192.168.1.0/24\"]\n"
           }
         }
       },
@@ -4170,6 +4951,12 @@
             ]
           },
           "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_ips": {
             "type": "array",
             "items": {
               "type": "string"
@@ -4262,6 +5049,389 @@
           }
         }
       },
+      "ManagedCallOperationConfig": {
+        "type": "object",
+        "required": [
+          "operation"
+        ],
+        "description": "Configuration for managed_call use cases. Defines a single API operation with JSONata mapping.",
+        "properties": {
+          "operation": {
+            "$ref": "#/components/schemas/ManagedCallOperation"
+          },
+          "request_mapping": {
+            "type": "string",
+            "description": "JSONata expression for outbound body transformation"
+          },
+          "response_mapping": {
+            "type": "string",
+            "description": "JSONata expression for inbound response transformation"
+          },
+          "inbound_use_case_slug": {
+            "type": "string",
+            "description": "Slug of the inbound use case to route responses to for async entity processing.\nWhen set, the managed call response is queued to the inbound pipeline and processed\nusing the referenced inbound use case's mapping configuration.\n"
+          }
+        }
+      },
+      "ManagedCallOperation": {
+        "type": "object",
+        "required": [
+          "method",
+          "path"
+        ],
+        "description": "HTTP operation configuration for managed calls",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "URL path template with {{variable}} interpolation"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "query_params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ManagedCallExecuteRequest": {
+        "type": "object",
+        "required": [
+          "integration_id"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Integration ID"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Request payload for the managed call operation"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Correlation ID for tracing related events (auto-generated if not provided)"
+          }
+        }
+      },
+      "ManagedCallExecuteResponse": {
+        "description": "The response from a managed call execution.\nOn success, returns the JSONata-mapped response data directly (no wrapper).\nThe shape is entirely defined by your response_mapping JSONata expression.\nIf no response_mapping is configured, returns the raw external API response.\nCheck the X-Inbound-Event-Id header for inbound pipeline tracking when inbound routing is configured.\n",
+        "additionalProperties": true
+      },
+      "ManagedCallErrorResponse": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Error code (e.g., EXTERNAL_API_ERROR, SSRF_BLOCKED, MANAGED_CALL_EXECUTION_ERROR)"
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable error message"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Additional error details (e.g., status code and body for external API errors)"
+              }
+            }
+          }
+        }
+      },
+      "TypeAnnotations": {
+        "type": "object",
+        "description": "Developer-provided type annotations for a use case's request and response fields",
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "Type annotations for request fields, keyed by dot-path (e.g., \"vendors[].id\" -> \"string\")",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "response": {
+            "type": "object",
+            "description": "Type annotations for response fields",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "TypeDescriptor": {
+        "type": "object",
+        "description": "Describes the inferred type shape of a JSONata expression",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "object",
+              "array",
+              "string",
+              "number",
+              "boolean",
+              "null",
+              "unknown",
+              "union"
+            ]
+          },
+          "properties": {
+            "type": "object",
+            "description": "For kind=object, the properties and their type descriptors",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TypeDescriptor"
+            }
+          },
+          "items": {
+            "description": "For kind=array, the type of array items",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TypeDescriptor"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "For kind=unknown, the JSONata path that produced this value"
+          },
+          "variants": {
+            "type": "array",
+            "description": "For kind=union, the variant types",
+            "items": {
+              "$ref": "#/components/schemas/TypeDescriptor"
+            }
+          }
+        }
+      },
+      "UseCaseTypePreview": {
+        "type": "object",
+        "description": "Scaffolded type descriptors for a single use case",
+        "required": [
+          "slug",
+          "request_shape",
+          "response_shape"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "request_shape": {
+            "$ref": "#/components/schemas/TypeDescriptor"
+          },
+          "response_shape": {
+            "$ref": "#/components/schemas/TypeDescriptor"
+          },
+          "existing_annotations": {
+            "$ref": "#/components/schemas/TypeAnnotations"
+          }
+        }
+      },
+      "GenerateTypesPreviewResponse": {
+        "type": "object",
+        "required": [
+          "use_cases"
+        ],
+        "properties": {
+          "integration_name": {
+            "type": "string"
+          },
+          "use_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UseCaseTypePreview"
+            }
+          },
+          "previous_version": {
+            "type": "string",
+            "description": "Previously generated version, if any"
+          },
+          "suggested_version": {
+            "type": "string",
+            "description": "Suggested next version based on detected changes"
+          },
+          "suggested_bump": {
+            "type": "string",
+            "enum": [
+              "major",
+              "minor"
+            ]
+          },
+          "detected_changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "slug",
+                "field",
+                "type",
+                "description"
+              ],
+              "properties": {
+                "slug": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "breaking",
+                    "non-breaking"
+                  ]
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GenerateTypesRequest": {
+        "type": "object",
+        "required": [
+          "package_name",
+          "version"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "npm package name",
+            "example": "@epilot/hems-cleverpv"
+          },
+          "version": {
+            "type": "string",
+            "description": "Package version",
+            "example": "1.0.0"
+          },
+          "description": {
+            "type": "string"
+          },
+          "domain_package": {
+            "type": "string",
+            "description": "Domain standard package to extend",
+            "example": "@epilot/hems"
+          },
+          "domain_map_name": {
+            "type": "string",
+            "description": "Name of the domain UseCaseMap to extend",
+            "example": "HemsUseCaseMap"
+          },
+          "annotations": {
+            "type": "object",
+            "description": "Type annotations per use case slug",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TypeAnnotations"
+            }
+          }
+        }
+      },
+      "GenerateTypesResponse": {
+        "type": "object",
+        "required": [
+          "package_name",
+          "version",
+          "files"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "files": {
+            "type": "object",
+            "description": "Generated file contents keyed by file path",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CommitTypesRequest": {
+        "type": "object",
+        "required": [
+          "package_name",
+          "version"
+        ],
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "npm package name",
+            "example": "@epilot/hems-cleverpv"
+          },
+          "version": {
+            "type": "string",
+            "description": "Package version",
+            "example": "1.0.0"
+          },
+          "annotations": {
+            "type": "object",
+            "description": "Type annotations per use case slug",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TypeAnnotations"
+            }
+          }
+        }
+      },
+      "CommitTypesResponse": {
+        "type": "object",
+        "required": [
+          "committed"
+        ],
+        "properties": {
+          "committed": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "FileProxyUseCaseConfiguration": {
         "type": "object",
         "required": [
@@ -4271,8 +5441,12 @@
         "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
         "properties": {
           "secure_proxy": {
-            "$ref": "#/components/schemas/FileProxySecureProxyAttachment",
-            "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n"
+            "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileProxySecureProxyAttachment"
+              }
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/FileProxyAuth"
@@ -5974,6 +7148,334 @@
             "description": "When processing completed"
           }
         }
+      },
+      "QueryMonitoringEventsV2Request": {
+        "type": "object",
+        "properties": {
+          "use_case_id": {
+            "type": "string",
+            "description": "Filter by use case ID (UUID). Empty string matches \"General\" events."
+          },
+          "use_case_type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy",
+              "managed_call",
+              "secure_proxy"
+            ],
+            "description": "Filter by use case type (replaces direction)"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "skipped",
+              "warning"
+            ],
+            "description": "Filter by event level"
+          },
+          "code": {
+            "type": "string",
+            "description": "Filter by taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502)"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Filter by trigger/inbound event ID"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Filter by correlation ID for tracing"
+          },
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events from this date (inclusive)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Filter events until this date (inclusive)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "example": 50,
+            "default": 50,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "object",
+            "description": "Cursor for pagination (from previous response's next_cursor)",
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "MonitoringEventV2": {
+        "type": "object",
+        "required": [
+          "id",
+          "org_id",
+          "integration_id",
+          "event_id",
+          "use_case_type",
+          "level",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique monitoring event ID"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "integration_id": {
+            "type": "string",
+            "description": "Integration ID"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Trigger/inbound event ID (groups related monitoring events)"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Correlation ID for tracing. Empty when unavailable."
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "Use case ID. Empty for system-level events (\"General\")."
+          },
+          "use_case_type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy",
+              "managed_call",
+              "secure_proxy",
+              ""
+            ],
+            "description": "Use case type. Empty for system-level events."
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "skipped",
+              "warning"
+            ],
+            "description": "Event outcome level"
+          },
+          "code": {
+            "type": "string",
+            "description": "Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message. Empty when not applicable."
+          },
+          "detail": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Event-specific JSON data. Structure determined by `code`."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the monitoring event was created"
+          }
+        }
+      },
+      "GetMonitoringStatsV2Request": {
+        "type": "object",
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the time range",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the time range",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "use_case_type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy",
+              "managed_call",
+              "secure_proxy"
+            ],
+            "description": "Filter stats by use case type"
+          },
+          "group_by": {
+            "type": "string",
+            "enum": [
+              "use_case_id",
+              "use_case_type",
+              "level",
+              "code",
+              "date"
+            ],
+            "description": "Field to group the breakdown by"
+          }
+        }
+      },
+      "MonitoringStatsV2": {
+        "type": "object",
+        "required": [
+          "total_events",
+          "success_count",
+          "error_count",
+          "warning_count",
+          "skipped_count"
+        ],
+        "properties": {
+          "total_events": {
+            "type": "integer",
+            "description": "Total number of events in the period"
+          },
+          "success_count": {
+            "type": "integer",
+            "description": "Number of successful events"
+          },
+          "error_count": {
+            "type": "integer",
+            "description": "Number of error events"
+          },
+          "warning_count": {
+            "type": "integer",
+            "description": "Number of warning events"
+          },
+          "skipped_count": {
+            "type": "integer",
+            "description": "Number of skipped events"
+          },
+          "ack_timeout_count": {
+            "type": "integer",
+            "description": "Number of ACK_TIMEOUT events (acknowledgement timed out)"
+          },
+          "success_rate": {
+            "type": "number",
+            "format": "float",
+            "description": "Success rate as percentage (0-100)"
+          },
+          "last_error_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Timestamp of the most recent error"
+          },
+          "breakdown": {
+            "type": "array",
+            "description": "Statistics breakdown by requested group_by field",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "GetMonitoringTimeSeriesV2Request": {
+        "type": "object",
+        "required": [
+          "from_date",
+          "interval"
+        ],
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the time range (required)",
+            "example": "2025-01-01T00:00:00Z"
+          },
+          "to_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the time range (defaults to now)",
+            "example": "2025-01-31T23:59:59Z"
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "5m",
+              "10m",
+              "30m",
+              "1h",
+              "3h",
+              "1d"
+            ],
+            "description": "Time bucket interval"
+          },
+          "use_case_type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy",
+              "managed_call",
+              "secure_proxy"
+            ],
+            "description": "Filter by use case type"
+          }
+        }
+      },
+      "TimeSeriesBucketV2": {
+        "type": "object",
+        "required": [
+          "timestamp",
+          "total_count"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Bucket start timestamp"
+          },
+          "success_count": {
+            "type": "integer",
+            "description": "Number of successful events in the bucket"
+          },
+          "error_count": {
+            "type": "integer",
+            "description": "Number of error events in the bucket"
+          },
+          "warning_count": {
+            "type": "integer",
+            "description": "Number of warning events in the bucket"
+          },
+          "skipped_count": {
+            "type": "integer",
+            "description": "Number of skipped events in the bucket"
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total events in the bucket"
+          }
+        }
       }
     },
     "responses": {
@@ -5999,6 +7501,16 @@
       },
       "Unauthorized": {
         "description": "Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden - insufficient permissions",
         "content": {
           "application/json": {
             "schema": {
@@ -6293,6 +7805,117 @@
                   "type": "boolean",
                   "description": "Indicates if more results are available",
                   "example": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryMonitoringEventsV2Response": {
+        "description": "Monitoring events queried successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringEventV2"
+                  },
+                  "description": "List of monitoring events"
+                },
+                "next_cursor": {
+                  "type": "object",
+                  "nullable": true,
+                  "description": "Cursor to fetch the next page. Null if no more results.",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean",
+                  "description": "Indicates if more results are available"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetMonitoringStatsV2Response": {
+        "description": "Monitoring statistics retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonitoringStatsV2"
+            }
+          }
+        }
+      },
+      "GetMonitoringTimeSeriesV2Response": {
+        "description": "Time-series data retrieved successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "interval": {
+                  "type": "string",
+                  "enum": [
+                    "5m",
+                    "10m",
+                    "30m",
+                    "1h",
+                    "3h",
+                    "1d"
+                  ],
+                  "description": "The bucket interval"
+                },
+                "from_date": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "to_date": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "buckets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSeriesBucketV2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetAssociatedMonitoringEventsResponse": {
+        "description": "Associated monitoring events for the given event_id",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "monitoring_events": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringEventV2"
+                  },
+                  "description": "All monitoring events sharing this event_id, ordered by created_at ASC"
+                },
+                "inbound_event": {
+                  "type": "object",
+                  "nullable": true,
+                  "additionalProperties": true,
+                  "description": "The original inbound event payload from erp_incoming_events, if available"
                 }
               }
             }

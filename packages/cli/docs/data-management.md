@@ -1,6 +1,5 @@
 # Data Management API
 
-- **Base URL:** `https://data-management.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
 
 ## Quick Start
@@ -80,7 +79,8 @@ epilot data-management queryEntities \
       "type": "entity_workflows_only_in_closed_or_cancelled_status",
       "related_entity_schemas": ["string"],
       "lookback_period_days": 0,
-      "message_type": ["SENT"]
+      "message_type": ["SENT"],
+      "workflow_status": ["CLOSED"]
     }
   ],
   "from": 0,
@@ -449,7 +449,8 @@ epilot data-management getConfig -p config_id=123e4567-e89b-12d3-a456-4266141740
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
         "lookback_period_days": 0,
-        "message_type": ["SENT"]
+        "message_type": ["SENT"],
+        "workflow_status": ["CLOSED"]
       }
     ]
   },
@@ -571,7 +572,8 @@ epilot data-management upsertConfig \
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
         "lookback_period_days": 0,
-        "message_type": ["SENT"]
+        "message_type": ["SENT"],
+        "workflow_status": ["CLOSED"]
       }
     ]
   },
@@ -620,7 +622,8 @@ epilot data-management upsertConfig -p entity_schema=example --jsonata 'id'
         "type": "entity_workflows_only_in_closed_or_cancelled_status",
         "related_entity_schemas": ["string"],
         "lookback_period_days": 0,
-        "message_type": ["SENT"]
+        "message_type": ["SENT"],
+        "workflow_status": ["CLOSED"]
       }
     ]
   },
@@ -690,7 +693,8 @@ epilot data-management listConfigs --jsonata 'configs'
             "type": "entity_workflows_only_in_closed_or_cancelled_status",
             "related_entity_schemas": ["string"],
             "lookback_period_days": 0,
-            "message_type": ["SENT"]
+            "message_type": ["SENT"],
+            "workflow_status": ["CLOSED"]
           }
         ]
       },

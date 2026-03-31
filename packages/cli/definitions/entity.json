@@ -66,6 +66,16 @@
             "in": "query",
             "name": "unpublished",
             "description": "Return unpublished draft schemas",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "latest",
+            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -142,6 +152,16 @@
             "in": "query",
             "name": "unpublished",
             "description": "Return unpublished draft schemas",
+            "deprecated": true,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "latest",
+            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -203,7 +223,7 @@
       "get": {
         "operationId": "getSchema",
         "summary": "getSchema",
-        "description": "By default gets the latest version of the Schema and to get the specific version of schema pass the id.",
+        "description": "By default gets the current version of the Schema (frozen version if frozen, otherwise latest).\nPass ?latest=true to get the latest version when the schema is frozen.\nPass ?id= to get a specific version by ID.\n",
         "tags": [
           "Schemas"
         ],
@@ -216,6 +236,15 @@
             "name": "id",
             "schema": {
               "$ref": "#/components/schemas/SchemaId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "latest",
+            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -238,7 +267,7 @@
       "put": {
         "operationId": "putSchema",
         "summary": "putSchema",
-        "description": "Create or update a schema with a new version",
+        "description": "Create or update a schema with a new version.\nWhen the schema is frozen, writes update the latest version without affecting the frozen version.\n",
         "tags": [
           "Schemas"
         ],
@@ -249,6 +278,7 @@
           {
             "in": "query",
             "name": "draft",
+            "deprecated": true,
             "schema": {
               "default": false,
               "type": "boolean"
@@ -746,6 +776,7 @@
                       }
                     },
                     "drafts": {
+                      "deprecated": true,
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/EntitySchemaItem"
@@ -756,8 +787,17 @@
                       "type": "boolean"
                     },
                     "drafts_more": {
+                      "deprecated": true,
                       "description": "Pagination: Whether more drafts are available",
                       "type": "boolean"
+                    },
+                    "frozen_version": {
+                      "description": "The version ID that is currently frozen, if any",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/SchemaId"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -767,6 +807,85 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/freeze": {
+      "post": {
+        "operationId": "freezeSchema",
+        "summary": "freezeSchema",
+        "description": "Freeze a schema at its current version, or at a specific version.\nWhen frozen, getSchema returns the frozen version by default.\nNew edits via putSchema update the latest version without affecting the frozen version.\n",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "version_id": {
+                    "description": "Freeze to a specific version ID. Defaults to the current version.",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SchemaId"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Schema frozen successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/schemas/{slug}/unfreeze": {
+      "post": {
+        "operationId": "unfreezeSchema",
+        "summary": "unfreezeSchema",
+        "description": "Unfreeze a schema. Promotes the latest version to the current version for all users.\n",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schema unfrozen successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySchemaItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -3420,6 +3539,34 @@
             "schema": {
               "$ref": "#/components/schemas/TaxonomySearchIncludeArchivedParam"
             }
+          },
+          {
+            "in": "query",
+            "name": "exclude_types",
+            "description": "Taxonomy type(s) to exclude from the results. Useful to filter out relation labels, schema labels, and system labels.\n",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "relation",
+                    "schema",
+                    "system"
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "relation",
+                      "schema",
+                      "system"
+                    ]
+                  }
+                }
+              ]
+            }
           }
         ],
         "requestBody": {
@@ -3557,7 +3704,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -4563,6 +4710,7 @@
             "example": false
           },
           "draft": {
+            "deprecated": true,
             "type": "boolean",
             "example": false
           },
@@ -4832,6 +4980,14 @@
                     "type": "string"
                   }
                 }
+              },
+              "frozen": {
+                "description": "Indicates this schema is currently frozen. Present when the returned version is the frozen version.",
+                "type": "boolean"
+              },
+              "latest": {
+                "description": "Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.",
+                "type": "boolean"
               },
               "_summary": {
                 "description": "Indicates this is a truncated summary schema (attributes trimmed to summary_attributes only, no capabilities or group_settings)",

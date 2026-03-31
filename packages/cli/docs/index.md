@@ -30,10 +30,10 @@ npx epilot auth login
 | Document API | `epilot document` | 3 | [document.md](./document.md) |
 | Messaging Settings API | `epilot email-settings` | 34 | [email-settings.md](./email-settings.md) |
 | Email template API | `epilot email-template` | 7 | [email-template.md](./email-template.md) |
-| Entity API | `epilot entity` | 82 | [entity.md](./entity.md) |
+| Entity API | `epilot entity` | 84 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
 | Environments API | `epilot environments` | 5 | [environments.md](./environments.md) |
-| ERP Integration API | `epilot erp-integration` | 35 | [erp-integration.md](./erp-integration.md) |
+| ERP Integration API | `epilot erp-integration` | 43 | [erp-integration.md](./erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | 7 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 27 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
@@ -57,7 +57,7 @@ npx epilot auth login
 | Validation Rules API | `epilot validation-rules` | 7 | [validation-rules.md](./validation-rules.md) |
 | Webhooks | `epilot webhooks` | 14 | [webhooks.md](./webhooks.md) |
 | Workflows Executions | `epilot workflow` | 23 | [workflow.md](./workflow.md) |
-| Workflows Definitions | `epilot workflow-definition` | 24 | [workflow-definition.md](./workflow-definition.md) |
+| Workflows Definitions | `epilot workflow-definition` | 22 | [workflow-definition.md](./workflow-definition.md) |
 
 ## Global Flags
 

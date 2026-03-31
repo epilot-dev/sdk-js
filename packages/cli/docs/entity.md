@@ -38,12 +38,14 @@ epilot entity listSchemas
 **Schemas**
 - [`listSchemas`](#listschemas) — Get the latest versions of all schemas
 - [`listSchemasV2`](#listschemasv2) — Get the latest versions of all schemas.
-- [`getSchema`](#getschema) — By default gets the latest version of the Schema and to get the specific version of schema pass the id.
-- [`putSchema`](#putschema) — Create or update a schema with a new version
+- [`getSchema`](#getschema) — By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
+- [`putSchema`](#putschema) — Create or update a schema with a new version.
 - [`deleteSchema`](#deleteschema) — Delete a schema, or a specific version of a schema
 - [`getJsonSchema`](#getjsonschema) — Get formal JSON schema definition draft 2020-12 for the given epilot schema
 - [`getSchemaExample`](#getschemaexample) — Get a full example entity for the given schema
 - [`getSchemaVersions`](#getschemaversions) — Get all versions of this schema ordered by the latest versions including drafts.
+- [`freezeSchema`](#freezeschema) — Freeze a schema at its current version, or at a specific version.
+- [`unfreezeSchema`](#unfreezeschema) — Unfreeze a schema. Promotes the latest version to the current version for all users.
 - [`listAvailableCapabilities`](#listavailablecapabilities) — List available capabilities for schema
 - [`listSchemaBlueprints`](#listschemablueprints) — List canonical versions of all available schemas
 - [`listTaxonomyClassificationsForSchema`](#listtaxonomyclassificationsforschema) — List taxonomy classifications for a given schema
@@ -142,6 +144,7 @@ Get the latest versions of all schemas
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `unpublished` | query | boolean | No | Return unpublished draft schemas |
+| `latest` | query | boolean | No | When true, return the latest version instead of the frozen version for frozen schemas. |
 | `exclude` | query | string[] | No | List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results. |
 | `include` | query | string[] | No | List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs. |
 
@@ -169,6 +172,8 @@ epilot entity listSchemas --jsonata 'results[0]'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "frozen": true,
+      "latest": true,
       "_summary": true,
       "slug": "contact",
       "version": 1,
@@ -214,6 +219,7 @@ Get the latest versions of all schemas.
 | ---- | -- | ---- | -------- | ----------- |
 | `full` | query | boolean | No | Return full schemas including all attributes and capabilities |
 | `unpublished` | query | boolean | No | Return unpublished draft schemas |
+| `latest` | query | boolean | No | When true, return the latest version instead of the frozen version for frozen schemas. |
 | `exclude` | query | string[] | No | List of schema slugs to exclude from the results. Accepts a comma-separated list of slugs to exclude from the results. |
 | `include` | query | string[] | No | List of schema slugs to include in the results. When provided, only these schemas are returned. Accepts a comma-separated list of slugs. |
 
@@ -241,6 +247,8 @@ epilot entity listSchemasV2 --jsonata 'results[0]'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "frozen": true,
+      "latest": true,
       "_summary": true,
       "slug": "contact",
       "version": 1,
@@ -276,7 +284,7 @@ epilot entity listSchemasV2 --jsonata 'results[0]'
 
 ### `getSchema`
 
-By default gets the latest version of the Schema and to get the specific version of schema pass the id.
+By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
 
 `GET /v1/entity/schemas/{slug}`
 
@@ -286,6 +294,7 @@ By default gets the latest version of the Schema and to get the specific version
 | ---- | -- | ---- | -------- | ----------- |
 | `slug` | path | string | Yes | Entity Type |
 | `id` | query | string (uuid) | No |  |
+| `latest` | query | boolean | No | When true, return the latest version instead of the frozen version for frozen schemas. |
 
 **Sample Call**
 
@@ -319,6 +328,8 @@ epilot entity getSchema -p slug=contact --jsonata '$'
     "id": "string",
     "type": "string"
   },
+  "frozen": true,
+  "latest": true,
   "_summary": true,
   "slug": "contact",
   "version": 1,
@@ -445,7 +456,7 @@ epilot entity getSchema -p slug=contact --jsonata '$'
 
 ### `putSchema`
 
-Create or update a schema with a new version
+Create or update a schema with a new version.
 
 `PUT /v1/entity/schemas/{slug}`
 
@@ -621,6 +632,8 @@ epilot entity putSchema -p slug=contact --jsonata '$'
     "id": "string",
     "type": "string"
   },
+  "frozen": true,
+  "latest": true,
   "_summary": true,
   "slug": "contact",
   "version": 1,
@@ -1015,6 +1028,8 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "frozen": true,
+      "latest": true,
       "_summary": true,
       "slug": "contact",
       "version": 1,
@@ -1048,6 +1063,8 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "frozen": true,
+      "latest": true,
       "_summary": true,
       "slug": "contact",
       "version": 1,
@@ -1075,7 +1092,357 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
     }
   ],
   "versions_more": true,
-  "drafts_more": true
+  "drafts_more": true,
+  "frozen_version": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+</details>
+
+---
+
+### `freezeSchema`
+
+Freeze a schema at its current version, or at a specific version.
+
+`POST /v1/entity/schemas/{slug}/freeze`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Entity Type |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot entity freezeSchema \
+  -p slug=contact \
+  -d '{"version_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot entity freezeSchema contact
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot entity freezeSchema -p slug=contact
+```
+
+With JSONata filter:
+
+```bash
+epilot entity freezeSchema -p slug=contact --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "created_at": "string",
+  "updated_at": "string",
+  "comment": "string",
+  "source": {
+    "id": "string",
+    "type": "string"
+  },
+  "frozen": true,
+  "latest": true,
+  "_summary": true,
+  "slug": "contact",
+  "version": 1,
+  "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "feature_flag": "FF_MY_FEATURE_FLAG",
+  "enable_setting": ["360_features"],
+  "name": "Contact",
+  "plural": "Contacts",
+  "description": "Example description",
+  "docs_url": "https://docs.epilot.io/docs/pricing/entities",
+  "category": "customer_relations",
+  "published": false,
+  "draft": false,
+  "icon": "person",
+  "title_template": "{{first_name}} {{last_name}}",
+  "ui_config": {
+    "table_view": {
+      "view_type": "default",
+      "row_actions": ["string"],
+      "bulk_actions": ["string"],
+      "navbar_actions": [],
+      "enable_thumbnails": false
+    },
+    "create_view": {
+      "view_type": "default",
+      "search_params": {}
+    },
+    "edit_view": {
+      "view_type": "default",
+      "search_params": {},
+      "summary_attributes": ["email"]
+    },
+    "single_view": {
+      "view_type": "default",
+      "search_params": {},
+      "summary_attributes": ["email"]
+    },
+    "list_item": {
+      "summary_attributes": [],
+      "quick_actions": [],
+      "ui_config": {}
+    },
+    "sharing": {
+      "show_sharing_button": true
+    }
+  },
+  "capabilities": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "customer_messaging",
+      "title": "Messaging",
+      "attributes": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+      "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "ui_config": {},
+      "ui_hooks": [],
+      "feature_flag": "FF_MY_FEATURE_FLAG",
+      "settings_flag": [],
+      "schemas": []
+    }
+  ],
+  "group_settings": [
+    {
+      "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
+      "label": "Contact Details",
+      "expanded": true,
+      "order": 1
+    },
+    {
+      "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
+      "label": "Address Details",
+      "expanded": false,
+      "order": 2,
+      "info_tooltip_title": {}
+    }
+  ],
+  "layout_settings": {
+    "grid_gap": "string",
+    "grid_template_columns": "string"
+  },
+  "dialog_config": {},
+  "attributes": [
+    {
+      "name": "email",
+      "type": "email",
+      "label": "Email",
+      "required": true
+    },
+    {
+      "name": "first_name",
+      "type": "string",
+      "label": "First Name"
+    }
+  ],
+  "_purpose": ["string"],
+  "explicit_search_mappings": {
+    "image": {
+      "type": "keyword",
+      "index": false
+    }
+  },
+  "group_headlines": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "label": "string",
+      "layout": "string",
+      "group": "string",
+      "order": 0,
+      "type": "headline",
+      "enable_divider": false,
+      "divider": "top_divider",
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `unfreezeSchema`
+
+Unfreeze a schema. Promotes the latest version to the current version for all users.
+
+`POST /v1/entity/schemas/{slug}/unfreeze`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Entity Type |
+
+**Sample Call**
+
+```bash
+epilot entity unfreezeSchema \
+  -p slug=contact
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot entity unfreezeSchema contact
+```
+
+With JSONata filter:
+
+```bash
+epilot entity unfreezeSchema -p slug=contact --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "created_at": "string",
+  "updated_at": "string",
+  "comment": "string",
+  "source": {
+    "id": "string",
+    "type": "string"
+  },
+  "frozen": true,
+  "latest": true,
+  "_summary": true,
+  "slug": "contact",
+  "version": 1,
+  "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "feature_flag": "FF_MY_FEATURE_FLAG",
+  "enable_setting": ["360_features"],
+  "name": "Contact",
+  "plural": "Contacts",
+  "description": "Example description",
+  "docs_url": "https://docs.epilot.io/docs/pricing/entities",
+  "category": "customer_relations",
+  "published": false,
+  "draft": false,
+  "icon": "person",
+  "title_template": "{{first_name}} {{last_name}}",
+  "ui_config": {
+    "table_view": {
+      "view_type": "default",
+      "row_actions": ["string"],
+      "bulk_actions": ["string"],
+      "navbar_actions": [],
+      "enable_thumbnails": false
+    },
+    "create_view": {
+      "view_type": "default",
+      "search_params": {}
+    },
+    "edit_view": {
+      "view_type": "default",
+      "search_params": {},
+      "summary_attributes": ["email"]
+    },
+    "single_view": {
+      "view_type": "default",
+      "search_params": {},
+      "summary_attributes": ["email"]
+    },
+    "list_item": {
+      "summary_attributes": [],
+      "quick_actions": [],
+      "ui_config": {}
+    },
+    "sharing": {
+      "show_sharing_button": true
+    }
+  },
+  "capabilities": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "customer_messaging",
+      "title": "Messaging",
+      "attributes": [],
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
+      "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "ui_config": {},
+      "ui_hooks": [],
+      "feature_flag": "FF_MY_FEATURE_FLAG",
+      "settings_flag": [],
+      "schemas": []
+    }
+  ],
+  "group_settings": [
+    {
+      "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
+      "label": "Contact Details",
+      "expanded": true,
+      "order": 1
+    },
+    {
+      "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
+      "label": "Address Details",
+      "expanded": false,
+      "order": 2,
+      "info_tooltip_title": {}
+    }
+  ],
+  "layout_settings": {
+    "grid_gap": "string",
+    "grid_template_columns": "string"
+  },
+  "dialog_config": {},
+  "attributes": [
+    {
+      "name": "email",
+      "type": "email",
+      "label": "Email",
+      "required": true
+    },
+    {
+      "name": "first_name",
+      "type": "string",
+      "label": "First Name"
+    }
+  ],
+  "_purpose": ["string"],
+  "explicit_search_mappings": {
+    "image": {
+      "type": "keyword",
+      "index": false
+    }
+  },
+  "group_headlines": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "label": "string",
+      "layout": "string",
+      "group": "string",
+      "order": 0,
+      "type": "headline",
+      "enable_divider": false,
+      "divider": "top_divider",
+      "_purpose": ["taxonomy-slug:classification-slug"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ]
 }
 ```
 
@@ -1172,6 +1539,8 @@ epilot entity listSchemaBlueprints --jsonata 'results[0]'
       "updated_at": "string",
       "comment": "string",
       "source": {},
+      "frozen": true,
+      "latest": true,
       "_summary": true,
       "slug": "contact",
       "version": 1,
@@ -4845,6 +5214,8 @@ List taxonomy classifications in an organization based on taxonomy slug
 | `query` | query | string | No | The label names to search for (lowercase insensitive) |
 | `archived` | query | boolean | No | Filter by archived status. Deprecated. Use `include_archived` instead. |
 | `include_archived` | query | "true" \| "false" \| "only" | No |  |
+| `exclude_types` | query | "relation" \| "schema" \| "system" \| "relation" \| "schema" \| "system"[] | No | Taxonomy type(s) to exclude from the results. Useful to filter out relation labels, schema labels, and system labels.
+ |
 
 **Request Body**
 
