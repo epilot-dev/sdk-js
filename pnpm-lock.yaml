@@ -2564,8 +2564,8 @@ importers:
         version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.46.0)
     optionalDependencies:
       '@epilot/epilot-journey-sdk':
-        specifier: '>=2.0.0-alpha.0'
-        version: 2.0.0-alpha.0(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
+        specifier: '>=2.0.0-alpha.1'
+        version: 2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
 
 packages:
 
@@ -2928,8 +2928,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@epilot/epilot-journey-sdk@2.0.0-alpha.0':
-    resolution: {integrity: sha512-NZWnF67R0YHtx62Uys2IgElEjiJuU3XXNJwnCqpFAh81wlSGhlxvnynFesqY232/26My6hjVBsxGy1nfCmm48A==}
+  '@epilot/epilot-journey-sdk@2.0.0-alpha.1':
+    resolution: {integrity: sha512-1W9WxXflAJ7Z+ycR07D0BoFIOIL+wmPk6917MAk0XXx4VzYebzqa7RFOaYm2WrqLOppkQRhJVtlUHvPA0KDdRg==}
     peerDependencies:
       '@material-ui/core': 4.*
 
@@ -8056,7 +8056,7 @@ snapshots:
       - debug
       - js-yaml
 
-  '@epilot/epilot-journey-sdk@2.0.0-alpha.0(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)':
+  '@epilot/epilot-journey-sdk@2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)':
     dependencies:
       '@epilot/journey-client': 0.5.2(axios@1.13.6)(js-yaml@4.1.1)
       '@material-ui/core': 4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)

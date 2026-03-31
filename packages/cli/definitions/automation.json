@@ -3,7 +3,7 @@
   "info": {
     "title": "Automation API",
     "description": "API Backend for epilot Automation Workflows feature",
-    "version": "1.4.0"
+    "version": "1.4.1"
   },
   "tags": [
     {
@@ -1131,6 +1131,10 @@
               "example": "123e4567-e89b-12d3-a456-426614174000"
             },
             "nullable": true
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "If true, automation is displayed in read-only mode in the UI to discourage changes"
           }
         },
         "required": [

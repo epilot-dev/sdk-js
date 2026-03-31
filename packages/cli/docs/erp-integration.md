@@ -76,6 +76,9 @@ epilot erp-integration acknowledgeTracking
 **proxy**
 - [`secureProxy`](#secureproxy) — Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
 
+**managed-call**
+- [`managedCallExecute`](#managedcallexecute) — Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+
 ### `acknowledgeTracking`
 
 Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication
@@ -435,7 +438,27 @@ epilot erp-integration listIntegrations --jsonata 'integrations'
           "enabled": false,
           "freshnessThresholdMinutes": 1
         }
-      }
+      },
+      "integration_type": "erp",
+      "connector_config": {
+        "base_url": "string",
+        "auth": {
+          "type": "oauth2_client_credentials",
+          "token_url": "string",
+          "client_id": "string",
+          "client_secret": "string",
+          "scope": "string",
+          "audience": "string",
+          "resource": "string",
+          "body_params": {},
+          "headers": {},
+          "query_params": {},
+          "api_key_header": "string",
+          "api_key": "string",
+          "token": "string"
+        }
+      },
+      "protected": true
     }
   ]
 }
@@ -483,7 +506,27 @@ epilot erp-integration createIntegration \
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }'
 ```
 
@@ -527,7 +570,27 @@ epilot erp-integration createIntegration --jsonata '$'
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -594,7 +657,27 @@ epilot erp-integration getIntegration -p integrationId=123e4567-e89b-12d3-a456-4
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -670,7 +753,27 @@ epilot erp-integration updateIntegration -p integrationId=123e4567-e89b-12d3-a45
       "enabled": false,
       "freshnessThresholdMinutes": 1
     }
-  }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true
 }
 ```
 
@@ -1307,6 +1410,9 @@ epilot erp-integration listIntegrationsV2 --jsonata 'integrations'
       "app_ids": ["string"],
       "environment_config": [],
       "settings": {},
+      "integration_type": "erp",
+      "connector_config": {},
+      "protected": true,
       "use_cases": []
     }
   ]
@@ -1356,6 +1462,26 @@ epilot erp-integration createIntegrationV2 \
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1411,6 +1537,26 @@ epilot erp-integration createIntegrationV2 --jsonata '$'
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1492,6 +1638,26 @@ epilot erp-integration getIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1560,6 +1726,26 @@ epilot erp-integration updateIntegrationV2 \
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1621,6 +1807,26 @@ epilot erp-integration updateIntegrationV2 -p integrationId=123e4567-e89b-12d3-a
       "freshnessThresholdMinutes": 1
     }
   },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    }
+  },
+  "protected": true,
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -2410,6 +2616,57 @@ epilot erp-integration secureProxy --jsonata 'status_code'
   "headers": {},
   "body": {}
 }
+```
+
+</details>
+
+---
+
+### `managedCallExecute`
+
+Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+
+`POST /v1/managed-call/{slug}/execute`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Use case slug (acts as the RPC method name) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot erp-integration managedCallExecute \
+  -p slug=contact \
+  -d '{"integration_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","payload":{},"correlation_id":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot erp-integration managedCallExecute contact
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot erp-integration managedCallExecute -p slug=contact
+```
+
+With JSONata filter:
+
+```bash
+epilot erp-integration managedCallExecute -p slug=contact --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{}
 ```
 
 </details>

@@ -372,7 +372,7 @@ export const API_LIST: ApiInfo[] = [
     apiName: 'dataManagement',
     kebabName: 'data-management',
     title: 'Data Management API',
-    serverUrl: 'https://data-management.sls.epilot.io',
+    serverUrl: '',
     operationCount: 10,
     operationIds: [
       'queryEntities',
@@ -489,7 +489,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'entity',
     title: 'Entity API',
     serverUrl: 'https://entity.sls.epilot.io',
-    operationCount: 82,
+    operationCount: 84,
     operationIds: [
       'listSchemas',
       'listSchemasV2',
@@ -499,6 +499,8 @@ export const API_LIST: ApiInfo[] = [
       'getJsonSchema',
       'getSchemaExample',
       'getSchemaVersions',
+      'freezeSchema',
+      'unfreezeSchema',
       'listAvailableCapabilities',
       'listSchemaBlueprints',
       'searchEntities',
@@ -615,7 +617,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'erp-integration',
     title: 'ERP Integration API',
     serverUrl: 'https://erp-integration-api.sls.epilot.io',
-    operationCount: 35,
+    operationCount: 36,
     operationIds: [
       'acknowledgeTracking',
       'triggerErp',
@@ -652,6 +654,7 @@ export const API_LIST: ApiInfo[] = [
       'queryOutboundMonitoringEvents',
       'listSecureProxies',
       'secureProxy',
+      'managedCallExecute',
     ],
   },
   {
