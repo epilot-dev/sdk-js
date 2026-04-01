@@ -151,6 +151,7 @@ jobs:
               const path = 'packages/cli-wrapper/package.json';
               const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
               pkg.version = '${CLI_VERSION}';
+              pkg.dependencies['@epilot/cli'] = '^${CLI_VERSION}';
               fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
             "
             FILES_TO_ADD="$FILES_TO_ADD packages/cli/package.json packages/cli-wrapper/package.json"
