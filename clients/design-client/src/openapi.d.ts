@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -11,7 +9,12 @@ import type {
 declare namespace Components {
     namespace Schemas {
         export interface AddConsumerReq {
-            consumer_id: string;
+            consumer_id: /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            DesignId;
             consumer_name: string;
             should_delete?: string;
         }
@@ -34,6 +37,10 @@ declare namespace Components {
                     consumer: ConsumerData;
                 };
                 is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
@@ -72,6 +79,10 @@ declare namespace Components {
                     consumer: ConsumerData;
                 };
                 is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
@@ -81,6 +92,12 @@ declare namespace Components {
                 };
             };
         }
+        /**
+         * Type of application that uses the design
+         * example:
+         * journey
+         */
+        export type Application = string;
         export interface BrandItem {
             id: string;
             name: string;
@@ -104,6 +121,12 @@ declare namespace Components {
             id: string;
             name: string;
         }
+        /**
+         * Id of the design
+         * example:
+         * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+         */
+        export type DesignId = string;
         export interface DesignItem {
             brand_id?: string;
             brand_name?: string;
@@ -122,9 +145,36 @@ declare namespace Components {
                 consumer: ConsumerData;
             };
             is_default?: boolean;
+            /**
+             * The manifest IDs associated with this design
+             */
+            _manifest?: string[];
+        }
+        export interface DesignParameters {
+            designId?: /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            DesignId;
+            theme?: /**
+             * Type of theme to be parsed and returned
+             * example:
+             * NEW
+             */
+            Theme;
+            application?: /**
+             * Type of application that uses the design
+             * example:
+             * journey
+             */
+            Application;
         }
         export interface ErrorResp {
             message?: string;
+            error?: {
+                [key: string]: any;
+            };
         }
         export interface FileData {
             name: string;
@@ -175,6 +225,10 @@ declare namespace Components {
                     consumer: ConsumerData;
                 };
                 is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
@@ -226,6 +280,10 @@ declare namespace Components {
                     consumer: ConsumerData;
                 };
                 is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
@@ -273,9 +331,24 @@ declare namespace Components {
             navbar: string;
             portal_login_background?: string;
         }
+        export interface RemoveConsumerReq {
+            consumer_id: /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            DesignId;
+            should_delete?: string;
+        }
         export interface ShapeData {
             border_radius?: number;
         }
+        /**
+         * Type of theme to be parsed and returned
+         * example:
+         * NEW
+         */
+        export type Theme = "NEW" | "OLD";
         export interface TypographyData {
             font: FontData;
             primary: string;
@@ -300,6 +373,10 @@ declare namespace Components {
                     consumer: ConsumerData;
                 };
                 is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
                 custom_theme?: string;
                 use_custom_theme?: boolean;
                 design_tokens?: {
@@ -336,7 +413,12 @@ declare namespace Paths {
     namespace AddConsumer {
         namespace Parameters {
             export type Application = string;
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -364,7 +446,12 @@ declare namespace Paths {
     }
     namespace DeleteDesign {
         namespace Parameters {
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -381,7 +468,7 @@ declare namespace Paths {
     }
     namespace GetAllDesigns {
         namespace Responses {
-            export type $200 = Components.Schemas.GetAllDesignsRes[];
+            export type $200 = Components.Schemas.GetAllDesignsRes;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -393,8 +480,18 @@ declare namespace Paths {
     }
     namespace GetConsumerDesign {
         namespace Parameters {
-            export type Application = string;
-            export type ConsumerId = string;
+            export type Application = /**
+             * Type of application that uses the design
+             * example:
+             * journey
+             */
+            Components.Schemas.Application;
+            export type ConsumerId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             consumerId: Parameters.ConsumerId;
@@ -411,7 +508,12 @@ declare namespace Paths {
     }
     namespace GetDesign {
         namespace Parameters {
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -447,9 +549,19 @@ declare namespace Paths {
     }
     namespace GetThemeFromDesign {
         namespace Parameters {
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
             export type OrgId = string;
-            export type Theme = "NEW" | "OLD";
+            export type Theme = /**
+             * Type of theme to be parsed and returned
+             * example:
+             * NEW
+             */
+            Components.Schemas.Theme;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -471,13 +583,18 @@ declare namespace Paths {
     namespace RemoveConsumer {
         namespace Parameters {
             export type Application = string;
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
             application: Parameters.Application;
         }
-        export type RequestBody = Components.Schemas.AddConsumerReq;
+        export type RequestBody = Components.Schemas.RemoveConsumerReq;
         namespace Responses {
             export interface $204 {
             }
@@ -490,7 +607,12 @@ declare namespace Paths {
     }
     namespace UpdateDesign {
         namespace Parameters {
-            export type DesignId = string;
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -808,11 +930,14 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type AddConsumerReq = Components.Schemas.AddConsumerReq;
 export type AddDesignReq = Components.Schemas.AddDesignReq;
 export type AddDesignRes = Components.Schemas.AddDesignRes;
+export type Application = Components.Schemas.Application;
 export type BrandItem = Components.Schemas.BrandItem;
 export type ConsumerData = Components.Schemas.ConsumerData;
 export type Custom_Style = Components.Schemas.CustomStyle;
 export type CustomerPortalData = Components.Schemas.CustomerPortalData;
+export type DesignId = Components.Schemas.DesignId;
 export type DesignItem = Components.Schemas.DesignItem;
+export type DesignParameters = Components.Schemas.DesignParameters;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type FileData = Components.Schemas.FileData;
 export type FontData = Components.Schemas.FontData;
@@ -825,7 +950,9 @@ export type ItemMetada = Components.Schemas.ItemMetada;
 export type Journey = Components.Schemas.Journey;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
+export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
 export type ShapeData = Components.Schemas.ShapeData;
+export type Theme = Components.Schemas.Theme;
 export type TypographyData = Components.Schemas.TypographyData;
 export type UpdateDesignReq = Components.Schemas.UpdateDesignReq;
 export type UploadFileReq = Components.Schemas.UploadFileReq;
