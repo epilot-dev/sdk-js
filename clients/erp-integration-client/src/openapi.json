@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "ERP Integration API",
-    "version": "0.56.0",
+    "version": "0.58.0",
     "description": "API for integrating with ERP systems, handling tracking acknowledgments, triggering ERP processes, and processing ERP updates."
   },
   "tags": [
@@ -3196,6 +3196,13 @@
           "protected": {
             "type": "boolean",
             "description": "If true, integration is displayed in read-only mode in the UI to discourage changes"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "The manifest IDs associated with this integration",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -5097,12 +5104,14 @@
           },
           "headers": {
             "type": "object",
+            "description": "Custom HTTP headers for the request. Values support {{variable}} interpolation from the request payload and {{env.VAR}} references for environment variables.",
             "additionalProperties": {
               "type": "string"
             }
           },
           "query_params": {
             "type": "object",
+            "description": "Query parameters for the request. Values support {{variable}} interpolation from the request payload.",
             "additionalProperties": {
               "type": "string"
             }
