@@ -175,6 +175,10 @@ jobs:
 
           git push origin main --follow-tags
 
+      - name: Rebuild CLI with bumped version
+        if: steps.check.outputs.cli == 'true'
+        run: pnpm --filter @epilot/cli build
+
       - name: Publish @epilot/sdk
         if: steps.check.outputs.sdk == 'true'
         run: npm publish --ignore-scripts
