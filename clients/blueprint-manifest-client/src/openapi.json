@@ -1214,7 +1214,13 @@
                         "properties": {
                           "slug": {
                             "type": "string",
+                            "description": "The installation slug identifier for the blueprint (used for publishing).",
                             "example": "wallbox_b2c"
+                          },
+                          "marketplace_slug": {
+                            "type": "string",
+                            "description": "The marketplace page slug for the Webflow CMS item (used for display).",
+                            "example": "wallbox-b2c"
                           },
                           "version": {
                             "type": "string",

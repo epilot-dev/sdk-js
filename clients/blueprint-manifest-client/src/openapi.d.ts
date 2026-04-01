@@ -2384,10 +2384,17 @@ declare namespace Paths {
             export interface $200 {
                 results?: {
                     /**
+                     * The installation slug identifier for the blueprint (used for publishing).
                      * example:
                      * wallbox_b2c
                      */
                     slug?: string;
+                    /**
+                     * The marketplace page slug for the Webflow CMS item (used for display).
+                     * example:
+                     * wallbox-b2c
+                     */
+                    marketplace_slug?: string;
                     /**
                      * example:
                      * v1.0.0
