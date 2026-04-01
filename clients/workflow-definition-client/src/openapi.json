@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows Definitions",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Service for Workflow Definitions for different processes inside of an Organization\n"
   },
   "servers": [
@@ -1698,6 +1698,13 @@
           "singleClosingReasonSelection": {
             "type": "boolean",
             "description": "Whether only a single closing reason can be selected"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "The manifest IDs associated with this workflow",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2736,6 +2743,13 @@
           "singleClosingReasonSelection": {
             "type": "boolean",
             "description": "Whether only a single closing reason can be selected"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "The manifest IDs associated with this workflow",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
