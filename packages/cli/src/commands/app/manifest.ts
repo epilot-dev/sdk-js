@@ -4,26 +4,6 @@ import { execSync } from 'node:child_process';
 import { resolveToken } from '../../lib/auth-store.js';
 import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from '../../lib/utils.js';
 
-export interface ManifestProxyAuth {
-  type: 'header' | 'bearer' | 'oauth2' | 'none';
-  /** Header name for 'header' auth type */
-  header?: string;
-  /** Key referencing a secret option value for the API key or client secret */
-  secret?: string;
-  /** OAuth 2.0 client credentials configuration */
-  oauth2?: {
-    token_url: string;
-    client_id_secret: string;
-    scope?: string;
-  };
-}
-
-export interface ManifestProxy {
-  name: string;
-  target: string;
-  auth?: ManifestProxyAuth;
-}
-
 export interface AppManifest {
   $schema?: string;
   manifest_version: number;
@@ -39,7 +19,6 @@ export interface AppManifest {
   permissions?: { action: string; resource?: string }[];
   blueprint?: { manifest_id?: string };
   assets?: { logo?: string };
-  proxies?: ManifestProxy[];
   components: ManifestComponent[];
 }
 
@@ -77,6 +56,7 @@ const COMPONENT_TYPES = [
   'CUSTOM_CAPABILITY',
   'EXTERNAL_PRODUCT_CATALOG',
   'CUSTOM_PAGE',
+  'API_PROXY',
 ];
 
 export interface ValidationError {
@@ -415,15 +395,6 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
   const blueprintRef = version.blueprint_ref as { manifest_id?: string } | undefined;
   if (blueprintRef?.manifest_id) {
     manifest.blueprint = { manifest_id: blueprintRef.manifest_id };
-  }
-
-  const proxies = version.proxies as ManifestProxy[] | undefined;
-  if (proxies?.length) {
-    manifest.proxies = proxies.map((p) => {
-      const proxy: ManifestProxy = { name: p.name, target: p.target };
-      if (p.auth) proxy.auth = p.auth;
-      return proxy;
-    });
   }
 
   if (config.icon_url) {
