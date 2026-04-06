@@ -9,7 +9,7 @@ import type {
 declare namespace Components {
     namespace Schemas {
         /**
-         * A governance config defining an automated policy (e.g., scheduled
+         * A data lifecycle config defining an automated policy (e.g., scheduled
          * entity deletion) for a specific entity schema.
          *
          */
@@ -32,12 +32,12 @@ declare namespace Components {
              */
             entity_schema: string;
             query: /**
-             * Defines the query used by a governance config to identify target
+             * Defines the query used by a data lifecycle config to identify target
              * entities. Combines a saved view with optional governance filters.
              *
              */
             QueryConfig;
-            schedule?: /* Schedule definition controlling when a governance config runs. */ ConfigSchedule;
+            schedule?: /* Schedule definition controlling when a data lifecycle config runs. */ ConfigSchedule;
             /**
              * Whether this config is currently active.
              */
@@ -74,7 +74,7 @@ declare namespace Components {
             last_run_at?: string; // date-time
         }
         /**
-         * Schedule definition controlling when a governance config runs.
+         * Schedule definition controlling when a data lifecycle config runs.
          */
         export type ConfigSchedule = /**
          * Interval-based schedule. The governance engine will create a job every
@@ -99,7 +99,7 @@ declare namespace Components {
              */
             ConfigType;
             /**
-             * ID of the governance config this job executes.
+             * ID of the data lifecycle config this job executes.
              */
             config_id: string;
             /**
@@ -154,7 +154,7 @@ declare namespace Components {
             end_date?: string; // date
         }
         /**
-         * Represents a single execution run of a governance config. Tracks the
+         * Represents a single execution run of a data lifecycle config. Tracks the
          * full lifecycle from creation through completion, including outcome
          * details and an optional downloadable report.
          *
@@ -171,7 +171,7 @@ declare namespace Components {
              */
             ConfigType;
             /**
-             * ID of the governance config this job was created from.
+             * ID of the data lifecycle config this job was created from.
              */
             config_id: string;
             /**
@@ -299,14 +299,14 @@ declare namespace Components {
          */
         export type JobTrigger = "schedule" | "manual";
         /**
-         * Paginated response containing a list of governance configs.
+         * Paginated response containing a list of data lifecycle configs.
          */
         export interface ListConfigsResponse {
             /**
              * Array of config records for the current page.
              */
             configs?: /**
-             * A governance config defining an automated policy (e.g., scheduled
+             * A data lifecycle config defining an automated policy (e.g., scheduled
              * entity deletion) for a specific entity schema.
              *
              */
@@ -326,7 +326,7 @@ declare namespace Components {
              * Array of job records for the current page.
              */
             jobs?: /**
-             * Represents a single execution run of a governance config. Tracks the
+             * Represents a single execution run of a data lifecycle config. Tracks the
              * full lifecycle from creation through completion, including outcome
              * details and an optional downloadable report.
              *
@@ -340,7 +340,7 @@ declare namespace Components {
             cursor?: string | null;
         }
         /**
-         * Defines the query used by a governance config to identify target
+         * Defines the query used by a data lifecycle config to identify target
          * entities. Combines a saved view with optional governance filters.
          *
          */
@@ -539,7 +539,7 @@ declare namespace Components {
             JobReport;
         }
         /**
-         * Request payload for creating or updating a governance config.
+         * Request payload for creating or updating a data lifecycle config.
          */
         export interface UpsertConfigRequest {
             type: /**
@@ -549,12 +549,12 @@ declare namespace Components {
              */
             ConfigType;
             query: /**
-             * Defines the query used by a governance config to identify target
+             * Defines the query used by a data lifecycle config to identify target
              * entities. Combines a saved view with optional governance filters.
              *
              */
             QueryConfig;
-            schedule: /* Schedule definition controlling when a governance config runs. */ ConfigSchedule;
+            schedule: /* Schedule definition controlling when a data lifecycle config runs. */ ConfigSchedule;
             /**
              * Entity schemas whose related entities should also be deleted
              * when the primary entity is removed. Only applicable when `type`
@@ -586,7 +586,7 @@ declare namespace Paths {
         export type RequestBody = /* Request payload for creating a new job run. */ Components.Schemas.CreateJobRequest;
         namespace Responses {
             export type $201 = /**
-             * Represents a single execution run of a governance config. Tracks the
+             * Represents a single execution run of a data lifecycle config. Tracks the
              * full lifecycle from creation through completion, including outcome
              * details and an optional downloadable report.
              *
@@ -609,7 +609,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $201 = /**
-             * Represents a single execution run of a governance config. Tracks the
+             * Represents a single execution run of a data lifecycle config. Tracks the
              * full lifecycle from creation through completion, including outcome
              * details and an optional downloadable report.
              *
@@ -630,7 +630,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /**
-             * A governance config defining an automated policy (e.g., scheduled
+             * A data lifecycle config defining an automated policy (e.g., scheduled
              * entity deletion) for a specific entity schema.
              *
              */
@@ -650,7 +650,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /**
-             * Represents a single execution run of a governance config. Tracks the
+             * Represents a single execution run of a data lifecycle config. Tracks the
              * full lifecycle from creation through completion, including outcome
              * details and an optional downloadable report.
              *
@@ -700,7 +700,7 @@ declare namespace Paths {
             enabled?: Parameters.Enabled;
         }
         namespace Responses {
-            export type $200 = /* Paginated response containing a list of governance configs. */ Components.Schemas.ListConfigsResponse;
+            export type $200 = /* Paginated response containing a list of data lifecycle configs. */ Components.Schemas.ListConfigsResponse;
             export interface $401 {
             }
         }
@@ -780,7 +780,7 @@ declare namespace Paths {
         Components.Schemas.UpdateJobRequest;
         namespace Responses {
             export type $200 = /**
-             * Represents a single execution run of a governance config. Tracks the
+             * Represents a single execution run of a data lifecycle config. Tracks the
              * full lifecycle from creation through completion, including outcome
              * details and an optional downloadable report.
              *
@@ -799,16 +799,16 @@ declare namespace Paths {
         export interface PathParameters {
             entity_schema: Parameters.EntitySchema;
         }
-        export type RequestBody = /* Request payload for creating or updating a governance config. */ Components.Schemas.UpsertConfigRequest;
+        export type RequestBody = /* Request payload for creating or updating a data lifecycle config. */ Components.Schemas.UpsertConfigRequest;
         namespace Responses {
             export type $200 = /**
-             * A governance config defining an automated policy (e.g., scheduled
+             * A data lifecycle config defining an automated policy (e.g., scheduled
              * entity deletion) for a specific entity schema.
              *
              */
             Components.Schemas.Config;
             export type $201 = /**
-             * A governance config defining an automated policy (e.g., scheduled
+             * A data lifecycle config defining an automated policy (e.g., scheduled
              * entity deletion) for a specific entity schema.
              *
              */
@@ -824,13 +824,13 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * queryEntities - Query entities matching a governance policy
+   * queryEntities - Query entities matching a data lifecycle config
    * 
    * Executes a query against the specified entity schema using a saved view
    * definition, optionally combined with additional data governance filters.
    * 
    * This endpoint is typically used to **preview** which entities would be
-   * affected by a governance config before it runs. The response includes
+   * affected by a data lifecycle config before it runs. The response includes
    * the total hit count and (optionally hydrated) entity results.
    * 
    * Pagination is supported via `from` and `size` in the request body.
@@ -902,7 +902,7 @@ export interface OperationMethods {
   /**
    * getConfig - Get a config by ID
    * 
-   * Returns a single data governance config by its unique identifier,
+   * Returns a single data data lifecycle config by its unique identifier,
    * including its query definition, schedule, and current enabled state.
    * 
    */
@@ -930,9 +930,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateJobForConfig.Responses.$201>
   /**
-   * upsertConfig - Create or update a governance config
+   * upsertConfig - Create or update a data lifecycle config
    * 
-   * Creates a new governance config or updates an existing one for the
+   * Creates a new data lifecycle config or updates an existing one for the
    * given entity schema. The config defines:
    * - A **query** (saved view + optional filters) to identify target entities
    * - A **schedule** controlling how often the policy runs
@@ -951,9 +951,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertConfig.Responses.$200 | Paths.UpsertConfig.Responses.$201>
   /**
-   * listConfigs - List governance configs
+   * listConfigs - List data lifecycle configs
    * 
-   * Returns a cursor-paginated list of governance configs. Results can be
+   * Returns a cursor-paginated list of data lifecycle configs. Results can be
    * filtered by entity schema, config type, scheduled run date, or
    * enabled status.
    * 
@@ -980,13 +980,13 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/data-governance/v1/{entity_schema}/query']: {
     /**
-     * queryEntities - Query entities matching a governance policy
+     * queryEntities - Query entities matching a data lifecycle config
      * 
      * Executes a query against the specified entity schema using a saved view
      * definition, optionally combined with additional data governance filters.
      * 
      * This endpoint is typically used to **preview** which entities would be
-     * affected by a governance config before it runs. The response includes
+     * affected by a data lifecycle config before it runs. The response includes
      * the total hit count and (optionally hydrated) entity results.
      * 
      * Pagination is supported via `from` and `size` in the request body.
@@ -1068,7 +1068,7 @@ export interface PathsDictionary {
     /**
      * getConfig - Get a config by ID
      * 
-     * Returns a single data governance config by its unique identifier,
+     * Returns a single data data lifecycle config by its unique identifier,
      * including its query definition, schedule, and current enabled state.
      * 
      */
@@ -1100,9 +1100,9 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/{entity_schema}/configs']: {
     /**
-     * upsertConfig - Create or update a governance config
+     * upsertConfig - Create or update a data lifecycle config
      * 
-     * Creates a new governance config or updates an existing one for the
+     * Creates a new data lifecycle config or updates an existing one for the
      * given entity schema. The config defines:
      * - A **query** (saved view + optional filters) to identify target entities
      * - A **schedule** controlling how often the policy runs
@@ -1123,9 +1123,9 @@ export interface PathsDictionary {
   }
   ['/data-governance/v1/configs']: {
     /**
-     * listConfigs - List governance configs
+     * listConfigs - List data lifecycle configs
      * 
-     * Returns a cursor-paginated list of governance configs. Results can be
+     * Returns a cursor-paginated list of data lifecycle configs. Results can be
      * filtered by entity schema, config type, scheduled run date, or
      * enabled status.
      * 
