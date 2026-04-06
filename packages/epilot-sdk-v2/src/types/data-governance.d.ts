@@ -1,4 +1,4 @@
-/* Auto-copied from data-management-client */
+/* Auto-copied from data-governance-client */
 import type {
   OpenAPIClient,
   Parameters,

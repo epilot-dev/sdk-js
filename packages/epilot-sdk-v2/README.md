@@ -52,7 +52,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.consent` | `@epilot/sdk/consent` | [docs](./docs/consent.md) |
 | `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./docs/customer-portal.md) |
 | `epilot.dashboard` | `@epilot/sdk/dashboard` | [docs](./docs/dashboard.md) |
-| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./docs/data-management.md) |
+| `epilot.dataGovernance` | `@epilot/sdk/data-governance` | [docs](./docs/data-governance.md) |
 | `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./docs/deduplication.md) |
 | `epilot.design` | `@epilot/sdk/design` | [docs](./docs/design.md) |
 | `epilot.document` | `@epilot/sdk/document` | [docs](./docs/document.md) |

@@ -38,6 +38,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateBlueprint`](#updateblueprint)
 - [`deleteBlueprint`](#deleteblueprint)
 - [`validateBlueprint`](#validateblueprint)
+- [`verifyBlueprint`](#verifyblueprint)
 - [`exportBlueprint`](#exportblueprint)
 - [`listMarketplaceSlugs`](#listmarketplaceslugs)
 - [`publishBlueprint`](#publishblueprint)
@@ -55,6 +56,19 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`getBlueprintJob`](#getblueprintjob)
 - [`continueInstallationJob`](#continueinstallationjob)
 - [`cancelBlueprintJob`](#cancelblueprintjob)
+
+**Marketplace Listings**
+- [`createMarketplaceListing`](#createmarketplacelisting)
+- [`getMarketplaceListing`](#getmarketplacelisting)
+- [`getMarketplaceListingById`](#getmarketplacelistingbyid)
+- [`updateMarketplaceListing`](#updatemarketplacelisting)
+- [`deleteMarketplaceListing`](#deletemarketplacelisting)
+
+**Marketplace Listing Versions**
+- [`createMarketplaceListingVersion`](#createmarketplacelistingversion)
+- [`listMarketplaceListingVersions`](#listmarketplacelistingversions)
+- [`updateMarketplaceListingVersion`](#updatemarketplacelistingversion)
+- [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion)
 
 **Schemas**
 - [`BlueprintID`](#blueprintid)
@@ -76,6 +90,10 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintJob`](#blueprintjob)
 - [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
 - [`BlueprintValidateJob`](#blueprintvalidatejob)
+- [`BlueprintVerificationJob`](#blueprintverificationjob)
+- [`VerificationSummary`](#verificationsummary)
+- [`ResourceVerificationResult`](#resourceverificationresult)
+- [`FieldDiff`](#fielddiff)
 - [`BlueprintJobEvent`](#blueprintjobevent)
 - [`BlueprintInstallationJobOptions`](#blueprintinstallationjoboptions)
 - [`ManifestID`](#manifestid)
@@ -106,6 +124,9 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`SelectedResources`](#selectedresources)
 - [`ResourceReplacement`](#resourcereplacement)
 - [`PutManifestPayload`](#putmanifestpayload)
+- [`MarketplaceListing`](#marketplacelisting)
+- [`MarketplaceListingUpdate`](#marketplacelistingupdate)
+- [`MarketplaceListingVersion`](#marketplacelistingversion)
 
 ### `uploadManifest`
 
@@ -173,7 +194,8 @@ const { data } = await client.listBlueprints({
           "source_blueprint_id": "string",
           "destination_org_id": "string",
           "destination_blueprint_id": "string",
-          "triggered_at": "1970-01-01T00:00:00.000Z"
+          "triggered_at": "1970-01-01T00:00:00.000Z",
+          "note": "string"
         }
       ],
       "is_verified": true,
@@ -219,7 +241,7 @@ const { data } = await client.listBlueprints({
           "impact_on_install_reason": ["string"]
         }
       ],
-      "source_type": "string"
+      "source_type": "custom"
     }
   ]
 }
@@ -255,7 +277,8 @@ const { data } = await client.createBlueprint(
         source_blueprint_id: 'string',
         destination_org_id: 'string',
         destination_blueprint_id: 'string',
-        triggered_at: '1970-01-01T00:00:00.000Z'
+        triggered_at: '1970-01-01T00:00:00.000Z',
+        note: 'string'
       }
     ],
     is_verified: true,
@@ -301,7 +324,7 @@ const { data } = await client.createBlueprint(
         impact_on_install_reason: ['string']
       }
     ],
-    source_type: 'string'
+    source_type: 'custom'
   },
 )
 ```
@@ -325,7 +348,8 @@ const { data } = await client.createBlueprint(
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -371,7 +395,7 @@ const { data } = await client.createBlueprint(
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -462,6 +486,10 @@ const { data } = await client.preInstallBlueprint(
   "is_verified": true,
   "docs_url": "string",
   "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -524,6 +552,10 @@ const { data } = await client.getBlueprintPreview({
   "is_verified": true,
   "docs_url": "string",
   "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -576,7 +608,8 @@ const { data } = await client.installBlueprint(
     },
     mode: 'simple',
     source_blueprint_type: 'marketplace',
-    slug: 'string'
+    slug: 'string',
+    auto_enable_features: true
   },
 )
 ```
@@ -614,7 +647,8 @@ const { data } = await client.getBlueprint({
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -660,7 +694,7 @@ const { data } = await client.getBlueprint({
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -696,7 +730,8 @@ const { data } = await client.updateBlueprint(
         source_blueprint_id: 'string',
         destination_org_id: 'string',
         destination_blueprint_id: 'string',
-        triggered_at: '1970-01-01T00:00:00.000Z'
+        triggered_at: '1970-01-01T00:00:00.000Z',
+        note: 'string'
       }
     ],
     is_verified: true,
@@ -742,7 +777,7 @@ const { data } = await client.updateBlueprint(
         impact_on_install_reason: ['string']
       }
     ],
-    source_type: 'string'
+    source_type: 'custom'
   },
 )
 ```
@@ -766,7 +801,8 @@ const { data } = await client.updateBlueprint(
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -812,7 +848,7 @@ const { data } = await client.updateBlueprint(
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -851,7 +887,8 @@ const { data } = await client.deleteBlueprint({
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -897,7 +934,7 @@ const { data } = await client.deleteBlueprint({
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -916,6 +953,31 @@ Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and
 const { data } = await client.validateBlueprint({
   blueprint_id: 'example',
 })
+```
+
+---
+
+### `verifyBlueprint`
+
+Start a blueprint verification job. Compares resource configurations between a source org
+and a destination org to verify that a sync/install was successful.
+Returns 202 Accepted with job_id. Poll GET
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}:verify`
+
+```ts
+const { data } = await client.verifyBlueprint(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    source_org_id: 'string',
+    source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    destination_org_id: 'string',
+    destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    source_auth_token: 'string'
+  },
+)
 ```
 
 ---
@@ -960,6 +1022,7 @@ const { data } = await client.listMarketplaceSlugs()
   "results": [
     {
       "slug": "wallbox_b2c",
+      "marketplace_slug": "wallbox-b2c",
       "version": "v1.0.0",
       "name": "Wallbox B2C",
       "installation_link": "https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip"
@@ -1643,6 +1706,524 @@ const { data } = await client.cancelBlueprintJob({
 
 ---
 
+### `createMarketplaceListing`
+
+Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+
+`POST /v1/blueprints/{blueprint_id}/marketplace-listing`
+
+```ts
+const { data } = await client.createMarketplaceListing(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    name: 'string',
+    slug: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getMarketplaceListing`
+
+Get marketplace listing for a blueprint including all versions
+
+`GET /v1/blueprints/{blueprint_id}/marketplace-listing`
+
+```ts
+const { data } = await client.getMarketplaceListing({
+  blueprint_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "has_publishable_draft": true
+}
+```
+
+</details>
+
+---
+
+### `getMarketplaceListingById`
+
+Get marketplace listing by listing ID including all versions
+
+`GET /v1/marketplace-listings/{listing_id}`
+
+```ts
+const { data } = await client.getMarketplaceListingById({
+  listing_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "has_publishable_draft": true
+}
+```
+
+</details>
+
+---
+
+### `updateMarketplaceListing`
+
+Update listing-level fields
+
+`PATCH /v1/marketplace-listings/{listing_id}`
+
+```ts
+const { data } = await client.updateMarketplaceListing(
+  {
+    listing_id: 'example',
+  },
+  {
+    name: 'string',
+    slug: 'string',
+    logo: 'string',
+    documentation_url: 'string',
+    pricing_type: 'free',
+    support_email: 'string',
+    portal_description: 'string',
+    teaser_name: 'string',
+    teaser_short_description: 'string',
+    teaser_thumbnail: 'string',
+    details_page_title: 'string',
+    details_page_description: 'string',
+    details_page_hero_image: 'string',
+    details_page_carousel: ['string'],
+    documentation_link: 'string',
+    resources_section_description: 'string',
+    resources_section_benefits_title: 'string',
+    resources_section_benefits_list: 'string',
+    resources_section_process_details: 'string',
+    partner: 'string',
+    partner_subtext: 'string',
+    partner_logo: 'string',
+    partner_website_link: 'string',
+    last_updated_on: 'string',
+    requires_customer_portal: true,
+    process_details_section_title: 'string',
+    is_new_blueprint: true,
+    available_in: 'string',
+    testimonials: ['string'],
+    installation_link: 'string',
+    installation_slug: 'string',
+    demo_form_link: 'string',
+    order: 0,
+    categories: ['string'],
+    main_category: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteMarketplaceListing`
+
+Delete listing and all versions
+
+`DELETE /v1/marketplace-listings/{listing_id}`
+
+```ts
+const { data } = await client.deleteMarketplaceListing({
+  listing_id: 'example',
+})
+```
+
+---
+
+### `createMarketplaceListingVersion`
+
+Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+
+`POST /v1/marketplace-listings/{listing_id}/versions`
+
+```ts
+const { data } = await client.createMarketplaceListingVersion({
+  listing_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listMarketplaceListingVersions`
+
+List all versions for a listing, newest first
+
+`GET /v1/marketplace-listings/{listing_id}/versions`
+
+```ts
+const { data } = await client.listMarketplaceListingVersions({
+  listing_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `updateMarketplaceListingVersion`
+
+Update updateNote, requiredFeatures, or recommendedApps on a draft version
+
+`PATCH /v1/marketplace-listings/{listing_id}/versions/{version_id}`
+
+```ts
+const { data } = await client.updateMarketplaceListingVersion(
+  {
+    listing_id: 'example',
+    version_id: 'example',
+  },
+  {
+    update_note: 'string',
+    required_features: ['string'],
+    recommended_apps: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `publishMarketplaceListingVersion`
+
+Publish a draft version; archives the previous live version
+
+`POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/publish`
+
+```ts
+const { data } = await client.publishMarketplaceListingVersion(
+  {
+    listing_id: 'example',
+    version_id: 'example',
+  },
+  {
+    version_name: 'string',
+    update_note: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `BlueprintID`
@@ -1679,6 +2260,7 @@ type CommonBlueprintFields = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -1715,13 +2297,13 @@ type CommonBlueprintFields = {
 type BlueprintResource = {
   id: string
   name?: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   address?: string
   is_root?: boolean
   is_ready?: boolean
   is_hidden?: boolean
   is_disabled?: boolean
-  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
   parent_resource_ids?: string[]
   depends_on_addresses?: string[]
   impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -1748,6 +2330,10 @@ type BlueprintPreview = {
   is_verified: boolean
   docs_url?: string
   recommended_apps?: string[]
+  required_features?: {
+    enabled?: string[]
+    disabled?: string[]
+  }
   created_at: string // date-time
   created_by: {
     name?: unknown
@@ -1759,13 +2345,13 @@ type BlueprintPreview = {
   resources: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -1792,6 +2378,7 @@ type CustomBlueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -1822,19 +2409,19 @@ type CustomBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
     impact_on_install_reason?: string[]
   }>
-  source_type?: string
+  source_type?: "custom"
 }
 ```
 
@@ -1856,6 +2443,7 @@ type FileBlueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -1883,17 +2471,17 @@ type FileBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: string
+  source_type?: "file"
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -1920,6 +2508,7 @@ type MarketplaceBlueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -1947,17 +2536,17 @@ type MarketplaceBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: string
+  source_type?: "marketplace"
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -2016,6 +2605,7 @@ type DeployedBlueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -2043,17 +2633,17 @@ type DeployedBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: string
+  source_type?: "deploy"
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -2080,6 +2670,7 @@ type AppBlueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -2107,17 +2698,17 @@ type AppBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: string
+  source_type?: "app"
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
@@ -2144,6 +2735,7 @@ type Blueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -2174,19 +2766,19 @@ type Blueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
     impact_on_install_reason?: string[]
   }>
-  source_type?: string
+  source_type?: "custom"
 } | {
   id?: string
   title: string
@@ -2202,6 +2794,7 @@ type Blueprint = {
     destination_org_id?: string
     destination_blueprint_id?: string
     triggered_at?: string // date-time
+    note?: string
   }>
   is_verified?: boolean
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
@@ -2227,8 +2820,6 @@ type Blueprint = {
   required_features?: {
     enabled?: string[]
     disabled?: string[]
-  }
-  zip_file_name?: string
   // ...
 }
 ```
@@ -2529,6 +3120,107 @@ type BlueprintValidateJob = {
 }
 ```
 
+### `BlueprintVerificationJob`
+
+```ts
+type BlueprintVerificationJob = {
+  id?: string
+  events?: Array<{
+    timestamp?: string // date-time
+    message?: string
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    level?: "info" | "warning" | "error"
+    data?: {
+      installed_blueprint_id?: { ... }
+      export_job_id?: { ... }
+      resources?: { ... }
+    }
+  }>
+  triggered_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  source_org_id?: string
+  source_blueprint_id?: string
+  destination_org_id?: string
+  destination_blueprint_id?: string
+  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+  summary?: {
+    total_resources?: number
+    matched?: number
+    mismatched?: number
+    missing_in_destination?: number
+    missing_in_source?: number
+    fetch_errors?: number
+  }
+  resource_results?: Array<{
+    resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
+    resource_name?: string
+    source_resource_id?: string
+    destination_resource_id?: string
+    status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error"
+    field_diffs?: Array<{
+      path?: { ... }
+      source_value?: { ... }
+      destination_value?: { ... }
+      diff_type?: { ... }
+    }>
+    error?: string
+  }>
+  resource_results_s3_key?: string
+}
+```
+
+### `VerificationSummary`
+
+```ts
+type VerificationSummary = {
+  total_resources?: number
+  matched?: number
+  mismatched?: number
+  missing_in_destination?: number
+  missing_in_source?: number
+  fetch_errors?: number
+}
+```
+
+### `ResourceVerificationResult`
+
+```ts
+type ResourceVerificationResult = {
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
+  resource_name?: string
+  source_resource_id?: string
+  destination_resource_id?: string
+  status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error"
+  field_diffs?: Array<{
+    path?: string
+    source_value?: unknown
+    destination_value?: unknown
+    diff_type?: "value_changed" | "field_missing_in_destination" | "field_missing_in_source" | "type_mismatch"
+  }>
+  error?: string
+}
+```
+
+### `FieldDiff`
+
+```ts
+type FieldDiff = {
+  path?: string
+  source_value?: unknown
+  destination_value?: unknown
+  diff_type?: "value_changed" | "field_missing_in_destination" | "field_missing_in_source" | "type_mismatch"
+}
+```
+
 ### `BlueprintJobEvent`
 
 ```ts
@@ -2755,7 +3447,7 @@ type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "I
 Type of the resource
 
 ```ts
-type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
 ```
 
 ### `PlanChanges`
@@ -2769,7 +3461,7 @@ type PlanChanges = "create" | "update" | "internal-update" | "no-op" | "delete" 
 ```ts
 type CommonResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   name?: string
   source_id?: string
   is_virtual?: boolean
@@ -2781,14 +3473,14 @@ type CommonResourceNode = {
 ```ts
 type RootResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: true
@@ -2815,13 +3507,13 @@ type RootResourceNode = {
 ```ts
 type VirtualResourceNodeGroup = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   name?: string
   source_id?: string
   is_virtual?: true
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -2853,14 +3545,14 @@ type VirtualResourceNodeGroup = {
 ```ts
 type ResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -2886,7 +3578,7 @@ type ResourceNode = {
   }>
   parents?: Array<{
     id?: string
-    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
   }>
   changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
   changes_reason?: string[]
@@ -2905,7 +3597,7 @@ type Job = {
   plan_file_content?: string
   resources_to_export?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -2922,7 +3614,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -2941,7 +3633,7 @@ type Job = {
   large_resources_to_export_url?: string
   resources_to_import?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -2958,7 +3650,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -3082,7 +3774,7 @@ type CommonImportFields = {
   source_type?: "file" | "marketplace" | "sandbox"
   imported_resources?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -3099,7 +3791,7 @@ type CommonImportFields = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -3199,7 +3891,7 @@ type CallerIdentity = {
 type SelectedResources = {
   exported_root_resources: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
     address?: string
   }>
   selected_resources: string[]
@@ -3230,5 +3922,112 @@ type PutManifestPayload = {
     destination_organization_type?: "sandbox" | "production"
     last_triggered_at?: string
   }>
+}
+```
+
+### `MarketplaceListing`
+
+```ts
+type MarketplaceListing = {
+  id: string // uuid
+  blueprint_id: string
+  name: string
+  slug: string
+  logo?: string
+  documentation_url?: string
+  pricing_type?: "free" | "paid" | "freemium" | "contact_us"
+  support_email?: string
+  portal_description?: string
+  teaser_name?: string
+  teaser_short_description?: string
+  teaser_thumbnail?: string
+  details_page_title?: string
+  details_page_description?: string
+  details_page_hero_image?: string
+  details_page_carousel?: string[]
+  documentation_link?: string
+  resources_section_description?: string
+  resources_section_benefits_title?: string
+  resources_section_benefits_list?: string
+  resources_section_process_details?: string
+  partner?: string
+  partner_subtext?: string
+  partner_logo?: string
+  partner_website_link?: string
+  last_updated_on?: string
+  requires_customer_portal?: boolean
+  process_details_section_title?: string
+  is_new_blueprint?: boolean
+  available_in?: string
+  testimonials?: string[]
+  installation_link?: string
+  installation_slug?: string
+  demo_form_link?: string
+  order?: number
+  categories?: string[]
+  main_category?: string[]
+  status: "draft" | "live" | "archived"
+  created_at?: string // date-time
+  updated_at?: string // date-time
+}
+```
+
+### `MarketplaceListingUpdate`
+
+```ts
+type MarketplaceListingUpdate = {
+  name?: string
+  slug?: string
+  logo?: string
+  documentation_url?: string
+  pricing_type?: "free" | "paid" | "freemium" | "contact_us"
+  support_email?: string
+  portal_description?: string
+  teaser_name?: string
+  teaser_short_description?: string
+  teaser_thumbnail?: string
+  details_page_title?: string
+  details_page_description?: string
+  details_page_hero_image?: string
+  details_page_carousel?: string[]
+  documentation_link?: string
+  resources_section_description?: string
+  resources_section_benefits_title?: string
+  resources_section_benefits_list?: string
+  resources_section_process_details?: string
+  partner?: string
+  partner_subtext?: string
+  partner_logo?: string
+  partner_website_link?: string
+  last_updated_on?: string
+  requires_customer_portal?: boolean
+  process_details_section_title?: string
+  is_new_blueprint?: boolean
+  available_in?: string
+  testimonials?: string[]
+  installation_link?: string
+  installation_slug?: string
+  demo_form_link?: string
+  order?: number
+  categories?: string[]
+  main_category?: string[]
+}
+```
+
+### `MarketplaceListingVersion`
+
+```ts
+type MarketplaceListingVersion = {
+  id: string // uuid
+  listing_id: string
+  status: "draft" | "published" | "archived"
+  version_name?: string
+  draft_label: string
+  update_note?: string
+  resources?: object[]
+  required_features?: string[]
+  recommended_apps?: string[]
+  created_at: string // date-time
+  published_at?: string // date-time
 }
 ```

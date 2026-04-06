@@ -38,6 +38,8 @@ const { data } = await messageClient.sendMessage(...)
 - [`markUnreadMessage`](#markunreadmessage)
 - [`getUnread`](#getunread)
 - [`markUnreadMessageV2`](#markunreadmessagev2)
+- [`spamMessage`](#spammessage)
+- [`unspamMessage`](#unspammessage)
 - [`getMessageV2`](#getmessagev2)
 
 **Threads**
@@ -52,6 +54,10 @@ const { data } = await messageClient.sendMessage(...)
 - [`getThreadTimeline`](#getthreadtimeline)
 - [`trashThread`](#trashthread)
 - [`untrashThread`](#untrashthread)
+- [`spamThread`](#spamthread)
+- [`unspamThread`](#unspamthread)
+- [`bulkMoveThreads`](#bulkmovethreads)
+- [`bulkAssignThreads`](#bulkassignthreads)
 - [`threadBulkActionsRead`](#threadbulkactionsread)
 - [`threadBulkActionsUnread`](#threadbulkactionsunread)
 - [`threadBulkActionsFavorite`](#threadbulkactionsfavorite)
@@ -557,7 +563,8 @@ const { data } = await client.getUnread({
   "count": 14,
   "unread": 0,
   "drafts": 12,
-  "unassigned": 1
+  "unassigned": 1,
+  "spam": 3
 }
 ```
 
@@ -953,6 +960,102 @@ const { data } = await client.untrashThread({
 
 ---
 
+### `spamThread`
+
+Mark a thread as spam
+
+`POST /v1/message/threads/{id}/spam`
+
+```ts
+const { data } = await client.spamThread({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+---
+
+### `unspamThread`
+
+Remove spam marking from a thread
+
+`POST /v1/message/threads/{id}/unspam`
+
+```ts
+const { data } = await client.unspamThread({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+---
+
+### `spamMessage`
+
+Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+
+`POST /v1/message/messages/{id}/spam`
+
+```ts
+const { data } = await client.spamMessage({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+---
+
+### `unspamMessage`
+
+Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+
+`POST /v1/message/messages/{id}/unspam`
+
+```ts
+const { data } = await client.unspamMessage({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+---
+
+### `bulkMoveThreads`
+
+Move many threads to a different inbox
+
+`POST /v1/message/threads/bulk:move`
+
+```ts
+const { data } = await client.bulkMoveThreads(
+  null,
+  {
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    assign_to: ['206801'],
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
+    scopes: ['organization', 'user']
+  },
+)
+```
+
+---
+
+### `bulkAssignThreads`
+
+Assign many threads
+
+`POST /v1/message/threads/bulk:assign`
+
+```ts
+const { data } = await client.bulkAssignThreads(
+  null,
+  {
+    ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    assign_to: ['206801'],
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
+    scopes: ['organization', 'user']
+  },
+)
+```
+
+---
+
 ### `threadBulkActionsRead`
 
 Perform a bulk action of marking an array of thread ids as read
@@ -964,6 +1067,8 @@ const { data } = await client.threadBulkActionsRead(
   null,
   {
     ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    assign_to: ['206801'],
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     scopes: ['organization', 'user']
   },
 )
@@ -982,6 +1087,8 @@ const { data } = await client.threadBulkActionsUnread(
   null,
   {
     ids: ['6b299eda-4018-4554-8965-c4b5598e6531'],
+    assign_to: ['206801'],
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     scopes: ['organization', 'user']
   },
 )
@@ -2096,6 +2203,8 @@ type TimelineEvent = {
 ```ts
 type BulkActionsPayloadWithScopes = {
   ids: string[]
+  assign_to?: string[]
+  inbox_id?: string
   scopes?: "organization" | "user"[]
 }
 ```

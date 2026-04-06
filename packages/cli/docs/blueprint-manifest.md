@@ -49,6 +49,7 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`updateBlueprint`](#updateblueprint) — Update a Blueprint
 - [`deleteBlueprint`](#deleteblueprint) — Delete a Blueprint
 - [`validateBlueprint`](#validateblueprint) — Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+- [`verifyBlueprint`](#verifyblueprint) — Start a blueprint verification job. Compares resource configurations between a source org
 - [`exportBlueprint`](#exportblueprint) — Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
 - [`listMarketplaceSlugs`](#listmarketplaceslugs) — List all available marketplace blueprint slugs from Webflow CMS.
 - [`publishBlueprint`](#publishblueprint) — Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates th
@@ -66,6 +67,19 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`getBlueprintJob`](#getblueprintjob) — Poll current state of a job.
 - [`continueInstallationJob`](#continueinstallationjob) — Continue an installation job if it is waiting for user action.
 - [`cancelBlueprintJob`](#cancelblueprintjob) — Cancel a blueprint job if it is still running.
+
+**Marketplace Listings**
+- [`getMarketplaceListing`](#getmarketplacelisting) — Get marketplace listing for a blueprint including all versions
+- [`createMarketplaceListing`](#createmarketplacelisting) — Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+- [`getMarketplaceListingById`](#getmarketplacelistingbyid) — Get marketplace listing by listing ID including all versions
+- [`updateMarketplaceListing`](#updatemarketplacelisting) — Update listing-level fields
+- [`deleteMarketplaceListing`](#deletemarketplacelisting) — Delete listing and all versions
+
+**Marketplace Listing Versions**
+- [`listMarketplaceListingVersions`](#listmarketplacelistingversions) — List all versions for a listing, newest first
+- [`createMarketplaceListingVersion`](#createmarketplacelistingversion) — Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+- [`updateMarketplaceListingVersion`](#updatemarketplacelistingversion) — Update updateNote, requiredFeatures, or recommendedApps on a draft version
+- [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion) — Publish a draft version; archives the previous live version
 
 ### `uploadManifest`
 
@@ -157,7 +171,8 @@ epilot blueprint-manifest listBlueprints --jsonata 'results[0]'
           "source_blueprint_id": "string",
           "destination_org_id": "string",
           "destination_blueprint_id": "string",
-          "triggered_at": "1970-01-01T00:00:00.000Z"
+          "triggered_at": "1970-01-01T00:00:00.000Z",
+          "note": "string"
         }
       ],
       "is_verified": true,
@@ -203,7 +218,7 @@ epilot blueprint-manifest listBlueprints --jsonata 'results[0]'
           "impact_on_install_reason": ["string"]
         }
       ],
-      "source_type": "string"
+      "source_type": "custom"
     }
   ]
 }
@@ -246,7 +261,8 @@ epilot blueprint-manifest createBlueprint \
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -292,7 +308,7 @@ epilot blueprint-manifest createBlueprint \
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }'
 ```
 
@@ -327,7 +343,8 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -373,7 +390,7 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -481,6 +498,10 @@ epilot blueprint-manifest preInstallBlueprint --jsonata 'id'
   "is_verified": true,
   "docs_url": "string",
   "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -562,6 +583,10 @@ epilot blueprint-manifest getBlueprintPreview -p preview_id=123e4567-e89b-12d3-a
   "is_verified": true,
   "docs_url": "string",
   "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
@@ -623,7 +648,8 @@ epilot blueprint-manifest installBlueprint \
   },
   "mode": "simple",
   "source_blueprint_type": "marketplace",
-  "slug": "string"
+  "slug": "string",
+  "auto_enable_features": true
 }'
 ```
 
@@ -691,7 +717,8 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -737,7 +764,7 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -786,7 +813,8 @@ epilot blueprint-manifest updateBlueprint \
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -832,7 +860,7 @@ epilot blueprint-manifest updateBlueprint \
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }'
 ```
 
@@ -873,7 +901,8 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -919,7 +948,7 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -977,7 +1006,8 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "source_blueprint_id": "string",
       "destination_org_id": "string",
       "destination_blueprint_id": "string",
-      "triggered_at": "1970-01-01T00:00:00.000Z"
+      "triggered_at": "1970-01-01T00:00:00.000Z",
+      "note": "string"
     }
   ],
   "is_verified": true,
@@ -1023,7 +1053,7 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "impact_on_install_reason": ["string"]
     }
   ],
-  "source_type": "string"
+  "source_type": "custom"
 }
 ```
 
@@ -1060,6 +1090,61 @@ With JSONata filter:
 
 ```bash
 epilot blueprint-manifest validateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+```
+
+---
+
+### `verifyBlueprint`
+
+Start a blueprint verification job. Compares resource configurations between a source org
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}:verify`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest verifyBlueprint \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With request body:
+
+```bash
+epilot blueprint-manifest verifyBlueprint \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -d '{
+  "source_org_id": "string",
+  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "destination_org_id": "string",
+  "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "source_auth_token": "string"
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest verifyBlueprint c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest verifyBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest verifyBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
 ```
 
 ---
@@ -1132,6 +1217,7 @@ epilot blueprint-manifest listMarketplaceSlugs --jsonata 'results[0]'
   "results": [
     {
       "slug": "wallbox_b2c",
+      "marketplace_slug": "wallbox-b2c",
       "version": "v1.0.0",
       "name": "Wallbox B2C",
       "installation_link": "https://portal.epilot.cloud/app/blueprints/install/marketplace/wallbox_b2c?s3Ref=https://example.com/blueprint.zip"
@@ -2103,6 +2189,718 @@ epilot blueprint-manifest cancelBlueprintJob -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1
     "bucket": "blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw",
     "key": "templates/main.tf"
   }
+}
+```
+
+</details>
+
+---
+
+### `getMarketplaceListing`
+
+Get marketplace listing for a blueprint including all versions
+
+`GET /v1/blueprints/{blueprint_id}/marketplace-listing`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest getMarketplaceListing \
+  -p blueprint_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest getMarketplaceListing 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest getMarketplaceListing -p blueprint_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "has_publishable_draft": true
+}
+```
+
+</details>
+
+---
+
+### `createMarketplaceListing`
+
+Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+
+`POST /v1/blueprints/{blueprint_id}/marketplace-listing`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest createMarketplaceListing \
+  -p blueprint_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"name":"string","slug":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest createMarketplaceListing 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest createMarketplaceListing -p blueprint_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest createMarketplaceListing -p blueprint_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getMarketplaceListingById`
+
+Get marketplace listing by listing ID including all versions
+
+`GET /v1/marketplace-listings/{listing_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest getMarketplaceListingById \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest getMarketplaceListingById 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest getMarketplaceListingById -p listing_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "has_publishable_draft": true
+}
+```
+
+</details>
+
+---
+
+### `updateMarketplaceListing`
+
+Update listing-level fields
+
+`PATCH /v1/marketplace-listings/{listing_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest updateMarketplaceListing \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot blueprint-manifest updateMarketplaceListing \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest updateMarketplaceListing 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest updateMarketplaceListing -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest updateMarketplaceListing -p listing_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "documentation_link": "string",
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteMarketplaceListing`
+
+Delete listing and all versions
+
+`DELETE /v1/marketplace-listings/{listing_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest deleteMarketplaceListing \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest deleteMarketplaceListing 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest deleteMarketplaceListing -p listing_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `listMarketplaceListingVersions`
+
+List all versions for a listing, newest first
+
+`GET /v1/marketplace-listings/{listing_id}/versions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest listMarketplaceListingVersions \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest listMarketplaceListingVersions 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest listMarketplaceListingVersions -p listing_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'versions'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "versions": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "listing_id": "string",
+      "status": "draft",
+      "version_name": "string",
+      "draft_label": "string",
+      "update_note": "string",
+      "resources": [
+        {}
+      ],
+      "required_features": ["string"],
+      "recommended_apps": ["string"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "published_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createMarketplaceListingVersion`
+
+Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+
+`POST /v1/marketplace-listings/{listing_id}/versions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest createMarketplaceListingVersion \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest createMarketplaceListingVersion 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest createMarketplaceListingVersion -p listing_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `updateMarketplaceListingVersion`
+
+Update updateNote, requiredFeatures, or recommendedApps on a draft version
+
+`PATCH /v1/marketplace-listings/{listing_id}/versions/{version_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+| `version_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest updateMarketplaceListingVersion \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p version_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"update_note":"string","required_features":["string"],"recommended_apps":["string"]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest updateMarketplaceListingVersion 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest updateMarketplaceListingVersion -p listing_id=123e4567-e89b-12d3-a456-426614174000 -p version_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest updateMarketplaceListingVersion -p listing_id=123e4567-e89b-12d3-a456-426614174000 -p version_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `publishMarketplaceListingVersion`
+
+Publish a draft version; archives the previous live version
+
+`POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/publish`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `listing_id` | path | string | Yes |  |
+| `version_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest publishMarketplaceListingVersion \
+  -p listing_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p version_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"version_name":"string","update_note":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest publishMarketplaceListingVersion 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest publishMarketplaceListingVersion -p listing_id=123e4567-e89b-12d3-a456-426614174000 -p version_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest publishMarketplaceListingVersion -p listing_id=123e4567-e89b-12d3-a456-426614174000 -p version_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "listing_id": "string",
+  "status": "draft",
+  "version_name": "string",
+  "draft_label": "string",
+  "update_note": "string",
+  "resources": [
+    {}
+  ],
+  "required_features": ["string"],
+  "recommended_apps": ["string"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "published_at": "1970-01-01T00:00:00.000Z"
 }
 ```
 

@@ -10,7 +10,7 @@ import type { Client as BlueprintManifestClient } from './types/blueprint-manife
 import type { Client as ConsentClient } from './types/consent';
 import type { Client as CustomerPortalClient } from './types/customer-portal';
 import type { Client as DashboardClient } from './types/dashboard';
-import type { Client as DataManagementClient } from './types/data-management';
+import type { Client as DataGovernanceClient } from './types/data-governance';
 import type { Client as DeduplicationClient } from './types/deduplication';
 import type { Client as DesignClient } from './types/design';
 import type { Client as DocumentClient } from './types/document';
@@ -58,7 +58,7 @@ export type SDKClientMap = {
   consent: ConsentClient;
   customerPortal: CustomerPortalClient;
   dashboard: DashboardClient;
-  dataManagement: DataManagementClient;
+  dataGovernance: DataGovernanceClient;
   deduplication: DeduplicationClient;
   design: DesignClient;
   document: DocumentClient;

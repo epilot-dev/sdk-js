@@ -513,7 +513,8 @@ const { data } = await client.listIntegrations()
         "latest_types_version": "string",
         "latest_types_package_name": "string"
       },
-      "protected": true
+      "protected": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -583,7 +584,8 @@ const { data } = await client.createIntegration(
       latest_types_version: 'string',
       latest_types_package_name: 'string'
     },
-    protected: true
+    protected: true,
+    _manifest: ['string']
   },
 )
 ```
@@ -647,7 +649,8 @@ const { data } = await client.createIntegration(
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -726,7 +729,8 @@ const { data } = await client.getIntegration({
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -808,7 +812,8 @@ const { data } = await client.updateIntegration(
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1221,6 +1226,7 @@ const { data } = await client.listIntegrationsV2()
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "_manifest": ["string"],
       "use_cases": []
     }
   ]
@@ -1286,6 +1292,7 @@ const { data } = await client.createIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    _manifest: ['string'],
     use_cases: [
       {
         id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -1355,6 +1362,7 @@ const { data } = await client.createIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1442,6 +1450,7 @@ const { data } = await client.getIntegrationV2({
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1524,6 +1533,7 @@ const { data } = await client.updateIntegrationV2(
       latest_types_package_name: 'string'
     },
     protected: true,
+    _manifest: ['string'],
     use_cases: [
       {
         id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -1593,6 +1603,7 @@ const { data } = await client.updateIntegrationV2(
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -2587,6 +2598,7 @@ type IntegrationEditableFields = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  _manifest?: string[]
 }
 ```
 
@@ -2701,6 +2713,7 @@ type Integration = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  _manifest?: string[]
 }
 ```
 
@@ -2755,6 +2768,7 @@ type CreateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  _manifest?: string[]
 }
 ```
 
@@ -2809,6 +2823,7 @@ type UpdateIntegrationRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  _manifest?: string[]
 }
 ```
 
@@ -3016,6 +3031,7 @@ type UpsertIntegrationWithUseCasesRequest = {
     latest_types_package_name?: string
   }
   protected?: boolean
+  _manifest?: string[]
   use_cases?: Array<{
     id?: string // uuid
     name: string
@@ -3067,7 +3083,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     }
   } | {
     id?: string // uuid
-    name: string
   // ...
 }
 ```

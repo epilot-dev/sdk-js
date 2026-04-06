@@ -1,8 +1,8 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.2",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.6.1",
+    "version": "4.6.4",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -29,6 +29,14 @@
     {
       "name": "Installations",
       "description": "Manage installation jobs"
+    },
+    {
+      "name": "Marketplace Listings",
+      "description": "Manage marketplace listings for blueprints"
+    },
+    {
+      "name": "Marketplace Listing Versions",
+      "description": "Manage versions for marketplace listings"
     }
   ],
   "security": [
@@ -936,6 +944,10 @@
                   "slug": {
                     "type": "string",
                     "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
+                  },
+                  "auto_enable_features": {
+                    "type": "boolean",
+                    "description": "If true, automatically enable required features in the destination org before installing"
                   }
                 },
                 "required": [
@@ -1124,6 +1136,90 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:verify": {
+      "post": {
+        "operationId": "verifyBlueprint",
+        "summary": "verifyBlueprint",
+        "description": "Start a blueprint verification job. Compares resource configurations between a source org\nand a destination org to verify that a sync/install was successful.\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_org_id",
+                  "source_blueprint_id",
+                  "destination_org_id",
+                  "destination_blueprint_id"
+                ],
+                "properties": {
+                  "source_org_id": {
+                    "type": "string",
+                    "description": "Organization ID of the source org"
+                  },
+                  "source_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "destination_org_id": {
+                    "type": "string",
+                    "description": "Organization ID of the destination org"
+                  },
+                  "destination_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "source_auth_token": {
+                    "type": "string",
+                    "description": "Auth token with access to the source org (e.g. pipeline token). If not provided, the caller's bearer token is used for both orgs."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Verification job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint not found"
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
@@ -1214,7 +1310,13 @@
                         "properties": {
                           "slug": {
                             "type": "string",
+                            "description": "The installation slug identifier for the blueprint (used for publishing).",
                             "example": "wallbox_b2c"
+                          },
+                          "marketplace_slug": {
+                            "type": "string",
+                            "description": "The marketplace page slug for the Webflow CMS item (used for display).",
+                            "example": "wallbox-b2c"
                           },
                           "version": {
                             "type": "string",
@@ -1868,6 +1970,450 @@
           }
         }
       }
+    },
+    "/v1/blueprints/{blueprint_id}/marketplace-listing": {
+      "post": {
+        "operationId": "createMarketplaceListing",
+        "summary": "createMarketplaceListing",
+        "description": "Create a marketplace listing for a blueprint. Returns 409 if one already exists.",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "blueprint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Marketplace listing created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListing"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Listing already exists for this blueprint"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getMarketplaceListing",
+        "summary": "getMarketplaceListing",
+        "description": "Get marketplace listing for a blueprint including all versions",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "blueprint_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marketplace listing with versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MarketplaceListing"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/MarketplaceListingVersion"
+                          }
+                        },
+                        "has_publishable_draft": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}": {
+      "get": {
+        "operationId": "getMarketplaceListingById",
+        "summary": "getMarketplaceListingById",
+        "description": "Get marketplace listing by listing ID including all versions",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marketplace listing with versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MarketplaceListing"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/MarketplaceListingVersion"
+                          }
+                        },
+                        "has_publishable_draft": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateMarketplaceListing",
+        "summary": "updateMarketplaceListing",
+        "description": "Update listing-level fields",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated marketplace listing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListing"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMarketplaceListing",
+        "summary": "deleteMarketplaceListing",
+        "description": "Delete listing and all versions",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Listing deleted"
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions": {
+      "post": {
+        "operationId": "createMarketplaceListingVersion",
+        "summary": "createMarketplaceListingVersion",
+        "description": "Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Draft version created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingVersion"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listMarketplaceListingVersions",
+        "summary": "listMarketplaceListingVersions",
+        "description": "List all versions for a listing, newest first",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MarketplaceListingVersion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}": {
+      "patch": {
+        "operationId": "updateMarketplaceListingVersion",
+        "summary": "updateMarketplaceListingVersion",
+        "description": "Update updateNote, requiredFeatures, or recommendedApps on a draft version",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "update_note": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "required_features": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "recommended_apps": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot update non-draft version"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}/publish": {
+      "post": {
+        "operationId": "publishMarketplaceListingVersion",
+        "summary": "publishMarketplaceListingVersion",
+        "description": "Publish a draft version; archives the previous live version",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version_name"
+                ],
+                "properties": {
+                  "version_name": {
+                    "type": "string"
+                  },
+                  "update_note": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Published version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Version not publishable or version_name already taken"
+          },
+          "404": {
+            "description": "Version not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1932,6 +2478,10 @@
                 "triggered_at": {
                   "type": "string",
                   "format": "date-time"
+                },
+                "note": {
+                  "type": "string",
+                  "description": "User-provided note about this synchronization"
                 }
               }
             }
@@ -1972,7 +2522,11 @@
           },
           "source_blueprint_id": {
             "description": "ID of the blueprint that brought this blueprint to the destination org (deployed or installed)",
-            "$ref": "#/components/schemas/BlueprintID"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlueprintID"
+              }
+            ]
           },
           "archived": {
             "type": "boolean",
@@ -2150,6 +2704,23 @@
               "type": "string"
             }
           },
+          "required_features": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "disabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -2197,7 +2768,9 @@
               },
               "source_type": {
                 "type": "string",
-                "const": "custom"
+                "enum": [
+                  "custom"
+                ]
               }
             }
           }
@@ -2216,7 +2789,9 @@
             "properties": {
               "source_type": {
                 "type": "string",
-                "const": "file"
+                "enum": [
+                  "file"
+                ]
               },
               "resources": {
                 "type": "array",
@@ -2245,7 +2820,9 @@
               },
               "source_type": {
                 "type": "string",
-                "const": "marketplace"
+                "enum": [
+                  "marketplace"
+                ]
               },
               "resources": {
                 "type": "array",
@@ -2341,7 +2918,9 @@
             "properties": {
               "source_type": {
                 "type": "string",
-                "const": "deploy"
+                "enum": [
+                  "deploy"
+                ]
               },
               "resources": {
                 "type": "array",
@@ -2366,7 +2945,9 @@
             "properties": {
               "source_type": {
                 "type": "string",
-                "const": "app"
+                "enum": [
+                  "app"
+                ]
               },
               "resources": {
                 "type": "array",
@@ -2517,6 +3098,9 @@
           },
           {
             "$ref": "#/components/schemas/BlueprintValidateJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintVerificationJob"
           }
         ]
       },
@@ -2577,6 +3161,130 @@
             }
           }
         ]
+      },
+      "BlueprintVerificationJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_org_id": {
+                "type": "string"
+              },
+              "source_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "destination_org_id": {
+                "type": "string"
+              },
+              "destination_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "IN_PROGRESS",
+                  "SUCCESS",
+                  "FAILED"
+                ]
+              },
+              "summary": {
+                "$ref": "#/components/schemas/VerificationSummary"
+              },
+              "resource_results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceVerificationResult"
+                }
+              },
+              "resource_results_s3_key": {
+                "type": "string",
+                "description": "S3 key for detailed results when too large for inline storage."
+              }
+            }
+          }
+        ]
+      },
+      "VerificationSummary": {
+        "type": "object",
+        "properties": {
+          "total_resources": {
+            "type": "integer"
+          },
+          "matched": {
+            "type": "integer"
+          },
+          "mismatched": {
+            "type": "integer"
+          },
+          "missing_in_destination": {
+            "type": "integer"
+          },
+          "missing_in_source": {
+            "type": "integer"
+          },
+          "fetch_errors": {
+            "type": "integer"
+          }
+        }
+      },
+      "ResourceVerificationResult": {
+        "type": "object",
+        "properties": {
+          "resource_type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "resource_name": {
+            "type": "string"
+          },
+          "source_resource_id": {
+            "type": "string"
+          },
+          "destination_resource_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "mismatched",
+              "missing_in_destination",
+              "missing_in_source",
+              "fetch_error"
+            ]
+          },
+          "field_diffs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldDiff"
+            }
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "FieldDiff": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "JSON path to the differing field (e.g. \"steps[2].name\")"
+          },
+          "source_value": {},
+          "destination_value": {},
+          "diff_type": {
+            "type": "string",
+            "enum": [
+              "value_changed",
+              "field_missing_in_destination",
+              "field_missing_in_source",
+              "type_mismatch"
+            ]
+          }
+        }
       },
       "BlueprintJobEvent": {
         "type": "object",
@@ -2745,7 +3453,8 @@
           "validation_rule",
           "flow_template",
           "taxonomy",
-          "notification_template"
+          "notification_template",
+          "environment_variable"
         ]
       },
       "PlanChanges": {
@@ -3463,6 +4172,426 @@
                 }
               }
             }
+          }
+        }
+      },
+      "MarketplaceListing": {
+        "type": "object",
+        "required": [
+          "id",
+          "blueprint_id",
+          "name",
+          "slug",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "blueprint_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentation_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricing_type": {
+            "type": "string",
+            "enum": [
+              "free",
+              "paid",
+              "freemium",
+              "contact_us"
+            ],
+            "nullable": true
+          },
+          "support_email": {
+            "type": "string",
+            "nullable": true
+          },
+          "portal_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_short_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_thumbnail": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_hero_image": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_carousel": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "documentation_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_benefits_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_benefits_list": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_process_details": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_subtext": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_website_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_updated_on": {
+            "type": "string",
+            "nullable": true
+          },
+          "requires_customer_portal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "process_details_section_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_new_blueprint": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "available_in": {
+            "type": "string",
+            "nullable": true
+          },
+          "testimonials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "installation_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "installation_slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "demo_form_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "number",
+            "nullable": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "main_category": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "live",
+              "archived"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MarketplaceListingUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentation_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "pricing_type": {
+            "type": "string",
+            "enum": [
+              "free",
+              "paid",
+              "freemium",
+              "contact_us"
+            ],
+            "nullable": true
+          },
+          "support_email": {
+            "type": "string",
+            "nullable": true
+          },
+          "portal_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_short_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "teaser_thumbnail": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_hero_image": {
+            "type": "string",
+            "nullable": true
+          },
+          "details_page_carousel": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "documentation_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_benefits_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_benefits_list": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources_section_process_details": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_subtext": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "partner_website_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_updated_on": {
+            "type": "string",
+            "nullable": true
+          },
+          "requires_customer_portal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "process_details_section_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_new_blueprint": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "available_in": {
+            "type": "string",
+            "nullable": true
+          },
+          "testimonials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "installation_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "installation_slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "demo_form_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "number",
+            "nullable": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "main_category": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "MarketplaceListingVersion": {
+        "type": "object",
+        "required": [
+          "id",
+          "listing_id",
+          "status",
+          "draft_label",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "listing_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ]
+          },
+          "version_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "draft_label": {
+            "type": "string"
+          },
+          "update_note": {
+            "type": "string",
+            "nullable": true
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "nullable": true
+          },
+          "required_features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "recommended_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       }

@@ -4377,6 +4377,11 @@ export declare namespace Paths {
             export type Size = number;
             /**
              * example:
+             * wfABCDEFGH
+             */
+            export type TargetWorkflow = string;
+            /**
+             * example:
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             export type TriggerSourceId = string;
@@ -4394,6 +4399,11 @@ export declare namespace Paths {
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             Parameters.TriggerSourceId;
+            target_workflow?: /**
+             * example:
+             * wfABCDEFGH
+             */
+            Parameters.TargetWorkflow;
             include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {

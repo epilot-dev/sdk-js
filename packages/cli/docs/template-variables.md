@@ -172,6 +172,7 @@ epilot template-variables getVariableContext \
     "context_data": {},
     "template_name": "string",
     "template_tags": ["string"],
+    "template_id": "string",
     "variables_version": "2"
   }
 }'
@@ -293,6 +294,7 @@ epilot template-variables replaceTemplates \
     "context_data": {},
     "template_name": "string",
     "template_tags": ["string"],
+    "template_id": "string",
     "variables_version": "2"
   }
 }'
@@ -359,6 +361,7 @@ epilot template-variables replaceTemplatesV2 \
     "context_data": {},
     "template_name": "string",
     "template_tags": ["string"],
+    "template_id": "string",
     "variables_version": "2"
   }
 }'
@@ -422,6 +425,7 @@ epilot template-variables getCustomVariables --jsonata '$'
     "name": "My Custom table",
     "key": "my_custom_table",
     "_tags": ["string"],
+    "_manifest": ["string"],
     "helper_params": ["param1", "param2"],
     "helper_logic": "return param1 * param2;",
     "config": {
@@ -468,6 +472,7 @@ epilot template-variables createCustomVariable \
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {
@@ -533,6 +538,7 @@ epilot template-variables createCustomVariable --jsonata 'id'
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {
@@ -633,6 +639,7 @@ epilot template-variables searchCustomVariables --jsonata 'results[0]'
       "name": "My Custom table",
       "key": "my_custom_table",
       "_tags": ["string"],
+      "_manifest": ["string"],
       "helper_params": ["param1", "param2"],
       "helper_logic": "return param1 * param2;",
       "config": {},
@@ -692,6 +699,7 @@ epilot template-variables getCustomVariable -p id=rbse777b-3cf8-4bff-bb0c-253fd1
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {
@@ -771,6 +779,7 @@ epilot template-variables updateCustomVariable \
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {
@@ -842,6 +851,7 @@ epilot template-variables updateCustomVariable -p id=rbse777b-3cf8-4bff-bb0c-253
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {
@@ -950,6 +960,7 @@ epilot template-variables getBluePrintTableConfig --jsonata 'id'
   "name": "My Custom table",
   "key": "my_custom_table",
   "_tags": ["string"],
+  "_manifest": ["string"],
   "helper_params": ["param1", "param2"],
   "helper_logic": "return param1 * param2;",
   "config": {

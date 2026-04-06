@@ -476,7 +476,8 @@ epilot erp-integration listIntegrations --jsonata 'integrations'
         "latest_types_version": "string",
         "latest_types_package_name": "string"
       },
-      "protected": true
+      "protected": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -555,7 +556,8 @@ epilot erp-integration createIntegration \
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }'
 ```
 
@@ -630,7 +632,8 @@ epilot erp-integration createIntegration --jsonata '$'
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -728,7 +731,8 @@ epilot erp-integration getIntegration -p integrationId=123e4567-e89b-12d3-a456-4
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -835,7 +839,8 @@ epilot erp-integration updateIntegration -p integrationId=123e4567-e89b-12d3-a45
     "latest_types_version": "string",
     "latest_types_package_name": "string"
   },
-  "protected": true
+  "protected": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1475,6 +1480,7 @@ epilot erp-integration listIntegrationsV2 --jsonata 'integrations'
       "integration_type": "erp",
       "connector_config": {},
       "protected": true,
+      "_manifest": ["string"],
       "use_cases": []
     }
   ]
@@ -1549,6 +1555,7 @@ epilot erp-integration createIntegrationV2 \
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1629,6 +1636,7 @@ epilot erp-integration createIntegrationV2 --jsonata '$'
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1735,6 +1743,7 @@ epilot erp-integration getIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1828,6 +1837,7 @@ epilot erp-integration updateIntegrationV2 \
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1914,6 +1924,7 @@ epilot erp-integration updateIntegrationV2 -p integrationId=123e4567-e89b-12d3-a
     "latest_types_package_name": "string"
   },
   "protected": true,
+  "_manifest": ["string"],
   "use_cases": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",

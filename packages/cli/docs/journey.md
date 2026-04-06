@@ -236,6 +236,7 @@ epilot journey getJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -479,6 +480,7 @@ epilot journey createJourney \
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string"
@@ -602,6 +604,7 @@ epilot journey createJourney --jsonata '$'
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -737,6 +740,7 @@ epilot journey updateJourney \
       "field2": "rule789"
     }
   },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string"
@@ -849,6 +853,7 @@ epilot journey patchUpdateJourney --jsonata 'createdJourney'
       "block1": "rule123",
       "block2": {}
     },
+    "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",

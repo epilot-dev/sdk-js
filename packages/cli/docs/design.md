@@ -1,6 +1,6 @@
 # Design Builder API v2
 
-- **Base URL:** `https://design-builder-api.epilot.io`
+- **Base URL:** `https://design-builder-api.{environment}.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
 
 ## Quick Start
@@ -61,20 +61,34 @@ epilot design getAllDesigns
 With JSONata filter:
 
 ```bash
-epilot design getAllDesigns --jsonata '$'
+epilot design getAllDesigns --jsonata 'designs'
 ```
 
 <details>
 <summary>Sample Response</summary>
 
 ```json
-[
-  {
-    "designs": [
-      {}
-    ]
-  }
-]
+{
+  "designs": [
+    {
+      "id": "string",
+      "created_at": "2021-01-30T08:30:00Z",
+      "created_by": "string",
+      "edited": true,
+      "last_modified_at": "string",
+      "brand_id": "string",
+      "brand_name": "string",
+      "user": {},
+      "style_name": "string",
+      "style": {},
+      "is_default": true,
+      "_manifest": ["string"],
+      "custom_theme": "string",
+      "use_custom_theme": true,
+      "design_tokens": {}
+    }
+  ]
+}
 ```
 
 </details>
@@ -166,6 +180,7 @@ epilot design addDesign \
       }
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -217,6 +232,7 @@ epilot design addDesign --jsonata 'design'
       "consumer": {}
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -242,7 +258,7 @@ Search for a especific design owned by user organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 
 **Sample Call**
 
@@ -291,6 +307,7 @@ epilot design getDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsona
       "consumer": {}
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -316,7 +333,7 @@ Update a especific design owned by user organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 
 **Request Body** (required)
 
@@ -399,6 +416,7 @@ epilot design updateDesign \
       }
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -440,7 +458,7 @@ Search and delete for a especific design owned by user organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 
 **Sample Call**
 
@@ -473,9 +491,9 @@ Search for a especific design owned by user organization and parse them to a new
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 | `orgId` | query | string | No | Organization id of the user |
-| `theme` | query | "NEW" \| "OLD" | Yes | Type of theme to be parsed and returned |
+| `theme` | query | "NEW" \| "OLD" | Yes |  |
 
 **Sample Call**
 
@@ -596,8 +614,8 @@ Search for a especific design owned by user organization
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `consumerId` | path | string | Yes | Id of the design |
-| `application` | path | string | Yes | Type of application that uses the design |
+| `consumerId` | path | string | Yes |  |
+| `application` | path | string | Yes |  |
 
 **Sample Call**
 
@@ -647,6 +665,7 @@ epilot design getConsumerDesign -p consumerId=4a062990-a6a3-11eb-9828-4f3da7d493
       "consumer": {}
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -672,7 +691,7 @@ Add a consumer that uses a specific design
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 | `application` | path | string | Yes | Type of application that uses the design |
 
 **Request Body** (required)
@@ -683,7 +702,7 @@ Add a consumer that uses a specific design
 epilot design addConsumer \
   -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a \
   -p application=journey \
-  -d '{"consumer_id":"string","consumer_name":"string","should_delete":"string"}'
+  -d '{"consumer_id":"4a062990-a6a3-11eb-9828-4f3da7d4935a","consumer_name":"string","should_delete":"string"}'
 ```
 
 Using positional args for path parameters:
@@ -716,7 +735,7 @@ Remove a consumer that uses a specific design
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `designId` | path | string | Yes | Id of the design |
+| `designId` | path | string | Yes |  |
 | `application` | path | string | Yes | Type of application that uses the design |
 
 **Request Body** (required)
@@ -727,7 +746,7 @@ Remove a consumer that uses a specific design
 epilot design removeConsumer \
   -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a \
   -p application=journey \
-  -d '{"consumer_id":"string","consumer_name":"string","should_delete":"string"}'
+  -d '{"consumer_id":"4a062990-a6a3-11eb-9828-4f3da7d4935a","should_delete":"string"}'
 ```
 
 Using positional args for path parameters:

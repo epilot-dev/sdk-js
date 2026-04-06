@@ -20,15 +20,15 @@ npx epilot auth login
 | Audit Log | `epilot audit-logs` | 2 | [audit-logs.md](./audit-logs.md) |
 | Automation API | `epilot automation` | 16 | [automation.md](./automation.md) |
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
-| Blueprint Manifest API | `epilot blueprint-manifest` | 35 | [blueprint-manifest.md](./blueprint-manifest.md) |
+| Blueprint Manifest API | `epilot blueprint-manifest` | 45 | [blueprint-manifest.md](./blueprint-manifest.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
 | Portal API | `epilot customer-portal` | 138 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
-| Data Management API | `epilot data-management` | 10 | [data-management.md](./data-management.md) |
+| Data Governance API | `epilot data-governance` | 10 | [data-governance.md](./data-governance.md) |
 | Deduplication API | `epilot deduplication` | 1 | [deduplication.md](./deduplication.md) |
 | Design Builder API v2 | `epilot design` | 13 | [design.md](./design.md) |
 | Document API | `epilot document` | 3 | [document.md](./document.md) |
-| Messaging Settings API | `epilot email-settings` | 34 | [email-settings.md](./email-settings.md) |
+| Messaging Settings API | `epilot email-settings` | 35 | [email-settings.md](./email-settings.md) |
 | Email template API | `epilot email-template` | 7 | [email-template.md](./email-template.md) |
 | Entity API | `epilot entity` | 84 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
@@ -39,7 +39,7 @@ npx epilot auth login
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
 | Journey API | `epilot journey` | 16 | [journey.md](./journey.md) |
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
-| Message API | `epilot message` | 46 | [message.md](./message.md) |
+| Message API | `epilot message` | 52 | [message.md](./message.md) |
 | Metering API | `epilot metering` | 16 | [metering.md](./metering.md) |
 | Notes API | `epilot notes` | 12 | [notes.md](./notes.md) |
 | Notification API | `epilot notification` | 14 | [notification.md](./notification.md) |

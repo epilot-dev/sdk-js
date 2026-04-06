@@ -1620,6 +1620,35 @@
             "$ref": "#/components/responses/NotFound"
           }
         }
+      },
+      "get": {
+        "operationId": "getDomains",
+        "summary": "getDomains",
+        "description": "Retrieves all custom email domains for the organization.\n",
+        "tags": [
+          "Domains"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved domains.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
       }
     },
     "/v1/email-settings/domain/name-servers:verify": {

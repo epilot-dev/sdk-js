@@ -4,8 +4,13 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://data-governance-api.sls.epilot.io"
+    }
+  ],
   "paths": {
-    "/data-management/v1/{entity_schema}/query": {
+    "/data-governance/v1/{entity_schema}/query": {
       "post": {
         "operationId": "queryEntities",
         "parameters": [
@@ -24,7 +29,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/{entity_schema}/jobs": {
+    "/data-governance/v1/{entity_schema}/jobs": {
       "post": {
         "operationId": "createJob",
         "parameters": [
@@ -43,7 +48,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/{entity_schema}/jobs/{job_id}": {
+    "/data-governance/v1/{entity_schema}/jobs/{job_id}": {
       "patch": {
         "operationId": "updateJob",
         "parameters": [
@@ -67,7 +72,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/jobs/{job_id}": {
+    "/data-governance/v1/jobs/{job_id}": {
       "get": {
         "operationId": "getJob",
         "parameters": [
@@ -80,7 +85,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/jobs/{job_id}/report-url": {
+    "/data-governance/v1/jobs/{job_id}/report-url": {
       "get": {
         "operationId": "getJobReportUrl",
         "parameters": [
@@ -93,7 +98,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/configs/{config_id}": {
+    "/data-governance/v1/configs/{config_id}": {
       "get": {
         "operationId": "getConfig",
         "parameters": [
@@ -106,7 +111,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/configs/{config_id}/jobs": {
+    "/data-governance/v1/configs/{config_id}/jobs": {
       "post": {
         "operationId": "createJobForConfig",
         "parameters": [
@@ -119,7 +124,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/{entity_schema}/configs": {
+    "/data-governance/v1/{entity_schema}/configs": {
       "post": {
         "operationId": "upsertConfig",
         "parameters": [
@@ -138,7 +143,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/configs": {
+    "/data-governance/v1/configs": {
       "get": {
         "operationId": "listConfigs",
         "parameters": [
@@ -176,7 +181,7 @@
         "responses": {}
       }
     },
-    "/data-management/v1/jobs": {
+    "/data-governance/v1/jobs": {
       "get": {
         "operationId": "listJobs",
         "parameters": [
@@ -215,6 +220,5 @@
       }
     }
   },
-  "components": {},
-  "servers": []
+  "components": {}
 }

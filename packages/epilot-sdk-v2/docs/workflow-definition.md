@@ -181,7 +181,8 @@ const { data } = await client.getDefinitions()
       {}
     ],
     "taxonomies": ["string"],
-    "singleClosingReasonSelection": true
+    "singleClosingReasonSelection": true,
+    "_manifest": ["string"]
   }
 ]
 ```
@@ -261,7 +262,8 @@ const { data } = await client.createDefinition(
       }
     ],
     taxonomies: ['string'],
-    singleClosingReasonSelection: true
+    singleClosingReasonSelection: true,
+    _manifest: ['string']
   },
 )
 ```
@@ -332,7 +334,8 @@ const { data } = await client.createDefinition(
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -381,7 +384,8 @@ const { data } = await client.listFlowTemplates({
       "closing_reasons": [],
       "entity_sync": [],
       "taxonomies": ["string"],
-      "singleClosingReasonSelection": true
+      "singleClosingReasonSelection": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -512,7 +516,8 @@ const { data } = await client.createFlowTemplate(
       }
     ],
     taxonomies: ['string'],
-    singleClosingReasonSelection: true
+    singleClosingReasonSelection: true,
+    _manifest: ['string']
   },
 )
 ```
@@ -631,7 +636,8 @@ const { data } = await client.createFlowTemplate(
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -689,7 +695,8 @@ const { data } = await client.searchFlowTemplates(
       "closing_reasons": [],
       "entity_sync": [],
       "taxonomies": ["string"],
-      "singleClosingReasonSelection": true
+      "singleClosingReasonSelection": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -825,7 +832,8 @@ const { data } = await client.getFlowTemplate({
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -956,7 +964,8 @@ const { data } = await client.updateFlowTemplate(
       }
     ],
     taxonomies: ['string'],
-    singleClosingReasonSelection: true
+    singleClosingReasonSelection: true,
+    _manifest: ['string']
   },
 )
 ```
@@ -1075,7 +1084,8 @@ const { data } = await client.updateFlowTemplate(
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1223,7 +1233,8 @@ const { data } = await client.duplicateFlowTemplate({
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1309,7 +1320,8 @@ const { data } = await client.getDefinition({
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1390,7 +1402,8 @@ const { data } = await client.updateDefinition(
       }
     ],
     taxonomies: ['string'],
-    singleClosingReasonSelection: true
+    singleClosingReasonSelection: true,
+    _manifest: ['string']
   },
 )
 ```
@@ -1461,7 +1474,8 @@ const { data } = await client.updateDefinition(
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 

@@ -69,6 +69,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 **Domains**
 - [`addDomain`](#adddomain)
 - [`deleteDomain`](#deletedomain)
+- [`getDomains`](#getdomains)
 - [`verifyNameServers`](#verifynameservers)
 - [`verifyDomain`](#verifydomain)
 
@@ -1176,6 +1177,27 @@ const { data } = await client.deleteDomain(
   },
 )
 ```
+
+---
+
+### `getDomains`
+
+Retrieves all custom email domains for the organization.
+
+`GET /v1/email-settings/domain`
+
+```ts
+const { data } = await client.getDomains()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+["string"]
+```
+
+</details>
 
 ---
 

@@ -364,6 +364,10 @@ export declare namespace Components {
              * }
              */
             ValidationRuleRef;
+            /**
+             * Manifest/Blueprint ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -612,6 +616,10 @@ export declare namespace Components {
              * }
              */
             ValidationRuleRef;
+            /**
+             * Manifest/Blueprint ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
             createdBy?: string;
             updatedBy?: string | null;
             /**

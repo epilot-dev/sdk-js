@@ -146,7 +146,8 @@ epilot workflow-definition getDefinitions --jsonata '$'
       {}
     ],
     "taxonomies": ["string"],
-    "singleClosingReasonSelection": true
+    "singleClosingReasonSelection": true,
+    "_manifest": ["string"]
   }
 ]
 ```
@@ -235,7 +236,8 @@ epilot workflow-definition createDefinition \
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }'
 ```
 
@@ -317,7 +319,8 @@ epilot workflow-definition createDefinition --jsonata 'id'
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -381,7 +384,8 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
       "closing_reasons": [],
       "entity_sync": [],
       "taxonomies": ["string"],
-      "singleClosingReasonSelection": true
+      "singleClosingReasonSelection": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -519,7 +523,8 @@ epilot workflow-definition createFlowTemplate \
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }'
 ```
 
@@ -649,7 +654,8 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -727,7 +733,8 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
       "closing_reasons": [],
       "entity_sync": [],
       "taxonomies": ["string"],
-      "singleClosingReasonSelection": true
+      "singleClosingReasonSelection": true,
+      "_manifest": ["string"]
     }
   ]
 }
@@ -882,7 +889,8 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1026,7 +1034,8 @@ epilot workflow-definition updateFlowTemplate \
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }'
 ```
 
@@ -1162,7 +1171,8 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1348,7 +1358,8 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1453,7 +1464,8 @@ epilot workflow-definition getDefinition -p definitionId=7hj28a --jsonata 'id'
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 
@@ -1549,7 +1561,8 @@ epilot workflow-definition updateDefinition \
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }'
 ```
 
@@ -1637,7 +1650,8 @@ epilot workflow-definition updateDefinition -p definitionId=7hj28a --jsonata 'id
     }
   ],
   "taxonomies": ["string"],
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "_manifest": ["string"]
 }
 ```
 

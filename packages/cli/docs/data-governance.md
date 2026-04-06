@@ -1,15 +1,21 @@
-# Data Management API
+# Data Governance API
 
-- **API Docs:** [https://docs.epilot.io/api/data-management](https://docs.epilot.io/api/data-management)
+- **Base URL:** `https://data-governance-api.sls.epilot.io`
+- **API Docs:** [https://docs.epilot.io/api/data-governance](https://docs.epilot.io/api/data-governance)
+
+The **Data Governance API** provides a set of endpoints for managing the lifecycle of
+entity data within the epilot platform. It enables organizations to define governance
+policies — such as automated data deletion rules — and execute them against any entity
+schema (currently limited to Contacts).
 
 ## Quick Start
 
 ```bash
 # List available operations
-epilot data-management
+epilot data-governance
 
 # Call an operation
-epilot data-management queryEntities -p entity_schema=example
+epilot data-governance queryEntities -p entity_schema=contact
 ```
 
 ## Common Flags
@@ -32,29 +38,34 @@ epilot data-management queryEntities -p entity_schema=example
 
 ## Operations
 
-**Data Management**
-- [`queryEntities`](#queryentities) — Executes a query against the specified entity schema using the saved view definition, optionally combined with additiona
-- [`createJob`](#createjob) — POST /data-management/v1/{entity_schema}/jobs
-- [`updateJob`](#updatejob) — PATCH /data-management/v1/{entity_schema}/jobs/{job_id}
-- [`getJob`](#getjob) — Returns details of a single job run.
-- [`getJobReportUrl`](#getjobreporturl) — Returns a short-lived, pre-signed URL to download the report file for the given job.
-- [`getConfig`](#getconfig) — Returns a data management config by its id.
-- [`createJobForConfig`](#createjobforconfig) — Creates a job run for the given config and triggers asynchronous execution. Returns a job id which can be used to poll j
-- [`upsertConfig`](#upsertconfig) — Creates or updates a config for the given entity schema. The config is later used by a scheduled background process to p
-- [`listConfigs`](#listconfigs) — Returns a paginated list of configs
-- [`listJobs`](#listjobs) — Returns a paginated list of jobs
+**Query**
+- [`queryEntities`](#queryentities) — Executes a query against the specified entity schema using a saved view
+
+**Jobs**
+- [`createJob`](#createjob) — Creates a new job run for the given entity schema. The job is associated
+- [`updateJob`](#updatejob) — Partially updates an existing job run. Typically used to record
+- [`getJob`](#getjob) — Returns full details of a single job run, including its current status,
+- [`getJobReportUrl`](#getjobreporturl) — Returns a short-lived, pre-signed S3 URL to download the CSV report
+- [`createJobForConfig`](#createjobforconfig) — Manually triggers a new job run for the specified config. The job is
+- [`listJobs`](#listjobs) — Returns a cursor-paginated list of job runs. Results can be filtered
+
+**Configs**
+- [`getConfig`](#getconfig) — Returns a single data governance config by its unique identifier,
+- [`upsertConfig`](#upsertconfig) — Creates a new governance config or updates an existing one for the
+- [`listConfigs`](#listconfigs) — Returns a cursor-paginated list of governance configs. Results can be
 
 ### `queryEntities`
 
-Executes a query against the specified entity schema using the saved view definition, optionally combined with additiona
+Executes a query against the specified entity schema using a saved view
 
-`POST /data-management/v1/{entity_schema}/query`
+`POST /data-governance/v1/{entity_schema}/query`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `entity_schema` | path | string | Yes | Target entity schema to query (for example: "contact", "opportunity", "order").
+| `entity_schema` | path | string | Yes | The target entity schema slug to query
+(e.g. `contact`, `opportunity`, `order`).
  |
 
 **Request Body** (required)
@@ -62,15 +73,15 @@ Executes a query against the specified entity schema using the saved view defini
 **Sample Call**
 
 ```bash
-epilot data-management queryEntities \
-  -p entity_schema=example
+epilot data-governance queryEntities \
+  -p entity_schema=contact
 ```
 
 With request body:
 
 ```bash
-epilot data-management queryEntities \
-  -p entity_schema=example \
+epilot data-governance queryEntities \
+  -p entity_schema=contact \
   -d '{
   "saved_view_id": "string",
   "include_deleted": "true",
@@ -93,19 +104,19 @@ epilot data-management queryEntities \
 Using positional args for path parameters:
 
 ```bash
-epilot data-management queryEntities example
+epilot data-governance queryEntities contact
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot data-management queryEntities -p entity_schema=example
+cat body.json | epilot data-governance queryEntities -p entity_schema=contact
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management queryEntities -p entity_schema=example --jsonata 'results[0]'
+epilot data-governance queryEntities -p entity_schema=contact --jsonata 'results[0]'
 ```
 
 <details>
@@ -126,28 +137,30 @@ epilot data-management queryEntities -p entity_schema=example --jsonata 'results
 
 ### `createJob`
 
-`POST /data-management/v1/{entity_schema}/jobs`
+Creates a new job run for the given entity schema. The job is associated
+
+`POST /data-governance/v1/{entity_schema}/jobs`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `entity_schema` | path | string | Yes |  |
+| `entity_schema` | path | string | Yes | The entity schema slug this job operates on (e.g. `contact`). |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot data-management createJob \
-  -p entity_schema=example
+epilot data-governance createJob \
+  -p entity_schema=contact
 ```
 
 With request body:
 
 ```bash
-epilot data-management createJob \
-  -p entity_schema=example \
+epilot data-governance createJob \
+  -p entity_schema=contact \
   -d '{
   "type": "deletion",
   "config_id": "string",
@@ -160,19 +173,19 @@ epilot data-management createJob \
 Using positional args for path parameters:
 
 ```bash
-epilot data-management createJob example
+epilot data-governance createJob contact
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot data-management createJob -p entity_schema=example
+cat body.json | epilot data-governance createJob -p entity_schema=contact
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management createJob -p entity_schema=example --jsonata 'id'
+epilot data-governance createJob -p entity_schema=contact --jsonata 'id'
 ```
 
 <details>
@@ -208,31 +221,33 @@ epilot data-management createJob -p entity_schema=example --jsonata 'id'
 
 ### `updateJob`
 
-`PATCH /data-management/v1/{entity_schema}/jobs/{job_id}`
+Partially updates an existing job run. Typically used to record
+
+`PATCH /data-governance/v1/{entity_schema}/jobs/{job_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `entity_schema` | path | string | Yes |  |
-| `job_id` | path | string | Yes |  |
+| `entity_schema` | path | string | Yes | The entity schema slug this job belongs to. |
+| `job_id` | path | string | Yes | Unique identifier of the job to update. |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot data-management updateJob \
-  -p entity_schema=example \
-  -p job_id=123e4567-e89b-12d3-a456-426614174000
+epilot data-governance updateJob \
+  -p entity_schema=contact \
+  -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 With request body:
 
 ```bash
-epilot data-management updateJob \
-  -p entity_schema=example \
-  -p job_id=123e4567-e89b-12d3-a456-426614174000 \
+epilot data-governance updateJob \
+  -p entity_schema=contact \
+  -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456 \
   -d '{
   "status": "in_progress",
   "details": {},
@@ -249,19 +264,19 @@ epilot data-management updateJob \
 Using positional args for path parameters:
 
 ```bash
-epilot data-management updateJob example 123e4567-e89b-12d3-a456-426614174000
+epilot data-governance updateJob contact 2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot data-management updateJob -p entity_schema=example -p job_id=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot data-governance updateJob -p entity_schema=contact -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management updateJob -p entity_schema=example -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+epilot data-governance updateJob -p entity_schema=contact -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456 --jsonata 'id'
 ```
 
 <details>
@@ -297,33 +312,33 @@ epilot data-management updateJob -p entity_schema=example -p job_id=123e4567-e89
 
 ### `getJob`
 
-Returns details of a single job run.
+Returns full details of a single job run, including its current status,
 
-`GET /data-management/v1/jobs/{job_id}`
+`GET /data-governance/v1/jobs/{job_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `job_id` | path | string | Yes |  |
+| `job_id` | path | string | Yes | Unique identifier of the job. |
 
 **Sample Call**
 
 ```bash
-epilot data-management getJob \
-  -p job_id=123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getJob \
+  -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot data-management getJob 123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getJob 2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management getJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+epilot data-governance getJob -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456 --jsonata 'id'
 ```
 
 <details>
@@ -359,33 +374,33 @@ epilot data-management getJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --j
 
 ### `getJobReportUrl`
 
-Returns a short-lived, pre-signed URL to download the report file for the given job.
+Returns a short-lived, pre-signed S3 URL to download the CSV report
 
-`GET /data-management/v1/jobs/{job_id}/report-url`
+`GET /data-governance/v1/jobs/{job_id}/report-url`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `job_id` | path | string | Yes |  |
+| `job_id` | path | string | Yes | Unique identifier of the job whose report to download. |
 
 **Sample Call**
 
 ```bash
-epilot data-management getJobReportUrl \
-  -p job_id=123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getJobReportUrl \
+  -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot data-management getJobReportUrl 123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getJobReportUrl 2d3b5e90-e4c0-4f1a-9c7b-abc123def456
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management getJobReportUrl -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'url'
+epilot data-governance getJobReportUrl -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123def456 --jsonata 'url'
 ```
 
 <details>
@@ -404,33 +419,33 @@ epilot data-management getJobReportUrl -p job_id=123e4567-e89b-12d3-a456-4266141
 
 ### `getConfig`
 
-Returns a data management config by its id.
+Returns a single data governance config by its unique identifier,
 
-`GET /data-management/v1/configs/{config_id}`
+`GET /data-governance/v1/configs/{config_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `config_id` | path | string | Yes |  |
+| `config_id` | path | string | Yes | Unique identifier of the config. |
 
 **Sample Call**
 
 ```bash
-epilot data-management getConfig \
-  -p config_id=123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getConfig \
+  -p config_id=cfg-8a12f3b4-5678-9abc-def0-123456789abc
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot data-management getConfig 123e4567-e89b-12d3-a456-426614174000
+epilot data-governance getConfig cfg-8a12f3b4-5678-9abc-def0-123456789abc
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management getConfig -p config_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+epilot data-governance getConfig -p config_id=cfg-8a12f3b4-5678-9abc-def0-123456789abc --jsonata 'id'
 ```
 
 <details>
@@ -475,33 +490,33 @@ epilot data-management getConfig -p config_id=123e4567-e89b-12d3-a456-4266141740
 
 ### `createJobForConfig`
 
-Creates a job run for the given config and triggers asynchronous execution. Returns a job id which can be used to poll j
+Manually triggers a new job run for the specified config. The job is
 
-`POST /data-management/v1/configs/{config_id}/jobs`
+`POST /data-governance/v1/configs/{config_id}/jobs`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `config_id` | path | string | Yes |  |
+| `config_id` | path | string | Yes | Unique identifier of the config to execute. |
 
 **Sample Call**
 
 ```bash
-epilot data-management createJobForConfig \
-  -p config_id=123e4567-e89b-12d3-a456-426614174000
+epilot data-governance createJobForConfig \
+  -p config_id=cfg-8a12f3b4-5678-9abc-def0-123456789abc
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot data-management createJobForConfig 123e4567-e89b-12d3-a456-426614174000
+epilot data-governance createJobForConfig cfg-8a12f3b4-5678-9abc-def0-123456789abc
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management createJobForConfig -p config_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+epilot data-governance createJobForConfig -p config_id=cfg-8a12f3b4-5678-9abc-def0-123456789abc --jsonata 'id'
 ```
 
 <details>
@@ -537,31 +552,30 @@ epilot data-management createJobForConfig -p config_id=123e4567-e89b-12d3-a456-4
 
 ### `upsertConfig`
 
-Creates or updates a config for the given entity schema. The config is later used by a scheduled background process to p
+Creates a new governance config or updates an existing one for the
 
-`POST /data-management/v1/{entity_schema}/configs`
+`POST /data-governance/v1/{entity_schema}/configs`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `entity_schema` | path | string | Yes | Target entity schema for the config
- |
+| `entity_schema` | path | string | Yes | The entity schema slug this config targets (e.g. `contact`). |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot data-management upsertConfig \
-  -p entity_schema=example
+epilot data-governance upsertConfig \
+  -p entity_schema=contact
 ```
 
 With request body:
 
 ```bash
-epilot data-management upsertConfig \
-  -p entity_schema=example \
+epilot data-governance upsertConfig \
+  -p entity_schema=contact \
   -d '{
   "type": "deletion",
   "query": {
@@ -591,19 +605,19 @@ epilot data-management upsertConfig \
 Using positional args for path parameters:
 
 ```bash
-epilot data-management upsertConfig example
+epilot data-governance upsertConfig contact
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot data-management upsertConfig -p entity_schema=example
+cat body.json | epilot data-governance upsertConfig -p entity_schema=contact
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management upsertConfig -p entity_schema=example --jsonata 'id'
+epilot data-governance upsertConfig -p entity_schema=contact --jsonata 'id'
 ```
 
 <details>
@@ -648,31 +662,35 @@ epilot data-management upsertConfig -p entity_schema=example --jsonata 'id'
 
 ### `listConfigs`
 
-Returns a paginated list of configs
+Returns a cursor-paginated list of governance configs. Results can be
 
-`GET /data-management/v1/configs`
+`GET /data-governance/v1/configs`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `limit` | query | number | No |  |
-| `cursor` | query | string | No |  |
-| `entity_schema` | query | string | No | Optional entity schema to filter configs. |
-| `type` | query | "deletion" | No | Optional config type to filter configs. |
-| `next_run_at` | query | string (date) | No | Optional next run date (YYYY-MM-DD) to filter configs. |
-| `enabled` | query | boolean | No | Optional enabled status to filter configs. |
+| `limit` | query | number | No | Maximum number of configs to return per page. |
+| `cursor` | query | string | No | Opaque cursor returned from a previous response for fetching the
+next page of results.
+ |
+| `entity_schema` | query | string | No | Filter configs by entity schema slug (e.g. `contact`). |
+| `type` | query | "deletion" | No | Filter configs by governance action type. |
+| `next_run_at` | query | string (date) | No | Filter configs whose next scheduled run date matches this value
+(format: `YYYY-MM-DD`).
+ |
+| `enabled` | query | boolean | No | Filter by enabled (`true`) or disabled (`false`) status. |
 
 **Sample Call**
 
 ```bash
-epilot data-management listConfigs
+epilot data-governance listConfigs
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management listConfigs --jsonata 'configs'
+epilot data-governance listConfigs --jsonata 'configs'
 ```
 
 <details>
@@ -722,31 +740,33 @@ epilot data-management listConfigs --jsonata 'configs'
 
 ### `listJobs`
 
-Returns a paginated list of jobs
+Returns a cursor-paginated list of job runs. Results can be filtered
 
-`GET /data-management/v1/jobs`
+`GET /data-governance/v1/jobs`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `limit` | query | number | No |  |
-| `cursor` | query | string | No |  |
-| `entity_schema` | query | string | No | Optional entity schema to filter jobs. |
-| `type` | query | "deletion" | No | Optional job type to filter jobs. |
-| `status` | query | "in_progress" \| "success" \| "failed" | No | Optional job status to filter jobs. |
-| `config_id` | query | string | No | Optional config id to filter jobs. |
+| `limit` | query | number | No | Maximum number of jobs to return per page. |
+| `cursor` | query | string | No | Opaque cursor returned from a previous response for fetching the
+next page of results.
+ |
+| `entity_schema` | query | string | No | Filter jobs by entity schema slug (e.g. `contact`). |
+| `type` | query | "deletion" | No | Filter jobs by governance action type. |
+| `status` | query | "in_progress" \| "success" \| "failed" | No | Filter jobs by execution status. |
+| `config_id` | query | string | No | Filter jobs belonging to a specific config. |
 
 **Sample Call**
 
 ```bash
-epilot data-management listJobs
+epilot data-governance listJobs
 ```
 
 With JSONata filter:
 
 ```bash
-epilot data-management listJobs --jsonata 'jobs'
+epilot data-governance listJobs --jsonata 'jobs'
 ```
 
 <details>

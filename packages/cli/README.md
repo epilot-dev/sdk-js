@@ -73,7 +73,7 @@ APIs
   consent              Consent API
   customer-portal      Portal API
   dashboard            Dashboard API
-  data-management      Data Management API
+  data-governance      Data Governance API
   deduplication        Deduplication API
   design               Design Builder API v2
   document             Document API
@@ -330,7 +330,7 @@ Full documentation with sample calls and responses for all APIs:
 | Consent API | `epilot consent` | [docs](./docs/consent.md) |
 | Portal API | `epilot customer-portal` | [docs](./docs/customer-portal.md) |
 | Dashboard API | `epilot dashboard` | [docs](./docs/dashboard.md) |
-| Data Management API | `epilot data-management` | [docs](./docs/data-management.md) |
+| Data Governance API | `epilot data-governance` | [docs](./docs/data-governance.md) |
 | Deduplication API | `epilot deduplication` | [docs](./docs/deduplication.md) |
 | Design Builder API v2 | `epilot design` | [docs](./docs/design.md) |
 | Document API | `epilot document` | [docs](./docs/document.md) |

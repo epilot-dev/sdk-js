@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { callApi } from '../../lib/call.js';
 
 export default defineCommand({
-  meta: { name: 'data-management', description: 'Data Management API' },
+  meta: { name: 'data-governance', description: 'Data Governance API' },
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },
@@ -36,7 +36,7 @@ export default defineCommand({
       }
     }
 
-    return callApi('data-management', {
+    return callApi('data-governance', {
       ...args,
       help: !!(args as Record<string, unknown>)._ophelp,
       _apihelp: !!(args as Record<string, unknown>)._apihelp,

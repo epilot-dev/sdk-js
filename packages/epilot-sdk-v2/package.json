@@ -87,12 +87,12 @@
       "require": "./dist/apis/dashboard.cjs"
     },
     "./dashboard/openapi.json": "./definitions/dashboard.json",
-    "./data-management": {
-      "types": "./dist/apis/data-management.d.ts",
-      "import": "./dist/apis/data-management.js",
-      "require": "./dist/apis/data-management.cjs"
+    "./data-governance": {
+      "types": "./dist/apis/data-governance.d.ts",
+      "import": "./dist/apis/data-governance.js",
+      "require": "./dist/apis/data-governance.cjs"
     },
-    "./data-management/openapi.json": "./definitions/data-management.json",
+    "./data-governance/openapi.json": "./definitions/data-governance.json",
     "./deduplication": {
       "types": "./dist/apis/deduplication.d.ts",
       "import": "./dist/apis/deduplication.js",
@@ -377,8 +377,8 @@
       "dashboard": [
         "./dist/apis/dashboard.d.ts"
       ],
-      "data-management": [
-        "./dist/apis/data-management.d.ts"
+      "data-governance": [
+        "./dist/apis/data-governance.d.ts"
       ],
       "deduplication": [
         "./dist/apis/deduplication.d.ts"

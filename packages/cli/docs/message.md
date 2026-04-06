@@ -49,6 +49,8 @@ epilot message sendMessage
 - [`markUnreadMessage`](#markunreadmessage) — Mark message as unread
 - [`getUnread`](#getunread) — Get all unread messages by actor
 - [`markUnreadMessageV2`](#markunreadmessagev2) — Mark message as unread within a scope
+- [`spamMessage`](#spammessage) — Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+- [`unspamMessage`](#unspammessage) — Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
 - [`getMessageV2`](#getmessagev2) — - Fetches message by ID
 
 **Threads**
@@ -63,6 +65,10 @@ epilot message sendMessage
 - [`getThreadTimeline`](#getthreadtimeline) — Get thread timeline
 - [`trashThread`](#trashthread) — Move a thread to trash
 - [`untrashThread`](#untrashthread) — Restore a trashed thread
+- [`spamThread`](#spamthread) — Mark a thread as spam
+- [`unspamThread`](#unspamthread) — Remove spam marking from a thread
+- [`bulkMoveThreads`](#bulkmovethreads) — Move many threads to a different inbox
+- [`bulkAssignThreads`](#bulkassignthreads) — Assign many threads
 - [`threadBulkActionsRead`](#threadbulkactionsread) — Perform a bulk action of marking an array of thread ids as read
 - [`threadBulkActionsUnread`](#threadbulkactionsunread) — Perform a bulk action of marking an array of thread ids as unread
 - [`threadBulkActionsFavorite`](#threadbulkactionsfavorite) — Perform a bulk action of marking an array of thread ids favorite
@@ -763,7 +769,8 @@ epilot message getUnread -p actor=example --jsonata 'count'
   "count": 14,
   "unread": 0,
   "drafts": 12,
-  "unassigned": 1
+  "unassigned": 1,
+  "spam": 3
 }
 ```
 
@@ -1368,6 +1375,218 @@ epilot message untrashThread -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
 
 ---
 
+### `spamThread`
+
+Mark a thread as spam
+
+`POST /v1/message/threads/{id}/spam`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | Thread ID |
+
+**Sample Call**
+
+```bash
+epilot message spamThread \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot message spamThread 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot message spamThread -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `unspamThread`
+
+Remove spam marking from a thread
+
+`POST /v1/message/threads/{id}/unspam`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | Thread ID |
+
+**Sample Call**
+
+```bash
+epilot message unspamThread \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot message unspamThread 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot message unspamThread -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `spamMessage`
+
+Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+
+`POST /v1/message/messages/{id}/spam`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | Message ID |
+
+**Sample Call**
+
+```bash
+epilot message spamMessage \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot message spamMessage 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot message spamMessage -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `unspamMessage`
+
+Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+
+`POST /v1/message/messages/{id}/unspam`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | Message ID |
+
+**Sample Call**
+
+```bash
+epilot message unspamMessage \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot message unspamMessage 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot message unspamMessage -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `bulkMoveThreads`
+
+Move many threads to a different inbox
+
+`POST /v1/message/threads/bulk:move`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot message bulkMoveThreads
+```
+
+With request body:
+
+```bash
+epilot message bulkMoveThreads \
+  -d '{
+  "ids": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "assign_to": ["206801"],
+  "inbox_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3",
+  "scopes": ["organization", "user"]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot message bulkMoveThreads
+```
+
+With JSONata filter:
+
+```bash
+epilot message bulkMoveThreads --jsonata '$'
+```
+
+---
+
+### `bulkAssignThreads`
+
+Assign many threads
+
+`POST /v1/message/threads/bulk:assign`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot message bulkAssignThreads
+```
+
+With request body:
+
+```bash
+epilot message bulkAssignThreads \
+  -d '{
+  "ids": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "assign_to": ["206801"],
+  "inbox_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3",
+  "scopes": ["organization", "user"]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot message bulkAssignThreads
+```
+
+With JSONata filter:
+
+```bash
+epilot message bulkAssignThreads --jsonata '$'
+```
+
+---
+
 ### `threadBulkActionsRead`
 
 Perform a bulk action of marking an array of thread ids as read
@@ -1379,8 +1598,19 @@ Perform a bulk action of marking an array of thread ids as read
 **Sample Call**
 
 ```bash
+epilot message threadBulkActionsRead
+```
+
+With request body:
+
+```bash
 epilot message threadBulkActionsRead \
-  -d '{"ids":["6b299eda-4018-4554-8965-c4b5598e6531"],"scopes":["organization","user"]}'
+  -d '{
+  "ids": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "assign_to": ["206801"],
+  "inbox_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3",
+  "scopes": ["organization", "user"]
+}'
 ```
 
 Using stdin pipe:
@@ -1408,8 +1638,19 @@ Perform a bulk action of marking an array of thread ids as unread
 **Sample Call**
 
 ```bash
+epilot message threadBulkActionsUnread
+```
+
+With request body:
+
+```bash
 epilot message threadBulkActionsUnread \
-  -d '{"ids":["6b299eda-4018-4554-8965-c4b5598e6531"],"scopes":["organization","user"]}'
+  -d '{
+  "ids": ["6b299eda-4018-4554-8965-c4b5598e6531"],
+  "assign_to": ["206801"],
+  "inbox_id": "3f34ce73-089c-4d45-a5ee-c161234e41c3",
+  "scopes": ["organization", "user"]
+}'
 ```
 
 Using stdin pipe:

@@ -265,6 +265,10 @@ export declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         export interface DecisionTask {
             id: string;
@@ -559,6 +563,10 @@ export declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         export interface FlowTemplateBase {
             id?: string;
@@ -650,6 +658,10 @@ export declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -1014,6 +1026,10 @@ export declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
     }
 }

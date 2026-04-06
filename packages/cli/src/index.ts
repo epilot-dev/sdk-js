@@ -33,7 +33,7 @@ export const main = defineCommand({
     consent: () => import('./commands/apis/consent.js').then((m) => m.default),
     'customer-portal': () => import('./commands/apis/customer-portal.js').then((m) => m.default),
     dashboard: () => import('./commands/apis/dashboard.js').then((m) => m.default),
-    'data-management': () => import('./commands/apis/data-management.js').then((m) => m.default),
+    'data-governance': () => import('./commands/apis/data-governance.js').then((m) => m.default),
     deduplication: () => import('./commands/apis/deduplication.js').then((m) => m.default),
     design: () => import('./commands/apis/design.js').then((m) => m.default),
     document: () => import('./commands/apis/document.js').then((m) => m.default),

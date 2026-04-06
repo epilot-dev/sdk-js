@@ -371,6 +371,10 @@ export declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            /**
+             * The manifest IDs associated with this integration
+             */
+            _manifest?: string[];
         }
         export interface CreateManagedCallUseCaseRequest {
             /**
@@ -1564,6 +1568,10 @@ export declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            /**
+             * The manifest IDs associated with this integration
+             */
+            _manifest?: string[];
         }
         export interface IntegrationAppMapping {
             /**
@@ -1631,6 +1639,10 @@ export declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            /**
+             * The manifest IDs associated with this integration
+             */
+            _manifest?: string[];
         }
         export interface IntegrationEntity {
             /**
@@ -1842,6 +1854,10 @@ export declare namespace Components {
              */
             protected?: boolean;
             /**
+             * The manifest IDs associated with this integration
+             */
+            _manifest?: string[];
+            /**
              * All use cases belonging to this integration
              */
             use_cases: UseCase[];
@@ -1963,9 +1979,15 @@ export declare namespace Components {
              * URL path template with {{variable}} interpolation
              */
             path: string;
+            /**
+             * Custom HTTP headers for the request. Values support {{variable}} interpolation from the request payload and {{env.VAR}} references for environment variables.
+             */
             headers?: {
                 [name: string]: string;
             };
+            /**
+             * Query parameters for the request. Values support {{variable}} interpolation from the request payload.
+             */
             query_params?: {
                 [name: string]: string;
             };
@@ -3721,6 +3743,10 @@ export declare namespace Components {
              * If true, integration is displayed in read-only mode in the UI to discourage changes
              */
             protected?: boolean;
+            /**
+             * The manifest IDs associated with this integration
+             */
+            _manifest?: string[];
             /**
              * Full list of use cases (declarative). This replaces ALL existing use cases.
              * - Use cases with an `id` field matching an existing use case will be updated

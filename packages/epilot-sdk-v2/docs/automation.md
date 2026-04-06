@@ -186,6 +186,7 @@ const { data } = await client.searchFlows({
   size: 1,
   from: 1,
   trigger_source_id: 'example',
+  target_workflow: 'example',
   include_flows: true,
 })
 ```

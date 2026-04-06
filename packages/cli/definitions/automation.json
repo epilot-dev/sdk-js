@@ -71,6 +71,15 @@
             }
           },
           {
+            "name": "target_workflow",
+            "in": "query",
+            "description": "Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow.",
+            "schema": {
+              "type": "string",
+              "example": "wfABCDEFGH"
+            }
+          },
+          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
