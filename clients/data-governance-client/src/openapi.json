@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://data-governance-api.sls.epilot.io"
+      "url": "https://data-governance.sls.epilot.io"
     }
   ],
   "tags": [
