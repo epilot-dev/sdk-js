@@ -3,25 +3,25 @@
   "info": {
     "title": "Data Governance API",
     "version": "1.2.0",
-    "description": "The **Data Governance API** provides a set of endpoints for managing the lifecycle of\nentity data within the epilot platform. It enables organizations to define governance\npolicies — such as automated data deletion rules — and execute them against any entity\nschema (currently limited to Contacts).\n\n## Core Concepts\n\n### Entity Lifecycle Configs\nA lifecycle **config** is a reusable governance policy that defines:\n- Which entities to target (via a saved view and optional filters)\n- What action to perform (currently `deletion`)\n- When and how often to run (via a schedule)\n\nLifecycle configs can be enabled or disabled and are evaluated on a recurring schedule.\n\n### Jobs\nA **Job** represents a single execution run of a lifecycle config. Jobs track progress,\nrecord outcomes (matched, deleted, failed counts), and can produce downloadable\nCSV reports. Jobs may be triggered on a schedule or manually.\n\n### Query\nThe query endpoint allows previewing which entities match a governance policy\nbefore it is executed, combining a saved view with additional data governance\nfilters (e.g., \"no related entities\", \"workflows all closed\").\n\n## Authentication\nAll endpoints require a valid epilot OAuth2 bearer token passed in the\n`Authorization` header. Optionally, the `x-epilot-org-id` header can be used\nto target a specific organization for shared-tenant access.\n"
+    "description": "The **Data Governance API** provides a set of endpoints for managing the lifecycle of\nentity data within the epilot platform. It enables organizations to define governance\npolicies — such as automated data deletion rules — and execute them against any entity\nschema (currently limited to Contacts).\n\n## Core Concepts\n\n### Data Lifecycle Configs\nA **config** defines a data lifecycle policy for a given entity schema. Each config consists of:\n- A **base view** (saved entity view) that identifies candidate entities\n- **Advanced filters** not available in standard entity tables (e.g. only contacts where all related opportunities have a workflow status of CLOSED)\n- A **schedule** controlling how often the policy runs (e.g. every 90 days)\n- **Related entity handling** — which linked entities should be deleted alongside the primary entity\n- An **action type** (currently only `deletion`)\n\nConfigs can be enabled or disabled and are evaluated on a recurring schedule.\n\n### Auditable Jobs\nEvery deletion — whether manual or automatic — produces an **auditable job** with full\ntraceability. Each job records its status, timing, trigger type, and generates a\ndownloadable CSV report detailing exactly which entities were affected.\n\n### Query\nThe query endpoint allows previewing which entities match a data lifecycle config\nbefore it is executed, combining a saved view with additional data governance\nfilters.\n\n### Data Recovery\nDeleted entities are moved to the trash where they remain recoverable for 30 days.\nAfter this retention period, deletion becomes permanent and irreversible.\n\n## Authentication\nAll endpoints require a valid epilot OAuth2 bearer token passed in the\n`Authorization` header. Optionally, the `x-epilot-org-id` header can be used\nto target a specific organization for shared-tenant access.\n"
   },
   "servers": [
     {
-      "url": "https://data-governance-api.sls.epilot.io"
+      "url": "https://data-governance.sls.epilot.io"
     }
   ],
   "tags": [
     {
       "name": "Query",
-      "description": "Preview which entities match a governance policy by combining a saved view\nwith additional data governance filters.\n"
+      "description": "Preview which entities match a data lifecycle config by combining a saved view\nwith additional data governance filters.\n"
     },
     {
-      "name": "Lifecycle Configs",
-      "description": "Create, update, list, and retrieve governance policy configurations that\ndefine automated actions (e.g., deletion) on entity data.\n"
+      "name": "Data Lifecycle Configs",
+      "description": "Create, update, list, and retrieve data lifecycle configurations that\ndefine automated actions (e.g., deletion) on entity data.\n"
     },
     {
-      "name": "Jobs",
-      "description": "Create, list, retrieve, and update job runs that represent individual\nexecutions of a governance config. Includes report download.\n"
+      "name": "Auditable Jobs",
+      "description": "Every deletion produces an auditable job with full traceability.\nCreate, list, retrieve, and update job runs. Includes report download.\n"
     }
   ],
   "security": [
@@ -36,8 +36,8 @@
     "/data-governance/v1/{entity_schema}/query": {
       "post": {
         "operationId": "queryEntities",
-        "summary": "Query entities matching a governance policy",
-        "description": "Executes a query against the specified entity schema using a saved view\ndefinition, optionally combined with additional data governance filters.\n\nThis endpoint is typically used to **preview** which entities would be\naffected by a governance config before it runs. The response includes\nthe total hit count and (optionally hydrated) entity results.\n\nPagination is supported via `from` and `size` in the request body.\n",
+        "summary": "Query entities matching a data lifecycle config",
+        "description": "Executes a query against the specified entity schema using a saved view\ndefinition, optionally combined with additional data governance filters.\n\nThis endpoint is typically used to **preview** which entities would be\naffected by a data lifecycle config before it runs. The response includes\nthe total hit count and (optionally hydrated) entity results.\n\nPagination is supported via `from` and `size` in the request body.\n",
         "tags": [
           "Query"
         ],
@@ -92,7 +92,7 @@
         "summary": "Create a new job run",
         "description": "Creates a new job run for the given entity schema. The job is associated\nwith an existing config and records the scheduled execution date.\n\nThis is a low-level endpoint used internally by the scheduler. For\nmanually triggering a config execution, prefer\n`POST /data-governance/v1/configs/{config_id}/jobs`.\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -145,7 +145,7 @@
         "summary": "Update an existing job run",
         "description": "Partially updates an existing job run. Typically used to record\nprogress or finalize a job by setting its status to `success` or\n`failed`, attaching details, error messages, or a report reference.\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -205,7 +205,7 @@
         "summary": "Get a job by ID",
         "description": "Returns full details of a single job run, including its current status,\nexecution timestamps, type-specific details, and report reference\n(if available).\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -245,7 +245,7 @@
         "summary": "Get report download URL for a job",
         "description": "Returns a short-lived, pre-signed S3 URL to download the CSV report\nfile for the given job. The URL expires after the number of seconds\nindicated in the `expires_in` field.\n\nA report is only available after a job has completed. If the job is\nstill in progress or did not produce a report, a 404 is returned.\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -283,9 +283,9 @@
       "get": {
         "operationId": "getConfig",
         "summary": "Get a config by ID",
-        "description": "Returns a single data governance config by its unique identifier,\nincluding its query definition, schedule, and current enabled state.\n",
+        "description": "Returns a single data data lifecycle config by its unique identifier,\nincluding its query definition, schedule, and current enabled state.\n",
         "tags": [
-          "Configs"
+          "Data Lifecycle Configs"
         ],
         "parameters": [
           {
@@ -325,7 +325,7 @@
         "summary": "Trigger a manual job run for a config",
         "description": "Manually triggers a new job run for the specified config. The job is\ncreated and queued for asynchronous execution.\n\nReturns the newly created job, whose `id` can be used to poll status\nvia `GET /data-governance/v1/jobs/{job_id}`.\n\nThe job's `trigger` field will be set to `manual` and `triggered_by`\nwill contain the authenticated user's identifier.\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -362,10 +362,10 @@
     "/data-governance/v1/{entity_schema}/configs": {
       "post": {
         "operationId": "upsertConfig",
-        "summary": "Create or update a governance config",
-        "description": "Creates a new governance config or updates an existing one for the\ngiven entity schema. The config defines:\n- A **query** (saved view + optional filters) to identify target entities\n- A **schedule** controlling how often the policy runs\n- An **action type** (currently only `deletion`)\n\nOnce created and enabled, the config is evaluated on its schedule by a\nbackground process that creates job runs automatically.\n\nReturns `201` when a new config is created, `200` when an existing\nconfig is updated.\n",
+        "summary": "Create or update a data lifecycle config",
+        "description": "Creates a new data lifecycle config or updates an existing one for the\ngiven entity schema. The config defines:\n- A **query** (saved view + optional filters) to identify target entities\n- A **schedule** controlling how often the policy runs\n- An **action type** (currently only `deletion`)\n\nOnce created and enabled, the config is evaluated on its schedule by a\nbackground process that creates job runs automatically.\n\nReturns `201` when a new config is created, `200` when an existing\nconfig is updated.\n",
         "tags": [
-          "Configs"
+          "Data Lifecycle Configs"
         ],
         "parameters": [
           {
@@ -422,10 +422,10 @@
     "/data-governance/v1/configs": {
       "get": {
         "operationId": "listConfigs",
-        "summary": "List governance configs",
-        "description": "Returns a cursor-paginated list of governance configs. Results can be\nfiltered by entity schema, config type, scheduled run date, or\nenabled status.\n",
+        "summary": "List data lifecycle configs",
+        "description": "Returns a cursor-paginated list of data lifecycle configs. Results can be\nfiltered by entity schema, config type, scheduled run date, or\nenabled status.\n",
         "tags": [
-          "Configs"
+          "Data Lifecycle Configs"
         ],
         "parameters": [
           {
@@ -508,7 +508,7 @@
         "summary": "List job runs",
         "description": "Returns a cursor-paginated list of job runs. Results can be filtered\nby entity schema, action type, execution status, or parent config.\n",
         "tags": [
-          "Jobs"
+          "Auditable Jobs"
         ],
         "parameters": [
           {
@@ -665,7 +665,7 @@
           },
           "config_id": {
             "type": "string",
-            "description": "ID of the governance config this job executes."
+            "description": "ID of the data lifecycle config this job executes."
           },
           "scheduled_for": {
             "type": "string",
@@ -715,7 +715,7 @@
       },
       "Job": {
         "type": "object",
-        "description": "Represents a single execution run of a governance config. Tracks the\nfull lifecycle from creation through completion, including outcome\ndetails and an optional downloadable report.\n",
+        "description": "Represents a single execution run of a data lifecycle config. Tracks the\nfull lifecycle from creation through completion, including outcome\ndetails and an optional downloadable report.\n",
         "additionalProperties": false,
         "required": [
           "id",
@@ -737,7 +737,7 @@
           },
           "config_id": {
             "type": "string",
-            "description": "ID of the governance config this job was created from."
+            "description": "ID of the data lifecycle config this job was created from."
           },
           "entity_schema": {
             "type": "string",
@@ -881,7 +881,7 @@
       },
       "QueryConfig": {
         "type": "object",
-        "description": "Defines the query used by a governance config to identify target\nentities. Combines a saved view with optional governance filters.\n",
+        "description": "Defines the query used by a data lifecycle config to identify target\nentities. Combines a saved view with optional governance filters.\n",
         "required": [
           "saved_view_id"
         ],
@@ -959,7 +959,7 @@
         }
       },
       "ConfigSchedule": {
-        "description": "Schedule definition controlling when a governance config runs.",
+        "description": "Schedule definition controlling when a data lifecycle config runs.",
         "$ref": "#/components/schemas/IntervalConfigSchedule"
       },
       "IntervalConfigSchedule": {
@@ -996,7 +996,7 @@
       },
       "UpsertConfigRequest": {
         "type": "object",
-        "description": "Request payload for creating or updating a governance config.",
+        "description": "Request payload for creating or updating a data lifecycle config.",
         "required": [
           "type",
           "query",
@@ -1028,7 +1028,7 @@
       },
       "Config": {
         "type": "object",
-        "description": "A governance config defining an automated policy (e.g., scheduled\nentity deletion) for a specific entity schema.\n",
+        "description": "A data lifecycle config defining an automated policy (e.g., scheduled\nentity deletion) for a specific entity schema.\n",
         "required": [
           "id",
           "entity_schema",
@@ -1105,7 +1105,7 @@
       },
       "ListConfigsResponse": {
         "type": "object",
-        "description": "Paginated response containing a list of governance configs.",
+        "description": "Paginated response containing a list of data lifecycle configs.",
         "properties": {
           "configs": {
             "type": "array",

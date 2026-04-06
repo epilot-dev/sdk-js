@@ -382,7 +382,7 @@ export const API_LIST: ApiInfo[] = [
     apiName: 'dataGovernance',
     kebabName: 'data-governance',
     title: 'Data Governance API',
-    serverUrl: 'https://data-governance-api.sls.epilot.io',
+    serverUrl: 'https://data-governance.sls.epilot.io',
     operationCount: 10,
     operationIds: [
       'queryEntities',

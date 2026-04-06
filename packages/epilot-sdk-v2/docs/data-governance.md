@@ -1,6 +1,6 @@
 # Data Governance API
 
-- **Base URL:** `https://data-governance-api.sls.epilot.io`
+- **Base URL:** `https://data-governance.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/data-governance](https://docs.epilot.io/api/data-governance)
 
 ## Usage
@@ -27,7 +27,7 @@ const { data } = await dataGovernanceClient.queryEntities(...)
 **Query**
 - [`queryEntities`](#queryentities)
 
-**Jobs**
+**Auditable Jobs**
 - [`createJob`](#createjob)
 - [`updateJob`](#updatejob)
 - [`getJob`](#getjob)
@@ -35,7 +35,7 @@ const { data } = await dataGovernanceClient.queryEntities(...)
 - [`createJobForConfig`](#createjobforconfig)
 - [`listJobs`](#listjobs)
 
-**Configs**
+**Data Lifecycle Configs**
 - [`getConfig`](#getconfig)
 - [`upsertConfig`](#upsertconfig)
 - [`listConfigs`](#listconfigs)
@@ -66,7 +66,7 @@ const { data } = await dataGovernanceClient.queryEntities(...)
 
 ### `queryEntities`
 
-Query entities matching a governance policy
+Query entities matching a data lifecycle config
 
 `POST /data-governance/v1/{entity_schema}/query`
 
@@ -386,7 +386,7 @@ const { data } = await client.createJobForConfig({
 
 ### `upsertConfig`
 
-Create or update a governance config
+Create or update a data lifecycle config
 
 `POST /data-governance/v1/{entity_schema}/configs`
 
@@ -464,7 +464,7 @@ const { data } = await client.upsertConfig(
 
 ### `listConfigs`
 
-List governance configs
+List data lifecycle configs
 
 `GET /data-governance/v1/configs`
 
@@ -683,7 +683,7 @@ type UpdateJobRequest = {
 
 ### `Job`
 
-Represents a single execution run of a governance config. Tracks the
+Represents a single execution run of a data lifecycle config. Tracks the
 full lifecycle from creation through completion, including outcome
 details and an optional downloadable report.
 
@@ -784,7 +784,7 @@ type QueryFilter = {
 
 ### `QueryConfig`
 
-Defines the query used by a governance config to identify target
+Defines the query used by a data lifecycle config to identify target
 entities. Combines a saved view with optional governance filters.
 
 
@@ -869,7 +869,7 @@ type IntervalConfigSchedule = {
 
 ### `UpsertConfigRequest`
 
-Request payload for creating or updating a governance config.
+Request payload for creating or updating a data lifecycle config.
 
 ```ts
 type UpsertConfigRequest = {
@@ -898,7 +898,7 @@ type UpsertConfigRequest = {
 
 ### `Config`
 
-A governance config defining an automated policy (e.g., scheduled
+A data lifecycle config defining an automated policy (e.g., scheduled
 entity deletion) for a specific entity schema.
 
 
@@ -946,7 +946,7 @@ type DeletionRelationEntitySchema = "contact" | "file" | "opportunity" | "order"
 
 ### `ListConfigsResponse`
 
-Paginated response containing a list of governance configs.
+Paginated response containing a list of data lifecycle configs.
 
 ```ts
 type ListConfigsResponse = {

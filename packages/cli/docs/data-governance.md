@@ -1,6 +1,6 @@
 # Data Governance API
 
-- **Base URL:** `https://data-governance-api.sls.epilot.io`
+- **Base URL:** `https://data-governance.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/data-governance](https://docs.epilot.io/api/data-governance)
 
 The **Data Governance API** provides a set of endpoints for managing the lifecycle of
@@ -41,7 +41,7 @@ epilot data-governance queryEntities -p entity_schema=contact
 **Query**
 - [`queryEntities`](#queryentities) — Executes a query against the specified entity schema using a saved view
 
-**Jobs**
+**Auditable Jobs**
 - [`createJob`](#createjob) — Creates a new job run for the given entity schema. The job is associated
 - [`updateJob`](#updatejob) — Partially updates an existing job run. Typically used to record
 - [`getJob`](#getjob) — Returns full details of a single job run, including its current status,
@@ -49,10 +49,10 @@ epilot data-governance queryEntities -p entity_schema=contact
 - [`createJobForConfig`](#createjobforconfig) — Manually triggers a new job run for the specified config. The job is
 - [`listJobs`](#listjobs) — Returns a cursor-paginated list of job runs. Results can be filtered
 
-**Configs**
-- [`getConfig`](#getconfig) — Returns a single data governance config by its unique identifier,
-- [`upsertConfig`](#upsertconfig) — Creates a new governance config or updates an existing one for the
-- [`listConfigs`](#listconfigs) — Returns a cursor-paginated list of governance configs. Results can be
+**Data Lifecycle Configs**
+- [`getConfig`](#getconfig) — Returns a single data data lifecycle config by its unique identifier,
+- [`upsertConfig`](#upsertconfig) — Creates a new data lifecycle config or updates an existing one for the
+- [`listConfigs`](#listconfigs) — Returns a cursor-paginated list of data lifecycle configs. Results can be
 
 ### `queryEntities`
 
@@ -419,7 +419,7 @@ epilot data-governance getJobReportUrl -p job_id=2d3b5e90-e4c0-4f1a-9c7b-abc123d
 
 ### `getConfig`
 
-Returns a single data governance config by its unique identifier,
+Returns a single data data lifecycle config by its unique identifier,
 
 `GET /data-governance/v1/configs/{config_id}`
 
@@ -552,7 +552,7 @@ epilot data-governance createJobForConfig -p config_id=cfg-8a12f3b4-5678-9abc-de
 
 ### `upsertConfig`
 
-Creates a new governance config or updates an existing one for the
+Creates a new data lifecycle config or updates an existing one for the
 
 `POST /data-governance/v1/{entity_schema}/configs`
 
@@ -662,7 +662,7 @@ epilot data-governance upsertConfig -p entity_schema=contact --jsonata 'id'
 
 ### `listConfigs`
 
-Returns a cursor-paginated list of governance configs. Results can be
+Returns a cursor-paginated list of data lifecycle configs. Results can be
 
 `GET /data-governance/v1/configs`
 
