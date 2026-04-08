@@ -338,6 +338,20 @@
         "responses": {}
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now": {
+      "post": {
+        "operationId": "runTaskScheduleNow",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
       "post": {
         "operationId": "cancelSchedule",
