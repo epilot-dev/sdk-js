@@ -1127,55 +1127,16 @@ importers:
 
   clients/erp-integration-client:
     dependencies:
-      '@dazn/lambda-powertools-correlation-ids':
-        specifier: ^1.28.1
-        version: 1.28.1
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
-      https-browserify:
+      '@epilot/integration-toolkit-client':
         specifier: ^1.0.0
-        version: 1.0.0
-      openapi-client-axios:
-        specifier: ^7.8.0
-        version: 7.9.0(axios@1.13.6)(js-yaml@4.1.1)
-      stream-http:
-        specifier: ^3.1.1
-        version: 3.2.0
-      url:
-        specifier: ^0.11.0
-        version: 0.11.4
-      util:
-        specifier: ^0.12.3
-        version: 0.12.5
-    devDependencies:
+        version: 1.0.0(axios@1.13.6)(js-yaml@4.1.1)
       axios:
-        specifier: ^1.13.5
+        specifier: ^1.0.0 || >=0.25.0 <1.0.0
         version: 1.13.6(debug@4.4.1)
-      copy-webpack-plugin:
-        specifier: ^7.0.0
-        version: 7.0.0(webpack@5.105.4)
-      json-loader:
-        specifier: ^0.5.7
-        version: 0.5.7
-      openapicmd:
-        specifier: ^2.7.0
-        version: 2.9.0(@types/node@25.4.0)(encoding@0.1.13)(node-notifier@8.0.2)(openapi-types@12.1.3)(ts-node@10.9.2(@types/node@25.4.0)(typescript@4.9.5))
-      ts-loader:
-        specifier: ^8.0.14
-        version: 8.4.0(typescript@4.9.5)(webpack@5.105.4)
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.2(@types/node@25.4.0)(typescript@4.9.5)
+    devDependencies:
       typescript:
         specifier: ^4.1.3
         version: 4.9.5
-      webpack:
-        specifier: ^5.104.1
-        version: 5.105.4(webpack-cli@4.10.0)
-      webpack-cli:
-        specifier: ^4.4.0
-        version: 4.10.0(webpack@5.105.4)
 
   clients/event-catalog-client:
     dependencies:
@@ -2984,6 +2945,11 @@ packages:
     resolution: {integrity: sha512-1W9WxXflAJ7Z+ycR07D0BoFIOIL+wmPk6917MAk0XXx4VzYebzqa7RFOaYm2WrqLOppkQRhJVtlUHvPA0KDdRg==}
     peerDependencies:
       '@material-ui/core': 4.*
+
+  '@epilot/integration-toolkit-client@1.0.0':
+    resolution: {integrity: sha512-HM4sCwRBJ6zB5u0/6BIdllJ8ddaF07xMW/9+d+TtZQUtboTPnzIpQjAs+KVc/OzeMx34acFzJrcFujxdxRuuoA==}
+    peerDependencies:
+      axios: ^1.0.0 || >=0.25.0 <1.0.0
 
   '@epilot/journey-client@0.5.2':
     resolution: {integrity: sha512-8sFIN9oNDEu/PaPM1tiql786hn3tOB6UFVoQSZZ0mCH/K8H5v3jX6tJu6QsQqVJrAq3u/RPS7iVLadt3yT6EGA==}
@@ -8116,6 +8082,19 @@ snapshots:
       - axios
       - js-yaml
     optional: true
+
+  '@epilot/integration-toolkit-client@1.0.0(axios@1.13.6)(js-yaml@4.1.1)':
+    dependencies:
+      '@dazn/lambda-powertools-correlation-ids': 1.28.1
+      axios: 1.13.6(debug@4.4.1)
+      buffer: 6.0.3
+      https-browserify: 1.0.0
+      openapi-client-axios: 7.9.0(axios@1.13.6)(js-yaml@4.1.1)
+      stream-http: 3.2.0
+      url: 0.11.4
+      util: 0.12.5
+    transitivePeerDependencies:
+      - js-yaml
 
   '@epilot/journey-client@0.5.2(axios@1.13.6)(js-yaml@4.1.1)':
     dependencies:
