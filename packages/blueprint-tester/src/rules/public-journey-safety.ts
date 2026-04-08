@@ -1,0 +1,91 @@
+import type { TerraformResource, ValidationContext, ValidationIssue, ValidationRule } from '../types.js';
+import { isReferenceExpression, isVariableReference } from '../utils/terraform-refs.js';
+import { extractUuids } from '../utils/uuid.js';
+
+const JOURNEY_TYPES = new Set([
+  'epilot_journey',
+  'epilot-journey_journey',
+]);
+
+/** Attribute keys in journey resources that reference other resources */
+const CRITICAL_REF_KEYS = new Set([
+  'mappings_automation_id',
+  'design_id',
+  'automation_id',
+]);
+
+export const publicJourneySafetyRule: ValidationRule = {
+  id: 'public-journey-safety',
+  name: 'Public Journey Safety',
+  description: 'Checks that public journeys have all critical references properly handled to prevent wrong-org submissions',
+  severity: 'warning',
+
+  validate(context: ValidationContext): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+    const isTerraform = context.format === 'terraform';
+
+    for (const file of context.files) {
+      for (const resource of file.resources) {
+        if (!JOURNEY_TYPES.has(resource.type)) continue;
+
+        const rawContent = resource.rawContent ?? resource.rawHcl;
+        const isPublic = isPublicJourney(resource.attributes, rawContent);
+        if (!isPublic) continue;
+
+        checkCriticalRefs(resource, issues, isTerraform);
+        checkOrgIdInJourney(resource, rawContent, issues);
+      }
+    }
+
+    return issues;
+  },
+};
+
+function isPublicJourney(attrs: Record<string, unknown>, rawContent: string): boolean {
+  if (attrs.access_mode === 'PUBLIC') return true;
+  if (attrs.accessMode === 'PUBLIC') return true;
+  if (/access_?[Mm]ode["'\s]*[:=]["'\s]*["']?PUBLIC/i.test(rawContent)) return true;
+  return false;
+}
+
+function checkCriticalRefs(resource: TerraformResource, issues: ValidationIssue[], isTerraform: boolean): void {
+  for (const [key, value] of Object.entries(resource.attributes)) {
+    if (!CRITICAL_REF_KEYS.has(key)) continue;
+    if (typeof value !== 'string') continue;
+    // For terraform, skip proper references
+    if (isTerraform) {
+      if (isReferenceExpression(value)) continue;
+      if (isVariableReference(value)) continue;
+    }
+
+    const uuids = extractUuids(value);
+    if (uuids.length > 0) {
+      issues.push({
+        ruleId: 'public-journey-safety',
+        severity: 'warning',
+        message: `Public journey has hardcoded "${key}" = "${value}". This reference should be properly managed to prevent submissions routing to the source org.`,
+        file: resource.file,
+        line: resource.lineStart,
+        resourceAddress: resource.address,
+        attributePath: key,
+        value,
+      });
+    }
+  }
+}
+
+function checkOrgIdInJourney(resource: TerraformResource, rawContent: string, issues: ValidationIssue[]): void {
+  const orgIdMatch = rawContent.match(/organization_id["'\s]*[:=]["'\s]*["']?(\d{4,10})/);
+  if (orgIdMatch) {
+    issues.push({
+      ruleId: 'public-journey-safety',
+      severity: 'warning',
+      message: `Public journey contains hardcoded organization_id "${orgIdMatch[1]}". Submissions may be routed to the source org instead of the target.`,
+      file: resource.file,
+      line: resource.lineStart,
+      resourceAddress: resource.address,
+      attributePath: 'organization_id',
+      value: orgIdMatch[1],
+    });
+  }
+}
