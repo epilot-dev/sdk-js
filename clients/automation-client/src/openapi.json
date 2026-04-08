@@ -71,15 +71,6 @@
             }
           },
           {
-            "name": "target_workflow",
-            "in": "query",
-            "description": "Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow.",
-            "schema": {
-              "type": "string",
-              "example": "wfABCDEFGH"
-            }
-          },
-          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -1246,6 +1237,12 @@
           },
           {
             "$ref": "#/components/schemas/FlowExecutionCancelAction"
+          },
+          {
+            "$ref": "#/components/schemas/ForwardEmailAction"
+          },
+          {
+            "$ref": "#/components/schemas/ReplyEmailAction"
           }
         ]
       },
@@ -1286,6 +1283,12 @@
           },
           {
             "$ref": "#/components/schemas/FlowExecutionCancelActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/ForwardEmailActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/ReplyEmailActionConfig"
           }
         ]
       },
@@ -2145,6 +2148,184 @@
           }
         ]
       },
+      "ForwardEmailActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "forward-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ForwardEmailConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Forward Email",
+          "type": "forward-email",
+          "config": {
+            "forward_to": [
+              {
+                "email": "external@outlook.com",
+                "name": "External User"
+              }
+            ]
+          }
+        }
+      },
+      "ForwardEmailAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "forward-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ForwardEmailConfig"
+              }
+            }
+          }
+        ]
+      },
+      "ForwardEmailConfig": {
+        "type": "object",
+        "properties": {
+          "forward_to": {
+            "type": "array",
+            "description": "List of email addresses to forward the incoming email to",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Email address to forward to"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Display name for the recipient"
+                }
+              },
+              "required": [
+                "email"
+              ]
+            }
+          },
+          "include_attachments": {
+            "type": "boolean",
+            "description": "Whether to include the original email attachments in the forwarded email",
+            "default": true
+          },
+          "subject_prefix": {
+            "type": "string",
+            "description": "Prefix to add to the original email subject",
+            "default": "Fwd: "
+          },
+          "mark_as_done": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
+            "default": false
+          }
+        },
+        "required": [
+          "forward_to"
+        ]
+      },
+      "ReplyEmailActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "reply-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ReplyEmailConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Reply Email",
+          "type": "reply-email",
+          "config": {
+            "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
+            "language_code": "de",
+            "reply_mode": "reply_in_thread"
+          }
+        }
+      },
+      "ReplyEmailAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "reply-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/ReplyEmailConfig"
+              }
+            }
+          }
+        ]
+      },
+      "ReplyEmailConfig": {
+        "type": "object",
+        "properties": {
+          "email_template_id": {
+            "type": "string",
+            "description": "ID of the email template to use for the reply"
+          },
+          "language_code": {
+            "type": "string",
+            "description": "Language code for the email template",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "reply_mode": {
+            "type": "string",
+            "description": "Controls how the reply email is sent.\n- reply_in_thread: Sends the email as a reply within the existing email thread (default).\n- new_email: Sends the email as a new standalone email to the original sender, creating a fresh thread.\n",
+            "enum": [
+              "reply_in_thread",
+              "new_email"
+            ],
+            "default": "reply_in_thread"
+          },
+          "mark_as_done": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
+            "default": false
+          }
+        }
+      },
       "SendEmailConfig": {
         "type": "object",
         "properties": {
@@ -2172,6 +2353,25 @@
             "type": "boolean",
             "description": "Pause automation execution after sending email to wait for a confirmation link to be clicked.\n\nThe email template should contain a confirmation link using the variable `{{confirmation_url}}`\n",
             "default": false
+          },
+          "reply_to_sender": {
+            "type": "boolean",
+            "description": "When enabled, overrides the template's \"To\" field with the sender address of the triggering incoming email.\nThis is useful for auto-reply scenarios where you want to automatically respond to the person who sent the email.\nOnly works when the automation is triggered by a received email (received_email or new_email_thread triggers).\n",
+            "default": false
+          },
+          "reply_mode": {
+            "type": "string",
+            "description": "Controls how the auto-reply email is sent when reply_to_sender is enabled.\n- reply_in_thread: Sends the email as a reply within the existing email thread (default).\n- new_email: Sends the email as a new standalone email to the original sender, creating a fresh thread.\n",
+            "enum": [
+              "reply_in_thread",
+              "new_email"
+            ],
+            "default": "reply_in_thread"
+          },
+          "mark_as_done": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
+            "default": true
           },
           "attachments": {
             "type": "array",
