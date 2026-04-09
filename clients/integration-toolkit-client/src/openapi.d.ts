@@ -1362,7 +1362,7 @@ declare namespace Components {
             /**
              * Field to group the bucket breakdown by
              */
-            group_by?: "use_case_type";
+            group_by?: "use_case_type" | "use_case";
         }
         /**
          * Configuration for inbound use cases (ERP to epilot)
@@ -3392,9 +3392,13 @@ declare namespace Components {
         }
         export interface TimeSeriesBreakdownItemV2 {
             /**
-             * Use case type for the breakdown item
+             * Present when grouping by use_case_type
              */
-            use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Present when grouping by use_case. Unknown historical IDs are collapsed into "__unknown__"
+             */
+            use_case_id?: string;
             /**
              * Number of successful events in the breakdown item
              */

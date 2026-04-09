@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -7453,7 +7453,8 @@
           "group_by": {
             "type": "string",
             "enum": [
-              "use_case_type"
+              "use_case_type",
+              "use_case"
             ],
             "description": "Field to group the bucket breakdown by"
           }
@@ -7462,7 +7463,6 @@
       "TimeSeriesBreakdownItemV2": {
         "type": "object",
         "required": [
-          "use_case_type",
           "success_count",
           "error_count",
           "warning_count",
@@ -7479,7 +7479,11 @@
               "managed_call",
               "secure_proxy"
             ],
-            "description": "Use case type for the breakdown item"
+            "description": "Present when grouping by use_case_type"
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "Present when grouping by use_case. Unknown historical IDs are collapsed into \"__unknown__\""
           },
           "success_count": {
             "type": "integer",
