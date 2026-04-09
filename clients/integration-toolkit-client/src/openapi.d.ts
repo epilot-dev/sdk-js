@@ -2854,7 +2854,8 @@ declare namespace Components {
         }
         export interface QueryMonitoringEventsV2Request {
             /**
-             * Filter by use case ID (UUID). Empty string matches "General" events.
+             * Filter by use case ID (UUID). Empty string matches "General" events. Special value "__unknown__" matches events whose use_case_id does not belong to any currently configured use case for this integration (excludes "General" events).
+             *
              */
             use_case_id?: string;
             /**

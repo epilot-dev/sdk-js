@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -7163,7 +7163,7 @@
         "properties": {
           "use_case_id": {
             "type": "string",
-            "description": "Filter by use case ID (UUID). Empty string matches \"General\" events."
+            "description": "Filter by use case ID (UUID). Empty string matches \"General\" events. Special value \"__unknown__\" matches events whose use_case_id does not belong to any currently configured use case for this integration (excludes \"General\" events).\n"
           },
           "use_case_type": {
             "type": "string",
