@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -7449,6 +7449,57 @@
               "secure_proxy"
             ],
             "description": "Filter by use case type"
+          },
+          "group_by": {
+            "type": "string",
+            "enum": [
+              "use_case_type"
+            ],
+            "description": "Field to group the bucket breakdown by"
+          }
+        }
+      },
+      "TimeSeriesBreakdownItemV2": {
+        "type": "object",
+        "required": [
+          "use_case_type",
+          "success_count",
+          "error_count",
+          "warning_count",
+          "skipped_count",
+          "total_count"
+        ],
+        "properties": {
+          "use_case_type": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "file_proxy",
+              "managed_call",
+              "secure_proxy"
+            ],
+            "description": "Use case type for the breakdown item"
+          },
+          "success_count": {
+            "type": "integer",
+            "description": "Number of successful events in the breakdown item"
+          },
+          "error_count": {
+            "type": "integer",
+            "description": "Number of error events in the breakdown item"
+          },
+          "warning_count": {
+            "type": "integer",
+            "description": "Number of warning events in the breakdown item"
+          },
+          "skipped_count": {
+            "type": "integer",
+            "description": "Number of skipped events in the breakdown item"
+          },
+          "total_count": {
+            "type": "integer",
+            "description": "Total events in the breakdown item"
           }
         }
       },
@@ -7483,6 +7534,13 @@
           "total_count": {
             "type": "integer",
             "description": "Total events in the bucket"
+          },
+          "breakdown": {
+            "type": "array",
+            "description": "Statistics breakdown by the requested group_by field for this bucket",
+            "items": {
+              "$ref": "#/components/schemas/TimeSeriesBreakdownItemV2"
+            }
           }
         }
       }

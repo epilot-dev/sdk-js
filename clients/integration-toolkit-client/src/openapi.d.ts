@@ -1359,6 +1359,10 @@ declare namespace Components {
              * Filter by use case type
              */
             use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Field to group the bucket breakdown by
+             */
+            group_by?: "use_case_type";
         }
         /**
          * Configuration for inbound use cases (ERP to epilot)
@@ -3386,6 +3390,32 @@ declare namespace Components {
              */
             overwrite?: boolean;
         }
+        export interface TimeSeriesBreakdownItemV2 {
+            /**
+             * Use case type for the breakdown item
+             */
+            use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Number of successful events in the breakdown item
+             */
+            success_count: number;
+            /**
+             * Number of error events in the breakdown item
+             */
+            error_count: number;
+            /**
+             * Number of warning events in the breakdown item
+             */
+            warning_count: number;
+            /**
+             * Number of skipped events in the breakdown item
+             */
+            skipped_count: number;
+            /**
+             * Total events in the breakdown item
+             */
+            total_count: number;
+        }
         export interface TimeSeriesBucket {
             /**
              * The start timestamp of the bucket
@@ -3436,6 +3466,10 @@ declare namespace Components {
              * Total events in the bucket
              */
             total_count: number;
+            /**
+             * Statistics breakdown by the requested group_by field for this bucket
+             */
+            breakdown?: TimeSeriesBreakdownItemV2[];
         }
         export interface TriggerErpActionRequest {
             /**
@@ -5735,6 +5769,7 @@ export type SecureProxyUseCase = Components.Schemas.SecureProxyUseCase;
 export type SecureProxyUseCaseConfiguration = Components.Schemas.SecureProxyUseCaseConfiguration;
 export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCaseHistoryEntry;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
 export type TimeSeriesBucketV2 = Components.Schemas.TimeSeriesBucketV2;
 export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest;
