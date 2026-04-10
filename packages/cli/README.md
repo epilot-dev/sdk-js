@@ -152,34 +152,29 @@ Token resolution order:
 
 ## Profiles
 
-Manage multiple environments (like AWS CLI profiles):
+Manage multiple environments, similar to AWS CLI profiles:
 
 ```bash
-# Create profiles for different environments
-epilot profile create dev --server https://entity.dev.sls.epilot.io --token <dev-token>
-epilot profile create staging --server https://entity.staging.sls.epilot.io --token <staging-token>
+# Create profiles
+epilot profile create sandbox --token <sandbox-token>
 epilot profile create prod --token <prod-token>
 
 # Switch active profile
-epilot profile use dev
+epilot profile use sandbox
 
-# Or use per-command
-epilot entity listSchemas --profile staging
+# Use per-command
+epilot entity listSchemas --profile sandbox
 
 # Or via environment variable
-EPILOT_PROFILE=dev epilot entity listSchemas
+EPILOT_PROFILE=sandbox epilot entity listSchemas
 
-# List profiles
+# List / show / delete
 epilot profile list
-
-# Show profile details
 epilot profile show dev
-
-# Delete a profile
 epilot profile delete dev
 ```
 
-Profiles store server URL, auth token, org ID, and custom headers in `~/.config/epilot/profiles.json`.
+Profiles store auth token, server URL, and custom headers in `~/.config/epilot/profiles.json`.
 
 ## Parameters
 
