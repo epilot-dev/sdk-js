@@ -3704,7 +3704,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
