@@ -15,12 +15,32 @@
         },
         "responses": {}
       }
+    },
+    "/v1/deduplicate/job": {
+      "post": {
+        "operationId": "deduplicateAsync",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/deduplicate/jobs/{jobId}": {
+      "get": {
+        "operationId": "getDeduplicationJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {},
-  "servers": [
-    {
-      "url": "https://deduplication.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
