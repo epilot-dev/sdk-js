@@ -86,6 +86,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
+| `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./packages/epilot-sdk-v2/docs/sharing.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |

@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://sharing-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/sharing/configurations/{partner_org_id}": {
+      "get": {
+        "operationId": "getSharingConfiguration",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateSharingConfiguration",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSharingConfiguration",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/sharing/configurations/{partner_org_id}/role": {
+      "put": {
+        "operationId": "assignRoleToConfiguration",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/configurations": {
+      "get": {
+        "operationId": "getSharingConfigurations",
+        "parameters": [
+          {
+            "name": "partner_org_ids",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/sharing/configurations:search": {
+      "post": {
+        "operationId": "searchPartnerSharingConfigurations",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/configurations/by-role/{template_role_id}": {
+      "get": {
+        "operationId": "getConfigurationsByTemplateRole",
+        "parameters": [
+          {
+            "name": "template_role_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/sharing/entities:share": {
+      "post": {
+        "operationId": "shareEntityWithPartners",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/entities:share-child": {
+      "post": {
+        "operationId": "shareChildEntityWithPartners",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/entities:offer": {
+      "post": {
+        "operationId": "offerEntityToPartners",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/offers/status": {
+      "get": {
+        "operationId": "getOfferStatus",
+        "parameters": [
+          {
+            "name": "partner_org_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "sharing_org_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/sharing/offers:accept": {
+      "post": {
+        "operationId": "acceptOffer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PartnerOrgIdPath": {
+        "name": "partner_org_id",
+        "in": "path",
+        "required": true
+      }
+    }
+  }
+}

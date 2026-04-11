@@ -59,6 +59,7 @@ export const main = defineCommand({
     'pricing-tier': () => import('./commands/apis/pricing-tier.js').then((m) => m.default),
     purpose: () => import('./commands/apis/purpose.js').then((m) => m.default),
     sandbox: () => import('./commands/apis/sandbox.js').then((m) => m.default),
+    sharing: () => import('./commands/apis/sharing.js').then((m) => m.default),
     submission: () => import('./commands/apis/submission.js').then((m) => m.default),
     targeting: () => import('./commands/apis/targeting.js').then((m) => m.default),
     'template-variables': () => import('./commands/apis/template-variables.js').then((m) => m.default),
