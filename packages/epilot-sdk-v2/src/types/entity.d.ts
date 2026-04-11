@@ -3729,6 +3729,10 @@ export declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -4121,6 +4125,10 @@ export declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -4806,6 +4814,12 @@ export declare namespace Components {
              */
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
+            /**
+             * The maximum file size in bytes. Used to derive file_size and file_size_unit in the UI.
+             * example:
+             * 5000000
+             */
+            file_size_bytes?: number;
         }
         export interface GenerateEntityTableAIFiltersRequest {
             /**
@@ -9703,15 +9717,38 @@ export declare namespace Components {
                  * Whether this column is required for each row
                  */
                 required?: boolean;
+                /**
+                 * When true, the row is rendered in bold (only applies in transposed mode)
+                 */
+                bold?: boolean;
             }[];
             /**
              * Minimum number of rows required
              */
             min_rows?: number;
             /**
-             * Maximum number of rows allowed
+             * Maximum number of rows allowed (or maximum periods when transposed)
              */
             max_rows?: number;
+            /**
+             * Enable transposed layout where rows become metrics and columns become periods
+             */
+            transposed?: boolean;
+            /**
+             * Configuration for column headers in transposed mode
+             */
+            column_header?: {
+                /**
+                 * Header label pattern with {{i}} as index placeholder (e.g., "Year {{i}}")
+                 * example:
+                 * Year {{i}}
+                 */
+                template?: string;
+                /**
+                 * Starting index value for the template placeholder
+                 */
+                start?: number;
+            };
         }
         /**
          * Tags
@@ -14437,6 +14474,7 @@ export interface OperationMethods {
    * 
    * - All activites are published as events on the event bus
    * - Entity mutations are always part of an activity
+   * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
    * 
    */
   'createActivity'(
@@ -15627,6 +15665,7 @@ export interface PathsDictionary {
      * 
      * - All activites are published as events on the event bus
      * - Entity mutations are always part of an activity
+     * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
      * 
      */
     'post'(

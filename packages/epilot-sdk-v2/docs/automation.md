@@ -85,6 +85,12 @@ const { data } = await automationClient.searchFlows(...)
 - [`AssignThreadConfig`](#assignthreadconfig)
 - [`SendEmailActionConfig`](#sendemailactionconfig)
 - [`SendEmailAction`](#sendemailaction)
+- [`ForwardEmailActionConfig`](#forwardemailactionconfig)
+- [`ForwardEmailAction`](#forwardemailaction)
+- [`ForwardEmailConfig`](#forwardemailconfig)
+- [`ReplyEmailActionConfig`](#replyemailactionconfig)
+- [`ReplyEmailAction`](#replyemailaction)
+- [`ReplyEmailConfig`](#replyemailconfig)
 - [`SendEmailConfig`](#sendemailconfig)
 - [`SendEmailCondition`](#sendemailcondition)
 - [`CreateDocumentActionConfig`](#createdocumentactionconfig)
@@ -186,7 +192,6 @@ const { data } = await client.searchFlows({
   size: 1,
   from: 1,
   trigger_source_id: 'example',
-  target_workflow: 'example',
   include_flows: true,
 })
 ```
@@ -1441,9 +1446,9 @@ type AnyAction = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
-    attachments?: Array<{
-      source_filter?: { ... }
-    }>
+    reply_to_sender?: boolean
+    reply_mode?: "reply_in_thread" | "new_email"
+    mark_as_done?: boolean
   // ...
 }
 ```
@@ -2168,6 +2173,9 @@ type SendEmailActionConfig = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
+    reply_to_sender?: boolean
+    reply_mode?: "reply_in_thread" | "new_email"
+    mark_as_done?: boolean
     attachments?: Array<{
       source_filter?: { ... }
     }>
@@ -2198,6 +2206,9 @@ type SendEmailAction = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
+    reply_to_sender?: boolean
+    reply_mode?: "reply_in_thread" | "new_email"
+    mark_as_done?: boolean
     attachments?: Array<{
       source_filter?: { ... }
     }>
@@ -2205,6 +2216,117 @@ type SendEmailAction = {
       _equals?: { ... }
     }>
   }
+}
+```
+
+### `ForwardEmailActionConfig`
+
+```ts
+type ForwardEmailActionConfig = {
+  id?: string
+  flow_action_id?: string
+  name?: string
+  type?: "forward-email"
+  config?: {
+    forward_to: Array<{
+      email: { ... }
+      name?: { ... }
+    }>
+    include_attachments?: boolean
+    subject_prefix?: string
+    mark_as_done?: boolean
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+}
+```
+
+### `ForwardEmailAction`
+
+```ts
+type ForwardEmailAction = {
+  type?: "forward-email"
+  config?: {
+    forward_to: Array<{
+      email: { ... }
+      name?: { ... }
+    }>
+    include_attachments?: boolean
+    subject_prefix?: string
+    mark_as_done?: boolean
+  }
+}
+```
+
+### `ForwardEmailConfig`
+
+```ts
+type ForwardEmailConfig = {
+  forward_to: Array<{
+    email: string // email
+    name?: string
+  }>
+  include_attachments?: boolean
+  subject_prefix?: string
+  mark_as_done?: boolean
+}
+```
+
+### `ReplyEmailActionConfig`
+
+```ts
+type ReplyEmailActionConfig = {
+  id?: string
+  flow_action_id?: string
+  name?: string
+  type?: "reply-email"
+  config?: {
+    email_template_id?: string
+    language_code?: "de" | "en"
+    reply_mode?: "reply_in_thread" | "new_email"
+    mark_as_done?: boolean
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+}
+```
+
+### `ReplyEmailAction`
+
+```ts
+type ReplyEmailAction = {
+  type?: "reply-email"
+  config?: {
+    email_template_id?: string
+    language_code?: "de" | "en"
+    reply_mode?: "reply_in_thread" | "new_email"
+    mark_as_done?: boolean
+  }
+}
+```
+
+### `ReplyEmailConfig`
+
+```ts
+type ReplyEmailConfig = {
+  email_template_id?: string
+  language_code?: "de" | "en"
+  reply_mode?: "reply_in_thread" | "new_email"
+  mark_as_done?: boolean
 }
 ```
 
@@ -2217,6 +2339,9 @@ type SendEmailConfig = {
   notify_portal_user_only?: boolean
   skip_creating_entities?: boolean
   wait_for_confirmation?: boolean
+  reply_to_sender?: boolean
+  reply_mode?: "reply_in_thread" | "new_email"
+  mark_as_done?: boolean
   attachments?: Array<{
     source_filter?: {
       limit?: { ... }
@@ -3072,6 +3197,12 @@ type GetExecutionsResp = {
     } | {
       type?: { ... }
       config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
     }>
     resume_token?: string
     trigger_context?: Record<string, string>
@@ -3079,12 +3210,6 @@ type GetExecutionsResp = {
     trigger_event?: {
       type?: { ... }
       org_id: { ... }
-      entity_id: { ... }
-      caller?: { ... }
-    } | {
-      type?: { ... }
-      org_id: { ... }
-      activity_id: { ... }
   // ...
 }
 ```
@@ -4017,6 +4142,12 @@ type ResumeResp = {
     } | {
       type?: { ... }
       config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
     }>
     resume_token?: string
     trigger_context?: Record<string, string>
@@ -4025,12 +4156,6 @@ type ResumeResp = {
       type?: { ... }
       org_id: { ... }
       entity_id: { ... }
-      caller?: { ... }
-    } | {
-      type?: { ... }
-      org_id: { ... }
-      activity_id: { ... }
-      activity_type: { ... }
   // ...
 }
 ```

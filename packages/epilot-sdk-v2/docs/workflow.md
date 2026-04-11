@@ -51,6 +51,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`patchPhase`](#patchphase)
 - [`addTask`](#addtask)
 - [`cancelTaskSchedule`](#canceltaskschedule)
+- [`runTaskScheduleNow`](#runtaskschedulenow)
 
 **Schemas**
 - [`WorkflowExecutionCreateReq`](#workflowexecutioncreatereq)
@@ -75,6 +76,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`StepJourney`](#stepjourney)
 - [`AutomationConfig`](#automationconfig)
 - [`ECPDetails`](#ecpdetails)
+- [`PartnerDetails`](#partnerdetails)
 - [`StepDescription`](#stepdescription)
 - [`ItemType`](#itemtype)
 - [`TriggerType`](#triggertype)
@@ -463,6 +465,11 @@ const { data } = await client.createStep(
       "complete_task_automatically": true
     }
   },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
   "enabled": true,
   "requirements": [
     {
@@ -595,6 +602,11 @@ const { data } = await client.updateStep(
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "enabled": true,
   "requirements": [
@@ -798,6 +810,7 @@ const { data } = await client.startFlowExecution(
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -939,6 +952,7 @@ const { data } = await client.getFlowExecution({
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -1116,6 +1130,7 @@ const { data } = await client.patchFlowExecution(
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -1298,6 +1313,11 @@ const { data } = await client.patchTask(
         complete_task_automatically: true
       }
     },
+    partner: {
+      enabled: true,
+      label: 'string',
+      description: 'string'
+    },
     next_condition_id: 'string',
     revert_execution: false
   },
@@ -1374,6 +1394,11 @@ const { data } = await client.patchTask(
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -1472,6 +1497,11 @@ const { data } = await client.runTaskAutomation({
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -1581,6 +1611,11 @@ const { data } = await client.executeTask({
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -1776,6 +1811,11 @@ const { data } = await client.addTask(
       "complete_task_automatically": true
     }
   },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
   "taxonomies": ["string"],
   "phase_id": "string",
   "task_type": "MANUAL",
@@ -1802,6 +1842,109 @@ const { data } = await client.cancelTaskSchedule({
   task_id: 'example',
 })
 ```
+
+---
+
+### `runTaskScheduleNow`
+
+Cancels the pending schedule for a task and immediately triggers its automation execution.
+
+`POST /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now`
+
+```ts
+const { data } = await client.runTaskScheduleNow({
+  execution_id: 'example',
+  task_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "template_id": "string",
+  "name": "string",
+  "description": {
+    "enabled": true,
+    "value": "string"
+  },
+  "status": "UNASSIGNED",
+  "journey": {
+    "id": "string",
+    "journeyId": "string",
+    "name": "string",
+    "complete_task_automatically": true
+  },
+  "due_date": "2021-04-27T12:00:00.000Z",
+  "due_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string",
+    "phase_id": "string"
+  },
+  "requirements": [
+    {
+      "task_id": "string",
+      "phase_id": "string",
+      "when": "TASK_FINISHED"
+    }
+  ],
+  "assigned_to": ["string"],
+  "analytics": {
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_at": "1970-01-01T00:00:00.000Z",
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "status_updated_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_by": "string",
+    "completed_by": "string",
+    "skipped_by": "string",
+    "on_hold_by": "string"
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "manually_created": true,
+  "enabled": true,
+  "ecp": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "complete_task_automatically": true
+    }
+  },
+  "installer": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "complete_task_automatically": true
+    }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
+  "taxonomies": ["string"],
+  "phase_id": "string",
+  "task_type": "MANUAL",
+  "loop_config": {
+    "max_iterations": 3,
+    "crt_iterations": 0
+  }
+}
+```
+
+</details>
 
 ---
 
@@ -2005,6 +2148,7 @@ type WorkflowExecutionSlim = {
       type: { ... }
       ecp?: { ... }
       installer?: { ... }
+      partner?: { ... }
       enabled?: { ... }
       requirements?: { ... }
       executionType?: { ... }
@@ -2028,7 +2172,6 @@ type WorkflowExecutionSlim = {
       taxonomies?: { ... }
     }>
     taxonomies?: string[]
-  } | {
   // ...
 }
 ```
@@ -2064,6 +2207,7 @@ type FlowSlim = {
       type: { ... }
       ecp?: { ... }
       installer?: { ... }
+      partner?: { ... }
       enabled?: { ... }
       requirements?: { ... }
       executionType?: { ... }
@@ -2109,6 +2253,11 @@ type FlowSlim = {
       description?: { ... }
       journey?: { ... }
     }
+    partner?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+    }
     enabled?: boolean
     requirements?: Array<{
       definitionId: { ... }
@@ -2130,12 +2279,6 @@ type FlowSlim = {
     completedTime?: string
     dueDate?: string
     dynamicDueDate?: {
-      numberOfUnits: { ... }
-      timePeriod: { ... }
-      actionTypeCondition?: { ... }
-      stepId?: { ... }
-      phaseId?: { ... }
-    }
   // ...
 }
 ```
@@ -2171,6 +2314,7 @@ type Flow = {
       type: { ... }
       ecp?: { ... }
       installer?: { ... }
+      partner?: { ... }
       enabled?: { ... }
       requirements?: { ... }
       executionType?: { ... }
@@ -2216,6 +2360,11 @@ type Flow = {
       description?: { ... }
       journey?: { ... }
     }
+    partner?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+    }
     enabled?: boolean
     requirements?: Array<{
       definitionId: { ... }
@@ -2237,12 +2386,6 @@ type Flow = {
     completedTime?: string
     dueDate?: string
     dynamicDueDate?: {
-      numberOfUnits: { ... }
-      timePeriod: { ... }
-      actionTypeCondition?: { ... }
-      stepId?: { ... }
-      phaseId?: { ... }
-    }
   // ...
 }
 ```
@@ -2326,6 +2469,7 @@ type WorkflowExecution = {
       type: { ... }
       ecp?: { ... }
       installer?: { ... }
+      partner?: { ... }
       enabled?: { ... }
       requirements?: { ... }
       executionType?: { ... }
@@ -2349,7 +2493,6 @@ type WorkflowExecution = {
       taxonomies?: { ... }
     }>
     taxonomies?: string[]
-  } | {
   // ...
 }
 ```
@@ -2391,6 +2534,11 @@ type SectionSimplified = {
       label?: { ... }
       description?: { ... }
       journey?: { ... }
+    }
+    partner?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
     }
     enabled?: boolean
     requirements?: Array<{
@@ -2448,6 +2596,11 @@ type Section = {
       label?: { ... }
       description?: { ... }
       journey?: { ... }
+    }
+    partner?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
     }
     enabled?: boolean
     requirements?: Array<{
@@ -2538,6 +2691,11 @@ type StepSimplified = {
       complete_task_automatically?: { ... }
     }
   }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+  }
   enabled?: boolean
   requirements?: Array<{
     definitionId: string
@@ -2582,6 +2740,11 @@ type Step = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   enabled?: boolean
   requirements?: Array<{
@@ -2701,6 +2864,18 @@ type ECPDetails = {
     name?: string
     complete_task_automatically?: boolean
   }
+}
+```
+
+### `PartnerDetails`
+
+Details regarding partner for the workflow step
+
+```ts
+type PartnerDetails = {
+  enabled?: boolean
+  label?: string
+  description?: string
 }
 ```
 
@@ -2829,6 +3004,11 @@ type UpdateStepResp = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   enabled?: boolean
   requirements?: Array<{
@@ -2980,6 +3160,7 @@ type SearchExecutionsResp = {
       type: { ... }
       ecp?: { ... }
       installer?: { ... }
+      partner?: { ... }
       enabled?: { ... }
       requirements?: { ... }
       executionType?: { ... }
@@ -3496,6 +3677,11 @@ type Task = {
       complete_task_automatically?: { ... }
     }
   }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+  }
   taxonomies?: string[]
   phase_id?: string
   task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
@@ -3523,11 +3709,6 @@ type Task = {
     duration: number
     unit: "minutes" | "hours" | "days" | "weeks" | "months"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
-    task_id?: string
-    phase_id?: string
-  }
-  requirements?: Array<{
-    task_id?: string
   // ...
 }
 ```
@@ -3608,6 +3789,11 @@ type ManualTask = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   taxonomies?: string[]
   phase_id?: string
@@ -3690,6 +3876,11 @@ type AutomationTask = {
       complete_task_automatically?: { ... }
     }
   }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+  }
   taxonomies?: string[]
   phase_id?: string
   task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
@@ -3717,11 +3908,6 @@ type AutomationTask = {
       id: { ... }
       origin: { ... }
       schema?: { ... }
-      attribute?: { ... }
-    }
-    schedule_id?: string
-  }
-  loop_config?: {
   // ...
 }
 ```
@@ -3887,6 +4073,11 @@ type DecisionTask = {
       complete_task_automatically?: { ... }
     }
   }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+  }
   taxonomies?: string[]
   phase_id?: string
   task_type: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
@@ -3905,6 +4096,7 @@ type DecisionTask = {
     evaluated_at?: string // date-time
     is_met?: boolean
   }>
+  allow_parallel_execution?: boolean
   schedule?: {
     mode: "delayed"
     duration: number
@@ -3913,12 +4105,6 @@ type DecisionTask = {
   } | {
     mode: "relative"
     direction: "before" | "after"
-    duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
-    reference: {
-      id: { ... }
-      origin: { ... }
-      schema?: { ... }
   // ...
 }
 ```
@@ -3993,6 +4179,11 @@ type AiAgentTask = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   taxonomies?: string[]
   phase_id?: string
@@ -4105,6 +4296,11 @@ type TaskBase = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   taxonomies?: string[]
   phase_id?: string
@@ -4403,6 +4599,11 @@ type PatchTaskReq = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
+  }
+  partner?: {
+    enabled?: boolean
+    label?: string
+    description?: string
   }
   next_condition_id?: string
   revert_execution?: boolean
