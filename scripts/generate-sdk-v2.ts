@@ -384,7 +384,7 @@ const generateRegistry = (clients: ClientInfo[]): string => {
     `import { expand } from '../compact'`,
     `import type { CompactDefinition } from '../compact'`,
     `import { registerApi } from '../registry'`,
-    `import type { ApiEntry } from '../types'`,
+    `import type { ApiEntry, ExtensionEntry } from '../types'`,
     ``,
     `/* eslint-disable @typescript-eslint/no-require-imports */`,
     `const expandDef = (mod: { default?: unknown }): Document =>`,
@@ -404,6 +404,30 @@ const generateRegistry = (clients: ClientInfo[]): string => {
   }
 
   lines.push(`}`);
+
+  lines.push(``);
+  lines.push(`/**`);
+  lines.push(` * Register non-API extensions (plain objects, not OpenAPI clients).`);
+  lines.push(` * These are mounted on the SDK alongside API handles.`);
+  lines.push(` * Extensions are lazy-loaded — the module is only imported on first access.`);
+  lines.push(` */`);
+  lines.push(`export const registerBuiltinExtensions = (extensions: Map<string, ExtensionEntry>) => {`);
+  lines.push(`  let cached: unknown = null`);
+  lines.push(`  extensions.set('journeyToolkit', {`);
+  lines.push(`    get value() {`);
+  lines.push(`      if (cached) return cached`);
+  lines.push(`      try {`);
+  lines.push(`        // lazy-load journey toolkit`);
+  lines.push(`        cached = require('@epilot/epilot-journey-sdk')`);
+  lines.push(`      } catch {`);
+  lines.push(`        // journey toolkit not installed`);
+  lines.push(`        cached = undefined`);
+  lines.push(`      }`);
+  lines.push(`      return cached`);
+  lines.push(`    },`);
+  lines.push(`  })`);
+  lines.push(`}`);
+
   return lines.join('\n');
 };
 
