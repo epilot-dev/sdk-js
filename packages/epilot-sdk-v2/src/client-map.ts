@@ -36,6 +36,7 @@ import type { Client as PricingClient } from './types/pricing';
 import type { Client as PricingTierClient } from './types/pricing-tier';
 import type { Client as PurposeClient } from './types/purpose';
 import type { Client as SandboxClient } from './types/sandbox';
+import type { Client as SharingClient } from './types/sharing';
 import type { Client as SubmissionClient } from './types/submission';
 import type { Client as TargetingClient } from './types/targeting';
 import type { Client as TemplateVariablesClient } from './types/template-variables';
@@ -84,6 +85,7 @@ export type SDKClientMap = {
   pricingTier: PricingTierClient;
   purpose: PurposeClient;
   sandbox: SandboxClient;
+  sharing: SharingClient;
   submission: SubmissionClient;
   targeting: TargetingClient;
   templateVariables: TemplateVariablesClient;

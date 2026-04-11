@@ -1,0 +1,956 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sharing API",
+    "description": "REST API for managing partner sharing configurations and entity sharing.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "epilot",
+      "url": "https://docs.epilot.io",
+      "email": "engineering@epilot.cloud"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://sharing-api.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Sharing Configuration",
+      "description": "Manage partner sharing configurations"
+    },
+    {
+      "name": "Entity Sharing",
+      "description": "Share and unshare entities with partners"
+    },
+    {
+      "name": "Entity Offering",
+      "description": "Offer entities to partners (First Come First Served)"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/sharing/configurations/{partner_org_id}": {
+      "get": {
+        "operationId": "getSharingConfiguration",
+        "summary": "Get sharing configuration for a partner",
+        "description": "Returns the sharing configuration for a specific partner organization, including shared entities, offered entities, and assigned users.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sharing configuration for the partner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSharingConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "No configuration found for the given partner"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateSharingConfiguration",
+        "summary": "Update sharing configuration for a partner",
+        "description": "Updates the sharing configuration for a partner, such as the user limit. Also patches the internal role if the user limit changes.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSharingConfigurationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated sharing configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSharingConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSharingConfiguration",
+        "summary": "Delete sharing configuration for a partner",
+        "description": "Deletes the sharing configuration for a partner, removing all shared and offered entity access.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted sharing configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSharingConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/configurations/{partner_org_id}/role": {
+      "put": {
+        "operationId": "assignRoleToConfiguration",
+        "summary": "Assign a template role to a partner sharing configuration",
+        "description": "Assigns a template role to a partner sharing configuration. The role grants are copied into the configuration for entity access control.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sharing configuration with assigned role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSharingConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/configurations": {
+      "get": {
+        "operationId": "getSharingConfigurations",
+        "summary": "Get sharing configurations for multiple partners",
+        "description": "Returns sharing configurations for multiple partner organizations in a single batch request.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "partner_org_ids",
+            "in": "query",
+            "required": true,
+            "description": "Comma-separated list of partner organization IDs",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sharing configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/configurations:search": {
+      "post": {
+        "operationId": "searchPartnerSharingConfigurations",
+        "summary": "Search partner sharing configurations by entities",
+        "description": "Searches for partner sharing configurations that have access to the given entities. Returns configurations with their shared and offered entity lists.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchSharingConfigurationsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Matching sharing configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/configurations/by-role/{template_role_id}": {
+      "get": {
+        "operationId": "getConfigurationsByTemplateRole",
+        "summary": "Get sharing configurations that use a specific template role",
+        "description": "Returns all partner sharing configurations that reference the given template role ID. Useful for checking role usage before deletion.",
+        "tags": [
+          "Sharing Configuration"
+        ],
+        "parameters": [
+          {
+            "name": "template_role_id",
+            "in": "path",
+            "required": true,
+            "description": "Template role ID to search for",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of sharing configurations using this role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/sharing/entities:share": {
+      "post": {
+        "operationId": "shareEntityWithPartners",
+        "summary": "Share or unshare entities with partners",
+        "description": "Shares or unshares top-level entities with one or more partner organizations. Publishes sharing events for downstream processing.",
+        "tags": [
+          "Entity Sharing"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharingEntityPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated partner sharing configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/entities:share-child": {
+      "post": {
+        "operationId": "shareChildEntityWithPartners",
+        "summary": "Share or unshare child entities with partners",
+        "description": "Shares or unshares child entities (entities that belong to an already-shared parent) with partner organizations.",
+        "tags": [
+          "Entity Sharing"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareChildEntityPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated partner sharing configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/entities:offer": {
+      "post": {
+        "operationId": "offerEntityToPartners",
+        "summary": "Offer or unoffer entities to partners (First Come First Served)",
+        "description": "Offers or unoffers entities to partner organizations using a First Come First Served model. Only one partner can accept each offered entity.",
+        "tags": [
+          "Entity Offering"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferEntityPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated partner sharing configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartnerSharingConfig"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/offers/status": {
+      "get": {
+        "operationId": "getOfferStatus",
+        "summary": "Get the status of an entity offer (public, no auth required)",
+        "description": "Returns the current status of an entity offer (pending, accepted, expired). This is a public endpoint used from partner-facing pages without authentication.",
+        "tags": [
+          "Entity Offering"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "partner_org_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sharing_org_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Offer status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/v1/sharing/offers:accept": {
+      "post": {
+        "operationId": "acceptOffer",
+        "summary": "Accept an entity offer (public, no auth required)",
+        "description": "Accepts an entity offer on behalf of a partner organization. This is a public endpoint used from partner-facing pages without authentication. Only one partner can accept each offer.",
+        "tags": [
+          "Entity Offering"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptOfferPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Partner sharing configuration after accepting the offer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerSharingConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "PartnerOrgIdPath": {
+        "name": "partner_org_id",
+        "in": "path",
+        "required": true,
+        "description": "Partner organization ID",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "PartnerSharingConfig": {
+        "type": "object",
+        "required": [
+          "sharing_org_id",
+          "partner_org_id"
+        ],
+        "properties": {
+          "sharing_org_id": {
+            "type": "string",
+            "description": "ID of the organization that is sharing the entities"
+          },
+          "partner_org_id": {
+            "type": "string",
+            "description": "ID of the organization that receives access to the entities"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "partner_status": {
+            "$ref": "#/components/schemas/PartnerStatus"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityResource"
+            }
+          },
+          "offered_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferEntityResource"
+            }
+          },
+          "template_role_id": {
+            "type": "string"
+          },
+          "template_role_grants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateRoleGrant"
+            }
+          },
+          "generated_role_id": {
+            "type": "string"
+          },
+          "user_limit": {
+            "type": "integer",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "PartnerStatus": {
+        "type": "string",
+        "enum": [
+          "REGISTERED",
+          "UNREGISTERED"
+        ]
+      },
+      "EntityResource": {
+        "type": "object",
+        "required": [
+          "schema",
+          "entity_id"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "parent_entity_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "offer_accepted": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "OfferEntityResource": {
+        "type": "object",
+        "required": [
+          "schema",
+          "entity_id",
+          "offer_status"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "parent_entity_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "offer_status": {
+            "$ref": "#/components/schemas/OfferStatusEnum"
+          },
+          "offered_by_user_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "TemplateRoleGrant": {
+        "type": "object",
+        "required": [
+          "action",
+          "resource"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string",
+            "description": "allow or deny"
+          }
+        }
+      },
+      "OfferStatus": {
+        "type": "object",
+        "required": [
+          "entity",
+          "offer_status"
+        ],
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/PartialEntity"
+          },
+          "offer_status": {
+            "$ref": "#/components/schemas/OfferStatusEnum"
+          },
+          "status_changed_at": {
+            "type": "string"
+          },
+          "offered_at": {
+            "type": "string"
+          },
+          "accepted_by_org_id": {
+            "type": "string"
+          }
+        }
+      },
+      "PartialEntity": {
+        "type": "object",
+        "required": [
+          "_schema",
+          "_id",
+          "_title",
+          "_created_at",
+          "_updated_at"
+        ],
+        "properties": {
+          "_schema": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string"
+          },
+          "_created_at": {
+            "type": "string"
+          },
+          "_updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "OfferStatusEnum": {
+        "type": "string",
+        "enum": [
+          "EXPIRED",
+          "UNAVAILABLE",
+          "PENDING",
+          "DECLINED",
+          "ACCEPTED"
+        ]
+      },
+      "EntityResourceInput": {
+        "type": "object",
+        "required": [
+          "schema",
+          "entity_id"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "parent_entity_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "offer_accepted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OfferEntityResourceInput": {
+        "type": "object",
+        "required": [
+          "schema",
+          "entity_id"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "parent_entity_id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateSharingConfigurationPayload": {
+        "type": "object",
+        "properties": {
+          "user_limit": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "AssignRolePayload": {
+        "type": "object",
+        "required": [
+          "template_role_id"
+        ],
+        "properties": {
+          "template_role_id": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchSharingConfigurationsPayload": {
+        "type": "object",
+        "required": [
+          "entities"
+        ],
+        "properties": {
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityResourceInput"
+            }
+          }
+        }
+      },
+      "SharingEntityPayload": {
+        "type": "object",
+        "required": [
+          "share",
+          "unshare"
+        ],
+        "properties": {
+          "share": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerEntitiesInput"
+            }
+          },
+          "unshare": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerEntitiesInput"
+            }
+          }
+        }
+      },
+      "PartnerEntitiesInput": {
+        "type": "object",
+        "required": [
+          "partner_org_id",
+          "entities"
+        ],
+        "properties": {
+          "partner_org_id": {
+            "type": "string"
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntityResourceInput"
+            }
+          }
+        }
+      },
+      "ShareChildEntityPayload": {
+        "type": "object",
+        "required": [
+          "share",
+          "unshare"
+        ],
+        "properties": {
+          "share": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerEntityInput"
+            }
+          },
+          "unshare": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerEntityInput"
+            }
+          }
+        }
+      },
+      "PartnerEntityInput": {
+        "type": "object",
+        "required": [
+          "entity",
+          "partner_org_id"
+        ],
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/EntityResourceInput"
+          },
+          "partner_org_id": {
+            "type": "string"
+          }
+        }
+      },
+      "OfferEntityPayload": {
+        "type": "object",
+        "required": [
+          "offer",
+          "unoffer"
+        ],
+        "properties": {
+          "offer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerOfferedEntitiesInput"
+            }
+          },
+          "unoffer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerOfferedEntitiesInput"
+            }
+          }
+        }
+      },
+      "PartnerOfferedEntitiesInput": {
+        "type": "object",
+        "required": [
+          "partner_org_id",
+          "offered_entities"
+        ],
+        "properties": {
+          "partner_org_id": {
+            "type": "string"
+          },
+          "offered_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferEntityResourceInput"
+            }
+          }
+        }
+      },
+      "AcceptOfferPayload": {
+        "type": "object",
+        "required": [
+          "partner_org_id",
+          "sharing_org_id",
+          "entity_id"
+        ],
+        "properties": {
+          "partner_org_id": {
+            "type": "string"
+          },
+          "sharing_org_id": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

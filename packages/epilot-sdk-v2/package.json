@@ -243,6 +243,12 @@
       "require": "./dist/apis/sandbox.cjs"
     },
     "./sandbox/openapi.json": "./definitions/sandbox.json",
+    "./sharing": {
+      "types": "./dist/apis/sharing.d.ts",
+      "import": "./dist/apis/sharing.js",
+      "require": "./dist/apis/sharing.cjs"
+    },
+    "./sharing/openapi.json": "./definitions/sharing.json",
     "./submission": {
       "types": "./dist/apis/submission.d.ts",
       "import": "./dist/apis/submission.js",
@@ -454,6 +460,9 @@
       ],
       "sandbox": [
         "./dist/apis/sandbox.d.ts"
+      ],
+      "sharing": [
+        "./dist/apis/sharing.d.ts"
       ],
       "submission": [
         "./dist/apis/submission.d.ts"

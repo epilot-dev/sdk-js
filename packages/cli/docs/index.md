@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 46 epilot APIs available via the CLI.
+All 47 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -50,6 +50,7 @@ npx epilot auth login
 | Pricing Tier API | `epilot pricing-tier` | 1 | [pricing-tier.md](./pricing-tier.md) |
 | Purpose API | `epilot purpose` | 6 | [purpose.md](./purpose.md) |
 | Sandbox API | `epilot sandbox` | 7 | [sandbox.md](./sandbox.md) |
+| Sharing API | `epilot sharing` | 12 | [sharing.md](./sharing.md) |
 | Submission API | `epilot submission` | 2 | [submission.md](./submission.md) |
 | Targeting API | `epilot targeting` | 11 | [targeting.md](./targeting.md) |
 | Template Variables API | `epilot template-variables` | 12 | [template-variables.md](./template-variables.md) |
