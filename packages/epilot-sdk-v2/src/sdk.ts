@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-import { registerBuiltinApis, registerBuiltinExtensions } from './apis/_registry';
+import { registerBuiltinApis } from './apis/_registry';
 import type { TokenArg } from './authorize';
 import type { SDKClientMap } from './client-map';
 import { createApiClient } from './client-factory';
@@ -56,7 +56,6 @@ export const createSDK = (): EpilotSDK => {
   };
 
   registerBuiltinApis(registry);
-  registerBuiltinExtensions(extensions);
   loadOverrides(registry);
 
   const getHandle = (name: string): ApiHandle<AxiosInstance> => {

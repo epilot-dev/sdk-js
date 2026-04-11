@@ -1,3 +1,4 @@
+/* Auto-copied from sharing-client */
 import type {
   OpenAPIClient,
   Parameters,
@@ -6,7 +7,7 @@ import type {
   AxiosRequestConfig,
 } from 'openapi-client-axios';
 
-declare namespace Components {
+export declare namespace Components {
     namespace Parameters {
         export type PartnerOrgIdPath = string;
     }
@@ -126,7 +127,7 @@ declare namespace Components {
         }
     }
 }
-declare namespace Paths {
+export declare namespace Paths {
     namespace AcceptOffer {
         export type RequestBody = Components.Schemas.AcceptOfferPayload;
         namespace Responses {
