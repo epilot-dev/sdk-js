@@ -3,7 +3,7 @@ import type { Document } from 'openapi-client-axios';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { registerApi } from '../registry';
-import type { ApiEntry, ExtensionEntry } from '../types';
+import type { ApiEntry } from '../types';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const expandDef = (mod: { default?: unknown }): Document =>
@@ -245,61 +245,4 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     name: 'workflowDefinition',
     loader: () => expandDef(require('../definitions/workflow-definition-runtime.json')),
   });
-};
-
-/**
- * Register non-API extensions (plain objects, not OpenAPI clients).
- * These are mounted on the SDK alongside API handles.
- */
-export const registerBuiltinExtensions = (extensions: Map<string, ExtensionEntry>) => {
-  // Journey Toolkit – factory functions, block utilities, export
-  try {
-    const journeySDK = require('@epilot/epilot-journey-sdk');
-    extensions.set('journeyToolkit', {
-      value: {
-        // Factories
-        createBlock: journeySDK.createBlock,
-        createJourney: journeySDK.createJourney,
-        createStep: journeySDK.createStep,
-        createTextInput: journeySDK.createTextInput,
-        createNumberInput: journeySDK.createNumberInput,
-        createBinaryInput: journeySDK.createBinaryInput,
-        createDatePicker: journeySDK.createDatePicker,
-        createSingleChoice: journeySDK.createSingleChoice,
-        createMultipleChoice: journeySDK.createMultipleChoice,
-        createPersonalInformation: journeySDK.createPersonalInformation,
-        createContact: journeySDK.createContact,
-        createAddress: journeySDK.createAddress,
-        createProductSelection: journeySDK.createProductSelection,
-        createShoppingCart: journeySDK.createShoppingCart,
-        createAvailabilityCheck: journeySDK.createAvailabilityCheck,
-        createPVRoofPlanner: journeySDK.createPVRoofPlanner,
-        createFileUpload: journeySDK.createFileUpload,
-        createPaymentMethod: journeySDK.createPaymentMethod,
-        createConsents: journeySDK.createConsents,
-        createParagraph: journeySDK.createParagraph,
-        createImage: journeySDK.createImage,
-        createActionBar: journeySDK.createActionBar,
-        createSuccessMessage: journeySDK.createSuccessMessage,
-        createSummary: journeySDK.createSummary,
-        // Block types
-        ControlName: journeySDK.ControlName,
-        BLOCK_CATALOG: journeySDK.BLOCK_CATALOG,
-        // Utilities
-        findBlock: journeySDK.findBlock,
-        getStepBlocks: journeySDK.getStepBlocks,
-        getAllBlocks: journeySDK.getAllBlocks,
-        updateBlock: journeySDK.updateBlock,
-        addBlock: journeySDK.addBlock,
-        removeBlock: journeySDK.removeBlock,
-        exportJourneyCode: journeySDK.exportJourneyCode,
-        parseBlockValue: journeySDK.parseBlockValue,
-        mergeBlockValue: journeySDK.mergeBlockValue,
-        // Client constructor
-        JourneyClient: journeySDK.JourneyClient,
-      },
-    });
-  } catch {
-    // @epilot/epilot-journey-sdk not installed — journeyToolkit won't be available
-  }
 };
