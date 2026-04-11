@@ -125,7 +125,10 @@ const compactifyData = (specPath: string): Record<string, unknown> => {
   // Component parameters
   const componentParams = raw.components?.parameters as Record<string, Record<string, unknown>> | undefined;
 
+  const serverVariables = raw.servers?.[0]?.variables;
+
   const result: Record<string, unknown> = { s: server, o: ops };
+  if (serverVariables) result.sv = serverVariables;
   if (openapiVersion !== '3.0.2') result.v = openapiVersion;
 
   if (componentParams && Object.keys(componentParams).length > 0) {
