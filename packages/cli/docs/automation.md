@@ -71,7 +71,6 @@ Search available automation flows
 | `size` | query | number | No | Pagination: max number of results to return |
 | `from` | query | number | No | Pagination: starting for results |
 | `trigger_source_id` | query | string | No | Trigger source identifier |
-| `target_workflow` | query | string | No | Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow. |
 | `include_flows` | query | boolean | No | Include flow automations in the response |
 
 **Sample Call**

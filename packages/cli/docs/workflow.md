@@ -62,6 +62,7 @@ epilot workflow getExecutions
 - [`patchPhase`](#patchphase) — Apply updates to a phase within flow execution
 - [`addTask`](#addtask) — Create a new task in current workflow execution.
 - [`cancelTaskSchedule`](#canceltaskschedule) — Cancels a scheduled task, deleting the schedule and marking the task as skipped.
+- [`runTaskScheduleNow`](#runtaskschedulenow) — Cancels the pending schedule for a task and immediately triggers its automation execution.
 
 ### `getExecutions`
 
@@ -515,6 +516,11 @@ epilot workflow createStep -p executionId=wd56125gah --jsonata '$'
       "complete_task_automatically": true
     }
   },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
   "enabled": true,
   "requirements": [
     {
@@ -681,6 +687,11 @@ epilot workflow updateStep -p executionId=wd56125gah -p stepId=7hj28a --jsonata 
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "enabled": true,
   "requirements": [
@@ -941,6 +952,7 @@ epilot workflow startFlowExecution --jsonata 'id'
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -1101,6 +1113,7 @@ epilot workflow getFlowExecution -p execution_id=wd561 --jsonata 'id'
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -1310,6 +1323,7 @@ epilot workflow patchFlowExecution -p execution_id=wd561 --jsonata 'id'
       "enabled": true,
       "ecp": {},
       "installer": {},
+      "partner": {},
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
@@ -1539,6 +1553,11 @@ epilot workflow patchTask \
       "complete_task_automatically": true
     }
   },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
   "next_condition_id": "string",
   "revert_execution": false
 }'
@@ -1632,6 +1651,11 @@ epilot workflow patchTask -p execution_id=wd561 -p task_id=7hj28a --jsonata '$'
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -1750,6 +1774,11 @@ epilot workflow runTaskAutomation -p execution_id=wd561 -p task_id=7hj28a --json
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -1879,6 +1908,11 @@ epilot workflow executeTask -p execution_id=wd561 -p task_id=7hj28a --jsonata '$
       "name": "string",
       "complete_task_automatically": true
     }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
   },
   "taxonomies": ["string"],
   "phase_id": "string",
@@ -2140,6 +2174,11 @@ epilot workflow addTask -p execution_id=wd561 --jsonata '$'
       "complete_task_automatically": true
     }
   },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
   "taxonomies": ["string"],
   "phase_id": "string",
   "task_type": "MANUAL",
@@ -2186,5 +2225,128 @@ With JSONata filter:
 ```bash
 epilot workflow cancelTaskSchedule -p execution_id=wd561 -p task_id=7hj28a --jsonata '$'
 ```
+
+---
+
+### `runTaskScheduleNow`
+
+Cancels the pending schedule for a task and immediately triggers its automation execution.
+
+`POST /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `execution_id` | path | string | Yes | Id of the execution |
+| `task_id` | path | string | Yes | Id of the task |
+
+**Sample Call**
+
+```bash
+epilot workflow runTaskScheduleNow \
+  -p execution_id=wd561 \
+  -p task_id=7hj28a
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot workflow runTaskScheduleNow wd561 7hj28a
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow runTaskScheduleNow -p execution_id=wd561 -p task_id=7hj28a --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "string",
+  "template_id": "string",
+  "name": "string",
+  "description": {
+    "enabled": true,
+    "value": "string"
+  },
+  "status": "UNASSIGNED",
+  "journey": {
+    "id": "string",
+    "journeyId": "string",
+    "name": "string",
+    "complete_task_automatically": true
+  },
+  "due_date": "2021-04-27T12:00:00.000Z",
+  "due_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string",
+    "phase_id": "string"
+  },
+  "requirements": [
+    {
+      "task_id": "string",
+      "phase_id": "string",
+      "when": "TASK_FINISHED"
+    }
+  ],
+  "assigned_to": ["string"],
+  "analytics": {
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_at": "1970-01-01T00:00:00.000Z",
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "status_updated_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_by": "string",
+    "completed_by": "string",
+    "skipped_by": "string",
+    "on_hold_by": "string"
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "manually_created": true,
+  "enabled": true,
+  "ecp": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "complete_task_automatically": true
+    }
+  },
+  "installer": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "complete_task_automatically": true
+    }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
+  "taxonomies": ["string"],
+  "phase_id": "string",
+  "task_type": "MANUAL",
+  "loop_config": {
+    "max_iterations": 3,
+    "crt_iterations": 0
+  }
+}
+```
+
+</details>
 
 ---

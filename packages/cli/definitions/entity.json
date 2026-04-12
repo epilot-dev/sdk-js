@@ -1881,7 +1881,7 @@
       "post": {
         "operationId": "createActivity",
         "summary": "createActivity",
-        "description": "Create an activity that can be displayed in activity feeds.\n\n- All activites are published as events on the event bus\n- Entity mutations are always part of an activity\n",
+        "description": "Create an activity that can be displayed in activity feeds.\n\n- All activites are published as events on the event bus\n- Entity mutations are always part of an activity\n- When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling\n",
         "tags": [
           "Activity"
         ],
@@ -4935,6 +4935,16 @@
               "type": "string"
             }
           },
+          "_manifest": {
+            "type": "array",
+            "description": "Manifest ID used to create the schema",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            },
+            "nullable": true
+          },
           "explicit_search_mappings": {
             "$ref": "#/components/schemas/SearchMappings"
           },
@@ -5859,6 +5869,11 @@
                   "public-read",
                   "private"
                 ]
+              },
+              "file_size_bytes": {
+                "type": "integer",
+                "description": "The maximum file size in bytes. Used to derive file_size and file_size_unit in the UI.",
+                "example": 5000000
               }
             },
             "required": [
@@ -6544,6 +6559,11 @@
                       "type": "boolean",
                       "description": "Whether this column is required for each row",
                       "default": false
+                    },
+                    "bold": {
+                      "type": "boolean",
+                      "description": "When true, the row is rendered in bold (only applies in transposed mode)",
+                      "default": false
                     }
                   },
                   "required": [
@@ -6560,8 +6580,30 @@
               },
               "max_rows": {
                 "type": "integer",
-                "description": "Maximum number of rows allowed",
+                "description": "Maximum number of rows allowed (or maximum periods when transposed)",
                 "minimum": 1
+              },
+              "transposed": {
+                "type": "boolean",
+                "description": "Enable transposed layout where rows become metrics and columns become periods",
+                "default": false
+              },
+              "column_header": {
+                "type": "object",
+                "description": "Configuration for column headers in transposed mode",
+                "properties": {
+                  "template": {
+                    "type": "string",
+                    "description": "Header label pattern with {{i}} as index placeholder (e.g., \"Year {{i}}\")",
+                    "example": "Year {{i}}"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "description": "Starting index value for the template placeholder",
+                    "default": 0,
+                    "minimum": 0
+                  }
+                }
               }
             }
           }

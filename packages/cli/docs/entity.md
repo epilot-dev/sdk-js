@@ -196,6 +196,7 @@ epilot entity listSchemas --jsonata 'results[0]'
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -271,6 +272,7 @@ epilot entity listSchemasV2 --jsonata 'results[0]'
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -426,6 +428,7 @@ epilot entity getSchema -p slug=contact --jsonata '$'
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -577,6 +580,7 @@ epilot entity putSchema \
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -730,6 +734,7 @@ epilot entity putSchema -p slug=contact --jsonata '$'
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1052,6 +1057,7 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1087,6 +1093,7 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1252,6 +1259,7 @@ epilot entity freezeSchema -p slug=contact --jsonata '$'
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1422,6 +1430,7 @@ epilot entity unfreezeSchema -p slug=contact --jsonata '$'
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1563,6 +1572,7 @@ epilot entity listSchemaBlueprints --jsonata 'results[0]'
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }

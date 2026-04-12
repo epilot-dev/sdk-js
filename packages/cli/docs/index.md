@@ -25,7 +25,7 @@ npx epilot auth login
 | Portal API | `epilot customer-portal` | 138 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
 | Data Governance API | `epilot data-governance` | 10 | [data-governance.md](./data-governance.md) |
-| Deduplication API | `epilot deduplication` | 1 | [deduplication.md](./deduplication.md) |
+| Deduplication API | `epilot deduplication` | 3 | [deduplication.md](./deduplication.md) |
 | Design Builder API v2 | `epilot design` | 13 | [design.md](./design.md) |
 | Document API | `epilot document` | 3 | [document.md](./document.md) |
 | Messaging Settings API | `epilot email-settings` | 35 | [email-settings.md](./email-settings.md) |
@@ -33,10 +33,10 @@ npx epilot auth login
 | Entity API | `epilot entity` | 84 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
 | Environments API | `epilot environments` | 5 | [environments.md](./environments.md) |
-| ERP Integration API | `epilot erp-integration` | 43 | [erp-integration.md](./erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | 7 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 27 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
+| Integration Toolkit API | `epilot integration-toolkit` | 43 | [integration-toolkit.md](./integration-toolkit.md) |
 | Journey API | `epilot journey` | 16 | [journey.md](./journey.md) |
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
 | Message API | `epilot message` | 52 | [message.md](./message.md) |
@@ -57,7 +57,7 @@ npx epilot auth login
 | User API | `epilot user` | 34 | [user.md](./user.md) |
 | Validation Rules API | `epilot validation-rules` | 7 | [validation-rules.md](./validation-rules.md) |
 | Webhooks | `epilot webhooks` | 14 | [webhooks.md](./webhooks.md) |
-| Workflows Executions | `epilot workflow` | 23 | [workflow.md](./workflow.md) |
+| Workflows Executions | `epilot workflow` | 24 | [workflow.md](./workflow.md) |
 | Workflows Definitions | `epilot workflow-definition` | 22 | [workflow-definition.md](./workflow-definition.md) |
 
 ## Global Flags

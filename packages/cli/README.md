@@ -29,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.17 — CLI for epilot APIs
+epilot v0.1.12 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -82,10 +82,10 @@ APIs
   entity               Entity API
   entity-mapping       Entity Mapping API
   environments         Environments API
-  erp-integration      ERP Integration API
   event-catalog        Event Catalog API
   file                 File API
   iban                 Iban API
+  integration-toolkit  Integration Toolkit API
   journey              Journey API
   kanban               Kanban API
   message              Message API
@@ -99,6 +99,7 @@ APIs
   pricing-tier         Pricing Tier API
   purpose              Purpose API
   sandbox              Sandbox API
+  sharing              Sharing API
   submission           Submission API
   targeting            Targeting API
   template-variables   Template Variables API
@@ -334,10 +335,10 @@ Full documentation with sample calls and responses for all APIs:
 | Entity API | `epilot entity` | [docs](./docs/entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | [docs](./docs/entity-mapping.md) |
 | Environments API | `epilot environments` | [docs](./docs/environments.md) |
-| ERP Integration API | `epilot erp-integration` | [docs](./docs/erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |
 | Iban API | `epilot iban` | [docs](./docs/iban.md) |
+| Integration Toolkit API | `epilot integration-toolkit` | [docs](./docs/integration-toolkit.md) |
 | Journey API | `epilot journey` | [docs](./docs/journey.md) |
 | Kanban API | `epilot kanban` | [docs](./docs/kanban.md) |
 | Message API | `epilot message` | [docs](./docs/message.md) |
@@ -351,6 +352,7 @@ Full documentation with sample calls and responses for all APIs:
 | Pricing Tier API | `epilot pricing-tier` | [docs](./docs/pricing-tier.md) |
 | Purpose API | `epilot purpose` | [docs](./docs/purpose.md) |
 | Sandbox API | `epilot sandbox` | [docs](./docs/sandbox.md) |
+| Sharing API | `epilot sharing` | [docs](./docs/sharing.md) |
 | Submission API | `epilot submission` | [docs](./docs/submission.md) |
 | Targeting API | `epilot targeting` | [docs](./docs/targeting.md) |
 | Template Variables API | `epilot template-variables` | [docs](./docs/template-variables.md) |

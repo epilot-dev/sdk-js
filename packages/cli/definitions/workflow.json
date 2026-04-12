@@ -1317,6 +1317,76 @@
         }
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now": {
+      "post": {
+        "operationId": "runTaskScheduleNow",
+        "summary": "runTaskScheduleNow",
+        "description": "Cancels the pending schedule for a task and immediately triggers its automation execution.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - task automation has been triggered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
       "post": {
         "operationId": "cancelSchedule",
@@ -1978,6 +2048,10 @@
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
           },
+          "partner": {
+            "$ref": "#/components/schemas/PartnerDetails",
+            "description": "Partner-specific task details shown to partner org users viewing shared resources"
+          },
           "enabled": {
             "type": "boolean"
           },
@@ -2206,6 +2280,21 @@
           },
           "journey": {
             "$ref": "#/components/schemas/StepJourney"
+          }
+        }
+      },
+      "PartnerDetails": {
+        "type": "object",
+        "description": "Details regarding partner for the workflow step",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       },
@@ -3405,6 +3494,11 @@
                   "$ref": "#/components/schemas/Condition"
                 }
               },
+              "allow_parallel_execution": {
+                "type": "boolean",
+                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.",
+                "default": true
+              },
               "schedule": {
                 "anyOf": [
                   {
@@ -3549,6 +3643,10 @@
           },
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "partner": {
+            "$ref": "#/components/schemas/PartnerDetails",
+            "description": "Partner-specific task details shown to partner org users viewing shared resources"
           },
           "taxonomies": {
             "type": "array",
@@ -4049,6 +4147,10 @@
           },
           "installer": {
             "$ref": "#/components/schemas/ECPDetails"
+          },
+          "partner": {
+            "$ref": "#/components/schemas/PartnerDetails",
+            "description": "Partner-specific task details shown to partner org users viewing shared resources"
           },
           "next_condition_id": {
             "type": "string",
