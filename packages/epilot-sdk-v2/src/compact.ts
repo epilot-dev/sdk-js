@@ -12,6 +12,7 @@ type CR = [ref: string];
 
 export type CompactDefinition = {
   s: string;
+  sv?: Record<string, { default: string; enum?: string[] }>;
   v?: string;
   o: [id: string, m: string, p: string, ps?: (CP | CR)[], b?: 0 | 1][];
   cp?: Record<string, CP>;
@@ -62,7 +63,7 @@ export const expand = (c: CompactDefinition): Record<string, unknown> => {
     openapi: c.v || '3.0.2',
     info: { title: '', version: '' },
     paths,
-    servers: c.s ? [{ url: c.s }] : [],
+    servers: c.s ? [{ url: c.s, ...(c.sv ? { variables: c.sv } : {}) }] : [],
   };
 
   if (c.cp) {

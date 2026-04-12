@@ -306,5 +306,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://deduplication.sls.epilot.io"
+    }
+  ]
 }
