@@ -141,12 +141,6 @@
       "require": "./dist/apis/environments.cjs"
     },
     "./environments/openapi.json": "./definitions/environments.json",
-    "./erp-integration": {
-      "types": "./dist/apis/erp-integration.d.ts",
-      "import": "./dist/apis/erp-integration.js",
-      "require": "./dist/apis/erp-integration.cjs"
-    },
-    "./erp-integration/openapi.json": "./definitions/erp-integration.json",
     "./event-catalog": {
       "types": "./dist/apis/event-catalog.d.ts",
       "import": "./dist/apis/event-catalog.js",
@@ -165,6 +159,12 @@
       "require": "./dist/apis/iban.cjs"
     },
     "./iban/openapi.json": "./definitions/iban.json",
+    "./integration-toolkit": {
+      "types": "./dist/apis/integration-toolkit.d.ts",
+      "import": "./dist/apis/integration-toolkit.js",
+      "require": "./dist/apis/integration-toolkit.cjs"
+    },
+    "./integration-toolkit/openapi.json": "./definitions/integration-toolkit.json",
     "./journey": {
       "types": "./dist/apis/journey.d.ts",
       "import": "./dist/apis/journey.js",
@@ -410,9 +410,6 @@
       "environments": [
         "./dist/apis/environments.d.ts"
       ],
-      "erp-integration": [
-        "./dist/apis/erp-integration.d.ts"
-      ],
       "event-catalog": [
         "./dist/apis/event-catalog.d.ts"
       ],
@@ -421,6 +418,9 @@
       ],
       "iban": [
         "./dist/apis/iban.d.ts"
+      ],
+      "integration-toolkit": [
+        "./dist/apis/integration-toolkit.d.ts"
       ],
       "journey": [
         "./dist/apis/journey.d.ts"

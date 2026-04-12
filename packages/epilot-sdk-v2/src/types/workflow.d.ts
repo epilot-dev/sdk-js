@@ -152,6 +152,7 @@ export declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -279,6 +280,7 @@ export declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -419,6 +421,7 @@ export declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -427,6 +430,10 @@ export declare namespace Components {
             task_type: TaskType;
             trigger_mode: TriggerMode;
             conditions: Condition[];
+            /**
+             * When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.
+             */
+            allow_parallel_execution?: boolean;
             schedule?: DelayedSchedule | RelativeSchedule;
             loop_config?: LoopConfig;
         }
@@ -811,6 +818,7 @@ export declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -820,6 +828,14 @@ export declare namespace Components {
             loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        /**
+         * Details regarding partner for the workflow step
+         */
+        export interface PartnerDetails {
+            enabled?: boolean;
+            label?: string;
+            description?: string;
+        }
         export interface PatchFlowReq {
             status?: WorkflowStatus;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
@@ -871,6 +887,10 @@ export declare namespace Components {
             description?: /* Longer information regarding Task */ StepDescription;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Condition to evaluate as true for a decision task with a manual trigger mode
              */
@@ -1031,6 +1051,7 @@ export declare namespace Components {
                 type: ItemType;
                 ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
                 installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+                partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
                 /**
                  * enabled flag results from calculating the requirements
                  */
@@ -1178,6 +1199,7 @@ export declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -1252,6 +1274,7 @@ export declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -1354,6 +1377,10 @@ export declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             enabled?: boolean;
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             /**
@@ -1431,6 +1458,10 @@ export declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -1520,6 +1551,7 @@ export declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -2374,6 +2406,23 @@ export declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace RunTaskScheduleNow {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Task;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SearchExecutions {
         export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
@@ -2677,6 +2726,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
   /**
+   * runTaskScheduleNow - runTaskScheduleNow
+   * 
+   * Cancels the pending schedule for a task and immediately triggers its automation execution.
+   */
+  'runTaskScheduleNow'(
+    parameters?: Parameters<Paths.RunTaskScheduleNow.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RunTaskScheduleNow.Responses.$200>
+  /**
    * cancelSchedule - cancelSchedule
    * 
    * Cancels a flow schedule, marking it as canceled.
@@ -2947,6 +3006,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
   }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now']: {
+    /**
+     * runTaskScheduleNow - runTaskScheduleNow
+     * 
+     * Cancels the pending schedule for a task and immediately triggers its automation execution.
+     */
+    'post'(
+      parameters?: Parameters<Paths.RunTaskScheduleNow.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RunTaskScheduleNow.Responses.$200>
+  }
   ['/v2/flows/executions/{execution_id}/schedules/{schedule_id}']: {
     /**
      * cancelSchedule - cancelSchedule
@@ -3009,6 +3080,7 @@ export type LoopConfig = Components.Schemas.LoopConfig;
 export type LoopInfo = Components.Schemas.LoopInfo;
 export type ManualTask = Components.Schemas.ManualTask;
 export type Operator = Components.Schemas.Operator;
+export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type PatchFlowReq = Components.Schemas.PatchFlowReq;
 export type PatchPhaseReq = Components.Schemas.PatchPhaseReq;
 export type PatchTaskReq = Components.Schemas.PatchTaskReq;

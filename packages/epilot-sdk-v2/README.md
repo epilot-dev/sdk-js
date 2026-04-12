@@ -61,10 +61,10 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.entity` | `@epilot/sdk/entity` | [docs](./docs/entity.md) |
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./docs/entity-mapping.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./docs/environments.md) |
-| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./docs/erp-integration.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./docs/event-catalog.md) |
 | `epilot.file` | `@epilot/sdk/file` | [docs](./docs/file.md) |
 | `epilot.iban` | `@epilot/sdk/iban` | [docs](./docs/iban.md) |
+| `epilot.integrationToolkit` | `@epilot/sdk/integration-toolkit` | [docs](./docs/integration-toolkit.md) |
 | `epilot.journey` | `@epilot/sdk/journey` | [docs](./docs/journey.md) |
 | `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./docs/kanban.md) |
 | `epilot.message` | `@epilot/sdk/message` | [docs](./docs/message.md) |
@@ -78,6 +78,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./docs/purpose.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./docs/sandbox.md) |
+| `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./docs/sharing.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./docs/submission.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./docs/template-variables.md) |
