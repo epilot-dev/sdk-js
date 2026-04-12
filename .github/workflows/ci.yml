@@ -93,8 +93,6 @@ jobs:
       - name: Build and test SDK
         if: steps.check.outputs.sdk == 'true'
         run: |
-          pnpm build
-          pnpm run lint:fix
           pnpm --filter @epilot/sdk generate
           pnpm --filter @epilot/sdk build
           pnpm --filter @epilot/sdk test
