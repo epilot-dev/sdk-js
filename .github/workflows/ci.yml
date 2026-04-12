@@ -52,7 +52,7 @@ jobs:
     concurrency:
       group: auto-release
       cancel-in-progress: false
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip release]')
     steps:
       - uses: actions/checkout@v5
         with:
