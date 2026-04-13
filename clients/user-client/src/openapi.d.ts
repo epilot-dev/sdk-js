@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -48,6 +46,17 @@ declare namespace Components {
              * ]
              */
             user_ids?: /* User's unique identifier */ UserId[];
+            image_uri?: /**
+             * Group's profile image or gradient colors. Supports uploaded image URLs and generated gradient avatars.
+             * example:
+             * {
+             *   "gradient_colors": [
+             *     "#0588f0",
+             *     "#3358d4"
+             *   ]
+             * }
+             */
+            GroupImageUri;
         }
         export interface DataPoint {
             /**
@@ -266,11 +275,62 @@ declare namespace Components {
              * The list of users in the group. Only contains the full user when respective endpoint is called with a flag. Otherwise only contains the user id.
              */
             users?: UserV2[];
+            image_uri?: /**
+             * Group's profile image or gradient colors. Supports uploaded image URLs and generated gradient avatars.
+             * example:
+             * {
+             *   "gradient_colors": [
+             *     "#0588f0",
+             *     "#3358d4"
+             *   ]
+             * }
+             */
+            GroupImageUri;
         }
         /**
          * Group unique identifier
          */
         export type GroupId = string;
+        /**
+         * Group's profile image or gradient colors. Supports uploaded image URLs and generated gradient avatars.
+         * example:
+         * {
+         *   "gradient_colors": [
+         *     "#0588f0",
+         *     "#3358d4"
+         *   ]
+         * }
+         */
+        export type GroupImageUri = {
+            [name: string]: any;
+            /**
+             * example:
+             * https://account-profile-images.epilot.cloud/org/group-avatar.png
+             */
+            original?: string; // uri
+            /**
+             * example:
+             * https://account-profile-images.epilot.cloud/org/group-avatar_32x32.png
+             */
+            thumbnail_32?: string; // uri
+            /**
+             * example:
+             * https://account-profile-images.epilot.cloud/org/group-avatar_64x64.png
+             */
+            thumbnail_64?: string; // uri
+            /**
+             * Two hex color strings [base_color, accent_color] for mesh gradient avatar.
+             * example:
+             * [
+             *   "#0588f0",
+             *   "#3358d4"
+             * ]
+             */
+            gradient_colors?: [
+                string,
+                string
+            ];
+        } | null;
         export type Hydrate = boolean;
         /**
          * Token used to invite a user to epilot
@@ -668,6 +728,17 @@ declare namespace Components {
              * ]
              */
             user_ids?: /* User's unique identifier */ UserId[];
+            image_uri?: /**
+             * Group's profile image or gradient colors. Supports uploaded image URLs and generated gradient avatars.
+             * example:
+             * {
+             *   "gradient_colors": [
+             *     "#0588f0",
+             *     "#3358d4"
+             *   ]
+             * }
+             */
+            GroupImageUri;
         }
         export interface User {
             id: /* User's unique identifier */ UserId;
@@ -2165,6 +2236,7 @@ export type DataPoint = Components.Schemas.DataPoint;
 export type DataPointsResponse = Components.Schemas.DataPointsResponse;
 export type Group = Components.Schemas.Group;
 export type GroupId = Components.Schemas.GroupId;
+export type GroupImageUri = Components.Schemas.GroupImageUri;
 export type Hydrate = Components.Schemas.Hydrate;
 export type InviteToken = Components.Schemas.InviteToken;
 export type Limit = Components.Schemas.Limit;
