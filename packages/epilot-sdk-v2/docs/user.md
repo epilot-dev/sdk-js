@@ -91,6 +91,7 @@ const { data } = await userClient.signUpUser(...)
 - [`UserV2`](#userv2)
 - [`User`](#user)
 - [`LoginParameters`](#loginparameters)
+- [`GroupImageUri`](#groupimageuri)
 - [`CreateGroupReq`](#creategroupreq)
 - [`UpdateGroupReq`](#updategroupreq)
 - [`Group`](#group)
@@ -832,7 +833,10 @@ const { data } = await client.getGroupsForUser({
     },
     "users": [
       {}
-    ]
+    ],
+    "image_uri": {
+      "gradient_colors": ["#0588f0", "#3358d4"]
+    }
   }
 ]
 ```
@@ -871,7 +875,8 @@ const { data } = await client.getGroups({
       "updated_at": "2024-02-08T04:44:32.246Z",
       "created_by": "123",
       "crt_assignee": {},
-      "users": []
+      "users": [],
+      "image_uri": {}
     }
   ]
 }
@@ -892,7 +897,10 @@ const { data } = await client.createGroup(
   null,
   {
     name: 'Finance',
-    user_ids: ['123', '456']
+    user_ids: ['123', '456'],
+    image_uri: {
+      gradient_colors: ['#0588f0', '#3358d4']
+    }
   },
 )
 ```
@@ -987,7 +995,10 @@ const { data } = await client.createGroup(
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1098,7 +1109,10 @@ const { data } = await client.getGroup({
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1119,7 +1133,10 @@ const { data } = await client.updateGroup(
   },
   {
     name: 'Finance',
-    user_ids: ['123', '456']
+    user_ids: ['123', '456'],
+    image_uri: {
+      gradient_colors: ['#0588f0', '#3358d4']
+    }
   },
 )
 ```
@@ -1214,7 +1231,10 @@ const { data } = await client.updateGroup(
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1338,7 +1358,10 @@ const { data } = await client.advanceUserAssignment({
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -2303,12 +2326,31 @@ type LoginParameters = {
 }
 ```
 
+### `GroupImageUri`
+
+Group's profile image or gradient colors. Supports uploaded image URLs and generated gradient avatars.
+
+```ts
+type GroupImageUri = {
+  original?: string // uri
+  thumbnail_32?: string // uri
+  thumbnail_64?: string // uri
+  gradient_colors?: string[]
+}
+```
+
 ### `CreateGroupReq`
 
 ```ts
 type CreateGroupReq = {
   name: string
   user_ids?: string[]
+  image_uri?: {
+    original?: string // uri
+    thumbnail_32?: string // uri
+    thumbnail_64?: string // uri
+    gradient_colors?: string[]
+  }
 }
 ```
 
@@ -2318,6 +2360,12 @@ type CreateGroupReq = {
 type UpdateGroupReq = {
   name?: string
   user_ids?: string[]
+  image_uri?: {
+    original?: string // uri
+    thumbnail_32?: string // uri
+    thumbnail_64?: string // uri
+    gradient_colors?: string[]
+  }
 }
 ```
 
@@ -2398,6 +2446,12 @@ type Group = {
       value: { ... }
     }>
   }>
+  image_uri?: {
+    original?: string // uri
+    thumbnail_32?: string // uri
+    thumbnail_64?: string // uri
+    gradient_colors?: string[]
+  }
 }
 ```
 
