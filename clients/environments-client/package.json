@@ -25,7 +25,7 @@
     "test": "vitest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/environments.yml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/environments.yaml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

@@ -27,6 +27,9 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 **environments**
 - [`listEnvironmentVariables`](#listenvironmentvariables)
 - [`createEnvironmentVariable`](#createenvironmentvariable)
+- [`listEnvironmentGroups`](#listenvironmentgroups)
+- [`upsertEnvironmentGroup`](#upsertenvironmentgroup)
+- [`deleteEnvironmentGroup`](#deleteenvironmentgroup)
 - [`getEnvironmentVariable`](#getenvironmentvariable)
 - [`updateEnvironmentVariable`](#updateenvironmentvariable)
 - [`deleteEnvironmentVariable`](#deleteenvironmentvariable)
@@ -38,6 +41,9 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`EnvironmentVariableList`](#environmentvariablelist)
 - [`EnvironmentVariableCreateRequest`](#environmentvariablecreaterequest)
 - [`EnvironmentVariableUpdateRequest`](#environmentvariableupdaterequest)
+- [`EnvironmentGroup`](#environmentgroup)
+- [`EnvironmentGroupList`](#environmentgrouplist)
+- [`EnvironmentGroupUpsertRequest`](#environmentgroupupsertrequest)
 
 ### `listEnvironmentVariables`
 
@@ -59,6 +65,7 @@ const { data } = await client.listEnvironmentVariables()
       "key": "string",
       "type": "String",
       "description": "string",
+      "group": "string",
       "value": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z"
@@ -84,6 +91,7 @@ const { data } = await client.createEnvironmentVariable(
     key: 'string',
     type: 'String',
     description: 'string',
+    group: 'string',
     value: 'string'
   },
 )
@@ -97,6 +105,7 @@ const { data } = await client.createEnvironmentVariable(
   "key": "string",
   "type": "String",
   "description": "string",
+  "group": "string",
   "value": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
@@ -104,6 +113,83 @@ const { data } = await client.createEnvironmentVariable(
 ```
 
 </details>
+
+---
+
+### `listEnvironmentGroups`
+
+List environment groups
+
+`GET /v1/environments/groups`
+
+```ts
+const { data } = await client.listEnvironmentGroups()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "name": "string",
+      "description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `upsertEnvironmentGroup`
+
+Create or update an environment group
+
+`PUT /v1/environments/groups/{name}`
+
+```ts
+const { data } = await client.upsertEnvironmentGroup(
+  {
+    name: 'example',
+  },
+  {
+    description: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "name": "string",
+  "description": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteEnvironmentGroup`
+
+Delete an environment group
+
+`DELETE /v1/environments/groups/{name}`
+
+```ts
+const { data } = await client.deleteEnvironmentGroup({
+  name: 'example',
+})
+```
 
 ---
 
@@ -127,6 +213,7 @@ const { data } = await client.getEnvironmentVariable({
   "key": "string",
   "type": "String",
   "description": "string",
+  "group": "string",
   "value": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
@@ -151,7 +238,8 @@ const { data } = await client.updateEnvironmentVariable(
   {
     type: 'String',
     value: 'string',
-    description: 'string'
+    description: 'string',
+    group: 'string'
   },
 )
 ```
@@ -164,6 +252,7 @@ const { data } = await client.updateEnvironmentVariable(
   "key": "string",
   "type": "String",
   "description": "string",
+  "group": "string",
   "value": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
@@ -203,6 +292,7 @@ type EnvironmentVariable = {
   key: string
   type: "String" | "SecretString"
   description?: string
+  group?: string
   value?: string
   created_at: string // date-time
   updated_at: string // date-time
@@ -216,6 +306,7 @@ type EnvironmentVariableListItem = {
   key: string
   type: "String" | "SecretString"
   description?: string
+  group?: string
   value?: string
   created_at: string // date-time
   updated_at: string // date-time
@@ -230,6 +321,7 @@ type EnvironmentVariableList = {
     key: string
     type: "String" | "SecretString"
     description?: string
+    group?: string
     value?: string
     created_at: string // date-time
     updated_at: string // date-time
@@ -244,7 +336,8 @@ type EnvironmentVariableCreateRequest = {
   key: string
   type: "String" | "SecretString"
   description?: string
-  value: string
+  group?: string
+  value?: string
 }
 ```
 
@@ -253,7 +346,40 @@ type EnvironmentVariableCreateRequest = {
 ```ts
 type EnvironmentVariableUpdateRequest = {
   type?: "String" | "SecretString"
-  value: string
+  value?: string
+  description?: string
+  group?: string
+}
+```
+
+### `EnvironmentGroup`
+
+```ts
+type EnvironmentGroup = {
+  name: string
+  description?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `EnvironmentGroupList`
+
+```ts
+type EnvironmentGroupList = {
+  items: Array<{
+    name: string
+    description?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }>
+}
+```
+
+### `EnvironmentGroupUpsertRequest`
+
+```ts
+type EnvironmentGroupUpsertRequest = {
   description?: string
 }
 ```

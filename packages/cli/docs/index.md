@@ -32,7 +32,7 @@ npx epilot auth login
 | Email template API | `epilot email-template` | 7 | [email-template.md](./email-template.md) |
 | Entity API | `epilot entity` | 84 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
-| Environments API | `epilot environments` | 5 | [environments.md](./environments.md) |
+| Environments API | `epilot environments` | 8 | [environments.md](./environments.md) |
 | Event Catalog API | `epilot event-catalog` | 7 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 27 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
