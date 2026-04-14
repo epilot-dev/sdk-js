@@ -542,6 +542,12 @@
         "responses": {}
       }
     },
+    "/v1/marketplace-listings": {
+      "get": {
+        "operationId": "listMarketplaceListings",
+        "responses": {}
+      }
+    },
     "/v1/marketplace-listings/{listing_id}": {
       "get": {
         "operationId": "getMarketplaceListingById",
@@ -652,6 +658,31 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprintV3",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
+      "get": {
+        "operationId": "getBlueprintLineageV3",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
         "responses": {}
       }
     }

@@ -2078,6 +2078,41 @@
         }
       }
     },
+    "/v1/marketplace-listings": {
+      "get": {
+        "operationId": "listMarketplaceListings",
+        "summary": "listMarketplaceListings",
+        "description": "List all marketplace listings for the authenticated organization",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of marketplace listings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "listings": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MarketplaceListing"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/marketplace-listings/{listing_id}": {
       "get": {
         "operationId": "getMarketplaceListingById",
@@ -2414,10 +2449,163 @@
           }
         }
       }
+    },
+    "/v3/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprintV3",
+        "summary": "Install Blueprint V3",
+        "description": "Install a blueprint using the V3 engine (direct API calls, no Terraform).\nCreates resources in topological order with global ID replacement.\nSupports checkpoint-based resume on failure.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_org_id": {
+                    "type": "string"
+                  },
+                  "source_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "source_blueprint_file": {
+                    "type": "string",
+                    "description": "S3 key to the blueprint zip file"
+                  },
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "destination_auth_token": {
+                    "type": "string",
+                    "description": "Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token."
+                  },
+                  "options": {
+                    "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug for marketplace blueprint consistency"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "V3 install job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    },
+                    "destination_blueprint_id": {
+                      "$ref": "#/components/schemas/BlueprintID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
+      "get": {
+        "operationId": "getBlueprintLineageV3",
+        "summary": "Get Blueprint Lineage V3",
+        "description": "Returns the lineage registry entries for a blueprint's resources in the current org.\nShows the mapping between source lineage IDs and target resource IDs.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lineage entries for the blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer"
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LineageEntry"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "LineageEntry": {
+        "type": "object",
+        "properties": {
+          "lineage_id": {
+            "type": "string",
+            "description": "Immutable resource identity across orgs"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Resource ID in the destination org"
+          },
+          "resource_type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "blueprint_instance_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fidelity": {
+            "type": "string",
+            "enum": [
+              "full",
+              "partial"
+            ]
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "BlueprintID": {
         "type": "string",
         "description": "ID of a blueprint",
@@ -2489,6 +2677,16 @@
           "is_verified": {
             "type": "boolean",
             "description": "Whether the blueprint is verified by epilot"
+          },
+          "latest_verification": {
+            "$ref": "#/components/schemas/LatestBlueprintVerification"
+          },
+          "ignored_resource_addresses": {
+            "type": "array",
+            "description": "Resource addresses excluded during the latest install/update and ignored by verification.",
+            "items": {
+              "type": "string"
+            }
           },
           "installation_status": {
             "type": "string",
@@ -3078,6 +3276,7 @@
                   "WAITING_USER_ACTION",
                   "CANCELED",
                   "SUCCESS",
+                  "PARTIAL_SUCCESS",
                   "FAILED"
                 ]
               }
@@ -3207,6 +3406,41 @@
           }
         ]
       },
+      "LatestBlueprintVerification": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "$ref": "#/components/schemas/BlueprintJobID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "SUCCESS",
+              "FAILED"
+            ]
+          },
+          "triggered_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "source_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "destination_org_id": {
+            "type": "string"
+          },
+          "destination_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/VerificationSummary"
+          }
+        }
+      },
       "VerificationSummary": {
         "type": "object",
         "properties": {
@@ -3220,9 +3454,6 @@
             "type": "integer"
           },
           "missing_in_destination": {
-            "type": "integer"
-          },
-          "missing_in_source": {
             "type": "integer"
           },
           "fetch_errors": {
@@ -3251,7 +3482,6 @@
               "matched",
               "mismatched",
               "missing_in_destination",
-              "missing_in_source",
               "fetch_error"
             ]
           },
@@ -3413,6 +3643,7 @@
           "CANCELED",
           "IN_PROGRESS",
           "SUCCESS",
+          "PARTIAL_SUCCESS",
           "FAILED"
         ]
       },
@@ -4255,10 +4486,6 @@
             },
             "nullable": true
           },
-          "documentation_link": {
-            "type": "string",
-            "nullable": true
-          },
           "resources_section_description": {
             "type": "string",
             "nullable": true
@@ -4430,10 +4657,6 @@
             "items": {
               "type": "string"
             },
-            "nullable": true
-          },
-          "documentation_link": {
-            "type": "string",
             "nullable": true
           },
           "resources_section_description": {
