@@ -1,0 +1,502 @@
+{
+  "name": "@epilot/sdk",
+  "version": "2.3.4",
+  "description": "JavaScript/TypeScript SDK for epilot APIs",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "epilot-sdk": "./dist/bin/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./access-token": {
+      "types": "./dist/apis/access-token.d.ts",
+      "import": "./dist/apis/access-token.js",
+      "require": "./dist/apis/access-token.cjs"
+    },
+    "./access-token/openapi.json": "./definitions/access-token.json",
+    "./address": {
+      "types": "./dist/apis/address.d.ts",
+      "import": "./dist/apis/address.js",
+      "require": "./dist/apis/address.cjs"
+    },
+    "./address/openapi.json": "./definitions/address.json",
+    "./address-suggestions": {
+      "types": "./dist/apis/address-suggestions.d.ts",
+      "import": "./dist/apis/address-suggestions.js",
+      "require": "./dist/apis/address-suggestions.cjs"
+    },
+    "./address-suggestions/openapi.json": "./definitions/address-suggestions.json",
+    "./ai-agents": {
+      "types": "./dist/apis/ai-agents.d.ts",
+      "import": "./dist/apis/ai-agents.js",
+      "require": "./dist/apis/ai-agents.cjs"
+    },
+    "./ai-agents/openapi.json": "./definitions/ai-agents.json",
+    "./app": {
+      "types": "./dist/apis/app.d.ts",
+      "import": "./dist/apis/app.js",
+      "require": "./dist/apis/app.cjs"
+    },
+    "./app/openapi.json": "./definitions/app.json",
+    "./audit-logs": {
+      "types": "./dist/apis/audit-logs.d.ts",
+      "import": "./dist/apis/audit-logs.js",
+      "require": "./dist/apis/audit-logs.cjs"
+    },
+    "./audit-logs/openapi.json": "./definitions/audit-logs.json",
+    "./automation": {
+      "types": "./dist/apis/automation.d.ts",
+      "import": "./dist/apis/automation.js",
+      "require": "./dist/apis/automation.cjs"
+    },
+    "./automation/openapi.json": "./definitions/automation.json",
+    "./billing": {
+      "types": "./dist/apis/billing.d.ts",
+      "import": "./dist/apis/billing.js",
+      "require": "./dist/apis/billing.cjs"
+    },
+    "./billing/openapi.json": "./definitions/billing.json",
+    "./blueprint-manifest": {
+      "types": "./dist/apis/blueprint-manifest.d.ts",
+      "import": "./dist/apis/blueprint-manifest.js",
+      "require": "./dist/apis/blueprint-manifest.cjs"
+    },
+    "./blueprint-manifest/openapi.json": "./definitions/blueprint-manifest.json",
+    "./consent": {
+      "types": "./dist/apis/consent.d.ts",
+      "import": "./dist/apis/consent.js",
+      "require": "./dist/apis/consent.cjs"
+    },
+    "./consent/openapi.json": "./definitions/consent.json",
+    "./customer-portal": {
+      "types": "./dist/apis/customer-portal.d.ts",
+      "import": "./dist/apis/customer-portal.js",
+      "require": "./dist/apis/customer-portal.cjs"
+    },
+    "./customer-portal/openapi.json": "./definitions/customer-portal.json",
+    "./dashboard": {
+      "types": "./dist/apis/dashboard.d.ts",
+      "import": "./dist/apis/dashboard.js",
+      "require": "./dist/apis/dashboard.cjs"
+    },
+    "./dashboard/openapi.json": "./definitions/dashboard.json",
+    "./data-governance": {
+      "types": "./dist/apis/data-governance.d.ts",
+      "import": "./dist/apis/data-governance.js",
+      "require": "./dist/apis/data-governance.cjs"
+    },
+    "./data-governance/openapi.json": "./definitions/data-governance.json",
+    "./deduplication": {
+      "types": "./dist/apis/deduplication.d.ts",
+      "import": "./dist/apis/deduplication.js",
+      "require": "./dist/apis/deduplication.cjs"
+    },
+    "./deduplication/openapi.json": "./definitions/deduplication.json",
+    "./design": {
+      "types": "./dist/apis/design.d.ts",
+      "import": "./dist/apis/design.js",
+      "require": "./dist/apis/design.cjs"
+    },
+    "./design/openapi.json": "./definitions/design.json",
+    "./document": {
+      "types": "./dist/apis/document.d.ts",
+      "import": "./dist/apis/document.js",
+      "require": "./dist/apis/document.cjs"
+    },
+    "./document/openapi.json": "./definitions/document.json",
+    "./email-settings": {
+      "types": "./dist/apis/email-settings.d.ts",
+      "import": "./dist/apis/email-settings.js",
+      "require": "./dist/apis/email-settings.cjs"
+    },
+    "./email-settings/openapi.json": "./definitions/email-settings.json",
+    "./email-template": {
+      "types": "./dist/apis/email-template.d.ts",
+      "import": "./dist/apis/email-template.js",
+      "require": "./dist/apis/email-template.cjs"
+    },
+    "./email-template/openapi.json": "./definitions/email-template.json",
+    "./entity": {
+      "types": "./dist/apis/entity.d.ts",
+      "import": "./dist/apis/entity.js",
+      "require": "./dist/apis/entity.cjs"
+    },
+    "./entity/openapi.json": "./definitions/entity.json",
+    "./entity-mapping": {
+      "types": "./dist/apis/entity-mapping.d.ts",
+      "import": "./dist/apis/entity-mapping.js",
+      "require": "./dist/apis/entity-mapping.cjs"
+    },
+    "./entity-mapping/openapi.json": "./definitions/entity-mapping.json",
+    "./environments": {
+      "types": "./dist/apis/environments.d.ts",
+      "import": "./dist/apis/environments.js",
+      "require": "./dist/apis/environments.cjs"
+    },
+    "./environments/openapi.json": "./definitions/environments.json",
+    "./event-catalog": {
+      "types": "./dist/apis/event-catalog.d.ts",
+      "import": "./dist/apis/event-catalog.js",
+      "require": "./dist/apis/event-catalog.cjs"
+    },
+    "./event-catalog/openapi.json": "./definitions/event-catalog.json",
+    "./file": {
+      "types": "./dist/apis/file.d.ts",
+      "import": "./dist/apis/file.js",
+      "require": "./dist/apis/file.cjs"
+    },
+    "./file/openapi.json": "./definitions/file.json",
+    "./iban": {
+      "types": "./dist/apis/iban.d.ts",
+      "import": "./dist/apis/iban.js",
+      "require": "./dist/apis/iban.cjs"
+    },
+    "./iban/openapi.json": "./definitions/iban.json",
+    "./integration-toolkit": {
+      "types": "./dist/apis/integration-toolkit.d.ts",
+      "import": "./dist/apis/integration-toolkit.js",
+      "require": "./dist/apis/integration-toolkit.cjs"
+    },
+    "./integration-toolkit/openapi.json": "./definitions/integration-toolkit.json",
+    "./journey": {
+      "types": "./dist/apis/journey.d.ts",
+      "import": "./dist/apis/journey.js",
+      "require": "./dist/apis/journey.cjs"
+    },
+    "./journey/openapi.json": "./definitions/journey.json",
+    "./kanban": {
+      "types": "./dist/apis/kanban.d.ts",
+      "import": "./dist/apis/kanban.js",
+      "require": "./dist/apis/kanban.cjs"
+    },
+    "./kanban/openapi.json": "./definitions/kanban.json",
+    "./message": {
+      "types": "./dist/apis/message.d.ts",
+      "import": "./dist/apis/message.js",
+      "require": "./dist/apis/message.cjs"
+    },
+    "./message/openapi.json": "./definitions/message.json",
+    "./metering": {
+      "types": "./dist/apis/metering.d.ts",
+      "import": "./dist/apis/metering.js",
+      "require": "./dist/apis/metering.cjs"
+    },
+    "./metering/openapi.json": "./definitions/metering.json",
+    "./notes": {
+      "types": "./dist/apis/notes.d.ts",
+      "import": "./dist/apis/notes.js",
+      "require": "./dist/apis/notes.cjs"
+    },
+    "./notes/openapi.json": "./definitions/notes.json",
+    "./notification": {
+      "types": "./dist/apis/notification.d.ts",
+      "import": "./dist/apis/notification.js",
+      "require": "./dist/apis/notification.cjs"
+    },
+    "./notification/openapi.json": "./definitions/notification.json",
+    "./organization": {
+      "types": "./dist/apis/organization.d.ts",
+      "import": "./dist/apis/organization.js",
+      "require": "./dist/apis/organization.cjs"
+    },
+    "./organization/openapi.json": "./definitions/organization.json",
+    "./partner-directory": {
+      "types": "./dist/apis/partner-directory.d.ts",
+      "import": "./dist/apis/partner-directory.js",
+      "require": "./dist/apis/partner-directory.cjs"
+    },
+    "./partner-directory/openapi.json": "./definitions/partner-directory.json",
+    "./permissions": {
+      "types": "./dist/apis/permissions.d.ts",
+      "import": "./dist/apis/permissions.js",
+      "require": "./dist/apis/permissions.cjs"
+    },
+    "./permissions/openapi.json": "./definitions/permissions.json",
+    "./pricing": {
+      "types": "./dist/apis/pricing.d.ts",
+      "import": "./dist/apis/pricing.js",
+      "require": "./dist/apis/pricing.cjs"
+    },
+    "./pricing/openapi.json": "./definitions/pricing.json",
+    "./pricing-tier": {
+      "types": "./dist/apis/pricing-tier.d.ts",
+      "import": "./dist/apis/pricing-tier.js",
+      "require": "./dist/apis/pricing-tier.cjs"
+    },
+    "./pricing-tier/openapi.json": "./definitions/pricing-tier.json",
+    "./purpose": {
+      "types": "./dist/apis/purpose.d.ts",
+      "import": "./dist/apis/purpose.js",
+      "require": "./dist/apis/purpose.cjs"
+    },
+    "./purpose/openapi.json": "./definitions/purpose.json",
+    "./query": {
+      "types": "./dist/apis/query.d.ts",
+      "import": "./dist/apis/query.js",
+      "require": "./dist/apis/query.cjs"
+    },
+    "./query/openapi.json": "./definitions/query.json",
+    "./sandbox": {
+      "types": "./dist/apis/sandbox.d.ts",
+      "import": "./dist/apis/sandbox.js",
+      "require": "./dist/apis/sandbox.cjs"
+    },
+    "./sandbox/openapi.json": "./definitions/sandbox.json",
+    "./sharing": {
+      "types": "./dist/apis/sharing.d.ts",
+      "import": "./dist/apis/sharing.js",
+      "require": "./dist/apis/sharing.cjs"
+    },
+    "./sharing/openapi.json": "./definitions/sharing.json",
+    "./submission": {
+      "types": "./dist/apis/submission.d.ts",
+      "import": "./dist/apis/submission.js",
+      "require": "./dist/apis/submission.cjs"
+    },
+    "./submission/openapi.json": "./definitions/submission.json",
+    "./targeting": {
+      "types": "./dist/apis/targeting.d.ts",
+      "import": "./dist/apis/targeting.js",
+      "require": "./dist/apis/targeting.cjs"
+    },
+    "./targeting/openapi.json": "./definitions/targeting.json",
+    "./template-variables": {
+      "types": "./dist/apis/template-variables.d.ts",
+      "import": "./dist/apis/template-variables.js",
+      "require": "./dist/apis/template-variables.cjs"
+    },
+    "./template-variables/openapi.json": "./definitions/template-variables.json",
+    "./user": {
+      "types": "./dist/apis/user.d.ts",
+      "import": "./dist/apis/user.js",
+      "require": "./dist/apis/user.cjs"
+    },
+    "./user/openapi.json": "./definitions/user.json",
+    "./validation-rules": {
+      "types": "./dist/apis/validation-rules.d.ts",
+      "import": "./dist/apis/validation-rules.js",
+      "require": "./dist/apis/validation-rules.cjs"
+    },
+    "./validation-rules/openapi.json": "./definitions/validation-rules.json",
+    "./webhooks": {
+      "types": "./dist/apis/webhooks.d.ts",
+      "import": "./dist/apis/webhooks.js",
+      "require": "./dist/apis/webhooks.cjs"
+    },
+    "./webhooks/openapi.json": "./definitions/webhooks.json",
+    "./workflow": {
+      "types": "./dist/apis/workflow.d.ts",
+      "import": "./dist/apis/workflow.js",
+      "require": "./dist/apis/workflow.cjs"
+    },
+    "./workflow/openapi.json": "./definitions/workflow.json",
+    "./workflow-definition": {
+      "types": "./dist/apis/workflow-definition.d.ts",
+      "import": "./dist/apis/workflow-definition.js",
+      "require": "./dist/apis/workflow-definition.cjs"
+    },
+    "./workflow-definition/openapi.json": "./definitions/workflow-definition.json"
+  },
+  "scripts": {
+    "generate": "tsx ../../scripts/generate-sdk-v2.ts && pnpm lint:fix",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src",
+    "lint:fix": "biome check src --fix",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "epilot",
+    "sdk",
+    "openapi"
+  ],
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "packages/epilot-sdk-v2"
+  },
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js#readme",
+  "files": [
+    "dist",
+    "definitions",
+    "docs"
+  ],
+  "optionalDependencies": {
+    "@epilot/epilot-journey-sdk": ">=2.0.0-alpha.1"
+  },
+  "peerDependencies": {
+    "axios": "^1.0.0",
+    "openapi-client-axios": "^7.0.0"
+  },
+  "devDependencies": {
+    "axios": "^1.11.0",
+    "msw": "^2.10.4",
+    "openapi-client-axios": "^7.8.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "typesVersions": {
+    "*": {
+      "access-token": [
+        "./dist/apis/access-token.d.ts"
+      ],
+      "address": [
+        "./dist/apis/address.d.ts"
+      ],
+      "address-suggestions": [
+        "./dist/apis/address-suggestions.d.ts"
+      ],
+      "ai-agents": [
+        "./dist/apis/ai-agents.d.ts"
+      ],
+      "app": [
+        "./dist/apis/app.d.ts"
+      ],
+      "audit-logs": [
+        "./dist/apis/audit-logs.d.ts"
+      ],
+      "automation": [
+        "./dist/apis/automation.d.ts"
+      ],
+      "billing": [
+        "./dist/apis/billing.d.ts"
+      ],
+      "blueprint-manifest": [
+        "./dist/apis/blueprint-manifest.d.ts"
+      ],
+      "consent": [
+        "./dist/apis/consent.d.ts"
+      ],
+      "customer-portal": [
+        "./dist/apis/customer-portal.d.ts"
+      ],
+      "dashboard": [
+        "./dist/apis/dashboard.d.ts"
+      ],
+      "data-governance": [
+        "./dist/apis/data-governance.d.ts"
+      ],
+      "deduplication": [
+        "./dist/apis/deduplication.d.ts"
+      ],
+      "design": [
+        "./dist/apis/design.d.ts"
+      ],
+      "document": [
+        "./dist/apis/document.d.ts"
+      ],
+      "email-settings": [
+        "./dist/apis/email-settings.d.ts"
+      ],
+      "email-template": [
+        "./dist/apis/email-template.d.ts"
+      ],
+      "entity": [
+        "./dist/apis/entity.d.ts"
+      ],
+      "entity-mapping": [
+        "./dist/apis/entity-mapping.d.ts"
+      ],
+      "environments": [
+        "./dist/apis/environments.d.ts"
+      ],
+      "event-catalog": [
+        "./dist/apis/event-catalog.d.ts"
+      ],
+      "file": [
+        "./dist/apis/file.d.ts"
+      ],
+      "iban": [
+        "./dist/apis/iban.d.ts"
+      ],
+      "integration-toolkit": [
+        "./dist/apis/integration-toolkit.d.ts"
+      ],
+      "journey": [
+        "./dist/apis/journey.d.ts"
+      ],
+      "kanban": [
+        "./dist/apis/kanban.d.ts"
+      ],
+      "message": [
+        "./dist/apis/message.d.ts"
+      ],
+      "metering": [
+        "./dist/apis/metering.d.ts"
+      ],
+      "notes": [
+        "./dist/apis/notes.d.ts"
+      ],
+      "notification": [
+        "./dist/apis/notification.d.ts"
+      ],
+      "organization": [
+        "./dist/apis/organization.d.ts"
+      ],
+      "partner-directory": [
+        "./dist/apis/partner-directory.d.ts"
+      ],
+      "permissions": [
+        "./dist/apis/permissions.d.ts"
+      ],
+      "pricing": [
+        "./dist/apis/pricing.d.ts"
+      ],
+      "pricing-tier": [
+        "./dist/apis/pricing-tier.d.ts"
+      ],
+      "purpose": [
+        "./dist/apis/purpose.d.ts"
+      ],
+      "query": [
+        "./dist/apis/query.d.ts"
+      ],
+      "sandbox": [
+        "./dist/apis/sandbox.d.ts"
+      ],
+      "sharing": [
+        "./dist/apis/sharing.d.ts"
+      ],
+      "submission": [
+        "./dist/apis/submission.d.ts"
+      ],
+      "targeting": [
+        "./dist/apis/targeting.d.ts"
+      ],
+      "template-variables": [
+        "./dist/apis/template-variables.d.ts"
+      ],
+      "user": [
+        "./dist/apis/user.d.ts"
+      ],
+      "validation-rules": [
+        "./dist/apis/validation-rules.d.ts"
+      ],
+      "webhooks": [
+        "./dist/apis/webhooks.d.ts"
+      ],
+      "workflow": [
+        "./dist/apis/workflow.d.ts"
+      ],
+      "workflow-definition": [
+        "./dist/apis/workflow-definition.d.ts"
+      ]
+    }
+  }
+}

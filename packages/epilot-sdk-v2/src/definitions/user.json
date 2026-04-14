@@ -1,0 +1,2245 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "User API",
+    "version": "2.0.0",
+    "description": "Manage users in epilot organization(s)\n"
+  },
+  "tags": [
+    {
+      "name": "User V2",
+      "description": "User API V2"
+    },
+    {
+      "name": "User V1",
+      "description": "Legacy User API"
+    },
+    {
+      "name": "Group",
+      "description": "User Groups"
+    },
+    {
+      "name": "Navigation",
+      "description": "Customized Workplace Navigation Configurations"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v2/users/public/signup": {
+      "post": {
+        "operationId": "signUpUser",
+        "summary": "signUpUser",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "description": "Partner invitation token",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PartnerInvitationToken"
+            }
+          }
+        ],
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupUserPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created user and organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "organization": {
+                      "$ref": "#/components/schemas/Organization"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me": {
+      "get": {
+        "operationId": "getMeV2",
+        "summary": "getMeV2",
+        "description": "Get currently logged in user",
+        "tags": ["User V2"],
+        "responses": {
+          "200": {
+            "description": "currently logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users": {
+      "get": {
+        "operationId": "listUsersV2",
+        "summary": "listUsersV2",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query text to filter by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the results size",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Specify the offset",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          }
+        ],
+        "description": "Get the list of organization users",
+        "tags": ["User V2"],
+        "responses": {
+          "200": {
+            "description": "List of organization users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserV2"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/{id}": {
+      "get": {
+        "operationId": "getUserV2",
+        "summary": "getUserV2",
+        "description": "Get user details by user id",
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateUserV2",
+        "summary": "updateUserV2",
+        "description": "Update user details",
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The returned user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserV2",
+        "summary": "deleteUserV2",
+        "description": "Delete user by user id",
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/invite": {
+      "post": {
+        "operationId": "inviteUser",
+        "summary": "inviteUser",
+        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user\n",
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInvitationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Invited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unable to invite the above email address."
+          }
+        }
+      }
+    },
+    "/v2/users/invite:resendEmail": {
+      "post": {
+        "operationId": "resendUserInvitation",
+        "summary": "resendUserInvitation",
+        "description": "Resend user invitation email",
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the address",
+                    "example": "test@example.com"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Language for user invitation email",
+                    "enum": ["en", "de"],
+                    "default": "en"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User Invitation sent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User not found."
+          }
+        }
+      }
+    },
+    "/v2/users/{id}/groups": {
+      "get": {
+        "operationId": "getGroupsForUser",
+        "summary": "getGroupsForUser",
+        "description": "Get groups of a user",
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "required": true,
+            "description": "The Id of user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The returned user groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/groups": {
+      "get": {
+        "operationId": "getGroups",
+        "summary": "getGroups",
+        "description": "Lists groups in organizations you have access to",
+        "tags": ["Group"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query name to filter by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the results size",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Specify the offset",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "description": "Pass it true when you want to hydrate the group with full user details",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Hydrate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hits": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Group"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createGroup",
+        "summary": "createGroup",
+        "description": "Create a new group",
+        "tags": ["Group"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Group created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/groups/{id}": {
+      "get": {
+        "operationId": "getGroup",
+        "summary": "getGroup",
+        "description": "Get group by id",
+        "tags": ["Group"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          },
+          {
+            "name": "hydrate",
+            "in": "query",
+            "description": "Pass it true when you want to hydrate the group with full user details",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Hydrate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateGroup",
+        "summary": "updateGroup",
+        "description": "Update group by id",
+        "tags": ["Group"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroupReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Group created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteGroup",
+        "summary": "deleteGroup",
+        "description": "Delete group by id",
+        "tags": ["Group"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Group deleted successfully"
+          }
+        }
+      }
+    },
+    "/v1/groups/{id}/user:next": {
+      "post": {
+        "operationId": "advanceUserAssignment",
+        "summary": "advanceUserAssignment",
+        "description": "Advance user assignment to next user in line",
+        "tags": ["Group"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Group id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated user group with crt_assignee updated to next user in line",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Group not found"
+          },
+          "422": {
+            "description": "User Group has no users assigned, thus it cannot advance to next user"
+          }
+        }
+      }
+    },
+    "/v2/user/navigations": {
+      "post": {
+        "operationId": "createNavigation",
+        "summary": "createNavigation",
+        "description": "Create a new navigation configuration. Navigations are immutable and globally accessible across organizations.\nEach creation generates a new id. To update a navigation, create a new one.\n",
+        "tags": ["Navigation"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NavigationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Navigation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Navigation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/user/navigations/{id}": {
+      "get": {
+        "operationId": "getNavigation",
+        "summary": "getNavigation",
+        "description": "Get a navigation configuration by ID",
+        "tags": ["Navigation"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/NavigationId"
+            },
+            "required": true,
+            "description": "The UUID of the navigation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The navigation configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Navigation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Navigation not found"
+          }
+        }
+      }
+    },
+    "/v2/users/public/verifyEmail": {
+      "post": {
+        "operationId": "verifyEmailWithToken",
+        "summary": "verifyEmailWithToken",
+        "description": "Update new email using an verification token",
+        "security": [],
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/VerificationToken"
+            },
+            "required": true,
+            "description": "Verification Token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserVerificationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verified successfully"
+          },
+          "404": {
+            "description": "Token not found"
+          }
+        }
+      }
+    },
+    "/v2/users/public/checkToken": {
+      "get": {
+        "operationId": "checkInviteToken",
+        "summary": "checkInviteToken",
+        "description": "Check an invite token",
+        "security": [],
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invite token found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invitation_org_id": {
+                      "type": "string",
+                      "description": "Organization ID of the organization that invited the user"
+                    },
+                    "invitation_org_name": {
+                      "type": "string",
+                      "description": "Name of the organization that invited the user"
+                    },
+                    "invitation_org_logo_url": {
+                      "type": "string",
+                      "description": "Logo URL of the organization that invited the user"
+                    },
+                    "invitation_org_logo_thumbnail_url": {
+                      "type": "string",
+                      "description": "Logo Thumbnail URL of the organization that invited the user"
+                    },
+                    "invitee_user_id": {
+                      "type": "string",
+                      "description": "User ID of the invited user"
+                    },
+                    "invitee_primary_org_id": {
+                      "type": "string",
+                      "description": "Organization ID of the primary organization of the user (when inviting an existing epilot user)"
+                    }
+                  },
+                  "required": ["invitee_user_id", "invitation_org_id", "invitation_org_name"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found"
+          }
+        }
+      }
+    },
+    "/v2/users/public/activate": {
+      "post": {
+        "operationId": "activateUser",
+        "summary": "activateUser",
+        "description": "Activate user using an invite token",
+        "security": [],
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserActivationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activated successfully"
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "404": {
+            "description": "Token not found for the user"
+          }
+        }
+      }
+    },
+    "/v2/users/public/reject": {
+      "delete": {
+        "operationId": "rejectInvite",
+        "summary": "rejectInvite",
+        "description": "Reject an invite",
+        "security": [],
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "$ref": "#/components/schemas/InviteToken"
+            },
+            "required": true,
+            "description": "Invite Token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rejected invite successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Token not found for the user"
+          }
+        }
+      }
+    },
+    "/v2/users/public/username/{username}:getLoginParameters": {
+      "get": {
+        "operationId": "getUserLoginParametersV2",
+        "summary": "getUserLoginParametersV2",
+        "description": "Get user organization login parameters by username\n\nThe first item in the list corresponds to the user's primary organization and must be used for initial login.\n",
+        "security": [],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Username"
+            }
+          }
+        ],
+        "tags": ["User V2"],
+        "responses": {
+          "200": {
+            "description": "User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login_parameters": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginParameters"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/public/passkeys:authenticateBegin": {
+      "post": {
+        "operationId": "beginPasskeyAuthentication",
+        "summary": "beginPasskeyAuthentication",
+        "description": "Begin passkey authentication flow. Returns WebAuthn options and a signed challenge token.",
+        "security": [],
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "WebAuthn authentication options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyAuthenticationOptions"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or no passkeys registered"
+          }
+        }
+      }
+    },
+    "/v2/users/public/passkeys:authenticateBeginDiscoverable": {
+      "post": {
+        "operationId": "beginDiscoverablePasskeyAuthentication",
+        "summary": "beginDiscoverablePasskeyAuthentication",
+        "description": "Begin discoverable passkey authentication flow (no email required). Returns WebAuthn options with empty allowCredentials for the browser credential picker.",
+        "security": [],
+        "tags": ["User V2"],
+        "responses": {
+          "200": {
+            "description": "WebAuthn discoverable authentication options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyAuthenticationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/public/passkeys:resolveCredential": {
+      "post": {
+        "operationId": "resolveDiscoverableCredential",
+        "summary": "resolveDiscoverableCredential",
+        "description": "Resolve user identity from a discoverable passkey assertion. Returns the user's email and login parameters.",
+        "security": [],
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challenge_token": {
+                    "type": "string",
+                    "description": "The challenge token from authenticateBeginDiscoverable"
+                  },
+                  "assertion_response": {
+                    "type": "object",
+                    "description": "WebAuthn AuthenticatorAssertionResponse JSON"
+                  }
+                },
+                "required": ["challenge_token", "assertion_response"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolved user identity and login parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "organization_id": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "login_parameters": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginParameters"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Credential not found"
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys:registerBegin": {
+      "post": {
+        "operationId": "beginPasskeyRegistration",
+        "summary": "beginPasskeyRegistration",
+        "description": "Begin passkey registration flow for the authenticated user.",
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "friendly_name": {
+                    "type": "string",
+                    "example": "My Laptop"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "WebAuthn registration options",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasskeyRegistrationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys:registerComplete": {
+      "post": {
+        "operationId": "completePasskeyRegistration",
+        "summary": "completePasskeyRegistration",
+        "description": "Complete passkey registration by verifying the attestation response.",
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasskeyRegistrationResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Passkey registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Passkey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys": {
+      "get": {
+        "operationId": "listPasskeys",
+        "summary": "listPasskeys",
+        "description": "List all passkeys registered for the authenticated user.",
+        "tags": ["User V2"],
+        "responses": {
+          "200": {
+            "description": "List of passkeys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "passkeys": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Passkey"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/passkeys/{credentialId}": {
+      "delete": {
+        "operationId": "deletePasskey",
+        "summary": "deletePasskey",
+        "description": "Delete a passkey by credential ID.",
+        "tags": ["User V2"],
+        "parameters": [
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Passkey deleted successfully"
+          },
+          "404": {
+            "description": "Passkey not found"
+          }
+        }
+      }
+    },
+    "/v2/users/switchOrganization": {
+      "post": {
+        "operationId": "switchOrganization",
+        "summary": "switchOrganization",
+        "description": "Switch to another organization the user is part of",
+        "tags": ["User V2"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "org_id": {
+                    "$ref": "#/components/schemas/OrganizationId"
+                  }
+                },
+                "required": ["org_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A login token for the new organization to be used with CUSTOM_AUTH flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login_token": {
+                      "type": "string",
+                      "description": "A login token for the new organization to be used with CUSTOM_AUTH flow against login parameters"
+                    }
+                  },
+                  "required": ["login_token"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "getMe",
+        "description": "Get currently logged in user",
+        "tags": ["User V1"],
+        "responses": {
+          "200": {
+            "description": "Currently logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "listUsers",
+        "description": "Lists users in organizations you have access to",
+        "parameters": [
+          {
+            "name": "org_ids",
+            "in": "query",
+            "description": "Comma-separated list of organization ids to filter by",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OrganizationId"
+              }
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query text to filter by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Query"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the results size",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Specify the offset",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Offset"
+            }
+          }
+        ],
+        "tags": ["User V1"],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "summary": "getUser",
+        "description": "Get user by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          }
+        ],
+        "tags": ["User V1"],
+        "responses": {
+          "200": {
+            "description": "User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/username/{username}:getLoginParameters": {
+      "get": {
+        "operationId": "getUserLoginParameters",
+        "summary": "getUserLoginParameters",
+        "description": "Get user organization login parameters by username",
+        "security": [],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "Username",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Username"
+            }
+          }
+        ],
+        "tags": ["User V1"],
+        "responses": {
+          "200": {
+            "description": "User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login_parameters": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginParameters"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "NavigationId": {
+        "description": "Navigation unique identifier - a hash of the normalized navigation payload (name + configuration). Identical navigations across orgs will have the same ID.",
+        "type": "string",
+        "example": "5gbe4nkp6jsfq",
+        "nullable": true
+      },
+      "Navigation": {
+        "type": "object",
+        "description": "A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID.",
+        "required": ["id", "name", "configuration"],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the navigation configuration",
+            "example": "Sales Team Navigation"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/NavigationConfiguration"
+          }
+        }
+      },
+      "NavigationCreateRequest": {
+        "type": "object",
+        "description": "Request payload to create a new navigation configuration",
+        "required": ["name", "configuration"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for the navigation configuration",
+            "example": "Sales Team Navigation"
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/NavigationConfiguration"
+          }
+        }
+      },
+      "NavigationConfiguration": {
+        "type": "object",
+        "description": "Navigation configuration organized by sections. Each section contains an array of navigation items.\n",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/NavigationItem"
+          }
+        },
+        "example": {
+          "customer_relations": [
+            {
+              "key": "dashboard"
+            },
+            {
+              "key": "contact"
+            }
+          ],
+          "configurations": [
+            {
+              "name": "Product Catalog",
+              "subItems": [
+                {
+                  "key": "product"
+                },
+                {
+                  "key": "price"
+                }
+              ]
+            },
+            {
+              "key": "journey"
+            }
+          ]
+        }
+      },
+      "NavigationItem": {
+        "description": "A navigation item - either a simple key item or a group with sub-items",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/NavigationKeyItem"
+          },
+          {
+            "$ref": "#/components/schemas/NavigationGroupItem"
+          }
+        ]
+      },
+      "NavigationKeyItem": {
+        "type": "object",
+        "description": "A simple navigation item with a key",
+        "required": ["key"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The unique key identifier for the navigation item",
+            "example": "dashboard"
+          }
+        }
+      },
+      "NavigationGroupItem": {
+        "type": "object",
+        "description": "A navigation group containing sub-items",
+        "required": ["name", "subItems"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name of the navigation group",
+            "example": "Product Catalog"
+          },
+          "subItems": {
+            "type": "array",
+            "description": "The list of navigation items within this group",
+            "items": {
+              "$ref": "#/components/schemas/NavigationKeyItem"
+            }
+          }
+        }
+      },
+      "InviteToken": {
+        "description": "Token used to invite a user to epilot",
+        "type": "string"
+      },
+      "PartnerInvitationToken": {
+        "description": "Token used to invite a partner user to epilot",
+        "type": "string"
+      },
+      "VerificationToken": {
+        "type": "string"
+      },
+      "GroupId": {
+        "description": "Group unique identifier",
+        "type": "string",
+        "readOnly": true
+      },
+      "UserId": {
+        "description": "User's unique identifier",
+        "type": "string",
+        "readOnly": true
+      },
+      "Query": {
+        "type": "string"
+      },
+      "OrganizationId": {
+        "type": "string"
+      },
+      "Limit": {
+        "type": "number"
+      },
+      "Offset": {
+        "type": "number"
+      },
+      "Hydrate": {
+        "type": "boolean"
+      },
+      "Username": {
+        "type": "string"
+      },
+      "UserInvitationPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the address",
+            "example": "test@example.com"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for user invitation email",
+            "enum": ["en", "de"],
+            "default": "en"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Role IDs for the user",
+              "example": "123:owner"
+            }
+          }
+        }
+      },
+      "UserActivationPayload": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
+          }
+        }
+      },
+      "UserVerificationPayload": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
+          }
+        }
+      },
+      "UserV2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "activated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User's display name (default: email address)",
+            "example": "Example User"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["Active", "Pending", "Deactivated", "Deleted"]
+          },
+          "email": {
+            "description": "User's email address",
+            "type": "string",
+            "format": "email"
+          },
+          "draft_email": {
+            "description": "User's pending email address",
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "department": {
+            "type": "string",
+            "description": "User's department",
+            "nullable": true,
+            "example": "Sales"
+          },
+          "phone": {
+            "description": "User's phone number",
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "secondary_phone": {
+            "description": "User's secondary phone number, preferred for communication",
+            "type": "string",
+            "nullable": true,
+            "example": 1234567890
+          },
+          "mfa_enabled": {
+            "description": "User's multi-factor authentication status",
+            "type": "boolean",
+            "example": false
+          },
+          "phone_verified": {
+            "description": "User's phone number verification status",
+            "type": "boolean",
+            "example": true
+          },
+          "token": {
+            "$ref": "#/components/schemas/InviteToken"
+          },
+          "signature": {
+            "description": "User's email signature",
+            "type": "string",
+            "example": "<p>Thanks</p>",
+            "nullable": true
+          },
+          "is_signature_enabled": {
+            "description": "Whether the user's signature is enabled",
+            "type": "boolean",
+            "example": true,
+            "nullable": true
+          },
+          "preferred_language": {
+            "description": "User's preferred language",
+            "type": "string",
+            "example": "de"
+          },
+          "custom_start_page": {
+            "description": "User's start page after login",
+            "type": "string",
+            "pattern": "^/app/*",
+            "default": "/app/dashboard",
+            "nullable": true
+          },
+          "custom_navigation": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
+          "override_release_channel": {
+            "description": "This field is used to override the release channel for the user.",
+            "type": "string",
+            "nullable": true,
+            "enum": ["canary", "rc", "stable", null]
+          },
+          "feature_preferences": {
+            "description": "User's feature preferences",
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "example": {
+              "feature_name": true
+            }
+          },
+          "image_uri": {
+            "type": "object",
+            "description": "User's custom profile image",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "nullable": true,
+            "example": {
+              "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+              "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+            }
+          },
+          "favorites": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "entity_views": {
+                "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
+                "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
+              },
+              "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
+            }
+          },
+          "email_notification_setting": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "added_participant_opportunity": true,
+              "assigned_opportunity": true,
+              "assigned_task": true,
+              "comment_opportunity": true,
+              "deleted_task": true,
+              "escalated_task": true,
+              "message_receive_opportunity": true,
+              "message_send_opportunity": true,
+              "created_task": true,
+              "created_opportunity_manual": true,
+              "created_opportunity_auto": true,
+              "deleted_opportunity": true
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": ["name", "value"]
+            }
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "organization_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Example user",
+            "deprecated": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Example user",
+            "deprecated": true
+          },
+          "preferred_language": {
+            "type": "string",
+            "example": "de"
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>"
+          },
+          "custom_navigation": {
+            "$ref": "#/components/schemas/NavigationId"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "Owner"
+            },
+            "deprecated": true,
+            "description": "Deprecated! Please use Permissions API instead"
+          },
+          "image_uri": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "original": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://account-profile-images.epilot.cloud/1/avatar.png"
+              },
+              "thumbnail_32": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+              }
+            },
+            "nullable": true
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "profileImageName"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "avatar.png"
+                }
+              },
+              "required": ["name", "value"]
+            }
+          }
+        },
+        "required": ["id", "organization_id", "email", "name", "preferred_language", "roles", "properties"]
+      },
+      "LoginParameters": {
+        "type": "object",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "organization_name": {
+            "type": "string",
+            "example": "epilot GmbH"
+          },
+          "organization_type": {
+            "type": "string",
+            "example": "Vendor"
+          },
+          "organization_use": {
+            "type": "string",
+            "example": "Production"
+          },
+          "cognito_region": {
+            "type": "string",
+            "example": "eu-central-1"
+          },
+          "cognito_user_pool_id": {
+            "type": "string",
+            "example": "eu-central-sample"
+          },
+          "cognito_user_pool_client_id": {
+            "type": "string",
+            "example": "asbkh213ehkquwhdi"
+          },
+          "cognito_oauth_domain": {
+            "type": "string",
+            "example": "epilot-org-123"
+          },
+          "cognito_oauth_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["openid"]
+          },
+          "oauth_response_type": {
+            "type": "string",
+            "enum": ["code", "token"]
+          },
+          "passkey_enabled": {
+            "type": "boolean",
+            "description": "Whether passkey login is enabled for this organization"
+          }
+        }
+      },
+      "CreateGroupReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the group. Could be a department or a team.",
+            "type": "string",
+            "example": "Finance"
+          },
+          "user_ids": {
+            "description": "The list of user ids in the group.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "example": ["123", "456"]
+          }
+        },
+        "required": ["name"]
+      },
+      "UpdateGroupReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the group. Could be a department or a team.",
+            "type": "string",
+            "example": "Finance"
+          },
+          "user_ids": {
+            "description": "The list of user ids in the group.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserId"
+            },
+            "example": ["123", "456"]
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/GroupId"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "name": {
+            "description": "The name of the group. Could be a department or a team.",
+            "type": "string",
+            "example": "Finance"
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2024-02-08T04:44:32.246Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "example": "2024-02-08T04:44:32.246Z"
+          },
+          "created_by": {
+            "description": "The user id of the user that created the group.",
+            "type": "string",
+            "example": "123"
+          },
+          "crt_assignee": {
+            "description": "The current user assignee of the group. This is the user, from within the group, that has last been assigned to a workflow task.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserV2"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "crt_index": {
+                    "description": "The index of the current assignee in the group's user list.",
+                    "type": "number",
+                    "example": 3
+                  }
+                }
+              }
+            ]
+          },
+          "users": {
+            "description": "The list of users in the group. Only contains the full user when respective endpoint is called with a flag. Otherwise only contains the user id.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserV2"
+            }
+          }
+        },
+        "required": ["id", "org_id", "name", "created_at", "updated_at"]
+      },
+      "SignupUserPayload": {
+        "type": "object",
+        "properties": {
+          "organization_detail": {
+            "$ref": "#/components/schemas/OrganizationDetail"
+          },
+          "user_detail": {
+            "$ref": "#/components/schemas/UserDetail"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for user invitation email",
+            "enum": ["en", "de"],
+            "default": "en"
+          }
+        }
+      },
+      "OrganizationDetail": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Vendor", "Partner"]
+          },
+          "name": {
+            "type": "string",
+            "example": "Epilot"
+          },
+          "pricing_tier": {
+            "type": "string",
+            "example": "professional"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "is_privacy_policy_checked": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
+          },
+          "is_terms_and_conditions_checked": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
+          }
+        },
+        "required": ["type", "name", "pricing_tier", "email"]
+      },
+      "CognitoDetails": {
+        "type": "object",
+        "properties": {
+          "cognito_region": {
+            "type": "string",
+            "example": "eu-central-1"
+          },
+          "cognito_user_pool_id": {
+            "type": "string",
+            "example": "eu-central-sample"
+          },
+          "cognito_user_pool_client_id": {
+            "type": "string",
+            "example": "asbkh213ehkquwhdi"
+          },
+          "cognito_user_pool_arn": {
+            "type": "string",
+            "example": "arn:aws:cognito-idp:eu-central-1:123456789012:userpool/eu-central-sample"
+          }
+        }
+      },
+      "UserDetail": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "example": "Example user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "AKjhdakjsdh@!34"
+          }
+        },
+        "required": ["full_name", "email", "password"]
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/OrganizationId"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["Vendor", "Partner"],
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Epilot",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string",
+            "example": "<p>Thanks</p>",
+            "nullable": true
+          },
+          "symbol": {
+            "type": "string",
+            "example": "EPI",
+            "nullable": true
+          },
+          "pricing_tier": {
+            "type": "string",
+            "example": "professional",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "example": "someone@epilot.cloud",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "example": 49123123123,
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "example": "https://epilot.cloud",
+            "nullable": true
+          },
+          "address": {
+            "type": "object",
+            "properties": {
+              "country": {
+                "type": "string",
+                "nullable": true
+              },
+              "city": {
+                "type": "string",
+                "nullable": true
+              },
+              "postal_code": {
+                "type": "string",
+                "nullable": true
+              },
+              "street": {
+                "type": "string",
+                "nullable": true
+              },
+              "street_number": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "logo_url": {
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
+          },
+          "logo_thumbnail_url": {
+            "type": "string",
+            "example": "https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png",
+            "nullable": true
+          },
+          "is_unlicensed_org": {
+            "type": "boolean",
+            "example": false,
+            "nullable": true
+          },
+          "cognito_details": {
+            "$ref": "#/components/schemas/CognitoDetails"
+          }
+        }
+      },
+      "DataPointsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DataPoint"
+        }
+      },
+      "DataPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "Organization id",
+            "type": "number",
+            "example": 206801
+          },
+          "actual_users": {
+            "description": "Number of current user",
+            "type": "number",
+            "example": 10
+          },
+          "max_users_last_month": {
+            "description": "Max user last month",
+            "type": "number",
+            "example": 10
+          },
+          "non_billable_users_last_month": {
+            "description": "Max non-billable user last month",
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "Passkey": {
+        "type": "object",
+        "properties": {
+          "credential_id": {
+            "type": "string",
+            "description": "Base64url-encoded credential ID"
+          },
+          "friendly_name": {
+            "type": "string",
+            "example": "My Laptop"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aaguid": {
+            "type": "string"
+          }
+        }
+      },
+      "PasskeyAuthenticationOptions": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "object",
+            "description": "WebAuthn PublicKeyCredentialRequestOptions"
+          },
+          "challenge_token": {
+            "type": "string",
+            "description": "Signed JWT containing the challenge"
+          }
+        }
+      },
+      "PasskeyRegistrationOptions": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "object",
+            "description": "WebAuthn PublicKeyCredentialCreationOptions"
+          },
+          "challenge_token": {
+            "type": "string",
+            "description": "Signed JWT containing the challenge"
+          }
+        }
+      },
+      "PasskeyRegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "challenge_token": {
+            "type": "string",
+            "description": "The challenge token from registerBegin"
+          },
+          "registration_response": {
+            "type": "object",
+            "description": "WebAuthn AuthenticatorAttestationResponse"
+          },
+          "friendly_name": {
+            "type": "string",
+            "example": "My Laptop"
+          }
+        },
+        "required": ["challenge_token", "registration_response"]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://user.sls.epilot.io"
+    }
+  ]
+}

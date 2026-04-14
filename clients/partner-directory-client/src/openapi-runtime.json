@@ -210,6 +210,22 @@
           }
         },
         "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePartnerRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "roleId",
+            "required": true
+          }
+        ],
+        "responses": {}
       }
     },
     "/v2/partners/{orgId}/users/{userId}/roles": {

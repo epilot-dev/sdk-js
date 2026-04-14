@@ -1,0 +1,1 @@
+{"s":"https://consent.sls.epilot.io","o":[["publishConsentEvent","post","/v1/consent/publish",null,1],["listConsentEvents","get","/v1/consent/{identifier}",[["identifier","p",true],["topic","q"],["limit","q"],["from","q"]]],["handleOptInWithToken","get","/v1/opt-in/{token}",[["token","p",true],["lang","q"]]]],"v":"3.0.3"}

@@ -1,0 +1,1486 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Entity Mapping API",
+    "description": "API Backend for mapping source entity into target entities",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "mappings",
+      "description": "Entity Mapping Configs"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/mappings": {
+      "post": {
+        "operationId": "storeConfig",
+        "summary": "storeConfig",
+        "description": "Store new MappingConfig",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "with_id",
+            "in": "query",
+            "required": false,
+            "description": "Whether ids are part of the body or not",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Mapping Config to store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The updated entity mapping config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "getConfig",
+        "description": "Get latest version of a mapping config by id",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteConfig",
+        "summary": "deleteConfig",
+        "description": "Delete entity mapping config",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted mapping config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}/versions": {
+      "get": {
+        "operationId": "getAllVersions",
+        "summary": "getAllVersions",
+        "description": "Get all version of MappingConfig",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All versions of a MappingConfig",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfigsResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "storeNewVersion",
+        "summary": "storeNewVersion",
+        "description": "Store new version of MappingConfig",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Mapping Config to store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated entity mapping config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getConfigVersion",
+        "summary": "getConfigVersion",
+        "description": "Get specific version of a mapping config by id & version",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "description": "Version to be loaded",
+            "schema": {
+              "type": "number",
+              "example": 3
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings:execute": {
+      "post": {
+        "operationId": "executeMapping",
+        "summary": "executeMapping",
+        "description": "Execute entity mapping based on a config",
+        "parameters": [
+          {
+            "name": "preview_mode",
+            "in": "query",
+            "required": false,
+            "description": "True, if you want to preview the entities which will result",
+            "schema": {
+              "type": "boolean",
+              "example": true
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteMappingReq"
+              }
+            }
+          }
+        },
+        "tags": ["mappings"],
+        "responses": {
+          "200": {
+            "description": "The target entities which were mapped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteMappingResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings:search": {
+      "post": {
+        "operationId": "searchConfigs",
+        "summary": "searchConfigs",
+        "description": "Search mapping configs",
+        "tags": ["mappings"],
+        "requestBody": {
+          "description": "Search Mapping Configs",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchMappingReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfig"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mappings/history": {
+      "get": {
+        "operationId": "queryMappingHistory",
+        "summary": "queryMappingHistory",
+        "description": "Get the Mapping History",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            },
+            "required": false,
+            "description": "filter the history from this date on"
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "format": "datetime"
+            },
+            "required": false,
+            "description": "filter the history to this date on"
+          },
+          {
+            "in": "query",
+            "name": "targetEntityId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sourceEntityId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query result of mapping history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MappingHistoryResp"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/relations:execute": {
+      "post": {
+        "operationId": "executeRelations",
+        "summary": "executeRelations",
+        "description": "Execute relation mapping between source entity and target entities",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteRelationsReq"
+              }
+            }
+          }
+        },
+        "tags": ["mappings"],
+        "responses": {
+          "200": {
+            "description": "The relations which were for both source entity and main entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteRelationsResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/mappings/{id}": {
+      "get": {
+        "operationId": "getMappingConfig",
+        "summary": "getMappingConfig",
+        "description": "Get latest version of a mapping config by id V2",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity Mapping Config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfigV2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putMappingConfig",
+        "summary": "putMappingConfig",
+        "description": "Stores new version of entity mapping config",
+        "tags": ["mappings"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Mapping Config Id",
+            "schema": {
+              "type": "string",
+              "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Mapping Config to store",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingConfigV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated entity mapping config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingConfigV2"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Bearer Token"
+      }
+    },
+    "schemas": {
+      "SearchMappingReq": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/SourceConfig"
+          }
+        }
+      },
+      "MappingConfigsResp": {
+        "type": "object",
+        "properties": {
+          "configs": {
+            "$ref": "#/components/schemas/MappingConfigs"
+          }
+        },
+        "required": ["configs"]
+      },
+      "MappingConfigs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MappingConfig"
+        }
+      },
+      "MappingConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MappingConfigCommonFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "org_id": {
+                "type": "string",
+                "example": "66"
+              },
+              "version": {
+                "type": "integer",
+                "example": 2
+              }
+            }
+          }
+        ],
+        "required": ["org_id", "version"]
+      },
+      "MappingConfigV2": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MappingConfigCommonFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "org_id": {
+                "type": "string",
+                "example": "66",
+                "readOnly": true
+              },
+              "version": {
+                "type": "integer",
+                "example": 2,
+                "readOnly": true
+              }
+            }
+          }
+        ]
+      },
+      "MappingConfigCommonFields": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceConfig"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetConfig"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/Owner",
+            "description": "User / service who created the entity mapping config",
+            "example": {
+              "type": "internal_service"
+            }
+          },
+          "last_updated_by": {
+            "$ref": "#/components/schemas/Owner",
+            "description": "User / service who last updated entity mapping config",
+            "example": {
+              "type": "user",
+              "org_id": 255151,
+              "user_id": 99252
+            }
+          }
+        },
+        "required": ["id", "source", "targets"]
+      },
+      "Owner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["user", "internal_service"]
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          }
+        },
+        "required": ["type"]
+      },
+      "ExecuteRelationsReq": {
+        "type": "object",
+        "description": "Build relations between a source entity and one or more target entities, dynamically identified",
+        "properties": {
+          "source_ref": {
+            "$ref": "#/components/schemas/EntityRef",
+            "description": "Entity for which to add relations."
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "main_entity_ref": {
+                "$ref": "#/components/schemas/EntityRef",
+                "description": "Main Entity from where to locate target entities. Eg. submisssion entity"
+              },
+              "relation_attributes": {
+                "type": "array",
+                "description": "Relation mappings",
+                "items": {
+                  "$ref": "#/components/schemas/RelationAttribute"
+                }
+              },
+              "linkback": {
+                "type": "object",
+                "description": "For cases where you want to store a relation between main entity (eg. submission) and current source entity.",
+                "properties": {
+                  "attribute": {
+                    "type": "string",
+                    "default": "mapped_entities",
+                    "description": "Relation attribute on the main entity (submission) where the target entity will be linked. Set to false to disable linkback\n"
+                  },
+                  "relation_tags": {
+                    "type": "array",
+                    "description": "Relation tags (labels) to include in main entity linkback relation attribute",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["attribute", "relation_tags"]
+              }
+            },
+            "required": ["main_entity_ref", "relation_attributes"]
+          },
+          "additional_relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationItem"
+            }
+          }
+        },
+        "required": ["source_ref"]
+      },
+      "ExecuteRelationsResp": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewRelationItem"
+            }
+          }
+        }
+      },
+      "NewRelationItem": {
+        "type": "object",
+        "properties": {
+          "source_entity_id": {
+            "type": "string"
+          },
+          "target_entity_id": {
+            "type": "string"
+          },
+          "relation_attr": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["source_entity_id", "target_entity_id", "relation_attr"]
+      },
+      "RelationItem": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          }
+        },
+        "required": ["entity_id", "attribute"]
+      },
+      "ExecuteMappingReq": {
+        "type": "object",
+        "description": "Pass either source or source_entity",
+        "properties": {
+          "source_ref": {
+            "$ref": "#/components/schemas/EntityRef",
+            "description": "A reference (id and schema) to the entity to be used as source."
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetConfig"
+            },
+            "description": "Mapping Configuration to apply."
+          }
+        },
+        "required": ["source_ref", "targets"]
+      },
+      "ExecuteMappingResp": {
+        "type": "object",
+        "properties": {
+          "mapped_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingFailure"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingWarning"
+            }
+          }
+        },
+        "required": ["mapped_entities"]
+      },
+      "MappingFailure": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/TargetConfig"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "isSilent": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "MappingWarning": {
+        "type": "object",
+        "properties": {
+          "explanation": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": ["explanation"]
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "_schema": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string",
+            "nullable": true
+          },
+          "_org": {
+            "type": "string"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "_created_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": ["_id", "_schema", "_org", "_created_at", "_updated_at"]
+        },
+        "additionalProperties": true
+      },
+      "EntityRef": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "id of the source entity to be mapped"
+          },
+          "entity_schema": {
+            "description": "schema of the source entity",
+            "type": "string",
+            "example": "submission"
+          }
+        },
+        "required": ["entity_id"]
+      },
+      "SourceConfig": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["journey", "entity"]
+          },
+          "config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JourneyRef"
+              },
+              {
+                "$ref": "#/components/schemas/EntityRef"
+              }
+            ]
+          }
+        }
+      },
+      "JourneyRef": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string"
+          }
+        }
+      },
+      "Loop_Index_String": {
+        "type": "string",
+        "description": "This string value will be replaced with the value of the loop index, when mapping in loop mode",
+        "enum": ["##LOOP_INDEX##"]
+      },
+      "TargetConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier for target configuration. Useful for later usages when trying to identify which target config to map to."
+          },
+          "name": {
+            "type": "string",
+            "description": "A name for this configuration"
+          },
+          "allow_failure": {
+            "type": "boolean",
+            "description": "Pass it as true, when you don't want failures to interrupt the mapping process."
+          },
+          "target_schema": {
+            "type": "string",
+            "description": "Schema of target entity"
+          },
+          "target_unique": {
+            "type": "array",
+            "description": "Unique key for target entity (see upsertEntity of Entity API)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loop_config": {
+            "type": "object",
+            "description": "contains config in case of running in loop mode",
+            "properties": {
+              "source_path": {
+                "type": "string",
+                "description": "path to the array from the entity payload"
+              },
+              "length": {
+                "type": "number",
+                "description": "a hard limit of how many times the loop is allowed to run.",
+                "default": "the length of the array"
+              }
+            }
+          },
+          "conditionMode": {
+            "description": "Mode of how conditions are considered valid",
+            "type": "string",
+            "enum": ["oneOf", "anyOf", "allOf"]
+          },
+          "conditions": {
+            "type": "array",
+            "description": "Conditions necessary to hold for the target entity to be mapped",
+            "items": {
+              "$ref": "#/components/schemas/MapCondition"
+            }
+          },
+          "mapping_attributes": {
+            "type": "array",
+            "description": "Attribute mappings",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/MappingAttributeV2"
+                },
+                {
+                  "$ref": "#/components/schemas/MappingAttribute"
+                }
+              ]
+            }
+          },
+          "relation_attributes": {
+            "type": "array",
+            "description": "Relation mappings",
+            "items": {
+              "$ref": "#/components/schemas/RelationAttribute"
+            }
+          },
+          "linkback_relation_attribute": {
+            "type": "string",
+            "default": "mapped_entities",
+            "description": "Relation attribute on the main entity where the target entity will be linked. Set to false to disable linkback\n"
+          },
+          "linkback_relation_tags": {
+            "type": "array",
+            "description": "Relation tags (labels) to include in main entity linkback relation attribute",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["target_schema", "mapping_attributes"]
+      },
+      "MapCondition": {
+        "type": "object",
+        "properties": {
+          "_exists": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_equals": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_not_exists": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "_any_of": {
+            "$ref": "#/components/schemas/ConditionNode"
+          }
+        }
+      },
+      "ConditionNode": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "RelationAttribute": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target attribute to store the relation in"
+          },
+          "target_tags": {
+            "type": "array",
+            "description": "Relation tags (labels) to set for the stored relations",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_tags_include_source": {
+            "type": "boolean",
+            "description": "Include all relation tags (labels) present on the main entity relation",
+            "default": false
+          },
+          "override_with_source_filter": {
+            "type": "boolean",
+            "description": "Whether to override the relation source_filter with the specified one",
+            "default": false
+          },
+          "source_filter": {
+            "type": "object",
+            "description": "A filter to identify which source entities to pick as relations from main entity",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "description": "Limit relations to maximum number (default, all matched relations)",
+                "minimum": 0
+              },
+              "schema": {
+                "type": "string",
+                "description": "Filter by specific schema"
+              },
+              "attribute": {
+                "type": "string",
+                "description": "Filter by a specific relation attribute on the main entity"
+              },
+              "relation_tag": {
+                "type": "string",
+                "description": "Filter by relation tag (label) on the main entity"
+              },
+              "tag": {
+                "type": "string",
+                "description": "Filter by a specific tag on the related entity"
+              },
+              "self": {
+                "type": "boolean",
+                "description": "Picks main entity as relation (overrides other filters)",
+                "default": false
+              }
+            }
+          },
+          "related_to": {
+            "type": "object",
+            "additionalProperties": true,
+            "deprecated": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["append", "prepend", "set"]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/AttributeOrigin"
+          }
+        },
+        "required": ["target", "mode"]
+      },
+      "MappingAttributeV2": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target JSON path for the attribute to set"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/OperationNode"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/AttributeOrigin"
+          }
+        },
+        "required": ["target", "operation"],
+        "example": {
+          "target": "_tags",
+          "operation": {
+            "_append": ["new", "tags"],
+            "_uniq": true
+          }
+        }
+      },
+      "AttributeOrigin": {
+        "type": "string",
+        "description": "Origin of an attribute.",
+        "enum": ["system_recommendation", "user_manually", "entity_updating_system_recommendation"]
+      },
+      "OperationNode": {
+        "description": "Mapping operation nodes are either primitive values or operation node objects",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OperationObjectNode"
+          },
+          {
+            "$ref": "#/components/schemas/PrimitiveJSONValue"
+          }
+        ]
+      },
+      "OperationObjectNode": {
+        "type": "object",
+        "properties": {
+          "_set": {
+            "$ref": "#/components/schemas/PrimitiveJSONValue"
+          },
+          "_append": {
+            "description": "Append to array",
+            "items": {
+              "$ref": "#/components/schemas/PrimitiveJSONValue"
+            }
+          },
+          "_prepend": {
+            "description": "Prepend to an array",
+            "items": {
+              "$ref": "#/components/schemas/OperationNode"
+            }
+          },
+          "_uniq": {
+            "description": "Unique array",
+            "oneOf": [
+              {
+                "type": "boolean",
+                "example": true
+              },
+              {
+                "type": "array",
+                "description": "Unique key consisting of object keys",
+                "example": ["email"],
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "_retain_old_values": {
+            "description": "Merge strategy when _uniq is defined",
+            "type": "boolean",
+            "example": true
+          },
+          "_copy": {
+            "description": "Copy JSONPath value from source entity context",
+            "type": "string",
+            "example": "contact.first_name"
+          },
+          "_template": {
+            "description": "Define handlebars template to output a string",
+            "type": "string",
+            "example": "{{contact.first_name}} {{contact.last_name}}"
+          },
+          "_random": {
+            "description": "Generate random ids / numbers",
+            "$ref": "#/components/schemas/RandomOperation"
+          }
+        },
+        "additionalProperties": true
+      },
+      "PrimitiveJSONValue": {
+        "description": "Represents any primitive JSON value",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true
+          },
+          {
+            "type": "array"
+          }
+        ]
+      },
+      "RandomOperation": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["uuid", "nanoid"]
+              }
+            },
+            "required": ["type"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["number"]
+              },
+              "min": {
+                "type": "number",
+                "default": 0
+              },
+              "max": {
+                "type": "number",
+                "default": 1
+              }
+            },
+            "required": ["type"]
+          }
+        ]
+      },
+      "MappingAttribute": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SetValueMapper"
+          },
+          {
+            "$ref": "#/components/schemas/CopyValueMapper"
+          },
+          {
+            "$ref": "#/components/schemas/AppendValueMapper"
+          }
+        ]
+      },
+      "MappingAttributeMode": {
+        "type": "string",
+        "enum": ["copy_if_exists", "append_if_exists", "set_value"],
+        "description": "- copy_if_exists - it replaces the target attribute with the source value - append_if_exists - it currently replaces target attribute with array like values. Useful when you have multiple values to be added into one attribute. - set_value - it sets a value to a predefined value. Must be used together with value property.\n"
+      },
+      "SetValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "value": {
+            "description": "Any value to be set: string, number, string[], number[], JSON object, etc. It will override existing values, if any.\n"
+          }
+        },
+        "required": ["mode", "target", "value"]
+      },
+      "CopyValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "source": {
+            "type": "string",
+            "description": "JSON source path for the value to be extracted from the main entity. Eg: steps[1].['Product Info'].price\n"
+          }
+        },
+        "required": ["mode", "target", "source"]
+      },
+      "AppendValueMapper": {
+        "type": "object",
+        "deprecated": true,
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MappingAttributeMode"
+          },
+          "target": {
+            "type": "string",
+            "description": "JSON like target path for the attribute. Eg. last_name"
+          },
+          "source": {
+            "type": "string",
+            "description": "JSON source path for the value to be extracted from the main entity. Eg: steps[1].['Product Info'].price\n"
+          },
+          "value_json": {
+            "type": "string",
+            "description": "To be provided only when mapping json objects into a target attribute. Eg array of addresses.\n"
+          },
+          "target_unique": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of keys which should be used when checking for uniqueness. Eg: [country, city, postal_code]\n"
+          }
+        },
+        "required": ["mode", "target", "value_json"]
+      },
+      "MappingHistoryResp": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingHistoryEntry"
+            }
+          }
+        },
+        "required": ["results"]
+      },
+      "MappingHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "70542580-2b38-4bfc-af8d-bb90102f9f47"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "ISO datetime"
+          },
+          "source_entity_snapshot": {
+            "$ref": "#/components/schemas/Entity"
+          },
+          "mapped_entities_snapshot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "target_configs_snapshot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetConfig"
+            }
+          }
+        },
+        "required": ["id", "timestamp", "source_entity_snapshot", "target_configs_snapshot", "mapped_entities_snapshot"]
+      },
+      "MappingSource": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Key aiming to identify source"
+          },
+          "sub_properties": {
+            "description": "Each item describes a property under the main source and a possibly, a default value for its target attribute",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceProperty"
+            }
+          },
+          "source_type": {
+            "type": "string",
+            "description": "Data Structure type of source"
+          },
+          "group": {
+            "type": "string",
+            "description": "A group this source belongs to. Used for grouping sources in the UI"
+          },
+          "possible_target_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceTargetType"
+            },
+            "description": "Data Structure Type of the underlaying output value"
+          },
+          "initial_relation": {
+            "description": "Initial value of a relation to be added",
+            "$ref": "#/components/schemas/RelationAttribute"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human readable name of the Source"
+          },
+          "sub_title": {
+            "type": "string",
+            "description": "Human readable type of the source"
+          },
+          "repeatable": {
+            "type": "boolean",
+            "description": "Whether the source (block or attribute) is a repeatable, aka holds a list of values"
+          },
+          "target_settings": {
+            "type": "object",
+            "properties": {
+              "allowed_ui_actions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["schema-select", "attribute-select", "target-delete", "target-add", "target"]
+                },
+                "description": "Describes which actions the user can perform on each target, if specified. If not specified, all actions are allowed"
+              },
+              "locked": {
+                "type": "string",
+                "enum": ["each", "first", "system_recommendation"],
+                "description": "Whether its a read-only ui or not. Can be each target, or only the first. Overwrites uiActions"
+              },
+              "isSingleTarget": {
+                "type": "boolean",
+                "description": "Whether all source mappings flow into a single attribute (e.g. address)"
+              },
+              "visibility": {
+                "description": "Determines whether a mapping target should be shown or not. Use if there are targets which cannot be manipulated by the UI. E.g journey_data",
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["hide", "show", "message"]
+                  },
+                  "if": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": ["mode", "if"]
+              }
+            }
+          }
+        },
+        "required": ["key", "title", "source_type"]
+      },
+      "MappingSourceProperty": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "initial_target_value": {
+            "type": "string"
+          },
+          "possible_target_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MappingSourceTargetType"
+            },
+            "description": "Data Structure Type of the underlaying output value"
+          },
+          "raw": {
+            "type": "boolean",
+            "description": "Whether the raw value should be used, or whether the value is enriched by a path"
+          }
+        },
+        "required": ["value", "label"]
+      },
+      "MappingSourceTargetType": {
+        "type": "string",
+        "enum": [
+          "string",
+          "date",
+          "datetime",
+          "boolean",
+          "number",
+          "image",
+          "file",
+          "address",
+          "email",
+          "phone",
+          "select",
+          "multiselect",
+          "payment",
+          "link",
+          "currency",
+          "sequence",
+          "relation",
+          "array"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://entity-mapping.sls.epilot.io"
+    }
+  ]
+}

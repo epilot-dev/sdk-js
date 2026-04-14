@@ -1,11 +1,9 @@
-/* eslint-disable */
-
 import type {
-  OpenAPIClient,
-  Parameters,
-  UnknownParamsObject,
-  OperationResponse,
-  AxiosRequestConfig,
+    AxiosRequestConfig,
+    OpenAPIClient,
+    OperationResponse,
+    Parameters,
+    UnknownParamsObject,
 } from 'openapi-client-axios';
 
 declare namespace Components {
@@ -73,12 +71,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
-            source_blueprint_id?: /**
-             * ID of a blueprint
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -248,6 +246,10 @@ declare namespace Components {
             is_verified: boolean;
             docs_url?: string;
             recommended_apps?: string[];
+            required_features?: {
+                enabled?: string[];
+                disabled?: string[];
+            };
             created_at: string; // date-time
             created_by: CallerIdentity;
             /**
@@ -446,13 +448,10 @@ declare namespace Components {
             BlueprintJobID[];
             /**
              * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
-             */
-            source_blueprint_id?: /**
-             * ID of a blueprint
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -721,12 +720,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
-            source_blueprint_id?: /**
-             * ID of a blueprint
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -811,12 +810,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
-            source_blueprint_id?: /**
-             * ID of a blueprint
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -910,12 +909,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
-            source_blueprint_id?: /**
-             * ID of a blueprint
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -1569,12 +1568,12 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
-            source_blueprint_id?: /**
-             * ID of a blueprint
+            /**
+             * ID of the blueprint that brought this blueprint to the destination org (deployed or installed)
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintID;
+            source_blueprint_id?: string;
             /**
              * Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.
              */
@@ -1620,6 +1619,100 @@ declare namespace Components {
              * URL to install/update the blueprint from the marketplace.
              */
             installation_link?: string;
+        }
+        export interface MarketplaceListing {
+            id: string; // uuid
+            blueprint_id: string;
+            name: string;
+            slug: string;
+            logo?: string | null;
+            documentation_url?: string | null;
+            pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+            support_email?: string | null;
+            portal_description?: string | null;
+            teaser_name?: string | null;
+            teaser_short_description?: string | null;
+            teaser_thumbnail?: string | null;
+            details_page_title?: string | null;
+            details_page_description?: string | null;
+            details_page_hero_image?: string | null;
+            details_page_carousel?: string[] | null;
+            documentation_link?: string | null;
+            resources_section_description?: string | null;
+            resources_section_benefits_title?: string | null;
+            resources_section_benefits_list?: string | null;
+            resources_section_process_details?: string | null;
+            partner?: string | null;
+            partner_subtext?: string | null;
+            partner_logo?: string | null;
+            partner_website_link?: string | null;
+            last_updated_on?: string | null;
+            requires_customer_portal?: boolean | null;
+            process_details_section_title?: string | null;
+            is_new_blueprint?: boolean | null;
+            available_in?: string | null;
+            testimonials?: string[] | null;
+            installation_link?: string | null;
+            installation_slug?: string | null;
+            demo_form_link?: string | null;
+            order?: number | null;
+            categories?: string[] | null;
+            main_category?: string[] | null;
+            status: "draft" | "live" | "archived";
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
+        export interface MarketplaceListingUpdate {
+            name?: string;
+            slug?: string;
+            logo?: string | null;
+            documentation_url?: string | null;
+            pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+            support_email?: string | null;
+            portal_description?: string | null;
+            teaser_name?: string | null;
+            teaser_short_description?: string | null;
+            teaser_thumbnail?: string | null;
+            details_page_title?: string | null;
+            details_page_description?: string | null;
+            details_page_hero_image?: string | null;
+            details_page_carousel?: string[] | null;
+            documentation_link?: string | null;
+            resources_section_description?: string | null;
+            resources_section_benefits_title?: string | null;
+            resources_section_benefits_list?: string | null;
+            resources_section_process_details?: string | null;
+            partner?: string | null;
+            partner_subtext?: string | null;
+            partner_logo?: string | null;
+            partner_website_link?: string | null;
+            last_updated_on?: string | null;
+            requires_customer_portal?: boolean | null;
+            process_details_section_title?: string | null;
+            is_new_blueprint?: boolean | null;
+            available_in?: string | null;
+            testimonials?: string[] | null;
+            installation_link?: string | null;
+            installation_slug?: string | null;
+            demo_form_link?: string | null;
+            order?: number | null;
+            categories?: string[] | null;
+            main_category?: string[] | null;
+        }
+        export interface MarketplaceListingVersion {
+            id: string; // uuid
+            listing_id: string;
+            status: "draft" | "published" | "archived";
+            version_name?: string | null;
+            draft_label: string;
+            update_note?: string | null;
+            resources?: {
+                [key: string]: any;
+            }[] | null;
+            required_features?: string[] | null;
+            recommended_apps?: string[] | null;
+            created_at: string; // date-time
+            published_at?: string | null; // date-time
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
         /**
@@ -2027,6 +2120,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateMarketplaceListing {
+        namespace Parameters {
+            export type BlueprintId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            name: string;
+            slug?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.MarketplaceListing;
+            export interface $409 {
+            }
+        }
+    }
+    namespace CreateMarketplaceListingVersion {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.MarketplaceListingVersion;
+            export interface $404 {
+            }
+        }
+    }
     namespace CreatePlan {
         export type RequestBody = {
             /**
@@ -2173,6 +2296,20 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Manifest;
+        }
+    }
+    namespace DeleteMarketplaceListing {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace ExportBlueprint {
@@ -2361,6 +2498,118 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Manifest;
         }
     }
+    namespace GetMarketplaceListing {
+        namespace Parameters {
+            export type BlueprintId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $200 {
+                id: string; // uuid
+                blueprint_id: string;
+                name: string;
+                slug: string;
+                logo?: string | null;
+                documentation_url?: string | null;
+                pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                support_email?: string | null;
+                portal_description?: string | null;
+                teaser_name?: string | null;
+                teaser_short_description?: string | null;
+                teaser_thumbnail?: string | null;
+                details_page_title?: string | null;
+                details_page_description?: string | null;
+                details_page_hero_image?: string | null;
+                details_page_carousel?: string[] | null;
+                documentation_link?: string | null;
+                resources_section_description?: string | null;
+                resources_section_benefits_title?: string | null;
+                resources_section_benefits_list?: string | null;
+                resources_section_process_details?: string | null;
+                partner?: string | null;
+                partner_subtext?: string | null;
+                partner_logo?: string | null;
+                partner_website_link?: string | null;
+                last_updated_on?: string | null;
+                requires_customer_portal?: boolean | null;
+                process_details_section_title?: string | null;
+                is_new_blueprint?: boolean | null;
+                available_in?: string | null;
+                testimonials?: string[] | null;
+                installation_link?: string | null;
+                installation_slug?: string | null;
+                demo_form_link?: string | null;
+                order?: number | null;
+                categories?: string[] | null;
+                main_category?: string[] | null;
+                status: "draft" | "live" | "archived";
+                created_at?: string; // date-time
+                updated_at?: string; // date-time
+                versions?: Components.Schemas.MarketplaceListingVersion[];
+                has_publishable_draft?: boolean;
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetMarketplaceListingById {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export interface $200 {
+                id: string; // uuid
+                blueprint_id: string;
+                name: string;
+                slug: string;
+                logo?: string | null;
+                documentation_url?: string | null;
+                pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                support_email?: string | null;
+                portal_description?: string | null;
+                teaser_name?: string | null;
+                teaser_short_description?: string | null;
+                teaser_thumbnail?: string | null;
+                details_page_title?: string | null;
+                details_page_description?: string | null;
+                details_page_hero_image?: string | null;
+                details_page_carousel?: string[] | null;
+                documentation_link?: string | null;
+                resources_section_description?: string | null;
+                resources_section_benefits_title?: string | null;
+                resources_section_benefits_list?: string | null;
+                resources_section_process_details?: string | null;
+                partner?: string | null;
+                partner_subtext?: string | null;
+                partner_logo?: string | null;
+                partner_website_link?: string | null;
+                last_updated_on?: string | null;
+                requires_customer_portal?: boolean | null;
+                process_details_section_title?: string | null;
+                is_new_blueprint?: boolean | null;
+                available_in?: string | null;
+                testimonials?: string[] | null;
+                installation_link?: string | null;
+                installation_slug?: string | null;
+                demo_form_link?: string | null;
+                order?: number | null;
+                categories?: string[] | null;
+                main_category?: string[] | null;
+                status: "draft" | "live" | "archived";
+                created_at?: string; // date-time
+                updated_at?: string; // date-time
+                versions?: Components.Schemas.MarketplaceListingVersion[];
+                has_publishable_draft?: boolean;
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace InstallBlueprint {
         export interface RequestBody {
             source_org_id?: string;
@@ -2391,6 +2640,10 @@ declare namespace Paths {
              * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
              */
             slug?: string;
+            /**
+             * If true, automatically enable required features in the destination org before installing
+             */
+            auto_enable_features?: boolean;
         }
         namespace Responses {
             export interface $202 {
@@ -2463,15 +2716,35 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListMarketplaceListingVersions {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export interface $200 {
+                versions?: Components.Schemas.MarketplaceListingVersion[];
+            }
+        }
+    }
     namespace ListMarketplaceSlugs {
         namespace Responses {
             export interface $200 {
                 results?: {
                     /**
+                     * The installation slug identifier for the blueprint (used for publishing).
                      * example:
                      * wallbox_b2c
                      */
                     slug?: string;
+                    /**
+                     * The marketplace page slug for the Webflow CMS item (used for display).
+                     * example:
+                     * wallbox-b2c
+                     */
+                    marketplace_slug?: string;
                     /**
                      * example:
                      * v1.0.0
@@ -2536,6 +2809,27 @@ declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintJobID;
+            }
+        }
+    }
+    namespace PublishMarketplaceListingVersion {
+        namespace Parameters {
+            export type ListingId = string;
+            export type VersionId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+            version_id: Parameters.VersionId;
+        }
+        export interface RequestBody {
+            version_name: string;
+            update_note?: string | null;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListingVersion;
+            export interface $400 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -2622,6 +2916,42 @@ declare namespace Paths {
             export type $200 = Components.Schemas.Manifest;
         }
     }
+    namespace UpdateMarketplaceListing {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        export type RequestBody = Components.Schemas.MarketplaceListingUpdate;
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $404 {
+            }
+        }
+    }
+    namespace UpdateMarketplaceListingVersion {
+        namespace Parameters {
+            export type ListingId = string;
+            export type VersionId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+            version_id: Parameters.VersionId;
+        }
+        export interface RequestBody {
+            update_note?: string | null;
+            required_features?: string[];
+            recommended_apps?: string[];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListingVersion;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace UploadManifest {
         export type RequestBody = Components.Schemas.UploadFilePayload;
         namespace Responses {
@@ -2693,6 +3023,10 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
+            /**
+             * Auth token with access to the source org (e.g. pipeline token). If not provided, the caller's bearer token is used for both orgs.
+             */
+            source_auth_token?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -3095,6 +3429,96 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
+  /**
+   * getMarketplaceListing - getMarketplaceListing
+   * 
+   * Get marketplace listing for a blueprint including all versions
+   */
+  'getMarketplaceListing'(
+    parameters?: Parameters<Paths.GetMarketplaceListing.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMarketplaceListing.Responses.$200>
+  /**
+   * createMarketplaceListing - createMarketplaceListing
+   * 
+   * Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+   */
+  'createMarketplaceListing'(
+    parameters?: Parameters<Paths.CreateMarketplaceListing.PathParameters> | null,
+    data?: Paths.CreateMarketplaceListing.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMarketplaceListing.Responses.$201>
+  /**
+   * getMarketplaceListingById - getMarketplaceListingById
+   * 
+   * Get marketplace listing by listing ID including all versions
+   */
+  'getMarketplaceListingById'(
+    parameters?: Parameters<Paths.GetMarketplaceListingById.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMarketplaceListingById.Responses.$200>
+  /**
+   * updateMarketplaceListing - updateMarketplaceListing
+   * 
+   * Update listing-level fields
+   */
+  'updateMarketplaceListing'(
+    parameters?: Parameters<Paths.UpdateMarketplaceListing.PathParameters> | null,
+    data?: Paths.UpdateMarketplaceListing.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateMarketplaceListing.Responses.$200>
+  /**
+   * deleteMarketplaceListing - deleteMarketplaceListing
+   * 
+   * Delete listing and all versions
+   */
+  'deleteMarketplaceListing'(
+    parameters?: Parameters<Paths.DeleteMarketplaceListing.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteMarketplaceListing.Responses.$204>
+  /**
+   * listMarketplaceListingVersions - listMarketplaceListingVersions
+   * 
+   * List all versions for a listing, newest first
+   */
+  'listMarketplaceListingVersions'(
+    parameters?: Parameters<Paths.ListMarketplaceListingVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMarketplaceListingVersions.Responses.$200>
+  /**
+   * createMarketplaceListingVersion - createMarketplaceListingVersion
+   * 
+   * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+   */
+  'createMarketplaceListingVersion'(
+    parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
+  /**
+   * updateMarketplaceListingVersion - updateMarketplaceListingVersion
+   * 
+   * Update updateNote, requiredFeatures, or recommendedApps on a draft version
+   */
+  'updateMarketplaceListingVersion'(
+    parameters?: Parameters<Paths.UpdateMarketplaceListingVersion.PathParameters> | null,
+    data?: Paths.UpdateMarketplaceListingVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateMarketplaceListingVersion.Responses.$200>
+  /**
+   * publishMarketplaceListingVersion - publishMarketplaceListingVersion
+   * 
+   * Publish a draft version; archives the previous live version
+   */
+  'publishMarketplaceListingVersion'(
+    parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
+    data?: Paths.PublishMarketplaceListingVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3538,6 +3962,106 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
   }
+  ['/v1/blueprints/{blueprint_id}/marketplace-listing']: {
+    /**
+     * createMarketplaceListing - createMarketplaceListing
+     * 
+     * Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMarketplaceListing.PathParameters> | null,
+      data?: Paths.CreateMarketplaceListing.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMarketplaceListing.Responses.$201>
+    /**
+     * getMarketplaceListing - getMarketplaceListing
+     * 
+     * Get marketplace listing for a blueprint including all versions
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMarketplaceListing.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMarketplaceListing.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}']: {
+    /**
+     * getMarketplaceListingById - getMarketplaceListingById
+     * 
+     * Get marketplace listing by listing ID including all versions
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMarketplaceListingById.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMarketplaceListingById.Responses.$200>
+    /**
+     * updateMarketplaceListing - updateMarketplaceListing
+     * 
+     * Update listing-level fields
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateMarketplaceListing.PathParameters> | null,
+      data?: Paths.UpdateMarketplaceListing.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateMarketplaceListing.Responses.$200>
+    /**
+     * deleteMarketplaceListing - deleteMarketplaceListing
+     * 
+     * Delete listing and all versions
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteMarketplaceListing.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteMarketplaceListing.Responses.$204>
+  }
+  ['/v1/marketplace-listings/{listing_id}/versions']: {
+    /**
+     * createMarketplaceListingVersion - createMarketplaceListingVersion
+     * 
+     * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
+    /**
+     * listMarketplaceListingVersions - listMarketplaceListingVersions
+     * 
+     * List all versions for a listing, newest first
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListMarketplaceListingVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMarketplaceListingVersions.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/versions/{version_id}']: {
+    /**
+     * updateMarketplaceListingVersion - updateMarketplaceListingVersion
+     * 
+     * Update updateNote, requiredFeatures, or recommendedApps on a draft version
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateMarketplaceListingVersion.PathParameters> | null,
+      data?: Paths.UpdateMarketplaceListingVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateMarketplaceListingVersion.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/versions/{version_id}/publish']: {
+    /**
+     * publishMarketplaceListingVersion - publishMarketplaceListingVersion
+     * 
+     * Publish a draft version; archives the previous live version
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
+      data?: Paths.PublishMarketplaceListingVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -3583,6 +4107,9 @@ export type ManifestItem = Components.Schemas.ManifestItem;
 export type ManifestSource = Components.Schemas.ManifestSource;
 export type ManifestTimestampFields = Components.Schemas.ManifestTimestampFields;
 export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
+export type MarketplaceListing = Components.Schemas.MarketplaceListing;
+export type MarketplaceListingUpdate = Components.Schemas.MarketplaceListingUpdate;
+export type MarketplaceListingVersion = Components.Schemas.MarketplaceListingVersion;
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;

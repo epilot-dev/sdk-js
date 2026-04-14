@@ -1,0 +1,3149 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Blueprint Manifest API",
+    "version": "4.5.0",
+    "description": "Service to create and install Blueprint Manifest files"
+  },
+  "tags": [
+    {
+      "name": "Jobs",
+      "description": "Manage Export and Import Jobs"
+    },
+    {
+      "name": "Export",
+      "description": "Export a Blueprint Manifest"
+    },
+    {
+      "name": "Import",
+      "description": "Install or update a Blueprint Manifest"
+    },
+    {
+      "name": "Manifests",
+      "description": "Manage installed Manifests"
+    },
+    {
+      "name": "Blueprints",
+      "description": "Manage Custom and Installed Blueprints"
+    },
+    {
+      "name": "Installations",
+      "description": "Manage installation jobs"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://blueprint-manifest.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/blueprint-manifest/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "summary": "getJob",
+        "description": "Get the current status of a blueprint (export or import)",
+        "deprecated": true,
+        "tags": ["Jobs"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current status of the blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createExport": {
+      "post": {
+        "operationId": "createExport",
+        "summary": "createExport",
+        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n",
+        "deprecated": true,
+        "tags": ["Export"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "$ref": "#/components/schemas/ResourceNodeType"
+                        },
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["type", "id"]
+                    },
+                    "minItems": 1
+                  },
+                  "jobId": {
+                    "$ref": "#/components/schemas/JobID"
+                  },
+                  "isExportingMultipleResources": {
+                    "type": "boolean",
+                    "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "pipelineId": {
+                    "type": "string",
+                    "description": "Pipeline ID selected when doing the sandbox sync"
+                  },
+                  "manifestId": {
+                    "type": "string",
+                    "description": "ID of the installed manifest to load the resource addresses from"
+                  }
+                },
+                "required": ["resources"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Export Job ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
+      "post": {
+        "operationId": "exportManifest",
+        "summary": "exportManifest",
+        "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`",
+        "deprecated": true,
+        "tags": ["Export"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "selectedResourceIds": {
+                    "description": "An array of resource IDs to export",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "resourceName": {
+                    "type": "string",
+                    "example": "journey_HouseConnectionJourney"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "markdown": {
+                        "type": "object",
+                        "properties": {
+                          "manifest": {
+                            "type": "string"
+                          },
+                          "preinstall": {
+                            "type": "string"
+                          },
+                          "postinstall": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "docs_link": {
+                        "type": "string"
+                      },
+                      "source_blueprint_name": {
+                        "type": "string"
+                      },
+                      "source_blueprint_slug": {
+                        "type": "string"
+                      },
+                      "source_blueprint_version": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "isExportingMultipleResources": {
+                    "type": "boolean",
+                    "description": "Temporary flag to indicate if multiple resources are being exported"
+                  },
+                  "generateAISummary": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": ["en", "de"]
+                  }
+                },
+                "required": ["resourceName", "selectedResourceIds"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Export Job ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest:uploadManifest": {
+      "post": {
+        "operationId": "uploadManifest",
+        "summary": "uploadManifest",
+        "description": "Create pre-signed S3 URL to upload a manifest file.\n",
+        "tags": ["Import"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadFilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL for POST / PUT upload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "s3ref": {
+                      "$ref": "#/components/schemas/S3Reference"
+                    },
+                    "upload_url": {
+                      "type": "string",
+                      "format": "url",
+                      "example": "https://epilot-dev-blueprints.s3.eu-central-1.amazonaws.com/templates/document.pdf"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/jobs:createPlan": {
+      "post": {
+        "operationId": "createPlan",
+        "summary": "createPlan",
+        "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n",
+        "deprecated": true,
+        "tags": ["Import"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "s3ref": {
+                        "allOf": [
+                          {
+                            "description": "s3ref of manifest file uploaded via `uploadManifest`"
+                          },
+                          {
+                            "$ref": "#/components/schemas/S3Reference"
+                          }
+                        ]
+                      },
+                      "manifest_id": {
+                        "allOf": [
+                          {
+                            "description": "Update an existing manifest (optional)"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestID"
+                          }
+                        ]
+                      },
+                      "job_id": {
+                        "allOf": [
+                          {
+                            "description": "Continue a previous job"
+                          },
+                          {
+                            "$ref": "#/components/schemas/JobID"
+                          }
+                        ]
+                      },
+                      "source": {
+                        "allOf": [
+                          {
+                            "description": "Source of the manifest"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestSource"
+                          }
+                        ]
+                      },
+                      "resourcesToIgnore": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of resources to ignore changes for"
+                      },
+                      "resourceReplacements": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/ResourceReplacement"
+                        },
+                        "description": "List of resource replacements to apply during import"
+                      },
+                      "deployedFrom": {
+                        "type": "object",
+                        "properties": {
+                          "sourceOrganizationId": {
+                            "type": "string"
+                          },
+                          "sourceManifestId": {
+                            "type": "string"
+                          },
+                          "sourceOrganizationType": {
+                            "type": "string",
+                            "enum": ["sandbox", "production"]
+                          }
+                        },
+                        "required": ["sourceOrganizationId", "sourceManifestId", "sourceOrganizationType"]
+                      }
+                    },
+                    "required": ["s3ref"]
+                  },
+                  {
+                    "type": "object",
+                    "deprecated": true,
+                    "properties": {
+                      "manifestFilePath": {
+                        "deprecated": true,
+                        "description": "Manifest s3 key uploaded via `uploadManifest`",
+                        "type": "string"
+                      },
+                      "manifest_id": {
+                        "allOf": [
+                          {
+                            "description": "Update an existing manifest (optional)"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestID"
+                          }
+                        ]
+                      },
+                      "job_id": {
+                        "allOf": [
+                          {
+                            "description": "Continue a previous job"
+                          },
+                          {
+                            "$ref": "#/components/schemas/JobID"
+                          }
+                        ]
+                      },
+                      "source": {
+                        "allOf": [
+                          {
+                            "description": "Source of the manifest"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ManifestSource"
+                          }
+                        ]
+                      },
+                      "resourcesToIgnore": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "List of resources to ignore changes for"
+                      },
+                      "resourceReplacements": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/ResourceReplacement"
+                        },
+                        "description": "List of resource replacements to apply during import"
+                      },
+                      "deployedFrom": {
+                        "type": "object",
+                        "properties": {
+                          "sourceOrganizationId": {
+                            "type": "string"
+                          },
+                          "sourceManifestId": {
+                            "type": "string"
+                          },
+                          "sourceOrganizationType": {
+                            "type": "string",
+                            "enum": ["sandbox", "production"]
+                          }
+                        },
+                        "required": ["sourceOrganizationId", "sourceManifestId", "sourceOrganizationType"]
+                      }
+                    },
+                    "required": ["manifestFilePath"]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Import Job ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string",
+                      "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
+      "post": {
+        "operationId": "applyPlan",
+        "summary": "applyPlan",
+        "description": "Apply a plan returned by `createPlan`.",
+        "deprecated": true,
+        "tags": ["Import"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/JobID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resourcesToIgnore": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "List of resources to ignore changes for"
+                  },
+                  "resourceReplacements": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ResourceReplacement"
+                    },
+                    "description": "List of resource replacements to apply during import"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Applied Import Job ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "$ref": "#/components/schemas/JobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/manifests": {
+      "get": {
+        "operationId": "listInstalledManifests",
+        "summary": "listInstalledManifests",
+        "description": "List Blueprint Manifests installed to the organization",
+        "deprecated": true,
+        "tags": ["Manifests"],
+        "responses": {
+          "200": {
+            "description": "Installed Blueprint Manifests in the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ManifestItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/blueprint-manifest/manifests/{manifest_id}": {
+      "get": {
+        "operationId": "getManifest",
+        "summary": "getManifest",
+        "description": "Get installed Manifest by ID",
+        "deprecated": true,
+        "tags": ["Manifests"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Installed Blueprint Manifest in the Organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateManifest",
+        "summary": "updateManifest",
+        "description": "Update an installed manifest\n",
+        "deprecated": true,
+        "tags": ["Manifests"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutManifestPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteManifest",
+        "summary": "deleteManifest",
+        "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n",
+        "deprecated": true,
+        "tags": ["Manifests"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "manifest_id",
+            "schema": {
+              "$ref": "#/components/schemas/ManifestID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted Manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints": {
+      "get": {
+        "operationId": "listBlueprints",
+        "summary": "listBlueprints",
+        "description": "List Custom and Installed Blueprints",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "name": "archived",
+            "in": "query",
+            "description": "Filter blueprints by archived status. If true, returns only archived blueprints. If false or not provided, returns only non-archived blueprints.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Blueprint"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBlueprint",
+        "summary": "createBlueprint",
+        "description": "Create a Blueprint",
+        "tags": ["Blueprints"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Blueprint"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:marketplace": {
+      "get": {
+        "operationId": "listInstalledMarketplaceBlueprints",
+        "summary": "listInstalledMarketplaceBlueprints",
+        "description": "List installed Marketplace Blueprints for the organization.\nWhen multiple blueprints have the same slug, returns only the most recently created one.\n",
+        "tags": ["Blueprints"],
+        "responses": {
+          "200": {
+            "description": "Installed Marketplace Blueprints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/InstalledMarketplaceBlueprintItem"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprint",
+        "summary": "preInstallBlueprint",
+        "description": "Pre-install a Blueprint based on a blueprint file",
+        "tags": ["Blueprints"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "blueprint_file": {
+                    "type": "string",
+                    "description": "URL to the blueprint zip file"
+                  },
+                  "source_blueprint_type": {
+                    "type": "string",
+                    "enum": ["marketplace"]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blueprint preview data for UI display",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
+      "get": {
+        "operationId": "getBlueprintPreview",
+        "summary": "getBlueprintPreview",
+        "description": "Get Blueprint Preview by ID",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "preview_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint Preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPreview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint Preview not found"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprint",
+        "summary": "installBlueprint",
+        "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
+        "tags": ["Blueprints"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_org_id": {
+                    "type": "string"
+                  },
+                  "source_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "source_blueprint_file": {
+                    "type": "string",
+                    "description": "URL to the blueprint zip file"
+                  },
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "options": {
+                    "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": ["simple", "advanced"],
+                    "description": "Installation mode"
+                  },
+                  "source_blueprint_type": {
+                    "type": "string",
+                    "enum": ["marketplace"]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
+                  }
+                },
+                "required": ["mode"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Blueprint installation job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    },
+                    "destination_blueprint_id": {
+                      "$ref": "#/components/schemas/BlueprintID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
+      "get": {
+        "operationId": "getBlueprint",
+        "summary": "getBlueprint",
+        "description": "Get Blueprint by ID",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBlueprint",
+        "summary": "updateBlueprint",
+        "description": "Update a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Blueprint"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprint",
+        "summary": "deleteBlueprint",
+        "description": "Delete a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Blueprint",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blueprint"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
+      "post": {
+        "operationId": "validateBlueprint",
+        "summary": "validateBlueprint",
+        "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Validation job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint not found"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
+      "post": {
+        "operationId": "exportBlueprint",
+        "summary": "exportBlueprint",
+        "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destination_org_id": {
+                    "type": "string"
+                  },
+                  "destination_blueprint_id": {
+                    "type": "string"
+                  },
+                  "validate": {
+                    "type": "boolean",
+                    "description": "When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Blueprint export job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
+      "post": {
+        "operationId": "formatBlueprintDescription",
+        "summary": "formatBlueprintDescription",
+        "description": "Format a blueprint description as markdown using AI.\n",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Plain text to format as markdown"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully formatted description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "markdown": {
+                      "type": "string",
+                      "description": "AI-formatted markdown content"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources": {
+      "post": {
+        "operationId": "addBlueprintResource",
+        "summary": "addBlueprintResource",
+        "description": "Add a resource to a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to add this resource dependencies to the blueprint automatically"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintResource"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Added Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies": {
+      "post": {
+        "operationId": "syncDependencies",
+        "summary": "syncDependencies",
+        "description": "Sync dependencies of all root resources in a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dependencies sync job started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the job",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk": {
+      "post": {
+        "operationId": "bulkAddBlueprintResources",
+        "summary": "bulkAddBlueprintResources",
+        "description": "Bulk Add resources in a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "add_dependencies",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to add this resource dependencies to the blueprint automatically"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk updated Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "bulkUpdateBlueprintResources",
+        "summary": "bulkUpdateBlueprintResources",
+        "description": "Bulk update resources in a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk updated Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "bulkDeleteBlueprintResources",
+        "summary": "bulkDeleteBlueprintResources",
+        "description": "Bulk delete resources in a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResourceID"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk deleted Blueprint Resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}": {
+      "put": {
+        "operationId": "updateBlueprintResource",
+        "summary": "updateBlueprintResource",
+        "description": "Update a resource in a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintResource"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprintResource",
+        "summary": "deleteBlueprintResource",
+        "description": "Delete a resource from a Blueprint",
+        "tags": ["Blueprints"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "resource_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted Blueprint Resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintResource"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/jobs": {
+      "get": {
+        "operationId": "listBlueprintJobs",
+        "summary": "List Blueprint Jobs",
+        "description": "List all blueprint jobs",
+        "tags": ["Jobs"],
+        "responses": {
+          "200": {
+            "description": "Blueprint jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintJob"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}": {
+      "get": {
+        "operationId": "getBlueprintJob",
+        "summary": "Get Job",
+        "description": "Poll current state of a job.",
+        "tags": ["Jobs"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}:continue": {
+      "post": {
+        "operationId": "continueInstallationJob",
+        "summary": "Continue Installation Job",
+        "description": "Continue an installation job if it is waiting for user action.",
+        "tags": ["Jobs"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blueprint installation job continued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintInstallationJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
+      "post": {
+        "operationId": "cancelBlueprintJob",
+        "summary": "Cancel Blueprint Job",
+        "description": "Cancel a blueprint job if it is still running.",
+        "tags": ["Jobs"],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blueprint job cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BlueprintID": {
+        "type": "string",
+        "description": "ID of a blueprint",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "BlueprintResourceID": {
+        "type": "string",
+        "description": "ID of a blueprint resource",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "CommonBlueprintFields": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string",
+                "description": "Markdown content shown before starting to install the blueprint",
+                "example": "This is the content of the preinstall.md file which contains the blueprint description.\n"
+              },
+              "postinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the postinstall.md file\n"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "deployments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source_org_id": {
+                  "type": "string"
+                },
+                "source_blueprint_id": {
+                  "type": "string"
+                },
+                "destination_org_id": {
+                  "type": "string"
+                },
+                "destination_blueprint_id": {
+                  "type": "string"
+                },
+                "triggered_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Whether the blueprint is verified by epilot"
+          },
+          "installation_status": {
+            "type": "string",
+            "enum": ["IN_PROGRESS", "CANCELED", "PARTIAL", "SUCCESS", "FAILED"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "installation_job_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          },
+          "source_blueprint_id": {
+            "description": "ID of the blueprint that brought this blueprint to the destination org (deployed or installed)",
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Whether the blueprint is archived (soft-deleted). Archived blueprints are hidden from the main list.",
+            "default": false
+          },
+          "docs_url": {
+            "type": "string",
+            "description": "URL to the blueprint documentation"
+          },
+          "recommended_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of recommended app IDs for the blueprint"
+          },
+          "required_features": {
+            "type": "object",
+            "description": "Feature constraints for blueprint installation",
+            "properties": {
+              "enabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Features that must be enabled in the target org"
+              },
+              "disabled": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Features that must be disabled in the target org"
+              }
+            }
+          },
+          "zip_file_name": {
+            "type": "string",
+            "description": "Custom name for the exported zip file"
+          }
+        },
+        "required": ["title"]
+      },
+      "BlueprintResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintResourceID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "address": {
+            "type": "string"
+          },
+          "is_root": {
+            "type": "boolean",
+            "description": "When a resource is marked as root, we'll be able to keep track of it's dependencies"
+          },
+          "is_ready": {
+            "type": "boolean",
+            "description": "when editing a blueprint, this indicates if the resource is ready to be exported and when installing a blueprint, this indicates if the resource is ready to be used"
+          },
+          "is_hidden": {
+            "type": "boolean",
+            "description": "When a resource is marked as hidden, it's used to hide it from the UI"
+          },
+          "is_disabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "When a resource is marked as disabled, it will be skipped during export"
+          },
+          "hard_dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceNodeType"
+            }
+          },
+          "parent_resource_ids": {
+            "type": "array",
+            "description": "Used to automatically remove resources with hard dependencies and to block deletion of resources with hard dependencies",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResourceID"
+            }
+          },
+          "depends_on_addresses": {
+            "type": "array",
+            "description": "Terraform addresses this resource references (for dependency-aware ignore)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "impact_on_install": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["create", "update", "internal-update", "no-op", "delete", "ignored"]
+            }
+          },
+          "impact_on_install_reason": {
+            "type": "array",
+            "description": "Fields causing the updates / internal updates on a resource install",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "type"]
+      },
+      "BlueprintPreview": {
+        "type": "object",
+        "description": "Preview data for a blueprint before installation. Stored temporarily with TTL.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique preview ID"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "preinstall": {
+                "type": "string"
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": ["marketplace", "file"]
+          },
+          "blueprint_file_s3_key": {
+            "type": "string",
+            "description": "S3 key of the blueprint zip file"
+          },
+          "is_verified": {
+            "type": "boolean"
+          },
+          "docs_url": {
+            "type": "string"
+          },
+          "recommended_apps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "is_updating": {
+            "type": "boolean",
+            "description": "Whether the blueprint is updating to the latest version in the marketplace"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResource"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "org_id",
+          "title",
+          "source_type",
+          "blueprint_file_s3_key",
+          "is_verified",
+          "created_at",
+          "created_by",
+          "resources",
+          "is_updating"
+        ]
+      },
+      "CustomBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              },
+              "source_type": {
+                "type": "string",
+                "const": "custom"
+              }
+            }
+          }
+        ],
+        "required": ["source_type"]
+      },
+      "FileBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_type": {
+                "type": "string",
+                "const": "file"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              }
+            }
+          }
+        ],
+        "required": ["source_type"]
+      },
+      "MarketplaceBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "docs_url": {
+                "type": "string",
+                "description": "URL to the blueprint documentation"
+              },
+              "source_type": {
+                "type": "string",
+                "const": "marketplace"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              },
+              "recommended_apps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of recommended app IDs for the blueprint"
+              },
+              "has_update_available": {
+                "type": "boolean",
+                "description": "Whether a newer version is available in the marketplace."
+              },
+              "latest_marketplace_version": {
+                "type": "string",
+                "description": "The latest version available in the marketplace.",
+                "example": "v2.0.0"
+              },
+              "installation_link": {
+                "type": "string",
+                "description": "URL to install/update the blueprint from the marketplace."
+              }
+            }
+          }
+        ],
+        "required": ["source_type"]
+      },
+      "InstalledMarketplaceBlueprintItem": {
+        "type": "object",
+        "description": "Summary of an installed marketplace blueprint for version tracking",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug of the blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the installed blueprint",
+            "example": "v1.0.0"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "has_update_available": {
+            "type": "boolean",
+            "description": "Whether a newer version is available in the marketplace",
+            "example": true
+          },
+          "latest_marketplace_version": {
+            "type": "string",
+            "description": "The latest version available in the marketplace",
+            "example": "v2.0.0"
+          },
+          "installation_link": {
+            "type": "string",
+            "description": "URL to install/update the blueprint from the marketplace"
+          }
+        },
+        "required": ["id", "slug"]
+      },
+      "DeployedBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_type": {
+                "type": "string",
+                "const": "deploy"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              }
+            }
+          }
+        ],
+        "required": ["source_type"]
+      },
+      "AppBlueprint": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_type": {
+                "type": "string",
+                "const": "app"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintResource"
+                }
+              }
+            }
+          }
+        ],
+        "required": ["source_type"]
+      },
+      "Blueprint": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CustomBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/FileBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/MarketplaceBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/DeployedBlueprint"
+          },
+          {
+            "$ref": "#/components/schemas/AppBlueprint"
+          }
+        ]
+      },
+      "BlueprintJobID": {
+        "type": "string",
+        "description": "ID of a job",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "CommonBlueprintJobFields": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintJobID"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintJobEvent"
+            }
+          },
+          "triggered_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          }
+        }
+      },
+      "BlueprintExportJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["IN_PROGRESS", "SUCCESS", "FAILED", "CANCELED"]
+              },
+              "download_file": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintInstallationJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "source_blueprint_type": {
+                "type": "string",
+                "enum": ["custom", "file", "marketplace", "deploy", "app"]
+              },
+              "source_org_id": {
+                "type": "string"
+              },
+              "source_blueprint_file": {
+                "type": "string"
+              },
+              "destination_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "destination_org_id": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string",
+                "description": "Blueprint slug for marketplace blueprints"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["IN_PROGRESS", "WAITING_USER_ACTION", "CANCELED", "SUCCESS", "FAILED"]
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintJob": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintExportJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintInstallationJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintDependenciesSyncJob"
+          },
+          {
+            "$ref": "#/components/schemas/BlueprintValidateJob"
+          }
+        ]
+      },
+      "BlueprintDependenciesSyncJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["IN_PROGRESS", "SUCCESS", "FAILED", "CANCELED"]
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintValidateJob": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonBlueprintJobFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["IN_PROGRESS", "SUCCESS", "FAILED"]
+              },
+              "valid": {
+                "type": "boolean",
+                "description": "Present when status is SUCCESS or FAILED."
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FormattedError"
+                },
+                "description": "Present when valid is false."
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintJobEvent": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormattedError"
+            }
+          },
+          "level": {
+            "type": "string",
+            "enum": ["info", "warning", "error"]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "installed_blueprint_id": {
+                "$ref": "#/components/schemas/BlueprintID"
+              },
+              "export_job_id": {
+                "$ref": "#/components/schemas/BlueprintJobID"
+              },
+              "resources": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "BlueprintInstallationJobOptions": {
+        "type": "object",
+        "properties": {
+          "resources_to_ignore": {
+            "description": "List of resource addresses to ignore changes for. When a resource is marked as create, it will be ignored and not created.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ManifestID": {
+        "type": "string",
+        "description": "ID of an imported / installed manifest",
+        "example": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"
+      },
+      "JobID": {
+        "type": "string",
+        "description": "ID of an import or export job (state machine)",
+        "example": "4854bb2a-94f9-424d-a968-3fb17fb0bf89"
+      },
+      "ManifestSource": {
+        "type": "string",
+        "enum": ["file", "marketplace", "sandbox"]
+      },
+      "Manifest": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "import_job_id": {
+                "$ref": "#/components/schemas/JobID"
+              },
+              "previous_jobs_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of job IDs that were used to install the manifest"
+              },
+              "previous_jobs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Job"
+                },
+                "description": "List of jobs that were used to install the manifest"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonMarkdownFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonImportFields"
+          },
+          {
+            "$ref": "#/components/schemas/ManifestTimestampFields"
+          }
+        ]
+      },
+      "ManifestItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
+          },
+          {
+            "$ref": "#/components/schemas/ManifestTimestampFields"
+          }
+        ]
+      },
+      "JobStatus": {
+        "type": "string",
+        "enum": ["PENDING", "STARTED", "WAITING_USER_ACTION", "CANCELED", "IN_PROGRESS", "SUCCESS", "FAILED"]
+      },
+      "ResourceNodeType": {
+        "type": "string",
+        "description": "Type of the resource",
+        "enum": [
+          "designbuilder",
+          "journey",
+          "product",
+          "price",
+          "product_recommendation",
+          "coupon",
+          "tax",
+          "automation_flow",
+          "entity_mapping",
+          "file",
+          "emailtemplate",
+          "schema",
+          "schema_attribute",
+          "schema_capability",
+          "schema_group",
+          "schema_group_headline",
+          "workflow_definition",
+          "closing_reason",
+          "taxonomy_classification",
+          "webhook",
+          "integration",
+          "dashboard",
+          "custom_variable",
+          "usergroup",
+          "saved_view",
+          "app",
+          "role",
+          "portal_config",
+          "target",
+          "kanban",
+          "validation_rule",
+          "flow_template",
+          "taxonomy",
+          "notification_template"
+        ]
+      },
+      "PlanChanges": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["create", "update", "internal-update", "no-op", "delete", "ignored"]
+        }
+      },
+      "CommonResourceNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of the resource"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the resource"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "Source ID of the resource"
+          },
+          "is_virtual": {
+            "type": "boolean",
+            "description": "Whether the resource is virtual"
+          }
+        },
+        "required": ["id", "type"]
+      },
+      "RootResourceNode": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "Terraform address of the resource"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VirtualResourceNodeGroup"
+                },
+                "description": "Dependencies of the resource",
+                "nullable": true
+              },
+              "changes": {
+                "$ref": "#/components/schemas/PlanChanges"
+              },
+              "changes_reason": {
+                "type": "array",
+                "description": "Fields causing the updates / internal updates on a resource install",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "VirtualResourceNodeGroup": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                }
+              },
+              "is_virtual": {
+                "type": "boolean",
+                "enum": [true]
+              }
+            }
+          }
+        ]
+      },
+      "ResourceNode": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CommonResourceNode"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "Terraform address of the resource"
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceNode"
+                },
+                "description": "Dependencies of the resource",
+                "nullable": true
+              },
+              "parents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "$ref": "#/components/schemas/ResourceNodeType"
+                    }
+                  }
+                }
+              },
+              "source_id": {
+                "description": "Original ID of the exported resource",
+                "type": "string"
+              },
+              "changes": {
+                "$ref": "#/components/schemas/PlanChanges"
+              },
+              "changes_reason": {
+                "type": "array",
+                "description": "Fields causing the updates / internal updates on a resource install",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Job": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "job_id": {
+                "$ref": "#/components/schemas/JobID"
+              },
+              "job_status": {
+                "$ref": "#/components/schemas/JobStatus"
+              },
+              "manifest_file_path": {
+                "type": "string",
+                "description": "The S3 key of the manifest file"
+              },
+              "message": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "plan_file_content": {
+                "type": "string",
+                "description": "An URL to download the plan file"
+              },
+              "resources_to_export": {
+                "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RootResourceNode"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/RootResourceNode"
+                  }
+                ]
+              },
+              "large_resources_to_export_url": {
+                "type": "string",
+                "description": "An URL to download the resources to export when the resources are too large to be included in the response"
+              },
+              "resources_to_import": {
+                "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RootResourceNode"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/RootResourceNode"
+                  }
+                ]
+              },
+              "large_resources_to_import_url": {
+                "type": "string",
+                "description": "An URL to download the resources to import when the resources are too large to be included in the response"
+              },
+              "resource_replacements": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ResourceReplacement"
+                }
+              },
+              "is_verified": {
+                "type": "boolean",
+                "description": "Whether the manifest comes from a trusted source and is signed by epilot"
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FormattedError"
+                }
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/CommonImportFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonMarkdownFields"
+          },
+          {
+            "$ref": "#/components/schemas/CommonManifestFields"
+          }
+        ]
+      },
+      "UploadFilePayload": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "example.manifest.zip"
+          }
+        },
+        "required": ["filename"]
+      },
+      "S3Reference": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "blueprint-manifest-prod-blueprintsv2bucket-sybpsryropzw"
+          },
+          "key": {
+            "type": "string",
+            "example": "templates/main.tf"
+          }
+        },
+        "required": ["bucket", "key"]
+      },
+      "CommonManifestFields": {
+        "type": "object",
+        "properties": {
+          "manifest_id": {
+            "$ref": "#/components/schemas/ManifestID"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/ManifestSource"
+          },
+          "source_blueprint_name": {
+            "type": "string",
+            "example": "Solar B2B"
+          },
+          "source_blueprint_slug": {
+            "type": "string",
+            "description": "URL slug of a blueprint from the epilot marketplace",
+            "example": "solar-b2b"
+          },
+          "source_blueprint_version": {
+            "type": "string",
+            "description": "Version of the blueprint (semver)",
+            "example": "1.0.0"
+          },
+          "pre_install_requirements": {
+            "$ref": "#/components/schemas/PreInstallRequirements"
+          },
+          "source_blueprint_file": {
+            "type": "string",
+            "deprecated": true,
+            "description": "A URL to download the source blueprint file used to import the blueprint",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/manifest.zip"
+          },
+          "docs_link": {
+            "type": "string",
+            "description": "Link to the blueprint documentation",
+            "example": "https://help.epilot.cloud"
+          },
+          "source_blueprint_file_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "install_status": {
+            "$ref": "#/components/schemas/BlueprintInstallStatus"
+          },
+          "install_status_description": {
+            "type": "string",
+            "example": "This blueprint installation resulted in a partial deployment; some resources were created successfully, but  failed to complete the full resource setup."
+          },
+          "is_verified": {
+            "type": "boolean",
+            "description": "Whether the manifest comes from a trusted source and is signed by epilot"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "manifest_version": {
+            "type": "string",
+            "description": "Version of the manifest (semver)",
+            "example": "1.0.0"
+          },
+          "selected_resources_url": {
+            "type": "string",
+            "description": "All the resources that were selected to be exported, used to pre-select the resources when updating a sandbox manifest",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/selected_resources.json"
+          },
+          "ready_imported_resources_url": {
+            "type": "string",
+            "description": "All the resources that were marked as ready by the user",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/ready_imported_resources.json"
+          },
+          "deployed_from": {
+            "type": "object",
+            "properties": {
+              "source_organization_id": {
+                "type": "string",
+                "description": "ID of the organization that deployed the manifest"
+              },
+              "source_manifest_id": {
+                "type": "string",
+                "description": "ID of the manifest that was deployed"
+              },
+              "source_organization_type": {
+                "type": "string",
+                "enum": ["sandbox", "production"]
+              },
+              "last_triggered_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the deployment was last triggered"
+              }
+            },
+            "description": "Information about the manifest that was deployed from, used to update existing deployments instead of always creating new ones"
+          },
+          "deployed_to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "destination_organization_id": {
+                  "type": "string",
+                  "description": "ID of the organization that the manifest was deployed to"
+                },
+                "destination_manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest that was deployed to"
+                },
+                "destination_organization_type": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"]
+                },
+                "last_triggered_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the deployment was last triggered"
+                }
+              }
+            },
+            "description": "Information about the manifest that was deployed to, used to update existing deployments instead of always creating new ones"
+          }
+        }
+      },
+      "ManifestTimestampFields": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "description": "When the manifest was first installed (applied)",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "description": "When the manifest was last updated (applied)",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CommonImportFields": {
+        "type": "object",
+        "properties": {
+          "source_type": {
+            "$ref": "#/components/schemas/ManifestSource"
+          },
+          "imported_resources": {
+            "description": "An array of tree-like JSON objects or a singular tree-like JSON object representing the resources to import",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RootResourceNode"
+                }
+              },
+              {
+                "$ref": "#/components/schemas/RootResourceNode"
+              }
+            ]
+          },
+          "large_imported_resources_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "An URL to download the imported resources when the resources are too large to be included in the response",
+            "example": "https://blueprint-manifest-prod.s3.eu-central-1.amazonaws.com/large.json"
+          }
+        }
+      },
+      "CommonMarkdownFields": {
+        "type": "object",
+        "properties": {
+          "markdown": {
+            "type": "object",
+            "description": "Markdown content part of a manifest file",
+            "properties": {
+              "manifest": {
+                "type": "string",
+                "description": "Markdown content shown before installing the manifest",
+                "example": "This is the content of the manifest.md file which contains the manifest descripton.\n"
+              },
+              "preinstall": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the preinstall.md file\n"
+              },
+              "postinstall": {
+                "type": "string",
+                "description": "Markdown content to be displayed when showing the plan to install blueprint",
+                "example": "This is the content of the postinstall.md file\n"
+              }
+            }
+          }
+        }
+      },
+      "PreInstallRequirements": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of feature settings that must be enabled before installing the blueprint",
+        "example": ["journey_automation", "ticket-entities", "advanced_permissions"]
+      },
+      "BlueprintInstallStatus": {
+        "type": "string",
+        "enum": ["SUCCESS", "PARTIAL", "FAILED"]
+      },
+      "FormattedErrorCodes": {
+        "type": "string",
+        "enum": [
+          "dependency_extraction",
+          "resource_not_found",
+          "resource_fetch_api_error",
+          "resource_fetch_unknown_error",
+          "terraform_cli_process_error",
+          "terraform_import_block_process_error",
+          "terraform_init_error",
+          "terraform_validate_error",
+          "terraform_plan_error",
+          "terraform_apply_error",
+          "terraform_show_error",
+          "generic_error",
+          "bad_request",
+          "forbidden",
+          "conflict",
+          "not_found",
+          "undeclared_resource",
+          "invalid_readonly_attribute",
+          "invalid_attribute_value",
+          "unsupported_attribute",
+          "self_referential_block",
+          "circular_dependency",
+          "state_mismatch",
+          "import_nonexistent_object",
+          "provider_install_error",
+          "stale_blueprint"
+        ]
+      },
+      "FormattedErrorData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "FormattedError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          },
+          "code": {
+            "$ref": "#/components/schemas/FormattedErrorCodes"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "formattedResource": {
+                "$ref": "#/components/schemas/FormattedErrorData"
+              },
+              "resource": {
+                "type": "string"
+              },
+              "resourceDependency": {
+                "type": "string"
+              },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "addresses": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "originalError": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CallerIdentity": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "a human readable name of the caller (e.g. user name, token name or email address)",
+            "example": "manifest@epilot.cloud"
+          },
+          "org_id": {
+            "description": "epilot organization id",
+            "type": "string",
+            "example": "911690"
+          },
+          "user_id": {
+            "description": "epilot user id, when called by a user",
+            "type": "string",
+            "example": "11001045"
+          },
+          "token_id": {
+            "description": "token id, when called by API token",
+            "type": "string",
+            "example": "api_5ZugdRXasLfWBypHi93Fk"
+          }
+        },
+        "required": ["org_id"]
+      },
+      "SelectedResources": {
+        "type": "object",
+        "properties": {
+          "exported_root_resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/ResourceNodeType"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Terraform address of the resource"
+                }
+              },
+              "required": ["id", "type"]
+            }
+          },
+          "selected_resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pipeline_id": {
+            "type": "string",
+            "description": "Pipeline ID selected when doing the sandbox sync"
+          }
+        },
+        "required": ["exported_root_resources", "selected_resources"]
+      },
+      "ResourceReplacement": {
+        "type": "object",
+        "properties": {
+          "originalAddress": {
+            "type": "string",
+            "description": "Original resource ID to be replaced"
+          },
+          "replacementId": {
+            "type": "string",
+            "description": "ID of the resource that will replace the original"
+          },
+          "replacementName": {
+            "type": "string",
+            "description": "Name of the resource that will replace the original"
+          }
+        },
+        "required": ["originalAddress", "replacementId"]
+      },
+      "PutManifestPayload": {
+        "type": "object",
+        "properties": {
+          "source_blueprint_name": {
+            "type": "string",
+            "description": "Name of the source blueprint"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "Markdown content of the manifest"
+          },
+          "ready_resources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of ids of resources selected to be ready by the user"
+          },
+          "deployed_to": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "destination_organization_id": {
+                  "type": "string",
+                  "description": "ID of the organization that the manifest was deployed to"
+                },
+                "destination_manifest_id": {
+                  "type": "string",
+                  "description": "ID of the manifest that was deployed to"
+                },
+                "destination_organization_type": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"]
+                },
+                "last_triggered_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "JobID": {
+        "name": "job_id",
+        "in": "path",
+        "required": true,
+        "description": "ID of an import or export job",
+        "schema": {
+          "$ref": "#/components/schemas/JobID"
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@
       "post": {
         "operationId": "createKanbanBoard",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -51,6 +52,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -67,6 +69,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -131,6 +134,7 @@
       "post": {
         "operationId": "executeFlowsQuery",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }

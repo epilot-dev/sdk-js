@@ -1,0 +1,1324 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Validation Rules API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Validation Rules",
+      "description": "Endpoints for managing validation rules"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/validation-rules": {
+      "get": {
+        "operationId": "getValidationRules",
+        "summary": "Get all validation rules by organization Id",
+        "description": "Gets all validation rules by organization Id",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetValidationRulesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createValidationRule",
+        "summary": "Create Validation Rule",
+        "description": "Creates a new validation rule",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValidationRuleRequest"
+              }
+            }
+          },
+          "description": "Payload"
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validation-rules/{ruleId}": {
+      "get": {
+        "operationId": "getValidationRuleById",
+        "summary": "Get validation rule by ID",
+        "description": "Retrieves a specific validation rule by its ID",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateValidationRule",
+        "summary": "Update Validation Rule (partial update)",
+        "description": "Updates an existing validation rule partially by ID",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateValidationRuleRequest"
+              }
+            }
+          },
+          "description": "Fields to update in the validation rule"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteValidationRule",
+        "summary": "Delete Validation Rule",
+        "description": "Deletes a validation rule by ID",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to delete."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Validation rule deleted successfully"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validation-rules/{ruleId}/used-by": {
+      "post": {
+        "operationId": "addUsedByReference",
+        "summary": "Add a reference to the usedBy array",
+        "description": "Adds a single reference to the usedBy array of a validation rule",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsedBy"
+              }
+            }
+          },
+          "description": "The usedBy reference to add"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeUsedByReference",
+        "summary": "Remove a reference from the usedBy array",
+        "description": "Removes a specific reference from the usedBy array of a validation rule",
+        "tags": ["Validation Rules"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the validation rule to update."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsedBy"
+              }
+            }
+          },
+          "description": "The usedBy reference to remove"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotPublicAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot public access token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "GetValidationRulesResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationRule"
+            }
+          }
+        }
+      },
+      "CreateValidationRuleRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          },
+          {
+            "type": "object",
+            "required": ["title", "rule"]
+          }
+        ]
+      },
+      "UpdateValidationRuleRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          }
+        ]
+      },
+      "ValidationRuleBase": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Title of the validation rule."
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "Placeholder for the validation rule."
+              },
+              "used_by": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UsedBy"
+                },
+                "description": "Describes where and how a validation rule is applied."
+              },
+              "rule": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegexRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PatternRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NumericRuleType"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ValidationRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ValidationRuleBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema_version",
+              "_id",
+              "_organization_id",
+              "title",
+              "type",
+              "created_at",
+              "updated_at",
+              "created_by",
+              "updated_by"
+            ],
+            "properties": {
+              "_schema_version": {
+                "type": "string",
+                "description": "Schema version of the validation rule."
+              },
+              "_id": {
+                "type": "string",
+                "description": "Unique identifier for the validation rule."
+              },
+              "_organization_id": {
+                "type": "string",
+                "description": "Organization ID that owns this rule."
+              },
+              "created_at": {
+                "type": "string",
+                "description": "ISO timestamp when the rule was created."
+              },
+              "updated_at": {
+                "type": "string",
+                "description": "ISO timestamp when the rule was last updated."
+              },
+              "created_by": {
+                "type": "string",
+                "description": "User ID of the creator."
+              },
+              "updated_by": {
+                "type": "string",
+                "description": "User ID of the last updater."
+              }
+            }
+          }
+        ],
+        "description": "The Validation rule definition."
+      },
+      "UsedBy": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["journey", "entity"],
+            "description": "The context in which the rule is used (e.g., journey or entity)."
+          },
+          "schema_slug": {
+            "type": "string",
+            "description": "Slug of the schema using this rule for entities."
+          },
+          "source_id": {
+            "type": "string",
+            "description": "Source identifier for the usage context."
+          }
+        },
+        "description": "Describes where and how a validation rule is applied."
+      },
+      "RegexRuleType": {
+        "description": "Validation rule that uses a regular expression to validate input.",
+        "type": "object",
+        "required": ["type", "conditions"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["regex"],
+            "description": "Indicates this is a regex-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/RegexCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "PatternRuleType": {
+        "description": "Validation rule that uses a sequence of patterns to validate input.",
+        "type": "object",
+        "required": ["type", "conditions"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["pattern"],
+            "description": "Indicates this is a pattern-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/PatternCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "NumericRuleType": {
+        "description": "Validation rule for numeric values, supporting range and digit count constraints.",
+        "type": "object",
+        "required": ["type", "conditions"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["numeric"],
+            "description": "Indicates this is a numeric-based validation rule."
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/NumericCondition",
+            "description": "The conditions that must be met for the rule to trigger"
+          }
+        }
+      },
+      "RegexCondition": {
+        "description": "Condition definition for a regex-based validation rule (2 levels deep)",
+        "anyOf": [
+          {
+            "type": "object",
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RegexFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["all"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RegexFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RegexNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["any"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RegexFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RegexNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": ["not"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "RegexNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RegexFactCondition"
+                }
+              }
+            },
+            "required": ["all"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RegexFactCondition"
+                }
+              }
+            },
+            "required": ["any"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "not": {
+                "$ref": "#/components/schemas/RegexFactCondition"
+              }
+            },
+            "required": ["not"]
+          }
+        ]
+      },
+      "RegexFactCondition": {
+        "description": "Fact-based condition for regex validation",
+        "type": "object",
+        "required": ["fact", "operator", "value"],
+        "properties": {
+          "fact": {
+            "type": "string",
+            "enum": ["inputValue"],
+            "description": "The name of the value to validate. Should always be 'inputValue' because this property name is passed to the engine"
+          },
+          "operator": {
+            "type": "string",
+            "enum": ["regexMatch"],
+            "description": "The operator to use for comparison"
+          },
+          "value": {
+            "type": "string",
+            "description": "The actual regex"
+          },
+          "params": {
+            "description": "Additional parameters for the condition",
+            "type": "object",
+            "properties": {
+              "errorMessage": {
+                "type": "string",
+                "description": "Custom error message"
+              }
+            }
+          }
+        }
+      },
+      "PatternCondition": {
+        "description": "Condition definition for a pattern-based validation rule (2 levels deep)",
+        "anyOf": [
+          {
+            "type": "object",
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PatternFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["all"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PatternFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PatternNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["any"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/PatternFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PatternNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": ["not"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "PatternNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PatternFactCondition"
+                }
+              }
+            },
+            "required": ["all"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PatternFactCondition"
+                }
+              }
+            },
+            "required": ["any"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "not": {
+                "$ref": "#/components/schemas/PatternFactCondition"
+              }
+            },
+            "required": ["not"]
+          }
+        ]
+      },
+      "PatternFactCondition": {
+        "description": "Fact-based condition for pattern validation",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "Numeric condition (total-length fact)",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["total-length"],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "notEqual", "lessThan", "lessThanInclusive", "greaterThan", "greaterThanInclusive"],
+                "description": "Numeric comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Numeric value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Exact digits condition",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["static-check", "total-length"],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["exactlyNDigits"],
+                "description": "Exact digit count operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Number of digits required"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Array-based condition (in, notIn, contains, doesNotContain)",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["static-check"],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["in", "notIn", "contains", "doesNotContain"],
+                "description": "Array-based comparison operator"
+              },
+              "value": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Array of string values for array-based operators"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "String-based condition",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["static-check"],
+                "description": "The name of the value to validate."
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "notEqual"],
+                "description": "String comparison operator"
+              },
+              "value": {
+                "type": "string",
+                "description": "String value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "start": {
+                    "type": "number",
+                    "description": "From where to check"
+                  },
+                  "end": {
+                    "type": "number",
+                    "description": "To where to check"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "NumericCondition": {
+        "description": "Condition definition for a numeric-based validation rule (2 levels deep)",
+        "anyOf": [
+          {
+            "type": "object",
+            "description": "All conditions must be true (AND logic)",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/NumericFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["all"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Any conditions must be true (OR logic)",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/NumericFactCondition"
+                    },
+                    {
+                      "$ref": "#/components/schemas/NumericNestedCondition"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["any"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "NOT condition (negation)",
+            "properties": {
+              "not": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/NumericFactCondition"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NumericNestedCondition"
+                  }
+                ]
+              }
+            },
+            "required": ["not"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "NumericNestedCondition": {
+        "description": "Nested condition with logical operators (level 2 only)",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "all": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/NumericFactCondition"
+                }
+              }
+            },
+            "required": ["all"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "any": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/NumericFactCondition"
+                }
+              }
+            },
+            "required": ["any"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "not": {
+                "$ref": "#/components/schemas/NumericFactCondition"
+              }
+            },
+            "required": ["not"]
+          }
+        ]
+      },
+      "NumericFactCondition": {
+        "description": "Fact-based condition for numeric validation",
+        "type": "object",
+        "oneOf": [
+          {
+            "description": "Numeric value comparison",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["numeric-value", "total-length"],
+                "description": "The numeric value extracted from input; The amount of digits"
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "notEqual", "lessThan", "lessThanInclusive", "greaterThan", "greaterThanInclusive"],
+                "description": "Numeric comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Numeric value to compare against"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Integer digits count validation",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["integer-digits-count"],
+                "description": "Count of integer digits (excludes leading zeros unless allowed)"
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "exactlyNDigits", "minIntegerDigits", "maxIntegerDigits"],
+                "description": "Digit count comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Expected number of integer digits"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  },
+                  "allowLeadingZeroes": {
+                    "type": "boolean",
+                    "description": "Whether to count leading zeroes in digit count",
+                    "default": false
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Decimal digits count validation",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["decimal-digits-count"],
+                "description": "Count of decimal digits"
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "minDecimalDigits", "maxDecimalDigits"],
+                "description": "Decimal digit count comparison operator"
+              },
+              "value": {
+                "type": "number",
+                "description": "Expected number of decimal digits"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "description": "Leading zeros validation",
+            "required": ["fact", "operator", "value"],
+            "properties": {
+              "fact": {
+                "type": "string",
+                "enum": ["has-leading-zeroes"],
+                "description": "Whether the input has leading zeros"
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["equal", "notAllowed"],
+                "description": "Leading zeros check operator"
+              },
+              "value": {
+                "type": "boolean",
+                "description": "Whether leading zeros should be present or not"
+              },
+              "params": {
+                "description": "Additional parameters for the condition",
+                "type": "object",
+                "properties": {
+                  "errorMessage": {
+                    "type": "string",
+                    "description": "Custom error message"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://validation-rules.sls.epilot.io"
+    }
+  ]
+}

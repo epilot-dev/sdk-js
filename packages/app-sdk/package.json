@@ -1,6 +1,6 @@
 {
   "name": "@epilot/app-sdk",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.2",
   "description": "SDK to build Apps for epilot XRM",
   "author": "epilot GmbH",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "start": "node build/src/main.js",
     "clean": "rimraf dist tmp",
     "build": "npm run clean && tsc -p tsconfig.release.json",
-    "lint": "pnpm exec eslint src",
+    "lint": "biome check src",
     "test": "vitest run",
     "test:watch": "vitest run"
   },

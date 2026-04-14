@@ -222,6 +222,30 @@
         "responses": {}
       }
     },
+    "/v2/user/navigations": {
+      "post": {
+        "operationId": "createNavigation",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/user/navigations/{id}": {
+      "get": {
+        "operationId": "getNavigation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/users/public/verifyEmail": {
       "post": {
         "operationId": "verifyEmailWithToken",
@@ -290,6 +314,75 @@
         "parameters": [
           {
             "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/users/public/passkeys:authenticateBegin": {
+      "post": {
+        "operationId": "beginPasskeyAuthentication",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users/public/passkeys:authenticateBeginDiscoverable": {
+      "post": {
+        "operationId": "beginDiscoverablePasskeyAuthentication",
+        "responses": {}
+      }
+    },
+    "/v2/users/public/passkeys:resolveCredential": {
+      "post": {
+        "operationId": "resolveDiscoverableCredential",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users/me/passkeys:registerBegin": {
+      "post": {
+        "operationId": "beginPasskeyRegistration",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users/me/passkeys:registerComplete": {
+      "post": {
+        "operationId": "completePasskeyRegistration",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users/me/passkeys": {
+      "get": {
+        "operationId": "listPasskeys",
+        "responses": {}
+      }
+    },
+    "/v2/users/me/passkeys/{credentialId}": {
+      "delete": {
+        "operationId": "deletePasskey",
+        "parameters": [
+          {
+            "name": "credentialId",
             "in": "path",
             "required": true
           }

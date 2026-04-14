@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 
 import { verifyEpilotSignature } from './signature';
 
-export const mockVerify = vi.fn();
+const mockVerify = vi.fn();
 vi.mock('node:crypto', async () => {
   const actual = await vi.importActual<typeof import('node:crypto')>('node:crypto');
 

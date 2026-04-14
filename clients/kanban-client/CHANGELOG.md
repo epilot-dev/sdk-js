@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0
+
+### Minor Changes
+
+- Add group by
+
 ## 1.2.0
 
 ### Minor Changes

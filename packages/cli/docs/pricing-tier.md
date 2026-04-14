@@ -1,0 +1,78 @@
+# Pricing Tier API
+
+- **API Docs:** [https://docs.epilot.io/api/pricing-tier](https://docs.epilot.io/api/pricing-tier)
+
+Pricing Tier API
+
+## Quick Start
+
+```bash
+# List available operations
+epilot pricing-tier
+
+# Call an operation
+epilot pricing-tier getCurrentPricingTier
+```
+
+## Common Flags
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
+| `--no-interactive` | Disable interactive prompts |
+
+## Operations
+
+**Pricing Tier**
+- [`getCurrentPricingTier`](#getcurrentpricingtier) — Get current pricing tier of logged in user
+
+### `getCurrentPricingTier`
+
+Get current pricing tier of logged in user
+
+`GET /v2/pricing-tiers/me`
+
+**Sample Call**
+
+```bash
+epilot pricing-tier getCurrentPricingTier
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing-tier getCurrentPricingTier --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": 22,
+  "created_date": "string",
+  "updated_date": "string",
+  "organization_id": "string",
+  "name": "string",
+  "settings": {},
+  "override_settings": {},
+  "created_by": "string",
+  "updated_by": "string",
+  "is_pure_360": true
+}
+```
+
+</details>
+
+---

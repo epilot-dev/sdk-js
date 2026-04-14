@@ -1,6 +1,6 @@
 {
   "name": "@epilot/journey-client",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "description": "API Client for epilot Journey API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/journey-config.yaml",
-    "typegen": "openapi typegen src/openapi.json --client -b '/* eslint-disable */' > src/openapi.d.ts",
+    "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "npm run openapi && npm run typegen && npm run typescript && npm run bundle-definition",
     "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
     "prepublishOnly": "npm run build"
@@ -51,6 +51,7 @@
     "copy-webpack-plugin": "^7.0.0",
     "json-loader": "^0.5.7",
     "openapi-client-axios-typegen": "^7.5.1",
+    "openapicmd": "^2.9.2",
     "ts-loader": "^8.3.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0",

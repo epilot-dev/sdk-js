@@ -1,0 +1,3814 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Workflows Executions",
+    "version": "1.0.0",
+    "description": "Service for Workflow Executions which covers executions of processes defined in an Organization\n"
+  },
+  "servers": [
+    {
+      "url": "https://workflows-execution.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Workflow Executions",
+      "description": "Interact with workflow executions - start / close / retrieve one or all / search / delete"
+    },
+    {
+      "name": "Workflow Steps"
+    },
+    {
+      "name": "Closing Reasons"
+    },
+    {
+      "name": "Flows V2"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/workflows/executions": {
+      "get": {
+        "operationId": "getExecutions",
+        "summary": "getExecutions",
+        "description": "Retrieve Workflow Executions. Optionally, you can filter them by context & schema. Please be aware, these executions are more light weight - steps are not loaded with all information.",
+        "tags": ["Workflow Executions"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "context",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Id of an Entity",
+            "example": "2843c005-c5b0-4df2-94ee-1ca2ddd998ac"
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Schema of an Entity",
+            "example": "contact"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - executions loaded with success. Empty array if org has no executions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowExecutionSlim"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createExecution",
+        "summary": "createExecution",
+        "description": "Create a Workflow Execution. Start a new workflow execution, based on a workflow definition (template).",
+        "tags": ["Workflow Executions"],
+        "requestBody": {
+          "description": "Workflow Execution payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowExecutionCreateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the execution is created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}": {
+      "get": {
+        "operationId": "getExecution",
+        "summary": "getExecution",
+        "description": "Get a full workflow execution, included steps information, by execution id.",
+        "tags": ["Workflow Executions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd561"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - execution loaded with success. Empty response execution was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowExecution"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateExecution",
+        "summary": "updateExecution",
+        "description": "Patches updates like assignees, status, closingReason for a single Workflow Execution.",
+        "tags": ["Workflow Executions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd561"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Updates for Workflow Execution payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowExecutionUpdateReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success - execution updated with success."
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteExecution",
+        "summary": "deleteExecution",
+        "description": "Delete workflow execution by id. Workflow contexts will NOT be deleted.",
+        "tags": ["Workflow Executions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution to de deleted.",
+            "example": "CustomerRequest"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - if the execution was deleted successfully"
+          },
+          "401": {
+            "description": "Failed to authenticate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No execution found"
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps": {
+      "post": {
+        "operationId": "createStep",
+        "summary": "createStep",
+        "description": "Create a new step in current workflow execution.",
+        "tags": ["Workflow Steps"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd56125gah"
+          }
+        ],
+        "requestBody": {
+          "description": "Workflow Execution Step payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStepReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the step is created with success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Step"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}/steps/{stepId}": {
+      "patch": {
+        "operationId": "updateStep",
+        "summary": "updateStep",
+        "description": "Patches various changes to a workflow execution step.",
+        "tags": ["Workflow Steps"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd56125gah"
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid (length 6) to identify the Workflow Execution Step.",
+            "example": "7hj28a"
+          }
+        ],
+        "requestBody": {
+          "description": "Workflow Execution Step payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStepReq"
+              },
+              "examples": {
+                "dynamicDueDate": {
+                  "value": {
+                    "stepId": "string",
+                    "assignedTo": ["10010730"],
+                    "dynamicDueDate": {
+                      "numberOfUnits": 2,
+                      "timePeriod": "weeks",
+                      "actionTypeCondition": "STEP_CLOSED",
+                      "stepId": "optional"
+                    },
+                    "name": "Static Duedate",
+                    "position": {
+                      "index": 0
+                    },
+                    "sectionId": "string",
+                    "status": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - if the step is updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Step"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteStep",
+        "summary": "deleteStep",
+        "description": "Deletes a step from a workflow execution.",
+        "tags": ["Workflow Steps"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd56125gah"
+          },
+          {
+            "in": "path",
+            "name": "stepId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid (length 6) to identify the Workflow Execution Step.",
+            "example": "7hj28a"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deletion happened with success."
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/search": {
+      "post": {
+        "deprecated": true,
+        "operationId": "searchExecutions",
+        "summary": "searchExecutions",
+        "description": "Search Workflow Executions by different filters.",
+        "tags": ["Workflow Executions"],
+        "requestBody": {
+          "description": "Search steps request",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchExecutionsReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - filtered steps are returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExecutionsResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/steps/search": {
+      "post": {
+        "deprecated": true,
+        "operationId": "searchSteps",
+        "summary": "searchSteps",
+        "description": "Search workflow execution steps by different filters.",
+        "tags": ["Workflow Steps"],
+        "requestBody": {
+          "description": "Search steps request",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchStepsReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - filtered steps are returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/SearchStepsResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/executions/{executionId}/closing-reasons": {
+      "get": {
+        "operationId": "getClosingReasonExecution",
+        "summary": "getClosingReasonExecution",
+        "description": "Shows all Closing Reasons defined at the moment of starting the Workflow Execution.\nThe Closing Reasons shown in the execution are just snapshots\nfrom the state of the Definition when the instance was created.\n",
+        "tags": ["Closing Reasons"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "executionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Id of the execution",
+            "example": "wd561"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "returns all Closing Reasons for this Execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Issues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions": {
+      "post": {
+        "operationId": "startFlowExecution",
+        "summary": "startFlowExecution",
+        "description": "Starts a new Flow Execution based on a flow template.",
+        "tags": ["Flows V2"],
+        "requestBody": {
+          "description": "Flow Execution payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartFlowReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - when the flow execution is started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}": {
+      "get": {
+        "operationId": "getFlowExecution",
+        "summary": "getFlowExecution",
+        "description": "Get a full flow execution, included tasks, phases, edges & analytics.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowExecution"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchFlowExecution",
+        "summary": "patchFlowExecution",
+        "description": "Patch flow execution with new assignees, status, analytics & other changes.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Flow Execution payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchFlowReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - execution updated with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowExecution"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFlowExecution",
+        "summary": "deleteFlowExecution",
+        "description": "Deletes a specific execution of a flow, identified by id. Flow contexts will NOT be deleted.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/SoftDeleteParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - if the execution was deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v2/flows/executions:search": {
+      "post": {
+        "operationId": "searchFlowExecutions",
+        "summary": "searchFlowExecutions",
+        "description": "Search Flow Executions for a specific Entity.",
+        "tags": ["Flows V2"],
+        "requestBody": {
+          "description": "Search Flow Executions for a specific Entity",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchFlowsReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of Running Flow Executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FlowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}": {
+      "patch": {
+        "operationId": "patchTask",
+        "summary": "patchTask",
+        "description": "Changes various attributes of a flow task, like assignees, status, due date, etc.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Task Payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - when task has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/automation:run": {
+      "post": {
+        "operationId": "runTaskAutomation",
+        "summary": "runTaskAutomation",
+        "description": "Runs configured automation for a flow task",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - when task automation has been successfully started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute": {
+      "post": {
+        "operationId": "executeTask",
+        "summary": "executeTask",
+        "description": "Executes any kind of flow task immediately.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - when task has been executed manually or automation has been started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/phases/{phase_id}": {
+      "patch": {
+        "operationId": "patchPhase",
+        "summary": "patchPhase",
+        "description": "Apply updates to a phase within flow execution",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/PhaseIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Patch Phase Payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchPhaseReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - when phase has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Phase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks": {
+      "post": {
+        "operationId": "addTask",
+        "summary": "addTask",
+        "description": "Create a new task in current workflow execution.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Workflow Execution Task payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success - if the task is created with success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "delete": {
+        "operationId": "cancelTaskSchedule",
+        "summary": "cancelTaskSchedule",
+        "description": "Cancels a scheduled task, deleting the schedule and marking the task as skipped.",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - when schedule has been successfully canceled"
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/schedules/{schedule_id}": {
+      "post": {
+        "operationId": "cancelSchedule",
+        "summary": "cancelSchedule",
+        "deprecated": true,
+        "description": "Cancels a flow schedule, marking it as canceled.\n\n**Deprecated**: Use DELETE /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule instead.\n",
+        "tags": ["Flows V2"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/ScheduleIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success - when schedule has been successfully canceled"
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "ExecutionIdParam": {
+        "in": "path",
+        "name": "execution_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the execution",
+        "example": "wd561"
+      },
+      "TaskIdParam": {
+        "in": "path",
+        "name": "task_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the task",
+        "example": "7hj28a"
+      },
+      "PhaseIdParam": {
+        "in": "path",
+        "name": "phase_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the phase",
+        "example": "9gjs2952j"
+      },
+      "ScheduleIdParam": {
+        "in": "path",
+        "name": "schedule_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Id of the schedule",
+        "example": "sch_8k2m9n4p"
+      },
+      "SoftDeleteParam": {
+        "in": "query",
+        "name": "soft",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "required": false,
+        "description": "If true, the execution will NOT be deleted permanently, but rather kept for archive purpose.",
+        "example": true
+      }
+    },
+    "schemas": {
+      "WorkflowExecutionCreateReq": {
+        "type": "object",
+        "properties": {
+          "workflowId": {
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/TriggerType"
+          },
+          "assignedTo": {
+            "deprecated": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowContext"
+            }
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of purposes to filter workflow phases."
+          }
+        },
+        "required": ["workflowId"],
+        "example": {
+          "workflowId": "j3f23fh23uif98",
+          "trigger": "AUTOMATIC",
+          "contexts": [
+            {
+              "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+              "schema": "contact"
+            },
+            {
+              "id": "3a6d42fa-5070-4723-b90f-41ead4303e33",
+              "schema": "opportunity"
+            }
+          ]
+        }
+      },
+      "WorkflowExecutionUpdateReq": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "selectedClosingReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "closingReasonDescription": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "closedBy": {
+            "type": "string",
+            "description": "id of the user / partner user who is closing the workflow. For partner pass orgId_userId."
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowContext"
+            }
+          },
+          "completedTime": {
+            "type": "string",
+            "description": "Completed time of the workflow execution"
+          }
+        }
+      },
+      "ClosingReason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title"]
+      },
+      "WorkflowContext": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "schema"]
+      },
+      "WorkflowExecutionBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string",
+            "description": "Creation timestamp which will double as started time as well"
+          },
+          "lastUpdateTime": {
+            "type": "string",
+            "description": "Last Update timestamp"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Due date for finishing the workflow"
+          },
+          "completedTime": {
+            "type": "string",
+            "description": "Completed time of the workflow execution"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/TriggerType"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastModifiedBy": {
+            "type": "string",
+            "description": "Id of the user who closed workflow"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowContext"
+            }
+          },
+          "nextOpenStep": {
+            "$ref": "#/components/schemas/StepId"
+          },
+          "configuredClosingReasonSnapshot": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "selectedClosingReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "closingReasonDescription": {
+            "type": "string"
+          },
+          "enableECPWorkflow": {
+            "type": "boolean",
+            "description": "Indicates whether this workflow is available for End Customer Portal or not. By default it's not."
+          },
+          "updateEntityAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdateEntityAttributes"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "description": "Version of the workflow execution."
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the workflow execution"
+          }
+        }
+      },
+      "WorkflowExecutionSlim": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkflowExecutionBase"
+          },
+          {
+            "$ref": "#/components/schemas/FlowSlim"
+          }
+        ],
+        "example": {
+          "id": "8gja72h6kas6h",
+          "name": "Lead Qualification",
+          "trigger": "MANUAL",
+          "status": "STARTED",
+          "creationTime": "2021-04-27T12:01:13.000Z",
+          "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+          "dueDate": "2021-04-27T12:01:13.000Z",
+          "flow": [
+            {
+              "id": "sectionId1",
+              "definitionId": "section_definition_id_1",
+              "name": "Initial Information Gathering",
+              "type": "SECTION",
+              "steps": [
+                {
+                  "id": "sada5641f3a21",
+                  "definitionId": "step_definition_id_1",
+                  "name": "Call client"
+                },
+                {
+                  "id": "sada5641f3a22",
+                  "definitionId": "step_definition_id_2",
+                  "name": "Check product availability"
+                },
+                {
+                  "id": "sada5641f3a23",
+                  "definitionId": "step_definition_id_3",
+                  "name": "Send email confirming contact with the client"
+                }
+              ]
+            },
+            {
+              "id": "firstLevelStepId1",
+              "definitionId": "step_definition_id_4",
+              "name": "Print and send catalog",
+              "type": "STEP"
+            }
+          ]
+        }
+      },
+      "FlowSlim": {
+        "type": "object",
+        "properties": {
+          "flow": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Section"
+                },
+                {
+                  "$ref": "#/components/schemas/Step"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["flow"]
+      },
+      "Flow": {
+        "type": "object",
+        "properties": {
+          "flow": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Section"
+                },
+                {
+                  "$ref": "#/components/schemas/Step"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["flow"]
+      },
+      "WorkflowExecution": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WorkflowExecutionBase"
+          },
+          {
+            "$ref": "#/components/schemas/Flow"
+          }
+        ],
+        "example": {
+          "id": "8gja72h6kas6h",
+          "name": "Lead Qualification",
+          "trigger": "MANUAL",
+          "status": "STARTED",
+          "creationTime": "2021-04-27T12:01:13.000Z",
+          "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+          "dueDate": "2021-04-27T12:01:13.000Z",
+          "assignedTo": ["252", "29052"],
+          "flow": [
+            {
+              "id": "sectionId1",
+              "name": "Initial Information Gathering",
+              "steps": [
+                {
+                  "id": "sada5641f3a21",
+                  "name": "Call client and confirm address and product",
+                  "definitionId": "step_definition_id_1",
+                  "status": "ASSIGNED",
+                  "assignedTo": ["11"]
+                },
+                {
+                  "id": "sada5641f3a22",
+                  "name": "Check product availability",
+                  "status": "UNASSIGNED",
+                  "definitionId": "step_definition_id_2"
+                },
+                {
+                  "id": "sada5641f3a23",
+                  "name": "Send email confirming contact with the client",
+                  "definitionId": "step_definition_id_3",
+                  "status": "SKIPPED"
+                }
+              ]
+            },
+            {
+              "id": "firstLevelStepId1",
+              "definitionId": "step_definition_id_4",
+              "name": "Print and send catalog",
+              "status": "SKIPPED",
+              "dueDate": "2023-01-15T20:00:00"
+            }
+          ]
+        }
+      },
+      "WorkflowStatus": {
+        "type": "string",
+        "enum": ["STARTED", "DONE", "CLOSED"]
+      },
+      "SectionSimplified": {
+        "type": "object",
+        "description": "A group of Steps that define the progress of the Workflow",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for this Section",
+            "example": "Lead Qualification"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StepSimplified"
+            }
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "name", "type", "steps"]
+      },
+      "Section": {
+        "type": "object",
+        "description": "A group of Steps that define the progress of the Workflow",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for this Section",
+            "example": "Lead Qualification"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dueDate": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "startedTime": {
+            "type": "string"
+          },
+          "completedTime": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SectionStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids (purposes in this case) that are associated with this section and used for filtering"
+          }
+        },
+        "required": ["id", "name", "type", "steps"]
+      },
+      "StepId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "entityRefId": {
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. It will be soon removed. Please use only id."
+          }
+        }
+      },
+      "StepSimplified": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "entityRefId": {
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. It will be soon removed. Please use only id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StepRequirement"
+            }
+          },
+          "executionType": {
+            "description": "Manual / Automation step",
+            "$ref": "#/components/schemas/StepType"
+          }
+        },
+        "required": ["id", "name", "type"]
+      },
+      "Step": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StepSimplified"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "sectionId": {
+                "type": "string"
+              },
+              "executionId": {
+                "type": "string"
+              },
+              "userIds": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "deprecated": true,
+                "description": "This field is deprecated. Please use assignedTo"
+              },
+              "assignedTo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "assignedToInProgress": {
+                "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/StepStatus"
+              },
+              "created": {
+                "type": "string"
+              },
+              "lastUpdated": {
+                "type": "string"
+              },
+              "statusLastUpdated": {
+                "type": "string",
+                "description": "Last updated timestamp of the status"
+              },
+              "startedTime": {
+                "type": "string"
+              },
+              "completedTime": {
+                "type": "string"
+              },
+              "dueDate": {
+                "type": "string"
+              },
+              "dynamicDueDate": {
+                "$ref": "#/components/schemas/DynamicDueDate"
+              },
+              "manuallyCreated": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "enabled flag results from calculating the requirements"
+              },
+              "automationConfig": {
+                "description": "Configuration for automated steps",
+                "$ref": "#/components/schemas/AutomationConfig"
+              },
+              "journey": {
+                "$ref": "#/components/schemas/StepJourney"
+              },
+              "taxonomies": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Taxonomy ids (purposes in this case) that are associated with this step/task and used for filtering"
+              }
+            }
+          }
+        ]
+      },
+      "StepExtended": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Step"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "executionId": {
+                "type": "string"
+              },
+              "executionName": {
+                "type": "string"
+              },
+              "executionStatus": {
+                "$ref": "#/components/schemas/WorkflowStatus"
+              },
+              "contexts": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/WorkflowContext"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": ["executionId", "executionName", "executionStatus"]
+          }
+        ]
+      },
+      "StepStatus": {
+        "type": "string",
+        "enum": [
+          "UNASSIGNED",
+          "ASSIGNED",
+          "COMPLETED",
+          "SKIPPED",
+          "IN_PROGRESS",
+          "SCHEDULED",
+          "PENDING",
+          "CONDITION_PENDING",
+          "WAITING_FOR_CONFIRMATION",
+          "ON_HOLD",
+          "FAILED"
+        ],
+        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
+      },
+      "SectionStatus": {
+        "type": "string",
+        "enum": ["OPEN", "IN_PROGRESS", "COMPLETED"]
+      },
+      "StepType": {
+        "type": "string",
+        "enum": ["MANUAL", "AUTOMATION"]
+      },
+      "StepJourney": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "complete_task_automatically": {
+            "type": "boolean",
+            "description": "If true, the task be auto completed when the journey is completed"
+          }
+        }
+      },
+      "AutomationConfig": {
+        "type": "object",
+        "description": "Configuration for automation execution to run",
+        "properties": {
+          "flowId": {
+            "type": "string",
+            "description": "Id of the configured automation to run"
+          },
+          "executionId": {
+            "type": "string",
+            "description": "Id of the automation execution which ran"
+          },
+          "executionStatus": {
+            "type": "string",
+            "description": "Status of Automation Execution. Types can be found in Automation API"
+          }
+        },
+        "required": ["flowId"]
+      },
+      "ECPDetails": {
+        "type": "object",
+        "description": "Details regarding ECP for the workflow step",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          }
+        }
+      },
+      "StepDescription": {
+        "type": "object",
+        "description": "Longer information regarding Task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "ItemType": {
+        "type": "string",
+        "enum": ["STEP", "SECTION"]
+      },
+      "TriggerType": {
+        "type": "string",
+        "enum": ["MANUAL", "AUTOMATIC"]
+      },
+      "CreateStepReq": {
+        "type": "object",
+        "properties": {
+          "insertionIndex": {
+            "type": "number",
+            "default": 0
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["enabled", "value"],
+            "description": "Longer information regarding Task"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "sectionId": {
+            "type": "string"
+          },
+          "executionType": {
+            "description": "Manual / Automation step",
+            "$ref": "#/components/schemas/StepType"
+          },
+          "automationConfig": {
+            "description": "Configuration for automated steps",
+            "$ref": "#/components/schemas/AutomationConfig"
+          }
+        },
+        "required": ["name", "insertionIndex"]
+      },
+      "UpdateStepReq": {
+        "type": "object",
+        "properties": {
+          "stepId": {
+            "type": "string"
+          },
+          "entityRefId": {
+            "type": "string",
+            "deprecated": true,
+            "description": "This field is deprecated. Please use stepId"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "deprecated": true,
+            "description": "This field is deprecated. Please use assignedTo"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedToInProgress": {
+            "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["enabled", "value"],
+            "description": "Longer information regarding Task"
+          },
+          "position": {
+            "$ref": "#/components/schemas/StepPositionAt"
+          },
+          "automationConfig": {
+            "$ref": "#/components/schemas/AutomationConfig"
+          },
+          "startedTime": {
+            "type": "string"
+          },
+          "completedTime": {
+            "type": "string"
+          }
+        }
+      },
+      "StepPositionAt": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number",
+            "default": 0
+          },
+          "sectionId": {
+            "type": "string"
+          }
+        },
+        "required": ["index"]
+      },
+      "UpdateStepResp": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Step"
+          }
+        ]
+      },
+      "SearchStepsResp": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "example": 50
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/StepExtended"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "SearchExecutionsReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "includeDoneWorkflows": {
+            "type": "boolean"
+          },
+          "assignedTo": {
+            "type": "string"
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/SearchSorting"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/ExecutionPaginationDynamo"
+          }
+        }
+      },
+      "SearchExecutionsResp": {
+        "type": "object",
+        "properties": {
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowExecutionSlim"
+            }
+          },
+          "lastEvaluatedKey": {
+            "$ref": "#/components/schemas/LastEvaluatedKey"
+          }
+        },
+        "required": ["executions"]
+      },
+      "LastEvaluatedKey": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchStepsReq": {
+        "type": "object",
+        "properties": {
+          "executionName": {
+            "type": "string"
+          },
+          "stepName": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "number"
+          },
+          "includeDoneWorkflows": {
+            "type": "boolean"
+          },
+          "manuallyCreated": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["OPEN", "COMPLETE", "NEXT_OPEN_ITEM_IN_WORKFLOW"]
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/SearchSorting"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/SearchPagination"
+          }
+        }
+      },
+      "SearchSorting": {
+        "type": "string",
+        "enum": ["A_Z", "Z_A", "DUE_DATE_ASC", "DUE_DATE_DESC", "TRIGGER_DATE_ASC", "TRIGGER_DATE_DESC"]
+      },
+      "SearchPagination": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      },
+      "ExecutionPaginationDynamo": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ClosingReasonResp": {
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          }
+        }
+      },
+      "PhaseInEntity": {
+        "type": "object",
+        "properties": {
+          "phase_id": {
+            "type": "string"
+          },
+          "phase_name": {
+            "type": "string"
+          },
+          "phase_progress": {
+            "type": "number"
+          },
+          "phase_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WorkflowInEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definition_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "duedate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_update_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "progress": {
+            "type": "number"
+          },
+          "upcoming_tasks_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_duedate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "task_execution_type": {
+            "$ref": "#/components/schemas/StepType"
+          },
+          "task_status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "phase_name": {
+            "type": "string"
+          },
+          "phase_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phase_progress": {
+            "type": "number"
+          },
+          "phases_in_progress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhaseInEntity"
+            }
+          },
+          "selected_closing_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "closing_reason_description": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEntityAttributes": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": ["workflow_status", "current_section", "current_step"]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "my_status"
+              }
+            },
+            "required": ["entitySchema", "entityAttribute"]
+          }
+        },
+        "required": ["source", "target"]
+      },
+      "EntitySync": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "object",
+            "description": "Trigger configuration that determines when entity sync occurs.\nContains the event type and optional filter to target specific tasks/phases.\n",
+            "required": ["event"],
+            "properties": {
+              "event": {
+                "type": "string",
+                "description": "Event or condition that triggers the entity sync.\nDirect triggers match EventBridge event names (PascalCase).\nStatus triggers are deduced from event + entity status combination.\n",
+                "enum": [
+                  "FlowStarted",
+                  "FlowCompleted",
+                  "FlowCancelled",
+                  "FlowReopened",
+                  "FlowDeleted",
+                  "FlowAssigned",
+                  "FlowDueDateChanged",
+                  "FlowContextsChanged",
+                  "TaskUpdated",
+                  "CurrTaskChanged",
+                  "TaskCompleted",
+                  "TaskSkipped",
+                  "TaskMarkedInProgress",
+                  "TaskMarkedOnHold",
+                  "PhaseUpdated",
+                  "PhaseCompleted",
+                  "PhaseSkipped",
+                  "PhaseMarkedInProgress"
+                ]
+              },
+              "filter": {
+                "type": "object",
+                "description": "Optional filter to target specific tasks or phases.\nSpecify either task_template_id OR phase_template_id (mutually exclusive).\nIf omitted, trigger applies to all tasks/phases.\n",
+                "properties": {
+                  "task_template_id": {
+                    "type": "string",
+                    "description": "Target a specific task by its template ID (stable across executions)"
+                  },
+                  "phase_template_id": {
+                    "type": "string",
+                    "description": "Target a specific phase by its template ID (stable across executions)"
+                  }
+                }
+              }
+            }
+          },
+          "value": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "workflow_name",
+                  "workflow_status",
+                  "workflow_assigned_to",
+                  "task_name",
+                  "task_status",
+                  "task_assigned_to",
+                  "phase_name",
+                  "phase_status",
+                  "phase_assigned_to",
+                  "custom_value"
+                ]
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["source"]
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "entitySchema": {
+                "type": "string",
+                "example": "opportunity"
+              },
+              "entityAttribute": {
+                "type": "string",
+                "example": "title"
+              }
+            },
+            "required": ["entitySchema", "entityAttribute"]
+          }
+        },
+        "example": {
+          "trigger": {
+            "event": "FlowStarted"
+          },
+          "target": {
+            "entitySchema": "opportunity",
+            "entityAttribute": "title"
+          },
+          "value": {
+            "source": "workflow_name"
+          }
+        },
+        "required": ["trigger", "target", "value"]
+      },
+      "DynamicDueDate": {
+        "description": "set a Duedate for a step then a specific",
+        "type": "object",
+        "properties": {
+          "numberOfUnits": {
+            "type": "number"
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": ["minutes", "hours", "days", "weeks", "months"]
+          },
+          "actionTypeCondition": {
+            "type": "string",
+            "enum": ["WORKFLOW_STARTED", "STEP_CLOSED", "PHASE_FINISHED"]
+          },
+          "stepId": {
+            "type": "string"
+          },
+          "phaseId": {
+            "type": "string"
+          }
+        },
+        "required": ["numberOfUnits", "timePeriod", "actionType"]
+      },
+      "StepRequirement": {
+        "description": "describe the requirement for step enablement",
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ItemType"
+          },
+          "condition": {
+            "type": "string",
+            "enum": ["CLOSED"]
+          }
+        },
+        "required": ["definitionId", "type", "condition"]
+      },
+      "StartFlowReq": {
+        "type": "object",
+        "required": ["flow_template_id", "contexts"],
+        "properties": {
+          "flow_template_id": {
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/FlowTrigger"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowContext"
+            }
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of purposes to filter workflow phases."
+          }
+        }
+      },
+      "SearchFlowsReq": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          }
+        },
+        "required": ["entity_id", "entity_schema"]
+      },
+      "PatchFlowReq": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "closing_reason": {
+            "$ref": "#/components/schemas/FlowClosingReason"
+          },
+          "due_date": {
+            "type": "string"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowContext"
+            }
+          }
+        }
+      },
+      "FlowExecution": {
+        "type": "object",
+        "required": [
+          "id",
+          "flow_template_id",
+          "org_id",
+          "name",
+          "created_at",
+          "updated_at",
+          "analytics",
+          "status",
+          "trigger",
+          "contexts",
+          "crt_tasks",
+          "tasks",
+          "edges"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FlowExecutionId"
+          },
+          "flow_template_id": {
+            "$ref": "#/components/schemas/FlowTemplateId"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp which will double as started time as well"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last Update timestamp"
+          },
+          "due_date": {
+            "type": "string",
+            "description": "Due date for finishing the workflow"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "analytics": {
+            "type": "object",
+            "properties": {
+              "started_at": {
+                "type": "string",
+                "description": "Timestamp when the flow execution started"
+              },
+              "completed_at": {
+                "type": "string",
+                "description": "Timestamp when the flow execution was completed"
+              },
+              "closed_at": {
+                "type": "string",
+                "description": "Timestamp when the flow execution was closed"
+              },
+              "started_by": {
+                "type": "string",
+                "description": "User who started the flow execution."
+              },
+              "closed_by": {
+                "type": "string",
+                "description": "User who closed the flow execution"
+              }
+            }
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowContext"
+            }
+          },
+          "crt_tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/TaskId"
+                }
+              }
+            }
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Phase"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Edge"
+            }
+          },
+          "_execution_chain": {
+            "type": "object",
+            "description": "[Internal] Tracks the chain of automation-originated executions to prevent infinite loops. This is an internal property and should not be used by external consumers.",
+            "properties": {
+              "parent_execution_id": {
+                "type": "string",
+                "description": "ID of the parent flow execution that triggered this execution via automation"
+              },
+              "parent_task_id": {
+                "type": "string",
+                "description": "ID of the automation task in the parent execution that triggered this"
+              },
+              "depth": {
+                "type": "integer",
+                "description": "The depth in the execution chain (0 for manual triggers, 1+ for automation-triggered)",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 10
+              }
+            }
+          },
+          "closing_reason": {
+            "$ref": "#/components/schemas/FlowClosingReason"
+          },
+          "available_in_ecp": {
+            "type": "boolean",
+            "description": "Indicates whether this flow execution is available for End Customer Portal or not. By default it's not."
+          },
+          "entity_sync": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntitySync"
+            }
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids (both Labels and Purposes) that are associated with this workflow and used for filtering"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/FlowTrigger"
+          },
+          "singleClosingReasonSelection": {
+            "type": "boolean",
+            "description": "Indicates whether only a single closing reason can be selected when closing the flow execution"
+          }
+        }
+      },
+      "FlowClosingReason": {
+        "type": "object",
+        "properties": {
+          "selected_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "configured_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReason"
+            }
+          },
+          "extra_description": {
+            "type": "string"
+          }
+        }
+      },
+      "FlowTrigger": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TriggerType"
+          },
+          "automation_config": {
+            "$ref": "#/components/schemas/AutomationInfo"
+          }
+        }
+      },
+      "FlowContext": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/EntityRef"
+          }
+        ]
+      },
+      "EntityRef": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "description": "Flag to indicate if the entity is primary and should be used for evaluating the conditions of the tasks",
+            "default": false
+          }
+        }
+      },
+      "PhaseId": {
+        "type": "string"
+      },
+      "TaskId": {
+        "type": "string"
+      },
+      "Task": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ManualTask"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationTask"
+          },
+          {
+            "$ref": "#/components/schemas/DecisionTask"
+          },
+          {
+            "$ref": "#/components/schemas/AiAgentTask"
+          }
+        ]
+      },
+      "TaskType": {
+        "type": "string",
+        "enum": ["MANUAL", "AUTOMATION", "DECISION", "AI_AGENT"]
+      },
+      "ManualTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopInfo"
+              }
+            }
+          }
+        ]
+      },
+      "AutomationTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "required": ["automation_config"],
+            "properties": {
+              "automation_config": {
+                "$ref": "#/components/schemas/AutomationInfo"
+              },
+              "automation_execution_id": {
+                "type": "string",
+                "description": "ID of the automation execution, used for tracking status updates."
+              },
+              "trigger_mode": {
+                "$ref": "#/components/schemas/TriggerMode"
+              },
+              "schedule": {
+                "$ref": "#/components/schemas/ActionSchedule"
+              },
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopInfo"
+              }
+            }
+          }
+        ]
+      },
+      "LoopInfo": {
+        "type": "object",
+        "description": "Information about loop iterations, when task is part of a loop branch",
+        "properties": {
+          "max_iterations": {
+            "type": "integer",
+            "description": "Maximum number of iterations for the loop branch",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 10
+          },
+          "crt_iterations": {
+            "type": "integer",
+            "description": "Current number of iterations for the loop branch",
+            "default": 0
+          }
+        },
+        "required": ["max_iterations"]
+      },
+      "LoopConfig": {
+        "type": "object",
+        "properties": {
+          "loop_branch_id": {
+            "type": "string",
+            "description": "The id of the branch that will be looped"
+          },
+          "exit_branch_id": {
+            "type": "string",
+            "description": "The id of the branch that will be used to exit the loop"
+          },
+          "max_iterations": {
+            "type": "integer",
+            "description": "Maximum number of iterations for the loop branch",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 10
+          },
+          "crt_iterations": {
+            "type": "integer",
+            "description": "Current number of iterations for the loop branch",
+            "default": 0
+          }
+        },
+        "required": ["loop_branch_id", "exit_branch_id", "max_iterations"]
+      },
+      "TriggerMode": {
+        "type": "string",
+        "enum": ["manual", "automatic"]
+      },
+      "ActionSchedule": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ImmediateSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/DelayedSchedule"
+          },
+          {
+            "$ref": "#/components/schemas/RelativeSchedule"
+          }
+        ]
+      },
+      "ImmediateSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": ["immediate"]
+          }
+        },
+        "required": ["mode"]
+      },
+      "DelayedSchedule": {
+        "type": "object",
+        "required": ["mode", "duration", "unit"],
+        "properties": {
+          "mode": {
+            "enum": ["delayed"]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "The id of the created schedule"
+          }
+        }
+      },
+      "RelativeSchedule": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "enum": ["relative"]
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["before", "after"]
+          },
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "reference": {
+            "type": "object",
+            "required": ["id", "origin"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value 'all_preceding_tasks_completed'."
+              },
+              "origin": {
+                "type": "string",
+                "enum": ["flow_started", "task_completed", "trigger_entity_attribute", "all_preceding_tasks_completed"]
+              },
+              "schema": {
+                "type": "string",
+                "description": "The schema of the entity"
+              },
+              "attribute": {
+                "type": "string",
+                "description": "An entity attribute that identifies a date / datetime"
+              }
+            }
+          },
+          "schedule_id": {
+            "type": "string",
+            "description": "The id of the created schedule"
+          }
+        },
+        "required": ["mode", "direction", "duration", "unit", "reference"]
+      },
+      "DecisionTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "trigger_mode": {
+                "$ref": "#/components/schemas/TriggerMode"
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Condition"
+                }
+              },
+              "schedule": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DelayedSchedule"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RelativeSchedule"
+                  }
+                ]
+              },
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopConfig"
+              }
+            },
+            "required": ["trigger_mode", "conditions"]
+          }
+        ]
+      },
+      "AiAgentTask": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TaskBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "agent_config": {
+                "$ref": "#/components/schemas/AgentConfig"
+              },
+              "loop_config": {
+                "$ref": "#/components/schemas/LoopInfo"
+              },
+              "agent_execution": {
+                "$ref": "#/components/schemas/AgentExecutionInfo"
+              },
+              "agent_execution_id": {
+                "type": "string",
+                "description": "ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing."
+              }
+            }
+          }
+        ]
+      },
+      "AgentConfig": {
+        "type": "object",
+        "description": "Configuration for AI Agent to run",
+        "required": ["agent_id"],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Id of the configured AI Agent to run"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameters to customize the AI Agent behavior"
+          }
+        },
+        "additionalProperties": true
+      },
+      "AgentExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the agent execution started by this task"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the agent execution, when it already ran"
+          },
+          "error_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TaskBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TaskId"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "requirements": {
+            "type": "array",
+            "description": "requirements that need to be fulfilled in order to enable the task while flow instances are running",
+            "items": {
+              "$ref": "#/components/schemas/EnableRequirement"
+            }
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/AnalyticsInfo"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the task was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last Update timestamp"
+          },
+          "manually_created": {
+            "type": "boolean",
+            "description": "Flag to indicate if the task was created manually"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "enabled flag results from calculating the requirements"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "phase_id": {
+            "type": "string"
+          },
+          "task_type": {
+            "$ref": "#/components/schemas/TaskType"
+          }
+        },
+        "required": ["id", "template_id", "name", "task_type", "status", "analytics", "enabled"]
+      },
+      "Phase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/PhaseId"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SectionStatus"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last Update timestamp"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/AnalyticsInfo"
+          },
+          "taxonomies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Taxonomy ids that are associated with this workflow and used for filtering"
+          },
+          "loop_config": {
+            "$ref": "#/components/schemas/LoopInfo"
+          }
+        },
+        "required": ["id", "template_id", "name"]
+      },
+      "Edge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from_id": {
+            "$ref": "#/components/schemas/TaskId"
+          },
+          "to_id": {
+            "$ref": "#/components/schemas/TaskId"
+          },
+          "condition_id": {
+            "$ref": "#/components/schemas/ConditionId"
+          },
+          "none_met": {
+            "type": "boolean",
+            "description": "Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met."
+          }
+        },
+        "required": ["id", "from_id", "to_id"]
+      },
+      "AutomationInfo": {
+        "type": "object",
+        "properties": {
+          "flow_id": {
+            "type": "string",
+            "description": "Id of the automation that should be run by this task"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the automation execution, when it already ran"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the automation execution, when it already ran"
+          },
+          "error_reason": {
+            "type": "string"
+          }
+        },
+        "required": ["flow_id"]
+      },
+      "AnalyticsInfo": {
+        "type": "object",
+        "properties": {
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "in_progress_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last updated timestamp of the status"
+          },
+          "in_progress_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to IN_PROGRESS state."
+          },
+          "completed_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to COMPLETED state."
+          },
+          "skipped_by": {
+            "$ref": "#/components/schemas/UserId",
+            "description": "The user which moved the task/phase to SKIPPED state."
+          }
+        }
+      },
+      "ConditionId": {
+        "description": "A locally unique identifier for the condition",
+        "type": "string",
+        "example": "abc123"
+      },
+      "Condition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ConditionId"
+          },
+          "branch_name": {
+            "type": "string",
+            "description": "The name of the branch",
+            "maxLength": 255,
+            "example": "Branch 1"
+          },
+          "logical_operator": {
+            "type": "string",
+            "enum": ["AND", "OR"]
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Statement"
+            }
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time when the condition was evaluated"
+          },
+          "is_met": {
+            "type": "boolean",
+            "description": "The result of evaluating this condition - true / false"
+          }
+        },
+        "required": ["id", "branch_name", "logical_operator", "statements"]
+      },
+      "Statement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvaluationSource"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "source", "operator", "values"]
+      },
+      "EvaluationSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the action or trigger"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["trigger", "action"]
+          },
+          "origin_type": {
+            "type": "string",
+            "enum": ["entity", "workflow", "journey_block"]
+          },
+          "schema": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "attribute_type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "text",
+              "number",
+              "boolean",
+              "date",
+              "datetime",
+              "tags",
+              "country",
+              "email",
+              "phone",
+              "product",
+              "price",
+              "status",
+              "relation",
+              "multiselect",
+              "select",
+              "radio",
+              "relation_user",
+              "purpose",
+              "label",
+              "message_email_address"
+            ]
+          },
+          "attribute_repeatable": {
+            "type": "boolean"
+          },
+          "attribute_operation": {
+            "enum": ["all", "updated", "added", "deleted"]
+          },
+          "attribute_sub_field": {
+            "type": "string",
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
+          }
+        }
+      },
+      "Operator": {
+        "type": "string",
+        "enum": [
+          "equals",
+          "not_equals",
+          "any_of",
+          "none_of",
+          "contains",
+          "not_contains",
+          "starts_with",
+          "ends_with",
+          "greater_than",
+          "less_than",
+          "greater_than_or_equals",
+          "less_than_or_equals",
+          "is_empty",
+          "is_not_empty"
+        ]
+      },
+      "DueDateConfig": {
+        "description": "Set due date for the task based on a dynamic condition",
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "TASK_FINISHED",
+              "PHASE_FINISHED",
+              "A_PRECEDING_TASK_COMPLETED",
+              "ALL_PRECEDING_TASKS_COMPLETED"
+            ]
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "phase_id": {
+            "type": "string"
+          }
+        },
+        "required": ["duration", "unit", "type"]
+      },
+      "TimeUnit": {
+        "type": "string",
+        "enum": ["minutes", "hours", "days", "weeks", "months"]
+      },
+      "EnableRequirement": {
+        "description": "describe the requirement for a task to be enabled",
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "description": "The template_id of the task that this requirement points to"
+          },
+          "phase_id": {
+            "type": "string",
+            "description": "The template_id of the phase that this requirement points to"
+          },
+          "when": {
+            "type": "string",
+            "enum": ["TASK_FINISHED", "PHASE_FINISHED"]
+          }
+        },
+        "required": ["when"]
+      },
+      "FlowTemplateId": {
+        "type": "string"
+      },
+      "FlowExecutionId": {
+        "type": "string"
+      },
+      "UserId": {
+        "type": "string",
+        "description": "The user id"
+      },
+      "VariableAssignment": {
+        "type": "object",
+        "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "description": "The variable expression, e.g., \"{{entity.owner}}\"",
+            "example": "{{entity.owner}}"
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The resolved values after variable evaluation (populated during execution)",
+            "example": ["user_12345"]
+          }
+        },
+        "required": ["variable"]
+      },
+      "Assignees": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/components/schemas/VariableAssignment"
+            }
+          ]
+        },
+        "description": "The user ids or variable assignments"
+      },
+      "PatchTaskReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "flag for controlling enabled/disabled state of the task"
+          },
+          "automation_config": {
+            "$ref": "#/components/schemas/AutomationInfo"
+          },
+          "description": {
+            "$ref": "#/components/schemas/StepDescription"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "next_condition_id": {
+            "type": "string",
+            "description": "Condition to evaluate as true for a decision task with a manual trigger mode"
+          },
+          "revert_execution": {
+            "type": "boolean",
+            "description": "When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:\n- `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)\n- `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected\nThis parameter is silently ignored when patching the current task or future tasks.\n",
+            "default": false
+          }
+        }
+      },
+      "PatchPhaseReq": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z"
+          },
+          "due_date_config": {
+            "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "assigned_to": {
+            "$ref": "#/components/schemas/Assignees"
+          }
+        }
+      },
+      "AddTaskReq": {
+        "type": "object",
+        "properties": {
+          "previous_task_id": {
+            "type": "string",
+            "description": "Source node id for the edge to this task",
+            "format": "uuid"
+          },
+          "next_task_id": {
+            "type": "string",
+            "description": "Target node id for the edge from this task",
+            "format": "uuid"
+          },
+          "task": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Id of the task",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/components/schemas/StepStatus"
+              },
+              "due_date": {
+                "type": "string",
+                "example": "2021-04-27T12:00:00.000Z"
+              },
+              "due_date_config": {
+                "$ref": "#/components/schemas/DueDateConfig"
+              },
+              "assigned_to": {
+                "$ref": "#/components/schemas/Assignees"
+              },
+              "enabled": {
+                "type": "boolean",
+                "description": "flag for controlling enabled/disabled state of the task"
+              },
+              "automation_config": {
+                "$ref": "#/components/schemas/AutomationInfo"
+              },
+              "phase_id": {
+                "type": "string"
+              },
+              "task_type": {
+                "$ref": "#/components/schemas/TaskType"
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "required": ["previous_task_id", "next_task_id", "task"]
+      }
+    }
+  }
+}

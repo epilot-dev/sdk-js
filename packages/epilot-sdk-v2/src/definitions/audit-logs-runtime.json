@@ -1,0 +1,1 @@
+{"s":"https://audit-logs.sls.epilot.io","o":[["getLogs","post","/v1/logs",null,1],["getLogById","get","/v1/logs/{logId}",[["logId","p",true]]]],"v":"3.0.0"}

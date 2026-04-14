@@ -1,0 +1,288 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Submission API",
+    "version": "1.0.0",
+    "description": "Use this API to handle submissions entities from external sources e.g. journeys and frontends\n"
+  },
+  "tags": [
+    {
+      "name": "Submissions",
+      "description": "Journey Submission"
+    },
+    {
+      "name": "submission_schema",
+      "x-displayName": "Submission",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/SubmissionEntity\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": ["Submissions"]
+    },
+    {
+      "name": "Schemas",
+      "tags": ["submission_schema"]
+    }
+  ],
+  "security": [
+    {},
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/submission/submissions": {
+      "post": {
+        "operationId": "createSubmission",
+        "summary": "createSubmission",
+        "description": "Creates a submission from a public facing Journey\n",
+        "tags": ["Submissions"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/v1/submission/nonce/{nonce_id}": {
+      "get": {
+        "operationId": "getNonce",
+        "summary": "Check if a nonce was already used (aka exists in storage)",
+        "description": "Returns { exists: boolean } along some meta data",
+        "tags": ["Submissions"],
+        "parameters": [
+          {
+            "name": "nonce_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nonce found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubmissionNonce"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Epilot Authorization Bearer Token - public access token / user token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "SubmissionNonce": {
+        "type": "object",
+        "properties": {
+          "nonce": {
+            "type": "string"
+          },
+          "submission_id": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "string"
+          },
+          "ttl": {
+            "type": "number"
+          }
+        },
+        "required": ["nonce", "submission_id", "organization_id"]
+      },
+      "SubmissionPayload": {
+        "description": "Holds content and meta information",
+        "type": "object",
+        "properties": {
+          "organization_id": {
+            "description": "organization id – defaults to token value",
+            "type": "string",
+            "example": "123"
+          },
+          "journey_submit_id": {
+            "description": "journey submit uid",
+            "type": "string",
+            "example": "123"
+          },
+          "source_type": {
+            "type": "string",
+            "description": "type of source, e.g. journey or frontend",
+            "example": "journey"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "identifier for source e.g. journey ID or frontend ID",
+            "example": "ce99875f-fba9-4fe2-a8f9-afaf52059051"
+          },
+          "opt_ins": {
+            "description": "Opt-ins to create from submission\n",
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/OptIn"
+            }
+          },
+          "entities": {
+            "description": "Entities to create from submission\n",
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/SubmissionEntity"
+            }
+          },
+          "_ivy_opportunity_ids": {
+            "deprecated": true,
+            "description": "Related Ivy Opportunity Ids",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["source_type", "source_id", "entities"]
+      },
+      "SubmissionEntity": {
+        "type": "object",
+        "description": "The submission entity to create",
+        "additionalProperties": true,
+        "properties": {
+          "_schema": {
+            "type": "string",
+            "enum": ["submission"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Readable description of the submission. Will be used as the title if passed"
+          },
+          "files": {
+            "type": "array",
+            "description": "Files to attach to Submission Entity as a relation (s3refs from File API)\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "s3ref": {
+                  "$ref": "#/components/schemas/S3Reference"
+                },
+                "filename": {
+                  "type": "string",
+                  "description": "Override the file name"
+                },
+                "_tags": {
+                  "type": "array",
+                  "description": "List of tags for File entities",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "relation_tags": {
+                  "type": "array",
+                  "description": "List of relation labels for File attachments",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": true,
+              "required": ["s3ref"]
+            }
+          }
+        },
+        "required": ["_schema"],
+        "example": {
+          "_schema": "submission",
+          "description": "Submission created via API",
+          "contact_first_name": "First",
+          "contact_last_name": "Last",
+          "contact_email": "example@submission.com",
+          "request": "I would like to know more about electric vehicles",
+          "files": [
+            {
+              "s3ref": {
+                "bucket": "epilot-user-content",
+                "key": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+              },
+              "filename": "document.pdf"
+            }
+          ]
+        }
+      },
+      "OptIn": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "example": "EMAIL_MARKETING"
+          },
+          "identifier": {
+            "type": "string",
+            "description": "Consent identifier",
+            "example": "example@email.com"
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "S3Reference": {
+        "type": "object",
+        "description": "S3 Reference from File API",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "epilot-user-content"
+          },
+          "key": {
+            "type": "string",
+            "example": "temp/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+          }
+        },
+        "required": ["bucket", "key"]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://submission.sls.epilot.io"
+    }
+  ]
+}

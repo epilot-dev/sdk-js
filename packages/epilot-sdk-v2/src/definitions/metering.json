@@ -1,0 +1,2178 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Metering API",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "ECP",
+      "description": "APIs defined for a portal user"
+    },
+    {
+      "name": "ECP Admin",
+      "description": "APIs defined for a ECP Admin"
+    },
+    {
+      "name": "meter_schema",
+      "x-displayName": "Meter",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Meter\" />\n"
+    },
+    {
+      "name": "meter_counter_schema",
+      "x-displayName": "Meter Counter",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/MeterCounter\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": ["ECP", "ECP Admin"]
+    },
+    {
+      "name": "Schemas",
+      "tags": ["meter_schema", "meter_counter_schema"]
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "PortalAuth": []
+    },
+    {
+      "EitherAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/metering/meter": {
+      "get": {
+        "operationId": "getCustomerMeters",
+        "summary": "Get Customer Meters",
+        "description": "Retrieves all meters related to a customer.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer meters retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Meter"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "journey_actions": {
+                                "$ref": "#/components/schemas/JourneyActions"
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "last_reading": {
+                                "type": "string",
+                                "example": "2022-10-10T00:00:00.000Z",
+                                "description": "The timestamp of the last reading"
+                              },
+                              "current_consumption": {
+                                "type": "number",
+                                "example": 100.5,
+                                "description": "The current consumption of the meter"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/contract/meters/{contract_id}": {
+      "get": {
+        "operationId": "getMetersByContractId",
+        "summary": "getMetersByContractId",
+        "description": "Retrieves all meters related to a contract.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the Contract."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meters related to the contract retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Meter"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/meter/{id}": {
+      "patch": {
+        "operationId": "updateMeter",
+        "summary": "Update Meter",
+        "description": "Updates the details of a meter.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Meter"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestUpdateMeter"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getMeter",
+        "summary": "Get Meter",
+        "description": "Retrieves the details of a meter.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meter retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "entity": {
+                          "$ref": "#/components/schemas/Meter"
+                        },
+                        "journey_actions": {
+                          "$ref": "#/components/schemas/JourneyActions"
+                        },
+                        "relations": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/EntityItem"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/counter": {
+      "get": {
+        "operationId": "getMeterCounters",
+        "summary": "Get Meter Counters",
+        "description": "Retrieves all counters for a given meter.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counters retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterCounter"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/counter/{counter_id}": {
+      "get": {
+        "operationId": "getCounterDetails",
+        "summary": "Get Counter Details",
+        "description": "Retrieves the details of a meter counter.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the counter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counter details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterCounter"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading": {
+      "post": {
+        "operationId": "createMeterReading",
+        "summary": "Create Meter Reading",
+        "description": "Inserts a new meter reading.",
+        "tags": ["ECP Admin", "ECP"],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Meter reading payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeterReading"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReading"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/readings": {
+      "post": {
+        "operationId": "createMeterReadings",
+        "summary": "Create Meter Readings",
+        "description": "Inserts multiple meter readings at once. Limited to 100 readings per request.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the reading to become available in GetReadings API. Useful for large migrations",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Meter readings payload. Limited to 100 readings per request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/MeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/readings/{meter_id}": {
+      "post": {
+        "operationId": "createPortalMeterReadings",
+        "summary": "createPortalMeterReadings",
+        "description": "Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.",
+        "tags": ["ECP"],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          }
+        ],
+        "requestBody": {
+          "description": "Meter readings payload. Limited to 2 readings per request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PortalMeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/metering/readings": {
+      "post": {
+        "operationId": "batchWriteMeterReadings",
+        "summary": "Batch Write Readings",
+        "description": "Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the reading to become available in GetReadings API. Useful for large migrations",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SkipValidationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          }
+        ],
+        "requestBody": {
+          "description": "Meter readings payload. Limited to 100 readings per request.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "identifiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "The identifier of the meter reading."
+                    },
+                    "description": "- By default, the system will use combination of counter_id, meter_id, direction, and timestamp to identify a meter reading.\n- Additional identifiers can be provided to identify a meter reading uniquely.\n- Example:\n  - [\"metadata.registration_id\", \"metadata.business_unit\"]\n  - [\"metadata.registration_id\", \"metadata.business_unit\", \"external_id\"]\n"
+                  },
+                  "readings": {
+                    "type": "array",
+                    "items": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/MeterReading"
+                        },
+                        {
+                          "properties": {
+                            "operation": {
+                              "type": "string",
+                              "enum": ["create", "update", "delete"],
+                              "default": "create"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/submission": {
+      "post": {
+        "operationId": "createMeterReadingFromSubmission",
+        "summary": "Create Meter Reading from Submission",
+        "description": "Creates a reading from a journey submission.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Meter reading payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "org_id": {
+                    "type": "string",
+                    "example": "123",
+                    "description": "ID of the organization"
+                  },
+                  "entity": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "_org": {
+                        "type": "string",
+                        "example": "123",
+                        "description": "ID of the organization"
+                      },
+                      "meterReadings": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/SubmissionMeterReading"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "enum": ["Successfully Processed"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateMeterReadingFromSubmission"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/allowed/reading/{meter_id}": {
+      "get": {
+        "operationId": "getAllowedReadingForMeter",
+        "summary": "getAllowedReadingForMeter",
+        "description": "Get allowed reading for the given meter",
+        "tags": ["ECP Admin", "ECP"],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false,
+            "description": "If not provided, the system will default to now.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T10:10:00.000Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent reading for the meter fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "counter_id": {
+                            "$ref": "#/components/schemas/Id"
+                          },
+                          "min_value": {
+                            "type": "number",
+                            "description": "Minimum allowed reading value for the meter"
+                          },
+                          "max_value": {
+                            "type": "number",
+                            "description": "Maximum allowed reading value for the meter"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/with-meter": {
+      "post": {
+        "operationId": "createReadingWithMeter",
+        "summary": "Create Reading with Meter",
+        "description": "Creates a reading along with a meter.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Meter reading payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingWithMeter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reading with meter created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestCreateReadingWithMeter"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}": {
+      "get": {
+        "operationId": "getReadingsByInterval",
+        "summary": "Get Readings by Interval",
+        "description": "Retrieves all readings specified in an interval.\nIf the start_date and end_date are equal, then it returns the readings of the specified date.\nThe start_date should be less than or equal to the end_date.\n",
+        "tags": ["ECP Admin", "ECP"],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the counter."
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "required": false,
+            "description": "If not provided, the system will default to 2000-01-01.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "required": false,
+            "description": "If not provided, the system will default to today's date.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-10"
+            }
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "Returns the first n results after the specified offset (from).\nIf this value is provided as -1, then it returns all results at once.\n",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "example": 20,
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "example": 0,
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "description": "Since meter readings are cumulative, users may need to request actual consumptions, which are the difference between consecutive measurements.\nIf this value is provided as \"cumulative\", then actual readings will be returned.\nIf this value is provided as \"relative\", then actual consumption will be returned.\n",
+            "schema": {
+              "type": "string",
+              "default": "cumulative",
+              "enum": ["cumulative", "relative"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "asc",
+              "enum": ["asc", "desc"]
+            },
+            "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Readings retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    },
+                    "hits": {
+                      "type": "number",
+                      "example": 120
+                    },
+                    "firstRecordCreatedAt": {
+                      "type": "string",
+                      "example": "2022-10-01T20:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateMeterReading",
+        "summary": "Update Meter Reading",
+        "description": "Updates a meter reading.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter entity."
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the counter entity."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": true,
+            "description": "The timestamp when the reading was created.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T20:00:00.000Z"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Update meter reading payload.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeterReading"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter reading updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequestUpdateMeterReading"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMeterReading",
+        "summary": "Delete Meter Reading",
+        "description": "Deletes a meter reading.",
+        "tags": ["ECP Admin"],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the meter entity."
+          },
+          {
+            "in": "path",
+            "name": "counter_id",
+            "schema": {
+              "$ref": "#/components/schemas/Id"
+            },
+            "required": true,
+            "description": "The ID of the counter entity."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": true,
+            "description": "The timestamp when the reading was created.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T20:00:00.000Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meter reading deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "meterId": {
+                          "$ref": "#/components/schemas/Id"
+                        },
+                        "counterId": {
+                          "$ref": "#/components/schemas/Id"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "example": "2022-10-01T20:00:00.000Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "InvalidRequest": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Could not authenticate the user",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The user is not allowed to access this resource",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "InvalidRequestUpdateMeter": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": ["missing_params"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReading": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "contract_period",
+                        "no_counter",
+                        "no_direction",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "greater_than_subsequent",
+                        "meter_decommissioned"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReadings": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "too_many_records",
+                        "timestamp_future",
+                        "duplicate_reading",
+                        "less_than_previous",
+                        "invalid_identifiers",
+                        "multiple_readings_found"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateMeterReadingFromSubmission": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": ["timestamp_future", "less_than_previous", "greater_than_subsequent"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestCreateReadingWithMeter": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "missing_params",
+                        "timestamp_future",
+                        "less_than_previous",
+                        "contract_period",
+                        "greater_than_subsequent"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "InvalidRequestUpdateMeterReading": {
+        "description": "The request could not be validated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "reason": {
+                      "type": "string",
+                      "enum": ["missing_params", "timestamp_future", "less_than_previous", "greater_than_subsequent"]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with ePilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "PortalAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with customer portal OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EitherAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Portal or Epilot Bearer Token"
+      },
+      "AsOrganization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-ivy-org-id",
+        "description": "Set organization id as internal user"
+      }
+    },
+    "schemas": {
+      "ErrorResp": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "EntityId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "EntitySlug": {
+        "description": "URL-friendly identifier for the entity schema",
+        "type": "string",
+        "example": "contact"
+      },
+      "BaseEntity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "Entity ID",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Title of the entity",
+            "example": "Example Entity"
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization ID the entity belongs to",
+            "example": "123"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of entity tags",
+            "example": ["example", "mock"]
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp of the entity",
+            "example": "2021-02-09T12:41:43.662Z"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp of the entity",
+            "example": "2021-02-09T12:41:43.662Z"
+          }
+        },
+        "required": ["_id", "_title", "_org", "_created_at", "_updated_at"]
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "EntityItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ]
+      },
+      "Id": {
+        "type": "string"
+      },
+      "EntityRelation": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "_slug": {
+            "type": "string",
+            "enum": ["contact", "contract"]
+          }
+        }
+      },
+      "Meter": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "required": ["_schema"],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": ["meter"],
+                "description": "The schema type of the meter"
+              },
+              "ma_lo_id": {
+                "type": "string",
+                "example": "A09-123",
+                "description": "The MA-LO ID of the meter"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["active", "decommissioned"],
+                "description": "The status of the meter"
+              },
+              "meter_type": {
+                "type": "string",
+                "enum": [
+                  "three-phase-meter",
+                  "bellow-gas-meter",
+                  "rotary-piston-meter",
+                  "smart-meter",
+                  "performance-meter",
+                  "maximum-meter",
+                  "turbine-gas-meter",
+                  "ultrasonic-gas-meter",
+                  "alternating-current-meter",
+                  "modern-metering-system",
+                  "intelligent-measuring-system",
+                  "electronic-meter"
+                ],
+                "description": "The type of the meter"
+              },
+              "tariff_type": {
+                "type": "string",
+                "example": "Peak load tariff",
+                "description": "The tariff type of the meter"
+              },
+              "meter_number": {
+                "type": "string",
+                "example": "J-1093-1AK",
+                "description": "The number of the meter"
+              },
+              "sector": {
+                "type": "string",
+                "enum": ["power", "water", "gas", "district_heating", "waste_water"],
+                "description": "The sector to which the meter belongs"
+              },
+              "location": {
+                "type": "object",
+                "example": [
+                  {
+                    "country": "Germany",
+                    "city": "Koln",
+                    "postal_code": 81475,
+                    "street": "Melatengürtel",
+                    "street_number": 71,
+                    "additional_info": "5. Etage",
+                    "_tags": ["billing", "delivery"]
+                  }
+                ],
+                "description": "The location information of the meter"
+              },
+              "used_for": {
+                "type": "string",
+                "example": "Domestic Usage",
+                "description": "The usage purpose of the meter"
+              },
+              "manufacturer": {
+                "type": "string",
+                "example": "Energy One",
+                "description": "The manufacturer of the meter"
+              },
+              "calibration_date": {
+                "type": "string",
+                "example": "2022-10-10T00:00:00.000Z",
+                "description": "The calibration date of the meter"
+              },
+              "contract": {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                },
+                "description": "The contract associated with the meter"
+              },
+              "customer": {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                },
+                "description": "The customer associated with the meter"
+              }
+            }
+          }
+        ]
+      },
+      "Direction": {
+        "type": "string",
+        "enum": ["feed-in", "feed-out"]
+      },
+      "TariffType": {
+        "type": "string",
+        "enum": ["ht", "nt"]
+      },
+      "Reason": {
+        "type": "string",
+        "nullable": true,
+        "description": "The reason for recording the reading\nIf no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text\n",
+        "enum": ["", "regular", "irregular", "last", "first", "meter_change", "contract_change", "meter_adjustment"]
+      },
+      "ReasonString": {
+        "type": "string",
+        "nullable": true,
+        "deprecated": true,
+        "description": "This field is deprecated. Please use the Reason enum instead.\n"
+      },
+      "ReadBy": {
+        "type": "string",
+        "nullable": true,
+        "example": "John Doe",
+        "description": "The person who recorded the reading"
+      },
+      "ReadingStatus": {
+        "type": "string",
+        "nullable": true,
+        "enum": ["valid", "in-validation", "implausible", null, ""]
+      },
+      "Reading": {
+        "type": "object",
+        "required": ["value", "source"],
+        "properties": {
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "The source of the reading"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus",
+            "description": "The status of the reading"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true,
+            "description": "A remark or comment for the reading",
+            "example": "Customer reported unusual consumption"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "Notes to record a meter reading"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
+          }
+        }
+      },
+      "MeterReading": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reading"
+          },
+          {
+            "required": ["meter_id"]
+          }
+        ]
+      },
+      "PortalMeterReading": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Reading"
+          },
+          {
+            "required": ["counter_id"]
+          }
+        ]
+      },
+      "UpdateMeterReading": {
+        "type": "object",
+        "required": ["value", "meter_id", "source"],
+        "properties": {
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReasonString"
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T00:00:00.000Z",
+            "format": "date-time"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "The source of the reading"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus",
+            "description": "The status of the reading"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true,
+            "description": "A remark or comment for the reading",
+            "example": "Customer reported unusual consumption"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
+          }
+        }
+      },
+      "MeterCounter": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "required": ["_schema"],
+            "properties": {
+              "_id": {
+                "$ref": "#/components/schemas/EntityId"
+              },
+              "_schema": {
+                "type": "string",
+                "enum": ["meter_counter"]
+              },
+              "obis_number": {
+                "type": "string",
+                "example": "A-34",
+                "description": "The OBIS number of the meter counter"
+              },
+              "direction": {
+                "$ref": "#/components/schemas/Direction",
+                "description": "The direction of the meter counter"
+              },
+              "transformer_ratio": {
+                "type": "number",
+                "example": 70,
+                "description": "The transformer ratio of the meter counter"
+              },
+              "unit": {
+                "$ref": "#/components/schemas/Unit",
+                "description": "The unit of measurement for the meter counter"
+              },
+              "forecast_reading_value": {
+                "type": "string",
+                "example": 270,
+                "description": "The forecast reading value of the meter counter"
+              },
+              "forecast_as_of": {
+                "type": "string",
+                "example": "2022-12-10T00:00:00.000Z",
+                "description": "The date as of which the forecast reading value is applicable"
+              },
+              "current_consumption": {
+                "type": "number",
+                "example": 240,
+                "description": "The current consumption value of the meter counter"
+              },
+              "last_reading": {
+                "type": "string",
+                "example": "2022-10-10T00:00:00.000Z",
+                "description": "The timestamp of the last reading"
+              },
+              "conversion_factor": {
+                "type": "number",
+                "example": 3,
+                "description": "The conversion factor for the meter counter"
+              },
+              "tariff_type": {
+                "$ref": "#/components/schemas/TariffType",
+                "description": "The tariff type of the meter counter"
+              }
+            }
+          }
+        ]
+      },
+      "CounterReadingOnSubmission": {
+        "type": "object",
+        "required": ["counterId", "direction", "value"],
+        "properties": {
+          "counterId": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          },
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter counter"
+          }
+        }
+      },
+      "SubmissionMeterReading": {
+        "type": "object",
+        "required": ["meterId"],
+        "nullable": true,
+        "properties": {
+          "meterId": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter"
+          },
+          "readings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounterReadingOnSubmission"
+            },
+            "description": "- The counter readings of a meter\n- This is only sent when the user is authenticated while submitting a journey\n"
+          },
+          "readingValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value of the meter when the counterId is passed or when the meterType is one-tariff"
+          },
+          "readingDate": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T10:10:00.000Z"
+          },
+          "readBy": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "The person who recorded the reading"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "maloId": {
+            "type": "string",
+            "example": "A09-123",
+            "description": "The MA-LO ID of the meter"
+          },
+          "obisNumber": {
+            "type": "string",
+            "example": "A-34",
+            "description": "The OBIS number of the meter counter"
+          },
+          "readingUnit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
+          },
+          "meterType": {
+            "type": "string",
+            "enum": ["one_tariff", "two_tariff", "bi_directional"],
+            "description": "The type of the meter"
+          },
+          "feedInValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The feed-in value of the meter when meterType is one-tariff or bi-directional"
+          },
+          "feedOutValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The feed-out value of the meter when meterType is bi-directional"
+          },
+          "htValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The high-peak tariff value of the meter when meterType is two-tariff"
+          },
+          "ntValue": {
+            "type": "number",
+            "example": 240,
+            "description": "The off-peak tariff value of the meter when meterType is two-tariff"
+          }
+        }
+      },
+      "Unit": {
+        "type": "string"
+      },
+      "Source": {
+        "type": "string",
+        "enum": ["ECP", "ERP", "360", "journey-submission"]
+      },
+      "ActionLabel": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "nullable": true
+          },
+          "de": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Rule": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribute_value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "JourneyActions": {
+        "type": "object",
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "action_label": {
+            "type": "object",
+            "$ref": "#/components/schemas/ActionLabel",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "ReadingWithMeter": {
+        "type": "object",
+        "properties": {
+          "ma_lo_id": {
+            "type": "string",
+            "example": "A09-123",
+            "description": "The MA-LO ID of the meter"
+          },
+          "meter_id": {
+            "$ref": "#/components/schemas/Id",
+            "description": "The ID of the associated meter"
+          },
+          "obis_number": {
+            "type": "string",
+            "example": "A-34",
+            "description": "The OBIS number of the meter counter"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit",
+            "description": "The unit of measurement for the reading"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading"
+          },
+          "tariff_type": {
+            "$ref": "#/components/schemas/TariffType",
+            "description": "The tariff type of the reading"
+          },
+          "value": {
+            "type": "number",
+            "example": 240,
+            "description": "The reading value"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "If the value is not provided, the system will be set with the time the request is processed.",
+            "example": "2022-10-10T10:10:00.000Z"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "The source of the reading"
+          }
+        }
+      },
+      "ActivityId": {
+        "type": "string",
+        "format": "ulid",
+        "description": "See https://github.com/ulid/spec",
+        "example": "01F130Q52Q6MWSNS8N2AVXV4JN"
+      }
+    },
+    "parameters": {
+      "ActivityIdQueryParam": {
+        "name": "activity_id",
+        "description": "Activity to include in event feed",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/ActivityId"
+        }
+      },
+      "SkipValidationQueryParam": {
+        "name": "skip_validation",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When set to true, all validations will be skipped and the system will allow the reading to be created.\nIf set to false or not provided, the system performs the following validations:\n  Validation Rules (when not skipped)\n  - Previous Reading Check:\n    The new reading must be greater than the previous reading.\n    Example: If the previous reading is 100 and the new reading is 50, the system will reject it.\n  - Subsequent Reading Check\n    The new reading must be less than the next (subsequent) reading, if one exists.\n    Example: If a future reading for 2022-10-10 is 200, and you try to enter 250 for 2022-10-09, it will be rejected.\n  - Future Timestamp Check\n    The reading timestamp must be less than or equal to the current time.\n    Example: If the current time is 2022-10-10T20:00:00Z, a reading with timestamp 2022-10-11T20:00:00Z will not be accepted.\n  - Duplicate Check\n    A reading is not allowed if there's already a record with the same meter_id, counter_id, and timestamp`.\n  - Update Check\n    When updating a reading, the system will look for an existing record with the same meter_id, counter_id, and timestamp.\n    If no such record exists, it won't throw an error — the update simply won't take effect.\n"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://metering.sls.epilot.io"
+    }
+  ]
+}

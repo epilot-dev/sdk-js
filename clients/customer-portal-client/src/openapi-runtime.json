@@ -55,7 +55,12 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           }
         ],
         "requestBody": {
@@ -579,6 +584,7 @@
     "/v2/portal/public-widgets": {
       "get": {
         "operationId": "getPublicPortalWidgets",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -597,6 +603,7 @@
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -614,6 +621,7 @@
       },
       "get": {
         "operationId": "getPortalWidgets",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -626,6 +634,60 @@
             "required": false
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/widgets": {
+      "get": {
+        "operationId": "getPortalWidgetsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contract_id",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "upsertPortalWidgetV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/portal/files": {
+      "post": {
+        "operationId": "savePortalFilesV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -718,6 +780,7 @@
       },
       "patch": {
         "operationId": "updateContact",
+        "deprecated": true,
         "requestBody": {
           "content": {
             "application/json": {}
@@ -765,7 +828,12 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           }
         ],
         "requestBody": {
@@ -921,11 +989,16 @@
           {
             "in": "query",
             "name": "org_id",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
             "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
             "required": false
           }
         ],
@@ -972,6 +1045,7 @@
     "/v2/portal/order": {
       "get": {
         "operationId": "getAllOrders",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1008,6 +1082,7 @@
     "/v2/portal/order/{id}": {
       "get": {
         "operationId": "getOrder",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1019,6 +1094,7 @@
       },
       "patch": {
         "operationId": "updateOrder",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1037,6 +1113,7 @@
     "/v2/portal/opportunity": {
       "get": {
         "operationId": "getAllOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1055,6 +1132,7 @@
     "/v2/portal/opportunities/searchable-attributes": {
       "get": {
         "operationId": "getSearchableAttributesForOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1073,6 +1151,7 @@
     "/v2/portal/opportunities/search": {
       "post": {
         "operationId": "getSearchResultsForOpportunities",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1097,6 +1176,7 @@
     "/v2/portal/opportunities/{id}": {
       "get": {
         "operationId": "getOpportunity",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1108,6 +1188,7 @@
       },
       "patch": {
         "operationId": "updateOpportunity",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1127,6 +1208,7 @@
     "/v2/portal/request": {
       "get": {
         "operationId": "getAllRequests",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1145,6 +1227,7 @@
     "/v2/portal/contract": {
       "get": {
         "operationId": "getAllContracts",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1163,6 +1246,7 @@
     "/v2/portal/contract/{id}": {
       "get": {
         "operationId": "getContract",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1174,6 +1258,7 @@
       },
       "patch": {
         "operationId": "updateContract",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1381,6 +1466,7 @@
     "/v2/portal/user/file/{id}": {
       "get": {
         "operationId": "getFileById",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -1525,7 +1611,12 @@
           {
             "name": "portal_id",
             "in": "query",
-            "required": true
+            "required": false
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -1608,6 +1699,24 @@
           {
             "in": "path",
             "name": "step_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}/workflows": {
+      "get": {
+        "operationId": "getEntityWorkflows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
             "required": true
           }
         ],
@@ -1708,12 +1817,17 @@
           {
             "in": "query",
             "name": "portal_id",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
             "name": "org_id",
-            "required": true
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           },
           {
             "in": "query",
@@ -1862,6 +1976,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/pages/interpolate": {
+      "post": {
+        "operationId": "interpolatePortalPages",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/pages/default": {
       "get": {
         "operationId": "getDefaultPages",
@@ -1951,6 +2077,18 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/entity:status": {
+      "put": {
+        "operationId": "updateNotificationsStatus",
         "requestBody": {
           "required": true,
           "content": {

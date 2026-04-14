@@ -3,20 +3,20 @@ import {
   authorizeClient,
   getActionConfig,
   getEntityContext,
+  getPageContext,
   getSession,
   initialize,
   isInitialized,
+  navigate,
   on,
+  onLocationChange,
   onVisibilityChange,
   send,
   updateActionConfig,
   updateContentHeight,
   __reset,
 } from './app-bridge';
-import {
-  AppBridgeNotInitializedError,
-  AppBridgeTimeoutError,
-} from './errors';
+import { AppBridgeNotInitializedError, AppBridgeTimeoutError } from './errors';
 
 describe('app-bridge', () => {
   let messageHandlers: Map<string, (event: MessageEvent) => void>;
@@ -124,10 +124,7 @@ describe('app-bridge', () => {
 
       await initPromise;
 
-      expect(postMessageMock).toHaveBeenCalledWith(
-        expect.objectContaining({ contentHeight: 1000 }),
-        '*',
-      );
+      expect(postMessageMock).toHaveBeenCalledWith(expect.objectContaining({ contentHeight: 1000 }), '*');
     });
 
     it('should timeout if no response received', async () => {
@@ -239,6 +236,87 @@ describe('app-bridge', () => {
       unsubscribe();
 
       simulateParentMessage('visibility-change', { isVisible: true });
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPageContext', () => {
+    it('should request and return page context', async () => {
+      const contextPromise = getPageContext();
+
+      setTimeout(() => {
+        simulateParentMessage('init-page-context', {
+          context: {
+            slug: 'zapier',
+            subPath: '/connections',
+            path: '/app/zapier/connections',
+          },
+        });
+      }, 10);
+
+      const context = await contextPromise;
+
+      expect(postMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'app-bridge',
+          event: 'init-page-context',
+        }),
+        '*',
+      );
+      expect(context).toEqual({
+        slug: 'zapier',
+        subPath: '/connections',
+        path: '/app/zapier/connections',
+      });
+    });
+
+    it('should timeout if no response', async () => {
+      await expect(getPageContext({ timeout: 50 })).rejects.toThrow(AppBridgeTimeoutError);
+    });
+  });
+
+  describe('navigate', () => {
+    it('should send navigate message with subPath', () => {
+      navigate('/connections/new');
+
+      expect(postMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'app-bridge',
+          event: 'navigate',
+          subPath: '/connections/new',
+        }),
+        '*',
+      );
+    });
+  });
+
+  describe('onLocationChange', () => {
+    it('should subscribe to location changes', () => {
+      const handler = vi.fn();
+      onLocationChange(handler);
+
+      simulateParentMessage('location-change', { subPath: '/settings' });
+
+      expect(handler).toHaveBeenCalledWith('/settings');
+    });
+
+    it('should default to root path when subPath is missing', () => {
+      const handler = vi.fn();
+      onLocationChange(handler);
+
+      simulateParentMessage('location-change', {});
+
+      expect(handler).toHaveBeenCalledWith('/');
+    });
+
+    it('should return unsubscribe function', () => {
+      const handler = vi.fn();
+      const unsubscribe = onLocationChange(handler);
+
+      unsubscribe();
+
+      simulateParentMessage('location-change', { subPath: '/settings' });
 
       expect(handler).not.toHaveBeenCalled();
     });

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -36,9 +34,10 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -54,7 +53,24 @@ declare namespace Components {
             /**
              * Id of the configured automation to run
              */
-            flow_id: string;
+            flow_id?: string;
+            /**
+             * Transient field. The full automation action configuration following the automation API action schema. Processed by the backend during create/update and stripped before storage. When present without a flow_id, a new automation flow is created. When present with a flow_id, the existing automation flow is updated.
+             *
+             */
+            action_config?: {
+                [name: string]: any;
+                /**
+                 * The action type (e.g. send-email, trigger-workflow)
+                 */
+                type: string;
+                /**
+                 * Action-specific configuration
+                 */
+                config?: {
+                    [name: string]: any;
+                };
+            };
         }
         export interface AutomationTask {
             id: string;
@@ -71,9 +87,10 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -94,7 +111,24 @@ declare namespace Components {
             /**
              * Id of the automation config that triggers this workflow
              */
-            automation_id: string;
+            automation_id?: string;
+            /**
+             * Transient field. Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update and stripped before storage.
+             *
+             */
+            trigger_config?: {
+                [name: string]: any;
+                /**
+                 * The trigger type (e.g. entity_operation, activity)
+                 */
+                type: string;
+                /**
+                 * Trigger-specific configuration
+                 */
+                configuration?: {
+                    [name: string]: any;
+                };
+            }[];
         }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
@@ -104,8 +138,8 @@ declare namespace Components {
          */
         export interface ClosingReason {
             id?: string;
-            title: string;
-            status: ClosingReasonsStatus;
+            title?: string;
+            status?: ClosingReasonsStatus;
             lastUpdateTime?: string;
             creationTime?: string;
         }
@@ -138,7 +172,7 @@ declare namespace Components {
              */
             branch_name: string;
             logical_operator: "AND" | "OR";
-            statements: Statement[];
+            statements: Statement[] | null;
         }
         export interface CreateFlowTemplate {
             id?: string;
@@ -186,11 +220,22 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
+            /**
+             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             */
+            additional_triggers?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger[];
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
@@ -219,6 +264,10 @@ declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         export interface DecisionTask {
             id: string;
@@ -235,9 +284,10 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -279,7 +329,7 @@ declare namespace Components {
         export interface DueDateConfig {
             duration: number;
             unit: TimeUnit;
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED";
             task_id?: string;
             phase_id?: string;
         }
@@ -305,7 +355,7 @@ declare namespace Components {
         export interface Edge {
             id: string;
             from_id: string;
-            to_id: string;
+            to_id?: string | null;
             condition_id?: string;
             /**
              * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
@@ -354,7 +404,7 @@ declare namespace Components {
                  * Status triggers are deduced from event + entity status combination.
                  *
                  */
-                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "TaskMarkedOnHold" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
                 /**
                  * Optional filter to target specific tasks or phases.
                  * Specify either task_template_id OR phase_template_id (mutually exclusive).
@@ -405,9 +455,22 @@ declare namespace Components {
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
             /**
-             * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
+             * For complex attribute types, specifies which sub-field to extract (e.g., "address", "name", "email_type")
              */
             attribute_sub_field?: string;
+            /**
+             * Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)
+             */
+            date_offset?: {
+                /**
+                 * Number of units to offset
+                 */
+                amount?: number;
+                /**
+                 * Unit of the offset
+                 */
+                unit?: "days" | "months" | "years";
+            };
         }
         export interface FlowTemplate {
             id?: string;
@@ -455,11 +518,22 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
+            /**
+             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             */
+            additional_triggers?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger[];
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
@@ -488,6 +562,10 @@ declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         export interface FlowTemplateBase {
             id?: string;
@@ -535,11 +613,22 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
              */
             available_in_ecp?: boolean;
+            /**
+             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             */
+            additional_triggers?: /**
+             * example:
+             * {
+             *   "type": "automation",
+             *   "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
+             * }
+             */
+            Trigger[];
             phases?: Phase[];
             tasks: Task[];
             edges: Edge[];
@@ -568,6 +657,10 @@ declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -618,9 +711,10 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -638,6 +732,14 @@ declare namespace Components {
             maxAllowed?: number;
         }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        /**
+         * Details regarding partner for the workflow step
+         */
+        export interface PartnerDetails {
+            enabled?: boolean;
+            label?: string;
+            description?: string;
+        }
         export interface Phase {
             id: string;
             name: string;
@@ -647,7 +749,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -660,10 +762,10 @@ declare namespace Components {
             unit: TimeUnit;
             reference: {
                 /**
-                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 * The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value "all_preceding_tasks_completed".
                  */
                 id: string;
-                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed";
                 /**
                  * The schema of the entity
                  */
@@ -710,6 +812,10 @@ declare namespace Components {
             source: EvaluationSource;
             operator: Operator;
             values: string[];
+            /**
+             * How to interpret values. "static" (default) means literal values. "relative_date" means values[0] is a dynamic date token like "today".
+             */
+            value_type?: "static" | "relative_date";
         }
         /**
          * Action that needs to be done in a Workflow
@@ -745,6 +851,10 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -791,9 +901,13 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: string[];
+            assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -834,6 +948,25 @@ declare namespace Components {
                  */
                 entityAttribute: string;
             };
+        }
+        /**
+         * Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.
+         */
+        export interface VariableAssignment {
+            /**
+             * The variable expression, e.g., "{{entity.owner}}"
+             * example:
+             * {{entity.owner}}
+             */
+            variable: string;
+            /**
+             * The resolved values after variable evaluation (populated during execution)
+             * example:
+             * [
+             *   "user_12345"
+             * ]
+             */
+            value?: string[];
         }
         /**
          * Version of the workflow schema.
@@ -892,6 +1025,10 @@ declare namespace Components {
              * Whether only a single closing reason can be selected
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * The manifest IDs associated with this workflow
+             */
+            _manifest?: string[];
         }
     }
 }
@@ -1726,6 +1863,7 @@ export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
 export type Operator = Components.Schemas.Operator;
+export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type Phase = Components.Schemas.Phase;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
 export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;
@@ -1744,5 +1882,6 @@ export type Trigger = Components.Schemas.Trigger;
 export type TriggerMode = Components.Schemas.TriggerMode;
 export type TriggerType = Components.Schemas.TriggerType;
 export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
+export type VariableAssignment = Components.Schemas.VariableAssignment;
 export type Version = Components.Schemas.Version;
 export type WorkflowDefinition = Components.Schemas.WorkflowDefinition;

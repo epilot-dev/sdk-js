@@ -1,0 +1,524 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Purpose API",
+    "version": "1.0.0",
+    "description": "Purpose API - enables the management of purposes for the epilot platform. \n\nepilot 'Purposes' are a special system taxonomy used to tag and organize resources (entities, attributes, groups, automations, templates, etc.) across the platform.\nIn essence, purposes are deeply connected to what information users can see or not on epilot360 UIs based on the \"purpose\" of the tasks they have at hand.\n",
+    "contact": {
+      "name": "Support",
+      "email": "info@epilot.cloud",
+      "url": "https://help.epilot.cloud"
+    }
+  },
+  "tags": [
+    {
+      "name": "Purpose",
+      "description": "Purpose operations"
+    },
+    {
+      "name": "purpose_schema",
+      "x-displayName": "Purpose",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Purpose\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "Purpose"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "purpose_schema"
+      ]
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://purpose.sls.epilot.io"
+    },
+    {
+      "url": "https://purpose.sls.epilot.io",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/v1/purpose": {
+      "post": {
+        "operationId": "createPurpose",
+        "summary": "Create Purpose",
+        "description": "Create a new purpose",
+        "tags": [
+          "Purpose"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CreatePurposeRequest"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PurposeResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/purpose:search": {
+      "get": {
+        "operationId": "searchPurposes",
+        "summary": "Search Purposes",
+        "description": "Search purposes using fuzzy matching.\n",
+        "tags": [
+          "Purpose"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/QueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PurposeSearchResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/purpose:batchGet": {
+      "post": {
+        "operationId": "batchGetPurposes",
+        "summary": "Batch Get Purposes",
+        "description": "Fetch multiple purposes by their known IDs in a single request.\n\n**Use this for:**\n- Hydrating purpose references from entities\n- Resolving a list of purpose IDs to full objects\n\n**Do NOT use this for:**\n- Browsing/discovering purposes (use `searchPurposes` instead)\n- Autocomplete (use `searchPurposes` instead)\n\n**Examples:**\n- Entity has `_purposes: [\"uuid-1\", \"uuid-2\"]` → fetch full purpose objects\n- Display purpose names for a list of tagged entities\n",
+        "tags": [
+          "Purpose"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/BatchGetPurposesRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PurposeListResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/purpose/{purposeId}": {
+      "get": {
+        "operationId": "getPurpose",
+        "summary": "Get Purpose",
+        "description": "Get a single purpose by ID",
+        "tags": [
+          "Purpose"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PurposeResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePurpose",
+        "summary": "Update Purpose",
+        "description": "Update an existing purpose",
+        "tags": [
+          "Purpose"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UpdatePurposeRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PurposeResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePurpose",
+        "summary": "Delete Purpose",
+        "description": "Permanently delete a purpose",
+        "tags": [
+          "Purpose"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PurposeIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PurposeResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Epilot Bearer token"
+      },
+      "EpilotOrg": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-epilot-org-id",
+        "description": "Epilot Organization ID"
+      }
+    },
+    "parameters": {
+      "PurposeIdPathParam": {
+        "name": "purposeId",
+        "in": "path",
+        "required": true,
+        "description": "Purpose ID (UUID)",
+        "schema": {
+          "type": "string"
+        },
+        "example": "1fdc8f66-0e2b-4e20-a347-9cbdbf6a7217"
+      },
+      "QueryParam": {
+        "name": "query",
+        "in": "query",
+        "required": false,
+        "description": "Search query string",
+        "schema": {
+          "type": "string"
+        },
+        "example": "electricity"
+      },
+      "SizeParam": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "description": "Maximum number of results to return",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 50
+        }
+      }
+    },
+    "schemas": {
+      "Purpose": {
+        "type": "object",
+        "description": "A purpose used to tag and organize entities",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable name",
+            "example": "Electricity Contract"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of creation"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of last update"
+          }
+        }
+      },
+      "CreatePurposeInput": {
+        "type": "object",
+        "description": "Input for creating a new purpose",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name",
+            "example": "Electricity Contract"
+          }
+        }
+      },
+      "UpdatePurposeInput": {
+        "type": "object",
+        "description": "Input for updating an existing purpose",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name"
+          }
+        }
+      },
+      "BatchGetPurposesInput": {
+        "type": "object",
+        "description": "Input for batch getting purposes",
+        "required": [
+          "purposeIds"
+        ],
+        "properties": {
+          "purposeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of purpose IDs to fetch",
+            "example": [
+              "123e4567-e89b-12d3-a456-426614174000"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    },
+    "requestBodies": {
+      "CreatePurposeRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CreatePurposeInput"
+            }
+          }
+        }
+      },
+      "UpdatePurposeRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UpdatePurposeInput"
+            }
+          }
+        }
+      },
+      "BatchGetPurposesRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BatchGetPurposesInput"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "PurposeResponse": {
+        "description": "Single purpose response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Purpose"
+            }
+          }
+        }
+      },
+      "PurposeListResponse": {
+        "description": "List of purposes",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Purpose"
+                  }
+                },
+                "hits": {
+                  "type": "integer",
+                  "description": "Total number of results"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PurposeSearchResponse": {
+        "description": "Search results",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Purpose"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ClientErrorResponse": {
+        "description": "Client error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ConflictResponse": {
+        "description": "Conflict - resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ServerErrorResponse": {
+        "description": "Server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

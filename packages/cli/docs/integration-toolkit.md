@@ -1,0 +1,3238 @@
+# Integration Toolkit API
+
+- **Base URL:** `https://integration-toolkit.sls.epilot.io`
+- **API Docs:** [https://docs.epilot.io/api/integration-toolkit](https://docs.epilot.io/api/integration-toolkit)
+
+API for integrating with external systems in a standardised way.
+
+## Quick Start
+
+```bash
+# List available operations
+epilot integration-toolkit
+
+# Call an operation
+epilot integration-toolkit acknowledgeTracking
+```
+
+## Common Flags
+
+| Flag | Description |
+| ---- | ----------- |
+| `-p key=value` | Set a named parameter |
+| `-d '{...}'` | Request body JSON |
+| `-H 'Key: Value'` | Custom header |
+| `-t, --token <token>` | Bearer token for authentication |
+| `--profile <name>` | Use a named profile |
+| `-s, --server <url>` | Override server base URL |
+| `-i, --include` | Include response headers in output |
+| `--json` | Output raw JSON (no formatting) |
+| `-v, --verbose` | Verbose output (show request details) |
+| `--jsonata <expr>` | JSONata expression to transform response |
+| `--definition <file>` | Override OpenAPI spec file/URL |
+| `--guided` | Prompt for all parameters interactively |
+| `--no-interactive` | Disable interactive prompts |
+
+## Operations
+
+**erp**
+- [`acknowledgeTracking`](#acknowledgetracking) — Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication
+- [`triggerErp`](#triggererp) — Triggers the ERP integration process
+- [`processErpUpdatesEventsV3`](#processerpupdateseventsv3) — Handles updates from ERP systems using integration_id directly.
+- [`simulateMappingV2`](#simulatemappingv2) — Test v2.0 mapping configuration by transforming a payload using the provided mapping rules without persisting data.
+- [`simulateMapping`](#simulatemapping) — Test mapping configuration by transforming a payload using the provided mapping rules without persisting data.
+
+**integrations**
+- [`listIntegrations`](#listintegrations) — Retrieve all integrations for the authenticated organization
+- [`createIntegration`](#createintegration) — Create a new integration configuration
+- [`getIntegration`](#getintegration) — Retrieve a specific integration by its ID
+- [`updateIntegration`](#updateintegration) — Update an existing integration configuration
+- [`deleteIntegration`](#deleteintegration) — Delete an integration and all its use cases
+- [`queryEvents`](#queryevents) — Query events for a specific integration
+- [`replayEvents`](#replayevents) — Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with 
+- [`listUseCases`](#listusecases) — Retrieve all use cases for a specific integration
+- [`createUseCase`](#createusecase) — Create a new use case for an integration
+- [`getUseCase`](#getusecase) — Retrieve a specific use case by its ID
+- [`updateUseCase`](#updateusecase) — Update an existing use case configuration
+- [`deleteUseCase`](#deleteusecase) — Delete a use case from an integration
+- [`listUseCaseHistory`](#listusecasehistory) — Retrieve historical versions of a use case's configuration.
+- [`listIntegrationsV2`](#listintegrationsv2) — Retrieve all integrations with embedded use cases for the authenticated organization
+- [`createIntegrationV2`](#createintegrationv2) — Create a new integration with embedded use cases.
+- [`getIntegrationV2`](#getintegrationv2) — Retrieve a specific integration with all its embedded use cases
+- [`updateIntegrationV2`](#updateintegrationv2) — Update an existing integration with embedded use cases.
+- [`deleteIntegrationV2`](#deleteintegrationv2) — Delete an integration and all its use cases
+- [`setIntegrationAppMapping`](#setintegrationappmapping) — Creates or updates a mapping from an app/component to an integration.
+- [`deleteIntegrationAppMapping`](#deleteintegrationappmapping) — Removes a mapping from an app/component to an integration.
+- [`getOutboundStatus`](#getoutboundstatus) — Get the status of all outbound use cases for a specific integration.
+- [`listSecureProxies`](#listsecureproxies) — Lists all secure_proxy use cases across all integrations for the authenticated organization.
+- [`generateTypesPreview`](#generatetypespreview) — Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. 
+- [`generateTypes`](#generatetypes) — Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless op
+- [`commitTypes`](#committypes) — Commits the generated types by locking use case configurations and updating version tracking. Should be called after the
+
+**monitoring**
+- [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents) — Query inbound monitoring events for a specific integration.
+- [`getMonitoringStats`](#getmonitoringstats) — Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+- [`getMonitoringTimeSeries`](#getmonitoringtimeseries) — Get time-series aggregated event counts for monitoring charts.
+- [`queryAccessLogs`](#queryaccesslogs) — Query API access logs for a specific integration's organization.
+- [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents) — Query outbound monitoring events for a specific integration.
+- [`queryMonitoringEventsV2`](#querymonitoringeventsv2) — Query monitoring events from the unified erp_monitoring_v2 table.
+- [`getMonitoringStatsV2`](#getmonitoringstatsv2) — Get aggregated statistics from the unified erp_monitoring_v2 table.
+- [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2) — Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+- [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents) — Returns all monitoring events sharing the same event_id, ordered chronologically.
+
+**proxy**
+- [`secureProxy`](#secureproxy) — Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+
+**managed-call**
+- [`managedCallExecute`](#managedcallexecute) — Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+
+### `acknowledgeTracking`
+
+Acknowledges an ERP tracking record by removing it from the tracking table, requires public authentication
+
+`POST /v1/erp/tracking/acknowledgement`
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit acknowledgeTracking \
+  -d '{"ack_id":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit acknowledgeTracking
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit acknowledgeTracking --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `triggerErp`
+
+Triggers the ERP integration process
+
+`POST /v1/erp/trigger`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit triggerErp
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit triggerErp \
+  -d '{
+  "execution_id": "string",
+  "org_id": "string",
+  "webhook_id": "string",
+  "flow_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "action_id": "string",
+  "flow_action_id": "string",
+  "flow_name": "string",
+  "activity_id": "string",
+  "entity_id": "string"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit triggerErp
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit triggerErp --jsonata 'status_code'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status_code": "string",
+  "message": "string",
+  "body": {},
+  "code": "string",
+  "status": "succeeded",
+  "start_date": "string",
+  "end_date": "string",
+  "event_id": "string"
+}
+```
+
+</details>
+
+---
+
+### `processErpUpdatesEventsV3`
+
+Handles updates from ERP systems using integration_id directly.
+
+`POST /v3/erp/updates/events`
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit processErpUpdatesEventsV3 \
+  -d '{"integration_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","correlation_id":"string","events":[{},{}]}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit processErpUpdatesEventsV3
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit processErpUpdatesEventsV3 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "event_id": "string",
+      "status": "success",
+      "message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `simulateMappingV2`
+
+Test v2.0 mapping configuration by transforming a payload using the provided mapping rules without persisting data.
+
+`POST /v2/erp/updates/mapping_simulation`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit simulateMappingV2
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit simulateMappingV2 \
+  -d '{
+  "event_configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  },
+  "format": "json",
+  "payload": "string"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit simulateMappingV2
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit simulateMappingV2 --jsonata 'entity_updates'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "entity_updates": [
+    {
+      "entity_slug": "string",
+      "unique_identifiers": {},
+      "attributes": {}
+    }
+  ],
+  "meter_readings_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "attributes": {}
+    }
+  ],
+  "warnings": [
+    {
+      "entity_schema": "string",
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `simulateMapping`
+
+Test mapping configuration by transforming a payload using the provided mapping rules without persisting data.
+
+`POST /v1/erp/updates/mapping_simulation`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit simulateMapping
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit simulateMapping \
+  -d '{
+  "mapping_configuration": {
+    "version": "1.0",
+    "mapping": {
+      "objects": {}
+    }
+  },
+  "object_type": "string",
+  "format": "json",
+  "payload": "string"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit simulateMapping
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit simulateMapping --jsonata 'entity_updates'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "entity_updates": [
+    {
+      "entity_slug": "string",
+      "unique_identifiers": {},
+      "attributes": {}
+    }
+  ],
+  "meter_readings_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "attributes": {}
+    }
+  ],
+  "warnings": [
+    {
+      "entity_schema": "string",
+      "field": "string",
+      "message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listIntegrations`
+
+Retrieve all integrations for the authenticated organization
+
+`GET /v1/integrations`
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listIntegrations
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listIntegrations --jsonata 'integrations'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "integrations": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "orgId": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "name": "string",
+      "description": "string",
+      "access_token_ids": ["string"],
+      "app_ids": ["string"],
+      "environment_config": [
+        {
+          "key": "string",
+          "label": "string",
+          "type": "String",
+          "description": "string",
+          "required": false,
+          "order": 0
+        }
+      ],
+      "settings": {
+        "autoRefresh": {
+          "enabled": false,
+          "freshnessThresholdMinutes": 1
+        }
+      },
+      "integration_type": "erp",
+      "connector_config": {
+        "base_url": "string",
+        "auth": {
+          "type": "oauth2_client_credentials",
+          "token_url": "string",
+          "client_id": "string",
+          "client_secret": "string",
+          "scope": "string",
+          "audience": "string",
+          "resource": "string",
+          "body_params": {},
+          "headers": {},
+          "query_params": {},
+          "api_key_header": "string",
+          "api_key": "string",
+          "token": "string"
+        },
+        "types_versions": [
+          {
+            "version": "string",
+            "package_name": "string",
+            "generated_at": "1970-01-01T00:00:00.000Z",
+            "generated_by": "string",
+            "status": "active"
+          }
+        ],
+        "latest_types_version": "string",
+        "latest_types_package_name": "string"
+      },
+      "protected": true,
+      "_manifest": ["string"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createIntegration`
+
+Create a new integration configuration
+
+`POST /v1/integrations`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit createIntegration
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit createIntegration \
+  -d '{
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit createIntegration
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit createIntegration --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `getIntegration`
+
+Retrieve a specific integration by its ID
+
+`GET /v1/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getIntegration \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getIntegration 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getIntegration -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `updateIntegration`
+
+Update an existing integration configuration
+
+`PUT /v1/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit updateIntegration \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit updateIntegration 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit updateIntegration -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit updateIntegration -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {
+        "version": "string",
+        "package_name": "string",
+        "generated_at": "1970-01-01T00:00:00.000Z",
+        "generated_by": "string",
+        "status": "active"
+      }
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `deleteIntegration`
+
+Delete an integration and all its use cases
+
+`DELETE /v1/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit deleteIntegration \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit deleteIntegration 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit deleteIntegration -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `queryEvents`
+
+Query events for a specific integration
+
+`POST /v1/integrations/{integrationId}/events`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit queryEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit queryEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "event_id": "string",
+  "event_type": "CREATE",
+  "correlation_id": "string",
+  "object_type": "string",
+  "event_name": "string",
+  "limit": 25,
+  "cursor": {
+    "event_time": "2025-10-31T12:34:56Z",
+    "event_id": "evt_1234567890abcdef"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit queryEvents 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit queryEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit queryEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "event_type": "CREATE",
+      "object_type": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "format": "json",
+      "payload": "string",
+      "deduplication_id": "evt-2025-05-01-12345-create-bp"
+    }
+  ],
+  "next_cursor": {
+    "event_time": "2025-10-31T12:34:56Z",
+    "event_id": "evt_1234567890abcdef"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `replayEvents`
+
+Replay one or more events for a specific integration. Events will be re-processed with their original payloads but with 
+
+`POST /v1/integrations/{integrationId}/events/replay`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit replayEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"event_ids":["string"]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit replayEvents 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit replayEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit replayEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'event_ids'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "event_ids": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `listUseCases`
+
+Retrieve all use cases for a specific integration
+
+`GET /v1/integrations/{integrationId}/use-cases`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listUseCases \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit listUseCases 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listUseCases -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'use_cases'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "type": "inbound",
+      "enabled": true,
+      "change_description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "configuration": {}
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createUseCase`
+
+Create a new use case for an integration
+
+`POST /v1/integrations/{integrationId}/use-cases`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit createUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit createUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "name": "string",
+  "slug": "string",
+  "enabled": true,
+  "type": "inbound",
+  "configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit createUseCase 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit createUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit createUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "name": "string",
+  "slug": "string",
+  "type": "inbound",
+  "enabled": true,
+  "change_description": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getUseCase`
+
+Retrieve a specific use case by its ID
+
+`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getUseCase 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "name": "string",
+  "slug": "string",
+  "type": "inbound",
+  "enabled": true,
+  "change_description": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `updateUseCase`
+
+Update an existing use case configuration
+
+`PUT /v1/integrations/{integrationId}/use-cases/{useCaseId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit updateUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit updateUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "name": "string",
+  "slug": "string",
+  "enabled": true,
+  "change_description": "string",
+  "type": "inbound",
+  "configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit updateUseCase 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit updateUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit updateUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "name": "string",
+  "slug": "string",
+  "type": "inbound",
+  "enabled": true,
+  "change_description": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "configuration": {
+    "entities": [
+      {}
+    ],
+    "meter_readings": [
+      {}
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `deleteUseCase`
+
+Delete a use case from an integration
+
+`DELETE /v1/integrations/{integrationId}/use-cases/{useCaseId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit deleteUseCase \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit deleteUseCase 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit deleteUseCase -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `listUseCaseHistory`
+
+Retrieve historical versions of a use case's configuration.
+
+`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+| `cursor` | query | string | No | Opaque pagination cursor. Pass the 'next_cursor' value from a previous
+response to fetch the next page of results.
+ |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listUseCaseHistory \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit listUseCaseHistory 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listUseCaseHistory -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'history'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "history": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "useCaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "change_description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "history_created_at": "1970-01-01T00:00:00.000Z",
+      "type": "inbound",
+      "configuration": {}
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `listIntegrationsV2`
+
+Retrieve all integrations with embedded use cases for the authenticated organization
+
+`GET /v2/integrations`
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listIntegrationsV2
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listIntegrationsV2 --jsonata 'integrations'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "integrations": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "orgId": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "name": "string",
+      "description": "string",
+      "access_token_ids": ["string"],
+      "app_ids": ["string"],
+      "environment_config": [],
+      "settings": {},
+      "integration_type": "erp",
+      "connector_config": {},
+      "protected": true,
+      "_manifest": ["string"],
+      "use_cases": []
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createIntegrationV2`
+
+Create a new integration with embedded use cases.
+
+`POST /v2/integrations`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit createIntegrationV2
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit createIntegrationV2 \
+  -d '{
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"],
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "change_description": "string",
+      "type": "inbound",
+      "configuration": {}
+    }
+  ]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit createIntegrationV2
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit createIntegrationV2 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"],
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "type": "inbound",
+      "enabled": true,
+      "change_description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "configuration": {}
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getIntegrationV2`
+
+Retrieve a specific integration with all its embedded use cases
+
+`GET /v2/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getIntegrationV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getIntegrationV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"],
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "type": "inbound",
+      "enabled": true,
+      "change_description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "configuration": {}
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `updateIntegrationV2`
+
+Update an existing integration with embedded use cases.
+
+`PUT /v2/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID (client-provided) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit updateIntegrationV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit updateIntegrationV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"],
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "change_description": "string",
+      "type": "inbound",
+      "configuration": {}
+    }
+  ]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit updateIntegrationV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit updateIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit updateIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orgId": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "name": "string",
+  "description": "string",
+  "access_token_ids": ["string"],
+  "app_ids": ["string"],
+  "environment_config": [
+    {
+      "key": "string",
+      "label": "string",
+      "type": "String",
+      "description": "string",
+      "required": false,
+      "order": 0
+    }
+  ],
+  "settings": {
+    "autoRefresh": {
+      "enabled": false,
+      "freshnessThresholdMinutes": 1
+    }
+  },
+  "integration_type": "erp",
+  "connector_config": {
+    "base_url": "string",
+    "auth": {
+      "type": "oauth2_client_credentials",
+      "token_url": "string",
+      "client_id": "string",
+      "client_secret": "string",
+      "scope": "string",
+      "audience": "string",
+      "resource": "string",
+      "body_params": {},
+      "headers": {},
+      "query_params": {},
+      "api_key_header": "string",
+      "api_key": "string",
+      "token": "string"
+    },
+    "types_versions": [
+      {}
+    ],
+    "latest_types_version": "string",
+    "latest_types_package_name": "string"
+  },
+  "protected": true,
+  "_manifest": ["string"],
+  "use_cases": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "type": "inbound",
+      "enabled": true,
+      "change_description": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "configuration": {}
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deleteIntegrationV2`
+
+Delete an integration and all its use cases
+
+`DELETE /v2/integrations/{integrationId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit deleteIntegrationV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit deleteIntegrationV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit deleteIntegrationV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `setIntegrationAppMapping`
+
+Creates or updates a mapping from an app/component to an integration.
+
+`PUT /v1/integrations/{integrationId}/app-mapping`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID to map to |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit setIntegrationAppMapping \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit setIntegrationAppMapping \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "app_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "component_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "overwrite": false
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit setIntegrationAppMapping 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit setIntegrationAppMapping -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit setIntegrationAppMapping -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'integration_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+</details>
+
+---
+
+### `deleteIntegrationAppMapping`
+
+Removes a mapping from an app/component to an integration.
+
+`DELETE /v1/integrations/{integrationId}/app-mapping`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID (used for authorization, must match the mapping) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit deleteIntegrationAppMapping \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"app_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","component_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit deleteIntegrationAppMapping 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit deleteIntegrationAppMapping -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit deleteIntegrationAppMapping -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `queryInboundMonitoringEvents`
+
+Query inbound monitoring events for a specific integration.
+
+`POST /v1/integrations/{integrationId}/monitoring/inbound-events`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit queryInboundMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit queryInboundMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "event_type": "CREATE",
+  "sync_type": "entity",
+  "status": "success",
+  "error_category": "validation",
+  "correlation_id": "string",
+  "object_type": "string",
+  "event_name": "string",
+  "event_id": "string",
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "limit": 50,
+  "cursor": {
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit queryInboundMonitoringEvents 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit queryInboundMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit queryInboundMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "org_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "integration_id": "string",
+      "use_case_id": "string",
+      "event_type": "CREATE",
+      "object_type": "string",
+      "sync_type": "entity",
+      "status": "success",
+      "error_code": "string",
+      "error_message": "string",
+      "error_category": "validation",
+      "processing_duration_ms": 0,
+      "received_at": "1970-01-01T00:00:00.000Z",
+      "completed_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringStats`
+
+Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+
+`POST /v1/integrations/{integrationId}/monitoring/stats`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getMonitoringStats \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit getMonitoringStats \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "inbound_group_by": ["use_case_id", "status"],
+  "outbound_group_by": ["event_name", "status"]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getMonitoringStats 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit getMonitoringStats -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getMonitoringStats -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'inbound'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "inbound": {
+    "total_events": 0,
+    "total_correlations": 0,
+    "success_count": 0,
+    "error_count": 0,
+    "skipped_count": 0,
+    "warning_count": 0,
+    "success_rate": 0,
+    "last_error_at": "1970-01-01T00:00:00.000Z",
+    "breakdown": [
+      {}
+    ]
+  },
+  "outbound": {
+    "total_events": 0,
+    "success_count": 0,
+    "error_count": 0,
+    "pending_count": 0,
+    "success_rate": 0,
+    "last_error_at": "1970-01-01T00:00:00.000Z",
+    "breakdown": [
+      {}
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringTimeSeries`
+
+Get time-series aggregated event counts for monitoring charts.
+
+`POST /v1/integrations/{integrationId}/monitoring/timeseries`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeries \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"from_date":"2025-01-01T00:00:00Z","to_date":"2025-01-31T23:59:59Z","interval":"1h","direction":"both"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeries 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit getMonitoringTimeSeries -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeries -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'interval'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "interval": "5m",
+  "from_date": "1970-01-01T00:00:00.000Z",
+  "to_date": "1970-01-01T00:00:00.000Z",
+  "buckets": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "inbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "warning_count": 0,
+        "skipped_count": 0,
+        "total_count": 0
+      },
+      "outbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "pending_count": 0,
+        "total_count": 0
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getOutboundStatus`
+
+Get the status of all outbound use cases for a specific integration.
+
+`GET /v1/integrations/{integrationId}/outbound-status`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getOutboundStatus \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getOutboundStatus 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getOutboundStatus -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'useCases'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "useCases": [
+    {
+      "useCaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "useCaseEnabled": true,
+      "eventCatalogEvent": "contract.created",
+      "eventEnabled": true,
+      "webhooks": [
+        {
+          "webhookId": "string",
+          "webhookName": "string",
+          "enabled": true
+        }
+      ],
+      "status": "ok",
+      "conflicts": [
+        {
+          "type": "event_disabled",
+          "webhookId": "string",
+          "message": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `queryAccessLogs`
+
+Query API access logs for a specific integration's organization.
+
+`POST /v1/integrations/{integrationId}/monitoring/access-logs`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID (used for tenant authorization) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit queryAccessLogs \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit queryAccessLogs \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "token_id": "api_5ZugdRXasLfWBypHi93Fk",
+  "service": "entity",
+  "method": "GET",
+  "path": "/v1/entity",
+  "status": 200,
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "limit": 50,
+  "cursor": {
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "request_id": "string"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit queryAccessLogs 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit queryAccessLogs -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit queryAccessLogs -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "environment": "string",
+      "service": "string",
+      "request_id": "string",
+      "method": "string",
+      "path": "string",
+      "status": 0,
+      "response_latency_ms": 0,
+      "response_length": 0,
+      "token_id": "string",
+      "org_id": "string",
+      "origin": "string",
+      "source_ip": "string"
+    }
+  ],
+  "next_cursor": {
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "request_id": "string"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `queryOutboundMonitoringEvents`
+
+Query outbound monitoring events for a specific integration.
+
+`POST /v1/integrations/{integrationId}/monitoring/outbound-events`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit queryOutboundMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit queryOutboundMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "event_name": "automation_flow_target",
+  "status": "succeeded",
+  "webhook_config_id": "string",
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "limit": 50,
+  "cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit queryOutboundMonitoringEvents 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit queryOutboundMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit queryOutboundMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "org_id": "string",
+      "event_id": "string",
+      "event_name": "string",
+      "status": "succeeded",
+      "url": "string",
+      "http_method": "string",
+      "http_response": {},
+      "webhook_config_id": "string",
+      "metadata": {},
+      "execution_context": {},
+      "payload": {},
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `queryMonitoringEventsV2`
+
+Query monitoring events from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/events`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit queryMonitoringEventsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit queryMonitoringEventsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "use_case_id": "string",
+  "use_case_type": "inbound",
+  "level": "success",
+  "code": "string",
+  "event_id": "string",
+  "correlation_id": "string",
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "limit": 50,
+  "cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit queryMonitoringEventsV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit queryMonitoringEventsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit queryMonitoringEventsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringStatsV2`
+
+Get aggregated statistics from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/stats`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getMonitoringStatsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"from_date":"2025-01-01T00:00:00Z","to_date":"2025-01-31T23:59:59Z","use_case_type":"inbound","group_by":"use_case_id"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getMonitoringStatsV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit getMonitoringStatsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getMonitoringStatsV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'total_events'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "total_events": 0,
+  "success_count": 0,
+  "error_count": 0,
+  "warning_count": 0,
+  "skipped_count": 0,
+  "ack_timeout_count": 0,
+  "success_rate": 0,
+  "last_error_at": "1970-01-01T00:00:00.000Z",
+  "breakdown": [
+    {}
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringTimeSeriesV2`
+
+Get time-series aggregated event counts from the unified erp_monitoring_v2 table.
+
+`POST /v2/integrations/{integrationId}/monitoring/time-series`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeriesV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeriesV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "interval": "5m",
+  "use_case_type": "inbound",
+  "group_by": "use_case_type"
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeriesV2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit getMonitoringTimeSeriesV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getMonitoringTimeSeriesV2 -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'interval'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "interval": "5m",
+  "from_date": "1970-01-01T00:00:00.000Z",
+  "to_date": "1970-01-01T00:00:00.000Z",
+  "buckets": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "success_count": 0,
+      "error_count": 0,
+      "warning_count": 0,
+      "skipped_count": 0,
+      "total_count": 0,
+      "breakdown": [
+        {
+          "use_case_type": "inbound",
+          "use_case_id": "string",
+          "success_count": 0,
+          "error_count": 0,
+          "warning_count": 0,
+          "skipped_count": 0,
+          "total_count": 0
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAssociatedMonitoringEvents`
+
+Returns all monitoring events sharing the same event_id, ordered chronologically.
+
+`GET /v2/integrations/{integrationId}/monitoring/events/{eventId}/associated`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `eventId` | path | string | Yes | The event ID to get associated events for |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getAssociatedMonitoringEvents \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p eventId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getAssociatedMonitoringEvents 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getAssociatedMonitoringEvents -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p eventId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'monitoring_events'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "monitoring_events": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "inbound_event": {}
+}
+```
+
+</details>
+
+---
+
+### `listSecureProxies`
+
+Lists all secure_proxy use cases across all integrations for the authenticated organization.
+
+`GET /v1/integrations/secure-proxies`
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listSecureProxies
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listSecureProxies --jsonata 'secure_proxies'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "secure_proxies": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "vpc_mode": "static_ip",
+      "allowed_domains": ["string"],
+      "allowed_ips": ["string"],
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integration_name": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `secureProxy`
+
+Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+
+`POST /v1/secure-proxy`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit secureProxy
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit secureProxy \
+  -d '{
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "use_case_slug": "string",
+  "url": "https://example.com/path",
+  "method": "GET",
+  "headers": {},
+  "body": {},
+  "response_type": "json"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit secureProxy
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit secureProxy --jsonata 'status_code'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status_code": 0,
+  "headers": {},
+  "body": {}
+}
+```
+
+</details>
+
+---
+
+### `managedCallExecute`
+
+Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+
+`POST /v1/managed-call/{slug}/execute`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Use case slug (acts as the RPC method name) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit managedCallExecute \
+  -p slug=contact \
+  -d '{"integration_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","payload":{},"correlation_id":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit managedCallExecute contact
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit managedCallExecute -p slug=contact
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit managedCallExecute -p slug=contact --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{}
+```
+
+</details>
+
+---
+
+### `generateTypesPreview`
+
+Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. 
+
+`POST /v1/integrations/{integrationId}/generate-types-preview`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit generateTypesPreview \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit generateTypesPreview 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit generateTypesPreview -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'integration_name'
+```
+
+---
+
+### `generateTypes`
+
+Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless op
+
+`POST /v1/integrations/{integrationId}/generate-types`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit generateTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit generateTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "package_name": "@epilot/hems-cleverpv",
+  "version": "1.0.0",
+  "description": "string",
+  "domain_package": "@epilot/hems",
+  "domain_map_name": "HemsUseCaseMap",
+  "annotations": {}
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit generateTypes 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit generateTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit generateTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'package_name'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "package_name": "string",
+  "version": "string",
+  "files": {},
+  "warnings": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `commitTypes`
+
+Commits the generated types by locking use case configurations and updating version tracking. Should be called after the
+
+`POST /v1/integrations/{integrationId}/commit-types`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit commitTypes \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"package_name":"@epilot/hems-cleverpv","version":"1.0.0","annotations":{}}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit commitTypes 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit commitTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit commitTypes -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'committed'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "committed": true,
+  "warnings": ["string"]
+}
+```
+
+</details>
+
+---

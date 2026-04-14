@@ -53,6 +53,22 @@
         "responses": {}
       }
     },
+    "/v1/app-configurations/public": {
+      "get": {
+        "operationId": "listPublicConfigurations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/app-configurations/public/{appId}": {
       "parameters": [
         {

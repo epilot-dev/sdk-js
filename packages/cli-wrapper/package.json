@@ -1,0 +1,36 @@
+{
+  "name": "epilot",
+  "version": "0.1.14",
+  "description": "CLI for epilot APIs (wrapper for @epilot/cli)",
+  "bin": {
+    "epilot": "./bin/epilot.js"
+  },
+  "keywords": [
+    "epilot",
+    "cli",
+    "api",
+    "openapi"
+  ],
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "packages/cli-wrapper"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/packages/cli#readme",
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "dependencies": {
+    "@epilot/cli": "*"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ]
+}

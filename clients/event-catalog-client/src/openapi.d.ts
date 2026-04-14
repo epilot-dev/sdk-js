@@ -316,13 +316,25 @@ declare namespace Components {
             };
             /**
              * Whether this event is enabled for the organization.
-             * When disabled, the event will not be triggered.
+             * When disabled, the event will not be triggered by any means
+             * (automatic, API, or automation).
              * Defaults to true if not specified.
              *
              * example:
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether the event should be triggered automatically by built-in logic
+             * (e.g., portal submissions, entity mutations, EventBridge rules).
+             * When false, the event can still be triggered manually via API or automations.
+             * Only meaningful for builtin events that have automatic trigger sources.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            auto_trigger?: boolean;
             /**
              * Whether this event can be explicitly triggered by automations.
              * When true, the event will appear in the automation builder as a
@@ -454,13 +466,25 @@ declare namespace Components {
             };
             /**
              * Whether this event is enabled for the organization.
-             * When disabled, the event will not be triggered.
+             * When disabled, the event will not be triggered by any means
+             * (automatic, API, or automation).
              * Defaults to true if not specified.
              *
              * example:
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether the event should be triggered automatically by built-in logic
+             * (e.g., portal submissions, entity mutations, EventBridge rules).
+             * When false, the event can still be triggered manually via API or automations.
+             * Only meaningful for builtin events that have automatic trigger sources.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            auto_trigger?: boolean;
             /**
              * Whether this event can be explicitly triggered by automations.
              * When true, the event will appear in the automation builder as a
@@ -859,7 +883,7 @@ declare namespace Components {
         /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently only the `enabled` field is processed, other fields are ignored.
+         * Currently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.
          *
          */
         export interface UpdateEventPayload {
@@ -979,13 +1003,25 @@ declare namespace Components {
             };
             /**
              * Whether this event is enabled for the organization.
-             * When disabled, the event will not be triggered.
+             * When disabled, the event will not be triggered by any means
+             * (automatic, API, or automation).
              * Defaults to true if not specified.
              *
              * example:
              * true
              */
             enabled?: boolean;
+            /**
+             * Whether the event should be triggered automatically by built-in logic
+             * (e.g., portal submissions, entity mutations, EventBridge rules).
+             * When false, the event can still be triggered manually via API or automations.
+             * Only meaningful for builtin events that have automatic trigger sources.
+             * Defaults to true if not specified.
+             *
+             * example:
+             * true
+             */
+            auto_trigger?: boolean;
             /**
              * Whether this event can be explicitly triggered by automations.
              * When true, the event will appear in the automation builder as a
@@ -1193,7 +1229,7 @@ declare namespace Paths {
         export type RequestBody = /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently only the `enabled` field is processed, other fields are ignored.
+         * Currently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.
          *
          */
         Components.Schemas.UpdateEventPayload;

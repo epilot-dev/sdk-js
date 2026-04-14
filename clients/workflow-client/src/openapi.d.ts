@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -64,7 +62,7 @@ declare namespace Components {
                  */
                 due_date?: string;
                 due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-                assigned_to?: /* The user ids */ Assignees;
+                assigned_to?: /* The user ids or variable assignments */ Assignees;
                 /**
                  * flag for controlling enabled/disabled state of the task
                  */
@@ -133,7 +131,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -153,6 +151,7 @@ declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -187,11 +186,15 @@ declare namespace Components {
              * The user which moved the task/phase to SKIPPED state.
              */
             skipped_by?: /* The user id */ UserId;
+            /**
+             * The user which moved the task/phase to ON_HOLD state.
+             */
+            on_hold_by?: /* The user id */ UserId;
         }
         /**
-         * The user ids
+         * The user ids or variable assignments
          */
-        export type Assignees = string[];
+        export type Assignees = (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
         /**
          * Configuration for automation execution to run
          */
@@ -256,7 +259,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -276,6 +279,7 @@ declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -396,7 +400,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -416,6 +420,7 @@ declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -424,6 +429,10 @@ declare namespace Components {
             task_type: TaskType;
             trigger_mode: TriggerMode;
             conditions: Condition[];
+            /**
+             * When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.
+             */
+            allow_parallel_execution?: boolean;
             schedule?: DelayedSchedule | RelativeSchedule;
             loop_config?: LoopConfig;
         }
@@ -442,7 +451,7 @@ declare namespace Components {
         export interface DueDateConfig {
             duration: number;
             unit: TimeUnit;
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED";
             task_id?: string;
             phase_id?: string;
         }
@@ -530,7 +539,7 @@ declare namespace Components {
                  * Status triggers are deduced from event + entity status combination.
                  *
                  */
-                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
+                event: "FlowStarted" | "FlowCompleted" | "FlowCancelled" | "FlowReopened" | "FlowDeleted" | "FlowAssigned" | "FlowDueDateChanged" | "FlowContextsChanged" | "TaskUpdated" | "CurrTaskChanged" | "TaskCompleted" | "TaskSkipped" | "TaskMarkedInProgress" | "TaskMarkedOnHold" | "PhaseUpdated" | "PhaseCompleted" | "PhaseSkipped" | "PhaseMarkedInProgress";
                 /**
                  * Optional filter to target specific tasks or phases.
                  * Specify either task_template_id OR phase_template_id (mutually exclusive).
@@ -584,6 +593,19 @@ declare namespace Components {
              * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
              */
             attribute_sub_field?: string;
+            /**
+             * Offset to apply to the source date value before comparison (e.g., +18 years for age check, +30 days for expiry)
+             */
+            date_offset?: {
+                /**
+                 * Number of units to offset
+                 */
+                amount?: number;
+                /**
+                 * Unit of the offset
+                 */
+                unit?: "days" | "months" | "years";
+            };
         }
         export interface ExecutionPaginationDynamo {
             orgId?: string;
@@ -617,7 +639,7 @@ declare namespace Components {
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             status: WorkflowStatus;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: {
                 /**
                  * Timestamp when the flow execution started
@@ -775,7 +797,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -795,6 +817,7 @@ declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -804,9 +827,17 @@ declare namespace Components {
             loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
         export type Operator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+        /**
+         * Details regarding partner for the workflow step
+         */
+        export interface PartnerDetails {
+            enabled?: boolean;
+            label?: string;
+            description?: string;
+        }
         export interface PatchFlowReq {
             status?: WorkflowStatus;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             closing_reason?: FlowClosingReason;
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
@@ -820,7 +851,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
         }
         export interface PatchTaskReq {
             name?: string;
@@ -846,7 +877,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             /**
              * flag for controlling enabled/disabled state of the task
              */
@@ -855,6 +886,10 @@ declare namespace Components {
             description?: /* Longer information regarding Task */ StepDescription;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Condition to evaluate as true for a decision task with a manual trigger mode
              */
@@ -883,7 +918,7 @@ declare namespace Components {
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics?: AnalyticsInfo;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
@@ -905,10 +940,10 @@ declare namespace Components {
             unit: TimeUnit;
             reference: {
                 /**
-                 * The id of the entity / workflow / task, based on the origin of the schedule
+                 * The id of the entity / workflow / task, based on the origin of the schedule. For all_preceding_tasks_completed, use the sentinel value 'all_preceding_tasks_completed'.
                  */
                 id: string;
-                origin: "flow_started" | "task_completed" | "trigger_entity_attribute";
+                origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed";
                 /**
                  * The schema of the entity
                  */
@@ -1015,6 +1050,7 @@ declare namespace Components {
                 type: ItemType;
                 ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
                 installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+                partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
                 /**
                  * enabled flag results from calculating the requirements
                  */
@@ -1032,6 +1068,10 @@ declare namespace Components {
                  * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
                  */
                 assignedToInProgress?: string;
+                /**
+                 * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+                 */
+                assignedToOnHold?: string;
                 status?: /**
                  * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
                  * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1127,7 +1167,10 @@ declare namespace Components {
         export interface StartFlowReq {
             flow_template_id: string;
             trigger?: FlowTrigger;
-            contexts: FlowContext[];
+            contexts: [
+                FlowContext,
+                ...FlowContext[]
+            ];
             /**
              * An array of purposes to filter workflow phases.
              */
@@ -1138,6 +1181,10 @@ declare namespace Components {
             source: EvaluationSource;
             operator: Operator;
             values: string[];
+            /**
+             * How to interpret values. "static" (default) means literal values. "relative_date" means values[0] is a dynamic date token like "today".
+             */
+            value_type?: "static" | "relative_date";
         }
         export interface Step {
             id: string;
@@ -1151,6 +1198,7 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -1168,6 +1216,10 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1221,6 +1273,7 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -1238,6 +1291,10 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1319,6 +1376,10 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             enabled?: boolean;
             requirements?: /* describe the requirement for step enablement */ StepRequirement[];
             /**
@@ -1376,7 +1437,7 @@ declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
-            assigned_to?: /* The user ids */ Assignees;
+            assigned_to?: /* The user ids or variable assignments */ Assignees;
             analytics: AnalyticsInfo;
             /**
              * Time when the task was created
@@ -1396,6 +1457,10 @@ declare namespace Components {
             enabled: boolean;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            /**
+             * Partner-specific task details shown to partner org users viewing shared resources
+             */
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -1438,6 +1503,10 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1481,6 +1550,7 @@ declare namespace Components {
             type: ItemType;
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
+            partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
              * enabled flag results from calculating the requirements
              */
@@ -1498,6 +1568,10 @@ declare namespace Components {
              * The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task
              */
             assignedToInProgress?: string;
+            /**
+             * The user which moved the step/task to the ON_HOLD state. The user should also be present in the assignedTo property of the step/task
+             */
+            assignedToOnHold?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
              * - **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)
@@ -1536,6 +1610,25 @@ declare namespace Components {
          * The user id
          */
         export type UserId = string;
+        /**
+         * Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.
+         */
+        export interface VariableAssignment {
+            /**
+             * The variable expression, e.g., "{{entity.owner}}"
+             * example:
+             * {{entity.owner}}
+             */
+            variable: string;
+            /**
+             * The resolved values after variable evaluation (populated during execution)
+             * example:
+             * [
+             *   "user_12345"
+             * ]
+             */
+            value?: string[];
+        }
         export interface WorkflowContext {
             id: string;
             title: string;
@@ -2312,6 +2405,23 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace RunTaskScheduleNow {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Task;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace SearchExecutions {
         export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
@@ -2615,6 +2725,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
   /**
+   * runTaskScheduleNow - runTaskScheduleNow
+   * 
+   * Cancels the pending schedule for a task and immediately triggers its automation execution.
+   */
+  'runTaskScheduleNow'(
+    parameters?: Parameters<Paths.RunTaskScheduleNow.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RunTaskScheduleNow.Responses.$200>
+  /**
    * cancelSchedule - cancelSchedule
    * 
    * Cancels a flow schedule, marking it as canceled.
@@ -2885,6 +3005,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
   }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now']: {
+    /**
+     * runTaskScheduleNow - runTaskScheduleNow
+     * 
+     * Cancels the pending schedule for a task and immediately triggers its automation execution.
+     */
+    'post'(
+      parameters?: Parameters<Paths.RunTaskScheduleNow.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RunTaskScheduleNow.Responses.$200>
+  }
   ['/v2/flows/executions/{execution_id}/schedules/{schedule_id}']: {
     /**
      * cancelSchedule - cancelSchedule
@@ -2947,6 +3079,7 @@ export type LoopConfig = Components.Schemas.LoopConfig;
 export type LoopInfo = Components.Schemas.LoopInfo;
 export type ManualTask = Components.Schemas.ManualTask;
 export type Operator = Components.Schemas.Operator;
+export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type PatchFlowReq = Components.Schemas.PatchFlowReq;
 export type PatchPhaseReq = Components.Schemas.PatchPhaseReq;
 export type PatchTaskReq = Components.Schemas.PatchTaskReq;
@@ -2987,6 +3120,7 @@ export type UpdateEntityAttributes = Components.Schemas.UpdateEntityAttributes;
 export type UpdateStepReq = Components.Schemas.UpdateStepReq;
 export type UpdateStepResp = Components.Schemas.UpdateStepResp;
 export type UserId = Components.Schemas.UserId;
+export type VariableAssignment = Components.Schemas.VariableAssignment;
 export type WorkflowContext = Components.Schemas.WorkflowContext;
 export type WorkflowExecution = Components.Schemas.WorkflowExecution;
 export type WorkflowExecutionBase = Components.Schemas.WorkflowExecutionBase;

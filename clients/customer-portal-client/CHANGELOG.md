@@ -1,5 +1,17 @@
 # @epilot/customer-portal-client
 
+## 0.36.0
+
+### Minor Changes
+
+- v3 apis
+
+## 0.33.1
+
+### Patch Changes
+
+- Use runtime definition
+
 ## 0.29.1
 
 ### Patch Changes

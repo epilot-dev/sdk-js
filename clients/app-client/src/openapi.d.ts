@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -247,7 +245,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -418,6 +416,10 @@ declare namespace Components {
              * ID of the job that created the blueprint
              */
             job_id?: string;
+            /**
+             * S3 key of a pre-exported blueprint zip used for cross-org installs
+             */
+            source_blueprint_file?: string;
         }
         export interface BooleanArg {
             type?: "boolean";
@@ -451,7 +453,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE";
         /**
          * Configuration of the published app
          */
@@ -822,6 +824,37 @@ declare namespace Components {
             };
         }
         export type CustomFlowConfig = ExternalIntegrationCustomActionConfig | SandboxCustomActionConfig;
+        export interface CustomPageComponent {
+            component_type: "CUSTOM_PAGE";
+            configuration: CustomPageConfig;
+            surfaces?: {
+                page?: AppBridgeSurfaceConfig;
+            };
+        }
+        export interface CustomPageConfig {
+            /**
+             * URL slug for the page route. Must be unique per organization.
+             * example:
+             * zapier
+             */
+            slug: string; // ^[a-z0-9][a-z0-9-]*[a-z0-9]$
+            /**
+             * Display label in the navigation sidebar.
+             * example:
+             * Zapier
+             */
+            nav_label?: string;
+            /**
+             * Icon identifier for the navigation item.
+             * example:
+             * zap
+             */
+            nav_icon?: string;
+            /**
+             * Optional tooltip or description for the navigation item.
+             */
+            nav_description?: string;
+        }
         export interface EnumArg {
             type?: "enum";
             /**
@@ -1008,19 +1041,19 @@ declare namespace Components {
              * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
              *
              */
-            ExternalProductCatalogHookProductsRecommendation)[];
+            ExternalProductCatalogHookProductRecommendations)[];
         }
         /**
-         * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
          *
          */
-        export interface ExternalProductCatalogHookProducts {
+        export interface ExternalProductCatalogHookProductRecommendations {
             /**
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
-            type: "products";
+            type: "product-recommendations";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
                 /**
@@ -1052,16 +1085,16 @@ declare namespace Components {
             };
         }
         /**
-         * Hook for getting product recommendations from an external catalog. This hook makes a call to retrieve product recommendations from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
+         * Hook for getting products from an external catalog. This hook makes a call to retrieve product data from an external source. Check the docs or the response API call contract https://docs.api.epilot.io/pricing-api-external-catalog for more details.
          *
          */
-        export interface ExternalProductCatalogHookProductsRecommendation {
+        export interface ExternalProductCatalogHookProducts {
             /**
              * Identifier of the hook. Should not change between updates.
              */
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
-            type: "products-recommendation";
+            type: "products";
             auth?: ExternalProductCatalogAuthBlock;
             call: {
                 /**
@@ -1330,9 +1363,9 @@ declare namespace Components {
              */
             override_url?: string;
             /**
-             * Define which section of the portal this block can be placed in
+             * Define which surfaces of the portal this block can be placed in
              */
-            section?: "main" | "footer";
+            supported_surfaces?: ("main" | "footer_inline" | "footer_left_absolute" | "footer_right_absolute")[];
         }
         export interface PortalExtensionAuthBlock {
             /**
@@ -1510,6 +1543,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
@@ -1591,6 +1625,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1647,6 +1682,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that checks the plausibility of meter readings before they are saved. This hook makes a POST call whenever a user is trying to save a meter reading. The expected response to the call is:
@@ -1740,6 +1776,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that will allow using the specified source as data for price visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1796,6 +1833,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that replaces the built-in registration identifiers check. This hook makes a POST call whenever a user is trying to register to find the corresponding contact. The expected response to the call is:
@@ -1847,6 +1885,7 @@ declare namespace Components {
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         export interface PortalExtensionSeamlessLink {
             /**
@@ -1875,6 +1914,19 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+        }
+        /**
+         * If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
+         */
+        export interface PortalExtensionSecureProxy {
+            /**
+             * Integration ID that owns the secure_proxy use case.
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case slug for the secure proxy use case.
+             */
+            use_case_slug: string;
         }
         export interface Pricing {
             pricing_type?: "FREE" | "SUBSCRIPTION" | "USAGE_BASED" | "ONE_TIME" | "CUSTOM" | "UNKNOWN";
@@ -2428,6 +2480,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListPublicConfigurations {
+        namespace Parameters {
+            export type Page = number;
+            export type PageSize = number;
+        }
+        export interface QueryParameters {
+            page?: Parameters.Page;
+            pageSize?: Parameters.PageSize;
+        }
+        namespace Responses {
+            export interface $200 {
+                configurations?: /* Basic metadata about your app configuration which does not get versioned */ Components.Schemas.ConfigurationMetadata[];
+                pagination?: {
+                    total?: number;
+                    page?: number;
+                    pageSize?: number;
+                };
+            }
+        }
+    }
     namespace ListVersions {
         namespace Parameters {
             export type AppId = string;
@@ -2633,6 +2705,16 @@ export interface OperationMethods {
     data?: Paths.CreateConfiguration.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateConfiguration.Responses.$201>
+  /**
+   * listPublicConfigurations - listPublicConfigurations
+   * 
+   * List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.
+   */
+  'listPublicConfigurations'(
+    parameters?: Parameters<Paths.ListPublicConfigurations.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPublicConfigurations.Responses.$200>
   /**
    * getPublicConfiguration - getPublicConfiguration
    * 
@@ -2930,6 +3012,18 @@ export interface PathsDictionary {
       data?: Paths.CreateConfiguration.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateConfiguration.Responses.$201>
+  }
+  ['/v1/app-configurations/public']: {
+    /**
+     * listPublicConfigurations - listPublicConfigurations
+     * 
+     * List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPublicConfigurations.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPublicConfigurations.Responses.$200>
   }
   ['/v1/app-configurations/public/{appId}']: {
     /**
@@ -3250,6 +3344,8 @@ export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
 export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
+export type CustomPageComponent = Components.Schemas.CustomPageComponent;
+export type CustomPageConfig = Components.Schemas.CustomPageConfig;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;
@@ -3258,8 +3354,8 @@ export type ExternalIntegrationCustomActionConfig = Components.Schemas.ExternalI
 export type ExternalProductCatalogAuthBlock = Components.Schemas.ExternalProductCatalogAuthBlock;
 export type ExternalProductCatalogComponent = Components.Schemas.ExternalProductCatalogComponent;
 export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCatalogConfig;
+export type ExternalProductCatalogHookProductRecommendations = Components.Schemas.ExternalProductCatalogHookProductRecommendations;
 export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
-export type ExternalProductCatalogHookProductsRecommendation = Components.Schemas.ExternalProductCatalogHookProductsRecommendation;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
@@ -3284,6 +3380,7 @@ export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schema
 export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
 export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;
 export type PortalExtensionSeamlessLink = Components.Schemas.PortalExtensionSeamlessLink;
+export type PortalExtensionSecureProxy = Components.Schemas.PortalExtensionSecureProxy;
 export type Pricing = Components.Schemas.Pricing;
 export type PublicConfiguration = Components.Schemas.PublicConfiguration;
 export type RawEvents = Components.Schemas.RawEvents;

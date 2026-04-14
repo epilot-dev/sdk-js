@@ -1,0 +1,3178 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Query API",
+    "description": "The Query API provides access to epilot's business analytics capabilities, enabling teams to query entity operations, workflow executions, and automation data stored in the epilot data lake.\n\n**Key capabilities**\n\n- **Entity queries** – Aggregate and filter entity operation events (create, update, delete) and point-in-time entity snapshots using `executeEntitiesQuery`.\n- **Workflow analytics** – Query workflow execution counts, time series, phase durations, and task overviews using `executeWorkflowsQuery`.\n- **Automation analytics** – Inspect automation execution history and list automation definitions via `executeAutomationQuery`.\n- **Datalake V2 views** – Create and manage materialized SQL views over epilot data using `createOrUpdateView` and related endpoints.\n- **BI tool integration** – Generate and manage ClickHouse credentials for connecting external BI tools (e.g. Tableau, Power BI) directly to the epilot data warehouse.\n- **Semantic model** – Retrieve the semantic data model for agent/tool consumption via `getSemanticModel`.\n\n**Concepts**\n\n- **Measures** – Quantitative values to aggregate (e.g. `count_operations`, `count_entities`).\n- **Dimensions** – Categorical groupings (e.g. `entity_attribute`, `time_with_granularity`).\n- **Filters** – Constraints narrowing the dataset (e.g. time range, entity schema, workflow state).\n- **Datasets** – Named data sources available for querying. Discover them with `listAvailableDatasetsV2`.\n\n**Authentication**\n\nAll endpoints require a valid epilot Bearer token.\n",
+    "version": "0.2.0"
+  },
+  "tags": [
+    {
+      "name": "Datasets",
+      "description": "Endpoints for discovering available datasets grouped by domain (entity, workflow, etc.)"
+    },
+    {
+      "name": "Query",
+      "description": "Execute analytical queries against epilot entity and workflow datasets.\n\nUse measures, dimensions, and filters to aggregate and slice data for dashboards, reports, and business intelligence.\n"
+    },
+    {
+      "name": "V1",
+      "description": "V1 query endpoints (maintained for backwards compatibility – prefer V2 endpoints for new integrations)"
+    },
+    {
+      "name": "V2",
+      "description": "V2 query endpoints including semantic model, autocomplete, and direct SQL-like query execution"
+    },
+    {
+      "name": "Datalake V2",
+      "description": "Manage materialized SQL views and table relationships in the epilot data lake.\n\nViews expose entity, taxonomy, and workflow data as queryable tables that can be used by BI tools connecting via ClickHouse credentials.\n"
+    },
+    {
+      "name": "CredentialsV2",
+      "description": "Manage ClickHouse credentials for connecting external BI tools directly to the epilot data warehouse"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/datalake/views": {
+      "post": {
+        "summary": "createOrUpdateView",
+        "operationId": "createOrUpdateView",
+        "description": "Create or update a materialized SQL view in the epilot data lake.\n\nViews expose epilot data (entities, taxonomies, workflow executions) as queryable tables that can be used by BI tools or queried directly. If a view with the same `view_name` already exists, it is updated.\n",
+        "tags": [
+          "Datalake V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewRequest"
+              },
+              "examples": {
+                "Current Entities View": {
+                  "summary": "Create a view for current entities",
+                  "value": {
+                    "view_name": "some_view",
+                    "source_dataset": "current_entities",
+                    "config": {
+                      "schema": "some_schema",
+                      "include_purpose_view": true,
+                      "include_label_view": true,
+                      "include_relation_view": true,
+                      "relationship_attribute": [
+                        "some_relationship_attribute"
+                      ]
+                    }
+                  }
+                },
+                "Taxonomies View": {
+                  "summary": "Create a view for taxonomies",
+                  "value": {
+                    "view_name": "some_view",
+                    "source_dataset": "taxonomies"
+                  }
+                },
+                "Workflow Executions View": {
+                  "summary": "Create a view for workflow executions",
+                  "value": {
+                    "view_name": "some_view",
+                    "source_dataset": "workflow_executions"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "View created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "summary": "getAllViews",
+        "operationId": "getAllViews",
+        "description": "Retrieve all materialized data lake views configured for the organization.",
+        "tags": [
+          "Datalake V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of views retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/datalake/views/{view_slug}": {
+      "get": {
+        "summary": "getView",
+        "operationId": "getView",
+        "description": "Retrieve the definition and attributes of a specific data lake view by its slug.",
+        "tags": [
+          "Datalake V2"
+        ],
+        "parameters": [
+          {
+            "name": "view_slug",
+            "in": "path",
+            "required": true,
+            "description": "The URL-safe slug identifier of the view",
+            "schema": {
+              "type": "string"
+            },
+            "example": "some_view"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "View details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/datalake/relationships": {
+      "post": {
+        "summary": "createOrUpdateRelationship",
+        "operationId": "createOrUpdateRelationship",
+        "description": "Define or update a relationship between two tables in the data lake.\n\nRelationships enable JOIN operations in views and queries. If a relationship with the same `relationship_name` already exists, it is updated.\n",
+        "tags": [
+          "Datalake V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationshipRequest"
+              },
+              "example": {
+                "relationship_name": "some_relationship",
+                "from_table": "some_table",
+                "to_table": "some_table",
+                "from_column": "some_column",
+                "to_column": "some_column",
+                "type": "one_to_many"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Relationship created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationshipResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      },
+      "get": {
+        "summary": "getAllRelationships",
+        "operationId": "getAllRelationships",
+        "description": "Retrieve all table relationships configured for the organization's data lake.",
+        "tags": [
+          "Datalake V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of relationships retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationshipsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/datasets": {
+      "get": {
+        "operationId": "listAvailableDatasetsV2",
+        "summary": "listAvailableDatasetsV2",
+        "description": "Lists all available datasets grouped by domain\n\nCurrent domains are:\n - Entity\n - Workflow\n",
+        "tags": [
+          "Datasets"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available datasets for the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Dataset"
+                      },
+                      "example": [
+                        {
+                          "domain": "entities",
+                          "dataset": "entity_operations",
+                          "endpoint": "/v2/query/domain/entities:execute"
+                        },
+                        {
+                          "domain": "workflows",
+                          "dataset": "workflow_execution_time_series",
+                          "endpoint": "/v2/query/domain/workflows:execute"
+                        },
+                        {
+                          "domain": "workflows",
+                          "dataset": "phases_duration",
+                          "endpoint": "/v2/query/domain/workflows:execute"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/entities:execute": {
+      "post": {
+        "operationId": "executeEntitiesQuery",
+        "summary": "executeEntitiesQuery",
+        "description": "Execute queries against entities datasets.\n\n**Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.\n\n**Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).\n\n**Filters** are used to narrow down the dataset to be more specific e.g. only to a time range or specific entity schemas.\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cache_expiration",
+            "schema": {
+              "$ref": "#/components/schemas/CacheExpiration"
+            }
+          },
+          {
+            "in": "query",
+            "name": "no_cache",
+            "schema": {
+              "$ref": "#/components/schemas/NoCache"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "$ref": "#/components/schemas/DatalakeQuery"
+                  }
+                }
+              },
+              "examples": {
+                "Number of new submissions this month": {
+                  "value": {
+                    "query": {
+                      "dataset": "entity_operations",
+                      "measure": "count_operations",
+                      "filters": [
+                        {
+                          "operation": [
+                            "createEntity"
+                          ]
+                        },
+                        {
+                          "entity_schema": [
+                            "submission"
+                          ]
+                        },
+                        {
+                          "time_between": [
+                            "2022-05-01T00:00:00Z",
+                            "2022-08-01T00:00:00Z"
+                          ]
+                        }
+                      ],
+                      "exclude_deleted": true
+                    }
+                  }
+                },
+                "Opportunities created by journeys by month": {
+                  "value": {
+                    "query": {
+                      "dataset": "entity_operations",
+                      "measure": "count_operations",
+                      "filters": [
+                        {
+                          "operation": [
+                            "createEntity"
+                          ]
+                        },
+                        {
+                          "entity_schema": [
+                            "opportunity"
+                          ]
+                        },
+                        {
+                          "time_between": [
+                            "2022-01-01T00:00:00Z",
+                            "2023-01-01T00:00:00Z"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "source.title",
+                          "as": "Journey Title"
+                        },
+                        {
+                          "time_with_granularity": "year-month"
+                        }
+                      ],
+                      "exclude_deleted": true
+                    }
+                  }
+                },
+                "Total number of opportunities by workflow step": {
+                  "value": {
+                    "query": {
+                      "dataset": "entities_timemachine",
+                      "measure": "count_entities",
+                      "point_in_time": "CURRENT_DATE",
+                      "filters": [
+                        {
+                          "entity_schema": [
+                            "opportunity"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "workflows.0.next_open_step_name",
+                          "as": "Workflow Step"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "Total number of orders by status": {
+                  "value": {
+                    "query": {
+                      "dataset": "entities_timemachine",
+                      "measure": "count_entities",
+                      "point_in_time": "CURRENT_DATE",
+                      "filters": [
+                        {
+                          "entity_schema": [
+                            "order"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "status"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/workflows:execute": {
+      "post": {
+        "operationId": "executeWorkflowsQuery",
+        "summary": "executeWorkflowsQuery",
+        "description": "Query Workflow Analytics Datasets.",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mock",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "cache_expiration",
+            "schema": {
+              "$ref": "#/components/schemas/CacheExpiration"
+            }
+          },
+          {
+            "in": "query",
+            "name": "no_cache",
+            "schema": {
+              "$ref": "#/components/schemas/NoCache"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/WorkflowsQueryOptions"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.TotalCountOfWorkflowExecutions"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.WorkflowExecutionTimeSeries"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.CumulativeSumOfWorkflows"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.CancellationReasons"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.WorkflowTasksOverview"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowsQueryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/automations:execute": {
+      "post": {
+        "operationId": "executeAutomationQuery",
+        "summary": "executeAutomationQuery",
+        "description": "Query Automation Analytics Datasets.",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "number",
+              "default": 25
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.AutomationExecutionsOverview"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatasetOptions.ListAutomationDefinitions"
+                  }
+                ]
+              },
+              "examples": {
+                "Automation Executions Overview": {
+                  "value": {
+                    "dataset": "automation_executions_overview",
+                    "flow_ids": [
+                      "flow_123",
+                      "flow_456"
+                    ],
+                    "execution_states": [
+                      "success",
+                      "failed",
+                      "scheduled"
+                    ],
+                    "relative_time_range": "this_month",
+                    "time_range_from": "2024-01-01",
+                    "time_range_to": "2024-01-31"
+                  }
+                },
+                "List Automation Definitions": {
+                  "value": {
+                    "dataset": "list_automation_definitions",
+                    "search": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AutomationExecutionResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ListAutomationDefinitionsResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/workflows/definitions/{workflowDefinitionId}/phases": {
+      "get": {
+        "operationId": "listWorkflowPhasesByDefinitionId",
+        "summary": "listWorkflowPhasesByDefinitionId",
+        "description": "Retrieves the workflow phases associated with a given workflow definition ID.\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workflowDefinitionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the workflow definition to retrieve phases for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of workflow phases associated with the specified definition ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier of the workflow phase.",
+                        "example": "y0UdVCOI"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the workflow phase.",
+                        "example": "Initial Phase"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "id": "y0UdVCOI",
+                    "name": "Initial Phase"
+                  },
+                  {
+                    "id": "g2HdNJKP",
+                    "name": "Final Phase"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/workflows/definitions": {
+      "get": {
+        "operationId": "listWorkflowDefinitions",
+        "summary": "listWorkflowDefinitions",
+        "description": "Lists available worflow definitions with their ids, names and start times\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mock",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available workflow definitions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "y0UdVCOI"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "PV Kauf"
+                          },
+                          "max_date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-05-31T00:00:00.000Z"
+                          },
+                          "min_date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-01-00T00:00:00.000Z"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "max_date",
+                          "min_date"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/domain/workflows/phases": {
+      "get": {
+        "operationId": "listPhaseNames",
+        "summary": "listPhaseNames",
+        "description": "Lists phase names of an org.\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available phases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "y0UdVCOI"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "PV Kauf"
+                          },
+                          "max_date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-05-31T00:00:00.000Z"
+                          },
+                          "min_date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2023-01-00T00:00:00.000Z"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "max_date",
+                          "min_date"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/query/datasets": {
+      "get": {
+        "operationId": "listDatasets",
+        "summary": "listDatasets",
+        "description": "Get list of available datasets",
+        "tags": [
+          "V1"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available datasets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Dataset"
+                      }
+                    }
+                  },
+                  "example": {
+                    "results": [
+                      {
+                        "dataset": "entity_operations"
+                      },
+                      {
+                        "dataset": "entities_timemachine"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/query:execute": {
+      "post": {
+        "operationId": "executeQuery",
+        "summary": "executeQuery",
+        "description": "Execute queries against datasets.\n\n**Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.\n\n**Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).\n\n**Filters** are used to narrow down the dataset to be more specific e.g. only to a time range or specific entity schemas.\n",
+        "tags": [
+          "V1"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cache_expiration",
+            "schema": {
+              "$ref": "#/components/schemas/CacheExpiration"
+            }
+          },
+          {
+            "in": "query",
+            "name": "no_cache",
+            "schema": {
+              "$ref": "#/components/schemas/NoCache"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "$ref": "#/components/schemas/DatalakeQuery"
+                  }
+                }
+              },
+              "examples": {
+                "Number of new submissions this month": {
+                  "value": {
+                    "query": {
+                      "dataset": "entity_operations",
+                      "measure": "count_operations",
+                      "filters": [
+                        {
+                          "operation": [
+                            "createEntity"
+                          ]
+                        },
+                        {
+                          "entity_schema": [
+                            "submission"
+                          ]
+                        },
+                        {
+                          "time_between": [
+                            "2022-05-01T00:00:00Z",
+                            "2022-08-01T00:00:00Z"
+                          ]
+                        }
+                      ],
+                      "exclude_deleted": true
+                    }
+                  }
+                },
+                "Opportunities created by journeys by month": {
+                  "value": {
+                    "query": {
+                      "dataset": "entity_operations",
+                      "measure": "count_operations",
+                      "filters": [
+                        {
+                          "operation": [
+                            "createEntity"
+                          ]
+                        },
+                        {
+                          "entity_schema": [
+                            "opportunity"
+                          ]
+                        },
+                        {
+                          "time_between": [
+                            "2022-01-01T00:00:00Z",
+                            "2023-01-01T00:00:00Z"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "source.title",
+                          "as": "Journey Title"
+                        },
+                        {
+                          "time_with_granularity": "year-month"
+                        }
+                      ],
+                      "exclude_deleted": true
+                    }
+                  }
+                },
+                "Total number of opportunities by workflow step": {
+                  "value": {
+                    "query": {
+                      "dataset": "entities_timemachine",
+                      "measure": "count_entities",
+                      "point_in_time": "CURRENT_DATE",
+                      "filters": [
+                        {
+                          "entity_schema": [
+                            "opportunity"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "workflows.0.next_open_step_name",
+                          "as": "Workflow Step"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "Total number of orders by status": {
+                  "value": {
+                    "query": {
+                      "dataset": "entities_timemachine",
+                      "measure": "count_entities",
+                      "point_in_time": "CURRENT_DATE",
+                      "filters": [
+                        {
+                          "entity_schema": [
+                            "order"
+                          ]
+                        }
+                      ],
+                      "dimensions": [
+                        {
+                          "entity_attribute": "status"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/credentials:generate": {
+      "post": {
+        "operationId": "generateCredentialsV2",
+        "summary": "generateCredentialsV2",
+        "description": "Generate credentials for the epilot datalake for connecting other BI tools with ClickHouse\n",
+        "tags": [
+          "CredentialsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "Permanent credentials and endpoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "datalakeuser_sfsdfs_66"
+                    },
+                    "password": {
+                      "type": "string",
+                      "example": "***"
+                    },
+                    "endpoints": {
+                      "type": "object",
+                      "properties": {
+                        "host": {
+                          "type": "string",
+                          "example": "qjjcxsy87t.eu-central-1.aws.clickhouse.cloud"
+                        },
+                        "port": {
+                          "type": "string",
+                          "example": 8443
+                        }
+                      }
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "datawarehouse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/credentials:list": {
+      "get": {
+        "operationId": "listCredentialsV2",
+        "summary": "listCredentialsV2",
+        "description": "List all the credentialof Clickhouse for the organization here",
+        "tags": [
+          "CredentialsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "Temporary credentials and endpoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/credentials:revoke": {
+      "post": {
+        "operationId": "revokeCredentialsV2",
+        "summary": "revokeCredentialsV2",
+        "description": "Revoke credentials for the epilot datalake for connecting other BI tools with Clickhouse\n",
+        "tags": [
+          "CredentialsV2"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user_id",
+            "schema": {
+              "$ref": "#/components/schemas/UserId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permanent credentials and endpoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query:execute": {
+      "post": {
+        "operationId": "executeQueryV2",
+        "summary": "executeQueryV2",
+        "description": "Execute queries against datasets.\n\n**Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.\n\n**Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).\n\n**Filters** are used to narrow down the dataset to be more specific e.g. only to a time range or specific entity schemas.\n",
+        "tags": [
+          "V2"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/semantic-model": {
+      "get": {
+        "operationId": "getSemanticModel",
+        "summary": "getSemanticModel",
+        "description": "Get the semantic model for agent/tool consumption.\n\nReturns available entities, their relationships, and supported query capabilities\nincluding aggregations, calculation types, date granularities, and filter operators.\n",
+        "tags": [
+          "V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "Semantic model with entities, relationships, and capabilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SemanticModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/autocomplete": {
+      "get": {
+        "operationId": "autocomplete",
+        "summary": "autocomplete",
+        "description": "Generic autocomplete endpoint for querying distinct values across datasets.\nUse the dataset parameter to specify which data category to query.\n",
+        "tags": [
+          "V2"
+        ],
+        "parameters": [
+          {
+            "name": "dataset",
+            "in": "query",
+            "description": "The dataset category to autocomplete against",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "workflows",
+                "purposes",
+                "sharing_configs",
+                "partners"
+              ]
+            }
+          },
+          {
+            "name": "input",
+            "in": "query",
+            "description": "Input text to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "description": "Attribute to autocomplete in table.column format (e.g., current_purposes.name)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "current_purposes.name"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 250
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        ]
+                      },
+                      "example": [
+                        "value"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v2/query/workflows:autocomplete": {
+      "get": {
+        "operationId": "workflowsAutocomplete",
+        "summary": "workflowsAutocomplete",
+        "description": "Autocomplete Workflows data\n",
+        "tags": [
+          "V2"
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "description": "Input to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "description": "Autocomplete attribute",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            },
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 250
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        ]
+                      },
+                      "example": [
+                        "value"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerErrorResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Standard error response body",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "description": "Short error label",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error",
+            "example": "Invalid query parameters provided"
+          }
+        }
+      },
+      "ViewRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CurrentEntitiesViewRequest"
+          },
+          {
+            "$ref": "#/components/schemas/TaxonomiesViewRequest"
+          },
+          {
+            "$ref": "#/components/schemas/WorkflowExecutionsViewRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "source_dataset"
+        }
+      },
+      "CurrentEntitiesViewRequest": {
+        "type": "object",
+        "required": [
+          "source_dataset",
+          "config"
+        ],
+        "properties": {
+          "view_name": {
+            "type": "string"
+          },
+          "source_dataset": {
+            "type": "string",
+            "enum": [
+              "current_entities"
+            ]
+          },
+          "config": {
+            "type": "object",
+            "required": [
+              "schema"
+            ],
+            "properties": {
+              "schema": {
+                "type": "string"
+              },
+              "include_purpose_view": {
+                "type": "boolean"
+              },
+              "include_label_view": {
+                "type": "boolean"
+              },
+              "include_relation_view": {
+                "type": "boolean"
+              },
+              "relationship_attribute": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "view_name": "some_view",
+          "source_dataset": "current_entities",
+          "config": {
+            "schema": "some_schema",
+            "include_purpose_view": true,
+            "include_label_view": true,
+            "include_relation_view": true,
+            "relationship_attribute": [
+              "some_relationship_attribute"
+            ]
+          }
+        }
+      },
+      "TaxonomiesViewRequest": {
+        "type": "object",
+        "required": [
+          "source_dataset"
+        ],
+        "properties": {
+          "view_name": {
+            "type": "string"
+          },
+          "source_dataset": {
+            "type": "string",
+            "enum": [
+              "taxonomies"
+            ]
+          }
+        },
+        "example": {
+          "view_name": "some_view",
+          "source_dataset": "taxonomies"
+        }
+      },
+      "WorkflowExecutionsViewRequest": {
+        "type": "object",
+        "required": [
+          "source_dataset"
+        ],
+        "properties": {
+          "view_name": {
+            "type": "string"
+          },
+          "source_dataset": {
+            "type": "string",
+            "enum": [
+              "workflow_executions"
+            ]
+          }
+        },
+        "example": {
+          "view_name": "some_view",
+          "source_dataset": "workflow_executions"
+        }
+      },
+      "ViewResponse": {
+        "type": "object",
+        "required": [
+          "view_name",
+          "source_dataset",
+          "attributes"
+        ],
+        "properties": {
+          "view_name": {
+            "type": "string"
+          },
+          "source_dataset": {
+            "type": "string",
+            "enum": [
+              "current_entities",
+              "taxonomies",
+              "workflow_executions"
+            ]
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "type"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the attribute"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Data type of the attribute"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the attribute"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "view_name": "some_view",
+          "source_dataset": "current_entities",
+          "attributes": [
+            {
+              "name": "some_attribute",
+              "type": "string",
+              "description": "some description"
+            }
+          ]
+        }
+      },
+      "ViewsListResponse": {
+        "type": "object",
+        "properties": {
+          "views": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "view_name",
+                "source_dataset",
+                "attributes"
+              ],
+              "properties": {
+                "view_name": {
+                  "type": "string"
+                },
+                "source_dataset": {
+                  "type": "string",
+                  "enum": [
+                    "current_entities",
+                    "taxonomies",
+                    "workflow_executions"
+                  ]
+                },
+                "view_slug": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "type"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the attribute"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Data type of the attribute"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Description of the attribute"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "views": [
+            {
+              "view_name": "some_view",
+              "source_dataset": "current_entities",
+              "view_slug": "some_view",
+              "attributes": [
+                {
+                  "name": "some_attribute",
+                  "type": "string",
+                  "description": "some description"
+                }
+              ]
+            },
+            {
+              "view_name": "another_view",
+              "source_dataset": "taxonomies",
+              "view_slug": "another_view",
+              "attributes": [
+                {
+                  "name": "taxonomy_attribute",
+                  "type": "string",
+                  "description": "taxonomy attribute description"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "RelationshipRequest": {
+        "type": "object",
+        "required": [
+          "relationship_name",
+          "from_table",
+          "to_table",
+          "from_column",
+          "to_column",
+          "type"
+        ],
+        "properties": {
+          "relationship_name": {
+            "type": "string",
+            "description": "Unique identifier for the relationship"
+          },
+          "from_table": {
+            "type": "string",
+            "description": "Source table name"
+          },
+          "to_table": {
+            "type": "string",
+            "description": "Target table name"
+          },
+          "from_column": {
+            "type": "string",
+            "description": "Source column name"
+          },
+          "to_column": {
+            "type": "string",
+            "description": "Target column name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "one_to_many",
+              "many_to_many",
+              "many_to_one",
+              "one_to_one"
+            ]
+          }
+        },
+        "example": {
+          "relationship_name": "some_relationship",
+          "from_table": "some_table",
+          "to_table": "some_table",
+          "from_column": "some_column",
+          "to_column": "some_column",
+          "type": "one_to_many"
+        }
+      },
+      "RelationshipResponse": {
+        "type": "object",
+        "properties": {
+          "relationship_name": {
+            "type": "string"
+          },
+          "from_table": {
+            "type": "string"
+          },
+          "to_table": {
+            "type": "string"
+          },
+          "from_column": {
+            "type": "string"
+          },
+          "to_column": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "one_to_many",
+              "many_to_many",
+              "many_to_one",
+              "one_to_one"
+            ]
+          }
+        },
+        "example": {
+          "relationship_name": "some_relationship",
+          "from_table": "some_table",
+          "to_table": "some_table",
+          "from_column": "some_column",
+          "to_column": "some_column",
+          "type": "one_to_many"
+        }
+      },
+      "RelationshipsListResponse": {
+        "type": "object",
+        "properties": {
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationshipResponse"
+            }
+          }
+        },
+        "example": {
+          "relationships": [
+            {
+              "relationship_name": "some_relationship",
+              "from_table": "some_table",
+              "to_table": "some_table",
+              "from_column": "some_column",
+              "to_column": "some_column",
+              "type": "one_to_many"
+            },
+            {
+              "relationship_name": "another_relationship",
+              "from_table": "table_a",
+              "to_table": "table_b",
+              "from_column": "column_a",
+              "to_column": "column_b",
+              "type": "many_to_many"
+            }
+          ]
+        }
+      },
+      "NoCache": {
+        "type": "boolean",
+        "example": false
+      },
+      "CacheExpiration": {
+        "description": "Cache Expiration timestamp",
+        "type": "string",
+        "format": "timestamp",
+        "example": 1663308898789
+      },
+      "UserId": {
+        "description": "Execution Id for the query",
+        "type": "string"
+      },
+      "DatasetDomain": {
+        "type": "string",
+        "enum": [
+          "entities",
+          "workflows"
+        ]
+      },
+      "Dataset": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/DatasetName"
+          },
+          "domain": {
+            "$ref": "#/components/schemas/DatasetDomain"
+          },
+          "endpoint": {
+            "type": "string",
+            "example": "/v2/query/entities"
+          }
+        }
+      },
+      "DatalakeQueryOptions": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "example": "entity_operations"
+          },
+          "measure": {
+            "type": "string",
+            "example": "count_operations"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "example": {
+                "time_with_granularity": "year"
+              }
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "example": {
+                "entity_schema": "opportunity"
+              }
+            }
+          },
+          "exclude_deleted": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "DatalakeQuery": {
+        "$ref": "#/components/schemas/DatalakeQueryOptions"
+      },
+      "AutomationQueryOptions": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/AutomationExecutionDataset"
+          }
+        },
+        "required": [
+          "dataset"
+        ],
+        "discriminator": {
+          "propertyName": "dataset"
+        }
+      },
+      "DatasetOptions.AutomationExecutionsOverview": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationQueryOptions"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "flow_ids": {
+                "title": "Automation Flow IDs",
+                "description": "Filter by specific automation executions passing a list of automation flow ids.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "execution_states": {
+                "title": "Automation Execution State",
+                "description": "Filter by the states of the automation executions. Use \"scheduled\" to filter executions that have scheduled actions. Multiple states are combined with OR logic.\n",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "success",
+                  "failed",
+                  "scheduled"
+                ]
+              },
+              "relative_time_range": {
+                "$ref": "#/components/schemas/RelativeTimeRange"
+              },
+              "time_range_from": {
+                "type": "string",
+                "description": "Start date in YYYY-MM-DD format"
+              },
+              "time_range_to": {
+                "type": "string",
+                "description": "End date in YYYY-MM-DD format"
+              }
+            }
+          }
+        ]
+      },
+      "DatasetOptions.ListAutomationDefinitions": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationQueryOptions"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "search": {
+                "type": "string",
+                "description": "Search term to filter automation definitions"
+              }
+            }
+          }
+        ]
+      },
+      "WorkflowsQueryOptions": {
+        "type": "object",
+        "description": "Settings for the data of the chart that is being queried.",
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/WorkflowDataset"
+          },
+          "workflow_definition_ids": {
+            "title": "Workflow Definition IDs",
+            "description": "Filter by specific workflows by passing a list of workflow definition ids.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entity_schemas": {
+            "title": "Entity Schemas",
+            "description": "Filter by entity schema",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "states": {
+            "title": "Workflow Definition IDs",
+            "description": "Filter by the states of the executions, phases, or tasks.\nexamples:\n  - [\"STARTED\"]\n  - [\"COMPLETED\", \"PARTIALLY_COMPLETED\"]\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "group_time_by": {
+            "title": "Group Time By",
+            "description": "If chosen a time series, this parameter sets by which time the data is grouped, e.g. quarterly, monthly or weekly.  Available values: \"D\",\"W\",\"M\",\"Q\",\"Y\"",
+            "default": "M",
+            "type": "string"
+          },
+          "relative_time_range": {
+            "title": "Relative Time Range",
+            "description": "If chosen a time series, this arg defines the time span, e.g.  show data of the current month. Either this param or \"time_range_from\" and \"time_range_to\" must be set.",
+            "type": "string"
+          },
+          "time_range_from": {
+            "title": "Time Range From",
+            "description": "If chosen a time series, specify the start date in the format YYYY-MM-DD, e.g. 2023-01-01.",
+            "type": "string"
+          },
+          "time_range_to": {
+            "title": "Time Range To",
+            "description": "If chosen a time series, specify the end date in the format YYYY-MM-DD, e.g. 2023-03-31.",
+            "type": "string"
+          },
+          "duration_threshold": {
+            "title": "Duration Threshold",
+            "description": "Certain datasets enable you to set a threshold of the duration. Example: We want to see total phase counts, phase counts less than threshold, phase counts more than threshold; threshold could be for example 45 days.",
+            "type": "integer"
+          }
+        }
+      },
+      "DatasetOptions.TotalCountOfWorkflowExecutions": {
+        "title": "Dataset Options: Total Count of Workflow Executions",
+        "type": "object",
+        "description": "See the total of workflow executions in a pie chart.",
+        "properties": {
+          "workflow_definition_ids": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowDefinitionIDs"
+          },
+          "entity_schema": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.EntitySchema"
+          },
+          "relative_time_range": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.RelativeTimeRange"
+          },
+          "time_range_from": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeFrom"
+          },
+          "time_range_to": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeTo"
+          }
+        }
+      },
+      "DatasetOptions.WorkflowExecutionTimeSeries": {
+        "title": "Dataset Options: Workflow Execution Time Series",
+        "type": "object",
+        "properties": {
+          "workflow_definition_ids": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowDefinitionIDs"
+          },
+          "entity_schema": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.EntitySchema"
+          },
+          "relative_time_range": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.RelativeTimeRange"
+          },
+          "time_range_from": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeFrom"
+          },
+          "time_range_to": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeTo"
+          },
+          "workflow_states": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowStates"
+          },
+          "group_time_by": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.GroupTimeBy"
+          }
+        }
+      },
+      "DatasetOptions.CumulativeSumOfWorkflows": {
+        "title": "Dataset Options: Cumulative Sum of Workflows",
+        "type": "object",
+        "properties": {
+          "workflow_definition_ids": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowDefinitionIDs"
+          },
+          "entity_schema": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.EntitySchema"
+          },
+          "relative_time_range": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.RelativeTimeRange"
+          },
+          "time_range_from": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeFrom"
+          },
+          "time_range_to": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeTo"
+          },
+          "workflow_states": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowStates"
+          },
+          "group_time_by": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.GroupTimeBy"
+          }
+        }
+      },
+      "DatasetOptions.CancellationReasons": {
+        "title": "Dataset Options: Cancellation Reasons",
+        "type": "object",
+        "description": "See the cancellation reasons of workflows in a pie chart.",
+        "properties": {
+          "workflow_definition_ids": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowDefinitionIDs"
+          },
+          "entity_schema": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.EntitySchema"
+          },
+          "relative_time_range": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.RelativeTimeRange"
+          },
+          "time_range_from": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeFrom"
+          },
+          "time_range_to": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeTo"
+          }
+        }
+      },
+      "DatasetOptions.WorkflowTasksOverview": {
+        "title": "Dataset Options: Workflow Tasks Overview",
+        "type": "object",
+        "description": "Get a list of tasks to help organize executing users their day.",
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/WorkflowDataset"
+          },
+          "workflow_definition_ids": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.WorkflowDefinitionIDs"
+          },
+          "entity_schema": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.EntitySchema"
+          },
+          "relative_time_range": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.RelativeTimeRange"
+          },
+          "time_range_from": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeFrom"
+          },
+          "time_range_to": {
+            "$ref": "#/components/schemas/WorkflowsQueryOptions.TimeRangeTo"
+          },
+          "assignee_ids": {
+            "title": "Assignee ID",
+            "description": "",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "include_unassigned": {
+            "title": "Include Unassigned",
+            "type": "boolean",
+            "default": false
+          },
+          "due_date_from": {
+            "title": "Due Date From",
+            "description": "If chosen a time series, specify the start date in the format YYYY-MM-DD, e.g. 2023-01-01.",
+            "type": "string"
+          },
+          "due_date_to": {
+            "title": "Due Date To",
+            "description": "If chosen a time series, specify the end date in the format YYYY-MM-DD, e.g. 2023-03-31.",
+            "type": "string"
+          },
+          "sort_by": {
+            "title": "Sort By",
+            "type": "string",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SortBy"
+              }
+            ]
+          },
+          "page_number": {
+            "title": "Page Number",
+            "description": "Pagination page number",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "description": "Number of tasks per page",
+            "type": "integer",
+            "default": 20
+          }
+        },
+        "required": [
+          "dataset"
+        ]
+      },
+      "Response.WorkflowTaskOverview": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "hits": {
+            "type": "integer"
+          }
+        }
+      },
+      "ECPDetails": {
+        "type": "object",
+        "description": "Details regarding ECP for the workflow step",
+        "properties": {
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkflowContext": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "schema"
+        ]
+      },
+      "WorkflowStatus": {
+        "type": "string",
+        "enum": [
+          "STARTED",
+          "DONE",
+          "CLOSED"
+        ]
+      },
+      "AutomationConfig": {
+        "type": "object",
+        "description": "Configuration for automation execution to run",
+        "properties": {
+          "flowId": {
+            "type": "string",
+            "description": "Id of the configured automation to run"
+          },
+          "executionId": {
+            "type": "string",
+            "description": "Id of the automation execution which ran"
+          },
+          "executionStatus": {
+            "type": "string",
+            "description": "Status of Automation Execution. Types can be found in Automation API"
+          }
+        },
+        "required": [
+          "flowId"
+        ]
+      },
+      "DynamicDueDate": {
+        "description": "set a Duedate for a step then a specific",
+        "type": "object",
+        "properties": {
+          "numberOfUnits": {
+            "type": "number"
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": [
+              "days",
+              "weeks",
+              "months"
+            ]
+          },
+          "actionTypeCondition": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "STEP_CLOSED"
+            ]
+          },
+          "stepId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "numberOfUnits",
+          "timePeriod",
+          "actionType"
+        ]
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "UNASSIGNED",
+          "ASSIGNED",
+          "COMPLETED",
+          "SKIPPED",
+          "IN_PROGRESS"
+        ]
+      },
+      "TaskRequirement": {
+        "description": "describe the requirement for step enablement",
+        "type": "object",
+        "properties": {
+          "definitionId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STEP"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "CLOSED"
+            ]
+          }
+        }
+      },
+      "TaskType": {
+        "type": "string",
+        "enum": [
+          "MANUAL",
+          "AUTOMATION"
+        ]
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "phaseId": {
+            "type": "string"
+          },
+          "entityRefId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TaskType"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskRequirement"
+            }
+          },
+          "executionType": {
+            "description": "Manual / Automation step",
+            "$ref": "#/components/schemas/TaskType",
+            "type": "object"
+          },
+          "executionId": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedToInProgress": {
+            "description": "The user which moved the step/task to the IN_PROGRESS state. The user should also be present in the assignedTo property of the step/task",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus"
+          },
+          "executionStatus": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "created": {
+            "type": "string"
+          },
+          "lastUpdated": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "dynamicDueDate": {
+            "$ref": "#/components/schemas/DynamicDueDate"
+          },
+          "manuallyCreated": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "enabled flag results from calculating the requirements"
+          },
+          "automationConfig": {
+            "description": "Configuration for automated steps",
+            "$ref": "#/components/schemas/AutomationConfig"
+          },
+          "executionName": {
+            "type": "string"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/WorkflowContext"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "WorkflowsQueryOptions.WorkflowDefinitionIDs": {
+        "title": "Workflow Definition IDs",
+        "description": "Filter by specific workflows by passing a list of workflow definition ids.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "WorkflowsQueryOptions.EntitySchema": {
+        "title": "Entity Schema",
+        "type": "string",
+        "example": "Opportunity",
+        "description": "Workflows can be applied to different kinds of entities, e.g. on Opportunities or Orders.\nYou can choose to limit your results to workflow executions to specific entity schemas / types.\n"
+      },
+      "WorkflowsQueryOptions.RelativeTimeRange": {
+        "title": "Relative Time Range",
+        "description": "A combination of two worde that describe a time range, e.g. \"this year\" or \"last month\"",
+        "type": "string",
+        "example": "this year"
+      },
+      "WorkflowsQueryOptions.TimeRangeFrom": {
+        "title": "Time Range From",
+        "description": "Set a specific start of a time range, e.g. \"2023-01-01\"",
+        "type": "string",
+        "example": "2023-01-01"
+      },
+      "WorkflowsQueryOptions.TimeRangeTo": {
+        "title": "Time Range To",
+        "description": "Set a specific end of a time range, e.g. \"2023-06-30\"",
+        "type": "string",
+        "example": "2023-06-01"
+      },
+      "WorkflowsQueryOptions.GroupTimeBy": {
+        "title": "Group Time By",
+        "description": "If chosen a time series, this parameter sets by which time the data is grouped, e.g. quarterly, monthly or weekly.  Available values: \"D\",\"W\",\"M\",\"Q\",\"Y\"",
+        "default": "M",
+        "type": "string"
+      },
+      "WorkflowsQueryOptions.WorkflowStates": {
+        "title": "Workflow States",
+        "description": "Filter by the states of the workflow executions.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/WorkflowStates"
+          }
+        ]
+      },
+      "DatasetName": {
+        "type": "string",
+        "example": "entity_operations",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EntityDataset"
+          },
+          {
+            "$ref": "#/components/schemas/WorkflowDataset"
+          }
+        ]
+      },
+      "EntityDataset": {
+        "type": "string",
+        "enum": [
+          "entity_operations",
+          "entities_timemachine",
+          "datalake_raw_sql"
+        ]
+      },
+      "AutomationExecutionDataset": {
+        "type": "string",
+        "enum": [
+          "automation_executions_overview",
+          "list_automation_definitions"
+        ]
+      },
+      "WorkflowDataset": {
+        "type": "string",
+        "enum": [
+          "total_count_of_workflow_executions",
+          "workflow_execution_time_series",
+          "cumulative_sum_of_workflows",
+          "cancellation_reasons",
+          "phases_count",
+          "phases_duration",
+          "tasks_duration",
+          "task_duration",
+          "workflow_tasks_overview"
+        ]
+      },
+      "WorkflowStates": {
+        "type": "string",
+        "enum": [
+          "STARTED",
+          "CLOSED",
+          "DONE"
+        ]
+      },
+      "PhaseStates": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "COMPLETED",
+          "IN_PROGRESS"
+        ]
+      },
+      "TaskStates": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "COMPLETED",
+          "IN_PROGRESS"
+        ]
+      },
+      "SortBy": {
+        "type": "string",
+        "enum": [
+          "due_date_ascending",
+          "due_date_descending",
+          "creation_date_ascending",
+          "creation_date_descending"
+        ]
+      },
+      "TimeGroups": {
+        "type": "string",
+        "enum": [
+          "Y",
+          "Q",
+          "M",
+          "W",
+          "D"
+        ]
+      },
+      "RelativeTimeRange": {
+        "type": "string",
+        "enum": [
+          "all_time",
+          "this_week",
+          "last_week",
+          "last_7_days",
+          "this_month",
+          "last_month",
+          "last_30_days",
+          "last_3_months",
+          "last_6_months",
+          "this_year",
+          "last_year"
+        ]
+      },
+      "WorkflowsQueryResult": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "data": [
+            0,
+            1
+          ],
+          "labels": [
+            "label1",
+            "label2"
+          ],
+          "timestamp": "1715621496068"
+        },
+        "additionalProperties": true
+      },
+      "AutomationExecutionResponse": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "integer",
+            "description": "Total number of execution records found",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "List of automation execution records",
+            "items": {
+              "type": "object",
+              "properties": {
+                "flow_id": {
+                  "type": "string",
+                  "description": "Unique identifier for the automation flow",
+                  "example": "1234567890"
+                },
+                "flow_name": {
+                  "type": "string",
+                  "description": "Name of the automation flow",
+                  "example": "flow_name"
+                },
+                "execution_id": {
+                  "type": "string",
+                  "description": "Unique identifier for the execution instance",
+                  "example": "execution_id"
+                },
+                "execution_status": {
+                  "type": "string",
+                  "description": "Current status of the execution",
+                  "example": "execution_status"
+                },
+                "entity_schema": {
+                  "type": "string",
+                  "description": "Entity schema associated with the flow",
+                  "example": "opportunity"
+                },
+                "entity_id": {
+                  "type": "string",
+                  "description": "Identifier of the entity associated with the execution",
+                  "example": "entity_id"
+                },
+                "created_at": {
+                  "type": "string",
+                  "description": "Timestamp when the execution was created",
+                  "example": "execution_created_at"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "description": "Timestamp when the execution was last updated",
+                  "example": "execution_updated_at"
+                },
+                "error": {
+                  "type": "object",
+                  "description": "Error details if execution failed",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "error_message"
+                    },
+                    "error_code": {
+                      "type": "string",
+                      "description": "Error code",
+                      "example": "error_code"
+                    }
+                  }
+                },
+                "trigger_event": {
+                  "type": "object",
+                  "description": "Event that triggered the automation",
+                  "additionalProperties": true,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the trigger event",
+                      "example": "EntityOperation"
+                    },
+                    "trigger_type": {
+                      "type": "string",
+                      "description": "Type of operation trigger",
+                      "example": "createEntity"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "flow_id",
+                "execution_id",
+                "execution_status",
+                "created_at"
+              ]
+            }
+          }
+        }
+      },
+      "ListAutomationDefinitionsResponse": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "integer",
+            "description": "Total number of automation definitions found",
+            "example": 100
+          },
+          "results": {
+            "type": "array",
+            "description": "List of automation definitions",
+            "items": {
+              "type": "object",
+              "properties": {
+                "flow_id": {
+                  "type": "string",
+                  "description": "Unique identifier for the automation flow",
+                  "example": "flow_123"
+                },
+                "flow_name": {
+                  "type": "string",
+                  "description": "Name of the automation flow",
+                  "example": "Email Notification Flow"
+                },
+                "entity_schema": {
+                  "type": "string",
+                  "description": "Entity schema associated with the flow",
+                  "example": "opportunity"
+                }
+              },
+              "required": [
+                "flow_id",
+                "flow_name"
+              ]
+            }
+          }
+        },
+        "example": {
+          "hits": 100,
+          "results": [
+            {
+              "flow_id": "flow_123",
+              "flow_name": "Email Notification Flow",
+              "entity_schema": "opportunity"
+            },
+            {
+              "flow_id": "flow_456",
+              "flow_name": "SMS Alert Flow",
+              "entity_schema": "customer"
+            }
+          ]
+        }
+      },
+      "SemanticModel": {
+        "type": "object",
+        "description": "The semantic model exposing entities, relationships, and query capabilities",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Available entity tables that can be queried",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Table identifier used in queries",
+                  "example": "current_contacts"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "Human-readable name",
+                  "example": "Contacts"
+                },
+                "schema": {
+                  "type": "string",
+                  "description": "Schema type (entity, workflow, purpose)",
+                  "example": "entity"
+                }
+              }
+            }
+          },
+          "relationships": {
+            "type": "array",
+            "description": "Relationships between entities for JOIN operations",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "example": "current_contacts"
+                },
+                "to": {
+                  "type": "string",
+                  "example": "opportunity_account_contact_relation"
+                },
+                "relationship": {
+                  "type": "string",
+                  "enum": [
+                    "hasMany",
+                    "belongsTo",
+                    "hasOne"
+                  ]
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "Contact has many Opportunities"
+                }
+              }
+            }
+          },
+          "capabilities": {
+            "type": "object",
+            "description": "Supported query capabilities",
+            "properties": {
+              "aggregations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "count",
+                  "count_distinct",
+                  "sum",
+                  "average",
+                  "min",
+                  "max",
+                  "median"
+                ]
+              },
+              "calculationTypes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "parameters": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "granularities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "day",
+                  "week",
+                  "month",
+                  "quarter",
+                  "year"
+                ]
+              },
+              "filterOperators": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "operator": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueryResults": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "FINISHED"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "1715621496068"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "TimeSeriesSettings": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "enum": [
+              "time_series"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "time_grouper": {
+            "type": "string"
+          },
+          "workflow_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "NameDurationSettings": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "type": "string",
+            "enum": [
+              "name_duration"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "workflow_name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequestResponse": {
+        "description": "Bad request – invalid or missing parameters in the request payload",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 400,
+              "error": "Bad Request",
+              "message": "Invalid query parameters provided"
+            }
+          }
+        }
+      },
+      "UnauthorizedResponse": {
+        "description": "Unauthorized – missing or invalid authentication credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 401,
+              "error": "Unauthorized",
+              "message": "Missing or invalid authorization token"
+            }
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "description": "Forbidden – caller does not have permission to perform this action",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 403,
+              "error": "Forbidden",
+              "message": "Insufficient permissions to access this resource"
+            }
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "description": "Not found – the requested resource does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 404,
+              "error": "Not Found",
+              "message": "The requested resource was not found"
+            }
+          }
+        }
+      },
+      "InternalServerErrorResponse": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": 500,
+              "error": "Internal Server Error",
+              "message": "An unexpected error occurred"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://query.sls.epilot.io"
+    }
+  ]
+}

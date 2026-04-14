@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/dashboard/dashboards": {
+      "get": {
+        "operationId": "listDashboards",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createDashboard",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/dashboards/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getDashboard",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putDashboard",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteDashboard",
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/visualisations": {
+      "get": {
+        "operationId": "listAvailableVisualisations",
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/examples": {
+      "get": {
+        "operationId": "listAvailableExamples",
+        "responses": {}
+      }
+    }
+  },
+  "components": {},
+  "servers": [
+    {
+      "url": "https://dashboard.sls.epilot.io"
+    }
+  ]
+}

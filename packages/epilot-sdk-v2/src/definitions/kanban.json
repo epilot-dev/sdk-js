@@ -1,0 +1,868 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Kanban API",
+    "version": "1.2.3"
+  },
+  "tags": [
+    {
+      "name": "Kanban",
+      "description": "Kanban endpoints"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/kanban/board": {
+      "post": {
+        "operationId": "createKanbanBoard",
+        "summary": "Create a Kanban board",
+        "description": "Create a Kanban board",
+        "tags": ["Kanban"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Board"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/boards": {
+      "get": {
+        "operationId": "getKanbanBoards",
+        "summary": "Get all Kanban boards",
+        "description": "Get all Kanban boards",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter boards by ownership type. If not provided, returns all accessible boards.",
+            "schema": {
+              "type": "string",
+              "enum": ["owned", "shared"]
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved boards",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BoardSummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/board/{boardId}": {
+      "get": {
+        "operationId": "getKanbanBoard",
+        "summary": "Get a Kanban board",
+        "description": "Get a Kanban board by ID. Use \"default\" as the boardId to get the organization's default board.\n",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The board ID, or \"default\" to get the organization's default board.\n",
+            "example": "board-123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateKanbanBoard",
+        "summary": "Update a Kanban board",
+        "description": "Update a Kanban board",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Board"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchKanbanBoard",
+        "summary": "Patch a Kanban board",
+        "description": "Patch a Kanban board",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Board 1"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Board description"
+                  },
+                  "shared_with": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "shared_with_org": {
+                    "type": "boolean"
+                  },
+                  "owners": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully patched board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Board"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteKanbanBoard",
+        "summary": "Delete a Kanban board",
+        "description": "Delete a Kanban board",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully deleted board"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/org/default-board": {
+      "put": {
+        "operationId": "setDefaultKanbanBoard",
+        "summary": "Set default board for organization",
+        "description": "Set a board as the default board for the organization",
+        "tags": ["Kanban"],
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the board to set as default"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully set default board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "default_board_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input data or boardId missing"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Board not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "clearDefaultKanbanBoard",
+        "summary": "Clear default board for organization",
+        "description": "Remove the default board setting for the organization",
+        "tags": ["Kanban"],
+        "responses": {
+          "200": {
+            "description": "Successfully cleared default board",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "default_board_id": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/kanban/query/flows:autocomplete": {
+      "get": {
+        "operationId": "flowsAutocomplete",
+        "summary": "flowsAutocomplete",
+        "description": "Autocomplete flows data\n",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "description": "Input to autocomplete",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "description": "Autocomplete attribute",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            },
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 250
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Starting offset for pagination",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        ]
+                      },
+                      "example": ["value"]
+                    },
+                    "hits": {
+                      "type": "number",
+                      "description": "Total number of matching items available",
+                      "example": 42
+                    }
+                  },
+                  "required": ["results", "hits"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/kanban/query/flows:execute": {
+      "post": {
+        "operationId": "executeFlowsQuery",
+        "summary": "executeFlowsQuery",
+        "description": "Query Flows Data for Kanban View.",
+        "tags": ["Query"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlowsQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowsQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenantaccess",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "BoardSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "example": "Board 1"
+          },
+          "description": {
+            "type": "string",
+            "example": "Board description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "shared_with": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shared_with_org": {
+            "type": "boolean"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
+          }
+        }
+      },
+      "Board": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BoardSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "type": "object",
+                "properties": {
+                  "dataset": {
+                    "type": "string",
+                    "example": "workflow_tasks_overview"
+                  },
+                  "swimlanes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Swimlane"
+                    }
+                  },
+                  "card_config": {
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "assignee"
+                        }
+                      }
+                    }
+                  },
+                  "board_filter": {
+                    "$ref": "#/components/schemas/BoardFilter"
+                  },
+                  "sorting": {
+                    "$ref": "#/components/schemas/Sorting"
+                  },
+                  "search_query": {
+                    "type": "string",
+                    "example": "task 1"
+                  }
+                }
+              }
+            },
+            "required": ["title", "config"]
+          }
+        ]
+      },
+      "Swimlane": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "example": "Swimlane 1"
+          },
+          "position": {
+            "type": "number",
+            "example": 1
+          },
+          "filter": {
+            "$ref": "#/components/schemas/BoardFilter"
+          },
+          "title_chip_variant": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
+      "Sorting": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "example": "created_at"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "default": "asc"
+          }
+        },
+        "required": ["field"]
+      },
+      "BoardFilter": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FilterItem"
+                },
+                {
+                  "$ref": "#/components/schemas/FilterGroup"
+                }
+              ]
+            }
+          },
+          "combination": {
+            "type": "string",
+            "enum": ["AND", "OR"],
+            "example": "OR"
+          }
+        },
+        "required": ["items", "combination"]
+      },
+      "FilterGroup": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterItem"
+            }
+          },
+          "combination": {
+            "type": "string",
+            "enum": ["AND", "OR"],
+            "example": "AND"
+          }
+        },
+        "required": ["items", "combination"]
+      },
+      "FilterOperator": {
+        "type": "string",
+        "enum": [
+          "EQUALS",
+          "NOT_EQUALS",
+          "EMPTY",
+          "NOT_EMPTY",
+          "CONTAINS",
+          "NOT_CONTAINS",
+          "IS_ONE_OF",
+          "IS_NONE_OF",
+          "GREATER_THAN",
+          "LESS_THAN",
+          "GREATER_THAN_OR_EQUAL",
+          "LESS_THAN_OR_EQUAL"
+        ],
+        "example": "EQUALS",
+        "description": "The comparison operator for filtering"
+      },
+      "DynamicDateValue": {
+        "type": "string",
+        "enum": [
+          "TODAY",
+          "TOMORROW",
+          "YESTERDAY",
+          "IN_THE_FUTURE",
+          "IN_THE_PAST",
+          "THIS_WEEK",
+          "NEXT_WEEK",
+          "LAST_WEEK",
+          "THIS_MONTH",
+          "NEXT_MONTH",
+          "LAST_MONTH"
+        ],
+        "description": "Dynamic date keywords that resolve to actual dates at runtime"
+      },
+      "ValueType": {
+        "anyOf": [
+          {
+            "type": "string",
+            "example": "100020"
+          },
+          {
+            "$ref": "#/components/schemas/DynamicDateValue"
+          },
+          {
+            "type": "number",
+            "example": 42
+          },
+          {
+            "type": "boolean",
+            "example": true
+          },
+          {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/components/schemas/DynamicDateValue"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "example": ["value1", "value2", 123, true]
+          }
+        ],
+        "description": "The value to compare against - can be a single value (string, number, boolean, or dynamic date) or an array of values"
+      },
+      "FlowsQueryRequest": {
+        "type": "object",
+        "properties": {
+          "filters": {
+            "$ref": "#/components/schemas/BoardFilter"
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/Sorting"
+          },
+          "from": {
+            "type": "number",
+            "default": 0
+          },
+          "size": {
+            "type": "number",
+            "default": 10
+          }
+        }
+      },
+      "FlowsQueryResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "hits": {
+            "type": "number"
+          },
+          "page_number": {
+            "type": "number"
+          },
+          "page_size": {
+            "type": "number"
+          },
+          "total_pages": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      },
+      "FilterItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "assignee",
+            "description": "The field key to filter on"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/FilterOperator"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ValueType"
+          },
+          "data_type": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "date"],
+            "example": "string",
+            "description": "The data type of the field"
+          }
+        },
+        "required": ["key", "operator"]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://kanban.sls.epilot.io"
+    },
+    {
+      "url": "https://kanban.sls.epilot.io"
+    }
+  ]
+}

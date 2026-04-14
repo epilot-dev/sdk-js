@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.22.0
+
+### Minor Changes
+
+- Added on hold assignees
+
+## 1.21.0
+
+### Minor Changes
+
+- updated value type for variable assignee
+
+## 1.20.0
+
+### Minor Changes
+
+- Updated specs for assigned_to for variable assignment
+
 ## 1.19.0
 
 ### Minor Changes

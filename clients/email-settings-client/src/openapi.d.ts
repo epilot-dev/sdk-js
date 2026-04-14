@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -18,62 +16,242 @@ declare namespace Components {
         SharedInboxId?: Parameters.SharedInboxId;
     }
     namespace Responses {
-        export type BadRequest = Schemas.ErrorResponse;
-        export type Conflict = Schemas.ErrorResponse;
-        export type CreateEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
-        export type CreateSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
-        export type Forbidden = Schemas.ErrorResponse;
-        export type GetEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
-        export type GetSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
-        export type InternalServerError = Schemas.ErrorResponse;
-        export type ListEmailAddressesSuccessResponse = Schemas.EmailAddressResponse[];
-        export type ListInboxBucketsSuccessResponse = Schemas.InboxBucketResponse[];
-        export type ListSharedInboxesSuccessResponse = Schemas.SharedInboxResponse[];
+        export type BadRequest = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
+        export type Conflict = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
+        export type CreateEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
+        export type CreateSharedInboxSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse;
+        export type Forbidden = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
+        export type GetEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
+        export type GetSharedInboxSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse;
+        export type InternalServerError = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
+        export type ListEmailAddressesSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse[];
+        export type ListInboxBucketsSuccessResponse = /* Inbox bucket representing the storage container for a shared inbox. */ Schemas.InboxBucketResponse[];
+        export type ListSharedInboxesSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse[];
         export interface NoContent {
         }
-        export type NotFound = Schemas.ErrorResponse;
-        export type ProvisionEpilotEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
-        export type SetEmailAddressPrimarySuccessResponse = Schemas.EmailAddressResponse;
-        export type UpdateEmailAddressSuccessResponse = Schemas.EmailAddressResponse;
-        export type UpdateSharedInboxSuccessResponse = Schemas.SharedInboxResponse;
+        export type NotFound = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
+        export type OutlookErrorResponse = Schemas.OutlookConnectionError;
+        export type ProvisionEpilotEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
+        export type SetEmailAddressPrimarySuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
+        export type UpdateEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
+        export type UpdateSharedInboxSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse;
     }
     namespace Schemas {
+        /**
+         * Mapping between an Outlook email and its Outlook Connection.
+         * This tracks which provider/tenant provisions each Outlook email.
+         *
+         */
+        export interface ConnectedOutlookEmail {
+            /**
+             * The Outlook shared mailbox email address
+             */
+            outlook_email: string; // email
+            /**
+             * Azure AD Tenant ID that provisions this mailbox
+             */
+            tenant_id?: string;
+            /**
+             * Provider type (for future extensibility)
+             */
+            provider?: "outlook";
+            /**
+             * When the mailbox was connected
+             */
+            connected_at?: string; // date-time
+            /**
+             * User who connected this mailbox
+             */
+            connected_by_user_id?: string;
+        }
+        /**
+         * Request payload for creating a new email address.
+         */
         export interface CreateEmailAddressPayload {
+            /**
+             * The email address to add (e.g., from a custom domain or external provider)
+             * example:
+             * support@yourcompany.com
+             */
             address: string;
+            /**
+             * Display name shown as the sender name in emails
+             * example:
+             * Customer Support
+             */
             name?: string;
+            /**
+             * List of user IDs who can send from this address
+             * example:
+             * [
+             *   "user-123"
+             * ]
+             */
             user_ids?: string[];
+            /**
+             * List of group IDs whose members can send from this address
+             * example:
+             * [
+             *   "group-456"
+             * ]
+             */
             group_ids?: string[];
+            /**
+             * ID of the signature to use by default when sending from this address
+             * example:
+             * sig-789
+             */
             default_signature_id?: string;
+            /**
+             * ID of the shared inbox to associate with this address
+             * example:
+             * inbox-abc
+             */
             shared_inbox_id?: string;
         }
+        /**
+         * Request payload for creating a new shared inbox.
+         */
         export interface CreateSharedInboxPayload {
+            /**
+             * Optional custom ID for the inbox (auto-generated if not provided)
+             * example:
+             * support-inbox
+             */
             id?: string;
+            /**
+             * Hex color code for visual identification in the UI (required)
+             * example:
+             * #2196F3
+             */
             color: string;
+            /**
+             * Display name of the shared inbox (required)
+             * example:
+             * Sales Inquiries
+             */
             name: string;
+            /**
+             * List of user IDs to assign to this inbox
+             * example:
+             * [
+             *   "user-123",
+             *   "user-456"
+             * ]
+             */
             assignees?: string[];
+            /**
+             * Optional description of the inbox purpose
+             * example:
+             * Inbound sales and pricing requests
+             */
             description?: string;
         }
+        /**
+         * Custom email domain configuration.
+         */
         export interface Domain {
             /**
+             * The domain name to add or verify. Can be a root domain or subdomain.
+             * Examples: "yourcompany.com", "mail.yourcompany.com"
+             *
              * example:
-             * subdomain.epilot.cloud
+             * mail.yourcompany.com
              */
             domain?: string;
         }
+        /**
+         * Email address configuration with all associated metadata.
+         */
         export interface EmailAddressResponse {
+            /**
+             * Unique identifier (UUID) for the resource
+             * example:
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
+             */
             id: string;
+            /**
+             * Timestamp when the resource was created
+             * example:
+             * 2024-01-15T10:30:00Z
+             */
             created_at: string; // date-time
+            /**
+             * Timestamp when the resource was last updated
+             * example:
+             * 2024-01-20T14:45:00Z
+             */
             updated_at?: string; // date-time
+            /**
+             * User ID of the user who created the resource
+             * example:
+             * user-123
+             */
             created_by?: string;
+            /**
+             * User ID of the user who last updated the resource
+             * example:
+             * user-456
+             */
             updated_by?: string;
+            /**
+             * The email address string
+             * example:
+             * sales@yourcompany.com
+             */
             address: string;
+            /**
+             * Display name shown as the sender name
+             * example:
+             * Sales Team
+             */
             name?: string;
+            /**
+             * IDs of users who can send from this address
+             * example:
+             * [
+             *   "user-123",
+             *   "user-456"
+             * ]
+             */
             user_ids?: string[];
+            /**
+             * IDs of groups whose members can send from this address
+             * example:
+             * [
+             *   "group-789"
+             * ]
+             */
             group_ids?: string[];
+            /**
+             * ID of the default signature for this address
+             * example:
+             * sig-abc
+             */
             default_signature_id?: string;
+            /**
+             * ID of the associated shared inbox
+             * example:
+             * inbox-xyz
+             */
             shared_inbox_id?: string;
+            /**
+             * Whether the address is currently active for sending
+             * example:
+             * true
+             */
             is_active?: boolean;
+            /**
+             * Whether this is the organization's primary email address
+             * example:
+             * false
+             */
             is_primary?: boolean;
+            /**
+             * Whether this is an epilot-managed address (@epilot.cloud)
+             * example:
+             * false
+             */
             is_epilot_email_address?: boolean;
         }
         /**
@@ -84,15 +262,141 @@ declare namespace Components {
          * Setting that allows to add a custom domain. For e.g; doe.com
          */
         export type EmailDomainSetting = "email_domain";
+        /**
+         * Standard error response format for all API errors.
+         */
         export interface ErrorResponse {
+            /**
+             * Human-readable error message describing what went wrong
+             * example:
+             * Resource not found
+             */
             error: string;
+            /**
+             * HTTP status code of the error
+             * example:
+             * 404
+             */
             status: number;
         }
+        /**
+         * Inbox bucket representing the storage container for a shared inbox.
+         */
         export interface InboxBucketResponse {
+            /**
+             * Unique identifier of the bucket
+             * example:
+             * bucket-abc
+             */
             id: string;
+            /**
+             * ID of the shared inbox associated with this bucket
+             * example:
+             * inbox-xyz
+             */
             inbox_id: string;
         }
+        export type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "SKIPPED";
+        export interface MailboxSyncStatus {
+            execution_id: string;
+            status: MailboxSyncStatuses;
+            timeframe: MailboxSyncTimeframePeriods;
+            started_at: string; // date-time
+            completed_at?: string; // date-time
+            inbox?: {
+                status?: MailboxSyncFolderStatuses;
+                total_messages?: number;
+                processed_messages?: number;
+                failed_messages?: number;
+            };
+            sent_items?: {
+                status?: MailboxSyncFolderStatuses;
+                total_messages?: number;
+                processed_messages?: number;
+                failed_messages?: number;
+            };
+        }
+        export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
+        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m";
+        export interface OutlookConnectionError {
+            /**
+             * Error code or message from the OAuth flow.
+             */
+            error: string;
+            /**
+             * Human-readable description of the error.
+             */
+            error_description?: string;
+            /**
+             * URL for tenant admin to grant consent, if applicable.
+             */
+            admin_consent_url?: string; // uri
+        }
+        export interface OutlookConnectionStatus {
+            /**
+             * Current connection status:
+             * - pending_auth: Admin consent granted, waiting for user OAuth
+             * - connected: Fully connected with valid tokens
+             * - expired: Tokens expired, need to re-authenticate
+             * - not_connected: No connection, initiate OAuth
+             *
+             */
+            status: "connected" | "expired" | "pending_auth" | "not_connected";
+            /**
+             * Action for UI to take (all call GET /outlook/connect):
+             * - connect: No connection, initiate OAuth
+             * - authorize: Admin consent done, complete OAuth
+             * - reconnect: Re-authenticate expired session
+             * - none: Fully connected, no action needed
+             *
+             */
+            action: "connect" | "authorize" | "reconnect" | "none";
+            /**
+             * Display name of user who connected
+             */
+            connected_by_display_name?: string;
+            /**
+             * Email of the user who connected
+             */
+            connected_by_email?: string; // email
+            /**
+             * Azure AD Object ID of user who connected
+             */
+            connected_by_user_id?: string;
+            /**
+             * When the connection was established
+             */
+            connected_at?: string; // date-time
+            /**
+             * When the connection was last updated
+             */
+            updated_at?: string; // date-time
+            /**
+             * Microsoft Azure AD tenant ID
+             */
+            tenant_id: string;
+            /**
+             * Granted permission scopes
+             */
+            scopes?: string[];
+            /**
+             * When the current access token expires
+             */
+            expires_at?: string; // date-time
+            /**
+             * Whether the current token is still valid
+             */
+            is_token_valid?: boolean;
+        }
+        /**
+         * Request payload for provisioning an epilot-managed email address.
+         */
         export interface ProvisionEpilotEmailAddressPayload {
+            /**
+             * The epilot email address to provision (must be on @epilot.cloud domain)
+             * example:
+             * mycompany@epilot.cloud
+             */
             address: string;
         }
         /**
@@ -109,27 +413,122 @@ declare namespace Components {
          *
          */
         export type RestrictDuplicatesWithinSetting = "restrict_duplicates_within";
+        /**
+         * Request payload for setting an email address as the organization's primary address.
+         */
         export interface SetEmailAddressPrimaryPayload {
+            /**
+             * The email address to set as primary
+             * example:
+             * sales@yourcompany.com
+             */
             address: string;
         }
+        /**
+         * Generic setting object used for various email configuration types.
+         * The applicable fields depend on the setting type:
+         * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+         * - **email_domain**: Uses `value` (domain name)
+         * - **whitelist_email_address**: Uses `value` (email address)
+         * - **restrict_duplicates_within**: Uses `value` (time duration)
+         *
+         */
         export interface Setting {
             [name: string]: any;
+            /**
+             * Unique identifier of the setting
+             * example:
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
+             */
             id?: string;
+            /**
+             * Display name of the setting (used for signatures)
+             * example:
+             * Default Signature
+             */
             name?: string;
+            /**
+             * Organization ID that owns this setting
+             * example:
+             * org-123
+             */
             org_id?: string;
             type: SettingType;
+            /**
+             * The setting value. Interpretation depends on type:
+             * - signature: Plain text version of the signature
+             * - email_domain: Domain name (e.g., "yourcompany.com")
+             * - whitelist_email_address: Email address to whitelist
+             * - restrict_duplicates_within: Time duration (e.g., "5m", "1d")
+             *
+             * example:
+             * Best regards, The Team
+             */
             value?: string;
+            /**
+             * HTML content (only applicable for signature type)
+             * example:
+             * <p>Best regards,<br/><strong>The Team</strong></p>
+             */
             html?: string;
+            /**
+             * ISO 8601 timestamp when the setting was created
+             * example:
+             * 2024-01-15T10:30:00Z
+             */
             created_at?: string;
+            /**
+             * ISO 8601 timestamp when the setting was last updated
+             * example:
+             * 2024-01-20T14:45:00Z
+             */
             updated_at?: string;
+            /**
+             * User ID of the creator
+             * example:
+             * user-123
+             */
             created_by?: string;
+            /**
+             * User ID of the last editor
+             * example:
+             * user-456
+             */
             updated_by?: string;
         }
+        /**
+         * Common metadata fields for all settings and resources.
+         */
         export interface SettingMeta {
+            /**
+             * Unique identifier (UUID) for the resource
+             * example:
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
+             */
             id: string;
+            /**
+             * Timestamp when the resource was created
+             * example:
+             * 2024-01-15T10:30:00Z
+             */
             created_at: string; // date-time
+            /**
+             * Timestamp when the resource was last updated
+             * example:
+             * 2024-01-20T14:45:00Z
+             */
             updated_at?: string; // date-time
+            /**
+             * User ID of the user who created the resource
+             * example:
+             * user-123
+             */
             created_by?: string;
+            /**
+             * User ID of the user who last updated the resource
+             * example:
+             * user-456
+             */
             updated_by?: string;
         }
         export type SettingType = /* Setting that allows to add a signature. */ SignatureSetting | /* Setting that allows to add a custom domain. For e.g; doe.com */ EmailDomainSetting | /* Setting that allows to add an email address on the custom domain. For e.g; john@doe.com */ EmailAddressSetting | /**
@@ -151,70 +550,177 @@ declare namespace Components {
          *
          */
         RestrictDuplicatesWithinSetting;
-        export type SettingsResponse = Setting[] | Setting;
-        export interface SharedInboxResponse {
-            id: string;
-            created_at: string; // date-time
-            updated_at?: string; // date-time
-            created_by?: string;
-            updated_by?: string;
-            name: string;
-            color: string;
-            assignees: string[];
-            description?: string;
-            bucket_id: string;
-        }
-        /**
-         * Mapping between a shared inbox and its Outlook shared mailbox.
-         * This tracks which provider/tenant provisions each shared mailbox.
+        export type SettingsResponse = /**
+         * Generic setting object used for various email configuration types.
+         * The applicable fields depend on the setting type:
+         * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+         * - **email_domain**: Uses `value` (domain name)
+         * - **whitelist_email_address**: Uses `value` (email address)
+         * - **restrict_duplicates_within**: Uses `value` (time duration)
          *
          */
-        export interface SharedMailboxMapping {
+        Setting[] | /**
+         * Generic setting object used for various email configuration types.
+         * The applicable fields depend on the setting type:
+         * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+         * - **email_domain**: Uses `value` (domain name)
+         * - **whitelist_email_address**: Uses `value` (email address)
+         * - **restrict_duplicates_within**: Uses `value` (time duration)
+         *
+         */
+        Setting;
+        /**
+         * Shared inbox configuration with all associated metadata.
+         */
+        export interface SharedInboxResponse {
             /**
-             * The email-settings shared inbox entity ID
+             * Unique identifier of the shared inbox
+             * example:
+             * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
              */
-            shared_inbox_id: string;
+            id: string;
             /**
-             * The Outlook shared mailbox email address
+             * Timestamp when the resource was created
+             * example:
+             * 2024-01-15T10:30:00Z
              */
-            outlook_email: string; // email
+            created_at: string; // date-time
             /**
-             * Azure AD Tenant ID that provisions this mailbox
+             * Timestamp when the resource was last updated
+             * example:
+             * 2024-01-20T14:45:00Z
              */
-            tenant_id: string;
+            updated_at?: string; // date-time
             /**
-             * Provider type (for future extensibility)
+             * User ID of the user who created the resource
+             * example:
+             * user-123
              */
-            provider: "outlook";
+            created_by?: string;
             /**
-             * Display name from Outlook
+             * User ID of the user who last updated the resource
+             * example:
+             * user-456
              */
-            display_name?: string;
+            updated_by?: string;
             /**
-             * When the mailbox was connected
+             * Display name of the shared inbox
+             * example:
+             * Customer Support
              */
-            connected_at: string; // date-time
+            name: string;
             /**
-             * User who connected this mailbox
+             * Hex color code for visual identification
+             * example:
+             * #4CAF50
              */
-            connected_by_user_id?: string;
+            color: string;
+            /**
+             * List of user IDs assigned to this inbox
+             * example:
+             * [
+             *   "user-123",
+             *   "user-456"
+             * ]
+             */
+            assignees: string[];
+            /**
+             * Description of the inbox purpose
+             * example:
+             * Incoming customer support requests
+             */
+            description?: string;
+            /**
+             * ID of the associated storage bucket for messages
+             * example:
+             * bucket-xyz
+             */
+            bucket_id: string;
         }
         /**
          * Setting that allows to add a signature.
          */
         export type SignatureSetting = "signature";
+        /**
+         * Request payload for updating an email address configuration.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
         export interface UpdateEmailAddressPayload {
+            /**
+             * Display name shown as the sender name in emails
+             * example:
+             * Sales Team
+             */
             name?: string;
+            /**
+             * List of user IDs who can send from this address
+             * example:
+             * [
+             *   "user-123",
+             *   "user-456"
+             * ]
+             */
             user_ids?: string[];
+            /**
+             * List of group IDs whose members can send from this address
+             * example:
+             * [
+             *   "group-789"
+             * ]
+             */
             group_ids?: string[];
+            /**
+             * ID of the signature to use by default when sending from this address
+             * example:
+             * sig-abc
+             */
             default_signature_id?: string;
+            /**
+             * ID of the shared inbox to associate with this address
+             * example:
+             * inbox-xyz
+             */
             shared_inbox_id?: string;
+            /**
+             * Whether the email address is active and can be used for sending
+             * example:
+             * true
+             */
             is_active?: boolean;
         }
+        /**
+         * Request payload for updating a shared inbox configuration.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
         export interface UpdateSharedInboxPayload {
+            /**
+             * Hex color code for visual identification in the UI
+             * example:
+             * #4CAF50
+             */
             color?: string;
+            /**
+             * Display name of the shared inbox
+             * example:
+             * Customer Support
+             */
             name?: string;
+            /**
+             * List of user IDs assigned to this inbox
+             * example:
+             * [
+             *   "user-123",
+             *   "user-456"
+             * ]
+             */
             assignees?: string[];
+            /**
+             * Optional description of the inbox purpose
+             * example:
+             * Incoming customer support requests
+             */
             description?: string;
         }
         /**
@@ -227,17 +733,15 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace AddDomain {
-        export type RequestBody = Components.Schemas.Domain;
+        export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {
             export type $200 = Components.Schemas.SettingsResponse;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace AddEmailAddress {
-        export type RequestBody = Components.Schemas.CreateEmailAddressPayload;
+        export type RequestBody = /* Request payload for creating a new email address. */ Components.Schemas.CreateEmailAddressPayload;
         namespace Responses {
             export type $201 = Components.Responses.CreateEmailAddressSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -247,17 +751,24 @@ declare namespace Paths {
         }
     }
     namespace AddSetting {
-        export type RequestBody = Components.Schemas.Setting;
+        export type RequestBody = /**
+         * Generic setting object used for various email configuration types.
+         * The applicable fields depend on the setting type:
+         * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+         * - **email_domain**: Uses `value` (domain name)
+         * - **whitelist_email_address**: Uses `value` (email address)
+         * - **restrict_duplicates_within**: Uses `value` (time duration)
+         *
+         */
+        Components.Schemas.Setting;
         namespace Responses {
             export type $200 = Components.Schemas.SettingsResponse;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace AddSharedInbox {
-        export type RequestBody = Components.Schemas.CreateSharedInboxPayload;
+        export type RequestBody = /* Request payload for creating a new shared inbox. */ Components.Schemas.CreateSharedInboxPayload;
         namespace Responses {
             export type $201 = Components.Responses.CreateSharedInboxSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -266,64 +777,58 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ConnectMsTeams {
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+                connected_at?: string; // date-time
+            }
+            export interface $400 {
+                error?: string;
+                message?: string;
+            }
+        }
+    }
     namespace ConnectOutlook {
         namespace Responses {
             export interface $200 {
                 authorization_url?: string;
             }
+            export type $403 = Components.Responses.OutlookErrorResponse;
         }
     }
-    namespace ConnectSharedMailbox {
+    namespace ConnectOutlookMailbox {
         export interface RequestBody {
             /**
-             * Email address of the Outlook shared mailbox to connect
+             * Email address of the Outlook mailbox to connect
              */
             email: string; // email
             /**
-             * Display name for the shared inbox (defaults to mailbox display name)
+             * Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.
              */
-            name?: string;
+            shared_inbox_id?: string;
             /**
-             * Color for the shared inbox (hex code, defaults to green)
+             * Optional timeframe for initial mailbox sync. When provided, triggers an automatic
+             * mailbox sync after connecting the mailbox, syncing emails from the specified period.
+             *
              */
-            color?: string;
-            /**
-             * User IDs to assign to this shared inbox
-             */
-            assignees?: string[];
-            /**
-             * Description for the shared inbox
-             */
-            description?: string;
+            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m";
         }
         namespace Responses {
             export interface $201 {
+                email_address: /* Email address configuration with all associated metadata. */ Components.Schemas.EmailAddressResponse;
                 /**
-                 * The created shared inbox from email-settings
+                 * The email of the connected mailbox
                  */
-                shared_inbox?: {
-                    id?: string;
-                    name?: string;
-                    color?: string;
-                    assignees?: string[];
-                    description?: string;
-                };
-                /**
-                 * The Outlook shared mailbox email address
-                 */
-                outlook_email?: string; // email
+                outlook_email: string; // email
                 /**
                  * Azure AD Tenant ID that provisions this mailbox
                  */
-                tenant_id?: string;
+                tenant_id: string;
                 /**
                  * The provider type
                  */
-                provider?: "outlook";
-                /**
-                 * Display name of the shared mailbox
-                 */
-                display_name?: string;
+                provider: "outlook";
             }
             export interface $400 {
             }
@@ -338,14 +843,12 @@ declare namespace Paths {
         }
     }
     namespace DeleteDomain {
-        export type RequestBody = Components.Schemas.Domain;
+        export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {
             export interface $204 {
             }
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace DeleteEmailAddress {
@@ -366,18 +869,25 @@ declare namespace Paths {
         export interface RequestBody {
             type: Components.Schemas.SettingType;
             /**
-             * ID of setting
+             * The unique identifier of the setting to delete
              * example:
              * a10bd0ff-4391-4cfc-88ee-b19d718a9bf7
              */
             id: string;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Setting;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $200 = /**
+             * Generic setting object used for various email configuration types.
+             * The applicable fields depend on the setting type:
+             * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+             * - **email_domain**: Uses `value` (domain name)
+             * - **whitelist_email_address**: Uses `value` (email address)
+             * - **restrict_duplicates_within**: Uses `value` (time duration)
+             *
+             */
+            Components.Schemas.Setting;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace DeleteSharedInbox {
@@ -397,6 +907,13 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DisconnectMsTeams {
+        namespace Responses {
+            export interface $200 {
+                connected?: boolean;
+            }
         }
     }
     namespace DisconnectOutlook {
@@ -426,6 +943,54 @@ declare namespace Paths {
             }
         }
     }
+    namespace DisconnectOutlookMailbox {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                /**
+                 * The email address that was disconnected
+                 */
+                email: string; // email
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace GetConnectedOutlookEmails {
+        namespace Responses {
+            export interface $200 {
+                outlook_emails: /**
+                 * Mapping between an Outlook email and its Outlook Connection.
+                 * This tracks which provider/tenant provisions each Outlook email.
+                 *
+                 */
+                Components.Schemas.ConnectedOutlookEmail[];
+                /**
+                 * Number of Outlook emails
+                 */
+                count: number;
+            }
+            export interface $400 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace GetDomains {
+        namespace Responses {
+            export type $200 = string[];
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace GetEmailAddress {
         namespace Parameters {
             export type Id = string;
@@ -440,71 +1005,54 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMailboxSyncStatus {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MailboxSyncStatus;
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace GetMsTeamsStatus {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the Teams channel is connected
+                 */
+                connected?: boolean;
+                /**
+                 * When the Teams channel was connected
+                 */
+                connected_at?: string; // date-time
+                /**
+                 * User ID who connected the Teams channel
+                 */
+                connected_by_user_id?: string;
+            }
+        }
+    }
     namespace GetOutlookConnectionStatus {
         namespace Responses {
             export interface $200 {
                 /**
                  * List of Outlook connections (one per tenant)
                  */
-                connections: {
-                    /**
-                     * Current connection status:
-                     * - pending_auth: Admin consent granted, waiting for user OAuth
-                     * - connected: Fully connected with valid tokens
-                     * - expired: Tokens expired, need to re-authenticate
-                     *
-                     */
-                    status: "connected" | "expired" | "pending_auth";
-                    /**
-                     * Action for UI to take (all call GET /outlook/connect):
-                     * - connect: No connection, initiate OAuth
-                     * - authorize: Admin consent done, complete OAuth
-                     * - reconnect: Re-authenticate expired session
-                     * - none: Fully connected, no action needed
-                     *
-                     */
-                    action: "connect" | "authorize" | "reconnect" | "none";
-                    /**
-                     * Display name of user who connected
-                     */
-                    connected_by_display_name?: string;
-                    /**
-                     * Email of the user who connected
-                     */
-                    connected_by_email?: string; // email
-                    /**
-                     * Azure AD Object ID of user who connected
-                     */
-                    connected_by_user_id?: string;
-                    /**
-                     * When the connection was established
-                     */
-                    connected_at?: string; // date-time
-                    /**
-                     * When the connection was last updated
-                     */
-                    updated_at?: string; // date-time
-                    /**
-                     * Microsoft Azure AD tenant ID
-                     */
-                    tenant_id: string;
-                    /**
-                     * Granted permission scopes
-                     */
-                    scopes?: string[];
-                    /**
-                     * When the current access token expires
-                     */
-                    expires_at?: string; // date-time
-                    /**
-                     * Whether the current token is still valid
-                     */
-                    is_token_valid?: boolean;
-                }[];
+                connections: Components.Schemas.OutlookConnectionStatus[];
                 /**
                  * Whether any connections exist
                  */
                 has_connections: boolean;
+                /**
+                 * Whether Microsoft Teams features are enabled for this organization
+                 */
+                teams_enabled?: boolean;
             }
             export interface $400 {
             }
@@ -523,10 +1071,8 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.SettingsResponse;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace GetSharedInbox {
@@ -541,48 +1087,6 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetSharedMailboxMappingById {
-        namespace Parameters {
-            export type SharedInboxId = string;
-        }
-        export interface PathParameters {
-            shared_inbox_id: Parameters.SharedInboxId;
-        }
-        namespace Responses {
-            export type $200 = /**
-             * Mapping between a shared inbox and its Outlook shared mailbox.
-             * This tracks which provider/tenant provisions each shared mailbox.
-             *
-             */
-            Components.Schemas.SharedMailboxMapping;
-            export interface $400 {
-            }
-            export interface $404 {
-            }
-            export interface $500 {
-            }
-        }
-    }
-    namespace GetSharedMailboxMappings {
-        namespace Responses {
-            export interface $200 {
-                mappings: /**
-                 * Mapping between a shared inbox and its Outlook shared mailbox.
-                 * This tracks which provider/tenant provisions each shared mailbox.
-                 *
-                 */
-                Components.Schemas.SharedMailboxMapping[];
-                /**
-                 * Number of mappings
-                 */
-                count: number;
-            }
-            export interface $400 {
-            }
-            export interface $500 {
-            }
         }
     }
     namespace ListEmailAddresses {
@@ -640,7 +1144,7 @@ declare namespace Paths {
         }
     }
     namespace ProvisionEpilotEmailAddress {
-        export type RequestBody = Components.Schemas.ProvisionEpilotEmailAddressPayload;
+        export type RequestBody = /* Request payload for provisioning an epilot-managed email address. */ Components.Schemas.ProvisionEpilotEmailAddressPayload;
         namespace Responses {
             export type $200 = Components.Responses.ProvisionEpilotEmailAddressSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -648,8 +1152,48 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RetryMailboxSync {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        export interface RequestBody {
+            /**
+             * Execution ID of the sync to retry
+             */
+            sync_id: string;
+            /**
+             * Retry scope. Use 'all_failed' to retry all retryable failed messages.
+             */
+            scope?: "all_failed";
+            /**
+             * Specific Graph message IDs to retry (alternative to scope)
+             */
+            message_ids?: string[];
+        }
+        namespace Responses {
+            export interface $202 {
+                /**
+                 * Execution ID for the retry sync
+                 */
+                retry_execution_id: string;
+                /**
+                 * Number of messages queued for retry
+                 */
+                messages_queued: number;
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace SetEmailAddressPrimary {
-        export type RequestBody = Components.Schemas.SetEmailAddressPrimaryPayload;
+        export type RequestBody = /* Request payload for setting an email address as the organization's primary address. */ Components.Schemas.SetEmailAddressPrimaryPayload;
         namespace Responses {
             export type $200 = Components.Responses.SetEmailAddressPrimarySuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -658,46 +1202,40 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace TestWebhookGet {
+    namespace StartMailboxSync {
         namespace Parameters {
-            export type ValidationToken = string;
+            export type Email = string; // email
         }
-        export interface QueryParameters {
-            validationToken?: Parameters.ValidationToken;
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
         }
-        namespace Responses {
-            export type $200 = string;
-            export interface $202 {
-                message?: string;
-                timestamp?: string; // date-time
-            }
-        }
-    }
-    namespace TestWebhookPost {
-        namespace Parameters {
-            export type DebugMessages = boolean;
-            export type ValidationToken = string;
-        }
-        export interface QueryParameters {
-            validationToken?: Parameters.ValidationToken;
-            debugMessages?: Parameters.DebugMessages;
-        }
-        /**
-         * Graph API notification payload
-         */
         export interface RequestBody {
-            value?: {
-                subscriptionId?: string;
-                changeType?: string;
-                resource?: string;
-                clientState?: string;
-            }[];
+            /**
+             * Sync period:
+             * - 5m: last 5 minutes (quick sync)
+             * - 1w: 1 week
+             * - 2w: 2 weeks
+             * - 1m: 1 month
+             *
+             */
+            timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
         }
         namespace Responses {
-            export type $200 = string;
             export interface $202 {
-                message?: string;
-                timestamp?: string; // date-time
+                /**
+                 * The execution ID
+                 */
+                execution_id: string;
+                status: Components.Schemas.MailboxSyncStatuses;
+                timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -708,7 +1246,12 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = Components.Schemas.UpdateEmailAddressPayload;
+        export type RequestBody = /**
+         * Request payload for updating an email address configuration.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
+        Components.Schemas.UpdateEmailAddressPayload;
         namespace Responses {
             export type $200 = Components.Responses.UpdateEmailAddressSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -725,13 +1268,29 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = Components.Schemas.Setting;
+        export type RequestBody = /**
+         * Generic setting object used for various email configuration types.
+         * The applicable fields depend on the setting type:
+         * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+         * - **email_domain**: Uses `value` (domain name)
+         * - **whitelist_email_address**: Uses `value` (email address)
+         * - **restrict_duplicates_within**: Uses `value` (time duration)
+         *
+         */
+        Components.Schemas.Setting;
         namespace Responses {
-            export type $200 = Components.Schemas.Setting;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $200 = /**
+             * Generic setting object used for various email configuration types.
+             * The applicable fields depend on the setting type:
+             * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
+             * - **email_domain**: Uses `value` (domain name)
+             * - **whitelist_email_address**: Uses `value` (email address)
+             * - **restrict_duplicates_within**: Uses `value` (time duration)
+             *
+             */
+            Components.Schemas.Setting;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace UpdateSharedInbox {
@@ -741,7 +1300,12 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = Components.Schemas.UpdateSharedInboxPayload;
+        export type RequestBody = /**
+         * Request payload for updating a shared inbox configuration.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
+        Components.Schemas.UpdateSharedInboxPayload;
         namespace Responses {
             export type $200 = Components.Responses.UpdateSharedInboxSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -752,33 +1316,34 @@ declare namespace Paths {
         }
     }
     namespace VerifyDomain {
-        export type RequestBody = Components.Schemas.Domain;
+        export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {
             export type $200 = Components.Schemas.SettingsResponse;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace VerifyNameServers {
-        export type RequestBody = Components.Schemas.Domain;
+        export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {
             export type $200 = Components.Schemas.SettingsResponse;
-            export interface $403 {
-            }
-            export interface $404 {
-            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
    * provisionEpilotEmailAddress - provisionEpilotEmailAddress
    * 
-   * Provision or reactivate epilot email address, deactivating other active epilot email addresses.
+   * Provisions or reactivates an epilot-managed email address for the organization.
+   * 
+   * When provisioning a new epilot email address, any previously active epilot email addresses
+   * will be automatically deactivated. Only one epilot email address can be active at a time.
+   * 
+   * Epilot email addresses use the `@epilot.cloud` domain and are fully managed by the platform.
+   * 
    */
   'provisionEpilotEmailAddress'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -788,7 +1353,11 @@ export interface OperationMethods {
   /**
    * setEmailAddressPrimary - setEmailAddressPrimary
    * 
-   * Set email address as primary
+   * Sets the specified email address as the primary address for the organization.
+   * 
+   * The primary email address is used as the default sender address when composing new emails.
+   * Only one email address can be primary at a time; setting a new primary will unset the previous one.
+   * 
    */
   'setEmailAddressPrimary'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -798,7 +1367,11 @@ export interface OperationMethods {
   /**
    * getEmailAddress - getEmailAddress
    * 
-   * Get email address
+   * Retrieves the details of a specific email address by its ID.
+   * 
+   * Returns the full configuration including display name, assigned users/groups,
+   * default signature, and shared inbox association.
+   * 
    */
   'getEmailAddress'(
     parameters?: Parameters<Paths.GetEmailAddress.PathParameters> | null,
@@ -808,7 +1381,15 @@ export interface OperationMethods {
   /**
    * updateEmailAddress - updateEmailAddress
    * 
-   * Update email address
+   * Updates the configuration of an existing email address.
+   * 
+   * You can modify:
+   * - Display name
+   * - Assigned users and groups
+   * - Default signature
+   * - Shared inbox association
+   * - Active status
+   * 
    */
   'updateEmailAddress'(
     parameters?: Parameters<Paths.UpdateEmailAddress.PathParameters> | null,
@@ -818,7 +1399,11 @@ export interface OperationMethods {
   /**
    * deleteEmailAddress - deleteEmailAddress
    * 
-   * Delete email address
+   * Permanently deletes an email address from the organization.
+   * 
+   * **Warning**: This action cannot be undone. Users will no longer be able to send
+   * emails from this address after deletion.
+   * 
    */
   'deleteEmailAddress'(
     parameters?: Parameters<Paths.DeleteEmailAddress.PathParameters> | null,
@@ -828,7 +1413,11 @@ export interface OperationMethods {
   /**
    * listEmailAddresses - listEmailAddresses
    * 
-   * List email addresses
+   * Retrieves all email addresses configured for the organization.
+   * 
+   * Returns an array of email address configurations including their IDs, display names,
+   * assigned users/groups, signatures, and status flags.
+   * 
    */
   'listEmailAddresses'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -838,7 +1427,11 @@ export interface OperationMethods {
   /**
    * addEmailAddress - addEmailAddress
    * 
-   * Add email address
+   * Adds a new email address to the organization.
+   * 
+   * The email address can be from a custom domain (if configured) or any external
+   * email provider. Optionally assign users, groups, and a default signature.
+   * 
    */
   'addEmailAddress'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -848,7 +1441,11 @@ export interface OperationMethods {
   /**
    * getSharedInbox - getSharedInbox
    * 
-   * Get shared inbox
+   * Retrieves the details of a specific shared inbox by its ID.
+   * 
+   * Returns the inbox configuration including name, color, description, assigned team members,
+   * and the associated bucket ID.
+   * 
    */
   'getSharedInbox'(
     parameters?: Parameters<Paths.GetSharedInbox.PathParameters> | null,
@@ -858,7 +1455,11 @@ export interface OperationMethods {
   /**
    * updateSharedInbox - updateSharedInbox
    * 
-   * Update shared inbox
+   * Updates the configuration of an existing shared inbox.
+   * 
+   * You can modify the inbox name, color, description, and team member assignments.
+   * Changes take effect immediately for all associated email addresses.
+   * 
    */
   'updateSharedInbox'(
     parameters?: Parameters<Paths.UpdateSharedInbox.PathParameters> | null,
@@ -868,7 +1469,15 @@ export interface OperationMethods {
   /**
    * deleteSharedInbox - deleteSharedInbox
    * 
-   * Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).
+   * Deletes a shared inbox and reroutes all associated emails to a successor inbox.
+   * 
+   * When a shared inbox is deleted:
+   * - All email addresses associated with this inbox will be reassigned to the successor
+   * - If no successor is specified, emails are routed to the default inbox
+   * - The inbox's message history is preserved in the successor inbox
+   * 
+   * **Note**: The default inbox cannot be deleted.
+   * 
    */
   'deleteSharedInbox'(
     parameters?: Parameters<Paths.DeleteSharedInbox.QueryParameters & Paths.DeleteSharedInbox.PathParameters> | null,
@@ -878,7 +1487,11 @@ export interface OperationMethods {
   /**
    * listSharedInboxes - listSharedInboxes
    * 
-   * List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.
+   * Retrieves all shared inboxes configured for the organization.
+   * 
+   * **Note**: The default inbox (with ID `default`) is not included in this list but is
+   * always available for all organizations. You do not need to create it explicitly.
+   * 
    */
   'listSharedInboxes'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -888,7 +1501,11 @@ export interface OperationMethods {
   /**
    * addSharedInbox - addSharedInbox
    * 
-   * Add shared inbox
+   * Creates a new shared inbox for the organization.
+   * 
+   * Shared inboxes help teams organize and categorize incoming emails.
+   * Each inbox requires a name and color for visual identification.
+   * 
    */
   'addSharedInbox'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -898,7 +1515,14 @@ export interface OperationMethods {
   /**
    * listInboxBuckets - listInboxBuckets
    * 
-   * List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.
+   * Retrieves all inbox buckets for the organization.
+   * 
+   * Inbox buckets are internal storage containers that correspond to shared inboxes.
+   * Each shared inbox has an associated bucket for storing messages.
+   * 
+   * **Note**: The default bucket (with ID `default`) is not included in this list but
+   * is always available for all organizations.
+   * 
    */
   'listInboxBuckets'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -906,7 +1530,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListInboxBuckets.Responses.$200>
   /**
-   * connectOutlook - Connect Outlook
+   * connectOutlook - connectOutlook
    * 
    * Returns Microsoft authorization URL for Outlook OAuth.
    */
@@ -916,7 +1540,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
   /**
-   * getOutlookConnectionStatus - Get Outlook Connection Status
+   * getOutlookConnectionStatus - getOutlookConnectionStatus
    * 
    * Returns all Microsoft 365 / Outlook connections for the organization.
    * Supports multiple connections (one per Azure AD tenant).
@@ -931,7 +1555,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
   /**
-   * disconnectOutlook - Disconnect Outlook
+   * disconnectOutlook - disconnectOutlook
    * 
    * Removes the Microsoft 365 / Outlook connection for a specific tenant.
    * This deletes the stored tokens and disconnects the integration.
@@ -943,71 +1567,116 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
   /**
-   * connectSharedMailbox - Connect Outlook Shared Mailbox
+   * connectMsTeams - connectMsTeams
    * 
-   * Connects an Outlook shared mailbox as a shared inbox.
-   * 1. Validates the user has access to the shared mailbox via Microsoft Graph API
-   * 2. Creates a shared inbox entry in email-settings with the Outlook provider info
-   * 
-   */
-  'connectSharedMailbox'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.ConnectSharedMailbox.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ConnectSharedMailbox.Responses.$201>
-  /**
-   * getSharedMailboxMappings - Get Shared Mailbox Mappings
-   * 
-   * Returns all shared mailbox mappings for the organization.
-   * Useful to determine which shared inboxes are connected to Outlook
-   * and which tenant provisions each one.
+   * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+   * Requires an active Microsoft 365 / Outlook connection.
    * 
    */
-  'getSharedMailboxMappings'(
+  'connectMsTeams'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetSharedMailboxMappings.Responses.$200>
+  ): OperationResponse<Paths.ConnectMsTeams.Responses.$200>
   /**
-   * getSharedMailboxMappingById - Get Shared Mailbox Mapping by ID
+   * disconnectMsTeams - disconnectMsTeams
    * 
-   * Returns the mapping for a specific shared inbox.
-   * Useful to check if a specific inbox is connected to Outlook.
+   * Disconnects Microsoft Teams channel for the organization.
    * 
    */
-  'getSharedMailboxMappingById'(
-    parameters?: Parameters<Paths.GetSharedMailboxMappingById.PathParameters> | null,
+  'disconnectMsTeams'(
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetSharedMailboxMappingById.Responses.$200>
+  ): OperationResponse<Paths.DisconnectMsTeams.Responses.$200>
   /**
-   * testWebhookGet - Test Webhook (GET)
+   * getMsTeamsStatus - getMsTeamsStatus
    * 
-   * Test endpoint for debugging Graph API webhook notifications via ngrok.
-   * Handles Microsoft Graph subscription validation requests by returning the validationToken.
-   * This is a PUBLIC endpoint with no authentication.
+   * Returns the connection status of the Microsoft Teams channel for the organization.
    * 
    */
-  'testWebhookGet'(
-    parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
+  'getMsTeamsStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
+  ): OperationResponse<Paths.GetMsTeamsStatus.Responses.$200>
   /**
-   * testWebhookPost - Test Webhook (POST)
+   * connectOutlookMailbox - connectOutlookMailbox
    * 
-   * Test endpoint for debugging Graph API webhook notifications via ngrok.
-   * Logs all incoming webhook payloads for debugging purposes.
-   * This is a PUBLIC endpoint with no authentication.
+   * Connects an Outlook mailbox:
+   *   1. Validates the user has access to the mailbox via Microsoft Graph API
+   *   2. Creates a mapping between the email address of the mailbox and the outlook connection
+   *   3. Enables the user to send emails as the mailbox's email address
    * 
    */
-  'testWebhookPost'(
-    parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
-    data?: Paths.TestWebhookPost.RequestBody,
+  'connectOutlookMailbox'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ConnectOutlookMailbox.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
+  ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
   /**
-   * outlookOAuthCallback - Outlook OAuth callback
+   * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+   * 
+   * Disconnects a single Outlook mailbox by email address.
+   * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+   * Does not affect the tenant-level Outlook connection.
+   * 
+   */
+  'disconnectOutlookMailbox'(
+    parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
+  /**
+   * startMailboxSync - Start Mailbox Sync
+   * 
+   * Triggers an Outlook mailbox sync for the specified email address.
+   * Syncs existing emails (inbox + sent items) for the specified timeframe.
+   * 
+   */
+  'startMailboxSync'(
+    parameters?: Parameters<Paths.StartMailboxSync.PathParameters> | null,
+    data?: Paths.StartMailboxSync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartMailboxSync.Responses.$202>
+  /**
+   * getMailboxSyncStatus - Get Mailbox Sync Status
+   * 
+   * Returns the current or latest sync status for the specified mailbox.
+   * Poll this endpoint to track sync progress.
+   * 
+   */
+  'getMailboxSyncStatus'(
+    parameters?: Parameters<Paths.GetMailboxSyncStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  /**
+   * retryMailboxSync - Retry Failed Messages
+   * 
+   * Retries failed messages from a previous sync execution.
+   * Only retries messages with status FAILED (not PERMANENTLY_FAILED).
+   * Messages that fail 3+ retries become PERMANENTLY_FAILED.
+   * 
+   */
+  'retryMailboxSync'(
+    parameters?: Parameters<Paths.RetryMailboxSync.PathParameters> | null,
+    data?: Paths.RetryMailboxSync.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  /**
+   * getConnectedOutlookEmails - getConnectedOutlookEmails
+   * 
+   * Returns all Outlook email addresses connected to the organization.
+   * 
+   */
+  'getConnectedOutlookEmails'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
+  /**
+   * outlookOAuthCallback - outlookOAuthCallback
    * 
    * Exchanges authorization code for tokens and stores them.
    */
@@ -1019,7 +1688,21 @@ export interface OperationMethods {
   /**
    * getSettings - getSettings
    * 
-   * Get all settings by type
+   * Retrieves settings of a specific type for the organization.
+   * 
+   * If an `id` is provided, returns only that specific setting.
+   * Otherwise, returns all settings of the specified type.
+   * 
+   * ## Setting Types
+   * 
+   * | Type | Description |
+   * |------|-------------|
+   * | `signature` | HTML email signatures |
+   * | `email_domain` | Custom email domains |
+   * | `email_address` | Sender email addresses |
+   * | `whitelist_email_address` | Addresses exempt from duplicate detection |
+   * | `restrict_duplicates_within` | Time window for duplicate email detection |
+   * 
    */
   'getSettings'(
     parameters?: Parameters<Paths.GetSettings.QueryParameters> | null,
@@ -1029,7 +1712,14 @@ export interface OperationMethods {
   /**
    * addSetting - addSetting
    * 
-   * Add setting
+   * Creates a new setting of the specified type.
+   * 
+   * The setting type determines which fields are applicable:
+   * - **signature**: Requires `name`, `value` (plain text), and `html` (HTML content)
+   * - **email_domain**: Requires `value` (domain name)
+   * - **whitelist_email_address**: Requires `value` (email address)
+   * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
+   * 
    */
   'addSetting'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1039,7 +1729,12 @@ export interface OperationMethods {
   /**
    * deleteSetting - deleteSetting
    * 
-   * delete setting by ID and type
+   * Deletes a setting by its ID and type.
+   * 
+   * Both the `id` and `type` are required to uniquely identify the setting to delete.
+   * 
+   * **Warning**: This action cannot be undone.
+   * 
    */
   'deleteSetting'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1049,7 +1744,11 @@ export interface OperationMethods {
   /**
    * updateSetting - updateSetting
    * 
-   * Update setting by ID
+   * Updates an existing setting identified by its ID.
+   * 
+   * Include the `type` field in the request body to specify which setting type
+   * is being updated. Only the fields provided will be updated.
+   * 
    */
   'updateSetting'(
     parameters?: Parameters<Paths.UpdateSetting.PathParameters> | null,
@@ -1057,9 +1756,27 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSetting.Responses.$200>
   /**
+   * getDomains - getDomains
+   * 
+   * Retrieves all custom email domains for the organization.
+   * 
+   */
+  'getDomains'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDomains.Responses.$200>
+  /**
    * addDomain - addDomain
    * 
-   * Add domain
+   * Adds a custom email domain to the organization.
+   * 
+   * After adding the domain, you must:
+   * 1. Configure the required DNS records (provided in the response)
+   * 2. Verify the domain using the verification endpoint
+   * 
+   * Until verification is complete, the domain cannot be used for sending emails.
+   * 
    */
   'addDomain'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1069,7 +1786,12 @@ export interface OperationMethods {
   /**
    * deleteDomain - deleteDomain
    * 
-   * Delete domain
+   * Removes a custom email domain from the organization.
+   * 
+   * **Warning**: Deleting a domain will prevent sending emails from any addresses
+   * using this domain. Existing email addresses on this domain should be removed
+   * or reassigned before deleting the domain.
+   * 
    */
   'deleteDomain'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1079,7 +1801,13 @@ export interface OperationMethods {
   /**
    * verifyNameServers - verifyNameServers
    * 
-   * Verify name servers
+   * Verifies that the domain's name server (NS) records are correctly configured.
+   * 
+   * This check ensures that DNS resolution is properly set up for the domain
+   * before proceeding with full domain verification.
+   * 
+   * Run this verification after configuring NS records in your DNS provider.
+   * 
    */
   'verifyNameServers'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1089,7 +1817,16 @@ export interface OperationMethods {
   /**
    * verifyDomain - verifyDomain
    * 
-   * Verify domain
+   * Verifies ownership and configuration of a custom email domain.
+   * 
+   * Domain verification checks:
+   * - DNS TXT records for domain ownership
+   * - MX records for email routing
+   * - SPF records for sender authentication
+   * - DKIM records for email signing
+   * 
+   * Once verified, the domain can be used to create email addresses and send emails.
+   * 
    */
   'verifyDomain'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1103,7 +1840,13 @@ export interface PathsDictionary {
     /**
      * provisionEpilotEmailAddress - provisionEpilotEmailAddress
      * 
-     * Provision or reactivate epilot email address, deactivating other active epilot email addresses.
+     * Provisions or reactivates an epilot-managed email address for the organization.
+     * 
+     * When provisioning a new epilot email address, any previously active epilot email addresses
+     * will be automatically deactivated. Only one epilot email address can be active at a time.
+     * 
+     * Epilot email addresses use the `@epilot.cloud` domain and are fully managed by the platform.
+     * 
      */
     'put'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1115,7 +1858,11 @@ export interface PathsDictionary {
     /**
      * setEmailAddressPrimary - setEmailAddressPrimary
      * 
-     * Set email address as primary
+     * Sets the specified email address as the primary address for the organization.
+     * 
+     * The primary email address is used as the default sender address when composing new emails.
+     * Only one email address can be primary at a time; setting a new primary will unset the previous one.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1127,7 +1874,11 @@ export interface PathsDictionary {
     /**
      * getEmailAddress - getEmailAddress
      * 
-     * Get email address
+     * Retrieves the details of a specific email address by its ID.
+     * 
+     * Returns the full configuration including display name, assigned users/groups,
+     * default signature, and shared inbox association.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetEmailAddress.PathParameters> | null,
@@ -1137,7 +1888,11 @@ export interface PathsDictionary {
     /**
      * deleteEmailAddress - deleteEmailAddress
      * 
-     * Delete email address
+     * Permanently deletes an email address from the organization.
+     * 
+     * **Warning**: This action cannot be undone. Users will no longer be able to send
+     * emails from this address after deletion.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteEmailAddress.PathParameters> | null,
@@ -1147,7 +1902,15 @@ export interface PathsDictionary {
     /**
      * updateEmailAddress - updateEmailAddress
      * 
-     * Update email address
+     * Updates the configuration of an existing email address.
+     * 
+     * You can modify:
+     * - Display name
+     * - Assigned users and groups
+     * - Default signature
+     * - Shared inbox association
+     * - Active status
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdateEmailAddress.PathParameters> | null,
@@ -1159,7 +1922,11 @@ export interface PathsDictionary {
     /**
      * listEmailAddresses - listEmailAddresses
      * 
-     * List email addresses
+     * Retrieves all email addresses configured for the organization.
+     * 
+     * Returns an array of email address configurations including their IDs, display names,
+     * assigned users/groups, signatures, and status flags.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1169,7 +1936,11 @@ export interface PathsDictionary {
     /**
      * addEmailAddress - addEmailAddress
      * 
-     * Add email address
+     * Adds a new email address to the organization.
+     * 
+     * The email address can be from a custom domain (if configured) or any external
+     * email provider. Optionally assign users, groups, and a default signature.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1181,7 +1952,11 @@ export interface PathsDictionary {
     /**
      * getSharedInbox - getSharedInbox
      * 
-     * Get shared inbox
+     * Retrieves the details of a specific shared inbox by its ID.
+     * 
+     * Returns the inbox configuration including name, color, description, assigned team members,
+     * and the associated bucket ID.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetSharedInbox.PathParameters> | null,
@@ -1191,7 +1966,15 @@ export interface PathsDictionary {
     /**
      * deleteSharedInbox - deleteSharedInbox
      * 
-     * Delete shared inbox, rerouting emails to a successor inbox (or default inbox if no successor is provided).
+     * Deletes a shared inbox and reroutes all associated emails to a successor inbox.
+     * 
+     * When a shared inbox is deleted:
+     * - All email addresses associated with this inbox will be reassigned to the successor
+     * - If no successor is specified, emails are routed to the default inbox
+     * - The inbox's message history is preserved in the successor inbox
+     * 
+     * **Note**: The default inbox cannot be deleted.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteSharedInbox.QueryParameters & Paths.DeleteSharedInbox.PathParameters> | null,
@@ -1201,7 +1984,11 @@ export interface PathsDictionary {
     /**
      * updateSharedInbox - updateSharedInbox
      * 
-     * Update shared inbox
+     * Updates the configuration of an existing shared inbox.
+     * 
+     * You can modify the inbox name, color, description, and team member assignments.
+     * Changes take effect immediately for all associated email addresses.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdateSharedInbox.PathParameters> | null,
@@ -1213,7 +2000,11 @@ export interface PathsDictionary {
     /**
      * listSharedInboxes - listSharedInboxes
      * 
-     * List shared inboxes. Default inbox (with inbox_id `default`) is not included, but is always available.
+     * Retrieves all shared inboxes configured for the organization.
+     * 
+     * **Note**: The default inbox (with ID `default`) is not included in this list but is
+     * always available for all organizations. You do not need to create it explicitly.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1223,7 +2014,11 @@ export interface PathsDictionary {
     /**
      * addSharedInbox - addSharedInbox
      * 
-     * Add shared inbox
+     * Creates a new shared inbox for the organization.
+     * 
+     * Shared inboxes help teams organize and categorize incoming emails.
+     * Each inbox requires a name and color for visual identification.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1235,7 +2030,14 @@ export interface PathsDictionary {
     /**
      * listInboxBuckets - listInboxBuckets
      * 
-     * List inbox buckets for an organization. Default bucket (with bucket_id `default`) is not included, but is always available.
+     * Retrieves all inbox buckets for the organization.
+     * 
+     * Inbox buckets are internal storage containers that correspond to shared inboxes.
+     * Each shared inbox has an associated bucket for storing messages.
+     * 
+     * **Note**: The default bucket (with ID `default`) is not included in this list but
+     * is always available for all organizations.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1245,7 +2047,7 @@ export interface PathsDictionary {
   }
   ['/v2/outlook/connect']: {
     /**
-     * connectOutlook - Connect Outlook
+     * connectOutlook - connectOutlook
      * 
      * Returns Microsoft authorization URL for Outlook OAuth.
      */
@@ -1257,7 +2059,7 @@ export interface PathsDictionary {
   }
   ['/v2/outlook/connection/status']: {
     /**
-     * getOutlookConnectionStatus - Get Outlook Connection Status
+     * getOutlookConnectionStatus - getOutlookConnectionStatus
      * 
      * Returns all Microsoft 365 / Outlook connections for the organization.
      * Supports multiple connections (one per Azure AD tenant).
@@ -1274,7 +2076,7 @@ export interface PathsDictionary {
   }
   ['/v2/outlook/connection/disconnect']: {
     /**
-     * disconnectOutlook - Disconnect Outlook
+     * disconnectOutlook - disconnectOutlook
      * 
      * Removes the Microsoft 365 / Outlook connection for a specific tenant.
      * This deletes the stored tokens and disconnects the integration.
@@ -1286,81 +2088,136 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DisconnectOutlook.Responses.$200>
   }
-  ['/v2/outlook/shared-mailboxes/connect']: {
+  ['/v2/channels/msteams/connect']: {
     /**
-     * connectSharedMailbox - Connect Outlook Shared Mailbox
+     * connectMsTeams - connectMsTeams
      * 
-     * Connects an Outlook shared mailbox as a shared inbox.
-     * 1. Validates the user has access to the shared mailbox via Microsoft Graph API
-     * 2. Creates a shared inbox entry in email-settings with the Outlook provider info
+     * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
+     * Requires an active Microsoft 365 / Outlook connection.
      * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.ConnectSharedMailbox.RequestBody,
+      data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ConnectSharedMailbox.Responses.$201>
+    ): OperationResponse<Paths.ConnectMsTeams.Responses.$200>
   }
-  ['/v2/outlook/shared-mailboxes/mappings']: {
+  ['/v2/channels/msteams/disconnect']: {
     /**
-     * getSharedMailboxMappings - Get Shared Mailbox Mappings
+     * disconnectMsTeams - disconnectMsTeams
      * 
-     * Returns all shared mailbox mappings for the organization.
-     * Useful to determine which shared inboxes are connected to Outlook
-     * and which tenant provisions each one.
+     * Disconnects Microsoft Teams channel for the organization.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectMsTeams.Responses.$200>
+  }
+  ['/v2/channels/msteams/status']: {
+    /**
+     * getMsTeamsStatus - getMsTeamsStatus
+     * 
+     * Returns the connection status of the Microsoft Teams channel for the organization.
      * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetSharedMailboxMappings.Responses.$200>
+    ): OperationResponse<Paths.GetMsTeamsStatus.Responses.$200>
   }
-  ['/v2/outlook/shared-mailboxes/mappings/{shared_inbox_id}']: {
+  ['/v2/outlook/mailbox/connect']: {
     /**
-     * getSharedMailboxMappingById - Get Shared Mailbox Mapping by ID
+     * connectOutlookMailbox - connectOutlookMailbox
      * 
-     * Returns the mapping for a specific shared inbox.
-     * Useful to check if a specific inbox is connected to Outlook.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetSharedMailboxMappingById.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetSharedMailboxMappingById.Responses.$200>
-  }
-  ['/v2/outlook/test-webhook']: {
-    /**
-     * testWebhookGet - Test Webhook (GET)
-     * 
-     * Test endpoint for debugging Graph API webhook notifications via ngrok.
-     * Handles Microsoft Graph subscription validation requests by returning the validationToken.
-     * This is a PUBLIC endpoint with no authentication.
-     * 
-     */
-    'get'(
-      parameters?: Parameters<Paths.TestWebhookGet.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TestWebhookGet.Responses.$200 | Paths.TestWebhookGet.Responses.$202>
-    /**
-     * testWebhookPost - Test Webhook (POST)
-     * 
-     * Test endpoint for debugging Graph API webhook notifications via ngrok.
-     * Logs all incoming webhook payloads for debugging purposes.
-     * This is a PUBLIC endpoint with no authentication.
+     * Connects an Outlook mailbox:
+     *   1. Validates the user has access to the mailbox via Microsoft Graph API
+     *   2. Creates a mapping between the email address of the mailbox and the outlook connection
+     *   3. Enables the user to send emails as the mailbox's email address
      * 
      */
     'post'(
-      parameters?: Parameters<Paths.TestWebhookPost.QueryParameters> | null,
-      data?: Paths.TestWebhookPost.RequestBody,
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ConnectOutlookMailbox.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.TestWebhookPost.Responses.$200 | Paths.TestWebhookPost.Responses.$202>
+    ): OperationResponse<Paths.ConnectOutlookMailbox.Responses.$201>
+  }
+  ['/v2/outlook/mailbox/{email}/disconnect']: {
+    /**
+     * disconnectOutlookMailbox - Disconnect Outlook Mailbox
+     * 
+     * Disconnects a single Outlook mailbox by email address.
+     * Deletes the email address entity, Outlook email mapping, and Graph API subscriptions.
+     * Does not affect the tenant-level Outlook connection.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DisconnectOutlookMailbox.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/{email}/sync']: {
+    /**
+     * startMailboxSync - Start Mailbox Sync
+     * 
+     * Triggers an Outlook mailbox sync for the specified email address.
+     * Syncs existing emails (inbox + sent items) for the specified timeframe.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.StartMailboxSync.PathParameters> | null,
+      data?: Paths.StartMailboxSync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartMailboxSync.Responses.$202>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/status']: {
+    /**
+     * getMailboxSyncStatus - Get Mailbox Sync Status
+     * 
+     * Returns the current or latest sync status for the specified mailbox.
+     * Poll this endpoint to track sync progress.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMailboxSyncStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/retry']: {
+    /**
+     * retryMailboxSync - Retry Failed Messages
+     * 
+     * Retries failed messages from a previous sync execution.
+     * Only retries messages with status FAILED (not PERMANENTLY_FAILED).
+     * Messages that fail 3+ retries become PERMANENTLY_FAILED.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetryMailboxSync.PathParameters> | null,
+      data?: Paths.RetryMailboxSync.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  }
+  ['/v2/outlook/mailbox/mappings']: {
+    /**
+     * getConnectedOutlookEmails - getConnectedOutlookEmails
+     * 
+     * Returns all Outlook email addresses connected to the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
   }
   ['/v2/outlook/oauth/callback']: {
     /**
-     * outlookOAuthCallback - Outlook OAuth callback
+     * outlookOAuthCallback - outlookOAuthCallback
      * 
      * Exchanges authorization code for tokens and stores them.
      */
@@ -1374,7 +2231,21 @@ export interface PathsDictionary {
     /**
      * getSettings - getSettings
      * 
-     * Get all settings by type
+     * Retrieves settings of a specific type for the organization.
+     * 
+     * If an `id` is provided, returns only that specific setting.
+     * Otherwise, returns all settings of the specified type.
+     * 
+     * ## Setting Types
+     * 
+     * | Type | Description |
+     * |------|-------------|
+     * | `signature` | HTML email signatures |
+     * | `email_domain` | Custom email domains |
+     * | `email_address` | Sender email addresses |
+     * | `whitelist_email_address` | Addresses exempt from duplicate detection |
+     * | `restrict_duplicates_within` | Time window for duplicate email detection |
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetSettings.QueryParameters> | null,
@@ -1384,7 +2255,14 @@ export interface PathsDictionary {
     /**
      * addSetting - addSetting
      * 
-     * Add setting
+     * Creates a new setting of the specified type.
+     * 
+     * The setting type determines which fields are applicable:
+     * - **signature**: Requires `name`, `value` (plain text), and `html` (HTML content)
+     * - **email_domain**: Requires `value` (domain name)
+     * - **whitelist_email_address**: Requires `value` (email address)
+     * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1394,7 +2272,12 @@ export interface PathsDictionary {
     /**
      * deleteSetting - deleteSetting
      * 
-     * delete setting by ID and type
+     * Deletes a setting by its ID and type.
+     * 
+     * Both the `id` and `type` are required to uniquely identify the setting to delete.
+     * 
+     * **Warning**: This action cannot be undone.
+     * 
      */
     'delete'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1406,7 +2289,11 @@ export interface PathsDictionary {
     /**
      * updateSetting - updateSetting
      * 
-     * Update setting by ID
+     * Updates an existing setting identified by its ID.
+     * 
+     * Include the `type` field in the request body to specify which setting type
+     * is being updated. Only the fields provided will be updated.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.UpdateSetting.PathParameters> | null,
@@ -1418,7 +2305,14 @@ export interface PathsDictionary {
     /**
      * addDomain - addDomain
      * 
-     * Add domain
+     * Adds a custom email domain to the organization.
+     * 
+     * After adding the domain, you must:
+     * 1. Configure the required DNS records (provided in the response)
+     * 2. Verify the domain using the verification endpoint
+     * 
+     * Until verification is complete, the domain cannot be used for sending emails.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1428,19 +2322,41 @@ export interface PathsDictionary {
     /**
      * deleteDomain - deleteDomain
      * 
-     * Delete domain
+     * Removes a custom email domain from the organization.
+     * 
+     * **Warning**: Deleting a domain will prevent sending emails from any addresses
+     * using this domain. Existing email addresses on this domain should be removed
+     * or reassigned before deleting the domain.
+     * 
      */
     'delete'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.DeleteDomain.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteDomain.Responses.$204>
+    /**
+     * getDomains - getDomains
+     * 
+     * Retrieves all custom email domains for the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDomains.Responses.$200>
   }
   ['/v1/email-settings/domain/name-servers:verify']: {
     /**
      * verifyNameServers - verifyNameServers
      * 
-     * Verify name servers
+     * Verifies that the domain's name server (NS) records are correctly configured.
+     * 
+     * This check ensures that DNS resolution is properly set up for the domain
+     * before proceeding with full domain verification.
+     * 
+     * Run this verification after configuring NS records in your DNS provider.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1452,7 +2368,16 @@ export interface PathsDictionary {
     /**
      * verifyDomain - verifyDomain
      * 
-     * Verify domain
+     * Verifies ownership and configuration of a custom email domain.
+     * 
+     * Domain verification checks:
+     * - DNS TXT records for domain ownership
+     * - MX records for email routing
+     * - SPF records for sender authentication
+     * - DKIM records for email signing
+     * 
+     * Once verified, the domain can be used to create email addresses and send emails.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1464,7 +2389,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
+export type ConnectedOutlookEmail = Components.Schemas.ConnectedOutlookEmail;
 export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;
 export type CreateSharedInboxPayload = Components.Schemas.CreateSharedInboxPayload;
 export type Domain = Components.Schemas.Domain;
@@ -1473,6 +2398,12 @@ export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type InboxBucketResponse = Components.Schemas.InboxBucketResponse;
+export type MailboxSyncFolderStatuses = Components.Schemas.MailboxSyncFolderStatuses;
+export type MailboxSyncStatus = Components.Schemas.MailboxSyncStatus;
+export type MailboxSyncStatuses = Components.Schemas.MailboxSyncStatuses;
+export type MailboxSyncTimeframePeriods = Components.Schemas.MailboxSyncTimeframePeriods;
+export type OutlookConnectionError = Components.Schemas.OutlookConnectionError;
+export type OutlookConnectionStatus = Components.Schemas.OutlookConnectionStatus;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
 export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;
@@ -1481,7 +2412,6 @@ export type SettingMeta = Components.Schemas.SettingMeta;
 export type SettingType = Components.Schemas.SettingType;
 export type SettingsResponse = Components.Schemas.SettingsResponse;
 export type SharedInboxResponse = Components.Schemas.SharedInboxResponse;
-export type SharedMailboxMapping = Components.Schemas.SharedMailboxMapping;
 export type SignatureSetting = Components.Schemas.SignatureSetting;
 export type UpdateEmailAddressPayload = Components.Schemas.UpdateEmailAddressPayload;
 export type UpdateSharedInboxPayload = Components.Schemas.UpdateSharedInboxPayload;

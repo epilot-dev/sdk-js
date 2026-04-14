@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -710,7 +708,7 @@ declare namespace Components {
              */
             DefaultAddressFields;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -726,7 +724,7 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
         /**
          * Automation entity
          */
@@ -2613,6 +2611,18 @@ declare namespace Components {
              * This capability should only be active when all the settings have the correct value
              */
             settings_flag?: SettingFlag[];
+            /**
+             * Schema-specific configuration for the capability
+             */
+            schemas?: {
+                [name: string]: any;
+                /**
+                 * Entity schema slug
+                 * example:
+                 * contact
+                 */
+                schema: string;
+            }[];
         }
         /**
          * a readonly computed ID for the entity capability including schema slug and the capability ID
@@ -2746,6 +2756,18 @@ declare namespace Components {
              * This capability should only be active when all the settings have the correct value
              */
             settings_flag?: SettingFlag[];
+            /**
+             * Schema-specific configuration for the capability
+             */
+            schemas?: {
+                [name: string]: any;
+                /**
+                 * Entity schema slug
+                 * example:
+                 * contact
+                 */
+                schema: string;
+            }[];
             /**
              * example:
              * contact:97644baa-083f-4e49-9188-fcff2ecaad7d
@@ -3443,6 +3465,22 @@ declare namespace Components {
                     _manifest?: string /* uuid */[] | null;
                 };
             };
+            /**
+             * Internal property for workflow origin tracking and infinite loop prevention.
+             * Populated when an entity update originates from a workflow execution.
+             * This allows downstream automation services to prevent circular triggering.
+             *
+             */
+            _workflow_origin?: {
+                /**
+                 * The ID of the workflow execution that triggered this entity update
+                 */
+                workflow_exec_id?: string;
+                /**
+                 * The flow template ID - used to detect and prevent circular triggering
+                 */
+                flow_template_id?: string;
+            };
         }
         /**
          * The user / organization owning this entity.
@@ -3690,6 +3728,10 @@ declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -3846,6 +3888,18 @@ declare namespace Components {
                 id?: string;
                 type?: string;
             };
+            /**
+             * Indicates this schema is currently frozen. Present when the returned version is the frozen version.
+             */
+            frozen?: boolean;
+            /**
+             * Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.
+             */
+            latest?: boolean;
+            /**
+             * Indicates this is a truncated summary schema (attributes trimmed to summary_attributes only, no capabilities or group_settings)
+             */
+            _summary?: boolean;
             slug: /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -4070,6 +4124,10 @@ declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -4755,6 +4813,12 @@ declare namespace Components {
              */
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
+            /**
+             * The maximum file size in bytes. Used to derive file_size and file_size_unit in the UI.
+             * example:
+             * 5000000
+             */
+            file_size_bytes?: number;
         }
         export interface GenerateEntityTableAIFiltersRequest {
             /**
@@ -9475,6 +9539,217 @@ declare namespace Components {
             display_as?: string;
         }
         /**
+         * Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row.
+         */
+        export interface TableAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            type: "table";
+            /**
+             * Column definitions for the table
+             */
+            columns?: {
+                /**
+                 * The column identifier (used as object key in row data)
+                 */
+                name: string;
+                /**
+                 * Display label for the column header
+                 */
+                label: string;
+                /**
+                 * The data type for cells in this column
+                 */
+                type?: "string" | "number" | "date" | "boolean";
+                /**
+                 * Optional column width (e.g., "100px", "20%")
+                 */
+                width?: string;
+                /**
+                 * Whether this column is required for each row
+                 */
+                required?: boolean;
+                /**
+                 * When true, the row is rendered in bold (only applies in transposed mode)
+                 */
+                bold?: boolean;
+            }[];
+            /**
+             * Minimum number of rows required
+             */
+            min_rows?: number;
+            /**
+             * Maximum number of rows allowed (or maximum periods when transposed)
+             */
+            max_rows?: number;
+            /**
+             * Enable transposed layout where rows become metrics and columns become periods
+             */
+            transposed?: boolean;
+            /**
+             * Configuration for column headers in transposed mode
+             */
+            column_header?: {
+                /**
+                 * Header label pattern with {{i}} as index placeholder (e.g., "Year {{i}}")
+                 * example:
+                 * Year {{i}}
+                 */
+                template?: string;
+                /**
+                 * Starting index value for the template placeholder
+                 */
+                start?: number;
+            };
+        }
+        /**
          * Tags
          */
         export interface TagsAttribute {
@@ -10994,6 +11269,37 @@ declare namespace Paths {
             Components.Responses.TooManyRequestsError;
         }
     }
+    namespace FreezeSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export interface RequestBody {
+            /**
+             * Freeze to a specific version ID. Defaults to the current version.
+             */
+            version_id?: string; // uuid
+        }
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace GetActivity {
         namespace Parameters {
             export type Id = /**
@@ -11904,6 +12210,7 @@ declare namespace Paths {
     namespace GetSchema {
         namespace Parameters {
             export type Id = /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            export type Latest = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -11916,6 +12223,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             id?: Parameters.Id;
+            latest?: Parameters.Latest;
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
@@ -12120,6 +12428,10 @@ declare namespace Paths {
                  * Pagination: Whether more drafts are available
                  */
                 drafts_more?: boolean;
+                /**
+                 * The version ID that is currently frozen, if any
+                 */
+                frozen_version?: string; // uuid
             }
         }
     }
@@ -12357,11 +12669,36 @@ declare namespace Paths {
     namespace ListSchemas {
         namespace Parameters {
             export type Exclude = string[];
+            export type Include = string[];
+            export type Latest = boolean;
             export type Unpublished = boolean;
         }
         export interface QueryParameters {
             unpublished?: Parameters.Unpublished;
+            latest?: Parameters.Latest;
             exclude?: Parameters.Exclude;
+            include?: Parameters.Include;
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem[];
+            }
+        }
+    }
+    namespace ListSchemasV2 {
+        namespace Parameters {
+            export type Exclude = string[];
+            export type Full = boolean;
+            export type Include = string[];
+            export type Latest = boolean;
+            export type Unpublished = boolean;
+        }
+        export interface QueryParameters {
+            full?: Parameters.Full;
+            unpublished?: Parameters.Unpublished;
+            latest?: Parameters.Latest;
+            exclude?: Parameters.Exclude;
+            include?: Parameters.Include;
         }
         namespace Responses {
             export interface $200 {
@@ -12920,6 +13257,7 @@ declare namespace Paths {
              * false
              */
             export type Archived = boolean;
+            export type ExcludeTypes = ("relation" | "schema" | "system") | ("relation" | "schema" | "system")[];
             export type IncludeArchived = /**
              * Whether to include archived labels in the search results
              * - `true`: include archived labels
@@ -12950,6 +13288,7 @@ declare namespace Paths {
              */
             Parameters.Archived;
             include_archived?: Parameters.IncludeArchived;
+            exclude_types?: Parameters.ExcludeTypes;
         }
         export interface RequestBody {
             classificationIds?: Components.Schemas.ClassificationIdOrPattern[];
@@ -12993,6 +13332,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace UnfreezeSchema {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
     namespace UpdateClassificationsForTaxonomy {
         namespace Parameters {
             export type TaxonomySlug = string;
@@ -13005,9 +13369,11 @@ declare namespace Paths {
             export interface $200 {
                 created?: Components.Schemas.TaxonomyClassification[];
                 updated?: Components.Schemas.TaxonomyClassification[];
-                deleted?: {
-                    [key: string]: any;
-                };
+                deleted?: /**
+                 * example:
+                 * taxonomy-slug:classification-slug
+                 */
+                Components.Schemas.ClassificationId[];
             }
             export type $404 = /**
              * A generic error returned by the API
@@ -13565,7 +13931,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * listSchemas - listSchemas
@@ -13578,9 +13943,25 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSchemas.Responses.$200>
   /**
+   * listSchemasV2 - listSchemasV2
+   * 
+   * Get the latest versions of all schemas.
+   * Returns summary schemas by default (only summary attributes, no capabilities).
+   * Use ?full=true for complete schemas.
+   * 
+   */
+  'listSchemasV2'(
+    parameters?: Parameters<Paths.ListSchemasV2.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSchemasV2.Responses.$200>
+  /**
    * getSchema - getSchema
    * 
-   * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
+   * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
+   * Pass ?latest=true to get the latest version when the schema is frozen.
+   * Pass ?id= to get a specific version by ID.
+   * 
    */
   'getSchema'(
     parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
@@ -13590,7 +13971,9 @@ export interface OperationMethods {
   /**
    * putSchema - putSchema
    * 
-   * Create or update a schema with a new version
+   * Create or update a schema with a new version.
+   * When the schema is frozen, writes update the latest version without affecting the frozen version.
+   * 
    */
   'putSchema'(
     parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
@@ -13637,6 +14020,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  /**
+   * freezeSchema - freezeSchema
+   * 
+   * Freeze a schema at its current version, or at a specific version.
+   * When frozen, getSchema returns the frozen version by default.
+   * New edits via putSchema update the latest version without affecting the frozen version.
+   * 
+   */
+  'freezeSchema'(
+    parameters?: Parameters<Paths.FreezeSchema.PathParameters> | null,
+    data?: Paths.FreezeSchema.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.FreezeSchema.Responses.$200>
+  /**
+   * unfreezeSchema - unfreezeSchema
+   * 
+   * Unfreeze a schema. Promotes the latest version to the current version for all users.
+   * 
+   */
+  'unfreezeSchema'(
+    parameters?: Parameters<Paths.UnfreezeSchema.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnfreezeSchema.Responses.$200>
   /**
    * listAvailableCapabilities - listAvailableCapabilities
    * 
@@ -14066,6 +14473,7 @@ export interface OperationMethods {
    * 
    * - All activites are published as events on the event bus
    * - Entity mutations are always part of an activity
+   * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
    * 
    */
   'createActivity'(
@@ -14680,11 +15088,29 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSchemas.Responses.$200>
   }
+  ['/v2/entity/schemas']: {
+    /**
+     * listSchemasV2 - listSchemasV2
+     * 
+     * Get the latest versions of all schemas.
+     * Returns summary schemas by default (only summary attributes, no capabilities).
+     * Use ?full=true for complete schemas.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSchemasV2.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSchemasV2.Responses.$200>
+  }
   ['/v1/entity/schemas/{slug}']: {
     /**
      * getSchema - getSchema
      * 
-     * By default gets the latest version of the Schema and to get the specific version of schema pass the id.
+     * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
+     * Pass ?latest=true to get the latest version when the schema is frozen.
+     * Pass ?id= to get a specific version by ID.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetSchema.QueryParameters & Paths.GetSchema.PathParameters> | null,
@@ -14694,7 +15120,9 @@ export interface PathsDictionary {
     /**
      * putSchema - putSchema
      * 
-     * Create or update a schema with a new version
+     * Create or update a schema with a new version.
+     * When the schema is frozen, writes update the latest version without affecting the frozen version.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.PutSchema.QueryParameters & Paths.PutSchema.PathParameters> | null,
@@ -14747,6 +15175,34 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemaVersions.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/freeze']: {
+    /**
+     * freezeSchema - freezeSchema
+     * 
+     * Freeze a schema at its current version, or at a specific version.
+     * When frozen, getSchema returns the frozen version by default.
+     * New edits via putSchema update the latest version without affecting the frozen version.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.FreezeSchema.PathParameters> | null,
+      data?: Paths.FreezeSchema.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.FreezeSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/unfreeze']: {
+    /**
+     * unfreezeSchema - unfreezeSchema
+     * 
+     * Unfreeze a schema. Promotes the latest version to the current version for all users.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnfreezeSchema.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnfreezeSchema.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/capabilities/available']: {
     /**
@@ -15208,6 +15664,7 @@ export interface PathsDictionary {
      * 
      * - All activites are published as events on the event bus
      * - Entity mutations are always part of an activity
+     * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
      * 
      */
     'post'(
@@ -15884,7 +16341,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
 export type ActivityId = Components.Schemas.ActivityId;
@@ -16004,6 +16460,7 @@ export type SettingFlag = Components.Schemas.SettingFlag;
 export type StatusAttribute = Components.Schemas.StatusAttribute;
 export type SummaryAttribute = Components.Schemas.SummaryAttribute;
 export type SummaryField = Components.Schemas.SummaryField;
+export type TableAttribute = Components.Schemas.TableAttribute;
 export type TagsAttribute = Components.Schemas.TagsAttribute;
 export type Taxonomy = Components.Schemas.Taxonomy;
 export type TaxonomyBulkJob = Components.Schemas.TaxonomyBulkJob;

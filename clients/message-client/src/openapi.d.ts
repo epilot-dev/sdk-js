@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -121,6 +119,16 @@ declare namespace Components {
              * ]
              */
             ids: string[];
+            /**
+             * Assignable IDs to assign the threads to
+             */
+            assign_to?: string[];
+            /**
+             * Inbox ID to move the threads to
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            inbox_id?: string;
             /**
              * The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.
              * example:
@@ -291,6 +299,10 @@ declare namespace Components {
         }
         export interface MessageRequestParams {
             [name: string]: any;
+            /**
+             * Whether the thread is marked as Done immediately after sending the message
+             */
+            complete_thread?: boolean;
             /**
              * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.
              *
@@ -664,7 +676,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00Z
+             * 2024-01-01T00:00:00.000Z
              */
             timestamp: string;
         }
@@ -733,6 +745,48 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace AssignUsersV2 {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * User IDs of users to add to thread
+             */
+            add: string[];
+            /**
+             * User IDs of users to remove from thread
+             */
+            remove: string[];
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace BulkAssignThreads {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace BulkMoveThreads {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $200 {
             }
             export interface $403 {
             }
@@ -1069,6 +1123,30 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetMessageEml {
+        namespace Parameters {
+            /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 4d74976d-fb64-47fd-85e2-65eea140f5eb
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $302 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace GetMessageV2 {
         namespace Parameters {
             /**
@@ -1286,6 +1364,12 @@ declare namespace Paths {
                  * 1
                  */
                 unassigned?: number;
+                /**
+                 * Total of spam messages
+                 * example:
+                 * 3
+                 */
+                spam?: number;
             }
             export interface $403 {
             }
@@ -2006,6 +2090,38 @@ declare namespace Paths {
             }
         }
     }
+    namespace SpamMessage {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace SpamThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace ThreadBulkActionsDelete {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
@@ -2163,6 +2279,38 @@ declare namespace Paths {
             export interface $409 {
             }
             export interface $500 {
+            }
+        }
+    }
+    namespace UnspamMessage {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace UnspamThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -2431,7 +2579,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * updateMessage - updateMessage
@@ -2473,6 +2620,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMessage.Responses.$204>
+  /**
+   * getMessageEml - getMessageEml
+   * 
+   * Download a message as an EML file.
+   * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+   * 
+   */
+  'getMessageEml'(
+    parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<any>
   /**
    * searchMessages - searchMessages
    * 
@@ -2677,6 +2836,66 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UntrashThread.Responses.$200>
   /**
+   * spamThread - spamThread
+   * 
+   * Mark a thread as spam
+   */
+  'spamThread'(
+    parameters?: Parameters<Paths.SpamThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SpamThread.Responses.$200>
+  /**
+   * unspamThread - unspamThread
+   * 
+   * Remove spam marking from a thread
+   */
+  'unspamThread'(
+    parameters?: Parameters<Paths.UnspamThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnspamThread.Responses.$200>
+  /**
+   * spamMessage - spamMessage
+   * 
+   * Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+   */
+  'spamMessage'(
+    parameters?: Parameters<Paths.SpamMessage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SpamMessage.Responses.$204>
+  /**
+   * unspamMessage - unspamMessage
+   * 
+   * Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+   */
+  'unspamMessage'(
+    parameters?: Parameters<Paths.UnspamMessage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnspamMessage.Responses.$204>
+  /**
+   * bulkMoveThreads - bulkMoveThreads
+   * 
+   * Move many threads to a different inbox
+   */
+  'bulkMoveThreads'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkMoveThreads.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkMoveThreads.Responses.$200>
+  /**
+   * bulkAssignThreads - bulkAssignThreads
+   * 
+   * Assign many threads
+   */
+  'bulkAssignThreads'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkAssignThreads.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkAssignThreads.Responses.$200>
+  /**
    * threadBulkActionsRead - threadBulkActionsRead
    * 
    * Perform a bulk action of marking an array of thread ids as read
@@ -2839,6 +3058,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignUsers.Responses.$204>
   /**
+   * assignUsersV2 - assignUsersV2
+   * 
+   * Assign users to thread.
+   * 
+   */
+  'assignUsersV2'(
+    parameters?: Parameters<Paths.AssignUsersV2.PathParameters> | null,
+    data?: Paths.AssignUsersV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AssignUsersV2.Responses.$204>
+  /**
    * pinThread - Pin a single thread
    * 
    * Pin a single thread
@@ -2944,6 +3174,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMessage.Responses.$204>
+  }
+  ['/v1/message/messages/{id}/eml']: {
+    /**
+     * getMessageEml - getMessageEml
+     * 
+     * Download a message as an EML file.
+     * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<any>
   }
   ['/v1/message/messages:search']: {
     /**
@@ -3186,6 +3430,78 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UntrashThread.Responses.$200>
   }
+  ['/v1/message/threads/{id}/spam']: {
+    /**
+     * spamThread - spamThread
+     * 
+     * Mark a thread as spam
+     */
+    'post'(
+      parameters?: Parameters<Paths.SpamThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SpamThread.Responses.$200>
+  }
+  ['/v1/message/threads/{id}/unspam']: {
+    /**
+     * unspamThread - unspamThread
+     * 
+     * Remove spam marking from a thread
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnspamThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnspamThread.Responses.$200>
+  }
+  ['/v1/message/messages/{id}/spam']: {
+    /**
+     * spamMessage - spamMessage
+     * 
+     * Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SpamMessage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SpamMessage.Responses.$204>
+  }
+  ['/v1/message/messages/{id}/unspam']: {
+    /**
+     * unspamMessage - unspamMessage
+     * 
+     * Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnspamMessage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnspamMessage.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:move']: {
+    /**
+     * bulkMoveThreads - bulkMoveThreads
+     * 
+     * Move many threads to a different inbox
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkMoveThreads.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkMoveThreads.Responses.$200>
+  }
+  ['/v1/message/threads/bulk:assign']: {
+    /**
+     * bulkAssignThreads - bulkAssignThreads
+     * 
+     * Assign many threads
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkAssignThreads.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkAssignThreads.Responses.$200>
+  }
   ['/v1/message/threads/bulk:read']: {
     /**
      * threadBulkActionsRead - threadBulkActionsRead
@@ -3380,6 +3696,19 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignUsers.Responses.$204>
   }
+  ['/v2/message/threads/{id}/assign:users']: {
+    /**
+     * assignUsersV2 - assignUsersV2
+     * 
+     * Assign users to thread.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AssignUsersV2.PathParameters> | null,
+      data?: Paths.AssignUsersV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AssignUsersV2.Responses.$204>
+  }
   ['/v1/message/threads/{id}:pin']: {
     /**
      * pinThread - Pin a single thread
@@ -3451,7 +3780,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type Address = Components.Schemas.Address;
 export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;

@@ -14,6 +14,7 @@ import type {
   UpdateConfigOptions,
   EntityContext,
   ActionConfig,
+  PageContext,
   MessageHandler,
   VisibilityHandler,
   Unsubscribe,
@@ -40,11 +41,7 @@ const DEFAULT_TIMEOUT = 5000;
  * Send a request and wait for a response with timeout handling.
  * @internal
  */
-function request<T>(
-  event: string,
-  payload: Record<string, unknown> = {},
-  options: RequestOptions = {},
-): Promise<T> {
+function request<T>(event: string, payload: Record<string, unknown> = {}, options: RequestOptions = {}): Promise<T> {
   const { timeout = DEFAULT_TIMEOUT } = options;
 
   return new Promise((resolve, reject) => {
@@ -104,11 +101,7 @@ export async function initialize(options: InitOptions = {}): Promise<AppBridgeSe
 
   const contentHeight = options.contentHeight ?? document.body.scrollHeight;
 
-  initPromise = request<AppBridgeSession>(
-    'app-bridge:init',
-    { contentHeight },
-    { timeout: options.timeout },
-  )
+  initPromise = request<AppBridgeSession>('app-bridge:init', { contentHeight }, { timeout: options.timeout })
     .then((result) => {
       session = result;
       return result;
@@ -244,6 +237,81 @@ export function onVisibilityChange(handler: VisibilityHandler): Unsubscribe {
 }
 
 // =============================================================================
+// Page Surface API
+// =============================================================================
+
+/**
+ * Get the page context for custom page surfaces.
+ *
+ * Returns context including the page slug, sub-path, and full path.
+ *
+ * @param options - Request options
+ * @returns Page context data
+ *
+ * @example
+ * ```typescript
+ * import { initialize, getPageContext } from '@epilot/app-bridge';
+ *
+ * await initialize();
+ *
+ * const { slug, subPath, path } = await getPageContext();
+ * console.log(`Page: ${slug}, sub-path: ${subPath}`);
+ * ```
+ */
+export async function getPageContext(options?: RequestOptions): Promise<PageContext> {
+  const response = await request<{ context: PageContext }>('init-page-context', {}, options);
+  return response.context;
+}
+
+/**
+ * Navigate to a sub-path within the current page surface.
+ * Updates the parent frame's URL via history.pushState.
+ *
+ * @param subPath - Sub-path to navigate to (e.g., "/connections/new")
+ *
+ * @example
+ * ```typescript
+ * import { navigate } from '@epilot/app-bridge';
+ *
+ * // Navigate to /app/zapier/connections/new
+ * navigate('/connections/new');
+ *
+ * // Navigate to root
+ * navigate('/');
+ * ```
+ */
+export function navigate(subPath: string): void {
+  sendMessageToParent('navigate', { subPath });
+}
+
+/**
+ * Subscribe to location changes triggered by browser navigation (back/forward).
+ *
+ * The parent app sends location-change events when the browser URL changes
+ * due to popstate (back/forward buttons).
+ *
+ * @param handler - Callback invoked with the new sub-path
+ * @returns Unsubscribe function
+ *
+ * @example
+ * ```typescript
+ * import { onLocationChange } from '@epilot/app-bridge';
+ *
+ * const unsubscribe = onLocationChange((subPath) => {
+ *   router.navigate(subPath);
+ * });
+ *
+ * // Later: cleanup
+ * unsubscribe();
+ * ```
+ */
+export function onLocationChange(handler: (subPath: string) => void): Unsubscribe {
+  return subscribeToParentMessages('location-change', (msgEvent: MessageEvent) => {
+    handler(msgEvent.data?.subPath ?? '/');
+  });
+}
+
+// =============================================================================
 // Action Config Surface API
 // =============================================================================
 
@@ -271,9 +339,7 @@ export function onVisibilityChange(handler: VisibilityHandler): Unsubscribe {
  * console.log(config.custom_action_config?.webhookUrl);
  * ```
  */
-export async function getActionConfig<T = Record<string, unknown>>(
-  options?: RequestOptions,
-): Promise<ActionConfig<T>> {
+export async function getActionConfig<T = Record<string, unknown>>(options?: RequestOptions): Promise<ActionConfig<T>> {
   const response = await request<{ config: ActionConfig<T> }>('init-action-config', {}, options);
   return response.config;
 }
@@ -301,10 +367,7 @@ export async function getActionConfig<T = Record<string, unknown>>(
  * );
  * ```
  */
-export function updateActionConfig<T = Record<string, unknown>>(
-  config: T,
-  options?: UpdateConfigOptions,
-): void {
+export function updateActionConfig<T = Record<string, unknown>>(config: T, options?: UpdateConfigOptions): void {
   sendMessageToParent('update-action-config', {
     config,
     wait_for_callback: options?.waitForCallback,
@@ -409,10 +472,7 @@ export interface AuthorizableClient {
  * authorizeClient(client, getSession());
  * ```
  */
-export function authorizeClient(
-  client: AuthorizableClient,
-  sessionOrToken: AppBridgeSession | string,
-): void {
+export function authorizeClient(client: AuthorizableClient, sessionOrToken: AppBridgeSession | string): void {
   const token = typeof sessionOrToken === 'string' ? sessionOrToken : sessionOrToken.token;
 
   client.defaults.headers.common = {

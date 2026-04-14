@@ -33,6 +33,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -69,6 +70,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -89,6 +91,19 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/organization/feature-settings": {
+      "get": {
+        "operationId": "getOrganizationFeatureSettings",
+        "responses": {}
+      }
+    },
+    "/v2/feature-settings": {
+      "get": {
+        "operationId": "getFeatureSettings",
+        "deprecated": true,
         "responses": {}
       }
     }

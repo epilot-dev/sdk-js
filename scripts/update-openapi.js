@@ -6,8 +6,8 @@
  * npm usage: npm run openapi <path-to-openapi.yml>
  * direct usage: node ./update-openapi.js <default_source> <source>
  */
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 
 const defaultSrc = process.argv[2];
 const overrideSrc = process.argv[3];
@@ -20,15 +20,20 @@ const RUNTIME_FILE = './src/openapi-runtime.json';
 /**
  * Deduplicates the servers array in an OpenAPI spec by URL.
  * Ensures at least one server exists using the fallback URL if needed.
+ * Restores server variables stripped by the openapicmd --server flag.
  */
-function deduplicateServers(spec, fallbackServerURL) {
+function deduplicateServers(spec, fallbackServerURL, serverVariablesMap = {}) {
   const servers = spec.servers || [];
   const seen = new Set();
   const uniqueServers = [];
 
   for (const server of servers) {
-    if (server.url && !seen.has(server.url)) {
+    if (server?.url && !seen.has(server.url)) {
       seen.add(server.url);
+      // restore variables stripped by --server flag
+      if (serverVariablesMap[server.url]) {
+        server.variables = serverVariablesMap[server.url];
+      }
       uniqueServers.push(server);
     }
   }
@@ -45,7 +50,12 @@ function deduplicateServers(spec, fallbackServerURL) {
 // get server from default external source
 console.log(`===> Reading server URL from ${defaultSrc}...`);
 const definitionJSON = execSync(`${OPENAPICMD} read --json ${defaultSrc}`).toString();
-const serverURL = JSON.parse(definitionJSON).servers?.[0]?.url;
+const originalServers = JSON.parse(definitionJSON).servers || [];
+const serverURL = originalServers[0]?.url;
+// build map of url → variables to restore after openapicmd --server strips them
+const serverVariablesMap = Object.fromEntries(
+  originalServers.filter((s) => s?.url && s?.variables).map((s) => [s.url, s.variables]),
+);
 console.log(`=====>> URL: ${serverURL}`);
 
 // save full openapi.json from source
@@ -66,8 +76,8 @@ execSync(
 // deduplicate servers array (openapicmd --server may add duplicates if source already has servers)
 console.log('===> Deduplicating servers...');
 const spec = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8'));
-const deduplicatedSpec = deduplicateServers(spec, serverURL);
-fs.writeFileSync(OUTPUT_FILE, JSON.stringify(deduplicatedSpec, null, 2) + '\n');
+const deduplicatedSpec = deduplicateServers(spec, serverURL, serverVariablesMap);
+fs.writeFileSync(OUTPUT_FILE, `${JSON.stringify(deduplicatedSpec, null, 2)}\n`);
 
 // store optimized runtime version for client
 console.log('===> Generating openapi-runtime.json');

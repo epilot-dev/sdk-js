@@ -7,3 +7,5 @@ dist
 **/*.DS_Store
 .prototools
 .npmrc
+.epilot-docs
+.claude

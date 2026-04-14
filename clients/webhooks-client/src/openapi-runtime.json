@@ -8,6 +8,13 @@
     "/v1/webhooks/.well-known/public-key": {
       "get": {
         "operationId": "getPublicKey",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "orgId",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },

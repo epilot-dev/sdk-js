@@ -1,0 +1,1407 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "version": "2.3.0",
+    "title": "Notes API",
+    "description": "Facade API Backend for Epilot Notes feature"
+  },
+  "servers": [
+    {
+      "url": "https://notes.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Notes"
+    },
+    {
+      "name": "Pinning"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/note": {
+      "post": {
+        "operationId": "createNote",
+        "summary": "createNote",
+        "description": "Creates a new Note entry",
+        "tags": ["Notes"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotePostRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}": {
+      "get": {
+        "operationId": "getNote",
+        "summary": "getNote",
+        "description": "Retrieves a single Note entry based on it's Entity ID",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to retrieve",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to retrieve"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "hydrate",
+            "description": "Whether to hydrate the Note's relation attributes",
+            "schema": {
+              "type": "boolean",
+              "description": "Whether to hydrate the Note's relation attributes"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteGetRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchNote",
+        "summary": "patchNote",
+        "description": "Updates an existing Note entry",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to update",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to update"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotePatchRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateNote",
+        "summary": "updateNote",
+        "description": "Updates an existing Note entry",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to update",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to update"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotePutRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteNote",
+        "summary": "deleteNote",
+        "description": "Deletes a single Note entry based on it's Entity ID",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to delete",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to delete"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the deleted Note entity"
+          }
+        }
+      }
+    },
+    "/v1/notes:search": {
+      "post": {
+        "operationId": "searchNotesByContext",
+        "summary": "searchNotesByContext",
+        "description": "Search for a paginated list of Notes based on one or more contexts",
+        "tags": ["Notes"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteSearchByContextRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesSearchRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notes/{entity_id}": {
+      "get": {
+        "operationId": "getNotesByContext",
+        "summary": "getNotesByContext",
+        "deprecated": true,
+        "description": "Given a `context_type`, returns a list of Notes that belong to that context within the specified `id`. \nThis endpoint is deprecated but will be kept for backwards compatibility. Please use the `searchNotesByContext` endpoint instead.",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The ID of the Contextual Entity from where to retrieve Notes",
+            "schema": {
+              "type": "string",
+              "description": "The ID of the Contextual Entity from where to retrieve Notes"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "contexts",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "$ref": "#/components/schemas/ContextType"
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": ["type", "id"]
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "The index of the first Note to return in this query",
+            "schema": {
+              "type": "number",
+              "default": 0,
+              "description": "The index of the first Note to return in this query"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "The number of Note entries to return in this query",
+            "schema": {
+              "type": "number",
+              "default": 10,
+              "description": "The number of Note entries to return in this query"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with Note content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesSearchRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/pin": {
+      "post": {
+        "operationId": "pinNote",
+        "summary": "pinNote",
+        "description": "Pins a single Note entry based on it's Entity ID",
+        "tags": ["Pinning"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to pin",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to pin"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the pinned Note entity"
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/context": {
+      "get": {
+        "operationId": "getNoteContexts",
+        "summary": "getNoteContexts",
+        "description": "Gets all the Entity and non-Entity records the Note is contextually attached to",
+        "tags": ["Notes"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to get contexts for",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to get contexts for"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the contexts for the Note Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NoteContexts"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reaction": {
+      "post": {
+        "operationId": "addNoteReaction",
+        "summary": "addNoteReaction",
+        "description": "Adds an emoji reaction to a note",
+        "tags": ["Reactions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to add reaction to",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to add reaction to"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reaction/{emoji_shortcode}": {
+      "delete": {
+        "operationId": "removeNoteReaction",
+        "summary": "removeNoteReaction",
+        "description": "Removes an emoji reaction from a note",
+        "tags": ["Reactions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to remove reaction from",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to remove reaction from"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "emoji_shortcode",
+            "description": "The emoji to remove from the note",
+            "schema": {
+              "type": "string",
+              "description": "The emoji to remove from the note"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/reactions/toggle": {
+      "post": {
+        "operationId": "toggleNoteReactions",
+        "summary": "toggleNoteReactions",
+        "description": "Toggles multiple emoji reactions on a note. If a user has already reacted with an emoji, it removes the reaction. If a user hasn't reacted with an emoji, it adds the reaction.",
+        "tags": ["Reactions"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to toggle reactions on",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to toggle reactions on"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToggleReactionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with the updated note reactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "NotePostRequestBody": {
+        "type": "object",
+        "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "The Entity ID of the Entity this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.",
+            "deprecated": true
+          },
+          "parent_id": {
+            "type": "string",
+            "description": "The Entity ID of the Note's parent Note. If supplied, the Note will be a comment to the parent Note. Be aware that Notes can only have comments one level deep"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            },
+            "description": "The contexts to which this Note will be related to"
+          },
+          "additional_contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            },
+            "description": "Any additional non-entity contexts to which this Note will be related to. This option has been deprecated since 2.1.0. Please use `contexts` instead.",
+            "deprecated": true
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of File Entity IDs attached to the Note"
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          }
+        }
+      },
+      "ContextType": {
+        "type": "string",
+        "enum": ["workflow_execution", "workflow_task", "workflow_configuration", "journey_configuration", "entity"]
+      },
+      "NoteEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "context_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "parent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/CreatedByType"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": ["type"]
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          }
+        },
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "_org": {
+            "type": "string",
+            "description": "ID of the Organization that owns this Note"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "The Entity schema of this Note"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was created",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "_created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "_acl": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Access Control List for this Note entry"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "org_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                }
+              },
+              "required": ["org_id", "user_id"]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          }
+        },
+        "required": ["_id"],
+        "description": "Base Entity schema"
+      },
+      "CreatedByType": {
+        "type": "string",
+        "enum": ["user", "group"]
+      },
+      "NoteGetRequestResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "context_entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "parent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/CreatedByType"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": ["type"]
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          }
+        }
+      },
+      "NotePatchRequestBody": {
+        "type": "object",
+        "properties": {
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "attachments": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["entity_id"]
+                }
+              }
+            },
+            "description": "The Note's parent Note"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NonHydratedNoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["user", "group"]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": ["type"]
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          }
+        }
+      },
+      "NonHydratedNoteEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Entity"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "context_entities": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["entity_id"]
+                }
+              }
+            },
+            "required": ["$relation"]
+          },
+          "parent": {
+            "$ref": "#/components/schemas/NoteEntityParent"
+          },
+          "attachments": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["entity_id"]
+                }
+              }
+            },
+            "description": "The Note's parent Note"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NonHydratedNoteEntity"
+            }
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["user", "group"]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": ["type"]
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          }
+        },
+        "required": ["context_entities"],
+        "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are not hydrated in place."
+      },
+      "NoteEntityParent": {
+        "type": "object",
+        "properties": {
+          "$relation": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
+                }
+              },
+              "required": ["entity_id"]
+            }
+          }
+        },
+        "description": "The Note's parent Note"
+      },
+      "NotePutRequestBody": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "_org": {
+            "type": "string",
+            "description": "ID of the Organization that owns this Note"
+          },
+          "_schema": {
+            "type": "string",
+            "description": "The Entity schema of this Note"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was created",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
+          "_created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "description": "The Entity ID of the User that created this Note"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags associated with this Note"
+          },
+          "_acl": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Access Control List for this Note entry"
+          },
+          "_owners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "org_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                }
+              },
+              "required": ["org_id", "user_id"]
+            }
+          },
+          "type": {
+            "type": "string",
+            "description": "Entity ID of the Note entry"
+          },
+          "context_entities": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["entity_id"]
+                }
+              }
+            },
+            "required": ["$relation"]
+          },
+          "parent": {
+            "$ref": "#/components/schemas/NoteEntityParent"
+          },
+          "attachments": {
+            "type": "object",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["entity_id"]
+                }
+              }
+            },
+            "description": "The Note's parent Note"
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the Note"
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "pinned_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was pinned",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["user", "group"]
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "org_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              }
+            },
+            "required": ["type"]
+          },
+          "read_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of user IDs who have read this note"
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          }
+        }
+      },
+      "NoteSearchByContextRequestBody": {
+        "type": "object",
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/ContextType"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["type", "id"]
+            }
+          },
+          "from": {
+            "type": "number",
+            "default": 0,
+            "description": "The index of the first Note to return in this query"
+          },
+          "size": {
+            "type": "number",
+            "default": 10,
+            "description": "The number of Note entries to return in this query"
+          }
+        },
+        "required": ["contexts"]
+      },
+      "NotesSearchRequestResponse": {
+        "type": "object",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "The number of Note entries returned in this query"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NoteEntity"
+            },
+            "description": "The Note entries returned in this query"
+          }
+        },
+        "required": ["results"]
+      },
+      "NoteContexts": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ContextType"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Entity"
+              },
+              {
+                "$ref": "#/components/schemas/WorkflowExecution"
+              }
+            ]
+          }
+        },
+        "required": ["type", "context"],
+        "description": "List of resolved Entity and non-Entity contexts attached to a given Note."
+      },
+      "WorkflowExecution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "definitionId": {
+            "type": "string"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "definitionId", "orgId", "name"],
+        "description": "Base metadata for a Workflow Execution. This is a lightweight representation of a Workflow Execution, and does not contain all it's data"
+      },
+      "ReactionRequest": {
+        "type": "object",
+        "properties": {
+          "emoji": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The emoji identifier (e.g., 'thumbs-up', 'heart', 'thinking-face')",
+            "example": "thumbs-up"
+          }
+        },
+        "required": ["emoji"]
+      },
+      "ToggleReactionsRequest": {
+        "type": "object",
+        "properties": {
+          "emojis": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "description": "Array of emoji identifiers to toggle (e.g., ['thumbs-up', 'heart', 'thinking-face'])",
+            "example": ["thumbs-up", "heart"]
+          }
+        },
+        "required": ["emojis"]
+      }
+    }
+  }
+}

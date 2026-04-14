@@ -9,6 +9,7 @@
       "put": {
         "operationId": "provisionEpilotEmailAddress",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -20,6 +21,7 @@
       "post": {
         "operationId": "setEmailAddressPrimary",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -69,6 +71,7 @@
       "post": {
         "operationId": "addEmailAddress",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -123,6 +126,7 @@
       "post": {
         "operationId": "addSharedInbox",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -160,9 +164,27 @@
         "responses": {}
       }
     },
-    "/v2/outlook/shared-mailboxes/connect": {
+    "/v2/channels/msteams/connect": {
       "post": {
-        "operationId": "connectSharedMailbox",
+        "operationId": "connectMsTeams",
+        "responses": {}
+      }
+    },
+    "/v2/channels/msteams/disconnect": {
+      "post": {
+        "operationId": "disconnectMsTeams",
+        "responses": {}
+      }
+    },
+    "/v2/channels/msteams/status": {
+      "get": {
+        "operationId": "getMsTeamsStatus",
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/connect": {
+      "post": {
+        "operationId": "connectOutlookMailbox",
         "requestBody": {
           "required": true,
           "content": {
@@ -172,18 +194,12 @@
         "responses": {}
       }
     },
-    "/v2/outlook/shared-mailboxes/mappings": {
-      "get": {
-        "operationId": "getSharedMailboxMappings",
-        "responses": {}
-      }
-    },
-    "/v2/outlook/shared-mailboxes/mappings/{shared_inbox_id}": {
-      "get": {
-        "operationId": "getSharedMailboxMappingById",
+    "/v2/outlook/mailbox/{email}/disconnect": {
+      "post": {
+        "operationId": "disconnectOutlookMailbox",
         "parameters": [
           {
-            "name": "shared_inbox_id",
+            "name": "email",
             "in": "path",
             "required": true
           }
@@ -191,39 +207,60 @@
         "responses": {}
       }
     },
-    "/v2/outlook/test-webhook": {
-      "get": {
-        "operationId": "testWebhookGet",
-        "parameters": [
-          {
-            "name": "validationToken",
-            "in": "query",
-            "required": false
-          }
-        ],
-        "responses": {}
-      },
+    "/v2/outlook/mailbox/{email}/sync": {
       "post": {
-        "operationId": "testWebhookPost",
+        "operationId": "startMailboxSync",
         "parameters": [
           {
-            "name": "validationToken",
-            "in": "query",
-            "required": false
-          },
-          {
-            "name": "debugMessages",
-            "in": "query",
-            "required": false
+            "name": "email",
+            "in": "path",
+            "required": true
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
-            "application/json": {},
-            "plain/text": {}
+            "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/status": {
+      "get": {
+        "operationId": "getMailboxSyncStatus",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync/retry": {
+      "post": {
+        "operationId": "retryMailboxSync",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/outlook/mailbox/mappings": {
+      "get": {
+        "operationId": "getConnectedOutlookEmails",
         "responses": {}
       }
     },
@@ -304,6 +341,7 @@
       "post": {
         "operationId": "addSetting",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -313,6 +351,7 @@
       "delete": {
         "operationId": "deleteSetting",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -331,6 +370,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -342,6 +382,7 @@
       "post": {
         "operationId": "addDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -351,10 +392,15 @@
       "delete": {
         "operationId": "deleteDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
         },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getDomains",
         "responses": {}
       }
     },
@@ -362,6 +408,7 @@
       "post": {
         "operationId": "verifyNameServers",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -373,6 +420,7 @@
       "post": {
         "operationId": "verifyDomain",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -460,6 +508,11 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "OutlookErrorResponse": {
         "content": {
           "application/json": {}
         }

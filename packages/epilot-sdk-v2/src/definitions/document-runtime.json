@@ -1,0 +1,1 @@
+{"s":"https://document.sls.epilot.io","o":[["getTemplateMeta","post","/v2/documents:meta",null,1],["generateDocumentV2","post","/v2/documents:generate",[["job_id","q"],["mode","q"],["preview_mode","q"]],1],["convertDocument","post","/v2/documents:convert",null,1]]}
