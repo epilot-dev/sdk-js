@@ -242,7 +242,7 @@ jobs:
       - run: pnpm --filter @epilot/cli build
 
       - name: Publish @epilot/cli
-        run: npm publish --ignore-scripts
+        run: npm publish --ignore-scripts || true
         working-directory: packages/cli
 
       - name: Publish epilot wrapper
