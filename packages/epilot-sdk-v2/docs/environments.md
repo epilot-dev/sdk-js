@@ -28,7 +28,7 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`listEnvironmentVariables`](#listenvironmentvariables)
 - [`createEnvironmentVariable`](#createenvironmentvariable)
 - [`listEnvironmentGroups`](#listenvironmentgroups)
-- [`upsertEnvironmentGroup`](#upsertenvironmentgroup)
+- [`putEnvironmentGroup`](#putenvironmentgroup)
 - [`deleteEnvironmentGroup`](#deleteenvironmentgroup)
 - [`getEnvironmentVariable`](#getenvironmentvariable)
 - [`updateEnvironmentVariable`](#updateenvironmentvariable)
@@ -146,14 +146,12 @@ const { data } = await client.listEnvironmentGroups()
 
 ---
 
-### `upsertEnvironmentGroup`
-
-Create or update an environment group
+### `putEnvironmentGroup`
 
 `PUT /v1/environments/groups/{name}`
 
 ```ts
-const { data } = await client.upsertEnvironmentGroup(
+const { data } = await client.putEnvironmentGroup(
   {
     name: 'example',
   },

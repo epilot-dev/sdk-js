@@ -39,7 +39,7 @@ epilot environments listEnvironmentVariables
 - [`listEnvironmentVariables`](#listenvironmentvariables) — List all environment variables for the organization. Returns metadata only, no secret values.
 - [`createEnvironmentVariable`](#createenvironmentvariable) — Create a new environment variable or secret for the organization.
 - [`listEnvironmentGroups`](#listenvironmentgroups) — List all environment groups for the organization.
-- [`upsertEnvironmentGroup`](#upsertenvironmentgroup) — PUT /v1/environments/groups/{name}
+- [`putEnvironmentGroup`](#putenvironmentgroup) — PUT /v1/environments/groups/{name}
 - [`deleteEnvironmentGroup`](#deleteenvironmentgroup) — Deletes a group. Variables assigned to this group become ungrouped.
 - [`getEnvironmentVariable`](#getenvironmentvariable) — Get an environment variable by key. Returns value only for String type, omitted for SecretString.
 - [`updateEnvironmentVariable`](#updateenvironmentvariable) — Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.
@@ -170,7 +170,7 @@ epilot environments listEnvironmentGroups --jsonata 'items[0]'
 
 ---
 
-### `upsertEnvironmentGroup`
+### `putEnvironmentGroup`
 
 `PUT /v1/environments/groups/{name}`
 
@@ -185,7 +185,7 @@ epilot environments listEnvironmentGroups --jsonata 'items[0]'
 **Sample Call**
 
 ```bash
-epilot environments upsertEnvironmentGroup \
+epilot environments putEnvironmentGroup \
   -p name=example \
   -d '{"description":"string"}'
 ```
@@ -193,19 +193,19 @@ epilot environments upsertEnvironmentGroup \
 Using positional args for path parameters:
 
 ```bash
-epilot environments upsertEnvironmentGroup example
+epilot environments putEnvironmentGroup example
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot environments upsertEnvironmentGroup -p name=example
+cat body.json | epilot environments putEnvironmentGroup -p name=example
 ```
 
 With JSONata filter:
 
 ```bash
-epilot environments upsertEnvironmentGroup -p name=example --jsonata 'name'
+epilot environments putEnvironmentGroup -p name=example --jsonata 'name'
 ```
 
 <details>

@@ -237,6 +237,12 @@
       "require": "./dist/apis/purpose.cjs"
     },
     "./purpose/openapi.json": "./definitions/purpose.json",
+    "./query": {
+      "types": "./dist/apis/query.d.ts",
+      "import": "./dist/apis/query.js",
+      "require": "./dist/apis/query.cjs"
+    },
+    "./query/openapi.json": "./definitions/query.json",
     "./sandbox": {
       "types": "./dist/apis/sandbox.d.ts",
       "import": "./dist/apis/sandbox.js",
@@ -255,6 +261,12 @@
       "require": "./dist/apis/submission.cjs"
     },
     "./submission/openapi.json": "./definitions/submission.json",
+    "./target": {
+      "types": "./dist/apis/target.d.ts",
+      "import": "./dist/apis/target.js",
+      "require": "./dist/apis/target.cjs"
+    },
+    "./target/openapi.json": "./definitions/target.json",
     "./targeting": {
       "types": "./dist/apis/targeting.d.ts",
       "import": "./dist/apis/targeting.js",
@@ -458,6 +470,9 @@
       "purpose": [
         "./dist/apis/purpose.d.ts"
       ],
+      "query": [
+        "./dist/apis/query.d.ts"
+      ],
       "sandbox": [
         "./dist/apis/sandbox.d.ts"
       ],
@@ -466,6 +481,9 @@
       ],
       "submission": [
         "./dist/apis/submission.d.ts"
+      ],
+      "target": [
+        "./dist/apis/target.d.ts"
       ],
       "targeting": [
         "./dist/apis/targeting.d.ts"

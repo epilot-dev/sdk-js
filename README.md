@@ -85,9 +85,11 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
+| `epilot.query` | `@epilot/sdk/query` | [docs](./packages/epilot-sdk-v2/docs/query.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
 | `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./packages/epilot-sdk-v2/docs/sharing.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
+| `epilot.target` | `@epilot/sdk/target` | [docs](./packages/epilot-sdk-v2/docs/target.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |
 | `epilot.user` | `@epilot/sdk/user` | [docs](./packages/epilot-sdk-v2/docs/user.md) |

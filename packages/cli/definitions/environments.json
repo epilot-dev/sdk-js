@@ -136,8 +136,8 @@
         }
       ],
       "put": {
-        "operationId": "upsertEnvironmentGroup",
-        "summary": "Create or update an environment group",
+        "operationId": "putEnvironmentGroup",
+        "summary": "putEnvironmentGroup",
         "tags": [
           "environments"
         ],

@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 export const main = defineCommand({
   meta: {
     name: 'epilot',
-    version: '0.1.13',
+    version: '0.1.14',
     description: 'CLI for epilot APIs',
   },
   args: {
@@ -58,9 +58,11 @@ export const main = defineCommand({
     pricing: () => import('./commands/apis/pricing.js').then((m) => m.default),
     'pricing-tier': () => import('./commands/apis/pricing-tier.js').then((m) => m.default),
     purpose: () => import('./commands/apis/purpose.js').then((m) => m.default),
+    query: () => import('./commands/apis/query.js').then((m) => m.default),
     sandbox: () => import('./commands/apis/sandbox.js').then((m) => m.default),
     sharing: () => import('./commands/apis/sharing.js').then((m) => m.default),
     submission: () => import('./commands/apis/submission.js').then((m) => m.default),
+    target: () => import('./commands/apis/target.js').then((m) => m.default),
     targeting: () => import('./commands/apis/targeting.js').then((m) => m.default),
     'template-variables': () => import('./commands/apis/template-variables.js').then((m) => m.default),
     user: () => import('./commands/apis/user.js').then((m) => m.default),

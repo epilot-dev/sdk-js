@@ -197,6 +197,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'query',
+    loader: () => expandDef(require('../definitions/query-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'sandbox',
     loader: () => expandDef(require('../definitions/sandbox-runtime.json')),
   });
@@ -209,6 +214,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'submission',
     loader: () => expandDef(require('../definitions/submission-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'target',
+    loader: () => expandDef(require('../definitions/target-runtime.json')),
   });
   registerApi({
     registry,

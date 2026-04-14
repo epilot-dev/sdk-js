@@ -77,9 +77,11 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./docs/purpose.md) |
+| `epilot.query` | `@epilot/sdk/query` | [docs](./docs/query.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./docs/sandbox.md) |
 | `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./docs/sharing.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./docs/submission.md) |
+| `epilot.target` | `@epilot/sdk/target` | [docs](./docs/target.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./docs/template-variables.md) |
 | `epilot.user` | `@epilot/sdk/user` | [docs](./docs/user.md) |
