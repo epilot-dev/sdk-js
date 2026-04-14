@@ -59,7 +59,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^7.0.0",
     "json-loader": "^0.5.7",
-    "openapicmd": "^2.7.0",
+    "openapicmd": "^2.9.2",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.8.2",
     "typescript": "^4.7.4",
