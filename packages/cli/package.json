@@ -11,7 +11,9 @@
   },
   "scripts": {
     "build": "pnpm generate && tsup",
-    "generate": "tsx scripts/generate.ts",
+    "generate": "tsx scripts/generate.ts && pnpm lint:fix",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
     "dev": "tsx bin/epilot.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
