@@ -3164,6 +3164,10 @@ declare namespace Paths {
              * Auth token with access to the source org (e.g. pipeline token). If not provided, the caller's bearer token is used for both orgs.
              */
             source_auth_token?: string;
+            /**
+             * Auth token with access to the destination org. Required for cross-org verification when the caller token only has access to the source org. If not provided, the caller's bearer token is used for both orgs.
+             */
+            destination_auth_token?: string;
         }
         namespace Responses {
             export interface $202 {
