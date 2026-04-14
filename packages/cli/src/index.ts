@@ -62,7 +62,6 @@ export const main = defineCommand({
     sandbox: () => import('./commands/apis/sandbox.js').then((m) => m.default),
     sharing: () => import('./commands/apis/sharing.js').then((m) => m.default),
     submission: () => import('./commands/apis/submission.js').then((m) => m.default),
-    target: () => import('./commands/apis/target.js').then((m) => m.default),
     targeting: () => import('./commands/apis/targeting.js').then((m) => m.default),
     'template-variables': () => import('./commands/apis/template-variables.js').then((m) => m.default),
     user: () => import('./commands/apis/user.js').then((m) => m.default),

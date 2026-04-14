@@ -102,7 +102,6 @@ APIs
   sandbox              Sandbox API
   sharing              Sharing API
   submission           Submission API
-  target               Target API
   targeting            Targeting API
   template-variables   Template Variables API
   user                 User API
@@ -357,7 +356,6 @@ Full documentation with sample calls and responses for all APIs:
 | Sandbox API | `epilot sandbox` | [docs](./docs/sandbox.md) |
 | Sharing API | `epilot sharing` | [docs](./docs/sharing.md) |
 | Submission API | `epilot submission` | [docs](./docs/submission.md) |
-| Target API | `epilot target` | [docs](./docs/target.md) |
 | Targeting API | `epilot targeting` | [docs](./docs/targeting.md) |
 | Template Variables API | `epilot template-variables` | [docs](./docs/template-variables.md) |
 | User API | `epilot user` | [docs](./docs/user.md) |

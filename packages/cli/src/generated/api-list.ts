@@ -1107,14 +1107,6 @@ export const API_LIST: ApiInfo[] = [
     operationIds: ['createSubmission', 'getNonce'],
   },
   {
-    apiName: 'target',
-    kebabName: 'target',
-    title: 'Target API',
-    serverUrl: 'https://target.sls.epilot.io',
-    operationCount: 5,
-    operationIds: ['createTarget', 'getTarget', 'updateTarget', 'patchTarget', 'deleteTarget'],
-  },
-  {
     apiName: 'targeting',
     kebabName: 'targeting',
     title: 'Targeting API',

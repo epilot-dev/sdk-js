@@ -261,12 +261,6 @@
       "require": "./dist/apis/submission.cjs"
     },
     "./submission/openapi.json": "./definitions/submission.json",
-    "./target": {
-      "types": "./dist/apis/target.d.ts",
-      "import": "./dist/apis/target.js",
-      "require": "./dist/apis/target.cjs"
-    },
-    "./target/openapi.json": "./definitions/target.json",
     "./targeting": {
       "types": "./dist/apis/targeting.d.ts",
       "import": "./dist/apis/targeting.js",
@@ -481,9 +475,6 @@
       ],
       "submission": [
         "./dist/apis/submission.d.ts"
-      ],
-      "target": [
-        "./dist/apis/target.d.ts"
       ],
       "targeting": [
         "./dist/apis/targeting.d.ts"
