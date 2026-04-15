@@ -57,6 +57,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'configurationHub',
+    loader: () => expandDef(require('../definitions/configuration-hub-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'consent',
     loader: () => expandDef(require('../definitions/consent-runtime.json')),
   });

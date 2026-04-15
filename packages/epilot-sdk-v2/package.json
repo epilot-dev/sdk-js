@@ -69,6 +69,12 @@
       "require": "./dist/apis/blueprint-manifest.cjs"
     },
     "./blueprint-manifest/openapi.json": "./definitions/blueprint-manifest.json",
+    "./configuration-hub": {
+      "types": "./dist/apis/configuration-hub.d.ts",
+      "import": "./dist/apis/configuration-hub.js",
+      "require": "./dist/apis/configuration-hub.cjs"
+    },
+    "./configuration-hub/openapi.json": "./definitions/configuration-hub.json",
     "./consent": {
       "types": "./dist/apis/consent.d.ts",
       "import": "./dist/apis/consent.js",
@@ -379,6 +385,9 @@
       ],
       "blueprint-manifest": [
         "./dist/apis/blueprint-manifest.d.ts"
+      ],
+      "configuration-hub": [
+        "./dist/apis/configuration-hub.d.ts"
       ],
       "consent": [
         "./dist/apis/consent.d.ts"
