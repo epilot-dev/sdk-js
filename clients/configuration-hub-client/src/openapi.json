@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Configuration Hub API",
-    "description": "API for exploring epilot organization configurations.\nProvides a unified tree index across all config types (journeys, automations, schemas, etc.)\nand resolves dependencies between configs.\n",
-    "version": "0.1.0"
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n",
+    "version": "0.2.0"
   },
   "servers": [
     {
@@ -31,13 +31,13 @@
       "get": {
         "operationId": "listConfigTypes",
         "summary": "listConfigTypes",
-        "description": "List all available configuration types with item counts.\nUsed to render the top-level folders in the config tree.\n",
+        "description": "Returns the static list of available configuration types with display metadata.\nThis is a cheap call — no fan-out to downstream APIs. Returns all known types\nwith labels and icons. The frontend should then call `listConfigs` separately\nfor each type it wants to load.\n",
         "tags": [
           "Configs"
         ],
         "responses": {
           "200": {
-            "description": "List of config types with counts",
+            "description": "Available config types",
             "content": {
               "application/json": {
                 "schema": {
@@ -64,18 +64,24 @@
       "get": {
         "operationId": "listConfigs",
         "summary": "listConfigs",
-        "description": "List all configs of a given type. Returns summary metadata only (not full payloads).\nUsed to render items under a type folder in the config tree.\n",
+        "description": "List configs of a given type with pagination. Returns summary metadata only\n(not full payloads). The frontend calls this per type folder when expanding.\n\nSupports offset-based pagination via `from` and `size` parameters.\n",
         "tags": [
           "Configs"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
           }
         ],
         "responses": {
           "200": {
-            "description": "Config index for the given type",
+            "description": "Paginated config list",
             "content": {
               "application/json": {
                 "schema": {
@@ -101,7 +107,7 @@
       "get": {
         "operationId": "getConfigDependencies",
         "summary": "getConfigDependencies",
-        "description": "Get configs that are referenced by the given config.\nUsed to render children when expanding a config node in the tree.\nResolves dependencies by scanning the config payload for references.\n",
+        "description": "Get configs that are referenced by the given config.\nUsed to render children when expanding a config node in the tree.\n\nResolves dependencies by fetching the config payload server-side and scanning\nfor references (UUIDs, source IDs, slug-based references).\n",
         "tags": [
           "Configs"
         ],
@@ -111,26 +117,21 @@
           },
           {
             "$ref": "#/components/parameters/ConfigId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of referenced configs",
+            "description": "Paginated list of referenced configs",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ConfigNode"
-                      }
-                    }
-                  },
-                  "required": [
-                    "results"
-                  ]
+                  "$ref": "#/components/schemas/ConfigDependenciesResponse"
                 }
               }
             }
@@ -175,12 +176,31 @@
         "schema": {
           "type": "string"
         }
+      },
+      "CursorParam": {
+        "name": "cursor",
+        "in": "query",
+        "description": "Opaque cursor for fetching the next page. Omit for the first page.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SizeParam": {
+        "name": "size",
+        "in": "query",
+        "description": "Number of items per page",
+        "schema": {
+          "type": "integer",
+          "default": 25,
+          "minimum": 1,
+          "maximum": 100
+        }
       }
     },
     "schemas": {
       "ResourceType": {
         "type": "string",
-        "description": "Configuration resource type identifier. Matches blueprint-manifest-api V3 naming.",
+        "description": "Configuration resource type identifier.\nMatches blueprint-manifest-api V3 naming conventions.\n",
         "enum": [
           "journey",
           "automation_flow",
@@ -217,7 +237,7 @@
       },
       "ConfigTypeInfo": {
         "type": "object",
-        "description": "Summary info for a config type folder in the tree",
+        "description": "Static metadata for a config type folder in the tree.\nNo downstream API calls — just type + label + icon + source API info.\n",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/ResourceType"
@@ -232,17 +252,23 @@
             "description": "Frontend icon name",
             "example": "Route"
           },
-          "count": {
-            "type": "integer",
-            "description": "Number of configs of this type",
-            "example": 8
+          "source_api": {
+            "type": "string",
+            "description": "Base URL of the epilot API that owns this resource type",
+            "example": "https://journey.sls.epilot.io"
+          },
+          "sdk_client": {
+            "type": "string",
+            "description": "@epilot/sdk subpath for fetching full config payloads",
+            "example": "@epilot/sdk/journey"
           }
         },
         "required": [
           "type",
           "label",
           "icon",
-          "count"
+          "source_api",
+          "sdk_client"
         ]
       },
       "ConfigNode": {
@@ -297,7 +323,7 @@
       },
       "ConfigListResponse": {
         "type": "object",
-        "description": "List of configs for a specific type",
+        "description": "Cursor-paginated list of configs for a specific type",
         "properties": {
           "type": {
             "$ref": "#/components/schemas/ResourceType"
@@ -308,8 +334,13 @@
           "icon": {
             "type": "string"
           },
-          "count": {
-            "type": "integer"
+          "total": {
+            "type": "integer",
+            "description": "Total number of configs of this type (if known)"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor for fetching the next page. Absent when no more pages."
           },
           "items": {
             "type": "array",
@@ -322,8 +353,30 @@
           "type",
           "label",
           "icon",
-          "count",
           "items"
+        ]
+      },
+      "ConfigDependenciesResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of configs referenced by a given config",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total number of dependencies found (if known)"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor for fetching the next page. Absent when no more pages."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigNode"
+            }
+          }
+        },
+        "required": [
+          "results"
         ]
       },
       "ErrorResponse": {
