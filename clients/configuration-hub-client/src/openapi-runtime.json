@@ -1,0 +1,79 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://configuration-hub.dev.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/configs/types": {
+      "get": {
+        "operationId": "listConfigTypes",
+        "responses": {}
+      }
+    },
+    "/v1/configs/{type}": {
+      "get": {
+        "operationId": "listConfigs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/{type}/{id}/dependencies": {
+      "get": {
+        "operationId": "getConfigDependencies",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ConfigType": {
+        "name": "type",
+        "in": "path",
+        "required": true
+      },
+      "ConfigId": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "CursorParam": {
+        "name": "cursor",
+        "in": "query"
+      },
+      "SizeParam": {
+        "name": "size",
+        "in": "query"
+      }
+    }
+  }
+}

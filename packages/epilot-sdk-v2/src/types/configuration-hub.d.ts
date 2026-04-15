@@ -1,3 +1,4 @@
+/* Auto-copied from configuration-hub-client */
 import type {
   OpenAPIClient,
   Parameters,
