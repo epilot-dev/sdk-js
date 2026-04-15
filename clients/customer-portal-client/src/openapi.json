@@ -137,6 +137,7 @@
         "operationId": "createUser",
         "summary": "createUser",
         "description": "Registers a portal user",
+        "deprecated": true,
         "security": [],
         "tags": [
           "Public"
@@ -814,7 +815,19 @@
                           },
                           "type": {
                             "type": "string",
-                            "description": "Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string."
+                            "description": "Optional type of the consumption, such as 'nt' (night time) and 'ht' (high time) or 'feed-in' and 'feed-out'. Can be any string.",
+                            "example": "nt"
+                          },
+                          "aggregation_method": {
+                            "type": "string",
+                            "description": "The method used to aggregate the consumption data. Assumed default is 'sum'.",
+                            "enum": [
+                              "sum",
+                              "average",
+                              "max",
+                              "min"
+                            ],
+                            "example": "sum"
                           }
                         },
                         "required": [
@@ -2169,6 +2182,68 @@
         }
       }
     },
+    "/v3/portal/public/widgets": {
+      "get": {
+        "operationId": "getPublicPortalWidgetsV3",
+        "summary": "getPublicPortalWidgetsV3",
+        "description": "Retrieves the public widgets of a portal.\nSupports two identification methods:\n1. Using org_id + portal_id\n2. Using domain\n",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": 12324
+            },
+            "description": "Organization ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "Portal ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to org_id + portal_id)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved the portal public widgets successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertPortalWidget"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
@@ -2741,6 +2816,76 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/public/schemas": {
+      "get": {
+        "operationId": "getPublicSchemasV3",
+        "summary": "getPublicSchemasV3",
+        "description": "Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.\nSupports two identification methods:\n1. Using org_id + portal_id\n2. Using domain\n",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": 12324
+            },
+            "description": "Organization ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "Portal ID (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to org_id + portal_id)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieved schemas for an organization successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schemas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Schema"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7000,7 +7145,7 @@
     "/v2/portal/metering/reading/allowed-range/{meter_id}": {
       "get": {
         "operationId": "getAllowedMeterReadingRange",
-        "description": "Get allowed reading range for all counters of a meter from the configured \nthird-party plausibility check hook using 'range' mode. This endpoint requires \na plausibility check hook to be configured for the portal.\n",
+        "description": "Get allowed reading range for all counters of a meter from the configured\nthird-party plausibility check hook using 'range' mode. This endpoint requires\na plausibility check hook to be configured for the portal.\n",
         "tags": [
           "ECP"
         ],
@@ -7077,6 +7222,124 @@
                           }
                         }
                       }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/readings": {
+      "post": {
+        "operationId": "getMeterReadings",
+        "summary": "Get meter readings with optional template resolution",
+        "description": "Fetches meter readings for a counter and optionally resolves Handlebars\ntemplate strings against each reading object using @epilot/variables.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "meter_id",
+                  "counter_id"
+                ],
+                "properties": {
+                  "meter_id": {
+                    "type": "string"
+                  },
+                  "counter_id": {
+                    "type": "string"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ],
+                    "default": "desc"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "default": 0
+                  },
+                  "size": {
+                    "type": "integer",
+                    "default": 10
+                  },
+                  "templates": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Template map (key to Handlebars template string). Each template is resolved per reading."
+                  },
+                  "counter_templates": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Template map resolved against the counter entity."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings with resolved templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "properties": {
+                          "templates_output": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hits": {
+                      "type": "integer"
+                    },
+                    "counter_templates_output": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Resolved counter templates."
                     }
                   }
                 }
@@ -8814,6 +9077,71 @@
                       "example": "Domain and users swapped successfully."
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/clone": {
+      "post": {
+        "operationId": "clonePortalConfig",
+        "summary": "clonePortalConfig",
+        "description": "Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Source portal ID and optional name for the cloned portal",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_portal_id"
+                ],
+                "properties": {
+                  "source_portal_id": {
+                    "$ref": "#/components/schemas/PortalId"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Name for the cloned portal. Defaults to \"Copy of <source portal name>\"."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Portal cloned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalConfigV3"
                 }
               }
             }
@@ -11245,8 +11573,45 @@
       },
       "Entity": {
         "type": "object",
-        "properties": {},
-        "additionalProperties": true
+        "additionalProperties": true,
+        "properties": {
+          "templates_output_highlighted": {
+            "type": "object",
+            "readOnly": true,
+            "description": "Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          "search_snippets": {
+            "type": "array",
+            "readOnly": true,
+            "description": "Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "description": "Human-readable field label"
+                },
+                "fragment": {
+                  "type": "string",
+                  "description": "Highlighted text fragment with <em> tags"
+                }
+              }
+            }
+          }
+        }
       },
       "EntityTemplates": {
         "type": "object",
@@ -12949,6 +13314,10 @@
             "example": [
               "active_workflow"
             ]
+          },
+          "highlight": {
+            "type": "object",
+            "description": "Elasticsearch highlight configuration passed through to the Entity API. When provided, matching results include a `highlight` object with field names as keys and arrays of highlighted fragments as values."
           }
         },
         "required": [

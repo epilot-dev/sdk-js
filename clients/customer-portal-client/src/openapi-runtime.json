@@ -32,6 +32,7 @@
     "/v2/portal/public/user": {
       "post": {
         "operationId": "createUser",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -600,6 +601,29 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/widgets": {
+      "get": {
+        "operationId": "getPublicPortalWidgetsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
@@ -723,6 +747,29 @@
             "in": "query",
             "name": "domain",
             "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/schemas": {
+      "get": {
+        "operationId": "getPublicSchemasV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
           }
         ],
         "responses": {}
@@ -1782,6 +1829,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/metering/readings": {
+      "post": {
+        "operationId": "getMeterReadings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -2202,6 +2261,18 @@
     "/v3/portal/config/swap": {
       "post": {
         "operationId": "swapPortalConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/config/clone": {
+      "post": {
+        "operationId": "clonePortalConfig",
         "requestBody": {
           "required": true,
           "content": {
