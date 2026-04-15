@@ -8,7 +8,7 @@ const OpenAPIClientAxios =
 
 import { loadDefinition } from './definition-loader.js';
 import { resolveToken } from './auth-store.js';
-import { getResolvedProfile } from './profiles.js';
+import { getResolvedProfile, getStage } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
 import { formatResponse } from './response-formatter.js';
@@ -34,6 +34,27 @@ export type CallArgs = {
   guided?: boolean;
   help?: boolean;
   _apihelp?: boolean;
+  'use-dev'?: boolean;
+  'use-staging'?: boolean;
+};
+
+/**
+ * Rewrite a production URL to target a different stage.
+ * e.g. https://entity.sls.epilot.io → https://entity.dev.sls.epilot.io
+ */
+const toStageUrl = (prodUrl: string, stage: string): string => {
+  if (stage === 'prod') return prodUrl;
+  return prodUrl.replace('.sls.epilot.io', `.${stage}.sls.epilot.io`);
+};
+
+/**
+ * Resolve the target stage from flags and profile config.
+ * Priority: --use-dev/--use-staging flags > saved config > 'prod'
+ */
+const resolveStage = (args: CallArgs): string => {
+  if (args['use-dev']) return 'dev';
+  if (args['use-staging']) return 'staging';
+  return getStage() ?? 'prod';
 };
 
 /**
@@ -206,6 +227,8 @@ const formatOperationHelp = (apiName: string, operationId: string, spec: OpenAPI
       w(`  ${GREEN}-t, --token${RESET} <token>     Bearer token for authentication\n`);
       w(`  ${GREEN}--profile${RESET} <name>        Use a named profile\n`);
       w(`  ${GREEN}-s, --server${RESET} <url>      Override server base URL\n`);
+      w(`  ${GREEN}--use-dev${RESET}               Target dev environment\n`);
+      w(`  ${GREEN}--use-staging${RESET}            Target staging environment\n`);
       w(`  ${GREEN}-i, --include${RESET}           Include response headers in output\n`);
       w(`  ${GREEN}--json${RESET}                  Output raw JSON (no formatting)\n`);
       w(`  ${GREEN}-v, --verbose${RESET}           Verbose output (show request details)\n`);
@@ -483,11 +506,19 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
     }
   }
 
-  // Resolve server URL override: --server flag > profile > spec default
+  // Resolve server URL: --server flag > profile server > stage-rewritten spec default
   const serverOverride = args.server || getResolvedProfile(args.profile)?.server;
   if (serverOverride) {
     const specDoc = spec as OpenAPIV3.Document;
     specDoc.servers = [{ url: serverOverride }];
+  } else {
+    const stage = resolveStage(args);
+    if (stage !== 'prod') {
+      const specDoc = spec as OpenAPIV3.Document;
+      if (specDoc.servers?.length) {
+        specDoc.servers = specDoc.servers.map((s) => ({ ...s, url: toStageUrl(s.url, stage) }));
+      }
+    }
   }
 
   // Init OpenAPI client

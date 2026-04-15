@@ -93,6 +93,8 @@ function printRootHelp() {
   w(`  ${GREEN}-t, --token${R} <token>     Bearer token for authentication\n`);
   w(`  ${GREEN}--profile${R} <name>        Use a named profile ${DIM}(or EPILOT_PROFILE)${R}\n`);
   w(`  ${GREEN}-s, --server${R} <url>      Override server base URL\n`);
+  w(`  ${GREEN}--use-dev${R}               Target dev environment\n`);
+  w(`  ${GREEN}--use-staging${R}            Target staging environment\n`);
   w(`  ${GREEN}--json${R}                  Output raw JSON (no formatting)\n`);
   w(`  ${GREEN}-v, --verbose${R}           Verbose output (show request details)\n`);
   w(`  ${GREEN}--jsonata${R} <expr>        JSONata expression to transform response\n`);
@@ -111,6 +113,7 @@ function printRootHelp() {
   w(`  ${CYAN}auth status${R}             Show authentication status\n`);
   w(`  ${CYAN}auth logout${R}             Remove stored credentials\n`);
   w(`  ${CYAN}profile${R}                 Manage named profiles\n`);
+  w(`  ${CYAN}config${R}                  Manage CLI configuration\n`);
   w(`  ${CYAN}completion${R}              Generate shell completion scripts\n`);
   w(`  ${CYAN}upgrade${R}                 Upgrade to the latest version\n`);
   w(`\n`);
@@ -131,6 +134,8 @@ function printRootHelp() {
   w(`  ${YELLOW}$${R} epilot entity searchEntities -d '{"q":"*"}'\n`);
   w(`  ${YELLOW}$${R} epilot entity searchEntities --jsonata 'results[0]._title'\n`);
   w(`  ${YELLOW}$${R} echo '{"q":"*"}' | epilot entity searchEntities\n`);
+  w(`  ${YELLOW}$${R} epilot entity searchEntities --use-dev ${DIM}# target dev environment${R}\n`);
+  w(`  ${YELLOW}$${R} epilot config set stage dev ${DIM}# persist dev as default${R}\n`);
   w(`\n`);
   w(`Run ${CYAN}epilot <api>${R} to list available operations.\n`);
   w(`Run ${CYAN}epilot <api> <operationId> --help${R} for operation details.\n`);
