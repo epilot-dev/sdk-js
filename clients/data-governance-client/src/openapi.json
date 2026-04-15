@@ -1,0 +1,1126 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Data Governance API",
+    "version": "1.2.0",
+    "description": "The **Data Governance API** provides a set of endpoints for managing the lifecycle of\nentity data within the epilot platform. It enables organizations to define governance\npolicies — such as automated data deletion rules — and execute them against any entity\nschema (currently limited to Contacts).\n\n## Core Concepts\n\n### Data Lifecycle Configs\nA **config** defines a data lifecycle policy for a given entity schema. Each config consists of:\n- A **base view** (saved entity view) that identifies candidate entities\n- **Advanced filters** not available in standard entity tables (e.g. only contacts where all related opportunities have a workflow status of CLOSED)\n- A **schedule** controlling how often the policy runs (e.g. every 90 days)\n- **Related entity handling** — which linked entities should be deleted alongside the primary entity\n- An **action type** (currently only `deletion`)\n\nConfigs can be enabled or disabled and are evaluated on a recurring schedule.\n\n### Auditable Jobs\nEvery deletion — whether manual or automatic — produces an **auditable job** with full\ntraceability. Each job records its status, timing, trigger type, and generates a\ndownloadable CSV report detailing exactly which entities were affected.\n\n### Query\nThe query endpoint allows previewing which entities match a data lifecycle config\nbefore it is executed, combining a saved view with additional data governance\nfilters.\n\n### Data Recovery\nDeleted entities are moved to the trash where they remain recoverable for 30 days.\nAfter this retention period, deletion becomes permanent and irreversible.\n\n## Authentication\nAll endpoints require a valid epilot OAuth2 bearer token passed in the\n`Authorization` header. Optionally, the `x-epilot-org-id` header can be used\nto target a specific organization for shared-tenant access.\n"
+  },
+  "servers": [
+    {
+      "url": "https://data-governance.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Query",
+      "description": "Preview which entities match a data lifecycle config by combining a saved view\nwith additional data governance filters.\n"
+    },
+    {
+      "name": "Data Lifecycle Configs",
+      "description": "Create, update, list, and retrieve data lifecycle configurations that\ndefine automated actions (e.g., deletion) on entity data.\n"
+    },
+    {
+      "name": "Auditable Jobs",
+      "description": "Every deletion produces an auditable job with full traceability.\nCreate, list, retrieve, and update job runs. Includes report download.\n"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/data-governance/v1/{entity_schema}/query": {
+      "post": {
+        "operationId": "queryEntities",
+        "summary": "Query entities matching a data lifecycle config",
+        "description": "Executes a query against the specified entity schema using a saved view\ndefinition, optionally combined with additional data governance filters.\n\nThis endpoint is typically used to **preview** which entities would be\naffected by a data lifecycle config before it runs. The response includes\nthe total hit count and (optionally hydrated) entity results.\n\nPagination is supported via `from` and `size` in the request body.\n",
+        "tags": [
+          "Query"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "The target entity schema slug to query\n(e.g. `contact`, `opportunity`, `order`).\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "contact"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryEntitiesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully executed query. Returns matching entities and total hit count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryEntitiesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request — malformed filters or missing saved view ID."
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid bearer token."
+          },
+          "403": {
+            "description": "Forbidden — caller lacks permission to query the specified schema."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/{entity_schema}/jobs": {
+      "post": {
+        "operationId": "createJob",
+        "summary": "Create a new job run",
+        "description": "Creates a new job run for the given entity schema. The job is associated\nwith an existing config and records the scheduled execution date.\n\nThis is a low-level endpoint used internally by the scheduler. For\nmanually triggering a config execution, prefer\n`POST /data-governance/v1/configs/{config_id}/jobs`.\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "The entity schema slug this job operates on (e.g. `contact`).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "contact"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Referenced config not found."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/{entity_schema}/jobs/{job_id}": {
+      "patch": {
+        "operationId": "updateJob",
+        "summary": "Update an existing job run",
+        "description": "Partially updates an existing job run. Typically used to record\nprogress or finalize a job by setting its status to `success` or\n`failed`, attaching details, error messages, or a report reference.\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "The entity schema slug this job belongs to.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "contact"
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the job to update.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2d3b5e90-e4c0-4f1a-9c7b-abc123def456"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Job not found."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "summary": "Get a job by ID",
+        "description": "Returns full details of a single job run, including its current status,\nexecution timestamps, type-specific details, and report reference\n(if available).\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the job.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2d3b5e90-e4c0-4f1a-9c7b-abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Job not found."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/jobs/{job_id}/report-url": {
+      "get": {
+        "operationId": "getJobReportUrl",
+        "summary": "Get report download URL for a job",
+        "description": "Returns a short-lived, pre-signed S3 URL to download the CSV report\nfile for the given job. The URL expires after the number of seconds\nindicated in the `expires_in` field.\n\nA report is only available after a job has completed. If the job is\nstill in progress or did not produce a report, a 404 is returned.\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the job whose report to download.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2d3b5e90-e4c0-4f1a-9c7b-abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pre-signed report download URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobReportUrlResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Job not found or report not yet available."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/configs/{config_id}": {
+      "get": {
+        "operationId": "getConfig",
+        "summary": "Get a config by ID",
+        "description": "Returns a single data data lifecycle config by its unique identifier,\nincluding its query definition, schedule, and current enabled state.\n",
+        "tags": [
+          "Data Lifecycle Configs"
+        ],
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the config.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "cfg-8a12f3b4-5678-9abc-def0-123456789abc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Config not found."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/configs/{config_id}/jobs": {
+      "post": {
+        "operationId": "createJobForConfig",
+        "summary": "Trigger a manual job run for a config",
+        "description": "Manually triggers a new job run for the specified config. The job is\ncreated and queued for asynchronous execution.\n\nReturns the newly created job, whose `id` can be used to poll status\nvia `GET /data-governance/v1/jobs/{job_id}`.\n\nThe job's `trigger` field will be set to `manual` and `triggered_by`\nwill contain the authenticated user's identifier.\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "config_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the config to execute.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "cfg-8a12f3b4-5678-9abc-def0-123456789abc"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Job created and queued for execution.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Config not found."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/{entity_schema}/configs": {
+      "post": {
+        "operationId": "upsertConfig",
+        "summary": "Create or update a data lifecycle config",
+        "description": "Creates a new data lifecycle config or updates an existing one for the\ngiven entity schema. The config defines:\n- A **query** (saved view + optional filters) to identify target entities\n- A **schedule** controlling how often the policy runs\n- An **action type** (currently only `deletion`)\n\nOnce created and enabled, the config is evaluated on its schedule by a\nbackground process that creates job runs automatically.\n\nReturns `201` when a new config is created, `200` when an existing\nconfig is updated.\n",
+        "tags": [
+          "Data Lifecycle Configs"
+        ],
+        "parameters": [
+          {
+            "name": "entity_schema",
+            "in": "path",
+            "required": true,
+            "description": "The entity schema slug this config targets (e.g. `contact`).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "contact"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Existing config updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "New config created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Config"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/configs": {
+      "get": {
+        "operationId": "listConfigs",
+        "summary": "List data lifecycle configs",
+        "description": "Returns a cursor-paginated list of data lifecycle configs. Results can be\nfiltered by entity schema, config type, scheduled run date, or\nenabled status.\n",
+        "tags": [
+          "Data Lifecycle Configs"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of configs to return per page.",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor returned from a previous response for fetching the\nnext page of results.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false,
+            "description": "Filter configs by entity schema slug (e.g. `contact`).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter configs by governance action type.",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigType"
+            }
+          },
+          {
+            "name": "next_run_at",
+            "in": "query",
+            "required": false,
+            "description": "Filter configs whose next scheduled run date matches this value\n(format: `YYYY-MM-DD`).\n",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "description": "Filter by enabled (`true`) or disabled (`false`) status.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of configs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConfigsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/data-governance/v1/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "summary": "List job runs",
+        "description": "Returns a cursor-paginated list of job runs. Results can be filtered\nby entity schema, action type, execution status, or parent config.\n",
+        "tags": [
+          "Auditable Jobs"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of jobs to return per page.",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor returned from a previous response for fetching the\nnext page of results.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity_schema",
+            "in": "query",
+            "required": false,
+            "description": "Filter jobs by entity schema slug (e.g. `contact`).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter jobs by governance action type.",
+            "schema": {
+              "$ref": "#/components/schemas/ConfigType"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter jobs by execution status.",
+            "schema": {
+              "$ref": "#/components/schemas/JobStatus"
+            }
+          },
+          {
+            "name": "config_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter jobs belonging to a specific config.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListJobsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "description": "Overrides the target organization to allow shared tenant access",
+        "name": "x-epilot-org-id",
+        "in": "header",
+        "type": "apiKey"
+      }
+    },
+    "schemas": {
+      "ConfigType": {
+        "type": "string",
+        "description": "The governance action type. Determines what operation is performed on\nmatched entities when a job runs. Currently only `deletion` is supported.\n",
+        "enum": [
+          "deletion"
+        ]
+      },
+      "JobStatus": {
+        "type": "string",
+        "description": "Current execution status of a job run.\n- `in_progress` — the job is actively processing entities.\n- `success` — the job completed without critical errors.\n- `failed` — the job terminated due to an error.\n",
+        "enum": [
+          "in_progress",
+          "success",
+          "failed"
+        ]
+      },
+      "JobTrigger": {
+        "type": "string",
+        "description": "Indicates how the job was initiated.\n- `schedule` — automatically created by the background scheduler.\n- `manual` — explicitly triggered by a user via the API.\n",
+        "enum": [
+          "schedule",
+          "manual"
+        ]
+      },
+      "JobReportFormat": {
+        "type": "string",
+        "description": "File format of the job report. Currently only CSV is supported.",
+        "enum": [
+          "csv"
+        ]
+      },
+      "JobReport": {
+        "type": "object",
+        "description": "Reference to a report file stored in S3 that details the outcome of a\njob run (e.g., which entities were deleted or failed).\n",
+        "additionalProperties": false,
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "description": "S3 bucket where the report file is stored."
+          },
+          "key": {
+            "type": "string",
+            "description": "S3 object key of the report file."
+          },
+          "format": {
+            "$ref": "#/components/schemas/JobReportFormat"
+          }
+        }
+      },
+      "CreateJobRequest": {
+        "type": "object",
+        "description": "Request payload for creating a new job run.",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "config_id",
+          "scheduled_for"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "config_id": {
+            "type": "string",
+            "description": "ID of the data lifecycle config this job executes."
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date",
+            "description": "The date this job is scheduled to process (format `YYYY-MM-DD`)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus",
+            "default": "in_progress"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp marking when execution began."
+          }
+        }
+      },
+      "JobDetails": {
+        "type": "object",
+        "description": "Type-specific job outcome payload. The shape depends on the config type.\nFor `deletion` jobs, typical fields include:\n- `matched_count` — total entities matched by the query\n- `deleted_count` — entities successfully deleted\n- `failed_count` — entities that could not be deleted\n",
+        "additionalProperties": true
+      },
+      "UpdateJobRequest": {
+        "type": "object",
+        "description": "Partial update payload for an existing job. Only the fields provided\nwill be merged into the job record.\n",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "details": {
+            "$ref": "#/components/schemas/JobDetails"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp marking when the job finished."
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message if the job failed."
+          },
+          "report": {
+            "$ref": "#/components/schemas/JobReport"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "description": "Represents a single execution run of a data lifecycle config. Tracks the\nfull lifecycle from creation through completion, including outcome\ndetails and an optional downloadable report.\n",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "config_id",
+          "entity_schema",
+          "scheduled_for",
+          "status",
+          "created_at",
+          "last_updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the job."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "config_id": {
+            "type": "string",
+            "description": "ID of the data lifecycle config this job was created from."
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Entity schema slug this job operates on."
+          },
+          "scheduled_for": {
+            "type": "string",
+            "format": "date",
+            "description": "The date this job was scheduled to process (`YYYY-MM-DD`)."
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "details": {
+            "$ref": "#/components/schemas/JobDetails"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when execution started."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when execution finished."
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if the job failed."
+          },
+          "report": {
+            "$ref": "#/components/schemas/JobReport"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the job record was created."
+          },
+          "last_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the most recent update to this job."
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/JobTrigger"
+          },
+          "triggered_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "Identifier of the user who triggered the job. Set when\n`trigger` is `manual`; `null` for scheduled jobs.\n"
+          }
+        }
+      },
+      "ListJobsResponse": {
+        "type": "object",
+        "description": "Paginated response containing a list of job runs.",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "description": "Array of job records for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            }
+          },
+          "cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque cursor for fetching the next page. `null` when there are\nno more results.\n"
+          }
+        }
+      },
+      "JobReportUrlResponse": {
+        "type": "object",
+        "description": "Contains a time-limited pre-signed URL to download a job report.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Pre-signed S3 URL for downloading the report file."
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Number of seconds until the pre-signed URL expires."
+          }
+        }
+      },
+      "QueryFilterType": {
+        "type": "string",
+        "description": "Predefined data governance filter types that can be layered on top of\na saved view to narrow down target entities:\n- `entity_workflows_only_in_closed_or_cancelled_status` — include only\n  entities whose own workflows are all in a closed/cancelled state.\n- `no_related_entities` — include only entities with no related entities\n  of the specified schemas.\n- `related_entities_all_in_closed_or_cancelled_status` — include only\n  entities whose related entities are all closed or cancelled.\n- `related_entities_workflows_only_in_closed_or_cancelled_status` —\n  include only entities whose related entities' workflows are all\n  closed or cancelled.\n- `no_email_communication_since` — include only entities with no email\n  communication (sent or received) within the lookback period.\n",
+        "enum": [
+          "entity_workflows_only_in_closed_or_cancelled_status",
+          "no_related_entities",
+          "related_entities_all_in_closed_or_cancelled_status",
+          "related_entities_workflows_only_in_closed_or_cancelled_status",
+          "no_email_communication_since"
+        ]
+      },
+      "QueryFilter": {
+        "type": "object",
+        "description": "A single governance filter condition applied during entity querying.\nThe required and optional fields depend on the `type`.\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/QueryFilterType"
+          },
+          "related_entity_schemas": {
+            "type": "array",
+            "description": "Entity schema slugs to consider when evaluating relationship-based\nfilters (e.g. `no_related_entities`).\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lookback_period_days": {
+            "type": "integer",
+            "description": "Number of days to look back when evaluating time-based filters\nsuch as `no_email_communication_since`.\n"
+          },
+          "message_type": {
+            "type": "array",
+            "description": "Email message direction(s) to consider. Applicable to\n`no_email_communication_since`.\n",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SENT",
+                "RECEIVED"
+              ]
+            }
+          },
+          "workflow_status": {
+            "type": "array",
+            "description": "Workflow statuses considered \"terminal\" for workflow-based filters.\n",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLOSED",
+                "DONE"
+              ]
+            }
+          }
+        }
+      },
+      "QueryConfig": {
+        "type": "object",
+        "description": "Defines the query used by a data lifecycle config to identify target\nentities. Combines a saved view with optional governance filters.\n",
+        "required": [
+          "saved_view_id"
+        ],
+        "properties": {
+          "saved_view_id": {
+            "type": "string",
+            "description": "ID of the saved view that provides the base entity query."
+          },
+          "include_deleted": {
+            "type": "string",
+            "description": "Controls whether soft-deleted entities are included:\n- `true` — include both active and deleted entities\n- `false` — exclude deleted entities (default)\n- `only` — return only deleted entities\n",
+            "enum": [
+              "true",
+              "false",
+              "only"
+            ]
+          },
+          "filters": {
+            "type": "array",
+            "description": "Additional data governance filters layered on top of the saved view\nto further narrow the set of matched entities.\n",
+            "items": {
+              "$ref": "#/components/schemas/QueryFilter"
+            }
+          }
+        }
+      },
+      "QueryEntitiesRequest": {
+        "description": "Request body for the query endpoint. Extends `QueryConfig` with\npagination and projection options.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "integer",
+                "description": "Zero-based offset for pagination."
+              },
+              "size": {
+                "type": "integer",
+                "description": "Maximum number of results to return."
+              },
+              "hydrate": {
+                "type": "boolean",
+                "description": "When `true`, return full entity payloads. When `false` (default),\nreturn only entity IDs and minimal metadata.\n"
+              },
+              "fields": {
+                "type": "array",
+                "description": "List of entity attribute names to include in the response.\nActs as a projection to reduce payload size.\n",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "QueryEntitiesResult": {
+        "type": "object",
+        "description": "Response from the entity query endpoint.",
+        "properties": {
+          "hits": {
+            "type": "number",
+            "description": "Total number of entities matching the query."
+          },
+          "results": {
+            "type": "array",
+            "description": "Array of matched entity objects. Shape depends on the `hydrate`\nand `fields` options in the request.\n",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ConfigSchedule": {
+        "description": "Schedule definition controlling when a data lifecycle config runs.",
+        "$ref": "#/components/schemas/IntervalConfigSchedule"
+      },
+      "IntervalConfigSchedule": {
+        "type": "object",
+        "description": "Interval-based schedule. The governance engine will create a job every\n`interval_days` days, optionally bounded by start and end dates.\n",
+        "required": [
+          "frequency",
+          "interval_days"
+        ],
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "description": "Schedule type. Currently only `interval` is supported.",
+            "enum": [
+              "interval"
+            ]
+          },
+          "interval_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of days between consecutive job runs."
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Earliest date (`YYYY-MM-DD`) the schedule is active. If omitted,\nthe schedule starts immediately.\n"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Latest date (`YYYY-MM-DD`) the schedule is active. If omitted,\nthe schedule runs indefinitely.\n"
+          }
+        }
+      },
+      "UpsertConfigRequest": {
+        "type": "object",
+        "description": "Request payload for creating or updating a data lifecycle config.",
+        "required": [
+          "type",
+          "query",
+          "schedule"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ConfigType"
+          },
+          "query": {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ConfigSchedule"
+          },
+          "relations_for_deletion": {
+            "type": "array",
+            "description": "Entity schemas whose related entities should also be deleted\nwhen the primary entity is removed. Only applicable when `type`\nis `deletion`.\n",
+            "items": {
+              "$ref": "#/components/schemas/DeletionRelationEntitySchema"
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this config is active and should be evaluated on schedule."
+          }
+        }
+      },
+      "Config": {
+        "type": "object",
+        "description": "A data lifecycle config defining an automated policy (e.g., scheduled\nentity deletion) for a specific entity schema.\n",
+        "required": [
+          "id",
+          "entity_schema",
+          "query",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the config."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConfigType",
+            "description": "Governance action type. Currently only `deletion` is supported."
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Entity schema slug this config targets."
+          },
+          "query": {
+            "$ref": "#/components/schemas/QueryConfig"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ConfigSchedule"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this config is currently active."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the config was created."
+          },
+          "last_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the most recent update."
+          },
+          "next_run_at": {
+            "type": "string",
+            "format": "date",
+            "description": "Next scheduled run date (`YYYY-MM-DD`). Computed from the schedule\nafter each job run.\n"
+          },
+          "relations_for_deletion": {
+            "type": "array",
+            "description": "Related entity schemas whose entities will also be deleted\nalongside the primary entity.\n",
+            "items": {
+              "$ref": "#/components/schemas/DeletionRelationEntitySchema"
+            }
+          },
+          "last_run_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the most recent job run."
+          }
+        }
+      },
+      "DeletionRelationEntitySchema": {
+        "type": "string",
+        "description": "Entity schema slug that can be specified as a cascading deletion\ntarget. When a primary entity is deleted, related entities of these\nschemas are also removed.\n",
+        "enum": [
+          "contact",
+          "file",
+          "opportunity",
+          "order",
+          "meter",
+          "ticket",
+          "message",
+          "account",
+          "submission",
+          "contract"
+        ]
+      },
+      "ListConfigsResponse": {
+        "type": "object",
+        "description": "Paginated response containing a list of data lifecycle configs.",
+        "properties": {
+          "configs": {
+            "type": "array",
+            "description": "Array of config records for the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Config"
+            }
+          },
+          "cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque cursor for fetching the next page. `null` when there are\nno more results.\n"
+          }
+        }
+      }
+    }
+  }
+}

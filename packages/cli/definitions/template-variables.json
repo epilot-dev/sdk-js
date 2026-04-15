@@ -3,12 +3,9 @@
   "info": {
     "title": "Template Variables API",
     "description": "This API provides dynamic template processing and variable management, seamless Handlebars template compilation, custom variable operations, and context-aware content generation across email, document templates and snippets.\n",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "servers": [
-    {
-      "url": "https://template-variables-api.sls.epilot.io"
-    },
     {
       "url": "https://template-variables-api.sls.epilot.io"
     },
@@ -644,6 +641,10 @@
               "type": "string"
             }
           },
+          "template_id": {
+            "type": "string",
+            "description": "The Id of email template"
+          },
           "variables_version": {
             "type": "string",
             "description": "The version of the variables syntax supported. Default is 1.0",
@@ -1077,6 +1078,13 @@
           "_tags": {
             "type": "array",
             "description": "The tags of custom variable",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "The manifest IDs associated with this custom variable",
             "items": {
               "type": "string"
             }

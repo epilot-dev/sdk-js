@@ -9,8 +9,6 @@ export default defineCommand({
     init: () => import('./init.js').then((m) => m.default),
     'add-component': () => import('./add-component.js').then((m) => m.default),
     'remove-component': () => import('./remove-component.js').then((m) => m.default),
-    'add-proxy': () => import('./add-proxy.js').then((m) => m.default),
-    'remove-proxy': () => import('./remove-proxy.js').then((m) => m.default),
     validate: () => import('./validate.js').then((m) => m.default),
     deploy: () => import('./deploy.js').then((m) => m.default),
     export: () => import('./export.js').then((m) => m.default),

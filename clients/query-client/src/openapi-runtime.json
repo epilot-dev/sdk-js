@@ -1,0 +1,316 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/datalake/views": {
+      "post": {
+        "operationId": "createOrUpdateView",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getAllViews",
+        "responses": {}
+      }
+    },
+    "/datalake/views/{view_slug}": {
+      "get": {
+        "operationId": "getView",
+        "parameters": [
+          {
+            "name": "view_slug",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/datalake/relationships": {
+      "post": {
+        "operationId": "createOrUpdateRelationship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getAllRelationships",
+        "responses": {}
+      }
+    },
+    "/v2/query/datasets": {
+      "get": {
+        "operationId": "listAvailableDatasetsV2",
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/entities:execute": {
+      "post": {
+        "operationId": "executeEntitiesQuery",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cache_expiration"
+          },
+          {
+            "in": "query",
+            "name": "no_cache"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/workflows:execute": {
+      "post": {
+        "operationId": "executeWorkflowsQuery",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mock"
+          },
+          {
+            "in": "query",
+            "name": "cache_expiration"
+          },
+          {
+            "in": "query",
+            "name": "no_cache"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/automations:execute": {
+      "post": {
+        "operationId": "executeAutomationQuery",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/workflows/definitions/{workflowDefinitionId}/phases": {
+      "get": {
+        "operationId": "listWorkflowPhasesByDefinitionId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workflowDefinitionId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/workflows/definitions": {
+      "get": {
+        "operationId": "listWorkflowDefinitions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "mock"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/query/domain/workflows/phases": {
+      "get": {
+        "operationId": "listPhaseNames",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "org_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/query/datasets": {
+      "get": {
+        "operationId": "listDatasets",
+        "responses": {}
+      }
+    },
+    "/v1/query:execute": {
+      "post": {
+        "operationId": "executeQuery",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cache_expiration"
+          },
+          {
+            "in": "query",
+            "name": "no_cache"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/credentials:generate": {
+      "post": {
+        "operationId": "generateCredentialsV2",
+        "responses": {}
+      }
+    },
+    "/v2/query/credentials:list": {
+      "get": {
+        "operationId": "listCredentialsV2",
+        "responses": {}
+      }
+    },
+    "/v2/query/credentials:revoke": {
+      "post": {
+        "operationId": "revokeCredentialsV2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/query:execute": {
+      "post": {
+        "operationId": "executeQueryV2",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/semantic-model": {
+      "get": {
+        "operationId": "getSemanticModel",
+        "responses": {}
+      }
+    },
+    "/v2/query/autocomplete": {
+      "get": {
+        "operationId": "autocomplete",
+        "parameters": [
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/query/workflows:autocomplete": {
+      "get": {
+        "operationId": "workflowsAutocomplete",
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query"
+          },
+          {
+            "name": "attribute",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "size",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequestResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnauthorizedResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ForbiddenResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://query.sls.epilot.io"
+    }
+  ]
+}

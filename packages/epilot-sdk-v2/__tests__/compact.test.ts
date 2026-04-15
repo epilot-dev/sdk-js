@@ -28,6 +28,7 @@ const compactifyParam = (p: Record<string, unknown>): unknown[] => {
 
 const compactifyDefinition = (raw: Record<string, unknown>): CompactDefinition => {
   const server: string = (raw.servers as { url: string }[])?.[0]?.url || '';
+  const serverVariables = (raw.servers as Record<string, unknown>[])?.[0]?.variables as CompactDefinition['sv'];
   const paths = (raw.paths || {}) as Record<string, Record<string, unknown>>;
 
   const ops: unknown[] = [];
@@ -65,6 +66,7 @@ const compactifyDefinition = (raw: Record<string, unknown>): CompactDefinition =
 
   const openapiVersion = (raw.openapi as string) || '3.0.2';
   const result: CompactDefinition = { s: server, o: ops as CompactDefinition['o'] };
+  if (serverVariables) result.sv = serverVariables;
   if (openapiVersion !== '3.0.2') result.v = openapiVersion;
 
   const componentParams = (raw.components as Record<string, unknown>)?.parameters as

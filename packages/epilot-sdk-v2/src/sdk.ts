@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-import { registerBuiltinApis } from './apis/_registry';
+import { registerBuiltinApis, registerBuiltinExtensions } from './apis/_registry';
 import type { TokenArg } from './authorize';
 import type { SDKClientMap } from './client-map';
 import { createApiClient } from './client-factory';
@@ -11,7 +11,7 @@ import { createApiHandle } from './proxy';
 import { createRegistry, resetAllClients, resolveClient } from './registry';
 import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
-import type { ApiHandle, HeadersConfig, SDKState } from './types';
+import type { ApiHandle, ExtensionEntry, HeadersConfig, SDKState } from './types';
 
 export type InterceptorUse = {
   request: (
@@ -45,6 +45,7 @@ export type EpilotSDK = {
 
 export const createSDK = (): EpilotSDK => {
   const registry = createRegistry();
+  const extensions = new Map<string, ExtensionEntry>();
   const state: SDKState = {
     token: null,
     tokenFn: null,
@@ -55,6 +56,7 @@ export const createSDK = (): EpilotSDK => {
   };
 
   registerBuiltinApis(registry);
+  registerBuiltinExtensions(extensions);
   loadOverrides(registry);
 
   const getHandle = (name: string): ApiHandle<AxiosInstance> => {
@@ -135,6 +137,11 @@ export const createSDK = (): EpilotSDK => {
         default:
           if (registry.has(prop)) {
             return getHandle(prop);
+          }
+
+          // Check non-API extensions (e.g. journeyToolkit)
+          if (extensions.has(prop)) {
+            return extensions.get(prop)!.value;
           }
 
           return undefined;

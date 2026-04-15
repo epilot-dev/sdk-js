@@ -3,7 +3,7 @@ import type { Document } from 'openapi-client-axios';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { registerApi } from '../registry';
-import type { ApiEntry } from '../types';
+import type { ApiEntry, ExtensionEntry } from '../types';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const expandDef = (mod: { default?: unknown }): Document =>
@@ -57,6 +57,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'configurationHub',
+    loader: () => expandDef(require('../definitions/configuration-hub-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'consent',
     loader: () => expandDef(require('../definitions/consent-runtime.json')),
   });
@@ -72,8 +77,8 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
-    name: 'dataManagement',
-    loader: () => expandDef(require('../definitions/data-management-runtime.json')),
+    name: 'dataGovernance',
+    loader: () => expandDef(require('../definitions/data-governance-runtime.json')),
   });
   registerApi({
     registry,
@@ -117,11 +122,6 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
-    name: 'erpIntegration',
-    loader: () => expandDef(require('../definitions/erp-integration-runtime.json')),
-  });
-  registerApi({
-    registry,
     name: 'eventCatalog',
     loader: () => expandDef(require('../definitions/event-catalog-runtime.json')),
   });
@@ -134,6 +134,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'iban',
     loader: () => expandDef(require('../definitions/iban-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'integrationToolkit',
+    loader: () => expandDef(require('../definitions/integration-toolkit-runtime.json')),
   });
   registerApi({
     registry,
@@ -197,8 +202,18 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'query',
+    loader: () => expandDef(require('../definitions/query-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'sandbox',
     loader: () => expandDef(require('../definitions/sandbox-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'sharing',
+    loader: () => expandDef(require('../definitions/sharing-runtime.json')),
   });
   registerApi({
     registry,
@@ -239,5 +254,27 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'workflowDefinition',
     loader: () => expandDef(require('../definitions/workflow-definition-runtime.json')),
+  });
+};
+
+/**
+ * Register non-API extensions (plain objects, not OpenAPI clients).
+ * These are mounted on the SDK alongside API handles.
+ * Extensions are lazy-loaded — the module is only imported on first access.
+ */
+export const registerBuiltinExtensions = (extensions: Map<string, ExtensionEntry>) => {
+  let cached: unknown = null;
+  extensions.set('journeyToolkit', {
+    get value() {
+      if (cached) return cached;
+      try {
+        // lazy-load journey toolkit
+        cached = require('@epilot/epilot-journey-sdk');
+      } catch {
+        // journey toolkit not installed
+        cached = undefined;
+      }
+      return cached;
+    },
   });
 };

@@ -78,6 +78,7 @@ epilot email-settings provisionEpilotEmailAddress
 - [`updateSetting`](#updatesetting) — Updates an existing setting identified by its ID.
 
 **Domains**
+- [`getDomains`](#getdomains) — Retrieves all custom email domains for the organization.
 - [`addDomain`](#adddomain) — Adds a custom email domain to the organization.
 - [`deleteDomain`](#deletedomain) — Removes a custom email domain from the organization.
 - [`verifyNameServers`](#verifynameservers) — Verifies that the domain's name server (NS) records are correctly configured.
@@ -1580,6 +1581,35 @@ epilot email-settings updateSetting -p id=a10bd0ff-4391-4cfc-88ee-b19d718a9bf7 -
   "created_by": "user-123",
   "updated_by": "user-456"
 }
+```
+
+</details>
+
+---
+
+### `getDomains`
+
+Retrieves all custom email domains for the organization.
+
+`GET /v1/email-settings/domain`
+
+**Sample Call**
+
+```bash
+epilot email-settings getDomains
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings getDomains --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+["string"]
 ```
 
 </details>

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Design Builder API v2",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "tags": [
     {
@@ -12,7 +12,17 @@
   ],
   "servers": [
     {
-      "url": "https://design-builder-api.epilot.io"
+      "url": "https://design-builder-api.{environment}.epilot.io",
+      "variables": {
+        "environment": {
+          "default": "sls",
+          "enum": [
+            "sls",
+            "dev.sls",
+            "staging.sls"
+          ]
+        }
+      }
     }
   ],
   "security": [
@@ -35,10 +45,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetAllDesignsRes"
-                  }
+                  "$ref": "#/components/schemas/GetAllDesignsRes"
                 }
               }
             }
@@ -129,12 +136,10 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           }
         ],
         "responses": {
@@ -194,12 +199,10 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           }
         ],
         "responses": {
@@ -252,12 +255,10 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           }
         ],
         "requestBody": {
@@ -324,16 +325,15 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           },
           {
             "in": "query",
             "name": "orgId",
+            "required": false,
             "schema": {
               "type": "string"
             },
@@ -342,16 +342,10 @@
           {
             "in": "query",
             "name": "theme",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "NEW",
-                "OLD"
-              ]
-            },
             "required": true,
-            "description": "Type of theme to be parsed and returned",
-            "example": "NEW"
+            "schema": {
+              "$ref": "#/components/schemas/Theme"
+            }
           }
         ],
         "responses": {
@@ -616,22 +610,18 @@
           {
             "in": "path",
             "name": "consumerId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           },
           {
             "in": "path",
             "name": "application",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Type of application that uses the design",
-            "example": "journey"
+            "schema": {
+              "$ref": "#/components/schemas/Application"
+            }
           }
         ],
         "responses": {
@@ -693,12 +683,10 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           },
           {
             "in": "path",
@@ -774,12 +762,10 @@
           {
             "in": "path",
             "name": "designId",
-            "schema": {
-              "type": "string"
-            },
             "required": true,
-            "description": "Id of the design",
-            "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
           },
           {
             "in": "path",
@@ -798,7 +784,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddConsumerReq"
+                "$ref": "#/components/schemas/RemoveConsumerReq"
               }
             }
           }
@@ -1047,7 +1033,7 @@
         "type": "object",
         "properties": {
           "consumer_id": {
-            "type": "string"
+            "$ref": "#/components/schemas/DesignId"
           },
           "consumer_name": {
             "type": "string"
@@ -1059,6 +1045,21 @@
         "required": [
           "consumer_id",
           "consumer_name"
+        ]
+      },
+      "RemoveConsumerReq": {
+        "type": "object",
+        "properties": {
+          "consumer_id": {
+            "$ref": "#/components/schemas/DesignId"
+          },
+          "should_delete": {
+            "type": "string",
+            "deprecated": true
+          }
+        },
+        "required": [
+          "consumer_id"
         ]
       },
       "DesignItem": {
@@ -1122,6 +1123,13 @@
           },
           "is_default": {
             "type": "boolean"
+          },
+          "_manifest": {
+            "type": "array",
+            "description": "The manifest IDs associated with this design",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1386,6 +1394,9 @@
         "properties": {
           "message": {
             "type": "string"
+          },
+          "error": {
+            "type": "object"
           }
         }
       },
@@ -1417,6 +1428,41 @@
           "s3_object_key",
           "url"
         ]
+      },
+      "DesignId": {
+        "type": "string",
+        "minLength": 36,
+        "maxLength": 36,
+        "description": "Id of the design",
+        "example": "4a062990-a6a3-11eb-9828-4f3da7d4935a"
+      },
+      "Theme": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "OLD"
+        ],
+        "description": "Type of theme to be parsed and returned",
+        "example": "NEW"
+      },
+      "Application": {
+        "type": "string",
+        "description": "Type of application that uses the design",
+        "example": "journey"
+      },
+      "DesignParameters": {
+        "type": "object",
+        "properties": {
+          "designId": {
+            "$ref": "#/components/schemas/DesignId"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
+          },
+          "application": {
+            "$ref": "#/components/schemas/Application"
+          }
+        }
       }
     }
   }

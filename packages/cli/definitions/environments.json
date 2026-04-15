@@ -3,7 +3,7 @@
   "info": {
     "title": "Environments API",
     "description": "API for managing organization environment variables and secrets",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "tags": [
     {
@@ -86,6 +86,122 @@
           },
           "409": {
             "description": "Environment variable with this key already exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/environments/groups": {
+      "get": {
+        "operationId": "listEnvironmentGroups",
+        "summary": "List environment groups",
+        "description": "List all environment groups for the organization.",
+        "tags": [
+          "environments"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of environment groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentGroupList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/environments/groups/{name}": {
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "putEnvironmentGroup",
+        "summary": "putEnvironmentGroup",
+        "tags": [
+          "environments"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentGroupUpsertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentGroup"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentGroup"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEnvironmentGroup",
+        "summary": "Delete an environment group",
+        "description": "Deletes a group. Variables assigned to this group become ungrouped.",
+        "tags": [
+          "environments"
+        ],
+        "responses": {
+          "204": {
+            "description": "Group deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Group not found"
           },
           "500": {
             "description": "Internal server error"
@@ -252,6 +368,10 @@
           "description": {
             "type": "string"
           },
+          "group": {
+            "type": "string",
+            "description": "Optional group name for organising variables in the UI"
+          },
           "value": {
             "type": "string",
             "description": "Value is returned for String type, omitted for SecretString"
@@ -283,6 +403,10 @@
           },
           "description": {
             "type": "string"
+          },
+          "group": {
+            "type": "string",
+            "description": "Optional group name for organising variables in the UI"
           },
           "value": {
             "type": "string",
@@ -316,8 +440,7 @@
         "type": "object",
         "required": [
           "key",
-          "type",
-          "value"
+          "type"
         ],
         "properties": {
           "key": {
@@ -330,6 +453,9 @@
           "description": {
             "type": "string"
           },
+          "group": {
+            "type": "string"
+          },
           "value": {
             "type": "string"
           }
@@ -337,9 +463,6 @@
       },
       "EnvironmentVariableUpdateRequest": {
         "type": "object",
-        "required": [
-          "value"
-        ],
         "properties": {
           "type": {
             "description": "Type of variable. Used when creating a new variable. Defaults to String.",
@@ -354,10 +477,63 @@
           },
           "description": {
             "type": "string"
+          },
+          "group": {
+            "type": "string"
+          }
+        }
+      },
+      "EnvironmentGroup": {
+        "type": "object",
+        "required": [
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EnvironmentGroupList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGroup"
+            }
+          }
+        }
+      },
+      "EnvironmentGroupUpsertRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
           }
         }
       }
     }
   },
-  "servers": [{"url":"https://environments.sls.epilot.io"}]
+  "servers": [
+    {
+      "url": "https://environments.sls.epilot.io"
+    }
+  ]
 }

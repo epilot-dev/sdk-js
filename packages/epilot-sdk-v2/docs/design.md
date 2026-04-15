@@ -1,6 +1,6 @@
 # Design Builder API v2
 
-- **Base URL:** `https://design-builder-api.epilot.io`
+- **Base URL:** `https://design-builder-api.{environment}.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
 
 ## Usage
@@ -49,6 +49,7 @@ const { data } = await designClient.getAllDesigns(...)
 - [`UpdateDesignReq`](#updatedesignreq)
 - [`ItemMetada`](#itemmetada)
 - [`AddConsumerReq`](#addconsumerreq)
+- [`RemoveConsumerReq`](#removeconsumerreq)
 - [`DesignItem`](#designitem)
 - [`BrandItem`](#branditem)
 - [`Custom_Style`](#custom_style)
@@ -65,6 +66,10 @@ const { data } = await designClient.getAllDesigns(...)
 - [`WidgetPortalData`](#widgetportaldata)
 - [`ErrorResp`](#errorresp)
 - [`FileData`](#filedata)
+- [`DesignId`](#designid)
+- [`Theme`](#theme)
+- [`Application`](#application)
+- [`DesignParameters`](#designparameters)
 
 ### `getAllDesigns`
 
@@ -80,91 +85,90 @@ const { data } = await client.getAllDesigns()
 <summary>Response</summary>
 
 ```json
-[
-  {
-    "designs": [
-      {
-        "id": "string",
-        "created_at": "2021-01-30T08:30:00Z",
-        "created_by": "string",
-        "edited": true,
-        "last_modified_at": "string",
-        "brand_id": "string",
-        "brand_name": "string",
-        "user": {
-          "emailaddress": "string",
-          "fullname": "string",
-          "name": "string",
-          "userid": "string"
-        },
-        "style_name": "string",
-        "style": {
-          "logo": {
-            "main": {
-              "name": "string",
-              "display_name": "string",
-              "file_type": "LOGO",
-              "s3_object_key": "string",
-              "url": "string"
-            }
-          },
-          "palette": {
-            "primary": "string",
-            "secondary": "string",
-            "error": "string",
-            "background": "string",
-            "paper": "string",
-            "navbar": "string",
-            "portal_login_background": "string"
-          },
-          "typography": {
-            "font": {
-              "font_id": "string",
-              "font_name": "string",
-              "font_family": "string",
-              "font_weight_regular": "string",
-              "font_weight_medium": "string",
-              "font_weight_bold": "string",
-              "urls": [
-                {
-                  "type": "WOFF2",
-                  "url": "string"
-                }
-              ]
-            },
-            "primary": "string",
-            "secondary": "string"
-          },
-          "shape": {
-            "border_radius": 0
-          },
-          "consumer": {
-            "widgets": [
-              {
-                "id": "string",
-                "name": "string"
-              }
-            ],
-            "customer_portals": [
-              {
-                "id": "string",
-                "name": "string"
-              }
-            ]
+{
+  "designs": [
+    {
+      "id": "string",
+      "created_at": "2021-01-30T08:30:00Z",
+      "created_by": "string",
+      "edited": true,
+      "last_modified_at": "string",
+      "brand_id": "string",
+      "brand_name": "string",
+      "user": {
+        "emailaddress": "string",
+        "fullname": "string",
+        "name": "string",
+        "userid": "string"
+      },
+      "style_name": "string",
+      "style": {
+        "logo": {
+          "main": {
+            "name": "string",
+            "display_name": "string",
+            "file_type": "LOGO",
+            "s3_object_key": "string",
+            "url": "string"
           }
         },
-        "is_default": true,
-        "custom_theme": "string",
-        "use_custom_theme": true,
-        "design_tokens": {
-          "coupon": "string",
-          "cashback": "string",
-          "custom_css": "string"
+        "palette": {
+          "primary": "string",
+          "secondary": "string",
+          "error": "string",
+          "background": "string",
+          "paper": "string",
+          "navbar": "string",
+          "portal_login_background": "string"
+        },
+        "typography": {
+          "font": {
+            "font_id": "string",
+            "font_name": "string",
+            "font_family": "string",
+            "font_weight_regular": "string",
+            "font_weight_medium": "string",
+            "font_weight_bold": "string",
+            "urls": [
+              {
+                "type": "WOFF2",
+                "url": "string"
+              }
+            ]
+          },
+          "primary": "string",
+          "secondary": "string"
+        },
+        "shape": {
+          "border_radius": 0
+        },
+        "consumer": {
+          "widgets": [
+            {
+              "id": "string",
+              "name": "string"
+            }
+          ],
+          "customer_portals": [
+            {
+              "id": "string",
+              "name": "string"
+            }
+          ]
         }
+      },
+      "is_default": true,
+      "_manifest": ["string"],
+      "custom_theme": "string",
+      "use_custom_theme": true,
+      "design_tokens": {
+        "coupon": "string",
+        "cashback": "string",
+        "custom_css": "string"
       }
-    ]
-  }
-]
+    }
+  ]
+}
 ```
 
 </details>
@@ -247,6 +251,7 @@ const { data } = await client.addDesign(
         }
       },
       is_default: true,
+      _manifest: ['string'],
       custom_theme: 'string',
       use_custom_theme: true,
       design_tokens: {
@@ -335,6 +340,7 @@ const { data } = await client.addDesign(
       }
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -438,6 +444,7 @@ const { data } = await client.getDesign({
       }
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -545,6 +552,7 @@ const { data } = await client.updateDesign(
         }
       },
       is_default: true,
+      _manifest: ['string'],
       custom_theme: 'string',
       use_custom_theme: true,
       design_tokens: {
@@ -731,6 +739,7 @@ const { data } = await client.getConsumerDesign({
       }
     },
     "is_default": true,
+    "_manifest": ["string"],
     "custom_theme": "string",
     "use_custom_theme": true,
     "design_tokens": {
@@ -759,7 +768,7 @@ const { data } = await client.addConsumer(
     application: 'example',
   },
   {
-    consumer_id: 'string',
+    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
     consumer_name: 'string',
     should_delete: 'string'
   },
@@ -781,8 +790,7 @@ const { data } = await client.removeConsumer(
     application: 'example',
   },
   {
-    consumer_id: 'string',
-    consumer_name: 'string',
+    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
     should_delete: 'string'
   },
 )
@@ -854,6 +862,7 @@ type GetAllDesignsRes = {
       consumer: { ... }
     }
     is_default?: boolean
+    _manifest?: string[]
     custom_theme?: string
     use_custom_theme?: boolean
     design_tokens?: {
@@ -905,6 +914,7 @@ type AddDesignReq = {
       consumer: { ... }
     }
     is_default?: boolean
+    _manifest?: string[]
     custom_theme?: string
     use_custom_theme?: boolean
     design_tokens?: {
@@ -943,6 +953,7 @@ type AddDesignRes = {
       consumer: { ... }
     }
     is_default?: boolean
+    _manifest?: string[]
     custom_theme?: string
     use_custom_theme?: boolean
     design_tokens?: {
@@ -981,6 +992,7 @@ type GetDesignRes = {
       consumer: { ... }
     }
     is_default?: boolean
+    _manifest?: string[]
     custom_theme?: string
     use_custom_theme?: boolean
     design_tokens?: {
@@ -1014,6 +1026,7 @@ type UpdateDesignReq = {
       consumer: { ... }
     }
     is_default?: boolean
+    _manifest?: string[]
     custom_theme?: string
     use_custom_theme?: boolean
     design_tokens?: {
@@ -1043,6 +1056,15 @@ type ItemMetada = {
 type AddConsumerReq = {
   consumer_id: string
   consumer_name: string
+  should_delete?: string
+}
+```
+
+### `RemoveConsumerReq`
+
+```ts
+type RemoveConsumerReq = {
+  consumer_id: string
   should_delete?: string
 }
 ```
@@ -1087,6 +1109,7 @@ type DesignItem = {
     }
   }
   is_default?: boolean
+  _manifest?: string[]
 }
 ```
 
@@ -1257,6 +1280,7 @@ type WidgetPortalData = {
 ```ts
 type ErrorResp = {
   message?: string
+  error?: object
 }
 ```
 
@@ -1269,5 +1293,39 @@ type FileData = {
   file_type?: "LOGO" | "FONT"
   s3_object_key: string
   url: string
+}
+```
+
+### `DesignId`
+
+Id of the design
+
+```ts
+type DesignId = string
+```
+
+### `Theme`
+
+Type of theme to be parsed and returned
+
+```ts
+type Theme = "NEW" | "OLD"
+```
+
+### `Application`
+
+Type of application that uses the design
+
+```ts
+type Application = string
+```
+
+### `DesignParameters`
+
+```ts
+type DesignParameters = {
+  designId?: string
+  theme?: "NEW" | "OLD"
+  application?: string
 }
 ```

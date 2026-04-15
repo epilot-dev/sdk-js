@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.2.4",
+  "version": "2.3.6",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -69,6 +69,12 @@
       "require": "./dist/apis/blueprint-manifest.cjs"
     },
     "./blueprint-manifest/openapi.json": "./definitions/blueprint-manifest.json",
+    "./configuration-hub": {
+      "types": "./dist/apis/configuration-hub.d.ts",
+      "import": "./dist/apis/configuration-hub.js",
+      "require": "./dist/apis/configuration-hub.cjs"
+    },
+    "./configuration-hub/openapi.json": "./definitions/configuration-hub.json",
     "./consent": {
       "types": "./dist/apis/consent.d.ts",
       "import": "./dist/apis/consent.js",
@@ -87,12 +93,12 @@
       "require": "./dist/apis/dashboard.cjs"
     },
     "./dashboard/openapi.json": "./definitions/dashboard.json",
-    "./data-management": {
-      "types": "./dist/apis/data-management.d.ts",
-      "import": "./dist/apis/data-management.js",
-      "require": "./dist/apis/data-management.cjs"
+    "./data-governance": {
+      "types": "./dist/apis/data-governance.d.ts",
+      "import": "./dist/apis/data-governance.js",
+      "require": "./dist/apis/data-governance.cjs"
     },
-    "./data-management/openapi.json": "./definitions/data-management.json",
+    "./data-governance/openapi.json": "./definitions/data-governance.json",
     "./deduplication": {
       "types": "./dist/apis/deduplication.d.ts",
       "import": "./dist/apis/deduplication.js",
@@ -141,12 +147,6 @@
       "require": "./dist/apis/environments.cjs"
     },
     "./environments/openapi.json": "./definitions/environments.json",
-    "./erp-integration": {
-      "types": "./dist/apis/erp-integration.d.ts",
-      "import": "./dist/apis/erp-integration.js",
-      "require": "./dist/apis/erp-integration.cjs"
-    },
-    "./erp-integration/openapi.json": "./definitions/erp-integration.json",
     "./event-catalog": {
       "types": "./dist/apis/event-catalog.d.ts",
       "import": "./dist/apis/event-catalog.js",
@@ -165,6 +165,12 @@
       "require": "./dist/apis/iban.cjs"
     },
     "./iban/openapi.json": "./definitions/iban.json",
+    "./integration-toolkit": {
+      "types": "./dist/apis/integration-toolkit.d.ts",
+      "import": "./dist/apis/integration-toolkit.js",
+      "require": "./dist/apis/integration-toolkit.cjs"
+    },
+    "./integration-toolkit/openapi.json": "./definitions/integration-toolkit.json",
     "./journey": {
       "types": "./dist/apis/journey.d.ts",
       "import": "./dist/apis/journey.js",
@@ -237,12 +243,24 @@
       "require": "./dist/apis/purpose.cjs"
     },
     "./purpose/openapi.json": "./definitions/purpose.json",
+    "./query": {
+      "types": "./dist/apis/query.d.ts",
+      "import": "./dist/apis/query.js",
+      "require": "./dist/apis/query.cjs"
+    },
+    "./query/openapi.json": "./definitions/query.json",
     "./sandbox": {
       "types": "./dist/apis/sandbox.d.ts",
       "import": "./dist/apis/sandbox.js",
       "require": "./dist/apis/sandbox.cjs"
     },
     "./sandbox/openapi.json": "./definitions/sandbox.json",
+    "./sharing": {
+      "types": "./dist/apis/sharing.d.ts",
+      "import": "./dist/apis/sharing.js",
+      "require": "./dist/apis/sharing.cjs"
+    },
+    "./sharing/openapi.json": "./definitions/sharing.json",
     "./submission": {
       "types": "./dist/apis/submission.d.ts",
       "import": "./dist/apis/submission.js",
@@ -323,6 +341,9 @@
     "definitions",
     "docs"
   ],
+  "optionalDependencies": {
+    "@epilot/epilot-journey-sdk": ">=2.0.0-alpha.1"
+  },
   "peerDependencies": {
     "axios": "^1.0.0",
     "openapi-client-axios": "^7.0.0"
@@ -365,6 +386,9 @@
       "blueprint-manifest": [
         "./dist/apis/blueprint-manifest.d.ts"
       ],
+      "configuration-hub": [
+        "./dist/apis/configuration-hub.d.ts"
+      ],
       "consent": [
         "./dist/apis/consent.d.ts"
       ],
@@ -374,8 +398,8 @@
       "dashboard": [
         "./dist/apis/dashboard.d.ts"
       ],
-      "data-management": [
-        "./dist/apis/data-management.d.ts"
+      "data-governance": [
+        "./dist/apis/data-governance.d.ts"
       ],
       "deduplication": [
         "./dist/apis/deduplication.d.ts"
@@ -401,9 +425,6 @@
       "environments": [
         "./dist/apis/environments.d.ts"
       ],
-      "erp-integration": [
-        "./dist/apis/erp-integration.d.ts"
-      ],
       "event-catalog": [
         "./dist/apis/event-catalog.d.ts"
       ],
@@ -412,6 +433,9 @@
       ],
       "iban": [
         "./dist/apis/iban.d.ts"
+      ],
+      "integration-toolkit": [
+        "./dist/apis/integration-toolkit.d.ts"
       ],
       "journey": [
         "./dist/apis/journey.d.ts"
@@ -449,8 +473,14 @@
       "purpose": [
         "./dist/apis/purpose.d.ts"
       ],
+      "query": [
+        "./dist/apis/query.d.ts"
+      ],
       "sandbox": [
         "./dist/apis/sandbox.d.ts"
+      ],
+      "sharing": [
+        "./dist/apis/sharing.d.ts"
       ],
       "submission": [
         "./dist/apis/submission.d.ts"

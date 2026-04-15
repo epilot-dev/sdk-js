@@ -51,6 +51,7 @@ vi.mock('../src/apis/_registry', () => ({
     registry.set('user', { loader: mockLoader, instance: null });
     registry.set('file', { loader: mockLoader, instance: null });
   }),
+  registerBuiltinExtensions: vi.fn(),
 }));
 
 vi.mock('../src/overrides', () => ({

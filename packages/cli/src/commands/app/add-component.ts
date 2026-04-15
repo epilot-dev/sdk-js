@@ -134,6 +134,17 @@ const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
       { key: 'api_key', label: 'API Key', type: 'secret', required: true, description: 'API key for product catalog' },
     ],
   },
+  API_PROXY: {
+    configOnly: true,
+    manifestType: 'API_PROXY',
+    templateDir: 'api-proxy',
+    description: 'Server-side API proxy with credential injection',
+    configuration: () => ({
+      name: '',
+      target: '',
+      auth_type: 'none',
+    }),
+  },
 };
 
 const AVAILABLE_TYPES = Object.keys(TEMPLATE_REGISTRY);
@@ -234,34 +245,76 @@ export default defineCommand({
     }
     const manifest = readManifest(manifestPath);
 
-    // Check for duplicate _dir
-    if (manifest.components.some((c) => c._dir === componentName)) {
+    const tmpl = TEMPLATE_REGISTRY[componentType];
+    const isApiProxy = componentType === 'API_PROXY';
+
+    // Check for duplicate _dir (skip for API_PROXY which has no directory)
+    if (!isApiProxy && manifest.components.some((c) => c._dir === componentName)) {
       log.error(`Component "${componentName}" already exists in manifest.`);
       process.exit(1);
     }
 
-    // Create component directory
-    const componentDir = resolve('components', componentName);
-    if (existsSync(componentDir)) {
-      log.error(`Directory "components/${componentName}" already exists.`);
-      process.exit(1);
+    // For API_PROXY, prompt for proxy-specific configuration
+    let proxyConfig: { name: string; target: string; auth_type: string } | undefined;
+    if (isApiProxy) {
+      const { input, select } = await import('@inquirer/prompts');
+      const proxyName = await input({
+        message: 'Proxy name (SDK identifier)',
+        default: componentName,
+        validate: (v) => {
+          if (!v.trim()) return 'Name is required';
+          if (!/^[a-zA-Z0-9_-]+$/.test(v)) return 'Use letters, numbers, hyphens, and underscores';
+          if (v.length > 64) return 'Max 64 characters';
+          return true;
+        },
+      });
+      const target = await input({
+        message: 'Target URL (must start with https://)',
+        validate: (v) => {
+          if (!v.trim()) return 'Target URL is required';
+          if (!v.startsWith('https://')) return 'Must start with https://';
+          try {
+            new URL(v);
+            return true;
+          } catch {
+            return 'Must be a valid URL';
+          }
+        },
+      });
+      const authType = await select({
+        message: 'Auth type',
+        choices: [
+          { value: 'none', name: 'none' },
+          { value: 'header', name: 'header' },
+          { value: 'bearer', name: 'bearer' },
+          { value: 'oauth2', name: 'oauth2' },
+        ],
+      });
+      proxyConfig = { name: proxyName, target, auth_type: authType };
+    } else {
+      // Create component directory and download template
+      const componentDir = resolve('components', componentName);
+      if (existsSync(componentDir)) {
+        log.error(`Directory "components/${componentName}" already exists.`);
+        process.exit(1);
+      }
+
+      log.dim(`Downloading template from ${TEMPLATES_REPO}/${tmpl.templateDir}...`);
+      await downloadTemplate(tmpl.templateDir, componentDir, componentName);
     }
-
-    const tmpl = TEMPLATE_REGISTRY[componentType];
-
-    // Download template from GitHub
-    log.dim(`Downloading template from ${TEMPLATES_REPO}/${tmpl.templateDir}...`);
-    await downloadTemplate(tmpl.templateDir, componentDir, componentName);
 
     // Add component to manifest
     const componentId = randomUUID();
+    const configuration = proxyConfig
+      ? { name: proxyConfig.name, target: proxyConfig.target, auth_type: proxyConfig.auth_type }
+      : tmpl.configuration(componentName);
     const component: ManifestComponent = {
       id: componentId,
       component_type: tmpl.manifestType,
-      _dir: componentName,
+      ...(isApiProxy ? {} : { _dir: componentName }),
       name: { de: toPascalCase(componentName), en: toPascalCase(componentName) },
       description: { de: 'Description', en: 'Description' },
-      configuration: tmpl.configuration(componentName),
+      configuration,
     };
 
     if (tmpl.surfaces) component.surfaces = tmpl.surfaces(componentName);
@@ -274,11 +327,15 @@ export default defineCommand({
     // Print summary
     log.success(`Added component "${componentName}" (${componentType})`);
     log.info('');
-    log.info(`  components/${componentName}/`);
 
-    if (tmpl.configOnly) {
+    if (isApiProxy) {
+      log.info(`  Proxy: ${proxyConfig!.name} -> ${proxyConfig!.target} (auth: ${proxyConfig!.auth_type})`);
+      log.dim('Add secret options to the component manually if needed.');
+    } else if (tmpl.configOnly) {
+      log.info(`  components/${componentName}/`);
       log.dim('This is a config-only component. Edit configuration.json to configure it.');
     } else {
+      log.info(`  components/${componentName}/`);
       log.dim('Run "npm install" to link the new workspace.');
     }
 

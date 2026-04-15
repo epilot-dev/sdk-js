@@ -57,10 +57,11 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.automation` | `@epilot/sdk/automation` | [docs](./packages/epilot-sdk-v2/docs/automation.md) |
 | `epilot.billing` | `@epilot/sdk/billing` | [docs](./packages/epilot-sdk-v2/docs/billing.md) |
 | `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./packages/epilot-sdk-v2/docs/blueprint-manifest.md) |
+| `epilot.configurationHub` | `@epilot/sdk/configuration-hub` | [docs](./packages/epilot-sdk-v2/docs/configuration-hub.md) |
 | `epilot.consent` | `@epilot/sdk/consent` | [docs](./packages/epilot-sdk-v2/docs/consent.md) |
 | `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./packages/epilot-sdk-v2/docs/customer-portal.md) |
 | `epilot.dashboard` | `@epilot/sdk/dashboard` | [docs](./packages/epilot-sdk-v2/docs/dashboard.md) |
-| `epilot.dataManagement` | `@epilot/sdk/data-management` | [docs](./packages/epilot-sdk-v2/docs/data-management.md) |
+| `epilot.dataGovernance` | `@epilot/sdk/data-governance` | [docs](./packages/epilot-sdk-v2/docs/data-governance.md) |
 | `epilot.deduplication` | `@epilot/sdk/deduplication` | [docs](./packages/epilot-sdk-v2/docs/deduplication.md) |
 | `epilot.design` | `@epilot/sdk/design` | [docs](./packages/epilot-sdk-v2/docs/design.md) |
 | `epilot.document` | `@epilot/sdk/document` | [docs](./packages/epilot-sdk-v2/docs/document.md) |
@@ -69,10 +70,10 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.entity` | `@epilot/sdk/entity` | [docs](./packages/epilot-sdk-v2/docs/entity.md) |
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./packages/epilot-sdk-v2/docs/entity-mapping.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./packages/epilot-sdk-v2/docs/environments.md) |
-| `epilot.erpIntegration` | `@epilot/sdk/erp-integration` | [docs](./packages/epilot-sdk-v2/docs/erp-integration.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
 | `epilot.file` | `@epilot/sdk/file` | [docs](./packages/epilot-sdk-v2/docs/file.md) |
 | `epilot.iban` | `@epilot/sdk/iban` | [docs](./packages/epilot-sdk-v2/docs/iban.md) |
+| `epilot.integrationToolkit` | `@epilot/sdk/integration-toolkit` | [docs](./packages/epilot-sdk-v2/docs/integration-toolkit.md) |
 | `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
 | `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |
 | `epilot.message` | `@epilot/sdk/message` | [docs](./packages/epilot-sdk-v2/docs/message.md) |
@@ -85,7 +86,9 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
+| `epilot.query` | `@epilot/sdk/query` | [docs](./packages/epilot-sdk-v2/docs/query.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
+| `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./packages/epilot-sdk-v2/docs/sharing.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |

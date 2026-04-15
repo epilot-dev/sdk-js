@@ -1,6 +1,4 @@
 /* Auto-copied from message-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -122,6 +120,16 @@ export declare namespace Components {
              * ]
              */
             ids: string[];
+            /**
+             * Assignable IDs to assign the threads to
+             */
+            assign_to?: string[];
+            /**
+             * Inbox ID to move the threads to
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            inbox_id?: string;
             /**
              * The scopes to be used when marking an item as read or unread. The read status will be synced for all provided scopes.
              * example:
@@ -767,6 +775,24 @@ export declare namespace Paths {
             }
         }
     }
+    namespace BulkAssignThreads {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace BulkMoveThreads {
+        export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace CreateDraft {
         export type RequestBody = Components.Schemas.MessageRequestParams;
         namespace Responses {
@@ -1339,6 +1365,12 @@ export declare namespace Paths {
                  * 1
                  */
                 unassigned?: number;
+                /**
+                 * Total of spam messages
+                 * example:
+                 * 3
+                 */
+                spam?: number;
             }
             export interface $403 {
             }
@@ -2059,6 +2091,38 @@ export declare namespace Paths {
             }
         }
     }
+    namespace SpamMessage {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace SpamThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace ThreadBulkActionsDelete {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
@@ -2216,6 +2280,38 @@ export declare namespace Paths {
             export interface $409 {
             }
             export interface $500 {
+            }
+        }
+    }
+    namespace UnspamMessage {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace UnspamThread {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -2484,7 +2580,6 @@ export declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * updateMessage - updateMessage
@@ -2741,6 +2836,66 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UntrashThread.Responses.$200>
+  /**
+   * spamThread - spamThread
+   * 
+   * Mark a thread as spam
+   */
+  'spamThread'(
+    parameters?: Parameters<Paths.SpamThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SpamThread.Responses.$200>
+  /**
+   * unspamThread - unspamThread
+   * 
+   * Remove spam marking from a thread
+   */
+  'unspamThread'(
+    parameters?: Parameters<Paths.UnspamThread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnspamThread.Responses.$200>
+  /**
+   * spamMessage - spamMessage
+   * 
+   * Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+   */
+  'spamMessage'(
+    parameters?: Parameters<Paths.SpamMessage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SpamMessage.Responses.$204>
+  /**
+   * unspamMessage - unspamMessage
+   * 
+   * Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+   */
+  'unspamMessage'(
+    parameters?: Parameters<Paths.UnspamMessage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnspamMessage.Responses.$204>
+  /**
+   * bulkMoveThreads - bulkMoveThreads
+   * 
+   * Move many threads to a different inbox
+   */
+  'bulkMoveThreads'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkMoveThreads.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkMoveThreads.Responses.$200>
+  /**
+   * bulkAssignThreads - bulkAssignThreads
+   * 
+   * Assign many threads
+   */
+  'bulkAssignThreads'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.BulkAssignThreads.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BulkAssignThreads.Responses.$200>
   /**
    * threadBulkActionsRead - threadBulkActionsRead
    * 
@@ -3276,6 +3431,78 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UntrashThread.Responses.$200>
   }
+  ['/v1/message/threads/{id}/spam']: {
+    /**
+     * spamThread - spamThread
+     * 
+     * Mark a thread as spam
+     */
+    'post'(
+      parameters?: Parameters<Paths.SpamThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SpamThread.Responses.$200>
+  }
+  ['/v1/message/threads/{id}/unspam']: {
+    /**
+     * unspamThread - unspamThread
+     * 
+     * Remove spam marking from a thread
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnspamThread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnspamThread.Responses.$200>
+  }
+  ['/v1/message/messages/{id}/spam']: {
+    /**
+     * spamMessage - spamMessage
+     * 
+     * Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SpamMessage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SpamMessage.Responses.$204>
+  }
+  ['/v1/message/messages/{id}/unspam']: {
+    /**
+     * unspamMessage - unspamMessage
+     * 
+     * Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnspamMessage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnspamMessage.Responses.$204>
+  }
+  ['/v1/message/threads/bulk:move']: {
+    /**
+     * bulkMoveThreads - bulkMoveThreads
+     * 
+     * Move many threads to a different inbox
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkMoveThreads.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkMoveThreads.Responses.$200>
+  }
+  ['/v1/message/threads/bulk:assign']: {
+    /**
+     * bulkAssignThreads - bulkAssignThreads
+     * 
+     * Assign many threads
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.BulkAssignThreads.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BulkAssignThreads.Responses.$200>
+  }
   ['/v1/message/threads/bulk:read']: {
     /**
      * threadBulkActionsRead - threadBulkActionsRead
@@ -3554,7 +3781,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type Address = Components.Schemas.Address;
 export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;

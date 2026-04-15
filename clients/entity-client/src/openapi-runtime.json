@@ -1200,6 +1200,10 @@
           {
             "in": "query",
             "name": "include_archived"
+          },
+          {
+            "in": "query",
+            "name": "exclude_types"
           }
         ],
         "requestBody": {

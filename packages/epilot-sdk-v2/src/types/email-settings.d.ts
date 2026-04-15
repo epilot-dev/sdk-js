@@ -985,6 +985,13 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetDomains {
+        namespace Responses {
+            export type $200 = string[];
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace GetEmailAddress {
         namespace Parameters {
             export type Id = string;
@@ -1326,7 +1333,6 @@ export declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -1750,6 +1756,17 @@ export interface OperationMethods {
     data?: Paths.UpdateSetting.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSetting.Responses.$200>
+  /**
+   * getDomains - getDomains
+   * 
+   * Retrieves all custom email domains for the organization.
+   * 
+   */
+  'getDomains'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDomains.Responses.$200>
   /**
    * addDomain - addDomain
    * 
@@ -2318,6 +2335,17 @@ export interface PathsDictionary {
       data?: Paths.DeleteDomain.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteDomain.Responses.$204>
+    /**
+     * getDomains - getDomains
+     * 
+     * Retrieves all custom email domains for the organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDomains.Responses.$200>
   }
   ['/v1/email-settings/domain/name-servers:verify']: {
     /**
@@ -2361,7 +2389,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type ConnectedOutlookEmail = Components.Schemas.ConnectedOutlookEmail;
 export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;

@@ -957,7 +957,10 @@ epilot user getGroupsForUser -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
     },
     "users": [
       {}
-    ]
+    ],
+    "image_uri": {
+      "gradient_colors": ["#0588f0", "#3358d4"]
+    }
   }
 ]
 ```
@@ -1008,7 +1011,8 @@ epilot user getGroups --jsonata 'hits[0]'
       "updated_at": "2024-02-08T04:44:32.246Z",
       "created_by": "123",
       "crt_assignee": {},
-      "users": []
+      "users": [],
+      "image_uri": {}
     }
   ]
 }
@@ -1030,7 +1034,7 @@ Create a new group
 
 ```bash
 epilot user createGroup \
-  -d '{"name":"Finance","user_ids":["123","456"]}'
+  -d '{"name":"Finance","user_ids":["123","456"],"image_uri":{"gradient_colors":["#0588f0","#3358d4"]}}'
 ```
 
 Using stdin pipe:
@@ -1135,7 +1139,10 @@ epilot user createGroup --jsonata 'id'
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1265,7 +1272,10 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1292,7 +1302,7 @@ Update group by id
 ```bash
 epilot user updateGroup \
   -p id=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"name":"Finance","user_ids":["123","456"]}'
+  -d '{"name":"Finance","user_ids":["123","456"],"image_uri":{"gradient_colors":["#0588f0","#3358d4"]}}'
 ```
 
 Using positional args for path parameters:
@@ -1403,7 +1413,10 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 
@@ -1565,7 +1578,10 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
       "email_notification_setting": {},
       "properties": []
     }
-  ]
+  ],
+  "image_uri": {
+    "gradient_colors": ["#0588f0", "#3358d4"]
+  }
 }
 ```
 

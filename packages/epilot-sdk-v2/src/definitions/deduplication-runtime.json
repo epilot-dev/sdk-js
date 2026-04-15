@@ -1,1 +1,1 @@
-{"s":"https://deduplication.sls.epilot.io","o":[["deduplicate","post","/v1/deduplicate",null,1]]}
+{"s":"https://deduplication.sls.epilot.io","o":[["deduplicate","post","/v1/deduplicate",null,1],["deduplicateAsync","post","/v1/deduplicate/job",null,1],["getDeduplicationJob","get","/v1/deduplicate/jobs/{jobId}",[["jobId","p",true]]]]}

@@ -317,6 +317,82 @@
         "responses": {}
       }
     },
+    "/v1/message/threads/{id}/spam": {
+      "post": {
+        "operationId": "spamThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/unspam": {
+      "post": {
+        "operationId": "unspamThread",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/spam": {
+      "post": {
+        "operationId": "spamMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/messages/{id}/unspam": {
+      "post": {
+        "operationId": "unspamMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:move": {
+      "post": {
+        "operationId": "bulkMoveThreads",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/bulk:assign": {
+      "post": {
+        "operationId": "bulkAssignThreads",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads/bulk:read": {
       "post": {
         "operationId": "threadBulkActionsRead",

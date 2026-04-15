@@ -31,6 +31,7 @@ vi.mock('../src/apis/_registry', () => ({
     registry.set('workflow', { loader: createLoader('workflow'), instance: null });
     registry.set('pricing', { loader: createLoader('pricing'), instance: null });
   }),
+  registerBuiltinExtensions: vi.fn(),
 }));
 
 vi.mock('../src/overrides', () => ({

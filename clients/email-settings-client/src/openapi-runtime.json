@@ -398,6 +398,10 @@
           }
         },
         "responses": {}
+      },
+      "get": {
+        "operationId": "getDomains",
+        "responses": {}
       }
     },
     "/v1/email-settings/domain/name-servers:verify": {

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.2",
   "info": {
     "title": "",
     "version": ""
@@ -258,6 +258,25 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}:verify": {
+      "post": {
+        "operationId": "verifyBlueprint",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
@@ -488,6 +507,180 @@
             "in": "path",
             "required": true,
             "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/blueprints/{blueprint_id}/marketplace-listing": {
+      "post": {
+        "operationId": "createMarketplaceListing",
+        "parameters": [
+          {
+            "name": "blueprint_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "getMarketplaceListing",
+        "parameters": [
+          {
+            "name": "blueprint_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings": {
+      "get": {
+        "operationId": "listMarketplaceListings",
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}": {
+      "get": {
+        "operationId": "getMarketplaceListingById",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateMarketplaceListing",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteMarketplaceListing",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions": {
+      "post": {
+        "operationId": "createMarketplaceListingVersion",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listMarketplaceListingVersions",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}": {
+      "patch": {
+        "operationId": "updateMarketplaceListingVersion",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}/publish": {
+      "post": {
+        "operationId": "publishMarketplaceListingVersion",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprint:install": {
+      "post": {
+        "operationId": "installBlueprintV3",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
+      "get": {
+        "operationId": "getBlueprintLineageV3",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
           }
         ],
         "responses": {}

@@ -3728,6 +3728,10 @@ declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -4120,6 +4124,10 @@ declare namespace Components {
              */
             attributes: Attribute[];
             _purpose?: string[];
+            /**
+             * Manifest ID used to create the schema
+             */
+            _manifest?: string /* uuid */[] | null;
             explicit_search_mappings?: /**
              * Advanced: explicit Elasticsearch index mapping definitions for entity data
              *
@@ -4805,6 +4813,12 @@ declare namespace Components {
              */
             enable_description?: boolean;
             default_access_control?: "public-read" | "private";
+            /**
+             * The maximum file size in bytes. Used to derive file_size and file_size_unit in the UI.
+             * example:
+             * 5000000
+             */
+            file_size_bytes?: number;
         }
         export interface GenerateEntityTableAIFiltersRequest {
             /**
@@ -9702,15 +9716,38 @@ declare namespace Components {
                  * Whether this column is required for each row
                  */
                 required?: boolean;
+                /**
+                 * When true, the row is rendered in bold (only applies in transposed mode)
+                 */
+                bold?: boolean;
             }[];
             /**
              * Minimum number of rows required
              */
             min_rows?: number;
             /**
-             * Maximum number of rows allowed
+             * Maximum number of rows allowed (or maximum periods when transposed)
              */
             max_rows?: number;
+            /**
+             * Enable transposed layout where rows become metrics and columns become periods
+             */
+            transposed?: boolean;
+            /**
+             * Configuration for column headers in transposed mode
+             */
+            column_header?: {
+                /**
+                 * Header label pattern with {{i}} as index placeholder (e.g., "Year {{i}}")
+                 * example:
+                 * Year {{i}}
+                 */
+                template?: string;
+                /**
+                 * Starting index value for the template placeholder
+                 */
+                start?: number;
+            };
         }
         /**
          * Tags
@@ -11248,7 +11285,7 @@ declare namespace Paths {
             /**
              * Freeze to a specific version ID. Defaults to the current version.
              */
-            version_id?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+            version_id?: string; // uuid
         }
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
@@ -12394,7 +12431,7 @@ declare namespace Paths {
                 /**
                  * The version ID that is currently frozen, if any
                  */
-                frozen_version?: /* Generated uuid for schema */ Components.Schemas.SchemaId /* uuid */;
+                frozen_version?: string; // uuid
             }
         }
     }
@@ -12446,7 +12483,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -12472,7 +12509,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -13220,6 +13257,7 @@ declare namespace Paths {
              * false
              */
             export type Archived = boolean;
+            export type ExcludeTypes = ("relation" | "schema" | "system") | ("relation" | "schema" | "system")[];
             export type IncludeArchived = /**
              * Whether to include archived labels in the search results
              * - `true`: include archived labels
@@ -13250,6 +13288,7 @@ declare namespace Paths {
              */
             Parameters.Archived;
             include_archived?: Parameters.IncludeArchived;
+            exclude_types?: Parameters.ExcludeTypes;
         }
         export interface RequestBody {
             classificationIds?: Components.Schemas.ClassificationIdOrPattern[];
@@ -13892,7 +13931,6 @@ declare namespace Paths {
     }
 }
 
-
 export interface OperationMethods {
   /**
    * listSchemas - listSchemas
@@ -14435,6 +14473,7 @@ export interface OperationMethods {
    * 
    * - All activites are published as events on the event bus
    * - Entity mutations are always part of an activity
+   * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
    * 
    */
   'createActivity'(
@@ -15625,6 +15664,7 @@ export interface PathsDictionary {
      * 
      * - All activites are published as events on the event bus
      * - Entity mutations are always part of an activity
+     * - When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling
      * 
      */
     'post'(
@@ -16300,7 +16340,6 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
-
 
 export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;

@@ -1,5 +1,11 @@
 # @epilot/user-client
 
+## 3.13.2
+
+### Patch Changes
+
+- Added option to add image to groups
+
 ## 3.12.2
 
 ### Patch Changes

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -49,6 +47,10 @@ declare namespace Components {
              * The tags of custom variable
              */
             _tags?: string[];
+            /**
+             * The manifest IDs associated with this custom variable
+             */
+            _manifest?: string[];
             /**
              * The helper function parameter's names
              * example:
@@ -835,6 +837,10 @@ declare namespace Components {
              * The tags of email template
              */
             template_tags?: string[];
+            /**
+             * The Id of email template
+             */
+            template_id?: string;
             /**
              * The version of the variables syntax supported. Default is 1.0
              * example:

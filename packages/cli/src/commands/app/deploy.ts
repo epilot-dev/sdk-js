@@ -110,17 +110,16 @@ export default defineCommand({
       }
     }
 
-    // Step 4: Patch version (permissions, blueprint, proxies)
-    if (manifest.permissions?.length || manifest.blueprint?.manifest_id || manifest.proxies) {
+    // Step 4: Patch version (permissions, blueprint)
+    if (manifest.permissions?.length || manifest.blueprint?.manifest_id) {
       if (dryRun) {
-        log.info('[dry-run] Would update version permissions/blueprint/proxies');
+        log.info('[dry-run] Would update version permissions/blueprint');
       } else {
         await client.patchVersion(appId!, targetVersion, {
           ...(manifest.permissions?.length ? { grants: manifest.permissions } : {}),
           ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
-          ...(manifest.proxies ? { proxies: manifest.proxies } : {}),
         });
-        log.success(`Updated version ${targetVersion} (permissions/blueprint/proxies)`);
+        log.success(`Updated version ${targetVersion} (permissions/blueprint)`);
       }
     }
 

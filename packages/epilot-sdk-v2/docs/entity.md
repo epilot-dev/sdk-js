@@ -307,6 +307,7 @@ const { data } = await client.listSchemas({
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -372,6 +373,7 @@ const { data } = await client.listSchemasV2({
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -510,6 +512,7 @@ const { data } = await client.getSchema({
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -648,6 +651,7 @@ const { data } = await client.putSchema(
       /* ... 5 more */
     ],
     _purpose: ['string'],
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     explicit_search_mappings: {
       image: {
         type: 'keyword',
@@ -784,6 +788,7 @@ const { data } = await client.putSchema(
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1030,6 +1035,7 @@ const { data } = await client.getSchemaVersions({
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1065,6 +1071,7 @@ const { data } = await client.getSchemaVersions({
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -1209,6 +1216,7 @@ const { data } = await client.freezeSchema(
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1360,6 +1368,7 @@ const { data } = await client.unfreezeSchema({
     }
   ],
   "_purpose": ["string"],
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "explicit_search_mappings": {
     "image": {
       "type": "keyword",
@@ -1474,6 +1483,7 @@ const { data } = await client.listSchemaBlueprints()
       "dialog_config": {},
       "attributes": [],
       "_purpose": ["string"],
+      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
       "group_headlines": []
     }
@@ -4015,6 +4025,7 @@ const { data } = await client.taxonomiesClassificationsSearch(
     query: 'example',
     archived: true,
     include_archived: 'example',
+    exclude_types: ['...'],
   },
   {
     classificationIds: [
@@ -6938,6 +6949,7 @@ type FileAttribute = {
   display_images_landscaped?: boolean
   enable_description?: boolean
   default_access_control?: "public-read" | "private"
+  file_size_bytes?: number
 }
 ```
 
@@ -7838,9 +7850,15 @@ type TableAttribute = {
     type?: "string" | "number" | "date" | "boolean"
     width?: string
     required?: boolean
+    bold?: boolean
   }>
   min_rows?: number
   max_rows?: number
+  transposed?: boolean
+  column_header?: {
+    template?: string
+    start?: number
+  }
 }
 ```
 

@@ -26,6 +26,10 @@
             "in": "query"
           },
           {
+            "name": "target_workflow",
+            "in": "query"
+          },
+          {
             "name": "include_flows",
             "in": "query"
           }

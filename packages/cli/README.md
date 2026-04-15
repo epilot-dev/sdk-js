@@ -29,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.10 — CLI for epilot APIs
+epilot v0.1.14 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -70,10 +70,11 @@ APIs
   automation           Automation API
   billing              Billing API
   blueprint-manifest   Blueprint Manifest API
+  configuration-hub    Configuration Hub API
   consent              Consent API
   customer-portal      Portal API
   dashboard            Dashboard API
-  data-management      Data Management API
+  data-governance      Data Governance API
   deduplication        Deduplication API
   design               Design Builder API v2
   document             Document API
@@ -82,10 +83,10 @@ APIs
   entity               Entity API
   entity-mapping       Entity Mapping API
   environments         Environments API
-  erp-integration      ERP Integration API
   event-catalog        Event Catalog API
   file                 File API
   iban                 Iban API
+  integration-toolkit  Integration Toolkit API
   journey              Journey API
   kanban               Kanban API
   message              Message API
@@ -98,7 +99,9 @@ APIs
   pricing              Pricing API
   pricing-tier         Pricing Tier API
   purpose              Purpose API
+  query                Query API
   sandbox              Sandbox API
+  sharing              Sharing API
   submission           Submission API
   targeting            Targeting API
   template-variables   Template Variables API
@@ -152,34 +155,29 @@ Token resolution order:
 
 ## Profiles
 
-Manage multiple environments (like AWS CLI profiles):
+Manage multiple environments, similar to AWS CLI profiles:
 
 ```bash
-# Create profiles for different environments
-epilot profile create dev --server https://entity.dev.sls.epilot.io --token <dev-token>
-epilot profile create staging --server https://entity.staging.sls.epilot.io --token <staging-token>
+# Create profiles
+epilot profile create sandbox --token <sandbox-token>
 epilot profile create prod --token <prod-token>
 
 # Switch active profile
-epilot profile use dev
+epilot profile use sandbox
 
-# Or use per-command
-epilot entity listSchemas --profile staging
+# Use per-command
+epilot entity listSchemas --profile sandbox
 
 # Or via environment variable
-EPILOT_PROFILE=dev epilot entity listSchemas
+EPILOT_PROFILE=sandbox epilot entity listSchemas
 
-# List profiles
+# List / show / delete
 epilot profile list
-
-# Show profile details
 epilot profile show dev
-
-# Delete a profile
 epilot profile delete dev
 ```
 
-Profiles store server URL, auth token, org ID, and custom headers in `~/.config/epilot/profiles.json`.
+Profiles store auth token, server URL, and custom headers in `~/.config/epilot/profiles.json`.
 
 ## Parameters
 
@@ -327,10 +325,11 @@ Full documentation with sample calls and responses for all APIs:
 | Automation API | `epilot automation` | [docs](./docs/automation.md) |
 | Billing API | `epilot billing` | [docs](./docs/billing.md) |
 | Blueprint Manifest API | `epilot blueprint-manifest` | [docs](./docs/blueprint-manifest.md) |
+| Configuration Hub API | `epilot configuration-hub` | [docs](./docs/configuration-hub.md) |
 | Consent API | `epilot consent` | [docs](./docs/consent.md) |
 | Portal API | `epilot customer-portal` | [docs](./docs/customer-portal.md) |
 | Dashboard API | `epilot dashboard` | [docs](./docs/dashboard.md) |
-| Data Management API | `epilot data-management` | [docs](./docs/data-management.md) |
+| Data Governance API | `epilot data-governance` | [docs](./docs/data-governance.md) |
 | Deduplication API | `epilot deduplication` | [docs](./docs/deduplication.md) |
 | Design Builder API v2 | `epilot design` | [docs](./docs/design.md) |
 | Document API | `epilot document` | [docs](./docs/document.md) |
@@ -339,10 +338,10 @@ Full documentation with sample calls and responses for all APIs:
 | Entity API | `epilot entity` | [docs](./docs/entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | [docs](./docs/entity-mapping.md) |
 | Environments API | `epilot environments` | [docs](./docs/environments.md) |
-| ERP Integration API | `epilot erp-integration` | [docs](./docs/erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |
 | Iban API | `epilot iban` | [docs](./docs/iban.md) |
+| Integration Toolkit API | `epilot integration-toolkit` | [docs](./docs/integration-toolkit.md) |
 | Journey API | `epilot journey` | [docs](./docs/journey.md) |
 | Kanban API | `epilot kanban` | [docs](./docs/kanban.md) |
 | Message API | `epilot message` | [docs](./docs/message.md) |
@@ -355,7 +354,9 @@ Full documentation with sample calls and responses for all APIs:
 | Pricing API | `epilot pricing` | [docs](./docs/pricing.md) |
 | Pricing Tier API | `epilot pricing-tier` | [docs](./docs/pricing-tier.md) |
 | Purpose API | `epilot purpose` | [docs](./docs/purpose.md) |
+| Query API | `epilot query` | [docs](./docs/query.md) |
 | Sandbox API | `epilot sandbox` | [docs](./docs/sandbox.md) |
+| Sharing API | `epilot sharing` | [docs](./docs/sharing.md) |
 | Submission API | `epilot submission` | [docs](./docs/submission.md) |
 | Targeting API | `epilot targeting` | [docs](./docs/targeting.md) |
 | Template Variables API | `epilot template-variables` | [docs](./docs/template-variables.md) |

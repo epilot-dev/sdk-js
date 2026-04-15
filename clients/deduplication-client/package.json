@@ -1,6 +1,6 @@
 {
   "name": "@epilot/deduplication-client",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "JavaScript client library for Epilot's Deduplication API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -62,7 +62,7 @@
     "axios": "^1.11.0",
     "copy-webpack-plugin": "^7.0.0",
     "json-loader": "^0.5.7",
-    "openapicmd": "^2.7.0",
+    "openapicmd": "^2.9.2",
     "ts-loader": "^8.0.14",
     "ts-node": "^10.9.2",
     "typescript": "^4.1.3",

@@ -6,7 +6,17 @@
   },
   "servers": [
     {
-      "url": "https://design-builder-api.epilot.io"
+      "url": "https://design-builder-api.{environment}.epilot.io",
+      "variables": {
+        "environment": {
+          "default": "sls",
+          "enum": [
+            "sls",
+            "dev.sls",
+            "staging.sls"
+          ]
+        }
+      }
     }
   ],
   "paths": {
@@ -78,7 +88,8 @@
           },
           {
             "in": "query",
-            "name": "orgId"
+            "name": "orgId",
+            "required": false
           },
           {
             "in": "query",

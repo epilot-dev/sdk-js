@@ -125,7 +125,7 @@ export declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | TriggerEventAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | TriggerEventAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction | ForwardEmailAction | ReplyEmailAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -375,7 +375,36 @@ export declare namespace Components {
          *   }
          * }
          */
-        FlowExecutionCancelActionConfig;
+        FlowExecutionCancelActionConfig | /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Forward Email",
+         *   "type": "forward-email",
+         *   "config": {
+         *     "forward_to": [
+         *       {
+         *         "email": "external@outlook.com",
+         *         "name": "External User"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        ForwardEmailActionConfig | /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Reply Email",
+         *   "type": "reply-email",
+         *   "config": {
+         *     "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
+         *     "language_code": "de",
+         *     "reply_mode": "reply_in_thread"
+         *   }
+         * }
+         */
+        ReplyEmailActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -2321,6 +2350,159 @@ export declare namespace Components {
                 journey_id?: string; // uuid
             };
         }
+        export interface ForwardEmailAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "forward-email";
+            config?: ForwardEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Forward Email",
+         *   "type": "forward-email",
+         *   "config": {
+         *     "forward_to": [
+         *       {
+         *         "email": "external@outlook.com",
+         *         "name": "External User"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface ForwardEmailActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "forward-email";
+            config?: ForwardEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        export interface ForwardEmailConfig {
+            /**
+             * List of email addresses to forward the incoming email to
+             */
+            forward_to: {
+                /**
+                 * Email address to forward to
+                 */
+                email: string; // email
+                /**
+                 * Display name for the recipient
+                 */
+                name?: string;
+            }[];
+            /**
+             * Whether to include the original email attachments in the forwarded email
+             */
+            include_attachments?: boolean;
+            /**
+             * Prefix to add to the original email subject
+             */
+            subject_prefix?: string;
+            /**
+             * When enabled, the email thread will be automatically marked as done after this action completes.
+             */
+            mark_as_done?: boolean;
+        }
         export interface FrontendSubmitTrigger {
             /**
              * example:
@@ -2988,6 +3170,150 @@ export declare namespace Components {
             };
             mode: "append" | "prepend" | "set";
         }
+        export interface ReplyEmailAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "reply-email";
+            config?: ReplyEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+        }
+        /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Reply Email",
+         *   "type": "reply-email",
+         *   "config": {
+         *     "email_template_id": "gasj02-29ug9asgm-29t9gsaghg2g-pkmbhx2",
+         *     "language_code": "de",
+         *     "reply_mode": "reply_in_thread"
+         *   }
+         * }
+         */
+        export interface ReplyEmailActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "reply-email";
+            config?: ReplyEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+        }
+        export interface ReplyEmailConfig {
+            /**
+             * ID of the email template to use for the reply
+             */
+            email_template_id?: string;
+            /**
+             * Language code for the email template
+             */
+            language_code?: "de" | "en";
+            /**
+             * Controls how the reply email is sent.
+             * - reply_in_thread: Sends the email as a reply within the existing email thread (default).
+             * - new_email: Sends the email as a new standalone email to the original sender, creating a fresh thread.
+             *
+             */
+            reply_mode?: "reply_in_thread" | "new_email";
+            /**
+             * When enabled, the email thread will be automatically marked as done after this action completes.
+             */
+            mark_as_done?: boolean;
+        }
         export interface ResumeReq {
             resume_token: /**
              * A unique token to resume a paused automation execution
@@ -3167,6 +3493,24 @@ export declare namespace Components {
              *
              */
             wait_for_confirmation?: boolean;
+            /**
+             * When enabled, overrides the template's "To" field with the sender address of the triggering incoming email.
+             * This is useful for auto-reply scenarios where you want to automatically respond to the person who sent the email.
+             * Only works when the automation is triggered by a received email (received_email or new_email_thread triggers).
+             *
+             */
+            reply_to_sender?: boolean;
+            /**
+             * Controls how the auto-reply email is sent when reply_to_sender is enabled.
+             * - reply_in_thread: Sends the email as a reply within the existing email thread (default).
+             * - new_email: Sends the email as a new standalone email to the original sender, creating a fresh thread.
+             *
+             */
+            reply_mode?: "reply_in_thread" | "new_email";
+            /**
+             * When enabled, the email thread will be automatically marked as done after this action completes.
+             */
+            mark_as_done?: boolean;
             /**
              * Include extra file attachments in sent email.
              * Attachments in email template will be sent regardless of this configuration.
@@ -4838,6 +5182,9 @@ export type FlowExecutionCancelAction = Components.Schemas.FlowExecutionCancelAc
 export type FlowExecutionCancelActionConfig = Components.Schemas.FlowExecutionCancelActionConfig;
 export type FlowExecutionCancelConfig = Components.Schemas.FlowExecutionCancelConfig;
 export type FlowsTrigger = Components.Schemas.FlowsTrigger;
+export type ForwardEmailAction = Components.Schemas.ForwardEmailAction;
+export type ForwardEmailActionConfig = Components.Schemas.ForwardEmailActionConfig;
+export type ForwardEmailConfig = Components.Schemas.ForwardEmailConfig;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
 export type InformERPAction = Components.Schemas.InformERPAction;
@@ -4866,6 +5213,9 @@ export type PrefixCondition = Components.Schemas.PrefixCondition;
 export type PrimitiveJSONValue = Components.Schemas.PrimitiveJSONValue;
 export type ReceivedEmailTrigger = Components.Schemas.ReceivedEmailTrigger;
 export type RelationAttribute = Components.Schemas.RelationAttribute;
+export type ReplyEmailAction = Components.Schemas.ReplyEmailAction;
+export type ReplyEmailActionConfig = Components.Schemas.ReplyEmailActionConfig;
+export type ReplyEmailConfig = Components.Schemas.ReplyEmailConfig;
 export type ResumeReq = Components.Schemas.ResumeReq;
 export type ResumeResp = Components.Schemas.ResumeResp;
 export type ResumeToken = Components.Schemas.ResumeToken;

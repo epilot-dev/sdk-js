@@ -21,6 +21,35 @@
         "responses": {}
       }
     },
+    "/v1/environments/groups": {
+      "get": {
+        "operationId": "listEnvironmentGroups",
+        "responses": {}
+      }
+    },
+    "/v1/environments/groups/{name}": {
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "operationId": "putEnvironmentGroup",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteEnvironmentGroup",
+        "responses": {}
+      }
+    },
     "/v1/environments/{key}": {
       "parameters": [
         {
@@ -51,5 +80,9 @@
     }
   },
   "components": {},
-  "servers": [{"url":"https://environments.sls.epilot.io"}]
+  "servers": [
+    {
+      "url": "https://environments.sls.epilot.io"
+    }
+  ]
 }
