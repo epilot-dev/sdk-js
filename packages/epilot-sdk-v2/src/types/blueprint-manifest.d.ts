@@ -61,6 +61,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -185,7 +190,7 @@ export declare namespace Components {
              * Blueprint slug for marketplace blueprints
              */
             slug?: string;
-            status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED";
+            status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
         }
         export interface BlueprintInstallationJobOptions {
             /**
@@ -436,6 +441,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -710,6 +720,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -800,6 +815,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -899,6 +919,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -1203,7 +1228,46 @@ export declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         export type JobID = string;
-        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED";
+        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+        export interface LatestBlueprintVerification {
+            job_id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            triggered_at?: string; // date-time
+            source_org_id?: string;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            summary?: VerificationSummary;
+        }
+        export interface LineageEntry {
+            /**
+             * Immutable resource identity across orgs
+             */
+            lineage_id?: string;
+            /**
+             * Resource ID in the destination org
+             */
+            target_id?: string;
+            resource_type?: /* Type of the resource */ ResourceNodeType;
+            blueprint_instance_ids?: string[];
+            fidelity?: "full" | "partial";
+            last_synced_at?: string; // date-time
+        }
         export interface Manifest {
             import_job_id?: /**
              * ID of an import or export job (state machine)
@@ -1558,6 +1622,11 @@ export declare namespace Components {
              * Whether the blueprint is verified by epilot
              */
             is_verified?: boolean;
+            latest_verification?: LatestBlueprintVerification;
+            /**
+             * Resource addresses excluded during the latest install/update and ignored by verification.
+             */
+            ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
             created_at?: string; // date-time
             updated_at?: string; // date-time
@@ -1638,7 +1707,6 @@ export declare namespace Components {
             details_page_description?: string | null;
             details_page_hero_image?: string | null;
             details_page_carousel?: string[] | null;
-            documentation_link?: string | null;
             resources_section_description?: string | null;
             resources_section_benefits_title?: string | null;
             resources_section_benefits_list?: string | null;
@@ -1678,7 +1746,6 @@ export declare namespace Components {
             details_page_description?: string | null;
             details_page_hero_image?: string | null;
             details_page_carousel?: string[] | null;
-            documentation_link?: string | null;
             resources_section_description?: string | null;
             resources_section_benefits_title?: string | null;
             resources_section_benefits_list?: string | null;
@@ -1811,7 +1878,7 @@ export declare namespace Components {
             resource_name?: string;
             source_resource_id?: string;
             destination_resource_id?: string;
-            status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error";
+            status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error";
             field_diffs?: FieldDiff[];
             error?: string;
         }
@@ -1886,7 +1953,6 @@ export declare namespace Components {
             matched?: number;
             mismatched?: number;
             missing_in_destination?: number;
-            missing_in_source?: number;
             fetch_errors?: number;
         }
         export interface VirtualResourceNodeGroup {
@@ -2454,6 +2520,25 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.BlueprintJob;
         }
     }
+    namespace GetBlueprintLineageV3 {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $200 {
+                total?: number;
+                entries?: Components.Schemas.LineageEntry[];
+            }
+        }
+    }
     namespace GetBlueprintPreview {
         namespace Parameters {
             export type PreviewId = string;
@@ -2524,7 +2609,6 @@ export declare namespace Paths {
                 details_page_description?: string | null;
                 details_page_hero_image?: string | null;
                 details_page_carousel?: string[] | null;
-                documentation_link?: string | null;
                 resources_section_description?: string | null;
                 resources_section_benefits_title?: string | null;
                 resources_section_benefits_list?: string | null;
@@ -2580,7 +2664,6 @@ export declare namespace Paths {
                 details_page_description?: string | null;
                 details_page_hero_image?: string | null;
                 details_page_carousel?: string[] | null;
-                documentation_link?: string | null;
                 resources_section_description?: string | null;
                 resources_section_benefits_title?: string | null;
                 resources_section_benefits_list?: string | null;
@@ -2663,6 +2746,53 @@ export declare namespace Paths {
             }
         }
     }
+    namespace InstallBlueprintV3 {
+        export interface RequestBody {
+            source_org_id?: string;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * S3 key to the blueprint zip file
+             */
+            source_blueprint_file?: string;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
+             */
+            destination_auth_token?: string;
+            options?: Components.Schemas.BlueprintInstallationJobOptions;
+            /**
+             * Slug for marketplace blueprint consistency
+             */
+            slug?: string;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+                destination_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintID;
+            }
+        }
+    }
     namespace ListBlueprintJobs {
         namespace Responses {
             export interface $200 {
@@ -2727,6 +2857,13 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 versions?: Components.Schemas.MarketplaceListingVersion[];
+            }
+        }
+    }
+    namespace ListMarketplaceListings {
+        namespace Responses {
+            export interface $200 {
+                listings?: Components.Schemas.MarketplaceListing[];
             }
         }
     }
@@ -3028,6 +3165,10 @@ export declare namespace Paths {
              * Auth token with access to the source org (e.g. pipeline token). If not provided, the caller's bearer token is used for both orgs.
              */
             source_auth_token?: string;
+            /**
+             * Auth token with access to the destination org. Required for cross-org verification when the caller token only has access to the source org. If not provided, the caller's bearer token is used for both orgs.
+             */
+            destination_auth_token?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -3451,6 +3592,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMarketplaceListing.Responses.$201>
   /**
+   * listMarketplaceListings - listMarketplaceListings
+   * 
+   * List all marketplace listings for the authenticated organization
+   */
+  'listMarketplaceListings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMarketplaceListings.Responses.$200>
+  /**
    * getMarketplaceListingById - getMarketplaceListingById
    * 
    * Get marketplace listing by listing ID including all versions
@@ -3520,6 +3671,31 @@ export interface OperationMethods {
     data?: Paths.PublishMarketplaceListingVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  /**
+   * installBlueprintV3 - Install Blueprint V3
+   * 
+   * Install a blueprint using the V3 engine (direct API calls, no Terraform).
+   * Creates resources in topological order with global ID replacement.
+   * Supports checkpoint-based resume on failure.
+   * 
+   */
+  'installBlueprintV3'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.InstallBlueprintV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
+  /**
+   * getBlueprintLineageV3 - Get Blueprint Lineage V3
+   * 
+   * Returns the lineage registry entries for a blueprint's resources in the current org.
+   * Shows the mapping between source lineage IDs and target resource IDs.
+   * 
+   */
+  'getBlueprintLineageV3'(
+    parameters?: Parameters<Paths.GetBlueprintLineageV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3985,6 +4161,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMarketplaceListing.Responses.$200>
   }
+  ['/v1/marketplace-listings']: {
+    /**
+     * listMarketplaceListings - listMarketplaceListings
+     * 
+     * List all marketplace listings for the authenticated organization
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMarketplaceListings.Responses.$200>
+  }
   ['/v1/marketplace-listings/{listing_id}']: {
     /**
      * getMarketplaceListingById - getMarketplaceListingById
@@ -4063,6 +4251,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   }
+  ['/v3/blueprint-manifest/blueprint:install']: {
+    /**
+     * installBlueprintV3 - Install Blueprint V3
+     * 
+     * Install a blueprint using the V3 engine (direct API calls, no Terraform).
+     * Creates resources in topological order with global ID replacement.
+     * Supports checkpoint-based resume on failure.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.InstallBlueprintV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage']: {
+    /**
+     * getBlueprintLineageV3 - Get Blueprint Lineage V3
+     * 
+     * Returns the lineage registry entries for a blueprint's resources in the current org.
+     * Shows the mapping between source lineage IDs and target resource IDs.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintLineageV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -4102,6 +4319,8 @@ export type InstalledMarketplaceBlueprintItem = Components.Schemas.InstalledMark
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;
 export type JobStatus = Components.Schemas.JobStatus;
+export type LatestBlueprintVerification = Components.Schemas.LatestBlueprintVerification;
+export type LineageEntry = Components.Schemas.LineageEntry;
 export type Manifest = Components.Schemas.Manifest;
 export type ManifestID = Components.Schemas.ManifestID;
 export type ManifestItem = Components.Schemas.ManifestItem;

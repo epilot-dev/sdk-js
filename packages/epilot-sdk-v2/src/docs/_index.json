@@ -8,6 +8,7 @@
   "automation": "automation",
   "billing": "billing",
   "blueprintManifest": "blueprint-manifest",
+  "configurationHub": "configuration-hub",
   "consent": "consent",
   "customerPortal": "customer-portal",
   "dashboard": "dashboard",

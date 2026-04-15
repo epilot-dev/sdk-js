@@ -50,6 +50,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`bulkDeleteBlueprintResources`](#bulkdeleteblueprintresources)
 - [`updateBlueprintResource`](#updateblueprintresource)
 - [`deleteBlueprintResource`](#deleteblueprintresource)
+- [`installBlueprintV3`](#installblueprintv3)
+- [`getBlueprintLineageV3`](#getblueprintlineagev3)
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs)
@@ -60,6 +62,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 **Marketplace Listings**
 - [`createMarketplaceListing`](#createmarketplacelisting)
 - [`getMarketplaceListing`](#getmarketplacelisting)
+- [`listMarketplaceListings`](#listmarketplacelistings)
 - [`getMarketplaceListingById`](#getmarketplacelistingbyid)
 - [`updateMarketplaceListing`](#updatemarketplacelisting)
 - [`deleteMarketplaceListing`](#deletemarketplacelisting)
@@ -71,6 +74,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion)
 
 **Schemas**
+- [`LineageEntry`](#lineageentry)
 - [`BlueprintID`](#blueprintid)
 - [`BlueprintResourceID`](#blueprintresourceid)
 - [`CommonBlueprintFields`](#commonblueprintfields)
@@ -91,6 +95,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
 - [`BlueprintValidateJob`](#blueprintvalidatejob)
 - [`BlueprintVerificationJob`](#blueprintverificationjob)
+- [`LatestBlueprintVerification`](#latestblueprintverification)
 - [`VerificationSummary`](#verificationsummary)
 - [`ResourceVerificationResult`](#resourceverificationresult)
 - [`FieldDiff`](#fielddiff)
@@ -199,6 +204,23 @@ const { data } = await client.listBlueprints({
         }
       ],
       "is_verified": true,
+      "latest_verification": {
+        "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "status": "IN_PROGRESS",
+        "triggered_at": "1970-01-01T00:00:00.000Z",
+        "source_org_id": "string",
+        "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "destination_org_id": "string",
+        "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "summary": {
+          "total_resources": 0,
+          "matched": 0,
+          "mismatched": 0,
+          "missing_in_destination": 0,
+          "fetch_errors": 0
+        }
+      },
+      "ignored_resource_addresses": ["string"],
       "installation_status": "IN_PROGRESS",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
@@ -282,6 +304,23 @@ const { data } = await client.createBlueprint(
       }
     ],
     is_verified: true,
+    latest_verification: {
+      job_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      status: 'IN_PROGRESS',
+      triggered_at: '1970-01-01T00:00:00.000Z',
+      source_org_id: 'string',
+      source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      destination_org_id: 'string',
+      destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      summary: {
+        total_resources: 0,
+        matched: 0,
+        mismatched: 0,
+        missing_in_destination: 0,
+        fetch_errors: 0
+      }
+    },
+    ignored_resource_addresses: ['string'],
     installation_status: 'IN_PROGRESS',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
@@ -353,6 +392,23 @@ const { data } = await client.createBlueprint(
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -652,6 +708,23 @@ const { data } = await client.getBlueprint({
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -735,6 +808,23 @@ const { data } = await client.updateBlueprint(
       }
     ],
     is_verified: true,
+    latest_verification: {
+      job_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      status: 'IN_PROGRESS',
+      triggered_at: '1970-01-01T00:00:00.000Z',
+      source_org_id: 'string',
+      source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      destination_org_id: 'string',
+      destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      summary: {
+        total_resources: 0,
+        matched: 0,
+        mismatched: 0,
+        missing_in_destination: 0,
+        fetch_errors: 0
+      }
+    },
+    ignored_resource_addresses: ['string'],
     installation_status: 'IN_PROGRESS',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
@@ -806,6 +896,23 @@ const { data } = await client.updateBlueprint(
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -892,6 +999,23 @@ const { data } = await client.deleteBlueprint({
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -975,7 +1099,8 @@ const { data } = await client.verifyBlueprint(
     source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
     destination_org_id: 'string',
     destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
-    source_auth_token: 'string'
+    source_auth_token: 'string',
+    destination_auth_token: 'string'
   },
 )
 ```
@@ -1745,7 +1870,6 @@ const { data } = await client.createMarketplaceListing(
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -1809,7 +1933,6 @@ const { data } = await client.getMarketplaceListing({
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -1858,6 +1981,71 @@ const { data } = await client.getMarketplaceListing({
 
 ---
 
+### `listMarketplaceListings`
+
+List all marketplace listings for the authenticated organization
+
+`GET /v1/marketplace-listings`
+
+```ts
+const { data } = await client.listMarketplaceListings()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "listings": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "blueprint_id": "string",
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"],
+      "status": "draft",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getMarketplaceListingById`
 
 Get marketplace listing by listing ID including all versions
@@ -1891,7 +2079,6 @@ const { data } = await client.getMarketplaceListingById({
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -1966,7 +2153,6 @@ const { data } = await client.updateMarketplaceListing(
     details_page_description: 'string',
     details_page_hero_image: 'string',
     details_page_carousel: ['string'],
-    documentation_link: 'string',
     resources_section_description: 'string',
     resources_section_benefits_title: 'string',
     resources_section_benefits_list: 'string',
@@ -2012,7 +2198,6 @@ const { data } = await client.updateMarketplaceListing(
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2224,7 +2409,81 @@ const { data } = await client.publishMarketplaceListingVersion(
 
 ---
 
+### `installBlueprintV3`
+
+Install Blueprint V3
+
+`POST /v3/blueprint-manifest/blueprint:install`
+
+```ts
+const { data } = await client.installBlueprintV3(
+  null,
+  {
+    source_org_id: 'string',
+    source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    source_blueprint_file: 'string',
+    destination_org_id: 'string',
+    destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    destination_auth_token: 'string',
+    options: {
+      resources_to_ignore: ['string']
+    },
+    slug: 'string'
+  },
+)
+```
+
+---
+
+### `getBlueprintLineageV3`
+
+Get Blueprint Lineage V3
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/lineage`
+
+```ts
+const { data } = await client.getBlueprintLineageV3({
+  blueprint_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "total": 0,
+  "entries": [
+    {
+      "lineage_id": "string",
+      "target_id": "string",
+      "resource_type": "designbuilder",
+      "blueprint_instance_ids": ["string"],
+      "fidelity": "full",
+      "last_synced_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ## Schemas
+
+### `LineageEntry`
+
+```ts
+type LineageEntry = {
+  lineage_id?: string
+  target_id?: string
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable"
+  blueprint_instance_ids?: string[]
+  fidelity?: "full" | "partial"
+  last_synced_at?: string // date-time
+}
+```
 
 ### `BlueprintID`
 
@@ -2263,6 +2522,23 @@ type CommonBlueprintFields = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2381,6 +2657,23 @@ type CustomBlueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2446,6 +2739,23 @@ type FileBlueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2511,6 +2821,23 @@ type MarketplaceBlueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2608,6 +2935,23 @@ type DeployedBlueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2673,6 +3017,23 @@ type AppBlueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2738,6 +3099,23 @@ type Blueprint = {
     note?: string
   }>
   is_verified?: boolean
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    summary?: {
+      total_resources?: { ... }
+      matched?: { ... }
+      mismatched?: { ... }
+      missing_in_destination?: { ... }
+      fetch_errors?: { ... }
+    }
+  }
+  ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -2797,29 +3175,12 @@ type Blueprint = {
     note?: string
   }>
   is_verified?: boolean
-  installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
-  created_at?: string // date-time
-  updated_at?: string // date-time
-  created_by?: {
-    name?: unknown
-    org_id: string
-    user_id?: string
-    token_id?: string
-  }
-  updated_by?: {
-    name?: unknown
-    org_id: string
-    user_id?: string
-    token_id?: string
-  }
-  installation_job_ids?: string[]
-  source_blueprint_id?: string
-  archived?: boolean
-  docs_url?: string
-  recommended_apps?: string[]
-  required_features?: {
-    enabled?: string[]
-    disabled?: string[]
+  latest_verification?: {
+    job_id?: string
+    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    triggered_at?: string // date-time
+    source_org_id?: string
+    source_blueprint_id?: string
   // ...
 }
 ```
@@ -2932,7 +3293,7 @@ type BlueprintInstallationJob = {
   destination_blueprint_id?: string
   destination_org_id?: string
   slug?: string
-  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED"
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 }
 ```
 
@@ -3000,7 +3361,7 @@ type BlueprintJob = {
   destination_blueprint_id?: string
   destination_org_id?: string
   slug?: string
-  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "FAILED"
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 } | {
   id?: string
   events?: Array<{
@@ -3157,7 +3518,6 @@ type BlueprintVerificationJob = {
     matched?: number
     mismatched?: number
     missing_in_destination?: number
-    missing_in_source?: number
     fetch_errors?: number
   }
   resource_results?: Array<{
@@ -3165,7 +3525,7 @@ type BlueprintVerificationJob = {
     resource_name?: string
     source_resource_id?: string
     destination_resource_id?: string
-    status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error"
+    status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error"
     field_diffs?: Array<{
       path?: { ... }
       source_value?: { ... }
@@ -3178,6 +3538,27 @@ type BlueprintVerificationJob = {
 }
 ```
 
+### `LatestBlueprintVerification`
+
+```ts
+type LatestBlueprintVerification = {
+  job_id?: string
+  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+  triggered_at?: string // date-time
+  source_org_id?: string
+  source_blueprint_id?: string
+  destination_org_id?: string
+  destination_blueprint_id?: string
+  summary?: {
+    total_resources?: number
+    matched?: number
+    mismatched?: number
+    missing_in_destination?: number
+    fetch_errors?: number
+  }
+}
+```
+
 ### `VerificationSummary`
 
 ```ts
@@ -3186,7 +3567,6 @@ type VerificationSummary = {
   matched?: number
   mismatched?: number
   missing_in_destination?: number
-  missing_in_source?: number
   fetch_errors?: number
 }
 ```
@@ -3199,7 +3579,7 @@ type ResourceVerificationResult = {
   resource_name?: string
   source_resource_id?: string
   destination_resource_id?: string
-  status?: "matched" | "mismatched" | "missing_in_destination" | "missing_in_source" | "fetch_error"
+  status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error"
   field_diffs?: Array<{
     path?: string
     source_value?: unknown
@@ -3286,7 +3666,7 @@ type Manifest = {
   previous_jobs_ids?: string[]
   previous_jobs?: Array<{
     job_id?: string
-    job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     manifest_file_path?: string
     message?: string
     timestamp?: string // date-time
@@ -3439,7 +3819,7 @@ type ManifestItem = {
 ### `JobStatus`
 
 ```ts
-type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED"
+type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 ```
 
 ### `ResourceNodeType`
@@ -3590,7 +3970,7 @@ type ResourceNode = {
 ```ts
 type Job = {
   job_id?: string
-  job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "FAILED"
+  job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   manifest_file_path?: string
   message?: string
   timestamp?: string // date-time
@@ -3945,7 +4325,6 @@ type MarketplaceListing = {
   details_page_description?: string
   details_page_hero_image?: string
   details_page_carousel?: string[]
-  documentation_link?: string
   resources_section_description?: string
   resources_section_benefits_title?: string
   resources_section_benefits_list?: string
@@ -3990,7 +4369,6 @@ type MarketplaceListingUpdate = {
   details_page_description?: string
   details_page_hero_image?: string
   details_page_carousel?: string[]
-  documentation_link?: string
   resources_section_description?: string
   resources_section_benefits_title?: string
   resources_section_benefits_list?: string

@@ -70,6 +70,7 @@ APIs
   automation           Automation API
   billing              Billing API
   blueprint-manifest   Blueprint Manifest API
+  configuration-hub    Configuration Hub API
   consent              Consent API
   customer-portal      Portal API
   dashboard            Dashboard API
@@ -324,6 +325,7 @@ Full documentation with sample calls and responses for all APIs:
 | Automation API | `epilot automation` | [docs](./docs/automation.md) |
 | Billing API | `epilot billing` | [docs](./docs/billing.md) |
 | Blueprint Manifest API | `epilot blueprint-manifest` | [docs](./docs/blueprint-manifest.md) |
+| Configuration Hub API | `epilot configuration-hub` | [docs](./docs/configuration-hub.md) |
 | Consent API | `epilot consent` | [docs](./docs/consent.md) |
 | Portal API | `epilot customer-portal` | [docs](./docs/customer-portal.md) |
 | Dashboard API | `epilot dashboard` | [docs](./docs/dashboard.md) |

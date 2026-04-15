@@ -1,0 +1,399 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Configuration Hub API",
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n",
+    "version": "0.2.0"
+  },
+  "servers": [
+    {
+      "url": "https://configuration-hub.dev.sls.epilot.io",
+      "description": "Dev"
+    },
+    {
+      "url": "https://configuration-hub.sls.epilot.io",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Configs",
+      "description": "Configuration tree index"
+    }
+  ],
+  "paths": {
+    "/v1/configs/types": {
+      "get": {
+        "operationId": "listConfigTypes",
+        "summary": "listConfigTypes",
+        "description": "Returns the static list of available configuration types with display metadata.\nThis is a cheap call — no fan-out to downstream APIs. Returns all known types\nwith labels and icons. The frontend should then call `listConfigs` separately\nfor each type it wants to load.\n",
+        "tags": [
+          "Configs"
+        ],
+        "responses": {
+          "200": {
+            "description": "Available config types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ConfigTypeInfo"
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/{type}": {
+      "get": {
+        "operationId": "listConfigs",
+        "summary": "listConfigs",
+        "description": "List configs of a given type with pagination. Returns summary metadata only\n(not full payloads). The frontend calls this per type folder when expanding.\n\nSupports offset-based pagination via `from` and `size` parameters.\n",
+        "tags": [
+          "Configs"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated config list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid config type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/{type}/{id}/dependencies": {
+      "get": {
+        "operationId": "getConfigDependencies",
+        "summary": "getConfigDependencies",
+        "description": "Get configs that are referenced by the given config.\nUsed to render children when expanding a config node in the tree.\n\nResolves dependencies by fetching the config payload server-side and scanning\nfor references (UUIDs, source IDs, slug-based references).\n",
+        "tags": [
+          "Configs"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of referenced configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDependenciesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Config not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "epilot JWT auth token"
+      }
+    },
+    "parameters": {
+      "ConfigType": {
+        "name": "type",
+        "in": "path",
+        "required": true,
+        "description": "Configuration resource type",
+        "schema": {
+          "$ref": "#/components/schemas/ResourceType"
+        }
+      },
+      "ConfigId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Configuration resource ID",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "CursorParam": {
+        "name": "cursor",
+        "in": "query",
+        "description": "Opaque cursor for fetching the next page. Omit for the first page.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SizeParam": {
+        "name": "size",
+        "in": "query",
+        "description": "Number of items per page",
+        "schema": {
+          "type": "integer",
+          "default": 25,
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "schemas": {
+      "ResourceType": {
+        "type": "string",
+        "description": "Configuration resource type identifier.\nMatches blueprint-manifest-api V3 naming conventions.\n",
+        "enum": [
+          "journey",
+          "automation_flow",
+          "workflow_definition",
+          "closing_reason",
+          "flow_template",
+          "schema",
+          "emailtemplate",
+          "product",
+          "price",
+          "tax",
+          "coupon",
+          "file",
+          "webhook",
+          "saved_view",
+          "dashboard",
+          "kanban",
+          "role",
+          "usergroup",
+          "validation_rule",
+          "integration",
+          "app",
+          "designbuilder",
+          "notification_template",
+          "custom_variable",
+          "environment_variable",
+          "taxonomy",
+          "taxonomy_classification",
+          "entity_mapping",
+          "portal_config",
+          "target",
+          "product_recommendation"
+        ]
+      },
+      "ConfigTypeInfo": {
+        "type": "object",
+        "description": "Static metadata for a config type folder in the tree.\nNo downstream API calls — just type + label + icon + source API info.\n",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label",
+            "example": "Journeys"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Frontend icon name",
+            "example": "Route"
+          },
+          "source_api": {
+            "type": "string",
+            "description": "Base URL of the epilot API that owns this resource type",
+            "example": "https://journey.sls.epilot.io"
+          },
+          "sdk_client": {
+            "type": "string",
+            "description": "@epilot/sdk subpath for fetching full config payloads",
+            "example": "@epilot/sdk/journey"
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "icon",
+          "source_api",
+          "sdk_client"
+        ]
+      },
+      "ConfigNode": {
+        "type": "object",
+        "description": "Summary metadata for a single configuration item in the tree",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "title": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last modified timestamp"
+          },
+          "updated_by": {
+            "type": "string",
+            "description": "User who last modified this config"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags / labels"
+          },
+          "purposes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Business purposes"
+          },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "description": "Direct link to open this config in epilot"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "title"
+        ]
+      },
+      "ConfigListResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of configs for a specific type",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "label": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of configs of this type (if known)"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor for fetching the next page. Absent when no more pages."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigNode"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "icon",
+          "items"
+        ]
+      },
+      "ConfigDependenciesResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of configs referenced by a given config",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total number of dependencies found (if known)"
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor for fetching the next page. Absent when no more pages."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigNode"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+    }
+  }
+}

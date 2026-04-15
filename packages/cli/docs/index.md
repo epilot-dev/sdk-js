@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 48 epilot APIs available via the CLI.
+All 49 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -20,7 +20,8 @@ npx epilot auth login
 | Audit Log | `epilot audit-logs` | 2 | [audit-logs.md](./audit-logs.md) |
 | Automation API | `epilot automation` | 16 | [automation.md](./automation.md) |
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
-| Blueprint Manifest API | `epilot blueprint-manifest` | 45 | [blueprint-manifest.md](./blueprint-manifest.md) |
+| Blueprint Manifest API | `epilot blueprint-manifest` | 48 | [blueprint-manifest.md](./blueprint-manifest.md) |
+| Configuration Hub API | `epilot configuration-hub` | 3 | [configuration-hub.md](./configuration-hub.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
 | Portal API | `epilot customer-portal` | 138 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |

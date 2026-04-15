@@ -61,6 +61,8 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`bulkDeleteBlueprintResources`](#bulkdeleteblueprintresources) — Bulk delete resources in a Blueprint
 - [`updateBlueprintResource`](#updateblueprintresource) — Update a resource in a Blueprint
 - [`deleteBlueprintResource`](#deleteblueprintresource) — Delete a resource from a Blueprint
+- [`installBlueprintV3`](#installblueprintv3) — Install a blueprint using the V3 engine (direct API calls, no Terraform).
+- [`getBlueprintLineageV3`](#getblueprintlineagev3) — Returns the lineage registry entries for a blueprint's resources in the current org.
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs) — List all blueprint jobs
@@ -71,6 +73,7 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 **Marketplace Listings**
 - [`getMarketplaceListing`](#getmarketplacelisting) — Get marketplace listing for a blueprint including all versions
 - [`createMarketplaceListing`](#createmarketplacelisting) — Create a marketplace listing for a blueprint. Returns 409 if one already exists.
+- [`listMarketplaceListings`](#listmarketplacelistings) — List all marketplace listings for the authenticated organization
 - [`getMarketplaceListingById`](#getmarketplacelistingbyid) — Get marketplace listing by listing ID including all versions
 - [`updateMarketplaceListing`](#updatemarketplacelisting) — Update listing-level fields
 - [`deleteMarketplaceListing`](#deletemarketplacelisting) — Delete listing and all versions
@@ -160,64 +163,25 @@ epilot blueprint-manifest listBlueprints --jsonata 'results[0]'
       "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "title": "string",
       "slug": "string",
-      "description": {
-        "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
-        "postinstall": "This is the content of the postinstall.md file\n"
-      },
+      "description": {},
       "version": "string",
-      "deployments": [
-        {
-          "source_org_id": "string",
-          "source_blueprint_id": "string",
-          "destination_org_id": "string",
-          "destination_blueprint_id": "string",
-          "triggered_at": "1970-01-01T00:00:00.000Z",
-          "note": "string"
-        }
-      ],
+      "deployments": [],
       "is_verified": true,
+      "latest_verification": {},
+      "ignored_resource_addresses": ["string"],
       "installation_status": "IN_PROGRESS",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {
-        "name": "manifest@epilot.cloud",
-        "org_id": "911690",
-        "user_id": "11001045",
-        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
-      },
-      "updated_by": {
-        "name": "manifest@epilot.cloud",
-        "org_id": "911690",
-        "user_id": "11001045",
-        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
-      },
+      "created_by": {},
+      "updated_by": {},
       "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "archived": false,
       "docs_url": "string",
       "recommended_apps": ["string"],
-      "required_features": {
-        "enabled": ["string"],
-        "disabled": ["string"]
-      },
+      "required_features": {},
       "zip_file_name": "string",
-      "resources": [
-        {
-          "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-          "name": "string",
-          "type": "designbuilder",
-          "address": "string",
-          "is_root": true,
-          "is_ready": true,
-          "is_hidden": true,
-          "is_disabled": false,
-          "hard_dependencies": ["designbuilder"],
-          "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
-          "depends_on_addresses": ["string"],
-          "impact_on_install": ["create"],
-          "impact_on_install_reason": ["string"]
-        }
-      ],
+      "resources": [],
       "source_type": "custom"
     }
   ]
@@ -266,6 +230,23 @@ epilot blueprint-manifest createBlueprint \
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -348,6 +329,23 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -722,6 +720,23 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -818,6 +833,23 @@ epilot blueprint-manifest updateBlueprint \
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -906,6 +938,23 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1011,6 +1060,23 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     }
   ],
   "is_verified": true,
+  "latest_verification": {
+    "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "status": "IN_PROGRESS",
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "source_org_id": "string",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "summary": {
+      "total_resources": 0,
+      "matched": 0,
+      "mismatched": 0,
+      "missing_in_destination": 0,
+      "fetch_errors": 0
+    }
+  },
+  "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1125,7 +1191,8 @@ epilot blueprint-manifest verifyBlueprint \
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "destination_org_id": "string",
   "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "source_auth_token": "string"
+  "source_auth_token": "string",
+  "destination_auth_token": "string"
 }'
 ```
 
@@ -2248,7 +2315,6 @@ epilot blueprint-manifest getMarketplaceListing -p blueprint_id=123e4567-e89b-12
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2358,7 +2424,6 @@ epilot blueprint-manifest createMarketplaceListing -p blueprint_id=123e4567-e89b
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2382,6 +2447,79 @@ epilot blueprint-manifest createMarketplaceListing -p blueprint_id=123e4567-e89b
   "status": "draft",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listMarketplaceListings`
+
+List all marketplace listings for the authenticated organization
+
+`GET /v1/marketplace-listings`
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest listMarketplaceListings
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest listMarketplaceListings --jsonata 'listings'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "listings": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "blueprint_id": "string",
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"],
+      "status": "draft",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -2441,7 +2579,6 @@ epilot blueprint-manifest getMarketplaceListingById -p listing_id=123e4567-e89b-
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2531,7 +2668,6 @@ epilot blueprint-manifest updateMarketplaceListing \
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2594,7 +2730,6 @@ epilot blueprint-manifest updateMarketplaceListing -p listing_id=123e4567-e89b-1
   "details_page_description": "string",
   "details_page_hero_image": "string",
   "details_page_carousel": ["string"],
-  "documentation_link": "string",
   "resources_section_description": "string",
   "resources_section_benefits_title": "string",
   "resources_section_benefits_list": "string",
@@ -2901,6 +3036,106 @@ epilot blueprint-manifest publishMarketplaceListingVersion -p listing_id=123e456
   "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
   "published_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `installBlueprintV3`
+
+Install a blueprint using the V3 engine (direct API calls, no Terraform).
+
+`POST /v3/blueprint-manifest/blueprint:install`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest installBlueprintV3
+```
+
+With request body:
+
+```bash
+epilot blueprint-manifest installBlueprintV3 \
+  -d '{
+  "source_org_id": "string",
+  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "source_blueprint_file": "string",
+  "destination_org_id": "string",
+  "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "destination_auth_token": "string",
+  "options": {
+    "resources_to_ignore": ["string"]
+  },
+  "slug": "string"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest installBlueprintV3
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest installBlueprintV3 --jsonata '$'
+```
+
+---
+
+### `getBlueprintLineageV3`
+
+Returns the lineage registry entries for a blueprint's resources in the current org.
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/lineage`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest getBlueprintLineageV3 \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest getBlueprintLineageV3 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest getBlueprintLineageV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'total'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "total": 0,
+  "entries": [
+    {
+      "lineage_id": "string",
+      "target_id": "string",
+      "resource_type": "designbuilder",
+      "blueprint_instance_ids": ["string"],
+      "fidelity": "full",
+      "last_synced_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 

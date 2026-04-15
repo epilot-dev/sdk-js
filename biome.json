@@ -5,6 +5,7 @@
       "**",
       "!**/node_modules",
       "!**/dist",
+      "!packages/epilot-sdk",
       "!**/*.d.ts",
       "!**/tsconfig.json",
       "!**/package.json",
