@@ -513,6 +513,55 @@ importers:
         specifier: ^4.10.0
         version: 4.10.0(webpack@5.105.4)
 
+  clients/configuration-hub-client:
+    dependencies:
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      https-browserify:
+        specifier: ^1.0.0
+        version: 1.0.0
+      openapi-client-axios:
+        specifier: ^7.8.0
+        version: 7.9.0(axios@1.13.6)(js-yaml@4.1.1)
+      stream-http:
+        specifier: ^3.1.1
+        version: 3.2.0
+      url:
+        specifier: ^0.11.0
+        version: 0.11.4
+      util:
+        specifier: ^0.12.3
+        version: 0.12.5
+    devDependencies:
+      axios:
+        specifier: ^1.11.0
+        version: 1.13.6(debug@4.4.1)
+      copy-webpack-plugin:
+        specifier: ^7.0.0
+        version: 7.0.0(webpack@5.105.4)
+      json-loader:
+        specifier: ^0.5.7
+        version: 0.5.7
+      openapi-client-axios-typegen:
+        specifier: ^7.5.1
+        version: 7.8.0(encoding@0.1.13)(js-yaml@4.1.1)
+      ts-loader:
+        specifier: ^8.3.0
+        version: 8.4.0(typescript@5.7.3)(webpack@5.105.4)
+      typescript:
+        specifier: ^5.4.5
+        version: 5.7.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.46.0)
+      webpack:
+        specifier: ^5.91.0
+        version: 5.105.4(webpack-cli@5.1.4)
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.105.4)
+
   clients/consent-client:
     dependencies:
       '@dazn/lambda-powertools-correlation-ids':
@@ -2650,6 +2699,10 @@ importers:
         version: 0.1.12(@types/node@24.2.0)(js-yaml@4.1.1)
 
   packages/epilot-sdk-v2:
+    optionalDependencies:
+      '@epilot/epilot-journey-sdk':
+        specifier: '>=2.0.0-alpha.1'
+        version: 2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
     devDependencies:
       axios:
         specifier: ^1.11.0
@@ -2672,10 +2725,6 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.46.0)
-    optionalDependencies:
-      '@epilot/epilot-journey-sdk':
-        specifier: '>=2.0.0-alpha.1'
-        version: 2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
 
 packages:
 
@@ -12981,6 +13030,16 @@ snapshots:
       semver: 7.7.2
       typescript: 4.9.5
       webpack: 5.105.4(webpack-cli@4.10.0)
+
+  ts-loader@8.4.0(typescript@5.7.3)(webpack@5.105.4):
+    dependencies:
+      chalk: 4.1.2
+      enhanced-resolve: 4.5.0
+      loader-utils: 2.0.4
+      micromatch: 4.0.8
+      semver: 7.7.2
+      typescript: 5.7.3
+      webpack: 5.105.4(webpack-cli@5.1.4)
 
   ts-loader@8.4.0(typescript@5.9.3)(webpack@5.105.4):
     dependencies:
