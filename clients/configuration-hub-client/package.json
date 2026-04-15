@@ -8,6 +8,7 @@
     "test": "vitest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/configuration-hub.yaml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "npm run typegen && npm run typescript && npm run bundle-definition",
     "prepublishOnly": "npm run build"
