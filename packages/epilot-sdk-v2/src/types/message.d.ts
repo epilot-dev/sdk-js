@@ -677,7 +677,7 @@ export declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
         }
@@ -2235,9 +2235,13 @@ export declare namespace Paths {
     namespace UnassignThread {
         namespace Parameters {
             export type Id = string;
+            export type UnlinkMappedEntities = boolean;
         }
         export interface PathParameters {
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            unlink_mapped_entities?: Parameters.UnlinkMappedEntities;
         }
         /**
          * Entities which thread is unassigned from
@@ -2579,6 +2583,7 @@ export declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -3042,7 +3047,7 @@ export interface OperationMethods {
    * Unassign thread from entities
    */
   'unassignThread'(
-    parameters?: Parameters<Paths.UnassignThread.PathParameters> | null,
+    parameters?: Parameters<Paths.UnassignThread.QueryParameters & Paths.UnassignThread.PathParameters> | null,
     data?: Paths.UnassignThread.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UnassignThread.Responses.$204>
@@ -3678,7 +3683,7 @@ export interface PathsDictionary {
      * Unassign thread from entities
      */
     'post'(
-      parameters?: Parameters<Paths.UnassignThread.PathParameters> | null,
+      parameters?: Parameters<Paths.UnassignThread.QueryParameters & Paths.UnassignThread.PathParameters> | null,
       data?: Paths.UnassignThread.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UnassignThread.Responses.$204>
@@ -3781,6 +3786,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Address = Components.Schemas.Address;
 export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
