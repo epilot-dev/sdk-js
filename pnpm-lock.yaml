@@ -2695,14 +2695,10 @@ importers:
   packages/cli-wrapper:
     dependencies:
       '@epilot/cli':
-        specifier: ^0.1.15
-        version: 0.1.15(@types/node@24.2.0)(js-yaml@4.1.1)
+        specifier: ^0.1.16
+        version: 0.1.16(@types/node@24.2.0)(js-yaml@4.1.1)
 
   packages/epilot-sdk-v2:
-    optionalDependencies:
-      '@epilot/epilot-journey-sdk':
-        specifier: '>=2.0.0-alpha.1'
-        version: 2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
     devDependencies:
       axios:
         specifier: ^1.11.0
@@ -2725,6 +2721,10 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.46.0)
+    optionalDependencies:
+      '@epilot/epilot-journey-sdk':
+        specifier: '>=2.0.0-alpha.1'
+        version: 2.0.0-alpha.1(@material-ui/core@4.12.4(@types/react@17.0.91)(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(axios@1.13.6)(js-yaml@4.1.1)
 
 packages:
 
@@ -3082,8 +3082,8 @@ packages:
   '@emotion/hash@0.8.0':
     resolution: {integrity: sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==}
 
-  '@epilot/cli@0.1.15':
-    resolution: {integrity: sha512-jMkhXIS4RBsrS0OWb7r/DX3lI8ycyKz+7GfUNGXr7boTAc8ZxXXrGLqw4M+DyJE8jaL6kaR6nAHczPVelhm20A==}
+  '@epilot/cli@0.1.16':
+    resolution: {integrity: sha512-Xl4rWqGqL8IBldehLi2ne/O+naIlDjd274QE4Udbc+yZ7YOaIJdIvI+r+XTHXp3hbBmXTY953s93XUE/6Bs3xA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -8180,7 +8180,7 @@ snapshots:
   '@emotion/hash@0.8.0':
     optional: true
 
-  '@epilot/cli@0.1.15(@types/node@24.2.0)(js-yaml@4.1.1)':
+  '@epilot/cli@0.1.16(@types/node@24.2.0)(js-yaml@4.1.1)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@24.2.0)
       axios: 1.13.6(debug@4.4.1)
