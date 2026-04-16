@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Design Builder API v2",
-    "version": "0.0.2"
+    "version": "0.0.3"
   },
   "tags": [
     {
@@ -477,7 +477,8 @@
               "type": "string",
               "enum": [
                 "LOGO",
-                "FONT"
+                "FONT",
+                "IMAGE"
               ]
             },
             "required": false,
@@ -846,7 +847,8 @@
             "type": "string",
             "enum": [
               "LOGO",
-              "FONT"
+              "FONT",
+              "IMAGE"
             ]
           },
           "file_data": {
@@ -1191,6 +1193,7 @@
         "properties": {
           "design_tokens": {
             "type": "object",
+            "description": "Design tokens for journey customization",
             "properties": {
               "coupon": {
                 "type": "string"
@@ -1200,6 +1203,255 @@
               },
               "custom_css": {
                 "type": "string"
+              },
+              "accent_color": {
+                "type": "string",
+                "description": "Accent color, defaults to primary"
+              },
+              "outline_color": {
+                "type": "string",
+                "description": "Global outline/focus color"
+              },
+              "divider_color": {
+                "type": "string",
+                "description": "Divider line color"
+              },
+              "link_color": {
+                "type": "string",
+                "description": "Link text color"
+              },
+              "link_hover_color": {
+                "type": "string",
+                "description": "Link hover text color"
+              },
+              "font_size_scale": {
+                "type": "string",
+                "description": "Font size scale factor",
+                "enum": [
+                  "xs",
+                  "sm",
+                  "md",
+                  "lg",
+                  "xl"
+                ]
+              },
+              "topbar_height": {
+                "type": "number",
+                "description": "Topbar minimum height in pixels"
+              },
+              "topbar_logo_alignment": {
+                "type": "string",
+                "description": "Logo/content alignment in the top bar",
+                "enum": [
+                  "flex-start",
+                  "center",
+                  "flex-end"
+                ]
+              },
+              "logo_size": {
+                "type": "number",
+                "description": "Logo size in pixels"
+              },
+              "input_background": {
+                "type": "string",
+                "description": "Input field background color"
+              },
+              "input_border_color": {
+                "type": "string",
+                "description": "Input field border color"
+              },
+              "input_text_color": {
+                "type": "string",
+                "description": "Input field text color"
+              },
+              "input_label_color": {
+                "type": "string",
+                "description": "Input field label color"
+              },
+              "input_border_radius": {
+                "type": "number",
+                "description": "Input field border radius in pixels"
+              },
+              "input_height": {
+                "type": "number",
+                "description": "Input field height in pixels"
+              },
+              "input_variant": {
+                "type": "string",
+                "description": "Input field variant style",
+                "enum": [
+                  "outlined",
+                  "filled",
+                  "underlined"
+                ]
+              },
+              "button_primary_bg": {
+                "type": "string",
+                "description": "Primary button background color or gradient"
+              },
+              "button_primary_text": {
+                "type": "string",
+                "description": "Primary button text color"
+              },
+              "button_primary_hover_bg": {
+                "type": "string",
+                "description": "Primary button hover background color or gradient"
+              },
+              "button_primary_hover_text": {
+                "type": "string",
+                "description": "Primary button hover text color"
+              },
+              "button_outlined_border": {
+                "type": "string",
+                "description": "Outlined button border color"
+              },
+              "button_outlined_text": {
+                "type": "string",
+                "description": "Outlined button text color"
+              },
+              "button_outlined_hover_bg": {
+                "type": "string",
+                "description": "Outlined button hover background color"
+              },
+              "button_outlined_hover_text": {
+                "type": "string",
+                "description": "Outlined button hover text color"
+              },
+              "button_ghost_bg": {
+                "type": "string",
+                "description": "Ghost button background color"
+              },
+              "button_ghost_text": {
+                "type": "string",
+                "description": "Ghost button text color"
+              },
+              "button_ghost_hover_bg": {
+                "type": "string",
+                "description": "Ghost button hover background color"
+              },
+              "button_ghost_hover_text": {
+                "type": "string",
+                "description": "Ghost button hover text color"
+              },
+              "button_border_radius": {
+                "type": "number",
+                "description": "Button border radius in pixels"
+              },
+              "button_height": {
+                "type": "number",
+                "description": "Button height in pixels"
+              },
+              "card_background": {
+                "type": "string",
+                "description": "Card background color"
+              },
+              "card_border_color": {
+                "type": "string",
+                "description": "Card border color for outlined variant"
+              },
+              "card_variant": {
+                "type": "string",
+                "description": "Card visual variant",
+                "enum": [
+                  "shadow",
+                  "outlined"
+                ]
+              },
+              "summary_card_background": {
+                "type": "string",
+                "description": "Summary card background color"
+              },
+              "toggle_selected_bg": {
+                "type": "string",
+                "description": "Toggle button selected background color"
+              },
+              "toggle_selected_text": {
+                "type": "string",
+                "description": "Toggle button selected text color"
+              },
+              "toggle_hover_bg": {
+                "type": "string",
+                "description": "Toggle button hover background color"
+              },
+              "toggle_hover_text": {
+                "type": "string",
+                "description": "Toggle button hover text color"
+              },
+              "toggle_border_color": {
+                "type": "string",
+                "description": "Toggle group wrapper border color"
+              },
+              "dropdown_hover_bg": {
+                "type": "string",
+                "description": "Dropdown option hover background color"
+              },
+              "dropdown_hover_text": {
+                "type": "string",
+                "description": "Dropdown option hover text color"
+              },
+              "dropdown_selected_bg": {
+                "type": "string",
+                "description": "Dropdown option selected background color"
+              },
+              "dropdown_selected_text": {
+                "type": "string",
+                "description": "Dropdown option selected text color"
+              },
+              "switch_unchecked_color": {
+                "type": "string",
+                "description": "Switch unchecked thumb color"
+              },
+              "switch_unchecked_bg": {
+                "type": "string",
+                "description": "Switch unchecked track background color"
+              },
+              "switch_border_radius": {
+                "type": "number",
+                "description": "Switch border radius in pixels"
+              },
+              "checkbox_unchecked_color": {
+                "type": "string",
+                "description": "Checkbox unchecked border color"
+              },
+              "checkbox_label_color": {
+                "type": "string",
+                "description": "Checkbox label text color"
+              },
+              "radio_unchecked_color": {
+                "type": "string",
+                "description": "Radio button unchecked border color"
+              },
+              "radio_label_color": {
+                "type": "string",
+                "description": "Radio button label text color"
+              },
+              "datepicker_selected_bg": {
+                "type": "string",
+                "description": "Date picker selected date background color"
+              },
+              "datepicker_selected_color": {
+                "type": "string",
+                "description": "Date picker selected date text color"
+              },
+              "datepicker_border_radius": {
+                "type": "number",
+                "description": "Date picker border radius in pixels"
+              },
+              "chip_background": {
+                "type": "string",
+                "description": "Chip background color"
+              },
+              "chip_hover_background": {
+                "type": "string",
+                "description": "Chip hover background color"
+              },
+              "chip_text_color": {
+                "type": "string",
+                "description": "Chip text color"
+              },
+              "chip_hover_text_color": {
+                "type": "string",
+                "description": "Chip hover text color"
               }
             }
           }
@@ -1413,7 +1665,8 @@
             "type": "string",
             "enum": [
               "LOGO",
-              "FONT"
+              "FONT",
+              "IMAGE"
             ]
           },
           "s3_object_key": {
