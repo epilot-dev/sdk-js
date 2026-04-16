@@ -469,6 +469,27 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
+            /**
              * Amount to be paid in cents i.e. precision 2
              * example:
              * 10050
@@ -593,6 +614,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Billing account number
              */
@@ -1728,6 +1770,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "contact";
         }
         export interface ContactCountRequest {
@@ -1858,6 +1921,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * The name of the contract.
              * example:
@@ -2268,6 +2352,27 @@ export declare namespace Components {
         }
         export interface Entity {
             [name: string]: any;
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
         }
         export interface EntityEditRule {
             slug?: /**
@@ -2457,6 +2562,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
              * example:
@@ -2794,6 +2920,12 @@ export declare namespace Components {
              * ]
              */
             include?: ("active_workflow")[];
+            /**
+             * Elasticsearch highlight configuration passed through to the Entity API. When provided, matching results include a `highlight` object with field names as keys and arrays of highlighted fragments as values.
+             */
+            highlight?: {
+                [key: string]: any;
+            };
         }
         /**
          * URL-friendly identifier for the entity schema
@@ -3661,6 +3793,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "file";
         }
         /**
@@ -3707,6 +3860,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "file";
             /**
              * example:
@@ -3838,6 +4012,27 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
+            /**
              * Amount to be paid in cents i.e. precision 2
              * example:
              * 10050
@@ -3946,6 +4141,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "meter";
         }
         export interface MeterChartWidget {
@@ -4278,6 +4494,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "opportunity";
         }
         /**
@@ -4324,6 +4561,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "order";
         }
         export interface OrganizationSettings {
@@ -5736,6 +5994,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "portal_user";
         }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
@@ -5784,6 +6063,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "product";
         }
         export interface ProductRecommendationsWidget {
@@ -5998,6 +6298,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Amount to be paid in cents i.e. precision 2
              * example:
@@ -7542,6 +7863,28 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ClonePortalConfig {
+        export interface RequestBody {
+            source_portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            /**
+             * Name for the cloned portal. Defaults to "Copy of <source portal name>".
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.PortalConfigV3;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ConfigureDistribution {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -8052,6 +8395,27 @@ export declare namespace Paths {
                      */
                     _updated_at: string; // date-time
                     /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
+                    /**
                      * The name of the contract.
                      * example:
                      * Grid Contract
@@ -8356,6 +8720,27 @@ export declare namespace Paths {
                      * 2021-02-09T12:41:43.662Z
                      */
                     _updated_at: string; // date-time
+                    /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
                     _schema: "opportunity";
                     journey_actions?: Components.Schemas.JourneyActions;
                 }[];
@@ -8438,6 +8823,27 @@ export declare namespace Paths {
                      * 2021-02-09T12:41:43.662Z
                      */
                     _updated_at: string; // date-time
+                    /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
                     _schema: "order";
                     journey_actions?: Components.Schemas.JourneyActions;
                 }[];
@@ -8728,9 +9134,17 @@ export declare namespace Paths {
                      */
                     value: number;
                     /**
-                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string.
+                     * Optional type of the consumption, such as 'nt' (night time) and 'ht' (high time) or 'feed-in' and 'feed-out'. Can be any string.
+                     * example:
+                     * nt
                      */
                     type?: string;
+                    /**
+                     * The method used to aggregate the consumption data. Assumed default is 'sum'.
+                     * example:
+                     * sum
+                     */
+                    aggregation_method?: "sum" | "average" | "max" | "min";
                 }[];
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -9228,6 +9642,48 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterReadings {
+        export interface RequestBody {
+            meter_id: string;
+            counter_id: string;
+            sort?: "asc" | "desc";
+            from?: number;
+            size?: number;
+            /**
+             * Template map (key to Handlebars template string). Each template is resolved per reading.
+             */
+            templates?: {
+                [name: string]: string;
+            };
+            /**
+             * Template map resolved against the counter entity.
+             */
+            counter_templates?: {
+                [name: string]: string;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    [name: string]: any;
+                    templates_output?: {
+                        [name: string]: string;
+                    };
+                }[];
+                hits?: number;
+                /**
+                 * Resolved counter templates.
+                 */
+                counter_templates_output?: {
+                    [name: string]: string;
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10977,6 +11433,70 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.UpsertPortalWidget;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPortalWidgetsV3 {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UpsertPortalWidget;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicSchemasV3 {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export interface $200 {
+                schemas?: Components.Schemas.Schema[];
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -13163,6 +13683,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPortalWidgets.Responses.$200>
   /**
+   * getPublicPortalWidgetsV3 - getPublicPortalWidgetsV3
+   * 
+   * Retrieves the public widgets of a portal.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
+   */
+  'getPublicPortalWidgetsV3'(
+    parameters?: Parameters<Paths.GetPublicPortalWidgetsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalWidgetsV3.Responses.$200>
+  /**
    * getPortalWidgets - getPortalWidgets
    * 
    * Retrieves the widgets of a portal.
@@ -13252,6 +13786,20 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  /**
+   * getPublicSchemasV3 - getPublicSchemasV3
+   * 
+   * Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
+   */
+  'getPublicSchemasV3'(
+    parameters?: Parameters<Paths.GetPublicSchemasV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicSchemasV3.Responses.$200>
   /**
    * getOrganizationSettingsByDomain - getOrganizationSettingsByDomain
    * 
@@ -13916,8 +14464,8 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
-   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
-   * third-party plausibility check hook using 'range' mode. This endpoint requires 
+   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+   * third-party plausibility check hook using 'range' mode. This endpoint requires
    * a plausibility check hook to be configured for the portal.
    * 
    */
@@ -13926,6 +14474,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  /**
+   * getMeterReadings - Get meter readings with optional template resolution
+   * 
+   * Fetches meter readings for a counter and optionally resolves Handlebars
+   * template strings against each reading object using @epilot/variables.
+   * 
+   */
+  'getMeterReadings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
    * ssoLogin - ssoLogin
    * 
@@ -14224,6 +14784,16 @@ export interface OperationMethods {
     data?: Paths.SwapPortalConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
+  /**
+   * clonePortalConfig - clonePortalConfig
+   * 
+   * Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.
+   */
+  'clonePortalConfig'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ClonePortalConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
   /**
    * invitePartner - invitePartner
    * 
@@ -14649,6 +15219,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicPortalWidgets.Responses.$200>
   }
+  ['/v3/portal/public/widgets']: {
+    /**
+     * getPublicPortalWidgetsV3 - getPublicPortalWidgetsV3
+     * 
+     * Retrieves the public widgets of a portal.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalWidgetsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalWidgetsV3.Responses.$200>
+  }
   ['/v2/portal/widgets']: {
     /**
      * upsertPortalWidget - upsertPortalWidget
@@ -14752,6 +15338,22 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  }
+  ['/v3/portal/public/schemas']: {
+    /**
+     * getPublicSchemasV3 - getPublicSchemasV3
+     * 
+     * Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicSchemasV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicSchemasV3.Responses.$200>
   }
   ['/v2/portal/public/org/settings']: {
     /**
@@ -15532,8 +16134,8 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/reading/allowed-range/{meter_id}']: {
     /**
-     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
-     * third-party plausibility check hook using 'range' mode. This endpoint requires 
+     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+     * third-party plausibility check hook using 'range' mode. This endpoint requires
      * a plausibility check hook to be configured for the portal.
      * 
      */
@@ -15542,6 +16144,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  }
+  ['/v2/portal/metering/readings']: {
+    /**
+     * getMeterReadings - Get meter readings with optional template resolution
+     * 
+     * Fetches meter readings for a counter and optionally resolves Handlebars
+     * template strings against each reading object using @epilot/variables.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
   ['/v2/portal/public/sso/login']: {
     /**
@@ -15880,6 +16496,18 @@ export interface PathsDictionary {
       data?: Paths.SwapPortalConfig.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
+  }
+  ['/v3/portal/config/clone']: {
+    /**
+     * clonePortalConfig - clonePortalConfig
+     * 
+     * Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ClonePortalConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
   }
   ['/v3/portal/partner/invite']: {
     /**

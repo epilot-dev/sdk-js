@@ -1,6 +1,6 @@
 {
   "name": "epilot",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "CLI for epilot APIs (wrapper for @epilot/cli)",
   "bin": {
     "epilot": "./bin/epilot.js"
@@ -23,7 +23,7 @@
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
   "dependencies": {
-    "@epilot/cli": "^0.1.15"
+    "@epilot/cli": "^0.1.16"
   },
   "engines": {
     "node": ">=18"

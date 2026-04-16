@@ -95,77 +95,14 @@ const { data } = await client.getAllDesigns()
       "last_modified_at": "string",
       "brand_id": "string",
       "brand_name": "string",
-      "user": {
-        "emailaddress": "string",
-        "fullname": "string",
-        "name": "string",
-        "userid": "string"
-      },
+      "user": {},
       "style_name": "string",
-      "style": {
-        "logo": {
-          "main": {
-            "name": "string",
-            "display_name": "string",
-            "file_type": "LOGO",
-            "s3_object_key": "string",
-            "url": "string"
-          }
-        },
-        "palette": {
-          "primary": "string",
-          "secondary": "string",
-          "error": "string",
-          "background": "string",
-          "paper": "string",
-          "navbar": "string",
-          "portal_login_background": "string"
-        },
-        "typography": {
-          "font": {
-            "font_id": "string",
-            "font_name": "string",
-            "font_family": "string",
-            "font_weight_regular": "string",
-            "font_weight_medium": "string",
-            "font_weight_bold": "string",
-            "urls": [
-              {
-                "type": "WOFF2",
-                "url": "string"
-              }
-            ]
-          },
-          "primary": "string",
-          "secondary": "string"
-        },
-        "shape": {
-          "border_radius": 0
-        },
-        "consumer": {
-          "widgets": [
-            {
-              "id": "string",
-              "name": "string"
-            }
-          ],
-          "customer_portals": [
-            {
-              "id": "string",
-              "name": "string"
-            }
-          ]
-        }
-      },
+      "style": {},
       "is_default": true,
       "_manifest": ["string"],
       "custom_theme": "string",
       "use_custom_theme": true,
-      "design_tokens": {
-        "coupon": "string",
-        "cashback": "string",
-        "custom_css": "string"
-      }
+      "design_tokens": {}
     }
   ]
 }
@@ -196,59 +133,11 @@ const { data } = await client.addDesign(
       },
       style_name: 'string',
       style: {
-        logo: {
-          main: {
-            name: 'string',
-            display_name: 'string',
-            file_type: 'LOGO',
-            s3_object_key: 'string',
-            url: 'string'
-          }
-        },
-        palette: {
-          primary: 'string',
-          secondary: 'string',
-          error: 'string',
-          background: 'string',
-          paper: 'string',
-          navbar: 'string',
-          portal_login_background: 'string'
-        },
-        typography: {
-          font: {
-            font_id: 'string',
-            font_name: 'string',
-            font_family: 'string',
-            font_weight_regular: 'string',
-            font_weight_medium: 'string',
-            font_weight_bold: 'string',
-            urls: [
-              {
-                type: 'WOFF2',
-                url: 'string'
-              }
-            ]
-          },
-          primary: 'string',
-          secondary: 'string'
-        },
-        shape: {
-          border_radius: 0
-        },
-        consumer: {
-          widgets: [
-            {
-              id: 'string',
-              name: 'string'
-            }
-          ],
-          customer_portals: [
-            {
-              id: 'string',
-              name: 'string'
-            }
-          ]
-        }
+        logo: { /* ... */ },
+        palette: { /* ... */ },
+        typography: { /* ... */ },
+        shape: { /* ... */ },
+        consumer: { /* ... */ }
       },
       is_default: true,
       _manifest: ['string'],
@@ -257,7 +146,64 @@ const { data } = await client.addDesign(
       design_tokens: {
         coupon: 'string',
         cashback: 'string',
-        custom_css: 'string'
+        custom_css: 'string',
+        accent_color: 'string',
+        outline_color: 'string',
+        divider_color: 'string',
+        link_color: 'string',
+        link_hover_color: 'string',
+        font_size_scale: 'xs',
+        topbar_height: 0,
+        topbar_logo_alignment: 'flex-start',
+        logo_size: 0,
+        input_background: 'string',
+        input_border_color: 'string',
+        input_text_color: 'string',
+        input_label_color: 'string',
+        input_border_radius: 0,
+        input_height: 0,
+        input_variant: 'outlined',
+        button_primary_bg: 'string',
+        button_primary_text: 'string',
+        button_primary_hover_bg: 'string',
+        button_primary_hover_text: 'string',
+        button_outlined_border: 'string',
+        button_outlined_text: 'string',
+        button_outlined_hover_bg: 'string',
+        button_outlined_hover_text: 'string',
+        button_ghost_bg: 'string',
+        button_ghost_text: 'string',
+        button_ghost_hover_bg: 'string',
+        button_ghost_hover_text: 'string',
+        button_border_radius: 0,
+        button_height: 0,
+        card_background: 'string',
+        card_border_color: 'string',
+        card_variant: 'shadow',
+        summary_card_background: 'string',
+        toggle_selected_bg: 'string',
+        toggle_selected_text: 'string',
+        toggle_hover_bg: 'string',
+        toggle_hover_text: 'string',
+        toggle_border_color: 'string',
+        dropdown_hover_bg: 'string',
+        dropdown_hover_text: 'string',
+        dropdown_selected_bg: 'string',
+        dropdown_selected_text: 'string',
+        switch_unchecked_color: 'string',
+        switch_unchecked_bg: 'string',
+        switch_border_radius: 0,
+        checkbox_unchecked_color: 'string',
+        checkbox_label_color: 'string',
+        radio_unchecked_color: 'string',
+        radio_label_color: 'string',
+        datepicker_selected_bg: 'string',
+        datepicker_selected_color: 'string',
+        datepicker_border_radius: 0,
+        chip_background: 'string',
+        chip_hover_background: 'string',
+        chip_text_color: 'string',
+        chip_hover_text_color: 'string'
       }
     }
   },
@@ -285,59 +231,11 @@ const { data } = await client.addDesign(
     },
     "style_name": "string",
     "style": {
-      "logo": {
-        "main": {
-          "name": "string",
-          "display_name": "string",
-          "file_type": "LOGO",
-          "s3_object_key": "string",
-          "url": "string"
-        }
-      },
-      "palette": {
-        "primary": "string",
-        "secondary": "string",
-        "error": "string",
-        "background": "string",
-        "paper": "string",
-        "navbar": "string",
-        "portal_login_background": "string"
-      },
-      "typography": {
-        "font": {
-          "font_id": "string",
-          "font_name": "string",
-          "font_family": "string",
-          "font_weight_regular": "string",
-          "font_weight_medium": "string",
-          "font_weight_bold": "string",
-          "urls": [
-            {
-              "type": "WOFF2",
-              "url": "string"
-            }
-          ]
-        },
-        "primary": "string",
-        "secondary": "string"
-      },
-      "shape": {
-        "border_radius": 0
-      },
-      "consumer": {
-        "widgets": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ],
-        "customer_portals": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ]
-      }
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
     },
     "is_default": true,
     "_manifest": ["string"],
@@ -346,7 +244,64 @@ const { data } = await client.addDesign(
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }
@@ -389,59 +344,11 @@ const { data } = await client.getDesign({
     },
     "style_name": "string",
     "style": {
-      "logo": {
-        "main": {
-          "name": "string",
-          "display_name": "string",
-          "file_type": "LOGO",
-          "s3_object_key": "string",
-          "url": "string"
-        }
-      },
-      "palette": {
-        "primary": "string",
-        "secondary": "string",
-        "error": "string",
-        "background": "string",
-        "paper": "string",
-        "navbar": "string",
-        "portal_login_background": "string"
-      },
-      "typography": {
-        "font": {
-          "font_id": "string",
-          "font_name": "string",
-          "font_family": "string",
-          "font_weight_regular": "string",
-          "font_weight_medium": "string",
-          "font_weight_bold": "string",
-          "urls": [
-            {
-              "type": "WOFF2",
-              "url": "string"
-            }
-          ]
-        },
-        "primary": "string",
-        "secondary": "string"
-      },
-      "shape": {
-        "border_radius": 0
-      },
-      "consumer": {
-        "widgets": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ],
-        "customer_portals": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ]
-      }
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
     },
     "is_default": true,
     "_manifest": ["string"],
@@ -450,7 +357,64 @@ const { data } = await client.getDesign({
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }
@@ -497,59 +461,11 @@ const { data } = await client.updateDesign(
       },
       style_name: 'string',
       style: {
-        logo: {
-          main: {
-            name: 'string',
-            display_name: 'string',
-            file_type: 'LOGO',
-            s3_object_key: 'string',
-            url: 'string'
-          }
-        },
-        palette: {
-          primary: 'string',
-          secondary: 'string',
-          error: 'string',
-          background: 'string',
-          paper: 'string',
-          navbar: 'string',
-          portal_login_background: 'string'
-        },
-        typography: {
-          font: {
-            font_id: 'string',
-            font_name: 'string',
-            font_family: 'string',
-            font_weight_regular: 'string',
-            font_weight_medium: 'string',
-            font_weight_bold: 'string',
-            urls: [
-              {
-                type: 'WOFF2',
-                url: 'string'
-              }
-            ]
-          },
-          primary: 'string',
-          secondary: 'string'
-        },
-        shape: {
-          border_radius: 0
-        },
-        consumer: {
-          widgets: [
-            {
-              id: 'string',
-              name: 'string'
-            }
-          ],
-          customer_portals: [
-            {
-              id: 'string',
-              name: 'string'
-            }
-          ]
-        }
+        logo: { /* ... */ },
+        palette: { /* ... */ },
+        typography: { /* ... */ },
+        shape: { /* ... */ },
+        consumer: { /* ... */ }
       },
       is_default: true,
       _manifest: ['string'],
@@ -558,7 +474,64 @@ const { data } = await client.updateDesign(
       design_tokens: {
         coupon: 'string',
         cashback: 'string',
-        custom_css: 'string'
+        custom_css: 'string',
+        accent_color: 'string',
+        outline_color: 'string',
+        divider_color: 'string',
+        link_color: 'string',
+        link_hover_color: 'string',
+        font_size_scale: 'xs',
+        topbar_height: 0,
+        topbar_logo_alignment: 'flex-start',
+        logo_size: 0,
+        input_background: 'string',
+        input_border_color: 'string',
+        input_text_color: 'string',
+        input_label_color: 'string',
+        input_border_radius: 0,
+        input_height: 0,
+        input_variant: 'outlined',
+        button_primary_bg: 'string',
+        button_primary_text: 'string',
+        button_primary_hover_bg: 'string',
+        button_primary_hover_text: 'string',
+        button_outlined_border: 'string',
+        button_outlined_text: 'string',
+        button_outlined_hover_bg: 'string',
+        button_outlined_hover_text: 'string',
+        button_ghost_bg: 'string',
+        button_ghost_text: 'string',
+        button_ghost_hover_bg: 'string',
+        button_ghost_hover_text: 'string',
+        button_border_radius: 0,
+        button_height: 0,
+        card_background: 'string',
+        card_border_color: 'string',
+        card_variant: 'shadow',
+        summary_card_background: 'string',
+        toggle_selected_bg: 'string',
+        toggle_selected_text: 'string',
+        toggle_hover_bg: 'string',
+        toggle_hover_text: 'string',
+        toggle_border_color: 'string',
+        dropdown_hover_bg: 'string',
+        dropdown_hover_text: 'string',
+        dropdown_selected_bg: 'string',
+        dropdown_selected_text: 'string',
+        switch_unchecked_color: 'string',
+        switch_unchecked_bg: 'string',
+        switch_border_radius: 0,
+        checkbox_unchecked_color: 'string',
+        checkbox_label_color: 'string',
+        radio_unchecked_color: 'string',
+        radio_label_color: 'string',
+        datepicker_selected_bg: 'string',
+        datepicker_selected_color: 'string',
+        datepicker_border_radius: 0,
+        chip_background: 'string',
+        chip_hover_background: 'string',
+        chip_text_color: 'string',
+        chip_hover_text_color: 'string'
       }
     }
   },
@@ -684,59 +657,11 @@ const { data } = await client.getConsumerDesign({
     },
     "style_name": "string",
     "style": {
-      "logo": {
-        "main": {
-          "name": "string",
-          "display_name": "string",
-          "file_type": "LOGO",
-          "s3_object_key": "string",
-          "url": "string"
-        }
-      },
-      "palette": {
-        "primary": "string",
-        "secondary": "string",
-        "error": "string",
-        "background": "string",
-        "paper": "string",
-        "navbar": "string",
-        "portal_login_background": "string"
-      },
-      "typography": {
-        "font": {
-          "font_id": "string",
-          "font_name": "string",
-          "font_family": "string",
-          "font_weight_regular": "string",
-          "font_weight_medium": "string",
-          "font_weight_bold": "string",
-          "urls": [
-            {
-              "type": "WOFF2",
-              "url": "string"
-            }
-          ]
-        },
-        "primary": "string",
-        "secondary": "string"
-      },
-      "shape": {
-        "border_radius": 0
-      },
-      "consumer": {
-        "widgets": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ],
-        "customer_portals": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ]
-      }
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
     },
     "is_default": true,
     "_manifest": ["string"],
@@ -745,7 +670,64 @@ const { data } = await client.getConsumerDesign({
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }
@@ -804,7 +786,7 @@ const { data } = await client.removeConsumer(
 
 ```ts
 type UploadFileReq = {
-  file_type: "LOGO" | "FONT"
+  file_type: "LOGO" | "FONT" | "IMAGE"
   file_data: string // base64
   display_name?: string
   file_name: string
@@ -817,7 +799,7 @@ type UploadFileReq = {
 type UploadFileRes = {
   name: string
   display_name?: string
-  file_type?: "LOGO" | "FONT"
+  file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
 }
@@ -829,7 +811,7 @@ type UploadFileRes = {
 type GetFilesRes = Array<{
   name: string
   display_name?: string
-  file_type?: "LOGO" | "FONT"
+  file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
 }>
@@ -869,6 +851,63 @@ type GetAllDesignsRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
     }
   }>
 }
@@ -921,6 +960,63 @@ type AddDesignReq = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
     }
   }
 }
@@ -960,6 +1056,63 @@ type AddDesignRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
     }
   }
 }
@@ -999,6 +1152,63 @@ type GetDesignRes = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
     }
   }
 }
@@ -1033,6 +1243,63 @@ type UpdateDesignReq = {
       coupon?: { ... }
       cashback?: { ... }
       custom_css?: { ... }
+      accent_color?: { ... }
+      outline_color?: { ... }
+      divider_color?: { ... }
+      link_color?: { ... }
+      link_hover_color?: { ... }
+      font_size_scale?: { ... }
+      topbar_height?: { ... }
+      topbar_logo_alignment?: { ... }
+      logo_size?: { ... }
+      input_background?: { ... }
+      input_border_color?: { ... }
+      input_text_color?: { ... }
+      input_label_color?: { ... }
+      input_border_radius?: { ... }
+      input_height?: { ... }
+      input_variant?: { ... }
+      button_primary_bg?: { ... }
+      button_primary_text?: { ... }
+      button_primary_hover_bg?: { ... }
+      button_primary_hover_text?: { ... }
+      button_outlined_border?: { ... }
+      button_outlined_text?: { ... }
+      button_outlined_hover_bg?: { ... }
+      button_outlined_hover_text?: { ... }
+      button_ghost_bg?: { ... }
+      button_ghost_text?: { ... }
+      button_ghost_hover_bg?: { ... }
+      button_ghost_hover_text?: { ... }
+      button_border_radius?: { ... }
+      button_height?: { ... }
+      card_background?: { ... }
+      card_border_color?: { ... }
+      card_variant?: { ... }
+      summary_card_background?: { ... }
+      toggle_selected_bg?: { ... }
+      toggle_selected_text?: { ... }
+      toggle_hover_bg?: { ... }
+      toggle_hover_text?: { ... }
+      toggle_border_color?: { ... }
+      dropdown_hover_bg?: { ... }
+      dropdown_hover_text?: { ... }
+      dropdown_selected_bg?: { ... }
+      dropdown_selected_text?: { ... }
+      switch_unchecked_color?: { ... }
+      switch_unchecked_bg?: { ... }
+      switch_border_radius?: { ... }
+      checkbox_unchecked_color?: { ... }
+      checkbox_label_color?: { ... }
+      radio_unchecked_color?: { ... }
+      radio_label_color?: { ... }
+      datepicker_selected_bg?: { ... }
+      datepicker_selected_color?: { ... }
+      datepicker_border_radius?: { ... }
+      chip_background?: { ... }
+      chip_hover_background?: { ... }
+      chip_text_color?: { ... }
+      chip_hover_text_color?: { ... }
     }
   }
 }
@@ -1146,6 +1413,63 @@ type Journey = {
     coupon?: string
     cashback?: string
     custom_css?: string
+    accent_color?: string
+    outline_color?: string
+    divider_color?: string
+    link_color?: string
+    link_hover_color?: string
+    font_size_scale?: "xs" | "sm" | "md" | "lg" | "xl"
+    topbar_height?: number
+    topbar_logo_alignment?: "flex-start" | "center" | "flex-end"
+    logo_size?: number
+    input_background?: string
+    input_border_color?: string
+    input_text_color?: string
+    input_label_color?: string
+    input_border_radius?: number
+    input_height?: number
+    input_variant?: "outlined" | "filled" | "underlined"
+    button_primary_bg?: string
+    button_primary_text?: string
+    button_primary_hover_bg?: string
+    button_primary_hover_text?: string
+    button_outlined_border?: string
+    button_outlined_text?: string
+    button_outlined_hover_bg?: string
+    button_outlined_hover_text?: string
+    button_ghost_bg?: string
+    button_ghost_text?: string
+    button_ghost_hover_bg?: string
+    button_ghost_hover_text?: string
+    button_border_radius?: number
+    button_height?: number
+    card_background?: string
+    card_border_color?: string
+    card_variant?: "shadow" | "outlined"
+    summary_card_background?: string
+    toggle_selected_bg?: string
+    toggle_selected_text?: string
+    toggle_hover_bg?: string
+    toggle_hover_text?: string
+    toggle_border_color?: string
+    dropdown_hover_bg?: string
+    dropdown_hover_text?: string
+    dropdown_selected_bg?: string
+    dropdown_selected_text?: string
+    switch_unchecked_color?: string
+    switch_unchecked_bg?: string
+    switch_border_radius?: number
+    checkbox_unchecked_color?: string
+    checkbox_label_color?: string
+    radio_unchecked_color?: string
+    radio_label_color?: string
+    datepicker_selected_bg?: string
+    datepicker_selected_color?: string
+    datepicker_border_radius?: number
+    chip_background?: string
+    chip_hover_background?: string
+    chip_text_color?: string
+    chip_hover_text_color?: string
   }
 }
 ```
@@ -1190,7 +1514,7 @@ type LogoData = {
   main?: {
     name: string
     display_name?: string
-    file_type?: "LOGO" | "FONT"
+    file_type?: "LOGO" | "FONT" | "IMAGE"
     s3_object_key: string
     url: string
   }
@@ -1290,7 +1614,7 @@ type ErrorResp = {
 type FileData = {
   name: string
   display_name?: string
-  file_type?: "LOGO" | "FONT"
+  file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
 }
