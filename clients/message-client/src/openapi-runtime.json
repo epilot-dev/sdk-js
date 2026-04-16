@@ -592,6 +592,11 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "unlink_mapped_entities",
+            "in": "query",
+            "required": false
           }
         ],
         "requestBody": {

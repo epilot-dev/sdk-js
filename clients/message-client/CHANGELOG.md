@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.28.0
+
+- Added `unlink_mapped_entities` query param to `unassignThread` to also remove unassigned entities from `mapped_entities` on related source entities
+
 ## 1.18.2
 
 ### Patch Changes
