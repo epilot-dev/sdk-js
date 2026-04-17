@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://configuration-hub.dev.sls.epilot.io"
+      "url": "https://configuration-hub.sls.epilot.io"
     }
   ],
   "paths": {
@@ -28,6 +28,22 @@
           },
           {
             "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "name": "updated_after",
+            "in": "query"
+          },
+          {
+            "name": "updated_before",
+            "in": "query"
+          },
+          {
+            "name": "purposes",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -50,6 +66,12 @@
             "$ref": "#/components/parameters/SizeParam"
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/index/rebuild": {
+      "post": {
+        "operationId": "rebuildIndex",
         "responses": {}
       }
     }
