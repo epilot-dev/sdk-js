@@ -73,6 +73,35 @@ describe('verifyEpilotSignature', () => {
     expect(isValid).toBe(false);
   });
 
+  it('returns true for a valid signature from openapi-backend Context', async () => {
+    // given
+    mockVerify.mockReturnValue(true);
+
+    const requestBody = { data: { entity: { _id: '123' } }, timestamp: new Date().toISOString(), type: 'external_integration' };
+    const context: any = {
+      request: {
+        headers: {
+          'webhook-id': 'test-id',
+          'webhook-timestamp': Math.floor(Date.now() / 1000).toString(),
+          'webhook-signature': 'v1a,base64-signature',
+        },
+        requestBody,
+      },
+    };
+
+    // when
+    const isValid = await verifyEpilotSignature(context);
+
+    // then
+    expect(isValid).toBe(true);
+    expect(mockVerify).toHaveBeenCalledWith(
+      null,
+      Buffer.from(`test-id.${context.request.headers['webhook-timestamp']}.${JSON.stringify(requestBody)}`, 'utf8'),
+      'mocked-public-key-peem',
+      expect.any(Buffer),
+    );
+  });
+
   it('returns false if the timestamp is expired', async () => {
     // given
     mockVerify.mockReturnValue(true); // valid signature but invalid timestamp
