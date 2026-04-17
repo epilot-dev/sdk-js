@@ -2,6 +2,7 @@ import { defineCommand } from 'citty';
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import { saveCredentials } from '../lib/auth-store.js';
+import { type Environment, getPortalUrl, resolveEnvironment } from '../lib/environment.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
 
 export default defineCommand({
@@ -9,9 +10,12 @@ export default defineCommand({
   args: {
     token: { type: 'string', description: 'Manually provide a token instead of browser login' },
     profile: { type: 'string', description: 'Save credentials to this profile' },
+    'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
+    'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
   },
   run: async ({ args }) => {
     const profileName = args.profile || process.env.EPILOT_PROFILE;
+    const env = resolveEnvironment(args['use-dev'], args['use-staging']);
 
     // Manual token input
     if (args.token) {
@@ -29,7 +33,7 @@ export default defineCommand({
       process.exit(1);
     }
 
-    const token = await browserLogin(profileName);
+    const token = await browserLogin(profileName, env);
     if (token) {
       process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
     } else {
@@ -39,7 +43,7 @@ export default defineCommand({
   },
 });
 
-const browserLogin = async (profileName?: string): Promise<string | null> => {
+const browserLogin = async (profileName?: string, env: Environment = 'production'): Promise<string | null> => {
   // Generate a cryptographic state parameter to prevent CSRF
   const state = randomBytes(32).toString('hex');
 
@@ -91,8 +95,9 @@ const browserLogin = async (profileName?: string): Promise<string | null> => {
 
       const port = address.port;
       const callbackUrl = `http://localhost:${port}/callback`;
+      const portalUrl = getPortalUrl(env);
       const loginUrl =
-        `https://portal.epilot.cloud/login?cli_callback=${encodeURIComponent(callbackUrl)}` +
+        `${portalUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}` +
         `&state=${state}` +
         `&code=${verificationCode}`;
 
