@@ -1,6 +1,6 @@
 {
   "name": "@epilot/app-sdk",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "SDK to build Apps for epilot XRM",
   "author": "epilot GmbH",
   "license": "MIT",
