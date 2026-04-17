@@ -1,6 +1,6 @@
 # Configuration Hub API
 
-- **Base URL:** `https://configuration-hub.dev.sls.epilot.io`
+- **Base URL:** `https://configuration-hub.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/configuration-hub](https://docs.epilot.io/api/configuration-hub)
 
 ## Usage
@@ -29,12 +29,16 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`listConfigs`](#listconfigs)
 - [`getConfigDependencies`](#getconfigdependencies)
 
+**Index**
+- [`rebuildIndex`](#rebuildindex)
+
 **Schemas**
 - [`ResourceType`](#resourcetype)
 - [`ConfigTypeInfo`](#configtypeinfo)
 - [`ConfigNode`](#confignode)
 - [`ConfigListResponse`](#configlistresponse)
 - [`ConfigDependenciesResponse`](#configdependenciesresponse)
+- [`IndexRebuildResponse`](#indexrebuildresponse)
 - [`ErrorResponse`](#errorresponse)
 
 ### `listConfigTypes`
@@ -82,6 +86,10 @@ const { data } = await client.listConfigs({
   type: 'example',
   cursor: 'example',
   size: 1,
+  q: 'example',
+  updated_after: 'example',
+  updated_before: 'example',
+  purposes: 'example',
 })
 ```
 
@@ -149,6 +157,35 @@ const { data } = await client.getConfigDependencies({
       "link": "https://example.com/path"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `rebuildIndex`
+
+Rebuild the configuration index for the caller's organization.
+Calls all adapter APIs in parallel and stores results in DynamoDB.
+If a build is already in progress (within 60s), returns immediately.
+
+`POST /v1/index/rebuild`
+
+```ts
+const { data } = await client.rebuildIndex()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "ready",
+  "last_built_at": "1970-01-01T00:00:00.000Z",
+  "total_items": 0,
+  "build_duration_ms": 0,
+  "failed_types": ["string"]
 }
 ```
 
@@ -243,6 +280,20 @@ type ConfigDependenciesResponse = {
     purposes?: string[]
     link?: string // uri
   }>
+}
+```
+
+### `IndexRebuildResponse`
+
+Result of an index rebuild operation
+
+```ts
+type IndexRebuildResponse = {
+  status: "ready" | "building" | "failed" | "already_building"
+  last_built_at?: string // date-time
+  total_items?: number
+  build_duration_ms?: number
+  failed_types?: string[]
 }
 ```
 

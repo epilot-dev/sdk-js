@@ -125,59 +125,11 @@ epilot design addDesign \
     },
     "style_name": "string",
     "style": {
-      "logo": {
-        "main": {
-          "name": "string",
-          "display_name": "string",
-          "file_type": "LOGO",
-          "s3_object_key": "string",
-          "url": "string"
-        }
-      },
-      "palette": {
-        "primary": "string",
-        "secondary": "string",
-        "error": "string",
-        "background": "string",
-        "paper": "string",
-        "navbar": "string",
-        "portal_login_background": "string"
-      },
-      "typography": {
-        "font": {
-          "font_id": "string",
-          "font_name": "string",
-          "font_family": "string",
-          "font_weight_regular": "string",
-          "font_weight_medium": "string",
-          "font_weight_bold": "string",
-          "urls": [
-            {
-              "type": "WOFF2",
-              "url": "string"
-            }
-          ]
-        },
-        "primary": "string",
-        "secondary": "string"
-      },
-      "shape": {
-        "border_radius": 0
-      },
-      "consumer": {
-        "widgets": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ],
-        "customer_portals": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ]
-      }
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
     },
     "is_default": true,
     "_manifest": ["string"],
@@ -186,7 +138,64 @@ epilot design addDesign \
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }'
@@ -238,7 +247,64 @@ epilot design addDesign --jsonata 'design'
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }
@@ -313,7 +379,64 @@ epilot design getDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsona
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }
@@ -361,59 +484,11 @@ epilot design updateDesign \
     },
     "style_name": "string",
     "style": {
-      "logo": {
-        "main": {
-          "name": "string",
-          "display_name": "string",
-          "file_type": "LOGO",
-          "s3_object_key": "string",
-          "url": "string"
-        }
-      },
-      "palette": {
-        "primary": "string",
-        "secondary": "string",
-        "error": "string",
-        "background": "string",
-        "paper": "string",
-        "navbar": "string",
-        "portal_login_background": "string"
-      },
-      "typography": {
-        "font": {
-          "font_id": "string",
-          "font_name": "string",
-          "font_family": "string",
-          "font_weight_regular": "string",
-          "font_weight_medium": "string",
-          "font_weight_bold": "string",
-          "urls": [
-            {
-              "type": "WOFF2",
-              "url": "string"
-            }
-          ]
-        },
-        "primary": "string",
-        "secondary": "string"
-      },
-      "shape": {
-        "border_radius": 0
-      },
-      "consumer": {
-        "widgets": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ],
-        "customer_portals": [
-          {
-            "id": "string",
-            "name": "string"
-          }
-        ]
-      }
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
     },
     "is_default": true,
     "_manifest": ["string"],
@@ -422,7 +497,64 @@ epilot design updateDesign \
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }'
@@ -536,7 +668,7 @@ List all files for the user organization bucket
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `type` | query | "LOGO" \| "FONT" | No | Type of files to be returned |
+| `type` | query | "LOGO" \| "FONT" \| "IMAGE" | No | Type of files to be returned |
 
 **Sample Call**
 
@@ -671,7 +803,64 @@ epilot design getConsumerDesign -p consumerId=4a062990-a6a3-11eb-9828-4f3da7d493
     "design_tokens": {
       "coupon": "string",
       "cashback": "string",
-      "custom_css": "string"
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
     }
   }
 }

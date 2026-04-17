@@ -1,6 +1,6 @@
 # Configuration Hub API
 
-- **Base URL:** `https://configuration-hub.dev.sls.epilot.io`
+- **Base URL:** `https://configuration-hub.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/configuration-hub](https://docs.epilot.io/api/configuration-hub)
 
 Lightweight index API for exploring epilot organization configurations.
@@ -39,6 +39,9 @@ epilot configuration-hub listConfigTypes
 - [`listConfigTypes`](#listconfigtypes) — Returns the static list of available configuration types with display metadata.
 - [`listConfigs`](#listconfigs) — List configs of a given type with pagination. Returns summary metadata only
 - [`getConfigDependencies`](#getconfigdependencies) — Get configs that are referenced by the given config.
+
+**Index**
+- [`rebuildIndex`](#rebuildindex) — Rebuild the configuration index for the caller's organization.
 
 ### `listConfigTypes`
 
@@ -92,6 +95,10 @@ List configs of a given type with pagination. Returns summary metadata only
 | `type` | path | "journey" \| "automation_flow" \| "workflow_definition" \| "closing_reason" \| "flow_template" \| "schema" \| "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "file" \| "webhook" \| "saved_view" \| "dashboard" \| "kanban" \| "role" \| "usergroup" \| "validation_rule" \| "integration" \| "app" \| "designbuilder" \| "notification_template" \| "custom_variable" \| "environment_variable" \| "taxonomy" \| "taxonomy_classification" \| "entity_mapping" \| "portal_config" \| "target" \| "product_recommendation" | Yes | Configuration resource type |
 | `cursor` | query | string | No | Opaque cursor for fetching the next page. Omit for the first page. |
 | `size` | query | number | No | Number of items per page |
+| `q` | query | string | No | Search query to filter configs by name/title |
+| `updated_after` | query | string (date-time) | No | Filter configs updated after this date (ISO 8601) |
+| `updated_before` | query | string (date-time) | No | Filter configs updated before this date (ISO 8601) |
+| `purposes` | query | string | No | Filter by purpose classification IDs (comma-separated) |
 
 **Sample Call**
 
@@ -195,6 +202,41 @@ epilot configuration-hub getConfigDependencies -p type=example -p id=123e4567-e8
       "link": "https://example.com/path"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `rebuildIndex`
+
+Rebuild the configuration index for the caller's organization.
+
+`POST /v1/index/rebuild`
+
+**Sample Call**
+
+```bash
+epilot configuration-hub rebuildIndex
+```
+
+With JSONata filter:
+
+```bash
+epilot configuration-hub rebuildIndex --jsonata 'status'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status": "ready",
+  "last_built_at": "1970-01-01T00:00:00.000Z",
+  "total_items": 0,
+  "build_duration_ms": 0,
+  "failed_types": ["string"]
 }
 ```
 

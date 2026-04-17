@@ -21,9 +21,9 @@ npx epilot auth login
 | Automation API | `epilot automation` | 16 | [automation.md](./automation.md) |
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
 | Blueprint Manifest API | `epilot blueprint-manifest` | 48 | [blueprint-manifest.md](./blueprint-manifest.md) |
-| Configuration Hub API | `epilot configuration-hub` | 3 | [configuration-hub.md](./configuration-hub.md) |
+| Configuration Hub API | `epilot configuration-hub` | 4 | [configuration-hub.md](./configuration-hub.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
-| Portal API | `epilot customer-portal` | 138 | [customer-portal.md](./customer-portal.md) |
+| Portal API | `epilot customer-portal` | 142 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
 | Data Governance API | `epilot data-governance` | 10 | [data-governance.md](./data-governance.md) |
 | Deduplication API | `epilot deduplication` | 3 | [deduplication.md](./deduplication.md) |

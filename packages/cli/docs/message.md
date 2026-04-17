@@ -1299,7 +1299,7 @@ epilot message getThreadTimeline -p id=123e4567-e89b-12d3-a456-426614174000 --js
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00.000Z"
+      "timestamp": "2024-01-01T00:00:00Z"
     }
   ]
 }
@@ -2073,6 +2073,7 @@ Unassign thread from entities
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string | Yes | Thread ID |
+| `unlink_mapped_entities` | query | boolean | No | When true, also removes unassigned entities from mapped_entities on related source entities |
 
 **Request Body** (required)
 
