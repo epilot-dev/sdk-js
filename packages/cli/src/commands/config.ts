@@ -60,7 +60,9 @@ export default defineCommand({
     list: defineCommand({
       meta: { name: 'list', description: 'List all config values' },
       run: () => {
-        process.stdout.write(`${BOLD}stage${RESET}  ${DIM}=${RESET}  ${getStage() ?? 'prod'}  ${DIM}(${YELLOW}prod${DIM} | dev | staging)${RESET}\n`);
+        process.stdout.write(
+          `${BOLD}stage${RESET}  ${DIM}=${RESET}  ${getStage() ?? 'prod'}  ${DIM}(${YELLOW}prod${DIM} | dev | staging)${RESET}\n`,
+        );
       },
     }),
   },
