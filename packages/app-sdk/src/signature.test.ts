@@ -77,7 +77,11 @@ describe('verifyEpilotSignature', () => {
     // given
     mockVerify.mockReturnValue(true);
 
-    const requestBody = { data: { entity: { _id: '123' } }, timestamp: new Date().toISOString(), type: 'external_integration' };
+    const requestBody = {
+      data: { entity: { _id: '123' } },
+      timestamp: new Date().toISOString(),
+      type: 'external_integration',
+    };
     const context: any = {
       request: {
         headers: {
