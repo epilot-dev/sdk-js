@@ -1,6 +1,7 @@
 import { runMain } from 'citty';
 import { main } from '../src/index.js';
 import { API_LIST } from '../src/generated/api-list.js';
+import { hoistFlagsAfterSubcommand } from '../src/lib/reorder-args.js';
 
 // Gracefully handle EPIPE (e.g. piping to `head` or `jq` that closes early)
 process.stdout.on('error', (err) => {
@@ -19,6 +20,12 @@ const VERSION =
     ? __CLI_VERSION__
     : ((await import('../package.json', { with: { type: 'json' } })) as { default: { version: string } }).default
         .version;
+
+// Reorder argv so global flags (e.g. --use-dev, --json, --server) can be
+// passed before the subcommand. Without this, citty strips leading flags
+// when dispatching to the subcommand.
+const reorderedArgv = hoistFlagsAfterSubcommand(process.argv.slice(2));
+process.argv = [process.argv[0], process.argv[1], ...reorderedArgv];
 
 const args = process.argv.slice(2);
 
