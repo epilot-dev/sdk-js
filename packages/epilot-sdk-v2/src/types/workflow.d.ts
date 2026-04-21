@@ -227,6 +227,26 @@ export declare namespace Components {
              */
             execution_status?: string;
             error_reason?: string;
+            input_context?: /**
+             * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+             *
+             */
+            AutomationInputContext;
+        }
+        /**
+         * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+         *
+         */
+        export interface AutomationInputContext {
+            /**
+             * `trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.
+             *
+             */
+            source: "trigger" | "task";
+            /**
+             * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
+             */
+            task_id?: string;
         }
         export interface AutomationTask {
             id: TaskId;
@@ -3047,6 +3067,7 @@ export type AnalyticsInfo = Components.Schemas.AnalyticsInfo;
 export type Assignees = Components.Schemas.Assignees;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationInfo = Components.Schemas.AutomationInfo;
+export type AutomationInputContext = Components.Schemas.AutomationInputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type ClosingReason = Components.Schemas.ClosingReason;
 export type ClosingReasonResp = Components.Schemas.ClosingReasonResp;

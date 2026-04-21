@@ -129,6 +129,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`Phase`](#phase)
 - [`Edge`](#edge)
 - [`AutomationInfo`](#automationinfo)
+- [`AutomationInputContext`](#automationinputcontext)
 - [`AnalyticsInfo`](#analyticsinfo)
 - [`ConditionId`](#conditionid)
 - [`Condition`](#condition)
@@ -721,7 +722,11 @@ const { data } = await client.startFlowExecution(
         flow_id: 'string',
         execution_id: 'string',
         execution_status: 'string',
-        error_reason: 'string'
+        error_reason: 'string',
+        input_context: {
+          source: 'trigger',
+          task_id: 'string'
+        }
       }
     },
     contexts: [
@@ -855,7 +860,8 @@ const { data } = await client.startFlowExecution(
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -997,7 +1003,8 @@ const { data } = await client.getFlowExecution({
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -1175,7 +1182,8 @@ const { data } = await client.patchFlowExecution(
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -1285,7 +1293,11 @@ const { data } = await client.patchTask(
       flow_id: 'string',
       execution_id: 'string',
       execution_status: 'string',
-      error_reason: 'string'
+      error_reason: 'string',
+      input_context: {
+        source: 'trigger',
+        task_id: 'string'
+      }
     },
     description: {
       enabled: true,
@@ -1510,7 +1522,11 @@ const { data } = await client.runTaskAutomation({
     "flow_id": "string",
     "execution_id": "string",
     "execution_status": "string",
-    "error_reason": "string"
+    "error_reason": "string",
+    "input_context": {
+      "source": "trigger",
+      "task_id": "string"
+    }
   },
   "automation_execution_id": "string",
   "trigger_mode": "manual",
@@ -1731,7 +1747,11 @@ const { data } = await client.addTask(
         flow_id: 'string',
         execution_id: 'string',
         execution_status: 'string',
-        error_reason: 'string'
+        error_reason: 'string',
+        input_context: {
+          source: 'trigger',
+          task_id: 'string'
+        }
       },
       phase_id: 'string',
       task_type: 'MANUAL'
@@ -3381,6 +3401,7 @@ type StartFlowReq = {
       execution_id?: { ... }
       execution_status?: { ... }
       error_reason?: { ... }
+      input_context?: { ... }
     }
   }
   contexts: Array<{
@@ -3570,6 +3591,10 @@ type FlowTrigger = {
     execution_id?: string
     execution_status?: string
     error_reason?: string
+    input_context?: {
+      source: { ... }
+      task_id?: { ... }
+    }
   }
 }
 ```
@@ -3889,6 +3914,10 @@ type AutomationTask = {
     execution_id?: string
     execution_status?: string
     error_reason?: string
+    input_context?: {
+      source: { ... }
+      task_id?: { ... }
+    }
   }
   automation_execution_id?: string
   trigger_mode?: "manual" | "automatic"
@@ -3904,10 +3933,6 @@ type AutomationTask = {
     direction: "before" | "after"
     duration: number
     unit: "minutes" | "hours" | "days" | "weeks" | "months"
-    reference: {
-      id: { ... }
-      origin: { ... }
-      schema?: { ... }
   // ...
 }
 ```
@@ -4367,6 +4392,22 @@ type AutomationInfo = {
   execution_id?: string
   execution_status?: string
   error_reason?: string
+  input_context?: {
+    source: "trigger" | "task"
+    task_id?: string
+  }
+}
+```
+
+### `AutomationInputContext`
+
+Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+
+
+```ts
+type AutomationInputContext = {
+  source: "trigger" | "task"
+  task_id?: string
 }
 ```
 
@@ -4573,6 +4614,10 @@ type PatchTaskReq = {
     execution_id?: string
     execution_status?: string
     error_reason?: string
+    input_context?: {
+      source: { ... }
+      task_id?: { ... }
+    }
   }
   description?: {
     enabled?: boolean
@@ -4658,6 +4703,7 @@ type AddTaskReq = {
       execution_id?: { ... }
       execution_status?: { ... }
       error_reason?: { ... }
+      input_context?: { ... }
     }
     phase_id?: string
     task_type?: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"
