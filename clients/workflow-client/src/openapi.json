@@ -3764,11 +3764,35 @@
           },
           "error_reason": {
             "type": "string"
+          },
+          "input_context": {
+            "$ref": "#/components/schemas/AutomationInputContext"
           }
         },
         "required": [
           "flow_id"
         ]
+      },
+      "AutomationInputContext": {
+        "type": "object",
+        "description": "Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.\n",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "trigger",
+              "task"
+            ],
+            "description": "`trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.\n"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Required when source is `task`. The id of the upstream task whose output entity should feed this task."
+          }
+        }
       },
       "AnalyticsInfo": {
         "type": "object",
