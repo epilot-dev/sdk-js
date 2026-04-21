@@ -638,6 +638,16 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict - the workflow was modified by another user since it was last loaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Other errors",
             "content": {
@@ -1795,6 +1805,15 @@
             "type": "string",
             "description": "Id of the automation config that triggers this workflow"
           },
+          "input_entity": {
+            "type": "string",
+            "enum": [
+              "thread",
+              "first_email",
+              "last_email"
+            ],
+            "description": "For email thread triggers, specifies which entity from the triggered email thread to use as the primary input for automation and decision tasks. Defaults to `thread` when not specified.\n"
+          },
           "trigger_config": {
             "type": "array",
             "items": {
@@ -2036,6 +2055,34 @@
             },
             "additionalProperties": true,
             "description": "Transient field. The full automation action configuration following the automation API action schema. Processed by the backend during create/update and stripped before storage. When present without a flow_id, a new automation flow is created. When present with a flow_id, the existing automation flow is updated.\n"
+          },
+          "duplicated_flow_id": {
+            "type": "string",
+            "description": "Transient field. When present, the backend clones the automation flow referenced by this ID and assigns the new flow_id to the task. Used when duplicating an automation task to give it an independent automation. Stripped before storage.\n"
+          },
+          "input_context": {
+            "$ref": "#/components/schemas/AutomationInputContext"
+          }
+        }
+      },
+      "AutomationInputContext": {
+        "type": "object",
+        "description": "Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.\n",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "trigger",
+              "task"
+            ],
+            "description": "`trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.\n"
+          },
+          "task_id": {
+            "type": "string",
+            "description": "Required when source is `task`. The id of the upstream task whose output entity should feed this task."
           }
         }
       },
@@ -2195,6 +2242,11 @@
                 "items": {
                   "$ref": "#/components/schemas/Condition"
                 }
+              },
+              "allow_parallel_execution": {
+                "type": "boolean",
+                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.",
+                "default": true
               },
               "schedule": {
                 "anyOf": [

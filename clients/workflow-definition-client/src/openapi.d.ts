@@ -71,6 +71,31 @@ declare namespace Components {
                     [name: string]: any;
                 };
             };
+            /**
+             * Transient field. When present, the backend clones the automation flow referenced by this ID and assigns the new flow_id to the task. Used when duplicating an automation task to give it an independent automation. Stripped before storage.
+             *
+             */
+            duplicated_flow_id?: string;
+            input_context?: /**
+             * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+             *
+             */
+            AutomationInputContext;
+        }
+        /**
+         * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+         *
+         */
+        export interface AutomationInputContext {
+            /**
+             * `trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.
+             *
+             */
+            source: "trigger" | "task";
+            /**
+             * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
+             */
+            task_id?: string;
         }
         export interface AutomationTask {
             id: string;
@@ -112,6 +137,11 @@ declare namespace Components {
              * Id of the automation config that triggers this workflow
              */
             automation_id?: string;
+            /**
+             * For email thread triggers, specifies which entity from the triggered email thread to use as the primary input for automation and decision tasks. Defaults to `thread` when not specified.
+             *
+             */
+            input_entity?: "thread" | "first_email" | "last_email";
             /**
              * Transient field. Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update and stripped before storage.
              *
@@ -296,6 +326,10 @@ declare namespace Components {
             task_type: TaskType;
             trigger_mode: TriggerMode;
             conditions: Condition[];
+            /**
+             * When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.
+             */
+            allow_parallel_execution?: boolean;
             schedule?: DelayedSchedule | RelativeSchedule;
             loop_config?: {
                 /**
@@ -1348,6 +1382,7 @@ declare namespace Paths {
             export type $200 = Components.Schemas.FlowTemplate;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
+            export type $409 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1829,6 +1864,7 @@ export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AgentConfig = Components.Schemas.AgentConfig;
 export type AiAgentTask = Components.Schemas.AiAgentTask;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
+export type AutomationInputContext = Components.Schemas.AutomationInputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
