@@ -44,6 +44,18 @@
           {
             "name": "purposes",
             "in": "query"
+          },
+          {
+            "name": "blueprint_ids",
+            "in": "query"
+          },
+          {
+            "name": "sort",
+            "in": "query"
+          },
+          {
+            "name": "active_only",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -69,7 +81,27 @@
         "responses": {}
       }
     },
-    "/v1/index/rebuild": {
+    "/v1/configs/{type}/{id}/used_by": {
+      "get": {
+        "operationId": "getConfigUsedBy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/index": {
+      "get": {
+        "operationId": "getIndex",
+        "responses": {}
+      }
+    },
+    "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
         "responses": {}

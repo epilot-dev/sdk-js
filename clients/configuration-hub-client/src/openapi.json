@@ -2,12 +2,16 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Configuration Hub API",
-    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n",
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `document_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | design-builder-api.sls.epilot.io | `@epilot/sdk/design` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `access_token` | access-token.sls.epilot.io | `@epilot/sdk/access-token` |\n",
     "version": "0.2.0"
   },
   "servers": [
     {
       "url": "https://configuration-hub.sls.epilot.io"
+    },
+    {
+      "url": "https://configuration-hub.dev.sls.epilot.io",
+      "description": "Dev"
     }
   ],
   "security": [
@@ -106,6 +110,35 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "blueprint_ids",
+            "in": "query",
+            "description": "Filter by installed-blueprint IDs (comma-separated). Only configs installed by one of the listed blueprints are returned.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort order. `updated_at` (default) sorts by most recently modified.\n`usage` sorts by the type-specific usage metric descending\n(submissions for journeys, executions for automations, entities for schemas, etc.).\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "updated_at",
+                "usage"
+              ],
+              "default": "updated_at"
+            }
+          },
+          {
+            "name": "active_only",
+            "in": "query",
+            "description": "If true, filter out configs that are explicitly inactive (active=false).\nConfigs with no `active` field are always included.\n",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -178,13 +211,65 @@
         }
       }
     },
-    "/v1/index/rebuild": {
+    "/v1/configs/{type}/{id}/used_by": {
+      "get": {
+        "operationId": "getConfigUsedBy",
+        "summary": "getConfigUsedBy",
+        "description": "Get configs that reference the given config (reverse dependencies).\nScans the indexed config items for references to this config's ID or aliases.\n",
+        "tags": [
+          "Configs"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ConfigType"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of configs that reference this config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDependenciesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/index": {
+      "get": {
+        "operationId": "getIndex",
+        "summary": "getIndex",
+        "description": "Return the current index build state for the caller's organization.\nClients poll this to decide whether to show a \"building\" indicator\nand when to refetch data.\n",
+        "tags": [
+          "Configs"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current index status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
         "summary": "rebuildIndex",
-        "description": "Rebuild the configuration index for the caller's organization.\nCalls all adapter APIs in parallel and stores results in DynamoDB.\nIf a build is already in progress (within 60s), returns immediately.\n",
+        "description": "Rebuild the configuration index for the caller's organization.\nFire-and-forget: invokes the async worker and returns immediately.\nA new rebuild will cancel any in-flight build (see `build_token`).\n",
         "tags": [
-          "Index"
+          "Configs"
         ],
         "responses": {
           "200": {
@@ -265,6 +350,7 @@
           "tax",
           "coupon",
           "file",
+          "document_template",
           "webhook",
           "saved_view",
           "dashboard",
@@ -283,7 +369,8 @@
           "entity_mapping",
           "portal_config",
           "target",
-          "product_recommendation"
+          "product_recommendation",
+          "access_token"
         ]
       },
       "ConfigTypeInfo": {
@@ -353,6 +440,13 @@
             },
             "description": "Tags / labels"
           },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Alternative identifiers (short IDs, slugs, variable keys) used in cross-references"
+          },
           "purposes": {
             "type": "array",
             "items": {
@@ -364,6 +458,11 @@
             "type": "string",
             "format": "uri",
             "description": "Direct link to open this config in epilot"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Type-specific metadata (e.g., submission count for journeys)",
+            "additionalProperties": true
           }
         },
         "required": [
@@ -393,7 +492,7 @@
             "type": "string",
             "description": "Cursor for fetching the next page. Absent when no more pages."
           },
-          "items": {
+          "results": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ConfigNode"
@@ -404,7 +503,7 @@
           "type",
           "label",
           "icon",
-          "items"
+          "results"
         ]
       },
       "ConfigDependenciesResponse": {
@@ -458,6 +557,34 @@
             "items": {
               "type": "string"
             }
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "IndexStatusResponse": {
+        "type": "object",
+        "description": "Current index build state",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "building",
+              "ready",
+              "failed"
+            ]
+          },
+          "last_built_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "total_items": {
+            "type": "integer"
+          },
+          "build_duration_ms": {
+            "type": "integer"
           }
         },
         "required": [

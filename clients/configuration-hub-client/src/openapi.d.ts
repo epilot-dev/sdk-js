@@ -61,7 +61,7 @@ declare namespace Components {
              * Cursor for fetching the next page. Absent when no more pages.
              */
             next_cursor?: string;
-            items: /* Summary metadata for a single configuration item in the tree */ ConfigNode[];
+            results: /* Summary metadata for a single configuration item in the tree */ ConfigNode[];
         }
         /**
          * Summary metadata for a single configuration item in the tree
@@ -94,6 +94,10 @@ declare namespace Components {
              */
             tags?: string[];
             /**
+             * Alternative identifiers (short IDs, slugs, variable keys) used in cross-references
+             */
+            aliases?: string[];
+            /**
              * Business purposes
              */
             purposes?: string[];
@@ -101,6 +105,12 @@ declare namespace Components {
              * Direct link to open this config in epilot
              */
             link?: string; // uri
+            /**
+             * Type-specific metadata (e.g., submission count for journeys)
+             */
+            metadata?: {
+                [name: string]: any;
+            };
         }
         /**
          * Static metadata for a config type folder in the tree.
@@ -154,11 +164,20 @@ declare namespace Components {
             failed_types?: string[];
         }
         /**
+         * Current index build state
+         */
+        export interface IndexStatusResponse {
+            status: "missing" | "building" | "ready" | "failed";
+            last_built_at?: string; // date-time
+            total_items?: number;
+            build_duration_ms?: number;
+        }
+        /**
          * Configuration resource type identifier.
          * Matches blueprint-manifest-api V3 naming conventions.
          *
          */
-        export type ResourceType = "journey" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation";
+        export type ResourceType = "journey" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token";
     }
 }
 declare namespace Paths {
@@ -187,6 +206,29 @@ declare namespace Paths {
             export type $404 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace GetConfigUsedBy {
+        namespace Parameters {
+            export type Id = string;
+            export type Type = /**
+             * Configuration resource type identifier.
+             * Matches blueprint-manifest-api V3 naming conventions.
+             *
+             */
+            Components.Schemas.ResourceType;
+        }
+        export interface PathParameters {
+            type: Parameters.Type;
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* Cursor-paginated list of configs referenced by a given config */ Components.Schemas.ConfigDependenciesResponse;
+        }
+    }
+    namespace GetIndex {
+        namespace Responses {
+            export type $200 = /* Current index build state */ Components.Schemas.IndexStatusResponse;
+        }
+    }
     namespace ListConfigTypes {
         namespace Responses {
             export interface $200 {
@@ -201,10 +243,13 @@ declare namespace Paths {
     }
     namespace ListConfigs {
         namespace Parameters {
+            export type ActiveOnly = boolean;
+            export type BlueprintIds = string;
             export type Cursor = string;
             export type Purposes = string;
             export type Q = string;
             export type Size = number;
+            export type Sort = "updated_at" | "usage";
             export type Type = /**
              * Configuration resource type identifier.
              * Matches blueprint-manifest-api V3 naming conventions.
@@ -224,6 +269,9 @@ declare namespace Paths {
             updated_after?: Parameters.UpdatedAfter /* date-time */;
             updated_before?: Parameters.UpdatedBefore /* date-time */;
             purposes?: Parameters.Purposes;
+            blueprint_ids?: Parameters.BlueprintIds;
+            sort?: Parameters.Sort;
+            active_only?: Parameters.ActiveOnly;
         }
         namespace Responses {
             export type $200 = /* Cursor-paginated list of configs for a specific type */ Components.Schemas.ConfigListResponse;
@@ -283,11 +331,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigDependencies.Responses.$200>
   /**
+   * getConfigUsedBy - getConfigUsedBy
+   * 
+   * Get configs that reference the given config (reverse dependencies).
+   * Scans the indexed config items for references to this config's ID or aliases.
+   * 
+   */
+  'getConfigUsedBy'(
+    parameters?: Parameters<Paths.GetConfigUsedBy.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
+  /**
+   * getIndex - getIndex
+   * 
+   * Return the current index build state for the caller's organization.
+   * Clients poll this to decide whether to show a "building" indicator
+   * and when to refetch data.
+   * 
+   */
+  'getIndex'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetIndex.Responses.$200>
+  /**
    * rebuildIndex - rebuildIndex
    * 
    * Rebuild the configuration index for the caller's organization.
-   * Calls all adapter APIs in parallel and stores results in DynamoDB.
-   * If a build is already in progress (within 60s), returns immediately.
+   * Fire-and-forget: invokes the async worker and returns immediately.
+   * A new rebuild will cancel any in-flight build (see `build_token`).
    * 
    */
   'rebuildIndex'(
@@ -347,13 +420,42 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigDependencies.Responses.$200>
   }
-  ['/v1/index/rebuild']: {
+  ['/v1/configs/{type}/{id}/used_by']: {
+    /**
+     * getConfigUsedBy - getConfigUsedBy
+     * 
+     * Get configs that reference the given config (reverse dependencies).
+     * Scans the indexed config items for references to this config's ID or aliases.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetConfigUsedBy.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
+  }
+  ['/v1/configs/index']: {
+    /**
+     * getIndex - getIndex
+     * 
+     * Return the current index build state for the caller's organization.
+     * Clients poll this to decide whether to show a "building" indicator
+     * and when to refetch data.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetIndex.Responses.$200>
+  }
+  ['/v1/configs/index:rebuild']: {
     /**
      * rebuildIndex - rebuildIndex
      * 
      * Rebuild the configuration index for the caller's organization.
-     * Calls all adapter APIs in parallel and stores results in DynamoDB.
-     * If a build is already in progress (within 60s), returns immediately.
+     * Fire-and-forget: invokes the async worker and returns immediately.
+     * A new rebuild will cancel any in-flight build (see `build_token`).
      * 
      */
     'post'(
@@ -373,4 +475,5 @@ export type ConfigNode = Components.Schemas.ConfigNode;
 export type ConfigTypeInfo = Components.Schemas.ConfigTypeInfo;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type IndexRebuildResponse = Components.Schemas.IndexRebuildResponse;
+export type IndexStatusResponse = Components.Schemas.IndexStatusResponse;
 export type ResourceType = Components.Schemas.ResourceType;
