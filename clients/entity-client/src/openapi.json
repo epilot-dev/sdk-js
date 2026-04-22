@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.8.0",
+    "version": "2.9.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -1428,6 +1428,9 @@
             "schema": {
               "$ref": "#/components/schemas/FieldsParam"
             }
+          },
+          {
+            "$ref": "#/components/parameters/ApplyChangesetsQueryParam"
           }
         ],
         "responses": {
@@ -1619,6 +1622,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -1682,6 +1688,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -2019,6 +2028,138 @@
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:apply": {
+      "post": {
+        "operationId": "applyChangeset",
+        "summary": "applyChangeset",
+        "description": "Applies the proposed value from a pending changeset to the entity attribute\nand removes the changeset. Used for human approval of pending changes.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true,
+            "description": "Attribute name of the changeset to apply",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Changeset applied successfully — returns updated entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:dismiss": {
+      "post": {
+        "operationId": "dismissChangeset",
+        "summary": "dismissChangeset",
+        "description": "Removes a pending changeset without applying it. The attribute value remains unchanged.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true,
+            "description": "Attribute name of the changeset to dismiss",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "Optional reason for dismissing the changeset"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changeset dismissed successfully — returns updated entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets": {
+      "get": {
+        "operationId": "listChangesets",
+        "summary": "listChangesets",
+        "description": "Returns all pending changesets for an entity.",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending changesets for the entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesetMap"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -3704,7 +3845,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -5497,6 +5638,24 @@
           },
           "has_primary": {
             "type": "boolean"
+          },
+          "edit_mode": {
+            "type": "string",
+            "description": "Controls how updates to this attribute are handled.\n- `direct` (default): update is applied immediately. No changeset created.\n- `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).\n- `approval`: update creates a changeset, requires explicit human approval.\n",
+            "enum": [
+              "direct",
+              "external",
+              "approval"
+            ],
+            "default": "direct"
+          },
+          "edit_mode_config": {
+            "description": "Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EditModeConfig"
+              }
+            ]
           }
         },
         "required": [
@@ -7417,6 +7576,15 @@
               "example": "123e4567-e89b-12d3-a456-426614174000"
             },
             "nullable": true
+          },
+          "_changesets": {
+            "readOnly": true,
+            "type": "object",
+            "nullable": true,
+            "description": "Pending attribute changesets for attributes configured with external or approval edit mode.\nRead-only via normal entity PATCH/PUT operations — cannot be set directly.\nUse the changeset management endpoints to apply or dismiss changesets.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Changeset"
+            }
           }
         },
         "example": {
@@ -8350,6 +8518,11 @@
             "type": "boolean",
             "description": "If true, return full entity objects in entityNodes instead of just entity IDs in nodes",
             "default": false
+          },
+          "apply_changesets": {
+            "type": "boolean",
+            "description": "When true and hydrate is also true, entity objects in entityNodes have pending changeset proposed values applied in-place. The _changesets field is still included in the response.",
+            "default": false
           }
         }
       },
@@ -8646,11 +8819,16 @@
                 "float",
                 "date",
                 "flattened",
-                "nested"
+                "nested",
+                "object"
               ]
             },
             "fields": {
               "additionalProperties": true
+            },
+            "dynamic": {
+              "type": "boolean",
+              "description": "When false, prevents ES from inferring types for nested fields. Used for _changesets where values can be any type."
             }
           }
         }
@@ -8717,7 +8895,7 @@
       },
       "ActivityType": {
         "type": "string",
-        "description": "A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.\n\nBuilt-in entity activity types (custom activities can be defined as well):\n- EntityCreated\n- EntityUpdated\n- EntityDeleted\n- EntitySoftDeleted\n- EntityRestored\n- RelationsAdded\n- RelationsRemoved\n- RelationsSoftDeleted\n- RelationsRestored\n- RelationsDeleted\n"
+        "description": "A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.\n\nBuilt-in entity activity types (custom activities can be defined as well):\n- EntityCreated\n- EntityUpdated\n- EntityDeleted\n- EntitySoftDeleted\n- EntityRestored\n- RelationsAdded\n- RelationsRemoved\n- RelationsSoftDeleted\n- RelationsRestored\n- RelationsDeleted\n- ChangesetCreated\n- ChangesetAutoCleared\n- ChangesetApplied\n- ChangesetDismissed\n"
       },
       "Activity": {
         "type": "object",
@@ -9505,6 +9683,158 @@
             "example": "Bad Request"
           }
         }
+      },
+      "ChangesetCreator": {
+        "type": "object",
+        "description": "Identifies the actor that created the changeset.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of actor that created the changeset",
+            "enum": [
+              "user",
+              "portal_user",
+              "api_client",
+              "automation"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "ID of the actor (user ID, portal user ID, API client ID, etc.)"
+          }
+        }
+      },
+      "Changeset": {
+        "type": "object",
+        "description": "A pending proposed change for a single entity attribute, awaiting external confirmation or human approval.",
+        "required": [
+          "proposed_value",
+          "created_at",
+          "edit_mode"
+        ],
+        "properties": {
+          "proposed_value": {
+            "description": "The proposed new value for the attribute. Type matches the attribute type."
+          },
+          "previous_value": {
+            "description": "The attribute value at the time the changeset was created. Stored for reference."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the changeset was created"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/ChangesetCreator"
+          },
+          "edit_mode": {
+            "type": "string",
+            "description": "The edit mode that triggered this changeset",
+            "enum": [
+              "external",
+              "approval"
+            ]
+          },
+          "match_strategy": {
+            "$ref": "#/components/schemas/MatchStrategy"
+          },
+          "source": {
+            "type": "string",
+            "description": "Optional label indicating where the change originated (e.g. end_customer_portal, installer_portal, journey, automation)"
+          },
+          "related_values": {
+            "type": "object",
+            "description": "Proposed and previous values for related fields in a multi-field attribute group (e.g. currency _decimal/_currency suffixes). Keyed by full field name.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "proposed_value": {
+                  "description": "The proposed new value for the related field."
+                },
+                "previous_value": {
+                  "description": "The value of the related field when the changeset was created."
+                }
+              }
+            }
+          }
+        }
+      },
+      "ChangesetMap": {
+        "type": "object",
+        "description": "Map of attribute name to pending changeset. At most one changeset per attribute.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/Changeset"
+        }
+      },
+      "EditModeConfig": {
+        "type": "object",
+        "description": "Configuration for non-direct edit modes on an entity attribute.",
+        "properties": {
+          "match_strategy": {
+            "$ref": "#/components/schemas/MatchStrategy"
+          },
+          "fuzzy_config": {
+            "$ref": "#/components/schemas/FuzzyConfig"
+          }
+        }
+      },
+      "FuzzyConfig": {
+        "type": "object",
+        "description": "Configuration for fuzzy match strategies on changeset auto-clearing.",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Which fuzzy algorithm to apply.",
+            "enum": [
+              "suffix",
+              "digits_only",
+              "normalize_phone",
+              "ignore_fields",
+              "contains_entry",
+              "regex"
+            ]
+          },
+          "suffix_length": {
+            "type": "integer",
+            "description": "For type=suffix: number of characters to compare from end of string."
+          },
+          "fields_to_ignore": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For type=ignore_fields: field names to exclude when comparing array entries."
+          },
+          "regex_flags": {
+            "type": "string",
+            "description": "For type=regex: flags to apply to the regex (e.g. 'i' for case-insensitive)."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "For type=normalize_phone: country dialing code digits to strip (e.g. '49' for Germany). No '+' prefix."
+          },
+          "match_on": {
+            "type": "string",
+            "description": "For type=normalize_phone and type=contains_entry: attribute key(s) within array entries to compare on."
+          },
+          "pattern": {
+            "type": "string",
+            "description": "For type=regex: regular expression pattern to test the incoming value against."
+          }
+        }
+      },
+      "MatchStrategy": {
+        "type": "string",
+        "description": "Strategy for auto-clearing the changeset when an external update is received.\n- `exact`: The inbound value must exactly match the proposed value (deep equality).\n- `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.\n- `any`: Any update to the attribute clears the changeset, regardless of value.\n",
+        "enum": [
+          "exact",
+          "fuzzy",
+          "any"
+        ],
+        "default": "exact"
       }
     },
     "parameters": {
@@ -9740,6 +10070,26 @@
         "schema": {
           "default": false,
           "type": "boolean"
+        }
+      },
+      "DirectQueryParam": {
+        "name": "direct",
+        "description": "When true, bypasses changeset interception and applies attribute updates directly.\nUsed by trusted integrations (e.g. ERP inbound sync) to confirm changes and auto-clear matching pending changesets.\nDefaults to false — no breaking change for existing callers.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "ApplyChangesetsQueryParam": {
+        "name": "apply_changesets",
+        "description": "When true, applies pending changeset proposed values in-place on the response entity.\nThe response includes both the hydrated values and the raw _changesets field.\nDoes not mutate stored data — pure read-time transform.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
         }
       }
     },

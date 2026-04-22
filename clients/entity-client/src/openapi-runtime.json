@@ -366,6 +366,9 @@
             "name": "fields",
             "style": "form",
             "explode": false
+          },
+          {
+            "$ref": "#/components/parameters/ApplyChangesetsQueryParam"
           }
         ],
         "responses": {}
@@ -448,6 +451,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -480,6 +486,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -596,6 +605,63 @@
             "name": "entities",
             "style": "form",
             "explode": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:apply": {
+      "post": {
+        "operationId": "applyChangeset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:dismiss": {
+      "post": {
+        "operationId": "dismissChangeset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets": {
+      "get": {
+        "operationId": "listChangesets",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
           }
         ],
         "responses": {}
@@ -1633,6 +1699,16 @@
       "ValidateEntityQueryParam": {
         "name": "validate",
         "in": "query"
+      },
+      "DirectQueryParam": {
+        "name": "direct",
+        "in": "query",
+        "required": false
+      },
+      "ApplyChangesetsQueryParam": {
+        "name": "apply_changesets",
+        "in": "query",
+        "required": false
       }
     },
     "responses": {
