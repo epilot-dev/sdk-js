@@ -72,6 +72,9 @@ const { data } = await entityClient.listSchemas(...)
 - [`deleteEntity`](#deleteentity)
 - [`autocomplete`](#autocomplete)
 - [`wipeAllEntities`](#wipeallentities)
+- [`applyChangeset`](#applychangeset)
+- [`dismissChangeset`](#dismisschangeset)
+- [`listChangesets`](#listchangesets)
 
 **Activity**
 - [`createActivity`](#createactivity)
@@ -255,6 +258,12 @@ const { data } = await entityClient.listSchemas(...)
 - [`ESClusterAssignment`](#esclusterassignment)
 - [`SettingFlag`](#settingflag)
 - [`ErrorObject`](#errorobject)
+- [`ChangesetCreator`](#changesetcreator)
+- [`Changeset`](#changeset)
+- [`ChangesetMap`](#changesetmap)
+- [`EditModeConfig`](#editmodeconfig)
+- [`FuzzyConfig`](#fuzzyconfig)
+- [`MatchStrategy`](#matchstrategy)
 
 ### `listSchemas`
 
@@ -1726,7 +1735,8 @@ const { data } = await client.queryEntityGraph(
         }
       ]
     },
-    hydrate: false
+    hydrate: false,
+    apply_changesets: false
   },
 )
 ```
@@ -2048,6 +2058,7 @@ const { data } = await client.getEntityV2({
   slug: 'example',
   hydrate: true,
   fields: ['...'],
+  apply_changesets: true,
 })
 ```
 
@@ -2257,6 +2268,7 @@ const { data } = await client.updateEntity(
     fill_activity: true,
     async: true,
     validate: true,
+    direct: true,
   },
   {
     _id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -2327,6 +2339,7 @@ const { data } = await client.patchEntity(
     dry_run: true,
     async: true,
     validate: true,
+    direct: true,
   },
   {
     _id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -2624,6 +2637,124 @@ const { data } = await client.attachActivity({
     }
   }
 }
+```
+
+</details>
+
+---
+
+### `applyChangeset`
+
+Applies the proposed value from a pending changeset to the entity attribute
+and removes the changeset. Used for human approval of pending changes.
+
+`POST /v1/entity/{slug}/{id}/changesets/{attribute}:apply`
+
+```ts
+const { data } = await client.applyChangeset({
+  slug: 'example',
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  attribute: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "_org": "123",
+  "_owners": [
+    {
+      "org_id": "123",
+      "user_id": "123"
+    }
+  ],
+  "_schema": "contact",
+  "_tags": ["example", "mock"],
+  "_created_at": "2021-02-09T12:41:43.662Z",
+  "_updated_at": "2021-02-09T12:41:43.662Z",
+  "_acl": {
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
+  },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `dismissChangeset`
+
+Removes a pending changeset without applying it. The attribute value remains unchanged.
+
+`POST /v1/entity/{slug}/{id}/changesets/{attribute}:dismiss`
+
+```ts
+const { data } = await client.dismissChangeset(
+  {
+    slug: 'example',
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    attribute: 'example',
+  },
+  {
+    reason: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "_org": "123",
+  "_owners": [
+    {
+      "org_id": "123",
+      "user_id": "123"
+    }
+  ],
+  "_schema": "contact",
+  "_tags": ["example", "mock"],
+  "_created_at": "2021-02-09T12:41:43.662Z",
+  "_updated_at": "2021-02-09T12:41:43.662Z",
+  "_acl": {
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
+  },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `listChangesets`
+
+Returns all pending changesets for an entity.
+
+`GET /v1/entity/{slug}/{id}/changesets`
+
+```ts
+const { data } = await client.listChangesets({
+  slug: 'example',
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{}
 ```
 
 </details>
@@ -4363,6 +4494,19 @@ const { data } = await client.createSchemaAttribute(
     exclude_from_search: false,
     repeatable: true,
     has_primary: true,
+    edit_mode: 'direct',
+    edit_mode_config: {
+      match_strategy: 'exact',
+      fuzzy_config: {
+        type: 'suffix',
+        suffix_length: 0,
+        fields_to_ignore: ['string'],
+        regex_flags: 'string',
+        country_code: 'string',
+        match_on: 'string',
+        pattern: 'string'
+      }
+    },
     type: 'string',
     multiline: true,
     rich_text: true,
@@ -4419,6 +4563,19 @@ const { data } = await client.createSchemaAttribute(
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -4490,6 +4647,19 @@ const { data } = await client.getSchemaAttribute({
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -4556,6 +4726,19 @@ const { data } = await client.putSchemaAttribute(
     exclude_from_search: false,
     repeatable: true,
     has_primary: true,
+    edit_mode: 'direct',
+    edit_mode_config: {
+      match_strategy: 'exact',
+      fuzzy_config: {
+        type: 'suffix',
+        suffix_length: 0,
+        fields_to_ignore: ['string'],
+        regex_flags: 'string',
+        country_code: 'string',
+        match_on: 'string',
+        pattern: 'string'
+      }
+    },
     type: 'string',
     multiline: true,
     rich_text: true,
@@ -4612,6 +4795,19 @@ const { data } = await client.putSchemaAttribute(
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -4683,6 +4879,19 @@ const { data } = await client.deleteSchemaAttribute({
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -4740,6 +4949,8 @@ const { data } = await client.createSchemaCapability(
         exclude_from_search: false,
         repeatable: true,
         has_primary: true,
+        edit_mode: 'direct',
+        edit_mode_config: { /* ... */ },
         type: 'string',
         multiline: true,
         rich_text: true,
@@ -4777,6 +4988,8 @@ const { data } = await client.createSchemaCapability(
         exclude_from_search: false,
         repeatable: true,
         has_primary: true,
+        edit_mode: 'direct',
+        edit_mode_config: { /* ... */ },
         type: 'link'
       },
       /* ... 33 more */
@@ -4862,6 +5075,8 @@ const { data } = await client.createSchemaCapability(
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -4899,6 +5114,8 @@ const { data } = await client.createSchemaCapability(
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -4998,6 +5215,8 @@ const { data } = await client.getSchemaCapability({
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -5035,6 +5254,8 @@ const { data } = await client.getSchemaCapability({
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -5129,6 +5350,8 @@ const { data } = await client.putSchemaCapability(
         exclude_from_search: false,
         repeatable: true,
         has_primary: true,
+        edit_mode: 'direct',
+        edit_mode_config: { /* ... */ },
         type: 'string',
         multiline: true,
         rich_text: true,
@@ -5166,6 +5389,8 @@ const { data } = await client.putSchemaCapability(
         exclude_from_search: false,
         repeatable: true,
         has_primary: true,
+        edit_mode: 'direct',
+        edit_mode_config: { /* ... */ },
         type: 'link'
       },
       /* ... 33 more */
@@ -5251,6 +5476,8 @@ const { data } = await client.putSchemaCapability(
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -5288,6 +5515,8 @@ const { data } = await client.putSchemaCapability(
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -5387,6 +5616,8 @@ const { data } = await client.deleteSchemaCapability({
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -5424,6 +5655,8 @@ const { data } = await client.deleteSchemaCapability({
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6289,6 +6522,19 @@ type Attribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "string"
   multiline?: boolean
   rich_text?: boolean
@@ -6333,22 +6579,9 @@ type Attribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
-  type: "link"
-} | {
-  id?: string
-  name: string
-  label: string
-  placeholder?: string
-  hidden?: boolean
-  show_in_table?: boolean
-  sortable?: boolean
-  required?: boolean
-  readonly?: boolean
-  deprecated?: boolean
-  default_value?: unknown
-  group?: string
-  order?: number
-  layout?: string
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
   // ...
 }
 ```
@@ -6405,6 +6638,19 @@ type BaseAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
 }
 ```
 
@@ -6451,6 +6697,19 @@ type TextAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "string"
   multiline?: boolean
   rich_text?: boolean
@@ -6501,6 +6760,19 @@ type LinkAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "link"
 }
 ```
@@ -6548,6 +6820,19 @@ type InternalAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "internal"
 }
 ```
@@ -6595,6 +6880,19 @@ type BooleanAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "boolean"
   display_type?: "switch" | "checkbox"
 }
@@ -6643,6 +6941,19 @@ type DateAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "date" | "datetime"
 }
 ```
@@ -6690,6 +7001,19 @@ type CountryAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "country"
 }
 ```
@@ -6737,6 +7061,19 @@ type SelectAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "select" | "radio"
   options?: Array<{
     value: string
@@ -6789,6 +7126,19 @@ type MultiSelectAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "multiselect" | "checkbox"
   disable_case_sensitive?: boolean
   allow_extra_options?: boolean
@@ -6843,6 +7193,19 @@ type StatusAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "status"
   options?: Array<string | {
     value: string
@@ -6894,6 +7257,19 @@ type SequenceAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "sequence"
   prefix?: string
   start_number?: number
@@ -6943,6 +7319,19 @@ type FileAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "image" | "file"
   multiple?: boolean
   allowed_extensions?: string[]
@@ -6996,6 +7385,19 @@ type CurrencyAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "currency"
   currency_selector_only?: boolean
   currency: Array<{
@@ -7074,12 +7476,24 @@ type RelationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "list-view"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "relation"
   relation_type?: "has_many" | "has_one"
   reverse_attributes?: Record<string, string>
   relation_affinity_mode?: "weak" | "strong"
   enable_relation_picker?: boolean
-  edit_mode?: "list-view"
   details_view_mode_enabled?: boolean
   relation_picker_filter?: {
     q: string
@@ -7150,6 +7564,19 @@ type UserRelationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "relation_user"
   multiple?: boolean
 }
@@ -7198,6 +7625,19 @@ type PartnerOrganisationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "partner_organisation"
 }
 ```
@@ -7245,6 +7685,19 @@ type PortalAccessAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "portal_access"
 }
 ```
@@ -7317,6 +7770,19 @@ type AddressAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "address"
   default_address_fields?: string[]
 }
@@ -7365,6 +7831,19 @@ type AddressRelationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "relation_address"
   default_address_fields?: string[]
 }
@@ -7413,6 +7892,19 @@ type PaymentMethodRelationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "relation_payment_method"
 }
 ```
@@ -7460,6 +7952,19 @@ type InvitationEmailAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "invitation_email"
 }
 ```
@@ -7507,6 +8012,19 @@ type AutomationAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "automation"
 }
 ```
@@ -7554,6 +8072,19 @@ type InternalUserAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "internal_user"
 }
 ```
@@ -7601,6 +8132,19 @@ type PurposeAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "purpose"
 }
 ```
@@ -7648,6 +8192,19 @@ type RepeatableAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
 }
 ```
 
@@ -7694,6 +8251,19 @@ type TagsAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "tags"
   options?: string[]
   suggestions?: string[]
@@ -7743,6 +8313,19 @@ type MessageEmailAddressAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "message_email_address"
   address?: string
   send_status?: string
@@ -7793,6 +8376,19 @@ type NumberAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "number"
   data_type?: "number" | "string"
   format?: string
@@ -7843,6 +8439,19 @@ type TableAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "table"
   columns?: Array<{
     name: string
@@ -7905,6 +8514,19 @@ type ConsentAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "consent"
   topic: string
   identifiers?: string[]
@@ -7954,6 +8576,19 @@ type OrderedListAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "ordered_list"
 }
 ```
@@ -8001,6 +8636,19 @@ type EmailAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "email"
 }
 ```
@@ -8048,6 +8696,19 @@ type PhoneAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "phone"
 }
 ```
@@ -8095,6 +8756,19 @@ type PaymentAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "payment"
 }
 ```
@@ -8142,6 +8816,19 @@ type PriceComponentAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "price_component"
 }
 ```
@@ -8189,6 +8876,19 @@ type ComputedAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "computed"
   computed?: boolean
   amount_field?: string
@@ -8239,6 +8939,19 @@ type PartnerStatusAttribute = {
   exclude_from_search?: boolean
   repeatable?: boolean
   has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      pattern?: { ... }
+    }
+  }
   type: "partner_status"
 }
 ```
@@ -8369,6 +9082,11 @@ type EntityCapability = {
     exclude_from_search?: boolean
     repeatable?: boolean
     has_primary?: boolean
+    edit_mode?: "direct" | "external" | "approval"
+    edit_mode_config?: {
+      match_strategy?: { ... }
+      fuzzy_config?: { ... }
+    }
     type: "string"
     multiline?: boolean
     rich_text?: boolean
@@ -8413,18 +9131,13 @@ type EntityCapability = {
     exclude_from_search?: boolean
     repeatable?: boolean
     has_primary?: boolean
+    edit_mode?: "direct" | "external" | "approval"
+    edit_mode_config?: {
+      match_strategy?: { ... }
+      fuzzy_config?: { ... }
+    }
     type: "link"
   } | {
-    id?: string
-    name: string
-    label: string
-    placeholder?: string
-    hidden?: boolean
-    show_in_table?: boolean
-    sortable?: boolean
-    required?: boolean
-    readonly?: boolean
-    deprecated?: boolean
   // ...
 }
 ```
@@ -8476,6 +9189,11 @@ type EntityCapabilityWithCompositeID = {
     exclude_from_search?: boolean
     repeatable?: boolean
     has_primary?: boolean
+    edit_mode?: "direct" | "external" | "approval"
+    edit_mode_config?: {
+      match_strategy?: { ... }
+      fuzzy_config?: { ... }
+    }
     type: "string"
     multiline?: boolean
     rich_text?: boolean
@@ -8520,18 +9238,13 @@ type EntityCapabilityWithCompositeID = {
     exclude_from_search?: boolean
     repeatable?: boolean
     has_primary?: boolean
+    edit_mode?: "direct" | "external" | "approval"
+    edit_mode_config?: {
+      match_strategy?: { ... }
+      fuzzy_config?: { ... }
+    }
     type: "link"
   } | {
-    id?: string
-    name: string
-    label: string
-    placeholder?: string
-    hidden?: boolean
-    show_in_table?: boolean
-    sortable?: boolean
-    required?: boolean
-    readonly?: boolean
-    deprecated?: boolean
   // ...
 }
 ```
@@ -8630,6 +9343,22 @@ type BaseEntity = {
   _purpose?: string[]
   _purpose_name?: string[]
   _manifest?: string // uuid[]
+  _changesets?: Record<string, {
+    proposed_value: unknown
+    previous_value?: unknown
+    created_at: string // date-time
+    created_by?: {
+      type?: { ... }
+      id?: { ... }
+    }
+    edit_mode: "external" | "approval"
+    match_strategy?: "exact" | "fuzzy" | "any"
+    source?: string
+    related_values?: Record<string, {
+      proposed_value?: { ... }
+      previous_value?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -8657,6 +9386,22 @@ type Entity = {
   _purpose?: string[]
   _purpose_name?: string[]
   _manifest?: string // uuid[]
+  _changesets?: Record<string, {
+    proposed_value: unknown
+    previous_value?: unknown
+    created_at: string // date-time
+    created_by?: {
+      type?: { ... }
+      id?: { ... }
+    }
+    edit_mode: "external" | "approval"
+    match_strategy?: "exact" | "fuzzy" | "any"
+    source?: string
+    related_values?: Record<string, {
+      proposed_value?: { ... }
+      previous_value?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -8684,6 +9429,22 @@ type NullableEntity = {
   _purpose?: string[]
   _purpose_name?: string[]
   _manifest?: string // uuid[]
+  _changesets?: Record<string, {
+    proposed_value: unknown
+    previous_value?: unknown
+    created_at: string // date-time
+    created_by?: {
+      type?: { ... }
+      id?: { ... }
+    }
+    edit_mode: "external" | "approval"
+    match_strategy?: "exact" | "fuzzy" | "any"
+    source?: string
+    related_values?: Record<string, {
+      proposed_value?: { ... }
+      previous_value?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -8749,6 +9510,22 @@ type EntityItem = {
   _purpose?: string[]
   _purpose_name?: string[]
   _manifest?: string // uuid[]
+  _changesets?: Record<string, {
+    proposed_value: unknown
+    previous_value?: unknown
+    created_at: string // date-time
+    created_by?: {
+      type?: { ... }
+      id?: { ... }
+    }
+    edit_mode: "external" | "approval"
+    match_strategy?: "exact" | "fuzzy" | "any"
+    source?: string
+    related_values?: Record<string, {
+      proposed_value?: { ... }
+      previous_value?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -9306,6 +10083,7 @@ type GraphQueryRequest = {
     }>
   }
   hydrate?: boolean
+  apply_changesets?: boolean
 }
 ```
 
@@ -9381,6 +10159,16 @@ type GraphQueryResponse = {
     _purpose?: string[]
     _purpose_name?: string[]
     _manifest?: string // uuid[]
+    _changesets?: Record<string, {
+      proposed_value: { ... }
+      previous_value?: { ... }
+      created_at: { ... }
+      created_by?: { ... }
+      edit_mode: { ... }
+      match_strategy?: { ... }
+      source?: { ... }
+      related_values?: { ... }
+    }>
   } | Array<{
     _id?: object
     _org?: string
@@ -9402,6 +10190,16 @@ type GraphQueryResponse = {
     _purpose?: string[]
     _purpose_name?: string[]
     _manifest?: string // uuid[]
+    _changesets?: Record<string, {
+      proposed_value: { ... }
+      previous_value?: { ... }
+      created_at: { ... }
+      created_by?: { ... }
+      edit_mode: { ... }
+      match_strategy?: { ... }
+      source?: { ... }
+      related_values?: { ... }
+    }>
   }>>
   edges: Array<{
     from: string
@@ -9436,6 +10234,16 @@ type EntitySearchResults = {
     _purpose?: string[]
     _purpose_name?: string[]
     _manifest?: string // uuid[]
+    _changesets?: Record<string, {
+      proposed_value: { ... }
+      previous_value?: { ... }
+      created_at: { ... }
+      created_by?: { ... }
+      edit_mode: { ... }
+      match_strategy?: { ... }
+      source?: { ... }
+      related_values?: { ... }
+    }>
   }>
   aggregations?: object
   stable_query_id?: string
@@ -9451,8 +10259,9 @@ Advanced: explicit Elasticsearch index mapping definitions for entity data
 ```ts
 type SearchMappings = Record<string, {
   index?: boolean
-  type?: "keyword" | "text" | "boolean" | "integer" | "long" | "float" | "date" | "flattened" | "nested"
+  type?: "keyword" | "text" | "boolean" | "integer" | "long" | "float" | "date" | "flattened" | "nested" | "object"
   fields?: unknown
+  dynamic?: boolean
 }>
 ```
 
@@ -9542,6 +10351,16 @@ type EntityOperation = {
     _purpose?: string[]
     _purpose_name?: string[]
     _manifest?: string // uuid[]
+    _changesets?: Record<string, {
+      proposed_value: { ... }
+      previous_value?: { ... }
+      created_at: { ... }
+      created_by?: { ... }
+      edit_mode: { ... }
+      match_strategy?: { ... }
+      source?: { ... }
+      related_values?: { ... }
+    }>
   }
   diff?: {
     added?: {
@@ -9558,6 +10377,7 @@ type EntityOperation = {
       _purpose?: { ... }
       _purpose_name?: { ... }
       _manifest?: { ... }
+      _changesets?: { ... }
     }
     updated?: {
       _id?: { ... }
@@ -9573,6 +10393,7 @@ type EntityOperation = {
       _purpose?: { ... }
       _purpose_name?: { ... }
       _manifest?: { ... }
+      _changesets?: { ... }
     }
     deleted?: {
       _id?: { ... }
@@ -9588,6 +10409,7 @@ type EntityOperation = {
       _purpose?: { ... }
       _purpose_name?: { ... }
       _manifest?: { ... }
+      _changesets?: { ... }
     }
   }
   _workflow_origin?: {
@@ -9645,6 +10467,7 @@ type ActivityItem = {
       _purpose?: { ... }
       _purpose_name?: { ... }
       _manifest?: { ... }
+      _changesets?: { ... }
     }
     diff?: {
       added?: { ... }
@@ -9942,4 +10765,107 @@ type ErrorObject = {
   status?: number
   error?: string
 }
+```
+
+### `ChangesetCreator`
+
+Identifies the actor that created the changeset.
+
+```ts
+type ChangesetCreator = {
+  type?: "user" | "portal_user" | "api_client" | "automation"
+  id?: string
+}
+```
+
+### `Changeset`
+
+A pending proposed change for a single entity attribute, awaiting external confirmation or human approval.
+
+```ts
+type Changeset = {
+  proposed_value: unknown
+  previous_value?: unknown
+  created_at: string // date-time
+  created_by?: {
+    type?: "user" | "portal_user" | "api_client" | "automation"
+    id?: string
+  }
+  edit_mode: "external" | "approval"
+  match_strategy?: "exact" | "fuzzy" | "any"
+  source?: string
+  related_values?: Record<string, {
+    proposed_value?: unknown
+    previous_value?: unknown
+  }>
+}
+```
+
+### `ChangesetMap`
+
+Map of attribute name to pending changeset. At most one changeset per attribute.
+
+```ts
+type ChangesetMap = Record<string, {
+  proposed_value: unknown
+  previous_value?: unknown
+  created_at: string // date-time
+  created_by?: {
+    type?: "user" | "portal_user" | "api_client" | "automation"
+    id?: string
+  }
+  edit_mode: "external" | "approval"
+  match_strategy?: "exact" | "fuzzy" | "any"
+  source?: string
+  related_values?: Record<string, {
+    proposed_value?: unknown
+    previous_value?: unknown
+  }>
+}>
+```
+
+### `EditModeConfig`
+
+Configuration for non-direct edit modes on an entity attribute.
+
+```ts
+type EditModeConfig = {
+  match_strategy?: "exact" | "fuzzy" | "any"
+  fuzzy_config?: {
+    type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "contains_entry" | "regex"
+    suffix_length?: number
+    fields_to_ignore?: string[]
+    regex_flags?: string
+    country_code?: string
+    match_on?: string
+    pattern?: string
+  }
+}
+```
+
+### `FuzzyConfig`
+
+Configuration for fuzzy match strategies on changeset auto-clearing.
+
+```ts
+type FuzzyConfig = {
+  type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "contains_entry" | "regex"
+  suffix_length?: number
+  fields_to_ignore?: string[]
+  regex_flags?: string
+  country_code?: string
+  match_on?: string
+  pattern?: string
+}
+```
+
+### `MatchStrategy`
+
+Strategy for auto-clearing the changeset when an external update is received.
+- `exact`: The inbound value must exactly match the proposed value (deep equality).
+- `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+- `any`: Any update to the attribute clears the changeset, 
+
+```ts
+type MatchStrategy = "exact" | "fuzzy" | "any"
 ```
