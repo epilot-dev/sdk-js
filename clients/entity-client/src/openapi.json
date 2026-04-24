@@ -5650,7 +5650,7 @@
             "default": "direct"
           },
           "edit_mode_config": {
-            "description": "Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.",
+            "description": "Configuration for auto-clear matching on `edit_mode: external` attributes.\n`match_strategy` and `fuzzy_config` are only consulted for `external` mode —\nthey are ignored for `approval` mode, which resolves via explicit\n`:apply` / `:dismiss` endpoints and never auto-clears.\n",
             "allOf": [
               {
                 "$ref": "#/components/schemas/EditModeConfig"
@@ -9729,14 +9729,19 @@
           },
           "edit_mode": {
             "type": "string",
-            "description": "The edit mode that triggered this changeset",
+            "description": "The edit mode that triggered this changeset.\n- `external`: auto-cleared by a matching `?direct=true` write (see `match_strategy`).\n- `approval`: resolved only via explicit `:apply` / `:dismiss` endpoints; never auto-clears.\n",
             "enum": [
               "external",
               "approval"
             ]
           },
           "match_strategy": {
-            "$ref": "#/components/schemas/MatchStrategy"
+            "description": "Match strategy copied from the attribute's `edit_mode_config` at changeset\ncreation time. Only consulted when `edit_mode` is `external`; ignored for\n`approval` (which never auto-clears).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MatchStrategy"
+              }
+            ]
           },
           "source": {
             "type": "string",
@@ -9768,7 +9773,7 @@
       },
       "EditModeConfig": {
         "type": "object",
-        "description": "Configuration for non-direct edit modes on an entity attribute.",
+        "description": "Configuration for `edit_mode: external` auto-clear matching.\nFields here (`match_strategy`, `fuzzy_config`) only take effect when\n`edit_mode` is `external`. They are ignored for `edit_mode: approval`,\nwhich never auto-clears and is resolved exclusively via the\n`:apply` / `:dismiss` changeset endpoints.\n",
         "properties": {
           "match_strategy": {
             "$ref": "#/components/schemas/MatchStrategy"
@@ -9780,7 +9785,7 @@
       },
       "FuzzyConfig": {
         "type": "object",
-        "description": "Configuration for fuzzy match strategies on changeset auto-clearing.",
+        "description": "Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.\nNot used for `edit_mode: approval`.\n\nType compatibility with attribute shape is enforced at schema save time:\n- scalar string attributes: `suffix`, `digits_only`, `regex`\n- repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`\n- relation attributes: `relation_set`\n",
         "required": [
           "type"
         ],
@@ -9793,7 +9798,9 @@
               "digits_only",
               "normalize_phone",
               "ignore_fields",
-              "contains_entry",
+              "set_equivalent",
+              "entry_match",
+              "relation_set",
               "regex"
             ]
           },
@@ -9806,7 +9813,7 @@
             "items": {
               "type": "string"
             },
-            "description": "For type=ignore_fields: field names to exclude when comparing array entries."
+            "description": "For type=ignore_fields and type=set_equivalent: field names to exclude when comparing array entries. `_id` is always stripped by the platform regardless of this config."
           },
           "regex_flags": {
             "type": "string",
@@ -9818,7 +9825,37 @@
           },
           "match_on": {
             "type": "string",
-            "description": "For type=normalize_phone and type=contains_entry: attribute key(s) within array entries to compare on."
+            "description": "For type=normalize_phone: attribute key within array entries to compare on (e.g. 'phone_number')."
+          },
+          "key": {
+            "description": "For type=entry_match: business key(s) within each entry used to match proposed entries against incoming entries.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "description": "For type=entry_match and type=set_equivalent: how strict the comparison is.\n- `subset` (default for entry_match): every proposed entry must exist in incoming; extra incoming entries are allowed.\n- `exact_set` (default for set_equivalent): the two sides must contain the same entries (order-insensitive, multiset semantics).\n",
+            "enum": [
+              "subset",
+              "exact_set"
+            ]
+          },
+          "ordered": {
+            "type": "boolean",
+            "description": "For type=relation_set: when true, relation order is significant. Defaults to false (order-insensitive)."
+          },
+          "require_tags_match": {
+            "type": "boolean",
+            "description": "For type=relation_set: when true, each relation item's `_tags` must match on both sides (order-insensitive). Defaults to false — `_tags` are stripped before compare."
           },
           "pattern": {
             "type": "string",
@@ -9828,7 +9865,7 @@
       },
       "MatchStrategy": {
         "type": "string",
-        "description": "Strategy for auto-clearing the changeset when an external update is received.\n- `exact`: The inbound value must exactly match the proposed value (deep equality).\n- `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.\n- `any`: Any update to the attribute clears the changeset, regardless of value.\n",
+        "description": "Strategy for auto-clearing a changeset on an `edit_mode: external` attribute\nwhen a direct write (`?direct=true`) arrives — typically an ERP inbound sync.\nIgnored for `edit_mode: approval`, which does not auto-clear and is resolved\nexclusively via the `:apply` / `:dismiss` changeset endpoints.\n- `exact`: The inbound value must exactly match the proposed value (deep equality).\n- `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.\n- `any`: Any update to the attribute clears the changeset, regardless of value.\n",
         "enum": [
           "exact",
           "fuzzy",
@@ -10074,7 +10111,7 @@
       },
       "DirectQueryParam": {
         "name": "direct",
-        "description": "When true, bypasses changeset interception and applies attribute updates directly.\nUsed by trusted integrations (e.g. ERP inbound sync) to confirm changes and auto-clear matching pending changesets.\nDefaults to false — no breaking change for existing callers.\n",
+        "description": "When true, bypasses changeset interception: attribute values in the payload\nare written directly to the entity regardless of each attribute's `edit_mode`.\nThe write always lands, independently of any auto-clear outcome below.\n\nAfter the direct write, for each attribute in the payload that also has a\npending changeset:\n- `edit_mode: external` — the incoming value is checked against the\n  changeset's `match_strategy` (and `fuzzy_config` when `fuzzy`). On match,\n  `_changesets[attr]` is cleared. On no-match, the write still stands and\n  the changeset stays pending (signalling the ERP/trusted source applied a\n  different correction than originally proposed; resolve via a later\n  matching direct write, or via the `:apply` / `:dismiss` endpoints).\n- `edit_mode: approval` — never auto-cleared. The write lands but the\n  pending changeset remains until explicitly resolved via `:apply` or\n  `:dismiss`.\n\nIntended for trusted integrations (e.g. ERP inbound sync). ERP middleware\nmust always use `?direct=true` — without it, an inbound sync on an\n`external` attribute would create a new changeset instead of confirming\nthe pending one.\n\nDefaults to false — no breaking change for existing callers.\n",
         "in": "query",
         "required": false,
         "schema": {
