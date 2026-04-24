@@ -525,18 +525,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "address";
             default_address_fields?: /**
@@ -728,18 +745,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "relation_address";
             default_address_fields?: /**
@@ -948,18 +982,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "automation";
         }
@@ -1183,18 +1234,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
         }
         /**
@@ -1454,18 +1522,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "boolean";
             display_type?: "switch" | "checkbox";
@@ -1488,17 +1573,19 @@ export declare namespace Components {
             created_at: string; // date-time
             created_by?: /* Identifies the actor that created the changeset. */ ChangesetCreator;
             /**
-             * The edit mode that triggered this changeset
-             */
-            edit_mode: "external" | "approval";
-            match_strategy?: /**
-             * Strategy for auto-clearing the changeset when an external update is received.
-             * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-             * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
-             * - `any`: Any update to the attribute clears the changeset, regardless of value.
+             * The edit mode that triggered this changeset.
+             * - `external`: auto-cleared by a matching `?direct=true` write (see `match_strategy`).
+             * - `approval`: resolved only via explicit `:apply` / `:dismiss` endpoints; never auto-clears.
              *
              */
-            MatchStrategy;
+            edit_mode: "external" | "approval";
+            /**
+             * Match strategy copied from the attribute's `edit_mode_config` at changeset
+             * creation time. Only consulted when `edit_mode` is `external`; ignored for
+             * `approval` (which never auto-clears).
+             *
+             */
+            match_strategy?: "exact" | "fuzzy" | "any";
             /**
              * Optional label indicating where the change originated (e.g. end_customer_portal, installer_portal, journey, automation)
              */
@@ -1742,18 +1829,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "computed";
             computed?: boolean;
@@ -1928,18 +2032,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "consent";
             topic: string;
@@ -2107,18 +2228,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "country";
         }
@@ -2284,18 +2422,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "currency";
             currency_selector_only?: boolean;
@@ -2471,18 +2626,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "date" | "datetime";
         }
@@ -2523,18 +2695,36 @@ export declare namespace Components {
             cluster?: string;
         }
         /**
-         * Configuration for non-direct edit modes on an entity attribute.
+         * Configuration for `edit_mode: external` auto-clear matching.
+         * Fields here (`match_strategy`, `fuzzy_config`) only take effect when
+         * `edit_mode` is `external`. They are ignored for `edit_mode: approval`,
+         * which never auto-clears and is resolved exclusively via the
+         * `:apply` / `:dismiss` changeset endpoints.
+         *
          */
         export interface EditModeConfig {
             match_strategy?: /**
-             * Strategy for auto-clearing the changeset when an external update is received.
+             * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+             * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+             * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+             * exclusively via the `:apply` / `:dismiss` changeset endpoints.
              * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-             * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+             * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
              * - `any`: Any update to the attribute clears the changeset, regardless of value.
              *
              */
             MatchStrategy;
-            fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+            fuzzy_config?: /**
+             * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+             * Not used for `edit_mode: approval`.
+             *
+             * Type compatibility with attribute shape is enforced at schema save time:
+             * - scalar string attributes: `suffix`, `digits_only`, `regex`
+             * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+             * - relation attributes: `relation_set`
+             *
+             */
+            FuzzyConfig;
         }
         /**
          * Email address
@@ -2698,18 +2888,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "email";
         }
@@ -5217,18 +5424,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "image" | "file";
             multiple?: boolean;
@@ -5255,19 +5479,26 @@ export declare namespace Components {
             file_size_bytes?: number;
         }
         /**
-         * Configuration for fuzzy match strategies on changeset auto-clearing.
+         * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+         * Not used for `edit_mode: approval`.
+         *
+         * Type compatibility with attribute shape is enforced at schema save time:
+         * - scalar string attributes: `suffix`, `digits_only`, `regex`
+         * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+         * - relation attributes: `relation_set`
+         *
          */
         export interface FuzzyConfig {
             /**
              * Which fuzzy algorithm to apply.
              */
-            type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "contains_entry" | "regex";
+            type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "set_equivalent" | "entry_match" | "relation_set" | "regex";
             /**
              * For type=suffix: number of characters to compare from end of string.
              */
             suffix_length?: number;
             /**
-             * For type=ignore_fields: field names to exclude when comparing array entries.
+             * For type=ignore_fields and type=set_equivalent: field names to exclude when comparing array entries. `_id` is always stripped by the platform regardless of this config.
              */
             fields_to_ignore?: string[];
             /**
@@ -5279,9 +5510,28 @@ export declare namespace Components {
              */
             country_code?: string;
             /**
-             * For type=normalize_phone and type=contains_entry: attribute key(s) within array entries to compare on.
+             * For type=normalize_phone: attribute key within array entries to compare on (e.g. 'phone_number').
              */
             match_on?: string;
+            /**
+             * For type=entry_match: business key(s) within each entry used to match proposed entries against incoming entries.
+             */
+            key?: /* For type=entry_match: business key(s) within each entry used to match proposed entries against incoming entries. */ string | string[];
+            /**
+             * For type=entry_match and type=set_equivalent: how strict the comparison is.
+             * - `subset` (default for entry_match): every proposed entry must exist in incoming; extra incoming entries are allowed.
+             * - `exact_set` (default for set_equivalent): the two sides must contain the same entries (order-insensitive, multiset semantics).
+             *
+             */
+            mode?: "subset" | "exact_set";
+            /**
+             * For type=relation_set: when true, relation order is significant. Defaults to false (order-insensitive).
+             */
+            ordered?: boolean;
+            /**
+             * For type=relation_set: when true, each relation item's `_tags` must match on both sides (order-insensitive). Defaults to false — `_tags` are stripped before compare.
+             */
+            require_tags_match?: boolean;
             /**
              * For type=regex: regular expression pattern to test the incoming value against.
              */
@@ -6049,18 +6299,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "internal";
         }
@@ -6226,18 +6493,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "internal_user";
         }
@@ -6403,18 +6687,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "invitation_email";
         }
@@ -6588,18 +6889,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "link";
         }
@@ -6612,9 +6930,12 @@ export declare namespace Components {
             results?: /* A saved entity view */ SavedViewItem[];
         }
         /**
-         * Strategy for auto-clearing the changeset when an external update is received.
+         * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+         * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+         * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+         * exclusively via the `:apply` / `:dismiss` changeset endpoints.
          * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-         * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+         * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
          * - `any`: Any update to the attribute clears the changeset, regardless of value.
          *
          */
@@ -6781,18 +7102,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "message_email_address";
             address?: string;
@@ -6961,18 +7299,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "multiselect" | "checkbox";
             /**
@@ -7245,18 +7600,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "number";
             /**
@@ -7431,18 +7803,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "ordered_list";
         }
@@ -7608,18 +7997,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "partner_organisation";
         }
@@ -7785,18 +8191,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "partner_status";
         }
@@ -7962,18 +8385,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "payment";
         }
@@ -8139,18 +8579,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "relation_payment_method";
         }
@@ -8316,18 +8773,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "phone";
         }
@@ -8493,18 +8967,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "portal_access";
         }
@@ -8670,18 +9161,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "price_component";
         }
@@ -8847,18 +9355,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "purpose";
         }
@@ -9039,18 +9564,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval" | "list-view";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "relation";
             relation_type?: "has_many" | "has_one";
@@ -9438,18 +9980,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
         }
         /**
@@ -10019,18 +10578,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "select" | "radio";
             options?: ({
@@ -10204,18 +10780,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "sequence";
             /**
@@ -10398,18 +10991,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "status";
             options?: ((string | null) | {
@@ -10671,18 +11281,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "table";
             /**
@@ -10904,18 +11531,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "tags";
             options?: string[];
@@ -11283,18 +11927,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "string";
             multiline?: boolean;
@@ -11473,18 +12134,35 @@ export declare namespace Components {
              */
             edit_mode?: "direct" | "external" | "approval";
             /**
-             * Configuration for non-direct edit modes. Required when edit_mode is external or approval with fuzzy match strategy.
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
              */
             edit_mode_config?: {
                 match_strategy?: /**
-                 * Strategy for auto-clearing the changeset when an external update is received.
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
                  * - `exact`: The inbound value must exactly match the proposed value (deep equality).
-                 * - `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
                  * - `any`: Any update to the attribute clears the changeset, regardless of value.
                  *
                  */
                 MatchStrategy;
-                fuzzy_config?: /* Configuration for fuzzy match strategies on changeset auto-clearing. */ FuzzyConfig;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
             };
             type: "relation_user";
             multiple?: boolean;

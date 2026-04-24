@@ -4504,6 +4504,10 @@ const { data } = await client.createSchemaAttribute(
         regex_flags: 'string',
         country_code: 'string',
         match_on: 'string',
+        key: 'string',
+        mode: 'subset',
+        ordered: true,
+        require_tags_match: true,
         pattern: 'string'
       }
     },
@@ -4573,6 +4577,10 @@ const { data } = await client.createSchemaAttribute(
       "regex_flags": "string",
       "country_code": "string",
       "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
       "pattern": "string"
     }
   },
@@ -4657,6 +4665,10 @@ const { data } = await client.getSchemaAttribute({
       "regex_flags": "string",
       "country_code": "string",
       "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
       "pattern": "string"
     }
   },
@@ -4736,6 +4748,10 @@ const { data } = await client.putSchemaAttribute(
         regex_flags: 'string',
         country_code: 'string',
         match_on: 'string',
+        key: 'string',
+        mode: 'subset',
+        ordered: true,
+        require_tags_match: true,
         pattern: 'string'
       }
     },
@@ -4805,6 +4821,10 @@ const { data } = await client.putSchemaAttribute(
       "regex_flags": "string",
       "country_code": "string",
       "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
       "pattern": "string"
     }
   },
@@ -4889,6 +4909,10 @@ const { data } = await client.deleteSchemaAttribute({
       "regex_flags": "string",
       "country_code": "string",
       "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
       "pattern": "string"
     }
   },
@@ -6532,6 +6556,10 @@ type Attribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6578,10 +6606,6 @@ type Attribute = {
   explicit_searchable?: boolean
   exclude_from_search?: boolean
   repeatable?: boolean
-  has_primary?: boolean
-  edit_mode?: "direct" | "external" | "approval"
-  edit_mode_config?: {
-    match_strategy?: "exact" | "fuzzy" | "any"
   // ...
 }
 ```
@@ -6648,6 +6672,10 @@ type BaseAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6707,6 +6735,10 @@ type TextAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6770,6 +6802,10 @@ type LinkAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6830,6 +6866,10 @@ type InternalAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6890,6 +6930,10 @@ type BooleanAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -6951,6 +6995,10 @@ type DateAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7011,6 +7059,10 @@ type CountryAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7071,6 +7123,10 @@ type SelectAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7136,6 +7192,10 @@ type MultiSelectAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7203,6 +7263,10 @@ type StatusAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7267,6 +7331,10 @@ type SequenceAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7329,6 +7397,10 @@ type FileAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7395,6 +7467,10 @@ type CurrencyAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7486,6 +7562,10 @@ type RelationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7574,6 +7654,10 @@ type UserRelationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7635,6 +7719,10 @@ type PartnerOrganisationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7695,6 +7783,10 @@ type PortalAccessAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7780,6 +7872,10 @@ type AddressAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7841,6 +7937,10 @@ type AddressRelationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7902,6 +8002,10 @@ type PaymentMethodRelationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -7962,6 +8066,10 @@ type InvitationEmailAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8022,6 +8130,10 @@ type AutomationAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8082,6 +8194,10 @@ type InternalUserAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8142,6 +8258,10 @@ type PurposeAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8202,6 +8322,10 @@ type RepeatableAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8261,6 +8385,10 @@ type TagsAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8323,6 +8451,10 @@ type MessageEmailAddressAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8386,6 +8518,10 @@ type NumberAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8449,6 +8585,10 @@ type TableAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8524,6 +8664,10 @@ type ConsentAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8586,6 +8730,10 @@ type OrderedListAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8646,6 +8794,10 @@ type EmailAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8706,6 +8858,10 @@ type PhoneAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8766,6 +8922,10 @@ type PaymentAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8826,6 +8986,10 @@ type PriceComponentAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8886,6 +9050,10 @@ type ComputedAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -8949,6 +9117,10 @@ type PartnerStatusAttribute = {
       regex_flags?: { ... }
       country_code?: { ... }
       match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
       pattern?: { ... }
     }
   }
@@ -10826,18 +10998,26 @@ type ChangesetMap = Record<string, {
 
 ### `EditModeConfig`
 
-Configuration for non-direct edit modes on an entity attribute.
+Configuration for `edit_mode: external` auto-clear matching.
+Fields here (`match_strategy`, `fuzzy_config`) only take effect when
+`edit_mode` is `external`. They are ignored for `edit_mode: approval`,
+which never auto-clears and is resolved exclusively via the
+`:apply` / `:dismiss` changeset endpoin
 
 ```ts
 type EditModeConfig = {
   match_strategy?: "exact" | "fuzzy" | "any"
   fuzzy_config?: {
-    type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "contains_entry" | "regex"
+    type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "set_equivalent" | "entry_match" | "relation_set" | "regex"
     suffix_length?: number
     fields_to_ignore?: string[]
     regex_flags?: string
     country_code?: string
     match_on?: string
+    key?: string | string[]
+    mode?: "subset" | "exact_set"
+    ordered?: boolean
+    require_tags_match?: boolean
     pattern?: string
   }
 }
@@ -10845,26 +11025,36 @@ type EditModeConfig = {
 
 ### `FuzzyConfig`
 
-Configuration for fuzzy match strategies on changeset auto-clearing.
+Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+Not used for `edit_mode: approval`.
+
+Type compatibility with attribute shape is enforced at schema save time:
+- scalar string attributes: `suffix`, `digits_only`, `regex`
+- repeatable attributes: `set_equivalent`, `entr
 
 ```ts
 type FuzzyConfig = {
-  type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "contains_entry" | "regex"
+  type: "suffix" | "digits_only" | "normalize_phone" | "ignore_fields" | "set_equivalent" | "entry_match" | "relation_set" | "regex"
   suffix_length?: number
   fields_to_ignore?: string[]
   regex_flags?: string
   country_code?: string
   match_on?: string
+  key?: string | string[]
+  mode?: "subset" | "exact_set"
+  ordered?: boolean
+  require_tags_match?: boolean
   pattern?: string
 }
 ```
 
 ### `MatchStrategy`
 
-Strategy for auto-clearing the changeset when an external update is received.
-- `exact`: The inbound value must exactly match the proposed value (deep equality).
-- `fuzzy`: The inbound value is compared using the configured fuzzy algorithm.
-- `any`: Any update to the attribute clears the changeset, 
+Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+exclusively via the `:apply` / `:dismiss` changeset endpoints.
+- `ex
 
 ```ts
 type MatchStrategy = "exact" | "fuzzy" | "any"
