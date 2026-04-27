@@ -9533,6 +9533,10 @@
               "street_number": {
                 "type": "string",
                 "description": "Street Number"
+              },
+              "journey_target_block": {
+                "type": "string",
+                "description": "The journey target block of the availability address <step_index>/<block_name>"
               }
             }
           },

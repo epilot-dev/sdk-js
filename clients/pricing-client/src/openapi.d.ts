@@ -6882,6 +6882,10 @@ declare namespace Components {
                  * Street Number
                  */
                 street_number?: string;
+                /**
+                 * The journey target block of the availability address <step_index>/<block_name>
+                 */
+                journey_target_block?: string;
             };
             /**
              * Variable inputs (e.g. energy or water consumption) extracted/provided by the portal so the external catalog service can compute amounts for variable prices.
