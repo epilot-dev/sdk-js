@@ -220,7 +220,7 @@ declare namespace Components {
             /**
              * Property to group tasks by within each swimlane
              */
-            field: "context_entity" | "phase";
+            field: "context_entity" | "phase" | "task";
         }
         /**
          * Defines how query results should be sorted. Specify a field name and sort direction.
