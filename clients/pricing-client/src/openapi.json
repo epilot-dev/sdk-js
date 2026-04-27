@@ -2036,7 +2036,6 @@
                                 "unit_amount_gross_decimal": "25",
                                 "unit_amount_net": 25,
                                 "unit_amount_net_decimal": "25",
-                                "billing_period": null,
                                 "type": "one_time",
                                 "taxes": [],
                                 "pricing_model": "per_unit",
@@ -2109,20 +2108,22 @@
                                 "amount_subtotal_decimal": "25",
                                 "amount_subtotal": 2500,
                                 "unit_amount": 25,
-                                "unit_amount_gross": 29.75,
+                                "unit_amount_gross": 2975,
                                 "unit_amount_gross_decimal": "29.75",
                                 "unit_amount_net": 25,
                                 "unit_amount_net_decimal": "25",
-                                "billing_period": null,
                                 "type": "one_time",
                                 "taxes": [
                                   {
                                     "tax": {
-                                      "_id": "tax-vat-19",
-                                      "name": "VAT",
+                                      "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                      "_title": "VAT 19%",
+                                      "_org": "728",
+                                      "_schema": "tax",
+                                      "_created_at": "2024-01-01T00:00:00.000Z",
+                                      "_updated_at": "2024-01-01T00:00:00.000Z",
                                       "type": "VAT",
-                                      "rate": 19,
-                                      "region": "DE"
+                                      "rate": 19
                                     },
                                     "amount": 475
                                   }
@@ -2140,15 +2141,16 @@
                                   "is_composite_price": false,
                                   "pricing_model": "per_unit",
                                   "price_display_in_journeys": "show_price",
-                                  "tax": [
-                                    {
-                                      "_id": "tax-vat-19",
-                                      "name": "VAT",
-                                      "type": "VAT",
-                                      "rate": 19,
-                                      "region": "DE"
-                                    }
-                                  ]
+                                  "tax": {
+                                    "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                    "_title": "VAT 19%",
+                                    "_org": "728",
+                                    "_schema": "tax",
+                                    "_created_at": "2024-01-01T00:00:00.000Z",
+                                    "_updated_at": "2024-01-01T00:00:00.000Z",
+                                    "type": "VAT",
+                                    "rate": 19
+                                  }
                                 },
                                 "_product": {
                                   "_id": "product-93f857a4",
@@ -2168,11 +2170,14 @@
                               "taxes": [
                                 {
                                   "tax": {
-                                    "_id": "tax-vat-19",
-                                    "name": "VAT",
+                                    "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                    "_title": "VAT 19%",
+                                    "_org": "728",
+                                    "_schema": "tax",
+                                    "_created_at": "2024-01-01T00:00:00.000Z",
+                                    "_updated_at": "2024-01-01T00:00:00.000Z",
                                     "type": "VAT",
-                                    "rate": 19,
-                                    "region": "DE"
+                                    "rate": 19
                                   },
                                   "amount": 475
                                 }
@@ -2722,6 +2727,17 @@
         "tags": [
           "External Catalog API"
         ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-epilot-org-id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Organization ID (required when not using EpilotPublicAuth token)"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2872,6 +2888,17 @@
         "tags": [
           "External Catalog API"
         ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-epilot-org-id",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Organization ID (required when not using EpilotPublicAuth token)"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3003,7 +3030,6 @@
                                 "unit_amount_gross_decimal": "25",
                                 "unit_amount_net": 25,
                                 "unit_amount_net_decimal": "25",
-                                "billing_period": null,
                                 "type": "one_time",
                                 "taxes": [],
                                 "pricing_model": "per_unit",
@@ -3076,20 +3102,22 @@
                                 "amount_subtotal_decimal": "25",
                                 "amount_subtotal": 2500,
                                 "unit_amount": 25,
-                                "unit_amount_gross": 29.75,
+                                "unit_amount_gross": 2975,
                                 "unit_amount_gross_decimal": "29.75",
                                 "unit_amount_net": 25,
                                 "unit_amount_net_decimal": "25",
-                                "billing_period": null,
                                 "type": "one_time",
                                 "taxes": [
                                   {
                                     "tax": {
-                                      "_id": "tax-vat-19",
-                                      "name": "VAT",
+                                      "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                      "_title": "VAT 19%",
+                                      "_org": "728",
+                                      "_schema": "tax",
+                                      "_created_at": "2024-01-01T00:00:00.000Z",
+                                      "_updated_at": "2024-01-01T00:00:00.000Z",
                                       "type": "VAT",
-                                      "rate": 19,
-                                      "region": "DE"
+                                      "rate": 19
                                     },
                                     "amount": 475
                                   }
@@ -3107,15 +3135,16 @@
                                   "is_composite_price": false,
                                   "pricing_model": "per_unit",
                                   "price_display_in_journeys": "show_price",
-                                  "tax": [
-                                    {
-                                      "_id": "tax-vat-19",
-                                      "name": "VAT",
-                                      "type": "VAT",
-                                      "rate": 19,
-                                      "region": "DE"
-                                    }
-                                  ]
+                                  "tax": {
+                                    "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                    "_title": "VAT 19%",
+                                    "_org": "728",
+                                    "_schema": "tax",
+                                    "_created_at": "2024-01-01T00:00:00.000Z",
+                                    "_updated_at": "2024-01-01T00:00:00.000Z",
+                                    "type": "VAT",
+                                    "rate": 19
+                                  }
                                 },
                                 "_product": {
                                   "_id": "product-93f857a4",
@@ -3135,11 +3164,14 @@
                               "taxes": [
                                 {
                                   "tax": {
-                                    "_id": "tax-vat-19",
-                                    "name": "VAT",
+                                    "_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc",
+                                    "_title": "VAT 19%",
+                                    "_org": "728",
+                                    "_schema": "tax",
+                                    "_created_at": "2024-01-01T00:00:00.000Z",
+                                    "_updated_at": "2024-01-01T00:00:00.000Z",
                                     "type": "VAT",
-                                    "rate": 19,
-                                    "region": "DE"
+                                    "rate": 19
                                   },
                                   "amount": 475
                                 }
@@ -9112,8 +9144,8 @@
                 "description": "Description of the contract"
               },
               "billing_account": {
-                "type": "string",
-                "description": "Billing Account relation ID"
+                "type": "object",
+                "description": "Billing Account relation"
               },
               "account_number": {
                 "type": "string",
@@ -9121,14 +9153,7 @@
               },
               "branch": {
                 "type": "string",
-                "description": "Branch/commodity type",
-                "enum": [
-                  "power",
-                  "gas",
-                  "water",
-                  "waste_water",
-                  "district_heating"
-                ]
+                "description": "Branch/commodity type (e.g. power, gas, water, waste_water, district_heating, or any custom value)"
               },
               "move_in_date": {
                 "type": "string",
@@ -9141,12 +9166,15 @@
                 "description": "Move Out Date"
               },
               "billing_address": {
-                "type": "object",
-                "description": "Billing Address"
+                "description": "Billing Address",
+                "type": "object"
               },
               "delivery_address": {
-                "type": "object",
-                "description": "Delivery Address"
+                "description": "Delivery Address",
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
               },
               "additional_addresses": {
                 "type": "array",
@@ -9175,11 +9203,8 @@
                 "description": "End Date"
               },
               "customer": {
-                "type": "array",
-                "description": "Customer relation (contact or account)",
-                "items": {
-                  "type": "string"
-                }
+                "type": "object",
+                "description": "Customer relation (contact or account)"
               },
               "order": {
                 "type": "string",
@@ -9265,30 +9290,11 @@
                 "description": "Billing Due Day"
               },
               "installment_amount": {
-                "type": "object",
-                "description": "Installment Amount",
-                "properties": {
-                  "value": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string",
-                    "default": "EUR"
-                  }
-                }
+                "type": "number"
               },
               "balance": {
-                "type": "object",
-                "description": "Balance",
-                "properties": {
-                  "value": {
-                    "type": "number"
-                  },
-                  "currency": {
-                    "type": "string",
-                    "default": "EUR"
-                  }
-                }
+                "type": "number",
+                "description": "Balance"
               },
               "meters": {
                 "type": "array",
@@ -9298,8 +9304,8 @@
                 }
               },
               "payment": {
-                "type": "string",
-                "description": "Payment Details relation ID"
+                "type": "object",
+                "description": "Payment Details relation"
               },
               "last_sync_at": {
                 "type": "string",
@@ -9505,6 +9511,61 @@
                 "type": "string",
                 "description": "External ID",
                 "readOnly": true
+              }
+            }
+          },
+          "availability_address": {
+            "type": "object",
+            "description": "Address to use for product availability checks. Include when the catalog should filter products by serviceable area (e.g. postal code coverage).\n",
+            "properties": {
+              "postal_code": {
+                "type": "string",
+                "description": "Postal Code"
+              },
+              "city": {
+                "type": "string",
+                "description": "City"
+              },
+              "street": {
+                "type": "string",
+                "description": "Street"
+              },
+              "street_number": {
+                "type": "string",
+                "description": "Street Number"
+              }
+            }
+          },
+          "variable_inputs": {
+            "type": "array",
+            "description": "Variable inputs (e.g. energy or water consumption) extracted/provided by the portal so the external catalog service can compute amounts for variable prices.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "description": "The value of the variable input"
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "The unit of the variable input"
+                },
+                "frequency_unit": {
+                  "type": "string",
+                  "description": "The frequency unit of the variable input",
+                  "enum": [
+                    "weekly",
+                    "monthly",
+                    "every_quarter",
+                    "every_6_months",
+                    "yearly",
+                    "one_time"
+                  ]
+                },
+                "journey_target_block": {
+                  "type": "string",
+                  "description": "The journey target block of the variable input <step_index>/<block_name>"
+                }
               }
             }
           }
@@ -9858,6 +9919,11 @@
                   {
                     "tax": {
                       "_id": "936db2a1-3748-45b6-bb9d-04943280ceeb",
+                      "_title": "VAT 23%",
+                      "_org": "728",
+                      "_schema": "tax",
+                      "_created_at": "2021-09-24T15:06:13.859Z",
+                      "_updated_at": "2021-09-24T15:06:13.859Z",
                       "type": "VAT",
                       "rate": 23
                     },
@@ -9866,6 +9932,11 @@
                   {
                     "tax": {
                       "_id": "936db2a1-3748-45b6-bb9d-04943280cee4",
+                      "_title": "VAT 7%",
+                      "_org": "728",
+                      "_schema": "tax",
+                      "_created_at": "2021-09-24T15:06:13.859Z",
+                      "_updated_at": "2021-09-24T15:06:13.859Z",
                       "type": "VAT",
                       "rate": 7
                     },

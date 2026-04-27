@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -6606,17 +6604,19 @@ declare namespace Components {
                  */
                 description?: string;
                 /**
-                 * Billing Account relation ID
+                 * Billing Account relation
                  */
-                billing_account?: string;
+                billing_account?: {
+                    [key: string]: any;
+                };
                 /**
                  * Account Number
                  */
                 account_number?: string;
                 /**
-                 * Branch/commodity type
+                 * Branch/commodity type (e.g. power, gas, water, waste_water, district_heating, or any custom value)
                  */
-                branch?: "power" | "gas" | "water" | "waste_water" | "district_heating";
+                branch?: string;
                 /**
                  * Move In Date
                  */
@@ -6636,7 +6636,7 @@ declare namespace Components {
                  */
                 delivery_address?: {
                     [key: string]: any;
-                };
+                }[];
                 /**
                  * Additional Addresses
                  */
@@ -6662,7 +6662,9 @@ declare namespace Components {
                 /**
                  * Customer relation (contact or account)
                  */
-                customer?: string[];
+                customer?: {
+                    [key: string]: any;
+                };
                 /**
                  * Order relation ID
                  */
@@ -6711,28 +6713,21 @@ declare namespace Components {
                  * Billing Due Day
                  */
                 billing_due_day?: number;
-                /**
-                 * Installment Amount
-                 */
-                installment_amount?: {
-                    value?: number;
-                    currency?: string;
-                };
+                installment_amount?: number;
                 /**
                  * Balance
                  */
-                balance?: {
-                    value?: number;
-                    currency?: string;
-                };
+                balance?: number;
                 /**
                  * Meters relation
                  */
                 meters?: string[];
                 /**
-                 * Payment Details relation ID
+                 * Payment Details relation
                  */
-                payment?: string;
+                payment?: {
+                    [key: string]: any;
+                };
                 /**
                  * Last Sync At
                  */
@@ -6866,6 +6861,50 @@ declare namespace Components {
                  */
                 external_id?: string;
             };
+            /**
+             * Address to use for product availability checks. Include when the catalog should filter products by serviceable area (e.g. postal code coverage).
+             *
+             */
+            availability_address?: {
+                /**
+                 * Postal Code
+                 */
+                postal_code?: string;
+                /**
+                 * City
+                 */
+                city?: string;
+                /**
+                 * Street
+                 */
+                street?: string;
+                /**
+                 * Street Number
+                 */
+                street_number?: string;
+            };
+            /**
+             * Variable inputs (e.g. energy or water consumption) extracted/provided by the portal so the external catalog service can compute amounts for variable prices.
+             *
+             */
+            variable_inputs?: {
+                /**
+                 * The value of the variable input
+                 */
+                value?: number;
+                /**
+                 * The unit of the variable input
+                 */
+                unit?: string;
+                /**
+                 * The frequency unit of the variable input
+                 */
+                frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time";
+                /**
+                 * The journey target block of the variable input <step_index>/<block_name>
+                 */
+                journey_target_block?: string;
+            }[];
         }
         /**
          * The meter type for power
@@ -10064,6 +10103,12 @@ declare namespace Paths {
         }
     }
     namespace $GetExternalCatalogProductRecommendations {
+        export interface HeaderParameters {
+            "x-epilot-org-id"?: Parameters.XEpilotOrgId;
+        }
+        namespace Parameters {
+            export type XEpilotOrgId = string;
+        }
         export type RequestBody = /**
          * The request payload for the external catalog service.
          * example:
@@ -10114,6 +10159,12 @@ declare namespace Paths {
         }
     }
     namespace $GetExternalCatalogProducts {
+        export interface HeaderParameters {
+            "x-epilot-org-id"?: Parameters.XEpilotOrgId;
+        }
+        namespace Parameters {
+            export type XEpilotOrgId = string;
+        }
         export type RequestBody = /**
          * The request payload for the external catalog service.
          * example:
@@ -11751,7 +11802,7 @@ export interface OperationMethods {
    * Returns the list of available external catalog products with computed prices based on a given context
    */
   '$getExternalCatalogProducts'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.$GetExternalCatalogProducts.HeaderParameters> | null,
     data?: Paths.$GetExternalCatalogProducts.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
@@ -11761,7 +11812,7 @@ export interface OperationMethods {
    * Returns the list of available external catalog products recommendations based on a given context
    */
   '$getExternalCatalogProductRecommendations'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.$GetExternalCatalogProductRecommendations.HeaderParameters> | null,
     data?: Paths.$GetExternalCatalogProductRecommendations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetExternalCatalogProductRecommendations.Responses.$200>
@@ -12024,7 +12075,7 @@ export interface PathsDictionary {
      * Returns the list of available external catalog products with computed prices based on a given context
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.$GetExternalCatalogProducts.HeaderParameters> | null,
       data?: Paths.$GetExternalCatalogProducts.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
@@ -12036,7 +12087,7 @@ export interface PathsDictionary {
      * Returns the list of available external catalog products recommendations based on a given context
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.$GetExternalCatalogProductRecommendations.HeaderParameters> | null,
       data?: Paths.$GetExternalCatalogProductRecommendations.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetExternalCatalogProductRecommendations.Responses.$200>
