@@ -798,7 +798,7 @@ Defines how tasks should be grouped within each swimlane. Tasks with the same gr
 
 ```ts
 type GroupBy = {
-  field: "context_entity" | "phase"
+  field: "context_entity" | "phase" | "task"
 }
 ```
 
@@ -887,7 +887,7 @@ type FlowsQueryRequest = {
     direction?: "asc" | "desc"
   }
   group_by?: {
-    field: "context_entity" | "phase"
+    field: "context_entity" | "phase" | "task"
   }
   from?: number
   size?: number
