@@ -1,9 +1,13 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.3.0",
+    "version": "2.4.0",
     "title": "Notes API",
-    "description": "Facade API Backend for Epilot Notes feature"
+    "description": "Facade API Backend for Epilot Notes feature",
+    "contact": {
+      "name": "epilot",
+      "url": "https://docs.epilot.io"
+    }
   },
   "servers": [
     {
@@ -16,6 +20,9 @@
     },
     {
       "name": "Pinning"
+    },
+    {
+      "name": "Reactions"
     }
   ],
   "security": [
@@ -675,30 +682,33 @@
             "format": "date-time"
           },
           "created_by": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "$ref": "#/components/schemas/CreatedByType"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/CreatedByType"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "org_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                }
               },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              },
-              "org_id": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ]
+              "required": [
+                "type"
+              ]
+            }
           },
           "read_by": {
             "type": "array",
@@ -873,30 +883,33 @@
             "format": "date-time"
           },
           "created_by": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "$ref": "#/components/schemas/CreatedByType"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/CreatedByType"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "org_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                }
               },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              },
-              "org_id": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ]
+              "required": [
+                "type"
+              ]
+            }
           },
           "read_by": {
             "type": "array",
@@ -984,35 +997,43 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
           "created_by": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "user",
-                  "group"
-                ]
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "group"
+                  ]
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "org_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                }
               },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              },
-              "org_id": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ]
+              "required": [
+                "type"
+              ]
+            }
           },
           "read_by": {
             "type": "array",
@@ -1119,35 +1140,43 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
           "created_by": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "user",
-                  "group"
-                ]
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "group"
+                  ]
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "org_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                }
               },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              },
-              "org_id": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ]
+              "required": [
+                "type"
+              ]
+            }
           },
           "read_by": {
             "type": "array",
@@ -1339,35 +1368,43 @@
             "description": "The timestamp of when this Note was pinned",
             "format": "date-time"
           },
+          "edited_at": {
+            "type": "string",
+            "description": "The timestamp of when this Note was last updated",
+            "format": "date-time"
+          },
           "created_by": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "user",
-                  "group"
-                ]
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "group"
+                  ]
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "org_id": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                }
               },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              },
-              "org_id": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "phone": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "type"
-            ]
+              "required": [
+                "type"
+              ]
+            }
           },
           "read_by": {
             "type": "array",
@@ -1407,7 +1444,15 @@
                 "type",
                 "id"
               ]
-            }
+            },
+            "minItems": 1
+          },
+          "include_related_schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "When set, the API resolves related entities of these schemas for the primary entity context and includes their notes in the results."
           },
           "from": {
             "type": "number",

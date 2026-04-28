@@ -1,5 +1,11 @@
 # @epilot/notes-client
 
+## 0.22.0
+
+### Minor Changes
+
+- Add include_related_schemas parameter to resolve notes from related entities
+
 ## 0.21.6
 
 ### Patch Changes
