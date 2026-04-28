@@ -2502,6 +2502,10 @@ export declare namespace Components {
              * When enabled, the email thread will be automatically marked as done after this action completes.
              */
             mark_as_done?: boolean;
+            /**
+             * When enabled, the email thread will be marked as read after this action completes.
+             */
+            mark_as_read?: boolean;
         }
         export interface FrontendSubmitTrigger {
             /**
@@ -3313,6 +3317,10 @@ export declare namespace Components {
              * When enabled, the email thread will be automatically marked as done after this action completes.
              */
             mark_as_done?: boolean;
+            /**
+             * When enabled, the email thread will be marked as read after this action completes.
+             */
+            mark_as_read?: boolean;
         }
         export interface ResumeReq {
             resume_token: /**
@@ -3511,6 +3519,10 @@ export declare namespace Components {
              * When enabled, the email thread will be automatically marked as done after this action completes.
              */
             mark_as_done?: boolean;
+            /**
+             * When enabled, the email thread will be marked as read after this action completes.
+             */
+            mark_as_read?: boolean;
             /**
              * Include extra file attachments in sent email.
              * Attachments in email template will be sent regardless of this configuration.
@@ -4314,6 +4326,15 @@ export declare namespace Components {
             workflow_exec_task_id?: string;
             workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
             _execution_chain?: /* [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers. */ ExecutionChain;
+            /**
+             * Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.
+             *
+             */
+            entity_contexts?: {
+                entity_id?: string;
+                entity_schema?: string;
+                is_primary?: boolean;
+            }[];
         }
     }
 }
@@ -4721,6 +4742,11 @@ export declare namespace Paths {
             export type Size = number;
             /**
              * example:
+             * wfABCDEFGH
+             */
+            export type TargetWorkflow = string;
+            /**
+             * example:
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             export type TriggerSourceId = string;
@@ -4738,6 +4764,11 @@ export declare namespace Paths {
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             Parameters.TriggerSourceId;
+            target_workflow?: /**
+             * example:
+             * wfABCDEFGH
+             */
+            Parameters.TargetWorkflow;
             include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {

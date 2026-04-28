@@ -1473,7 +1473,9 @@ getExternalCatalogProducts
 
 ```ts
 const { data } = await client.$getExternalCatalogProducts(
-  null,
+  {
+    x-epilot-org-id: 'example',
+  },
   {
     config: {
       appId: '1234567890',
@@ -1539,7 +1541,9 @@ getExternalCatalogProductRecommendations
 
 ```ts
 const { data } = await client.$getExternalCatalogProductRecommendations(
-  null,
+  {
+    x-epilot-org-id: 'example',
+  },
   {
     config: {
       appId: '1234567890',
@@ -5598,6 +5602,19 @@ type ExternalCatalogPortalRequest = {
       contracts?: { ... }
       external_id?: { ... }
     }
+    availability_address?: {
+      postal_code?: { ... }
+      city?: { ... }
+      street?: { ... }
+      street_number?: { ... }
+      journey_target_block?: { ... }
+    }
+    variable_inputs?: Array<{
+      value?: { ... }
+      unit?: { ... }
+      frequency_unit?: { ... }
+      journey_target_block?: { ... }
+    }>
   }
 }
 ```
@@ -5651,19 +5668,19 @@ type PortalContext = {
     assignee?: string
     status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired"
     description?: string
-    billing_account?: string
+    billing_account?: object
     account_number?: string
-    branch?: "power" | "gas" | "water" | "waste_water" | "district_heating"
+    branch?: string
     move_in_date?: string // date
     move_out_date?: string // date
     billing_address?: object
-    delivery_address?: object
+    delivery_address?: object[]
     additional_addresses?: object[]
     termination_date?: string // date
     termination_reason?: string
     start_date?: string // date
     end_date?: string // date
-    customer?: string[]
+    customer?: object
     order?: string
     type?: "one_time" | "recurring"
     billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly"
@@ -5676,16 +5693,10 @@ type PortalContext = {
     renewal_duration_amount?: number
     renewal_duration_unit?: "weeks" | "months" | "years"
     billing_due_day?: number
-    installment_amount?: {
-      value?: { ... }
-      currency?: { ... }
-    }
-    balance?: {
-      value?: { ... }
-      currency?: { ... }
-    }
+    installment_amount?: number
+    balance?: number
     meters?: string[]
-    payment?: string
+    payment?: object
     last_sync_at?: string // date
     external_id?: string
   }
@@ -5730,6 +5741,19 @@ type PortalContext = {
     contracts?: string[]
     external_id?: string
   }
+  availability_address?: {
+    postal_code?: string
+    city?: string
+    street?: string
+    street_number?: string
+    journey_target_block?: string
+  }
+  variable_inputs?: Array<{
+    value?: number
+    unit?: string
+    frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time"
+    journey_target_block?: string
+  }>
 }
 ```
 
