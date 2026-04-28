@@ -138,6 +138,35 @@ declare namespace Components {
                 };
             }[];
         }
+        export interface ApiProxyComponent {
+            component_type: "API_PROXY";
+            configuration: /* Configuration for an API proxy component */ ApiProxyConfig;
+        }
+        /**
+         * Configuration for an API proxy component
+         */
+        export interface ApiProxyConfig {
+            /**
+             * Human-friendly proxy name used in SDK calls
+             */
+            name: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Base URL of the target API. Must be HTTPS.
+             */
+            target: string; // uri ^https://
+            /**
+             * Authentication strategy
+             */
+            auth_type: "header" | "bearer" | "oauth2" | "none";
+            /**
+             * Header name for 'header' auth type
+             */
+            auth_header?: string;
+            /**
+             * OAuth2 token endpoint URL
+             */
+            token_url?: string; // uri ^https://
+        }
         export interface AppBridgeSurfaceConfig {
             /**
              * URL of the uploaded App Bridge App. This is the entrypoint for the app
@@ -245,7 +274,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent | ApiProxyComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -407,6 +436,22 @@ declare namespace Components {
          * How often the subscription is billed
          */
         export type BillingFrequency = "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM";
+        /**
+         * References another journey block by its ID. The configuring user picks
+         * a block from the journey via a dropdown in the journey-builder; the
+         * chosen block's ID is stored as the arg value (a string). The bundle can
+         * then call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.
+         *
+         */
+        export interface BlockReferenceArg {
+            type?: "block_reference";
+            /**
+             * Restrict the picker to blocks of these journey block types
+             * (e.g. ["availability-check", "address"]). Omit to allow any type.
+             *
+             */
+            allowed_types?: string[];
+        }
         export interface BlueprintRef {
             /**
              * ID of the blueprint
@@ -453,7 +498,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY";
         /**
          * Configuration of the published app
          */
@@ -1214,7 +1259,7 @@ declare namespace Components {
              * Unique identifier for this component arg
              */
             key: string;
-            type: "text" | "boolean" | "enum";
+            type: "text" | "boolean" | "enum" | "block_reference";
             /**
              * Flag to indicate if this option is required
              */
@@ -1245,7 +1290,14 @@ declare namespace Components {
                  */
                 de: string;
             };
-        } & (TextArg | BooleanArg | EnumArg);
+        } & (TextArg | BooleanArg | EnumArg | /**
+         * References another journey block by its ID. The configuring user picks
+         * a block from the journey via a dropdown in the journey-builder; the
+         * chosen block's ID is stored as the arg value (a string). The bundle can
+         * then call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.
+         *
+         */
+        BlockReferenceArg);
         export interface JourneyBlockConfig {
             override_dev_mode?: /* Override URL when app is in dev mode */ OverrideDevMode;
             /**
@@ -2607,6 +2659,32 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublicProxyGet {
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
+    namespace PublicProxyPost {
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
     namespace QueryEvents {
         namespace Parameters {
             export type AppId = string;
@@ -2669,6 +2747,18 @@ declare namespace Paths {
         export interface PathParameters {
             appId: Parameters.AppId;
             componentId: Parameters.ComponentId;
+        }
+    }
+    namespace V1PublicApp$AppIdProxy$ProxyName$Path {
+        namespace Parameters {
+            export type AppId = string;
+            export type Path = string;
+            export type ProxyName = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            proxyName: Parameters.ProxyName;
+            path: Parameters.Path;
         }
     }
 }
@@ -2976,6 +3066,26 @@ export interface OperationMethods {
     data?: Paths.IngestEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.IngestEvent.Responses.$202>
+  /**
+   * publicProxyGet - publicProxyGet
+   * 
+   * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+   */
+  'publicProxyGet'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
+  /**
+   * publicProxyPost - publicProxyPost
+   * 
+   * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+   */
+  'publicProxyPost'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: Paths.PublicProxyPost.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3318,6 +3428,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.IngestEvent.Responses.$202>
   }
+  ['/v1/public/app/{appId}/proxy/{proxyName}/{path}']: {
+    /**
+     * publicProxyGet - publicProxyGet
+     * 
+     * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
+    /**
+     * publicProxyPost - publicProxyPost
+     * 
+     * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+     */
+    'post'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: Paths.PublicProxyPost.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -3325,6 +3457,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type Actor = Components.Schemas.Actor;
 export type AggregatedEvents = Components.Schemas.AggregatedEvents;
+export type ApiProxyComponent = Components.Schemas.ApiProxyComponent;
+export type ApiProxyConfig = Components.Schemas.ApiProxyConfig;
 export type AppBridgeSurfaceConfig = Components.Schemas.AppBridgeSurfaceConfig;
 export type AppEventData = Components.Schemas.AppEventData;
 export type Audit = Components.Schemas.Audit;
@@ -3334,6 +3468,7 @@ export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
 export type BatchEventRequest = Components.Schemas.BatchEventRequest;
 export type BillingFrequency = Components.Schemas.BillingFrequency;
+export type BlockReferenceArg = Components.Schemas.BlockReferenceArg;
 export type BlueprintRef = Components.Schemas.BlueprintRef;
 export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;

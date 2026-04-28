@@ -17,6 +17,10 @@
     {
       "name": "App Analytics",
       "description": "Analytics for installed apps"
+    },
+    {
+      "name": "App Proxy",
+      "description": "Forward requests to external APIs via registered proxy targets"
     }
   ],
   "servers": [
@@ -1468,6 +1472,100 @@
           }
         }
       }
+    },
+    "/v1/public/app/{appId}/proxy/{proxyName}/{path}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "ID of the installed app"
+        },
+        {
+          "name": "proxyName",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Name of the proxy target as defined in the app manifest"
+        },
+        {
+          "name": "path",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Path to forward to the proxy target"
+        }
+      ],
+      "get": {
+        "summary": "publicProxyGet",
+        "operationId": "publicProxyGet",
+        "description": "Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "post": {
+        "summary": "publicProxyPost",
+        "operationId": "publicProxyPost",
+        "description": "Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1832,7 +1930,8 @@
           "ERP_INFORM_TOOLKIT",
           "CUSTOM_CAPABILITY",
           "EXTERNAL_PRODUCT_CATALOG",
-          "CUSTOM_PAGE"
+          "CUSTOM_PAGE",
+          "API_PROXY"
         ],
         "description": "Type of app component"
       },
@@ -1944,7 +2043,8 @@
                 "ERP_INFORM_TOOLKIT": "#/components/schemas/ErpInformToolkitComponent",
                 "CUSTOM_CAPABILITY": "#/components/schemas/CustomCapabilityComponent",
                 "EXTERNAL_PRODUCT_CATALOG": "#/components/schemas/ExternalProductCatalogComponent",
-                "CUSTOM_PAGE": "#/components/schemas/CustomPageComponent"
+                "CUSTOM_PAGE": "#/components/schemas/CustomPageComponent",
+                "API_PROXY": "#/components/schemas/ApiProxyComponent"
               }
             },
             "oneOf": [
@@ -1971,10 +2071,31 @@
               },
               {
                 "$ref": "#/components/schemas/CustomPageComponent"
+              },
+              {
+                "$ref": "#/components/schemas/ApiProxyComponent"
               }
             ]
           }
         ]
+      },
+      "ApiProxyComponent": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "API_PROXY"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/ApiProxyConfig"
+          }
+        }
       },
       "CustomCapabilityComponent": {
         "type": "object",
@@ -3430,7 +3551,8 @@
                 "enum": [
                   "text",
                   "boolean",
-                  "enum"
+                  "enum",
+                  "block_reference"
                 ]
               },
               "required": {
@@ -3467,7 +3589,8 @@
               "mapping": {
                 "text": "#/components/schemas/TextArg",
                 "boolean": "#/components/schemas/BooleanArg",
-                "enum": "#/components/schemas/EnumArg"
+                "enum": "#/components/schemas/EnumArg",
+                "block_reference": "#/components/schemas/BlockReferenceArg"
               }
             },
             "oneOf": [
@@ -3479,6 +3602,9 @@
               },
               {
                 "$ref": "#/components/schemas/EnumArg"
+              },
+              {
+                "$ref": "#/components/schemas/BlockReferenceArg"
               }
             ]
           }
@@ -3503,6 +3629,25 @@
             "enum": [
               "boolean"
             ]
+          }
+        }
+      },
+      "BlockReferenceArg": {
+        "type": "object",
+        "description": "References another journey block by its ID. The configuring user picks\na block from the journey via a dropdown in the journey-builder; the\nchosen block's ID is stored as the arg value (a string). The bundle can\nthen call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "block_reference"
+            ]
+          },
+          "allowed_types": {
+            "type": "array",
+            "description": "Restrict the picker to blocks of these journey block types\n(e.g. [\"availability-check\", \"address\"]). Omit to allow any type.\n",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3873,6 +4018,49 @@
                 }
               }
             ]
+          }
+        }
+      },
+      "ApiProxyConfig": {
+        "type": "object",
+        "description": "Configuration for an API proxy component",
+        "required": [
+          "name",
+          "target",
+          "auth_type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-friendly proxy name used in SDK calls",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "maxLength": 64
+          },
+          "target": {
+            "type": "string",
+            "format": "uri",
+            "description": "Base URL of the target API. Must be HTTPS.",
+            "pattern": "^https://"
+          },
+          "auth_type": {
+            "type": "string",
+            "enum": [
+              "header",
+              "bearer",
+              "oauth2",
+              "none"
+            ],
+            "description": "Authentication strategy"
+          },
+          "auth_header": {
+            "type": "string",
+            "description": "Header name for 'header' auth type"
+          },
+          "token_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth2 token endpoint URL",
+            "pattern": "^https://"
           }
         }
       },
