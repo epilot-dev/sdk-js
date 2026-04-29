@@ -7582,8 +7582,12 @@
       },
       "CashbackAmount": {
         "type": "object",
-        "description": "An amount associated with a specific cashback period.",
+        "description": "A detail associated with a specific cashback.",
         "properties": {
+          "cashback_name": {
+            "type": "string",
+            "description": "The name of the cashback."
+          },
           "cashback_period": {
             "$ref": "#/components/schemas/CashbackPeriod"
           },
