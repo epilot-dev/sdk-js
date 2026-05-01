@@ -828,6 +828,11 @@
                               "min"
                             ],
                             "example": "sum"
+                          },
+                          "unit": {
+                            "type": "string",
+                            "description": "Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.",
+                            "example": "kWh"
                           }
                         },
                         "required": [
@@ -10804,6 +10809,14 @@
           "widgets"
         ],
         "properties": {
+          "portal_sk_v3": {
+            "type": "string",
+            "description": "V3 portal-scoped storage key for the widget configuration"
+          },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Indicates whether the widget configuration is stored as a V3 portal-scoped item"
+          },
           "widgets": {
             "type": "array",
             "items": {
@@ -14672,6 +14685,11 @@
             "example": [
               "00123456"
             ]
+          },
+          "file_id": {
+            "type": "string",
+            "description": "ID of the created file entity for the uploaded photo.",
+            "example": "abc123def456"
           }
         }
       },
@@ -15397,6 +15415,17 @@
                 "type": "string",
                 "description": "The id of the portal",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+              },
+              "past_routes": {
+                "type": "array",
+                "description": "Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.\n",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "old-dashboard",
+                  "home"
+                ]
               }
             }
           }

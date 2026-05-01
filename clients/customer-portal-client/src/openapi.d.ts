@@ -4326,6 +4326,12 @@ declare namespace Components {
              * ]
              */
             meter_numbers?: string[];
+            /**
+             * ID of the created file entity for the uploaded photo.
+             * example:
+             * abc123def456
+             */
+            file_id?: string;
         }
         export interface MeterReadingWidget {
             id: string;
@@ -4843,6 +4849,16 @@ declare namespace Components {
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
+            /**
+             * Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.
+             *
+             * example:
+             * [
+             *   "old-dashboard",
+             *   "home"
+             * ]
+             */
+            past_routes?: string[];
         }
         export interface PageRequest {
             [name: string]: any;
@@ -7581,6 +7597,14 @@ declare namespace Components {
             pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
+            /**
+             * V3 portal-scoped storage key for the widget configuration
+             */
+            portal_sk_v3?: string;
+            /**
+             * Indicates whether the widget configuration is stored as a V3 portal-scoped item
+             */
+            is_v3_item?: boolean;
             widgets: PortalWidget[];
         }
         export interface UserRequest {
@@ -9144,6 +9168,12 @@ declare namespace Paths {
                      * sum
                      */
                     aggregation_method?: "sum" | "average" | "max" | "min";
+                    /**
+                     * Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.
+                     * example:
+                     * kWh
+                     */
+                    unit?: string;
                 }[];
             }
             export type $401 = Components.Responses.Unauthorized;

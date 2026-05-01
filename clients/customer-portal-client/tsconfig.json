@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
