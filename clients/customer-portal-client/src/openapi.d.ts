@@ -2158,6 +2158,7 @@ declare namespace Components {
          */
         export type Currency = string;
         export interface DataRetrievalItem {
+            app?: PublicAppDetails;
             extension?: PublicExtensionDetails;
             hook?: PublicDataRetrievalHookDetails;
         }
@@ -3443,6 +3444,14 @@ declare namespace Components {
          */
         export interface ExtensionHookDataExport {
             type: "dataExport";
+            /**
+             * Optional list of portal block types this hook supports. If omitted,
+             * the hook is usable on any export-capable block. Allowed values match
+             * the block type identifiers used by the portal builder
+             * (e.g. `consumption_visualization`, `dynamic_tariff`).
+             *
+             */
+            block_types?: string[];
             auth?: ExtensionAuthBlock;
             call: {
                 /**
@@ -6237,6 +6246,19 @@ declare namespace Components {
          * office-365-login
          */
         export type ProviderSlug = string; // [0-9a-z-]+
+        export interface PublicAppDetails {
+            /**
+             * Identifier of the app.
+             */
+            app_id?: string;
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the app in English.
+                 */
+                en: string;
+            };
+        }
         export interface PublicContractIdentificationDetails {
             /**
              * Explanation of the hook.
@@ -6267,6 +6289,10 @@ declare namespace Components {
              * The intervals associated with the hook.
              */
             intervals?: string[];
+            /**
+             * Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block.
+             */
+            block_types?: string[];
         }
         export interface PublicExtensionCapabilities {
             consumptionDataRetrieval?: DataRetrievalItem[];
@@ -9200,7 +9226,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -9370,7 +9396,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -11232,7 +11258,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -12199,9 +12225,9 @@ declare namespace Paths {
              */
             extension_id: string;
             /**
-             * Hook ID for the export.
+             * Optional Hook ID. If omitted, the only `dataExport` hook on the extension is used; if the extension has multiple `dataExport` hooks, this becomes required.
              */
-            hook_id: string;
+            hook_id?: string;
             /**
              * Optional start date for the export window (ISO 8601 format).
              */
@@ -16870,6 +16896,7 @@ export type ProviderConfig = Components.Schemas.ProviderConfig;
 export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
 export type ProviderSlug = Components.Schemas.ProviderSlug;
+export type PublicAppDetails = Components.Schemas.PublicAppDetails;
 export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;

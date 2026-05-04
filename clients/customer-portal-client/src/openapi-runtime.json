@@ -212,7 +212,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
@@ -273,7 +273,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
@@ -322,7 +322,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",

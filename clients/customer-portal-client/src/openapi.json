@@ -733,8 +733,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for consumption data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -891,7 +891,7 @@
                   },
                   "hook_id": {
                     "type": "string",
-                    "description": "Hook ID for the export."
+                    "description": "Optional Hook ID. If omitted, the only `dataExport` hook on the extension is used; if the extension has multiple `dataExport` hooks, this becomes required."
                   },
                   "from": {
                     "type": "string",
@@ -909,8 +909,7 @@
                 },
                 "required": [
                   "app_id",
-                  "extension_id",
-                  "hook_id"
+                  "extension_id"
                 ],
                 "additionalProperties": false
               }
@@ -1004,8 +1003,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for cost data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -1178,8 +1177,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for price data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -13642,11 +13641,39 @@
       "DataRetrievalItem": {
         "type": "object",
         "properties": {
+          "app": {
+            "$ref": "#/components/schemas/PublicAppDetails"
+          },
           "extension": {
             "$ref": "#/components/schemas/PublicExtensionDetails"
           },
           "hook": {
             "$ref": "#/components/schemas/PublicDataRetrievalHookDetails"
+          }
+        }
+      },
+      "PublicAppDetails": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "Identifier of the app."
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the app in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the app in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
           }
         }
       },
@@ -13704,6 +13731,13 @@
               "type": "string"
             },
             "description": "The intervals associated with the hook."
+          },
+          "block_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block."
           }
         }
       },
@@ -14457,6 +14491,13 @@
             "enum": [
               "dataExport"
             ]
+          },
+          "block_types": {
+            "type": "array",
+            "description": "Optional list of portal block types this hook supports. If omitted,\nthe hook is usable on any export-capable block. Allowed values match\nthe block type identifiers used by the portal builder\n(e.g. `consumption_visualization`, `dynamic_tariff`).\n",
+            "items": {
+              "type": "string"
+            }
           },
           "auth": {
             "$ref": "#/components/schemas/ExtensionAuthBlock"
